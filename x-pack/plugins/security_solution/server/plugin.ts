@@ -109,7 +109,10 @@ import {
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
-import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
+import {
+  latestRiskScoreIndexPattern,
+  allRiskScoreIndexPattern,
+} from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';

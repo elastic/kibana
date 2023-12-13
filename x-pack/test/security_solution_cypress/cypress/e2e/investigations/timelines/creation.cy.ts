@@ -21,6 +21,8 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
+import { LOADING_INDICATOR } from '../../../screens/security_header';
+import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
@@ -41,23 +43,21 @@ import {
   pinFirstEvent,
   populateTimeline,
   addNameToTimelineAndSave,
+  addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
+import { createTimeline } from '../../../tasks/timelines';
 
-import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    deleteTimelines();
-    login();
-    createTimelineTemplate(getTimeline());
-  });
-
+describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     login();
-    visit(TIMELINE_TEMPLATES_URL);
+    deleteTimelines();
   });
 
-  it('Should have the same query and open the timeline modal', () => {
+  it('creates a timeline from a template and should have the same query and open the timeline modal', () => {
+    createTimelineTemplate(getTimeline());
+    visit(TIMELINE_TEMPLATES_URL);
     selectCustomTemplates();
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
@@ -65,15 +65,9 @@ describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] },
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
     closeTimeline();
   });
-});
-
-describe('Timelines', (): void => {
-  before(() => {
-    deleteTimelines();
-  });
 
   describe('Toggle create timeline from "New" btn', () => {
-    context('Privileges: CRUD', { tags: '@ess' }, () => {
+    context('Privileges: CRUD', () => {
       beforeEach(() => {
         login();
         visitWithTimeRange(OVERVIEW_URL);
@@ -87,10 +81,10 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', { tags: '@ess' }, () => {
+    context('Privileges: READ', () => {
       beforeEach(() => {
         login(ROLES.t1_analyst);
-        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -108,75 +102,80 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe(
-    'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: ['@ess', '@serverless'] },
-    () => {
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(OVERVIEW_URL);
-        openTimelineUsingToggle();
-        addNameAndDescriptionToTimeline(getTimeline());
-        populateTimeline();
-        goToQueryTab();
-      });
+  it('creates a timeline by clicking untitled timeline from bottom bar', () => {
+    visitWithTimeRange(OVERVIEW_URL);
+    openTimelineUsingToggle();
+    addNameAndDescriptionToTimeline(getTimeline());
+    populateTimeline();
+    goToQueryTab();
 
-      it.skip('can be added filter', () => {
-        addFilter(getTimeline().filter);
-        cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
-      });
+    addFilter(getTimeline().filter);
+    cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
 
-      it('pins an event', () => {
-        pinFirstEvent();
-        cy.get(PIN_EVENT)
-          .should('have.attr', 'aria-label')
-          .and('match', /Unpin the event in row 2/);
-      });
+    pinFirstEvent();
+    cy.get(PIN_EVENT)
+      .should('have.attr', 'aria-label')
+      .and('match', /Unpin the event in row 2/);
 
-      it('has a lock icon', () => {
-        cy.get(LOCKED_ICON).should('be.visible');
-      });
+    cy.get(LOCKED_ICON).should('be.visible');
 
-      // TO-DO: Issue 163398
-      it.skip('can be added notes', () => {
-        addNotesToTimeline(getTimeline().notes);
-        cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
-          .find(NOTES_TEXT)
-          .should('have.text', getTimeline().notes);
-      });
-    }
-  );
+    addNotesToTimeline(getTimeline().notes);
+    cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
+      .find(NOTES_TEXT)
+      .should('have.text', getTimeline().notes);
+  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172031
-  describe.skip('shows the different timeline states', () => {
-    before(() => {
-      login();
-      visitWithTimeRange(OVERVIEW_URL);
-      openTimelineUsingToggle();
-      createNewTimeline();
-    });
+  it('shows the different timeline states', () => {
+    visitWithTimeRange(TIMELINES_URL);
+    createTimeline();
 
-    it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
-      // Unsaved
-      cy.get(TIMELINE_PANEL).should('be.visible');
-      cy.get(TIMELINE_STATUS).should('be.visible');
-      cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
+    // Unsaved
+    cy.get(TIMELINE_PANEL).should('be.visible');
+    cy.get(TIMELINE_STATUS).should('be.visible');
+    cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
 
-      addNameToTimelineAndSave('Test');
+    addNameToTimelineAndSave('Test');
 
-      // Saved
-      cy.get(TIMELINE_STATUS).should('be.visible');
-      cy.get(TIMELINE_STATUS)
-        .invoke('text')
-        .should('match', /^Saved/);
+    // Saved
+    cy.get(TIMELINE_STATUS).should('be.visible');
+    cy.get(TIMELINE_STATUS)
+      .invoke('text')
+      .should('match', /^Saved/);
 
-      executeTimelineKQL('agent.name : *');
+    // Offsetting the extra save that is happening in the background
+    // for the saved search object.
+    cy.get(LOADING_INDICATOR).should('be.visible');
+    cy.get(LOADING_INDICATOR).should('not.exist');
 
-      // Saved but has unsaved changes
-      cy.get(TIMELINE_STATUS).should('be.visible');
-      cy.get(TIMELINE_STATUS)
-        .invoke('text')
-        .should('match', /^Has unsaved changes/);
-    });
+    executeTimelineKQL('agent.name : *');
+
+    // Saved but has unsaved changes
+    cy.get(TIMELINE_STATUS).should('be.visible');
+    cy.get(TIMELINE_STATUS)
+      .invoke('text')
+      .should('match', /^Has unsaved changes/);
+  });
+
+  it('should save timelines as new', () => {
+    visitWithTimeRange(TIMELINES_URL);
+    cy.get(ROWS).should('have.length', '0');
+
+    createTimeline();
+    addNameToTimelineAndSave('First');
+
+    // Offsetting the extra save that is happening in the background
+    // for the saved search object.
+    cy.get(LOADING_INDICATOR).should('be.visible');
+    cy.get(LOADING_INDICATOR).should('not.exist');
+
+    addNameToTimelineAndSaveAsNew('Second');
+    closeTimeline();
+
+    cy.get(ROWS).should('have.length', '2');
+    cy.get(ROWS)
+      .first()
+      .invoke('text')
+      .should('match', /Second/);
+    cy.get(ROWS).last().invoke('text').should('match', /First/);
   });
 });

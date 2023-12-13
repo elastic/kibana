@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './inp.journey';
 export * from './core_web_vitals';
 // export * from './page_views';
 export * from './url_ux_query.journey';

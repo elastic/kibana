@@ -50,6 +50,11 @@ Array [
                 },
               },
             ],
+            "must_not": Object {
+              "term": Object {
+                "error.type": "crash",
+              },
+            },
           },
         },
         "size": 0,

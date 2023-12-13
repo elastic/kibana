@@ -257,6 +257,16 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
       },
     },
+    flyout: {
+      queries: {
+        [usersModel.UserAssetTableType.assetEntra]: {
+          fields: [],
+        },
+        [usersModel.UserAssetTableType.assetOkta]: {
+          fields: [],
+        },
+      },
+    },
   },
   inputs: {
     global: {
@@ -372,6 +382,7 @@ export const mockGlobalState: State = {
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
         isDiscoverSavedSearchLoaded: false,
+        savedSearch: null,
         isDataProviderVisible: true,
       },
     },

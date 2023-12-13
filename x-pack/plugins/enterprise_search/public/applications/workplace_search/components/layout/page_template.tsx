@@ -29,6 +29,7 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
         items: useWorkplaceSearchNav(),
       }}
       setPageChrome={pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
+      useEndpointHeaderActions={false}
     >
       {pageViewTelemetry && (
         <SendWorkplaceSearchTelemetry action="viewed" metric={pageViewTelemetry} />

@@ -88,3 +88,5 @@ export {
   EmbeddableProfilingSearchBar,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
+
+export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';

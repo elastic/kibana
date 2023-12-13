@@ -52,8 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172215
-    describe.skip('field filtering', function () {
+    describe('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();

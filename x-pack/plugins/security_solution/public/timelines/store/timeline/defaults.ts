@@ -79,6 +79,7 @@ export const timelineDefaults: SubsetTimelineModel &
   isSelectAllChecked: false,
   filters: [],
   savedSearchId: null,
+  savedSearch: null,
   isDiscoverSavedSearchLoaded: false,
   isDataProviderVisible: false,
 };

@@ -9,16 +9,17 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
+  DARK_THEME,
   isMetricElementEvent,
   Metric,
-  Settings,
-  DARK_THEME,
   MetricTrendShape,
+  Settings,
 } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import { SLOWithSummaryResponse, HistoricalSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
@@ -40,7 +41,7 @@ export interface Props {
   cardsPerRow: number;
 }
 
-const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
   const colors = {
     DEGRADING: useEuiBackgroundColor('warning'),
     VIOLATED: useEuiBackgroundColor('danger'),
@@ -52,29 +53,16 @@ const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
 };
 
 const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
-  const subTitle =
-    slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
-  if (cardsPerRow === 4) {
-    return subTitle.substring(0, 30) + (subTitle.length > 30 ? '..' : '');
-  }
-  return subTitle.substring(0, 40) + (subTitle.length > 40 ? '..' : '');
+  return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
-  const {
-    application: { navigateToUrl },
-  } = useKibana().services;
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-
-  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
-
-  const cardColor = useCardColor(slo.summary.status);
-
-  const subTitle = getSubTitle(slo, cardsPerRow);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
@@ -88,6 +76,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
   return (
     <>
       <EuiPanel
+        panelRef={containerRef as React.Ref<HTMLDivElement>}
         onMouseOver={() => {
           if (!isMouseOver) {
             setIsMouseOver(true);
@@ -106,52 +95,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         }}
         title={slo.summary.status}
       >
-        <Chart>
-          <Settings
-            baseTheme={DARK_THEME}
-            onElementClick={([d]) => {
-              if (isMetricElementEvent(d)) {
-                navigateToUrl(sloDetailsUrl);
-              }
-            }}
-            locale={i18n.getLocale()}
-          />
-          <Metric
-            id={`${slo.id}-${slo.instanceId}`}
-            data={[
-              [
-                {
-                  title: slo.name,
-                  subtitle: subTitle,
-                  value: sliValue,
-                  trendShape: MetricTrendShape.Area,
-                  trend: historicalSliData?.map((d) => ({
-                    x: d.key as number,
-                    y: d.value as number,
-                  })),
-                  extra: (
-                    <FormattedMessage
-                      id="xpack.observability.sLOGridItem.targetFlexItemLabel"
-                      defaultMessage="Target {target}"
-                      values={{
-                        target: sloTarget,
-                      }}
-                    />
-                  ),
-                  icon: () => <EuiIcon type="visGauge" size="l" />,
-                  color: cardColor,
-                },
-              ],
-            ]}
-          />
-        </Chart>
-        <SloCardItemBadges
-          slo={slo}
-          rules={rules}
-          activeAlerts={activeAlerts}
-          handleCreateRule={handleCreateRule}
-          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
-        />
+        <SloCardChart slo={slo} historicalSliData={historicalSliData} cardsPerRow={cardsPerRow} />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -162,6 +106,15 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           />
         )}
       </EuiPanel>
+      <SloCardBadgesPortal containerRef={containerRef}>
+        <SloCardItemBadges
+          slo={slo}
+          rules={rules}
+          activeAlerts={activeAlerts}
+          handleCreateRule={handleCreateRule}
+          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
+        />
+      </SloCardBadgesPortal>
 
       <BurnRateRuleFlyout
         slo={slo}
@@ -177,5 +130,65 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
         />
       ) : null}
     </>
+  );
+}
+
+export function SloCardChart({
+  slo,
+  cardsPerRow,
+  historicalSliData,
+}: {
+  slo: SLOWithSummaryResponse;
+  cardsPerRow: number;
+  historicalSliData?: Array<{ key?: number; value?: number }>;
+}) {
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
+  const cardColor = useSloCardColor(slo.summary.status);
+  const subTitle = getSubTitle(slo, cardsPerRow);
+  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
+
+  return (
+    <Chart>
+      <Settings
+        baseTheme={DARK_THEME}
+        onElementClick={([d]) => {
+          if (isMetricElementEvent(d)) {
+            navigateToUrl(sloDetailsUrl);
+          }
+        }}
+        locale={i18n.getLocale()}
+      />
+      <Metric
+        id={`${slo.id}-${slo.instanceId}`}
+        data={[
+          [
+            {
+              title: slo.name,
+              subtitle: subTitle,
+              value: sliValue,
+              trendShape: MetricTrendShape.Area,
+              trend: historicalSliData?.map((d) => ({
+                x: d.key as number,
+                y: d.value as number,
+              })),
+              extra: (
+                <FormattedMessage
+                  id="xpack.observability.sLOGridItem.targetFlexItemLabel"
+                  defaultMessage="Target {target}"
+                  values={{
+                    target: sloTarget,
+                  }}
+                />
+              ),
+              icon: () => <EuiIcon type="visGauge" size="l" />,
+              color: cardColor,
+            },
+          ],
+        ]}
+      />
+    </Chart>
   );
 }

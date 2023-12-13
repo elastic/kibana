@@ -78,7 +78,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             group: 'default',
             params: {},
             uuid: response.body.actions[0].uuid,
-            use_alert_data_for_template: false,
           },
         ],
         enabled: true,
@@ -182,7 +181,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             group: 'default',
             params: {},
             uuid: response.body.actions[0].uuid,
-            use_alert_data_for_template: false,
           },
           {
             id: 'my-slack1',
@@ -192,7 +190,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               message: 'something important happened!',
             },
             uuid: response.body.actions[1].uuid,
-            use_alert_data_for_template: false,
           },
           {
             id: 'system-connector-test.system-action',
@@ -200,7 +197,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: 'test.system-action',
             params: {},
             uuid: response.body.actions[2].uuid,
-            use_alert_data_for_template: false,
           },
         ],
         enabled: true,

@@ -18,7 +18,7 @@ import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 
 const loadPageAsUserWithNoPrivileges = () => {
   login(ROLES.no_risk_engine_privileges);
-  visit(ENTITY_ANALYTICS_MANAGEMENT_URL, { role: ROLES.no_risk_engine_privileges });
+  visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
 };
 
 // this test suite doesn't run on serverless because it requires a custom role
@@ -26,9 +26,6 @@ describe(
   'Entity analytics management page - Risk Engine Privileges Callout',
   {
     tags: ['@ess'],
-    env: {
-      ftrConfig: { enableExperimental: ['riskEnginePrivilegesRouteEnabled'] },
-    },
   },
   () => {
     it('should not show the callout for superuser', () => {

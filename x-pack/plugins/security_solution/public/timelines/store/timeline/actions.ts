@@ -7,6 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 import type { SessionViewConfig } from '../../../../common/types';
 import type {
@@ -46,7 +47,7 @@ export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSER
 
 export const addProvider = actionCreator<{ id: string; providers: DataProvider[] }>('ADD_PROVIDER');
 
-export const saveTimeline = actionCreator<{ id: string }>('SAVE_TIMELINE');
+export const saveTimeline = actionCreator<{ id: string; saveAsNew: boolean }>('SAVE_TIMELINE');
 
 export const createTimeline = actionCreator<TimelinePersistInput>('CREATE_TIMELINE');
 
@@ -272,6 +273,16 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const initializeSavedSearch = actionCreator<{
+  id: string;
+  savedSearch: SavedSearch;
+}>('INITIALIZE_SAVED_SEARCH');
+
+export const updateSavedSearch = actionCreator<{
+  id: string;
+  savedSearch: SavedSearch;
+}>('UPDATE_SAVED_SEARCH');
 
 export const setDataProviderVisibility = actionCreator<{
   id: string;

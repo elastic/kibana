@@ -21,7 +21,6 @@ import {
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   CLOSE_TIMELINE_BTN,
-  COMBO_BOX,
   COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
   DELETE_TIMELINE_BTN,
@@ -55,6 +54,7 @@ import {
   OPEN_TIMELINE_TEMPLATE_ICON,
   TIMELINE_SAVE_MODAL,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
+  TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
   CLOSE_OPEN_TIMELINE_MODAL_BTN,
@@ -94,7 +94,7 @@ import {
   SAVE_TIMELINE_ACTION_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-import { drag, drop } from './common';
+import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -122,6 +122,17 @@ export const addNameToTimelineAndSave = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
+export const addNameToTimelineAndSaveAsNew = (name: string) => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).click();
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
 export const addNameAndDescriptionToTimeline = (
   timeline: Timeline,
   modalAlreadyOpen: boolean = false
@@ -144,15 +155,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const gotToEsqlTab = () => {
-  recurse(
-    () => cy.get(ESQL_TAB).should('be.visible').click({ force: true }),
-    ($el) => expect($el).to.have.class('euiTab-isSelected'),
-    {
-      delay: 500,
-    }
-  );
-};
+export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);
 
 export const goToCorrelationTab = () => {
   cy.get(TIMELINE_CORRELATION_TAB).click();
@@ -199,8 +202,8 @@ export const addEqlToTimeline = (eql: string) => {
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).trigger('click');
+  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
+
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }

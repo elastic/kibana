@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../../timelines/components/side_panel/new_user_detail/__mocks__';
@@ -20,14 +21,14 @@ export default {
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
   panels: {},
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 export const Default: Story<void> = () => {
   return (
     <StorybookProviders>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <div style={{ maxWidth: '300px' }}>
-          <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
+          <RiskSummary riskScoreData={{ ...mockRiskScoreState, data: [] }} queryId={'testQuery'} />
         </div>
       </ExpandableFlyoutContext.Provider>
     </StorybookProviders>

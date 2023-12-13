@@ -86,7 +86,12 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
       memory: {
         heap: {
           usedInBytes: processMemoryUsedInBytes,
+          totalInBytes: process?.memory?.heap.total_in_bytes,
+          sizeLimit: process?.memory?.heap.size_limit,
         },
+        residentSetSizeInBytes: process?.memory?.resident_set_size_in_bytes,
+        externalInBytes: process?.memory?.external_in_bytes,
+        arrayBuffersInBytes: process?.memory?.array_buffers_in_bytes,
       },
       eventLoopDelay: eventLoopDelayVal,
       eventLoopDelayHistogram: eventLoopDelayHistVals,
