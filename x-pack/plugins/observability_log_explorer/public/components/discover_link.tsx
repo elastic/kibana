@@ -13,6 +13,7 @@ import {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/log-explorer-plugin/public';
+import { getRouterLinkProps } from '@kbn/observability-shared-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
@@ -21,7 +22,6 @@ import {
   ObservabilityLogExplorerService,
   useObservabilityLogExplorerPageStateContext,
 } from '../state_machines/observability_log_explorer/src';
-import { getRouterLinkProps } from '../utils/get_router_link_props';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {

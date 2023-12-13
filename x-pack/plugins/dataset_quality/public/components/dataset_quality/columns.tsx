@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
+import { LogExplorerLink } from '../log_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
-import { useLinkToLogExplorer } from '../../hooks/use_link_to_log_explorer';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -176,14 +175,9 @@ export const getDatasetQualitTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LinkToLogExplorer dataStreamStat={dataStreamStat} />
+        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
-};
-
-const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
-  const url = useLinkToLogExplorer({ dataStreamStat });
-  return <EuiLink href={url}>{openActionName}</EuiLink>;
 };

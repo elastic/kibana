@@ -67,6 +67,8 @@ export type { ApmIndicesConfig, UXMetrics } from './types';
 
 export { noCasesPermissions, allCasesPermissions } from './utils/cases_permissions';
 
+export { getRouterLinkProps } from './utils/get_router_link_props';
+
 export {
   type ObservabilityActionContextMenuItemProps,
   getContextMenuItemsFromActions,
