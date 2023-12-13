@@ -137,9 +137,10 @@ async function wrapUserDefinedCode(code: string) {
   );
 }
 
+const reportAlertLogPrefix = 'alertsClient:report:';
 function getDetectedAlerts(output: string) {
   return output
     .split('\n')
-    .filter((str) => str.indexOf('reportAlert:') === 0)
-    .map((str) => str.substring(12));
+    .filter((str) => str.indexOf(reportAlertLogPrefix) === 0)
+    .map((str) => str.substring(reportAlertLogPrefix.length));
 }

@@ -13,8 +13,8 @@ export interface ReportedAlert {
   payload?: Record<string, unknown>;
 }
 
-export function reportAlert(alert: ReportedAlert) {
-  console.log(`reportAlert:${JSON.stringify(alert)}`);
+export function report(alert: ReportedAlert) {
+  console.log(`alertsClient:report:${JSON.stringify(alert)}`);
 }
 
 // function setAlertData(alert: Pick<ReportedAlert, 'id' | 'context' | 'payload'>) {
@@ -35,7 +35,7 @@ export function reportAlert(alert: ReportedAlert) {
 // }
 
 export const alertsClient = {
-  reportAlert,
+  report,
   // setAlertData,
   // getAlertLimitValue,
   // setAlertLimitReached,
