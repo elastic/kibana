@@ -22,10 +22,7 @@ import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
 
 interface FrameValue {
-  selfCPU: number;
-  totalCPU: number;
   totalCount: number;
-  duration: number;
   scaleFactor?: number;
   totalAnnualCO2Kgs: number;
   totalAnnualCostUSD: number;

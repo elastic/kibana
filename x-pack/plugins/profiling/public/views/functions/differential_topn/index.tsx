@@ -173,10 +173,7 @@ export function DifferentialTopNFunctionsView() {
               baseValue={
                 state.data
                   ? {
-                      duration: totalSeconds,
-                      selfCPU: state.data.selfCPU,
                       totalCount: state.data.TotalCount,
-                      totalCPU: state.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? baselineTime : baseline,
                       totalAnnualCO2Kgs: state.data.totalAnnualCO2Kgs,
                       totalAnnualCostUSD: state.data.totalAnnualCostUSD,
@@ -186,10 +183,7 @@ export function DifferentialTopNFunctionsView() {
               comparisonValue={
                 comparisonState.data
                   ? {
-                      duration: totalComparisonSeconds,
-                      selfCPU: comparisonState.data.selfCPU,
                       totalCount: comparisonState.data.TotalCount,
-                      totalCPU: comparisonState.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
                       totalAnnualCO2Kgs: comparisonState.data.totalAnnualCO2Kgs,
                       totalAnnualCostUSD: comparisonState.data.totalAnnualCostUSD,
