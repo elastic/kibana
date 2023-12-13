@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FlyoutProps, LogDocument } from './types';
+import { LogExplorerFlyoutContentProps, LogDocument } from './types';
 import { useDocDetail } from './use_doc_detail';
 import { FlyoutHeader } from './flyout_header';
 import { FlyoutHighlights } from './flyout_highlights';
@@ -16,7 +16,7 @@ export function FlyoutDetail({
   dataView,
   doc,
   actions,
-}: Pick<FlyoutProps, 'dataView' | 'doc' | 'actions'>) {
+}: Pick<LogExplorerFlyoutContentProps, 'dataView' | 'doc' | 'actions'>) {
   const parsedDoc = useDocDetail(doc as LogDocument, { dataView });
 
   return (
