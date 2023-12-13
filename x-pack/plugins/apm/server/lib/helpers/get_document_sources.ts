@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ApmDocumentType } from '../../../common/document_type';
@@ -178,13 +177,14 @@ export async function getDocumentSources({
         documentType,
         rollupInterval,
         hasDocs,
-        hasDurationSummaryField:
+        hasDurationSummaryField: Boolean(
           sourcesWithHasDocs.find((eSource) => {
             return (
               eSource.documentType === documentType &&
               eSource.rollupInterval === rollupInterval
             );
-          })?.hasDurationSummary || false,
+          })?.hasDurationSummary
+        ),
       };
     }
   );
