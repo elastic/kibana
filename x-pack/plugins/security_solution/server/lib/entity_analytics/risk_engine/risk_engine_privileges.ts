@@ -45,22 +45,17 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     riskEnginePrivileges.privileges
   );
 
-  const indexPrivilegesMessage = !indexPrivileges.length
-    ? ''
-    : indexPrivileges
-        .map(([indexName, privileges]) =>
-          i18n.translate(
-            'xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege',
-            {
-              defaultMessage: 'Missing index privileges for index "{indexName}": {privileges}.',
-              values: {
-                indexName,
-                privileges: privileges.join(', '),
-              },
-            }
-          )
-        )
-        .join('\n');
+  const indexPrivilegesMessage = indexPrivileges
+    .map(([indexName, privileges]) =>
+      i18n.translate('xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege', {
+        defaultMessage: 'Missing index privileges for index "{indexName}": {privileges}.',
+        values: {
+          indexName,
+          privileges: privileges.join(', '),
+        },
+      })
+    )
+    .join('\n');
 
   const clusterPrivilegesMessage = !clusterPrivileges.length
     ? ''
