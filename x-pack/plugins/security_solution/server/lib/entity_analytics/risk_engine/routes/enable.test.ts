@@ -14,29 +14,7 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-
-export const createMockSecurityStartWithFullRiskEngineAccess = () => {
-  const mockSecurityStart = securityMock.createStart();
-
-  const mockCheckPrivileges = jest.fn().mockResolvedValue({
-    hasAllRequested: true,
-    privileges: {
-      elasticsearch: {
-        cluster: ['manage', 'monitor'],
-        index: {
-          'index-name': ['read'],
-        },
-      },
-    },
-  });
-
-  mockSecurityStart.authz.checkPrivilegesDynamicallyWithRequest = jest
-    .fn()
-    .mockReturnValue(mockCheckPrivileges);
-
-  return mockSecurityStart;
-};
+import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
 
 describe('risk score enable route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -74,7 +52,7 @@ describe('risk score enable route', () => {
         {},
         {
           taskManager: mockTaskManagerStart,
-          security: createMockSecurityStartWithFullRiskEngineAccess(),
+          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
       riskEngineEnableRoute(server.router, getStartServicesMock);
@@ -110,12 +88,13 @@ describe('risk score enable route', () => {
 
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest
-        .fn()
-        .mockResolvedValue([
-          {},
-          { taskManager: undefined, security: createMockSecurityStartWithFullRiskEngineAccess() },
-        ]);
+      getStartServicesMock = jest.fn().mockResolvedValue([
+        {},
+        {
+          taskManager: undefined,
+          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        },
+      ]);
       riskEngineEnableRoute(server.router, getStartServicesMock);
     });
 
