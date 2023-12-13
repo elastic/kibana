@@ -15,23 +15,32 @@ export interface UseFetchSloDefinitionsResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
+  refetch: () => void;
 }
 
 interface Params {
   name?: string;
+  includeOutdatedOnly?: boolean;
+  page?: number;
+  perPage?: number;
 }
 
-export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefinitionsResponse {
+export function useFetchSloDefinitions({
+  name = '',
+  includeOutdatedOnly = false,
+  page = 1,
+  perPage = 100,
+}: Params): UseFetchSloDefinitionsResponse {
   const { http } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
-  const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: sloKeys.definitions(search),
+  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+    queryKey: sloKeys.definitions(search, page, perPage, includeOutdatedOnly),
     queryFn: async ({ signal }) => {
       try {
         const response = await http.get<FindSLODefinitionsResponse>(
           '/api/observability/slos/_definitions',
-          { query: { search }, signal }
+          { query: { search, includeOutdatedOnly, page, perPage }, signal }
         );
 
         return response;
@@ -43,5 +52,5 @@ export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefini
     refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, data };
+  return { isLoading, isError, isSuccess, data, refetch };
 }
