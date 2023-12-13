@@ -113,7 +113,6 @@ export const managedUserDetails: ManagedUserHits = {
     _index: 'test-index',
     _id: '123-test',
   },
-  [ManagedUserDatasetKey.OKTA]: undefined,
 };
 
 export const mockManagedUserData: ManagedUserData = {
