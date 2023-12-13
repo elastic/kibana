@@ -11,7 +11,7 @@ import { DynamicTool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { getOpenAlertsQuery } from './get_open_alerts_query';
+import { getOpenAndAcknowledgedAlertsQuery } from './get_open_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
 import { APP_ID } from '../../../../common';
 
@@ -21,10 +21,11 @@ export interface OpenAlertsToolParams extends AssistantToolParams {
 }
 
 export const OPEN_ALERTS_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
 
 /**
- * A tool for querying open alerts, or null if the request doesn't have all the required parameters.
+ * Returns a tool for querying open and acknowledged alerts, or null if the
+ * request doesn't have all the required parameters.
  */
 export const OPEN_ALERTS_TOOL: AssistantTool = {
   id: 'open-alerts-tool',
@@ -56,7 +57,7 @@ export const OPEN_ALERTS_TOOL: AssistantTool = {
       name: 'open-alerts',
       description: OPEN_ALERTS_TOOL_DESCRIPTION,
       func: async () => {
-        const query = getOpenAlertsQuery({
+        const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
           allow: allow ?? [],
           size,
