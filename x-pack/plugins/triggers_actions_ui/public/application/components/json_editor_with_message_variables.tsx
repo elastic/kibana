@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiCallOut, EuiSpacer, EuiButtonIcon, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
@@ -17,6 +17,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
+import { SaveActionTemplateModal } from './save_action_template_modal';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.noEditorErrorTitle',
@@ -34,6 +35,7 @@ const NO_EDITOR_ERROR_MESSAGE = i18n.translate(
 
 interface Props {
   buttonTitle?: string;
+  connectorTypeId?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string | null;
@@ -44,6 +46,7 @@ interface Props {
   helpText?: JSX.Element;
   onBlur?: () => void;
   showButtonTitle?: boolean;
+  canUseTemplate?: boolean;
   euiCodeEditorProps?: { [key: string]: any };
 }
 
@@ -57,6 +60,7 @@ const EDITOR_SOURCE = 'json-editor-with-message-variables';
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   buttonTitle,
   messageVariables,
+  connectorTypeId,
   paramsProperty,
   inputTargetValue,
   label,
@@ -66,11 +70,13 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   helpText,
   onBlur,
   showButtonTitle,
+  canUseTemplate,
   euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
@@ -153,54 +159,85 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   }, [registerEditorListeners]);
 
   return (
-    <EuiFormRow
-      data-test-subj="actionJsonEditor"
-      fullWidth
-      error={errors}
-      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-      label={label}
-      labelAppend={
-        <AddMessageVariables
-          buttonTitle={buttonTitle}
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-          showButtonTitle={showButtonTitle}
-        />
-      }
-      helpText={helpText}
-    >
-      <>
-        {renderErrorMessage()}
-        <CodeEditor
-          languageId={XJsonLang.ID}
-          options={{
-            renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
-            lineNumbers: 'on',
-            fontSize: 14,
-            minimap: {
-              enabled: false,
-            },
-            scrollBeyondLastLine: false,
-            folding: true,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            automaticLayout: true,
-          }}
-          value={xJson}
-          width="100%"
-          height="200px"
-          data-test-subj={`${paramsProperty}JsonEditor`}
-          aria-label={areaLabel}
-          {...euiCodeEditorProps}
-          editorDidMount={onEditorMount}
-          onChange={(xjson: string) => {
-            setXJson(xjson);
-            // Keep the documents in sync with the editor content
-            onDocumentsChange(convertToJson(xjson));
-          }}
-        />
-      </>
-    </EuiFormRow>
+    <>
+      <EuiFormRow
+        data-test-subj="actionJsonEditor"
+        fullWidth
+        error={errors}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        label={label}
+        labelAppend={
+          <>
+            {canUseTemplate && (
+              <>
+                <EuiText size="xs">
+                  {xJson.length > 0 && (
+                    <EuiButtonIcon
+                      id="saveButton"
+                      data-test-subj="saveButton"
+                      title="Save action template"
+                      iconType="save"
+                      onClick={() => setIsModalOpen(true)}
+                    />
+                  )}
+                  <EuiButtonIcon
+                    id="loadButton"
+                    data-test-subj="loadButton"
+                    title="Load Template"
+                    iconType="folderOpen"
+                  />
+                </EuiText>
+              </>
+            )}
+            <AddMessageVariables
+              buttonTitle={buttonTitle}
+              messageVariables={messageVariables}
+              onSelectEventHandler={onSelectMessageVariable}
+              paramsProperty={paramsProperty}
+              showButtonTitle={showButtonTitle}
+            />
+          </>
+        }
+        helpText={helpText}
+      >
+        <>
+          {renderErrorMessage()}
+          <CodeEditor
+            languageId={XJsonLang.ID}
+            options={{
+              renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
+              lineNumbers: 'on',
+              fontSize: 14,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              folding: true,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+            value={xJson}
+            width="100%"
+            height="200px"
+            data-test-subj={`${paramsProperty}JsonEditor`}
+            aria-label={areaLabel}
+            {...euiCodeEditorProps}
+            editorDidMount={onEditorMount}
+            onChange={(xjson: string) => {
+              setXJson(xjson);
+              // Keep the documents in sync with the editor content
+              onDocumentsChange(convertToJson(xjson));
+            }}
+          />
+        </>
+      </EuiFormRow>
+      <SaveActionTemplateModal
+        isOpen={isModalOpen}
+        template={xJson}
+        connectorTypeId={connectorTypeId ?? ''}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 };

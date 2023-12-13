@@ -21,6 +21,7 @@ import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
+import { createActionTemplateRoute } from './action_template/create';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -45,4 +46,6 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
+
+  createActionTemplateRoute(router, licenseState);
 }

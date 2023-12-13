@@ -24,6 +24,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  ACTION_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 
 export function setupSavedObjects(
@@ -114,5 +115,26 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+  });
+
+  savedObjects.registerType({
+    name: ACTION_TEMPLATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      dynamic: false,
+      properties: {
+        connectorId: {
+          type: 'keyword',
+        },
+        connectorTypeId: {
+          type: 'keyword',
+        },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
   });
 }

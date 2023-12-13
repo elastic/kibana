@@ -36,6 +36,7 @@ export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>
 
 import type { ActionExecutionSource } from './lib';
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
+import { ActionTemplateClient } from './lib/action_template_client';
 export type { ActionExecutionSource } from './lib';
 
 export { ActionExecutionSourceType } from './lib';
@@ -48,6 +49,7 @@ export interface Services {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
+  getActionTemplateClient: () => ActionTemplateClient;
   listTypes: ActionTypeRegistry['list'];
 }
 

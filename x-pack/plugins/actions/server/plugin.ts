@@ -74,6 +74,7 @@ import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/ta
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  ACTION_TEMPLATE_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
@@ -92,6 +93,7 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { ActionTemplateClient } from './lib/action_template_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
@@ -715,6 +717,16 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+          });
+        },
+        getActionTemplateClient: () => {
+          const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
+            excludedExtensions: [SECURITY_EXTENSION_ID],
+            includedHiddenTypes: [ACTION_TEMPLATE_SAVED_OBJECT_TYPE],
+          });
+          return new ActionTemplateClient({
+            logger,
+            unsecuredSavedObjectsClient,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

@@ -336,6 +336,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
             messageVariables={messageVariables}
             paramsProperty="webApi"
             inputTargetValue={text}
+            connectorTypeId={'.slack_api'}
+            canUseTemplate={true}
             label={i18n.translate(
               'xpack.stackConnectors.components.slack.messageJsonAreaFieldLabel',
               {
