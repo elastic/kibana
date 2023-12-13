@@ -65,23 +65,6 @@ export class SynthtraceEsClient<TFields extends Fields> {
     });
   }
 
-  async rollover() {
-    const { data_streams: dataStreams } = await this.client.indices.getDataStream({
-      name: this.dataStreams,
-    });
-
-    const indexNames = dataStreams.flatMap((stream) => stream.name);
-
-    await Promise.all(
-      indexNames.map(
-        async (name) =>
-          await this.client.indices.rollover({
-            alias: name,
-          })
-      )
-    );
-  }
-
   pipeline(cb: (base: Readable) => NodeJS.WritableStream) {
     this.pipelineCallback = cb;
   }

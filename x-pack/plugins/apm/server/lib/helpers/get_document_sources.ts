@@ -84,7 +84,7 @@ export async function getDocumentSources({
       enableContinuousRollups
         ? docTypeConfig.rollupIntervals
         : [RollupInterval.OneMinute]
-    ).flatMap((rollupInterval) => {
+    ).map((rollupInterval) => {
       return {
         documentType,
         rollupInterval,
@@ -98,14 +98,22 @@ export async function getDocumentSources({
           rollupInterval,
           filters: [...kql, ...currentRange],
         }),
+        durationSummaryCheck: getRequest({
+          documentType,
+          rollupInterval,
+          filters: [...kql, ...currentRange, getDurationLegacyFilter()],
+        }),
       };
     });
   });
 
-  const allSearches = sourcesToCheck.flatMap(({ before, current }) => [
-    before,
-    current,
-  ]);
+  const allSearches = [
+    ...sourcesToCheck.flatMap(({ before, current, durationSummaryCheck }) => [
+      before,
+      current,
+      durationSummaryCheck,
+    ]),
+  ];
 
   const allResponses = (
     await apmEventClient.msearch('get_document_availability', ...allSearches)
@@ -113,17 +121,21 @@ export async function getDocumentSources({
 
   const checkedSources = sourcesToCheck.map((source, index) => {
     const { documentType, rollupInterval } = source;
-    const responseBefore = allResponses[index * 2];
-    const responseAfter = allResponses[index * 2 + 1];
+    const responseBefore = allResponses[index * 3];
+    const responseAfter = allResponses[index * 3 + 1];
+    const responseDurationSummaryCheck = allResponses[index * 3 + 2];
 
     const hasDocBefore = responseBefore.hits.total.value > 0;
     const hasDocAfter = responseAfter.hits.total.value > 0;
+    const hasDurationSummary =
+      responseDurationSummaryCheck.hits.total.value === 0;
 
     return {
       documentType,
       rollupInterval,
       hasDocBefore,
       hasDocAfter,
+      hasDurationSummary,
     };
   });
 
@@ -132,8 +144,13 @@ export async function getDocumentSources({
   );
 
   const sourcesWithHasDocs = checkedSources.map((checkedSource) => {
-    const { documentType, hasDocAfter, hasDocBefore, rollupInterval } =
-      checkedSource;
+    const {
+      documentType,
+      hasDocAfter,
+      hasDocBefore,
+      rollupInterval,
+      hasDurationSummary,
+    } = checkedSource;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
 
@@ -141,7 +158,7 @@ export async function getDocumentSources({
     // this time range to mark this source as available. If we don't do that,
     // users that upgrade to a version that starts generating service tx metrics
     // will see a mostly empty screen for a while after upgrading.
-    // If we only check before, users with a new deployment will use raw transaction
+    // If we only check before, users with a new deployment will use raw transactionp
     // events.
     const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
 
@@ -149,30 +166,25 @@ export async function getDocumentSources({
       documentType,
       rollupInterval,
       hasDocs,
+      hasDurationSummary,
     };
-  });
-
-  const durationSummarySupport = await getDurationSummarySupportByDocType({
-    apmEventClient,
-    documentTypes: documentTypesToCheck,
-    enableContinuousRollups,
-    filters: [...kql, ...currentRange],
   });
 
   const sources: TimeRangeMetadata['sources'] = sourcesWithHasDocs.map(
     (checkedSource) => {
       const { documentType, hasDocs, rollupInterval } = checkedSource;
 
-      const hasDurationSummaryField =
-        documentType in durationSummarySupport
-          ? durationSummarySupport[documentType][rollupInterval] || false
-          : false;
-
       return {
         documentType,
         rollupInterval,
         hasDocs,
-        hasDurationSummaryField,
+        hasDurationSummaryField:
+          sourcesWithHasDocs.find((eSource) => {
+            return (
+              eSource.documentType === documentType &&
+              eSource.rollupInterval === rollupInterval
+            );
+          })?.hasDurationSummary || false,
       };
     }
   );
@@ -183,52 +195,4 @@ export async function getDocumentSources({
     hasDocs: true,
     hasDurationSummaryField: false,
   });
-}
-
-async function getDurationSummarySupportByDocType({
-  apmEventClient,
-  documentTypes,
-  filters,
-  enableContinuousRollups,
-}: {
-  apmEventClient: APMEventClient;
-  documentTypes: ApmDocumentType[];
-  filters: estypes.QueryDslQueryContainer[];
-  enableContinuousRollups: boolean;
-}) {
-  const sources = documentTypes.flatMap((documentType) => {
-    const docTypeConfig = getConfigForDocumentType(documentType);
-
-    return (
-      enableContinuousRollups
-        ? docTypeConfig.rollupIntervals
-        : [RollupInterval.OneMinute]
-    ).flatMap((rollupInterval) => ({
-      documentType,
-      rollupInterval,
-      query: getRequest({
-        documentType,
-        rollupInterval,
-        filters: [...filters, getDurationLegacyFilter()],
-      }),
-    }));
-  });
-
-  const allResponses = (
-    await apmEventClient.msearch(
-      'get_duration_summary_support',
-      ...sources.map((source) => source.query)
-    )
-  ).responses;
-
-  return sources.reduce(
-    (acc, curr, index) => ({
-      ...acc,
-      [curr.documentType]: {
-        ...acc[curr.documentType],
-        [curr.rollupInterval]: allResponses[index].hits.total.value === 0,
-      },
-    }),
-    {} as { [key: string]: { [key: string]: boolean } }
-  );
 }
