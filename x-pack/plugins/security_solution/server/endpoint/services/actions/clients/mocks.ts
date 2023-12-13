@@ -18,6 +18,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { merge } from 'lodash';
 import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import {
   createActionRequestsEsSearchResultsMock,
@@ -47,7 +48,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   const casesClient = createCasesClientMock();
   const endpointService = new EndpointAppContextService();
 
-  esClient.index.mockImplementation(async (payload) => {
+  esClient.index.mockImplementation((async (payload) => {
     switch (payload.index) {
       case ENDPOINT_ACTIONS_INDEX:
         return createEsIndexTransportResponseMock({ body: { _index: payload.index } });
@@ -56,18 +57,24 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     }
 
     throw new Error(`no esClient.index() mock defined for index ${payload.index}`);
-  });
+  }) as typeof esClient.index);
 
   esClient.search.mockImplementation(async (payload) => {
-    switch (payload.index) {
-      case ENDPOINT_ACTIONS_INDEX:
-        return createActionRequestsEsSearchResultsMock();
-      case ACTION_RESPONSE_INDICES:
-        return createActionResponsesEsSearchResultsMock();
+    if (payload) {
+      switch (payload.index) {
+        case ENDPOINT_ACTIONS_INDEX:
+          return createActionRequestsEsSearchResultsMock();
+        case ACTION_RESPONSE_INDICES:
+          return createActionResponsesEsSearchResultsMock();
+      }
     }
 
     return BaseDataGenerator.toEsSearchResponse([]);
   });
+
+  (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(
+    (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
+  );
 
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
   endpointService.start(createMockEndpointAppContextServiceStartContract());
@@ -104,7 +111,10 @@ const createEsIndexTransportResponseMock = (
       context: {},
       name: 'foo',
       request: {
-        params: {},
+        params: {
+          method: 'GET',
+          path: 'some/path',
+        },
         options: {},
         id: 'some-id',
       },

@@ -310,12 +310,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
-      req.body.agent_type ?? 'endpoint',
+      req.body.agent_type || 'endpoint',
       {
         esClient,
         casesClient,
         endpointService: endpointContext.service,
-        username: user?.username ?? 'unknown',
+        username: user?.username || 'unknown',
         connectorActions,
       }
     );
