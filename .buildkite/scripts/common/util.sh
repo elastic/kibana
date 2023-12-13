@@ -184,7 +184,7 @@ vault_get() {
   if [[ -z "${2:-}" ]]; then
     retry 5 5 vault read "$fullPath"
   else
-    retry 5 5 vault read -field="$field" "$fullPath"
+    retry 5 5 vault read -field="$field" "$fullPath" ${@:1}
   fi
 }
 
@@ -195,7 +195,7 @@ vault_set() {
 
   fullPath="secret/ci/elastic-kibana/$path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
-    fullPath="secret/kibana-issues/dev/$path"
+    fullPath="secret/kibana-issues/dev/$path" ${@:2}
   fi
 
   # shellcheck disable=SC2068
