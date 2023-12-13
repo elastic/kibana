@@ -29,8 +29,6 @@ export const CORRELATION_EVENT_TABLE_CELL =
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
-export const COMBO_BOX = 'button.euiFilterSelectItem[role="option"]';
-
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';

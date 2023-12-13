@@ -13,8 +13,8 @@ import { Integration } from '../../types/integration';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
-import { getMalformedDocsPaginated } from './get_malformed_docs';
-import { MalformedDocs } from '../../../common/api_types';
+import { getDegradedDocsPaginated } from './get_degraded_docs';
+import { DegradedDocs } from '../../../common/api_types';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -72,8 +72,8 @@ const statsRoute = createDatasetQualityServerRoute({
   },
 });
 
-const malformedDocsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/malformed_docs',
+const degradedDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
       rangeRt,
@@ -87,25 +87,25 @@ const malformedDocsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    malformedDocs: MalformedDocs[];
+    degradedDocs: DegradedDocs[];
   }> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const malformedDocs = await getMalformedDocsPaginated({
+    const degradedDocs = await getDegradedDocsPaginated({
       esClient,
       ...params.query,
     });
 
     return {
-      malformedDocs,
+      degradedDocs,
     };
   },
 });
 
 export const dataStreamsRouteRepository = {
   ...statsRoute,
-  ...malformedDocsRoute,
+  ...degradedDocsRoute,
 };
