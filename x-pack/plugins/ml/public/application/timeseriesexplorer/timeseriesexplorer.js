@@ -265,7 +265,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   /**
-   * Gets focus data for the current component state/
+   * Gets focus data for the current component state
    */
   getFocusData(selection) {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
@@ -745,7 +745,7 @@ export class TimeSeriesExplorer extends React.Component {
         );
       }
     }
-
+    // ------ FROM HERE to BELOW --------
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', () => {
@@ -1091,7 +1091,7 @@ export class TimeSeriesExplorer extends React.Component {
               entities={entityControls}
             />
           )}
-
+        {/* ------ START HERE --------- */}
         {arePartitioningFieldsProvided &&
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
@@ -1219,6 +1219,7 @@ export class TimeSeriesExplorer extends React.Component {
                 showModelBounds={showModelBounds}
                 lastRefresh={lastRefresh}
               />
+              {/* ------ END HERE --------- */}
               {focusAnnotationError !== undefined && (
                 <>
                   <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>

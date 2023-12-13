@@ -22,11 +22,13 @@ import { AnomalyExplorerChartsService } from '../application/services/anomaly_ex
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  // ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -100,13 +102,26 @@ export interface AnomalyChartsEmbeddableCustomInput {
 
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
+export interface SingleMetricViewerEmbeddableCustomInput {
+  jobIds: JobId[];
+}
+
+export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
+  SingleMetricViewerEmbeddableCustomInput;
+
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
   mlResultsService: MlResultsService;
+  mlApiServices?: MlApiServices;
 }
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
+export type SingleMetricViewerEmbeddableServices = [
+  CoreStart,
+  MlDependencies,
+  AnomalyChartsServices
+];
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];
   severity?: number;

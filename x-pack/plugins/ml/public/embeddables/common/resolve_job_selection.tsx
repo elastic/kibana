@@ -26,7 +26,8 @@ import { JobSelectorFlyout } from './components/job_selector_flyout';
  */
 export async function resolveJobSelection(
   coreStart: CoreStart,
-  selectedJobIds?: JobId[]
+  selectedJobIds?: JobId[],
+  singleSelection: boolean = false
 ): Promise<{ jobIds: string[]; groups: Array<{ groupId: string; jobIds: string[] }> }> {
   const {
     http,
@@ -74,7 +75,7 @@ export async function resolveJobSelection(
               selectedIds={selectedJobIds}
               withTimeRangeSelector={false}
               dateFormatTz={dateFormatTz}
-              singleSelection={false}
+              singleSelection={singleSelection}
               timeseriesOnly={true}
               onFlyoutClose={onFlyoutClose}
               onSelectionConfirmed={onSelectionConfirmed}

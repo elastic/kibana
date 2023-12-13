@@ -14,7 +14,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
-import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { CombinedJob, Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
 import {
@@ -67,12 +67,13 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
-  selectedDetectorIndex: number;
-  selectedJobId: JobId;
-  bounds: any;
   appStateHandler: Function;
-  selectedEntities: Record<string, any>;
+  bounds: any;
   functionDescription: string;
+  job?: CombinedJob; // TODO: might need some type stuff as it's actually an MlJob type
+  selectedDetectorIndex: number;
+  selectedEntities: Record<string, any>;
+  selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }
 
@@ -80,13 +81,14 @@ interface SeriesControlsProps {
  * Component for handling the detector and entities controls.
  */
 export const SeriesControls: FC<SeriesControlsProps> = ({
-  bounds,
-  selectedDetectorIndex,
-  selectedJobId,
   appStateHandler,
+  bounds,
   children,
-  selectedEntities,
   functionDescription,
+  job,
+  selectedDetectorIndex,
+  selectedEntities,
+  selectedJobId,
   setFunctionDescription,
 }) => {
   const {
@@ -97,7 +99,11 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
+  const selectedJob: CombinedJob = useMemo(
+    () => job ?? mlJobService.getJob(selectedJobId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId]
+  );
 
   const isModelPlotEnabled = !!selectedJob.model_plot_config?.enabled;
 
@@ -112,7 +118,13 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   }, [selectedJob]);
 
   const entityControls = useMemo(() => {
-    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
+    return getControlsForDetector(
+      selectedDetectorIndex,
+      selectedEntities,
+      selectedJobId,
+      selectedJob
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
   const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<
