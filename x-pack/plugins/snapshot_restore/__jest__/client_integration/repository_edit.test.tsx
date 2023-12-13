@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick, TestBed, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';
 import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
@@ -45,12 +45,11 @@ describe('<RepositoryEdit />', () => {
         repository: REPOSITORY_EDIT,
         snapshots: { count: 0 },
       });
-      testBed = await setup(httpSetup);
 
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
@@ -85,12 +84,11 @@ describe('<RepositoryEdit />', () => {
         snapshots: { count: 0 },
         isManagedRepository: true,
       });
-      testBed = await setup(httpSetup);
 
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     };
 
     it('azure repository', async () => {
@@ -139,12 +137,10 @@ describe('<RepositoryEdit />', () => {
         repository: { name: getRandomString(), ...repository },
         snapshots: { count: 0 },
       });
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     };
 
     it('fs repository', async () => {
