@@ -133,6 +133,11 @@ export interface IVectorSource extends ISource {
     mbFeature,
     onClose,
   }: GetFeatureActionsArgs): TooltipFeatureAction[];
+
+  /*
+   * Provide unique ids for managing source requests in Inspector
+   */
+  getInspectorRequestIds(): string[];
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -284,5 +289,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
           },
         ]
       : [];
+  }
+
+  getInspectorRequestIds(): string[] {
+    return [];
   }
 }

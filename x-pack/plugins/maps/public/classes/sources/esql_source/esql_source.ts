@@ -48,8 +48,12 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     this._descriptor = descriptor;
   }
 
-  getId(): string {
+  private _getRequestId(): string {
     return this._descriptor.id;
+  }
+
+  getInspectorRequestIds(): string[] {
+    return [this._getRequestId()];
   }
 
   async getGeoJsonWithMeta(
@@ -63,11 +67,10 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
       query: this._descriptor.esql
     };
 
-
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),
       {
-        id: this.getId()
+        id: this._getRequestId()
       }
     );
     requestResponder.json(params);

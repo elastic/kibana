@@ -74,7 +74,7 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import type { IESSource } from '../classes/sources/es_source';
+import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
@@ -858,8 +858,10 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
   }
 
   const source = layer.getSource();
-  if ('getId' in source) {
-    adapters.requests!.resetRequest((source as IESSource).getId());
+  if ('getInspectorRequestIds' in source) {
+    (source as IVectorSource).getInspectorRequestIds().forEach(id => {
+      adapters.requests!.resetRequest(id);
+    });
   }
 
   if (adapters.requests && 'getValidJoins' in layer) {
