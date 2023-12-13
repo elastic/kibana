@@ -19,10 +19,12 @@ import {
   CreateModelApiLogicActions,
 } from '../../../../api/ml_models/create_model_api_logic';
 import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
+import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
 import {
   StartModelApiLogic,
   StartModelApiLogicActions,
 } from '../../../../api/ml_models/start_model_api_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface ModelSelectActions {
   createModel: (modelId: string) => { modelId: string };
@@ -52,6 +54,8 @@ export interface ModelSelectValues {
   modelsData: FetchModelsApiResponse | undefined;
   modelsStatus: Status;
   selectableModels: MlModel[];
+  selectedModel: MlModel | undefined;
+  selectedMLModel: TrainedModel | undefined;
   startModelError: HttpError | undefined;
   startModelStatus: Status;
 }
@@ -91,6 +95,8 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       ['modelsData', 'status as modelsStatus', 'isInitialLoading'],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
+      MLInferenceLogic,
+      ['selectedMLModel']
     ],
   },
   events: ({ actions }) => ({
@@ -133,6 +139,10 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
     selectableModels: [
       () => [selectors.modelsData],
       (response: FetchModelsApiResponse) => response ?? [],
+    ],
+    selectedModel: [
+      () => [selectors.selectableModels, selectors.selectedMLModel],
+      (models: MlModel[], model?: TrainedModel) => model && models.find((m) => m.modelId === model.model_id),
     ],
     isLoading: [() => [selectors.isInitialLoading], (isInitialLoading) => isInitialLoading],
   }),
