@@ -46,6 +46,8 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
    * Optionally replace the auto-generated page description
    */
   pageDescription?: string;
+  /** Optionally replace the link to esql */
+  esqlLink?: string;
 }
 
 /**
