@@ -11,7 +11,7 @@ import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
-import { ALERT_COUNTS_TOOL } from './get_alert_counts_tool';
+import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 
 describe('AlertCountsTool', () => {

@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import { OPEN_ALERTS_TOOL } from './get_open_alerts_tool';
+import { OPEN_ALERTS_TOOL } from './open_and_acknowledge_alerts_tool';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { MAX_SIZE } from './helpers';

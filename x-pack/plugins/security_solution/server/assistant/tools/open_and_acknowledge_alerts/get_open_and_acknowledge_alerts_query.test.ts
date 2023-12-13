@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOpenAndAcknowledgedAlertsQuery } from './get_open_alerts_query';
+import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 
 describe('getOpenAndAcknowledgedAlertsQuery', () => {
   it('returns the expected query', () => {

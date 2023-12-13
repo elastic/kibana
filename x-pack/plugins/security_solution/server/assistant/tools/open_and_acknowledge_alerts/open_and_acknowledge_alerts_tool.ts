@@ -11,7 +11,7 @@ import { DynamicTool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { getOpenAndAcknowledgedAlertsQuery } from './get_open_alerts_query';
+import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
 import { APP_ID } from '../../../../common';
 

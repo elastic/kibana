@@ -6,9 +6,9 @@
  */
 
 import type { AssistantTool } from '@kbn/elastic-assistant-plugin/server';
-import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base/get_esql_language_knowledge_base_tool';
-import { OPEN_ALERTS_TOOL } from './open_alerts/get_open_alerts_tool';
-import { ALERT_COUNTS_TOOL } from './alert_counts/get_alert_counts_tool';
+import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base/esql_language_knowledge_base_tool';
+import { OPEN_ALERTS_TOOL } from './open_and_acknowledge_alerts/open_and_acknowledge_alerts_tool';
+import { ALERT_COUNTS_TOOL } from './alert_counts/alert_counts_tool';
 
 export const getAssistantTools = (): AssistantTool[] => [
   ALERT_COUNTS_TOOL,
