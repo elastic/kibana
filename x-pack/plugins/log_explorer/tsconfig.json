@@ -40,7 +40,7 @@
     "@kbn/xstate-utils",
     "@kbn/ecs",
     "@kbn/react-field",
-    "@kbn/observability-shared-plugin",
+    "@kbn/observability-shared-plugin"
   ],
   "exclude": [
     "target/**/*"
