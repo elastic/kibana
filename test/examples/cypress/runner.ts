@@ -11,16 +11,16 @@ import { resolve } from 'path';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export async function ExamplePluginsHeadlessTestRunner({
-  // what to say about this
-  getService,
-}: FtrProviderContext) {
+const ExamplePluginsCypressTestConfig = async (
+  { getService }: FtrProviderContext,
+  command: 'open' | 'run'
+) => {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:open'], // FIXME: could be :open or :run depending on choice
+      args: ['cypress:' + command],
       cwd: resolve(__dirname),
       env: {
         ...process.env,
@@ -28,4 +28,17 @@ export async function ExamplePluginsHeadlessTestRunner({
       wait: true,
     });
   });
-}
+};
+
+/**
+ * Using the Cypress Test Runner provides an interactive experience, allows you to see commands as they
+ * execute, while also being able to see the app or component under test.
+ */
+export const ExamplePluginsCypressTestRunner = (context: FtrProviderContext) =>
+  ExamplePluginsCypressTestConfig(context, 'open');
+
+/**
+ * Running Cypress headlessly is often used in CI.
+ */
+export const ExamplePluginsCypressTestHeadless = (context: FtrProviderContext) =>
+  ExamplePluginsCypressTestConfig(context, 'run');
