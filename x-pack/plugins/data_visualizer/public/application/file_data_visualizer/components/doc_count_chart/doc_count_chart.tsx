@@ -18,6 +18,7 @@ import { EventRateChart, LineChartPoint } from './event_rate_chart';
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
 const FINISHED_CHECKS = 5;
+const ATTEMPTS = 3;
 
 export const DocCountChart: FC<{
   statuses: Statuses;
@@ -50,6 +51,12 @@ export const DocCountChart: FC<{
   // const [previousPredictedEnd, setPreviousPredictedEnd] = useState<Moment>(moment(0));
   // const [actualEnd, setActualEnd] = useState<Moment | undefined>(undefined);
   const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
+  const [timeRangeAttempts, setTimeRangeAttempts] = useState(ATTEMPTS);
+  const incrementFailedAttempts = useCallback(() => {
+    // eslint-disable-next-line no-console
+    console.log('incrementFailedAttempts');
+    setTimeRangeAttempts(timeRangeAttempts - 1);
+  }, [timeRangeAttempts]);
 
   // const [finishedChecksCountDown, setFinishedChecksCountDown] = useState(FINISHED_CHECKS);
 
@@ -127,76 +134,84 @@ export const DocCountChart: FC<{
 
     // console.log(end.epoch, newEndMs);
 
-    if (start != null && end != null) {
-      timeBuckets.setBounds({
-        min: start,
-        max: end,
-      });
-      timeBuckets.setBarTarget(BAR_TARGET);
-    }
-    const startMs = start.tz('UTC-1').valueOf();
-    const endMs = end.tz('UTC-1').valueOf();
-    const intervalMs = timeBuckets.getInterval().asMilliseconds();
-    // console.log('intervalMs', intervalMs);
+    try {
+      const startMs = start.tz('UTC-1').valueOf();
+      const endMs = end.tz('UTC-1').valueOf();
 
-    // console.log('loadData');
+      if (start != null && end != null) {
+        timeBuckets.setBounds({
+          min: start,
+          max: end,
+        });
+        timeBuckets.setBarTarget(BAR_TARGET);
+      }
 
-    const resp = await lastValueFrom(
-      dataStart.search.search({
-        params: {
-          index,
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                must: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: startMs,
-                        lte: endMs,
-                        format: 'epoch_millis',
+      const intervalMs = timeBuckets.getInterval().asMilliseconds();
+      // console.log('intervalMs', intervalMs);
+
+      // console.log('loadData');
+
+      const resp = await lastValueFrom(
+        dataStart.search.search({
+          params: {
+            index,
+            body: {
+              size: 0,
+              query: {
+                bool: {
+                  must: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: startMs,
+                          lte: endMs,
+                          format: 'epoch_millis',
+                        },
                       },
                     },
-                  },
-                  {
-                    match_all: {},
-                  },
-                ],
+                    {
+                      match_all: {},
+                    },
+                  ],
+                },
               },
-            },
-            aggs: {
-              eventRate: {
-                date_histogram: {
-                  field: timeFieldName,
-                  fixed_interval: `${intervalMs}ms`,
-                  min_doc_count: 0,
-                  extended_bounds: {
-                    min: startMs,
-                    max: endMs,
+              aggs: {
+                eventRate: {
+                  date_histogram: {
+                    field: timeFieldName,
+                    fixed_interval: `${intervalMs}ms`,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: startMs,
+                      max: endMs,
+                    },
                   },
                 },
               },
             },
           },
-        },
-      })
-    );
-    setLoading(false);
-    // @ts-expect-error
-    if (resp?.rawResponse?.aggregations?.eventRate?.buckets !== undefined) {
+        })
+      );
+      setLoading(false);
       // @ts-expect-error
-      const dd: LineChartPoint[] = resp.rawResponse.aggregations.eventRate.buckets.map((b) => ({
-        time: b.key,
-        value: b.doc_count,
-      }));
-      // console.log('dd', dd);
+      if (resp?.rawResponse?.aggregations?.eventRate?.buckets !== undefined) {
+        // @ts-expect-error
+        const dd: LineChartPoint[] = resp.rawResponse.aggregations.eventRate.buckets.map((b) => ({
+          time: b.key,
+          value: b.doc_count,
+        }));
+        // console.log('dd', dd);
 
-      setEventRateChartData(dd);
+        setEventRateChartData(dd);
+      }
+    } catch (error) {
+      // console.log('error', error);
+      setLoading(false);
+      incrementFailedAttempts();
     }
 
     // console.log('resp', resp);
-  }, [dataStart.search, index, timeBuckets, timeFieldName, timeRange]);
+  }, [dataStart.search, incrementFailedAttempts, index, timeBuckets, timeFieldName, timeRange]);
 
   const finishedChecks = useCallback(
     async (counter: number) => {
@@ -241,23 +256,44 @@ export const DocCountChart: FC<{
       return;
     }
 
-    const [firstDocTime, lastDocTime] = await Promise.all([
-      fileUpload.getTimeFromDoc(timeFieldName, firstReadDoc, pipeline),
-      fileUpload.getTimeFromDoc(timeFieldName, lastReadDoc, pipeline),
-    ]);
+    try {
+      const firstReadDoc1 =
+        typeof firstReadDoc === 'string' ? JSON.parse(firstReadDoc) : firstReadDoc;
+      const lastReadDoc1 = typeof lastReadDoc === 'string' ? JSON.parse(lastReadDoc) : lastReadDoc;
 
-    const diffMs = lastDocTime.time.epoch - firstDocTime.time.epoch;
-    const realEnd = moment(realStart.epoch + diffMs);
+      const [firstDocTime, lastDocTime] = await Promise.all([
+        fileUpload.getTimeFromDoc(timeFieldName, firstReadDoc1, pipeline),
+        fileUpload.getTimeFromDoc(timeFieldName, lastReadDoc1, pipeline),
+      ]);
 
-    setTimeRange({ start: moment(realStart.epoch), end: realEnd });
-  }, [fileUpload, firstReadDoc, index, lastReadDoc, pipelineString, timeFieldName]);
+      const startMs = realStart.epoch;
+      const diffMs = lastDocTime.time.epoch - firstDocTime.time.epoch;
+      const endMs = startMs + diffMs;
 
-  // useEffect(() => {
-  //   loadTimeRange();
-  // }, [loadTimeRange]);
+      if (startMs > endMs) {
+        throw new Error('startMs > endMs');
+      }
+
+      setTimeRange({ start: moment(startMs), end: moment(endMs) });
+    } catch (error) {
+      // console.log('loadTimeRange', error);
+      incrementFailedAttempts();
+    }
+  }, [
+    fileUpload,
+    firstReadDoc,
+    incrementFailedAttempts,
+    index,
+    lastReadDoc,
+    pipelineString,
+    timeFieldName,
+  ]);
 
   useEffect(() => {
     // console.log(statuses);
+    if (timeRangeAttempts === 0) {
+      return;
+    }
 
     if (timeRange === undefined) {
       loadTimeRange();
@@ -283,12 +319,14 @@ export const DocCountChart: FC<{
     previousProgress,
     statuses,
     timeRange,
+    timeRangeAttempts,
   ]);
 
   if (
     timeFieldName === undefined ||
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
-    statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE
+    statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
+    timeRangeAttempts === 0
   ) {
     return null;
   }
