@@ -27,7 +27,6 @@ disabled:
   - x-pack/test/functional/config.edge.js
 
   # Cypress configs, for now these are still run manually
-  - test/examples/cypress/config_headless.ts
   - test/examples/cypress/config_runner.ts
   - x-pack/test/fleet_cypress/cli_config.ts
   - x-pack/test/fleet_cypress/config.ts
@@ -99,6 +98,7 @@ enabled:
   - test/analytics/config.ts
   - test/api_integration/config.js
   - test/examples/config.js
+  - test/examples/cypress/config_headless.ts
   - test/functional/apps/bundles/config.ts
   - test/functional/apps/console/config.ts
   - test/functional/apps/context/config.ts
