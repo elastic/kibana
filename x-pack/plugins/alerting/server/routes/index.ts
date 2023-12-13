@@ -40,6 +40,7 @@ import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rule
 import { snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
+import { testRuleRoute } from './test_rule';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
@@ -137,4 +138,5 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertRoute(router, licenseState);
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
+  testRuleRoute(router, licenseState);
 }
