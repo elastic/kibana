@@ -10,13 +10,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import { OPEN_ALERTS_TOOL } from './open_and_acknowledge_alerts_tool';
+import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { MAX_SIZE } from './helpers';
 import type { RetrievalQAChain } from 'langchain/chains';
 
-describe('getOpenAlertsTool', () => {
+describe('OpenAndAcknowledgedAlertsTool', () => {
   describe('getTool', () => {
     const alertsIndexPattern = 'alerts-index';
     const esClient = {
@@ -47,7 +47,7 @@ describe('getOpenAlertsTool', () => {
     });
 
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-      const tool: DynamicTool = OPEN_ALERTS_TOOL.getTool({
+      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
@@ -153,7 +153,7 @@ describe('getOpenAlertsTool', () => {
         RequestBody
       >;
 
-      const tool = OPEN_ALERTS_TOOL.getTool({
+      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: requestWithMissingParams.body.allow,
         allowReplacement: requestWithMissingParams.body.allowReplacement,
@@ -169,7 +169,7 @@ describe('getOpenAlertsTool', () => {
     });
 
     it('returns null when alertsIndexPattern is undefined', () => {
-      const tool = OPEN_ALERTS_TOOL.getTool({
+      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
@@ -185,7 +185,7 @@ describe('getOpenAlertsTool', () => {
     });
 
     it('returns null when size is undefined', () => {
-      const tool = OPEN_ALERTS_TOOL.getTool({
+      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
@@ -201,7 +201,7 @@ describe('getOpenAlertsTool', () => {
     });
 
     it('returns null when size out of range', () => {
-      const tool = OPEN_ALERTS_TOOL.getTool({
+      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
@@ -217,7 +217,7 @@ describe('getOpenAlertsTool', () => {
     });
 
     it('returns a tool instance with the expected tags', () => {
-      const tool = OPEN_ALERTS_TOOL.getTool({
+      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
@@ -229,7 +229,7 @@ describe('getOpenAlertsTool', () => {
         ...rest,
       }) as DynamicTool;
 
-      expect(tool.tags).toEqual(['alerts', 'open-alerts']);
+      expect(tool.tags).toEqual(['alerts', 'open-and-acknowledged-alerts']);
     });
   });
 });
