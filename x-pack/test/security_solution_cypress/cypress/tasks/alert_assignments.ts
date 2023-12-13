@@ -126,12 +126,9 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: SecurityRoleName[])
   });
 };
 
-export const alertsTableShowsAssigneesBadgeForAlert = (
-  users: SecurityRoleName[],
-  alertIndex = 0
-) => {
+export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: SecurityRoleName[]) => {
   cy.get(ALERT_ASIGNEES_COLUMN)
-    .eq(alertIndex)
+    .first()
     .within(() => {
       cy.get(ALERT_ASSIGNEES_COUNT_BADGE).contains(users.length);
       users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('not.exist'));

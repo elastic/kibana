@@ -23,7 +23,7 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   alertDetailsFlyoutShowsAssignees,
   alertDetailsFlyoutShowsAssigneesBadge,
-  alertsTableShowsAssigneesBadgeForAlert,
+  alertsTableShowsAssigneesBadgeForFirstAlert,
   alertsTableShowsAssigneesForAlert,
   updateAssigneesForFirstAlert,
   checkEmptyAssigneesStateInAlertDetailsFlyout,
@@ -98,7 +98,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
         ROLES.detections_admin,
       ];
       updateAssigneesForFirstAlert(users);
-      alertsTableShowsAssigneesBadgeForAlert(users);
+      alertsTableShowsAssigneesBadgeForFirstAlert(users);
     });
 
     it(`alert with many assignees (collapsed into badge) in alert's details flyout`, () => {
