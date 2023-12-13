@@ -159,6 +159,7 @@ export function LensEditConfigurationFlyout({
       } else {
         updateSuggestion?.(previousAttrs);
       }
+      onApplyCb?.(previousAttrs as TypedLensByValueInput['attributes']);
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
@@ -174,6 +175,7 @@ export function LensEditConfigurationFlyout({
     updateSuggestion,
     savedObjectId,
     updateByRefInput,
+    onApplyCb,
     visualization,
   ]);
 
