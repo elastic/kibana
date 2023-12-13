@@ -32,85 +32,74 @@ export const useEntityAnalyticsRoutes = () => {
   /**
    * Fetches preview risks scores
    */
-  const fetchRiskScorePreview = async ({
+  const fetchRiskScorePreview = ({
     signal,
     params,
   }: {
     signal?: AbortSignal;
     params: RiskScorePreviewRequestSchema;
-  }): Promise<CalculateScoresResponse> => {
-    return http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
+  }) =>
+    http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
       version: '1',
       method: 'POST',
       body: JSON.stringify(params),
       signal,
     });
-  };
 
   /**
    * Fetches risks engine status
    */
-  const fetchRiskEngineStatus = async ({
-    signal,
-  }: {
-    signal?: AbortSignal;
-  }): Promise<GetRiskEngineStatusResponse> => {
-    return http.fetch<GetRiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
+  const fetchRiskEngineStatus = ({ signal }: { signal?: AbortSignal }) =>
+    http.fetch<GetRiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
       version: '1',
       method: 'GET',
       signal,
     });
-  };
 
   /**
    * Init risk score engine
    */
-  const initRiskEngine = async (): Promise<InitRiskEngineResponse> => {
-    return http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
+  const initRiskEngine = () =>
+    http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
       version: '1',
       method: 'POST',
     });
-  };
 
   /**
    * Enable risk score engine
    */
-  const enableRiskEngine = async (): Promise<EnableRiskEngineResponse> => {
-    return http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
+  const enableRiskEngine = () =>
+    http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
       version: '1',
       method: 'POST',
     });
-  };
 
   /**
    * Disable risk score engine
    */
-  const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> => {
-    return http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
+  const disableRiskEngine = () =>
+    http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
       version: '1',
       method: 'POST',
     });
-  };
 
   /**
    * Get risk engine privileges
    */
-  const fetchRiskEnginePrivileges = async (): Promise<EntityAnalyticsPrivileges> => {
-    return http.fetch<EntityAnalyticsPrivileges>(RISK_ENGINE_PRIVILEGES_URL, {
+  const fetchRiskEnginePrivileges = () =>
+    http.fetch<EntityAnalyticsPrivileges>(RISK_ENGINE_PRIVILEGES_URL, {
       version: '1',
       method: 'GET',
     });
-  };
 
   /**
    * Get asset criticality privileges
    */
-  const fetchAssetCriticalityPrivileges = async (): Promise<EntityAnalyticsPrivileges> => {
-    return http.fetch<EntityAnalyticsPrivileges>(ASSET_CRITICALITY_PRIVILEGES_URL, {
+  const fetchAssetCriticalityPrivileges = () =>
+    http.fetch<EntityAnalyticsPrivileges>(ASSET_CRITICALITY_PRIVILEGES_URL, {
       version: '1',
       method: 'GET',
     });
-  };
 
   return {
     fetchRiskScorePreview,
