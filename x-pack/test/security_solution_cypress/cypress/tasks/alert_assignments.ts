@@ -27,7 +27,7 @@ import {
 } from '../screens/alerts';
 import { PAGE_TITLE } from '../screens/common/page';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES } from '../screens/expandable_flyout/alert_details_right_panel';
-import { selectFirstPageAlerts } from './alerts';
+import { expandFirstAlertActions, selectFirstPageAlerts } from './alerts';
 import { login } from './login';
 import { visitWithTimeRange } from './navigation';
 
@@ -56,8 +56,8 @@ export const loadPageAs = (url: string, role?: SecurityRoleName) => {
   waitForPageTitleToBeShown();
 };
 
-export const openAlertAssigningActionMenu = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const openFirstAlertAssigningActionMenu = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).click();
 };
 
@@ -93,8 +93,8 @@ export const alertsTableMoreActionsAreNotAvailable = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
 };
 
-export const asigneesMenuItemsAreNotAvailable = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const asigneesMenuItemsAreNotAvailable = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
 };
@@ -166,10 +166,9 @@ export const selectAlertAssignee = (assignee: string) => {
 /**
  * This will update assignees for selected alert
  * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
- * @param alertIndex The index of the alert in the alerts table
  */
-export const updateAssigneesForAlert = (users: SecurityRoleName[], alertIndex = 0) => {
-  openAlertAssigningActionMenu(alertIndex);
+export const updateAssigneesForFirstAlert = (users: SecurityRoleName[]) => {
+  openFirstAlertAssigningActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
   updateAlertAssignees();
@@ -201,8 +200,8 @@ export const bulkUpdateAssignees = (users: SecurityRoleName[]) => {
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const removeAllAssigneesForAlert = (alertIndex = 0) => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(alertIndex).click();
+export const removeAllAssigneesForFirstAlert = () => {
+  expandFirstAlertActions();
   cy.get(ALERT_UNASSIGN_CONTEXT_MENU_ITEM).click();
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
