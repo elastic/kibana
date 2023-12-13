@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FormBasedLayer } from './types';
 import type { IndexPattern } from '../../types';
-import type { FieldBasedOperationErrorMessage } from './operations/definitions';
+import type { FieldBasedOperationErrorMessage } from '../../../common/datasources/form_based/operations/definitions';
 
 export const reducedTimeRangeOptions = [
   {

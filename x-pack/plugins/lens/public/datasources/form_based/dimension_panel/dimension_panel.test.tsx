@@ -37,10 +37,10 @@ import {
   GenericIndexPatternColumn,
   replaceColumn,
   TermsIndexPatternColumn,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../../types';
-import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
+import { DateHistogramIndexPatternColumn } from '../../../../common/datasources/form_based/operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';

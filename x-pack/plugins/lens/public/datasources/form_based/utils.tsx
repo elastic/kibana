@@ -26,17 +26,12 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
-import type { DateRange } from '../../../common/types';
-import type {
-  FramePublicAPI,
-  IndexPattern,
-  StateSetter,
-  UserMessage,
-  VisualizationInfo,
-} from '../../types';
+import { getSamplingValue } from '../../../common/datasources/form_based/utils';
+import type { DateRange, IndexPattern } from '../../../common/types';
+import type { FramePublicAPI, StateSetter, UserMessage, VisualizationInfo } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
+import type { ReferenceBasedIndexPatternColumn } from '../../../common/datasources/form_based/operations/definitions/column_types';
 
 import {
   operationDefinitionMap,
@@ -49,57 +44,22 @@ import {
   type RangeIndexPatternColumn,
   type FormulaIndexPatternColumn,
   type DateHistogramIndexPatternColumn,
-  type MaxIndexPatternColumn,
-  type MinIndexPatternColumn,
   type GenericOperationDefinition,
   type FieldBasedIndexPatternColumn,
-} from './operations';
+} from '../../../common/datasources/form_based/operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
-import { hasField } from './pure_utils';
+import {
+  getInvalidFieldMessage,
+  isColumnOfType,
+} from '../../../common/datasources/form_based/operations/definitions/helpers';
+import { FiltersIndexPatternColumn } from '../../../common/datasources/form_based/operations/definitions/filters';
+import { hasField } from '../../../common/datasources/form_based/pure_utils';
 import { mergeLayer } from './state_helpers';
-import { supportsRarityRanking } from './operations/definitions/terms';
-import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
+import { supportsRarityRanking } from '../../../common/datasources/form_based/operations/definitions/terms';
+import { DEFAULT_MAX_DOC_COUNT } from '../../../common/datasources/form_based/operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
-
-function isMinOrMaxColumn(
-  column?: GenericIndexPatternColumn
-): column is MaxIndexPatternColumn | MinIndexPatternColumn {
-  if (!column) {
-    return false;
-  }
-  return (
-    isColumnOfType<MaxIndexPatternColumn>('max', column) ||
-    isColumnOfType<MinIndexPatternColumn>('min', column)
-  );
-}
-
-function isReferenceColumn(
-  column: GenericIndexPatternColumn
-): column is ReferenceBasedIndexPatternColumn {
-  return 'references' in column;
-}
-
-export function isSamplingValueEnabled(layer: FormBasedLayer) {
-  // Do not use columnOrder here as it needs to check also inside formulas columns
-  return !Object.values(layer.columns).some(
-    (column) =>
-      isMinOrMaxColumn(column) ||
-      (isReferenceColumn(column) && isMinOrMaxColumn(layer.columns[column.references[0]]))
-  );
-}
-
-/**
- * Centralized logic to get the actual random sampling value for a layer
- * @param layer
- * @returns
- */
-export function getSamplingValue(layer: FormBasedLayer) {
-  return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
-}
 
 export function isColumnInvalid(
   layer: FormBasedLayer,

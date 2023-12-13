@@ -6,7 +6,7 @@
  */
 
 import { DragDropOperation, OperationMetadata } from '../../../../types';
-import { TermsIndexPatternColumn } from '../../operations';
+import { TermsIndexPatternColumn } from '../../../../../common/datasources/form_based/operations';
 import { getDropProps } from './get_drop_props';
 import {
   mockDataViews,

@@ -11,7 +11,7 @@ import React from 'react';
 import { FormBasedLayer } from '../..';
 import { InfoBadge } from '../../shared_components/info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
-import { getSamplingValue } from './utils';
+import { getSamplingValue } from '../../../common/datasources/form_based/utils';
 
 export function ReducedSamplingSectionEntries({
   layers,

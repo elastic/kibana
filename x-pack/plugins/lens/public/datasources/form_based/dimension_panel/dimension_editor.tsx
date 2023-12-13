@@ -42,10 +42,14 @@ import {
   FieldBasedIndexPatternColumn,
   canTransition,
   adjustColumnReferencesForChangedColumn,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import { mergeLayer } from '../state_helpers';
-import { getReferencedField, hasField } from '../pure_utils';
-import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
+import { getReferencedField, hasField } from '../../../../common/datasources/form_based/pure_utils';
+import {
+  fieldIsInvalid,
+  getSamplingValue,
+  isSamplingValueEnabled,
+} from '../../../../common/datasources/form_based/utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
 import { FormatSelector } from './format_selector';
@@ -71,9 +75,9 @@ import {
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { ParamEditorProps } from '../operations/definitions';
+import { ParamEditorProps } from '../../../../common/datasources/form_based/operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
-import { isColumn } from '../operations/definitions/helpers';
+import { isColumn } from '../../../../common/datasources/form_based/operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
 import type { IndexPattern, IndexPatternField } from '../../../types';
 import { documentField } from '../../../../common/document_field';

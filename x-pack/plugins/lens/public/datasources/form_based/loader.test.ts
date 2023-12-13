@@ -13,7 +13,10 @@ import {
   injectReferences,
 } from './loader';
 import { FormBasedPersistedState, FormBasedPrivateState } from './types';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import {
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../../../common/datasources/form_based/operations';
 import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {

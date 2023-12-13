@@ -14,7 +14,7 @@ import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
   operationDefinitionMap,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import type { FormBasedLayer } from '../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import {
@@ -22,7 +22,7 @@ import {
   getLayerTimeShiftChecks,
   timeShiftOptions,
   getColumnTimeShiftWarnings,
-} from '../time_shift_utils';
+} from '../../../../common/datasources/form_based/time_shift_utils';
 import type { IndexPattern } from '../../../types';
 
 export function setTimeShift(

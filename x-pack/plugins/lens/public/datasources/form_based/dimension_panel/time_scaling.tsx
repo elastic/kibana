@@ -19,7 +19,7 @@ import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,
   operationDefinitionMap,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
 import type { FormBasedLayer } from '../types';

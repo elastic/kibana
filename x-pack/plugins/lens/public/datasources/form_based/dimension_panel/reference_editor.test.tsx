@@ -24,7 +24,7 @@ import {
   LastValueIndexPatternColumn,
   operationDefinitionMap,
   TermsIndexPatternColumn,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import { FieldSelect } from './field_select';
 import { FormBasedLayer } from '../types';
 

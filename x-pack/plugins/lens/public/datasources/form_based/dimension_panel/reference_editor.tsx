@@ -25,13 +25,13 @@ import {
   RequiredReference,
   IncompleteColumn,
   GenericOperationDefinition,
-} from '../operations';
+} from '../../../../common/datasources/form_based/operations';
 import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
-import { hasField } from '../pure_utils';
+import { hasField } from '../../../../common/datasources/form_based/pure_utils';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
-import { FormRow } from '../operations/definitions/shared_components';
+import { FormRow } from '../../../../common/datasources/form_based/operations/definitions/shared_components';
 
 const operationDisplay = getOperationDisplay();
 

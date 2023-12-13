@@ -40,11 +40,11 @@ import {
   FormulaIndexPatternColumn,
   updateColumnLabel,
   ColumnAdvancedParams,
-} from './operations';
-import { hasField } from './pure_utils';
+} from '../../../common/datasources/form_based/operations';
+import { hasField } from '../../../common/datasources/form_based/pure_utils';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';
-import { OperationDefinition } from './operations/definitions';
-import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
+import { OperationDefinition } from '../../../common/datasources/form_based/operations/definitions';
+import { insertOrReplaceFormulaColumn } from '../../../common/datasources/form_based/operations/definitions/formula';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<FormBasedPrivateState>;
 

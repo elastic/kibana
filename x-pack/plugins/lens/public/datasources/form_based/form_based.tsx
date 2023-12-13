@@ -53,7 +53,7 @@ import {
   renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
-import { toExpression } from './to_expression';
+import { toExpression } from '../../../common/datasources/form_based/to_expression';
 import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
@@ -71,9 +71,12 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
-} from './utils';
+} from '../../../common/datasources/form_based/utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
-import { hasField, normalizeOperationDataType } from './pure_utils';
+import {
+  hasField,
+  normalizeOperationDataType,
+} from '../../../common/datasources/form_based/pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
@@ -83,27 +86,30 @@ import {
   insertNewColumn,
   operationDefinitionMap,
   TermsIndexPatternColumn,
-} from './operations';
+} from '../../../common/datasources/form_based/operations';
 import {
   copyColumn,
   getColumnOrder,
   getReferenceRoot,
   reorderByGroups,
-} from './operations/layer_helpers';
+} from '../../../common/datasources/form_based/operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
-import { deleteColumn, isReferenced } from './operations';
+import { deleteColumn, isReferenced } from '../../../common/datasources/form_based/operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-import { getPrecisionErrorWarningMessages } from './utils';
+import { getStateTimeShiftWarningMessages } from '../../../common/datasources/form_based/time_shift_utils';
+import { getPrecisionErrorWarningMessages } from '../../../common/datasources/form_based/utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { isColumnOfType } from './operations/definitions/helpers';
+import { isColumnOfType } from '../../../common/datasources/form_based/operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-export type { OperationType, GenericIndexPatternColumn } from './operations';
-export { deleteColumn } from './operations';
+export type {
+  OperationType,
+  GenericIndexPatternColumn,
+} from '../../../common/datasources/form_based/operations';
+export { deleteColumn } from '../../../common/datasources/form_based/operations';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows

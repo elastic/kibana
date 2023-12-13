@@ -13,7 +13,7 @@ import {
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '../../operations';
+} from '../../../../../common/datasources/form_based/operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../../id_generator');
 

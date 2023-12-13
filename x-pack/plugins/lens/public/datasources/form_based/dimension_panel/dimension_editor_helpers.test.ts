@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TermsIndexPatternColumn } from '../operations';
+import type { TermsIndexPatternColumn } from '../../../../common/datasources/form_based/operations';
 import type { FormBasedLayer } from '../types';
 import { isLayerChangingDueToOtherBucketChange } from './dimensions_editor_helpers';
 

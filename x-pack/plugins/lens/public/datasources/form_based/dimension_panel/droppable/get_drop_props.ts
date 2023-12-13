@@ -17,11 +17,11 @@ import {
   getCurrentFieldsForOperation,
   getOperationDisplay,
   hasOperationSupportForMultipleFields,
-} from '../../operations';
+} from '../../../../../common/datasources/form_based/operations';
 import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../../utils';
-import { hasField } from '../../pure_utils';
+import { hasField } from '../../../../../common/datasources/form_based/pure_utils';
 import { OperationMetadata, DraggedField } from '../../../../types';
-import { getOperationTypesForField } from '../../operations';
+import { getOperationTypesForField } from '../../../../../common/datasources/form_based/operations';
 import { GenericIndexPatternColumn } from '../../form_based';
 import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
 

@@ -29,8 +29,8 @@ import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
 import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
-import { isColumnFormatted } from '../operations/definitions/helpers';
-import { ValueFormatConfig } from '../operations/definitions/column_types';
+import { isColumnFormatted } from '../../../../common/datasources/form_based/operations/definitions/helpers';
+import { ValueFormatConfig } from '../../../../common/datasources/form_based/operations/definitions/column_types';
 import { DurationRowInputs } from './formatting/duration_input';
 import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 

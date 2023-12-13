@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
-import { isSamplingValueEnabled } from './utils';
+import { isSamplingValueEnabled } from '../../../common/datasources/form_based/utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 

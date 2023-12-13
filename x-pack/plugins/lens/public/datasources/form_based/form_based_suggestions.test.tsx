@@ -25,12 +25,15 @@ import {
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import {
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../../../common/datasources/form_based/operations';
 import {
   MathIndexPatternColumn,
   RangeIndexPatternColumn,
   StaticValueIndexPatternColumn,
-} from './operations/definitions';
+} from '../../../common/datasources/form_based/operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
