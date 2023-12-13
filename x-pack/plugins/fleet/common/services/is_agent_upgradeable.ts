@@ -42,6 +42,53 @@ export function isAgentUpgradeable(
   return isAgentVersionLessThanLatest(agentVersion, latestAgentVersion);
 }
 
+// Based on the previous, returns a detailed message explaining why the agent is not upgradeable
+export const getNotUpgradeableMessage = (
+  agent: Agent,
+  latestAgentVersion: string,
+  versionToUpgrade?: string
+) => {
+  let agentVersion: string;
+  if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
+    agentVersion = agent.local_metadata.elastic.agent.version;
+  } else {
+    return `version is missing.`;
+  }
+  if (agent.unenrolled_at) {
+    return `agent was unenrolled.`;
+  }
+  if (agent.unenrollment_started_at) {
+    return `agent unenrollment started at ${new Date(agent.unenrollment_started_at)}.`;
+  }
+  if (!agent.local_metadata.elastic.agent.upgradeable) {
+    return `agent is marked as not upgradeable in elastic-agent.`;
+  }
+  if (isAgentUpgrading(agent)) {
+    return `upgrade was already started.`;
+  }
+  if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
+    return `the agent has been upgraded recently. Please wait.`;
+  }
+  if (versionToUpgrade !== undefined) {
+    const agentVersionNumber = semverCoerce(agentVersion);
+    if (!agentVersionNumber) return 'agent version is not valid.';
+
+    const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
+    if (!versionToUpgradeNumber) return 'target version is not valid.';
+
+    // TODO: verify this one
+    if (semverLt(versionToUpgradeNumber, agentVersionNumber))
+      return `target version is lower than current version.`;
+  }
+
+  const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
+  if (!latestAgentVersionNumber) return 'latest version is not valid.';
+
+  // TODO: verify this one
+  if (semverGt(agentVersion, latestAgentVersionNumber))
+    return `agent version is lower than latest.`;
+};
+
 const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);

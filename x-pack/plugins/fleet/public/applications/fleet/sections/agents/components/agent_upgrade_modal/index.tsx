@@ -26,7 +26,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
 
 import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
 
@@ -49,8 +48,8 @@ import {
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
-  getRecentUpgradeInfoForAgent,
-  isAgentUpgrading,
+  isAgentUpgradeable,
+  getNotUpgradeableMessage,
 } from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
@@ -101,52 +100,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const QUERY_STUCK_UPDATING = `status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-${AGENT_UPDATING_TIMEOUT_HOURS}h`;
 
-  const getNotUpgradeableMessage = (
-    agent: Agent,
-    latestAgentVersion: string,
-    versionToUpgrade?: string
-  ) => {
-    let agentVersion: string;
-    if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
-      agentVersion = agent.local_metadata.elastic.agent.version;
-    } else {
-      return `Version missing`;
-    }
-    if (agent.unenrolled_at) {
-      return `Agent was unenrolled`;
-    }
-    if (agent.unenrollment_started_at) {
-      return `Agent unenrollment started at ${new Date(agent.unenrollment_started_at)}`;
-    }
-    if (!agent.local_metadata.elastic.agent.upgradeable) {
-      return `Agent is marked as not upgradeable`;
-    }
-    if (isAgentUpgrading(agent)) {
-      return `An upgrade was already started`;
-    }
-    if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
-      return `The agent has been upgraded recently. Please wait.`;
-    }
-    if (versionToUpgrade !== undefined) {
-      const agentVersionNumber = semverCoerce(agentVersion);
-      if (!agentVersionNumber) return 'Agent version is not valid';
-
-      const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
-      if (!versionToUpgradeNumber) return 'Target version is not valid';
-
-      // TODO: verify this one
-      if (semverLt(versionToUpgradeNumber, agentVersionNumber))
-        return `Target version is lower than current version`;
-    }
-
-    const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
-    if (!latestAgentVersionNumber) return 'Latest version is not valid';
-
-    // TODO: verify this one
-    if (semverGt(agentVersion, latestAgentVersionNumber))
-      return `Agent version is lower than latest`;
-  };
-
   useEffect(() => {
     const getStuckUpdatingAgentCount = async (agentsOrQuery: Agent[] | string) => {
       let newQuery;
@@ -177,7 +130,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         return;
       }
     };
-    console.log('updating', updatingQuery);
     if (!isUpdating) return;
 
     getStuckUpdatingAgentCount(agents);
@@ -286,7 +238,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       const getQuery = (agentsOrQuery: Agent[] | string) =>
         Array.isArray(agentsOrQuery) ? agentsOrQuery.map((agent) => agent.id) : agentsOrQuery;
       const { error } =
-        isSingleAgent && !isScheduled
+        isSingleAgent &&
+        !isScheduled &&
+        isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion)
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
               force: isUpdating,
@@ -380,7 +334,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={isSubmitting || noVersions || (isUpdating && updatingAgents === 0)}
+      confirmButtonDisabled={
+        isSubmitting ||
+        noVersions ||
+        (isUpdating && updatingAgents === 0) ||
+        (isSingleAgent && !isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion))
+      }
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -414,32 +373,53 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
           />
         ) : isSingleAgent ? (
-          <>
-            <p>
+          !isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion) ? (
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.upgradeAgents.notUpgradeable"
+                  defaultMessage="The selected agent is not upgradeable."
+                />
+              }
+            >
               <FormattedMessage
-                id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-                defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
+                id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
+                defaultMessage="Reason: {reason}"
                 values={{
-                  hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-                  version: getVersion(selectedVersion),
+                  reason: getNotUpgradeableMessage(agents[0], latestAgentVersion, selectedVersion),
                 }}
               />
-            </p>
-            {isUpdating && (
+            </EuiCallOut>
+          ) : (
+            <>
               <p>
-                <em>
-                  <FormattedMessage
-                    id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
-                    // TODO: Add link to docs regarding agent upgrade cooldowns
-                    defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
-                    values={{
-                      minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
-                    }}
-                  />
-                </em>
+                <FormattedMessage
+                  id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
+                  defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
+                  values={{
+                    hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
+                    version: getVersion(selectedVersion),
+                  }}
+                />
               </p>
-            )}
-          </>
+              {isUpdating && (
+                <p>
+                  <em>
+                    <FormattedMessage
+                      id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
+                      // TODO: Add link to docs regarding agent upgrade cooldowns
+                      defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
+                      values={{
+                        minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
+                      }}
+                    />
+                  </em>
+                </p>
+              )}
+            </>
+          )
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
