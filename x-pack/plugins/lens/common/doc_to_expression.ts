@@ -26,9 +26,6 @@ import type { Document } from '../public/persistence';
 import type { DatasourceStates, VisualizationState } from '../public/state_management';
 import type {
   DatasourceMap,
-  IndexPattern,
-  IndexPatternMap,
-  IndexPatternRef,
   InitializationOptions,
   SuggestionRequest,
   VisualizationMap,
@@ -43,6 +40,7 @@ import {
 import { buildExpression } from './expression_helpers';
 import { getDatasourceLayers } from './get_datasource_layers';
 import { readFromStorage } from './settings_storage';
+import type { DatasourceCommonMap, IndexPattern, IndexPatternMap, IndexPatternRef } from './types';
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
@@ -125,7 +123,7 @@ function initializeVisualization({
   return visualizationState.state;
 }
 
-const initializeEventAnnotationGroups = async (
+export const initializeEventAnnotationGroups = async (
   loadAnnotationGroup: (id: string) => Promise<EventAnnotationGroupConfig>,
   references?: SavedObjectReference[]
 ) => {
@@ -256,7 +254,7 @@ async function initializeDataViews(
   };
 }
 
-function initializeDatasources({
+export function initializeDatasources({
   datasourceMap,
   datasourceStates,
   indexPatternRefs,
@@ -264,7 +262,7 @@ function initializeDatasources({
   references,
   initialContext,
 }: {
-  datasourceMap: DatasourceMap;
+  datasourceMap: DatasourceCommonMap;
   datasourceStates: DatasourceStates;
   indexPatterns: Record<string, IndexPattern>;
   indexPatternRefs: IndexPatternRef[];

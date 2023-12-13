@@ -28,9 +28,6 @@ import { COLOR_MAPPING_OFF_BY_DEFAULT } from './constants';
 import type {
   Datasource,
   DatasourceMap,
-  IndexPattern,
-  IndexPatternMap,
-  IndexPatternRef,
   InitializationOptions,
   VisualizationMap,
   VisualizeEditorContext,
@@ -43,10 +40,15 @@ import type {
   DatasourceStates,
   VisualizationState,
 } from '../public/state_management';
-import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from './doc_to_expression';
+import { getActiveDatasourceIdFromDoc } from './doc_to_expression';
 import { getDatasourceLayers } from './get_datasource_layers';
-import { loadIndexPatternRefs, loadIndexPatterns } from './data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  sortDataViewRefs,
+} from './data_views_service/loader';
 import { readFromStorage } from './settings_storage';
+import { DatasourceCommonMap, IndexPattern, IndexPatternMap, IndexPatternRef } from './types';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -130,7 +132,7 @@ export async function initializeDataViews(
     annotationGroups,
   }: {
     dataViews: DataViewsService;
-    datasourceMap: DatasourceMap;
+    datasourceMap: DatasourceCommonMap;
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage?: IStorageWrapper;

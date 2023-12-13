@@ -35,7 +35,6 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { EventAnnotationGroupSavedObjectAttributes } from '@kbn/event-annotation-plugin/common';
 import { mapSavedObjectToGroupConfig } from '@kbn/event-annotation-plugin/common';
-import { toExpression } from '@kbn/interpreter';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -44,7 +43,15 @@ import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
 import type { Document } from '../public/persistence';
-import { docToExpression as _docToExpression } from '../common';
+import { TextBasedDatasourceCommon } from '../common/datasources/text_based/text_based_languages';
+import type { DatasourceCommonMap } from '../common/types';
+import { initializeDataViews } from '../common/state_helpers';
+import {
+  initializeDatasources,
+  initializeEventAnnotationGroups,
+} from '../common/doc_to_expression';
+import { getDatasourceExpressionsByLayers } from '../common/expression_helpers';
+// import { getCommonFormBasedDatasource } from '../common/datasources/form_based/form_based';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -138,20 +145,61 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
         return mapSavedObjectToGroupConfig(savedObject);
       };
 
-      const { ast } = await _docToExpression(
-        {},
-        {},
-        doc,
-        '',
-        { from: '', to: '' },
+      const {
+        state: { datasourceStates: persistedDatasourceStates, adHocDataViews, internalReferences },
+        references,
+      } = doc;
+
+      const annotationGroups = await initializeEventAnnotationGroups(
         loadAnnotationGroup,
-        new Date(),
-        {
-          dataViews: dataViewsService,
-        }
+        references
       );
 
-      return ast ? toExpression(ast) : null;
+      const datasources = [TextBasedDatasourceCommon];
+
+      const datasourceMap: DatasourceCommonMap = {};
+
+      datasources.forEach((datasource) => {
+        datasourceMap[datasource.id] = datasource;
+      });
+
+      const datasourceStatesFromSO = Object.fromEntries(
+        Object.entries(persistedDatasourceStates).map(([id, state]) => [
+          id,
+          { isLoading: false, state },
+        ])
+      );
+
+      const { indexPatterns, indexPatternRefs } = await initializeDataViews(
+        {
+          datasourceMap,
+          datasourceStates: datasourceStatesFromSO,
+          references,
+          dataViews: dataViewsService,
+          defaultIndexPatternId: '',
+          adHocDataViews,
+          annotationGroups,
+        },
+        { isFullEditor: false }
+      );
+
+      const datasourceStates = initializeDatasources({
+        datasourceMap,
+        datasourceStates: datasourceStatesFromSO,
+        references: [...references, ...(internalReferences || [])],
+        indexPatterns,
+        indexPatternRefs,
+      });
+
+      const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+        datasourceMap,
+        datasourceStates,
+        indexPatterns,
+        { fromDate: '', toDate: '' },
+        new Date()
+      );
+
+      return datasourceExpressionsByLayers;
     };
 
     return {

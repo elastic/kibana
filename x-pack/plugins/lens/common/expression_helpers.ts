@@ -5,17 +5,12 @@
  * 2.0.
  */
 import { type Ast, fromExpression } from '@kbn/interpreter';
-import type { DateRange } from './types';
+import type { DatasourceCommonMap, DateRange, IndexPatternMap } from './types';
 import type { DatasourceStates } from '../public/state_management';
-import type {
-  Visualization,
-  DatasourceMap,
-  DatasourceLayers,
-  IndexPatternMap,
-} from '../public/types';
+import type { Visualization, DatasourceMap, DatasourceLayers } from '../public/types';
 
 export function getDatasourceExpressionsByLayers(
-  datasourceMap: DatasourceMap,
+  datasourceMap: DatasourceCommonMap,
   datasourceStates: DatasourceStates,
   indexPatterns: IndexPatternMap,
   dateRange: DateRange,

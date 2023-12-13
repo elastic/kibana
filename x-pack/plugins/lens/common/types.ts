@@ -171,3 +171,5 @@ export interface DatasourceCommon<T = unknown, P = unknown> {
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 }
+
+export type DatasourceCommonMap = Record<string, DatasourceCommon>;

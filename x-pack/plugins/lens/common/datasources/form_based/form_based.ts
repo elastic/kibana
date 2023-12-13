@@ -17,12 +17,12 @@ import { DatasourceCommon, IndexPattern, IndexPatternRef } from '../../types';
 import { loadInitialState } from './loader';
 import { toExpression } from './to_expression';
 
-export function getFormBasedDatasource({
+export function getCommonFormBasedDatasource({
   defaultIndexPatternId,
   storage,
 }: {
   defaultIndexPatternId?: string;
-  storage: IStorageWrapper;
+  storage?: IStorageWrapper;
 }) {
   const DATASOURCE_ID = 'formBased';
 

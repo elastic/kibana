@@ -30,7 +30,7 @@ export function loadInitialState({
   persistedState?: FormBasedPersistedState;
   references?: SavedObjectReference[];
   defaultIndexPatternId?: string;
-  storage: IStorageWrapper;
+  storage?: IStorageWrapper;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
@@ -104,9 +104,12 @@ export function getLayerReferenceName(layerId: string) {
 }
 
 const getLastUsedIndexPatternId = (
-  storage: IStorageWrapper,
-  indexPatternRefs: IndexPatternRef[]
+  indexPatternRefs: IndexPatternRef[],
+  storage?: IStorageWrapper
 ) => {
+  if (!storage) {
+    return undefined;
+  }
   const indexPattern = readFromStorage(storage, 'indexPatternId');
   return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
 };
@@ -126,11 +129,11 @@ function getUsedIndexPatterns({
     layers: Record<string, FormBasedLayer>;
   };
   defaultIndexPatternId?: string;
-  storage: IStorageWrapper;
+  storage?: IStorageWrapper;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   indexPatternRefs: IndexPatternRef[];
 }) {
-  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(indexPatternRefs, storage);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
   const indexPatternIds = [];
   if (initialContext) {
