@@ -6,7 +6,7 @@
  */
 import { mergeWith, isArray } from 'lodash';
 
-import type { ApplyEnrichmentsToEvents, EventsMapByEnrichments, MergeEnrichments } from '../types';
+import type { ApplyEnrichmentsToEvents, MergeEnrichments } from '../types';
 
 function customizer<T>(objValue: T, srcValue: T) {
   if (isArray(objValue)) {
@@ -23,7 +23,7 @@ export const applyEnrichmentsToEvents: ApplyEnrichmentsToEvents = ({
   enrichmentsList,
   logger,
 }) => {
-  const mergedEnrichments: EventsMapByEnrichments = mergeEnrichments(enrichmentsList);
+  const mergedEnrichments = mergeEnrichments(enrichmentsList);
   logger.debug(`${Object.keys(mergedEnrichments).length} events ready to be enriched`);
   const enrichedEvents = events.map((event) => {
     const enrichFunctions = mergedEnrichments[event._id];
