@@ -268,11 +268,13 @@ export default ({ getService }: FtrProviderContext): void => {
                 id_value: 'host-1',
                 criticality_level: 'very_important',
                 criticality_modifier: 2,
-                calculated_level: 'Low',
+                calculated_level: 'Moderate',
                 calculated_score: 79.81345973382406,
                 calculated_score_norm: 46.809565696393314,
-                category_1_score: 76,
                 category_1_count: 10,
+                category_1_score: 30.55645472198471,
+                category_5_count: 1,
+                category_5_score: 16.253110974408603,
               },
             ]);
           });

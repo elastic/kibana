@@ -119,17 +119,24 @@ export default ({ getService }: FtrProviderContext): void => {
         const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
-        expect(normalizeScores(scores)).to.eql([
-          {
-            calculated_level: 'Unknown',
-            calculated_score: 21,
-            calculated_score_norm: 8.039816232771823,
-            category_1_score: 21,
-            category_1_count: 1,
-            id_field: 'host.name',
-            id_value: 'host-1',
-          },
-        ]);
+        const [score] = normalizeScores(scores);
+
+        expect(score).to.eql({
+          calculated_level: 'Unknown',
+          calculated_score: 21,
+          calculated_score_norm: 8.039816232771823,
+          category_1_score: 8.039816232771821,
+          category_1_count: 1,
+          category_5_score: 0,
+          category_5_count: 0,
+          id_field: 'host.name',
+          id_value: 'host-1',
+        });
+
+        expect(score.category_1_score! + score.category_5_score!).to.be.within(
+          score.calculated_score_norm! - 0.000000000000001,
+          score.calculated_score_norm! + 0.000000000000001
+        );
       });
 
       describe('paging through calculations', () => {
@@ -304,19 +311,25 @@ export default ({ getService }: FtrProviderContext): void => {
           const scores = await readRiskScores(es);
           expect(scores.length).to.eql(1);
 
-          expect(normalizeScores(scores)).to.eql([
-            {
-              criticality_level: 'important',
-              criticality_modifier: 1.5,
-              calculated_level: 'Unknown',
-              calculated_score: 21,
-              calculated_score_norm: 11.59366948840633,
-              category_1_score: 21,
-              category_1_count: 1,
-              id_field: 'host.name',
-              id_value: 'host-1',
-            },
-          ]);
+          const [score] = normalizeScores(scores);
+          expect(score).to.eql({
+            criticality_level: 'important',
+            criticality_modifier: 1.5,
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 11.59366948840633,
+            category_1_score: 8.039816232771821,
+            category_1_count: 1,
+            category_5_count: 1,
+            category_5_score: 3.5538532556345075,
+            id_field: 'host.name',
+            id_value: 'host-1',
+          });
+
+          expect(score.category_1_score! + score.category_5_score!).to.be.within(
+            score.calculated_score_norm! - 0.000000000000001,
+            score.calculated_score_norm! + 0.000000000000001
+          );
         });
       });
     });
