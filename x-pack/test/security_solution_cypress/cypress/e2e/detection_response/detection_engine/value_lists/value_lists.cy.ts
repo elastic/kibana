@@ -26,7 +26,7 @@ import {
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../../screens/lists';
 import { refreshIndex } from '../../../../tasks/api_calls/elasticsearch';
 
-describe('value lists management modal', { tags: ['@ess', '@serverless'] }, () => {
+describe('value lists management modal', { tags: ['@aaa', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteValueLists([

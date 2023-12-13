@@ -55,7 +55,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(
   'Machine Learning rules',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@aaa', '@serverless', '@brokenInServerlessQA'] },
   () => {
     const expectedUrls = (getMachineLearningRule().references ?? []).join('');
     const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');

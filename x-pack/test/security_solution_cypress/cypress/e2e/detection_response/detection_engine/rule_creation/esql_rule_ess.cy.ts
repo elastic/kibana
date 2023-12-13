@@ -34,7 +34,7 @@ import { visit } from '../../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe.only('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
+describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 

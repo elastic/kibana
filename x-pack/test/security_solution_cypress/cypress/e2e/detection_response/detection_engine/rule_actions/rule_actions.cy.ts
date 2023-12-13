@@ -33,7 +33,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Rule actions during detection rule creation',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@aaa', '@serverless', '@brokenInServerless'] },
   () => {
     const indexConnector = getIndexConnector();
 

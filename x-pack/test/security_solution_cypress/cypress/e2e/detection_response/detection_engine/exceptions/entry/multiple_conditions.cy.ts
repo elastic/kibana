@@ -29,7 +29,7 @@ import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 
 describe(
   'Add multiple conditions and validate the generated exceptions',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@aaa', '@serverless'] },
   () => {
     beforeEach(() => {
       login();

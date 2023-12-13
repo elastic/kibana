@@ -21,7 +21,7 @@ import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
-describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Import Lists', { tags: ['@aaa', '@serverless', '@skipInServerless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   beforeEach(() => {
     login();

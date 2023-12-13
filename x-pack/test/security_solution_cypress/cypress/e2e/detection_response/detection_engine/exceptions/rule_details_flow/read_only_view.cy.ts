@@ -27,7 +27,7 @@ import {
   deleteExceptionList,
 } from '../../../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
+describe('Exceptions viewer read only', { tags: ['@aaa'] }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {

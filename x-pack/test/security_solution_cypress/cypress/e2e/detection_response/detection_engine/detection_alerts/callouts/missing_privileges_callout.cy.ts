@@ -46,7 +46,7 @@ const waitForPageTitleToBeShown = () => {
 
 describe(
   'Detections > Callouts',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@aaa', '@serverless', '@brokenInServerlessQA'] },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.

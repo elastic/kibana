@@ -18,7 +18,7 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
+describe('Alert user assignment - Basic License', { tags: ['@aaa'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     login();

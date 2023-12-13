@@ -50,7 +50,7 @@ import {
   createEndpointExceptionListItem,
 } from '../../../../../tasks/api_calls/exceptions';
 
-describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
+describe('Add endpoint exception from rule details', { tags: ['@aaa', '@serverless'] }, () => {
   const ITEM_NAME = 'Sample Exception List Item';
   const NEW_ITEM_NAME = 'Exception item-EDITED';
   const ITEM_FIELD = 'event.code';

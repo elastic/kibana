@@ -30,7 +30,7 @@ import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
-describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
+describe('Exceptions match_any', { tags: ['@aaa', '@serverless'] }, () => {
   before(() => {
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large

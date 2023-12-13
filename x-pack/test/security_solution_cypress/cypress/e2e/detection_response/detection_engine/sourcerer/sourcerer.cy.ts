@@ -32,7 +32,7 @@ import { SOURCERER } from '../../../../screens/sourcerer';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
+describe('Sourcerer', { tags: ['@aaa', '@serverless'] }, () => {
   before(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });

@@ -26,7 +26,7 @@ import { deleteRuntimeField } from '../../../../tasks/api_calls/sourcerer';
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';
 
-describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () => {
+describe('Create DataView runtime field', { tags: ['@aaa', '@serverless'] }, () => {
   before(() => {
     deleteRuntimeField('security-solution-default', alertRunTimeField);
     deleteRuntimeField('security-solution-default', timelineRuntimeField);

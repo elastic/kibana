@@ -41,7 +41,7 @@ const getExceptionList1 = () => ({
 
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
-describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Exception list detail page', { tags: ['@aaa', '@serverless'] }, () => {
   beforeEach(() => {
     login();
 

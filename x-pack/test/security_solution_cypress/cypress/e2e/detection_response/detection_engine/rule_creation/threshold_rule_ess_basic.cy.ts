@@ -18,7 +18,7 @@ import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { TOOLTIP } from '../../../../screens/common';
 
-describe('Threshold rules, ESS basic license', { tags: ['@ess'] }, () => {
+describe('Threshold rules, ESS basic license', { tags: ['@aaa'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();

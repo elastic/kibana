@@ -37,7 +37,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
+describe('Filter Lists', { tags: ['@aaa', '@serverless'] }, () => {
   beforeEach(() => {
     login();
 
