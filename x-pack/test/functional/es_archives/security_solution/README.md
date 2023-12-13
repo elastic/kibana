@@ -10,4 +10,4 @@ or
 x-pack/test/api_integration/apis/security_solution
 ```
 
-* Folder `telemetry` is for the tests underneath `detection_engine_api_integration/security_and_spaces/tests/telemetry`.
+- Folder `telemetry` is for the tests underneath `x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/ess.config.ts`.
