@@ -202,7 +202,7 @@ describe('kbn_url_storage', () => {
       await Promise.all([pr1, pr2, pr3]);
       expect(getCurrentUrl()).toBe('/3');
 
-      expect(urlControls.getPendingUrl()).toBeUndefined();
+      expect(urlControls.getPendingUrl()).toEqual(getCurrentUrl());
     });
   });
 
