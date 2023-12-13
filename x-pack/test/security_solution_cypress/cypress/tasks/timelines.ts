@@ -69,7 +69,8 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
-export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+export const createTimeline = () =>
+  cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).should('be.visible').click();
 
 export const createTimelineFromFirstTemplateInList = () => {
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();

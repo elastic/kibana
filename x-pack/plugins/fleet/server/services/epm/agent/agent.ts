@@ -21,7 +21,6 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    logger.debug(`Compiling agent template: ${templateStr}`);
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
