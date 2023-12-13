@@ -31,9 +31,11 @@ export interface HelloAppProps {
 
 export const HelloApp: React.FC<HelloAppProps> = ({ core }) => {
   const [name, setName] = useLocalStorage('helloWorldAppName', DEFAULT_NAME);
+
   const handleText: React.EventHandler<React.ChangeEvent<HTMLInputElement>> = (event) => {
     setName(event.target.value);
   };
+
   const handleReset = () => {
     setName(DEFAULT_NAME);
   };
@@ -55,7 +57,7 @@ export const HelloApp: React.FC<HelloAppProps> = ({ core }) => {
 
         <EuiPageTemplate.Section grow={false}>
           <EuiText>
-            <p data-test-subj="helloWorldMessage">
+            <p data-test-subj="helloWorldDiv">
               {i18n.translate('helloApp.showName', {
                 defaultMessage: 'Hello {name}!',
                 values: { name },

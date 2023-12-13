@@ -7,7 +7,19 @@
  */
 
 describe('Hello World example app', () => {
-  it('loads initial state', () => {
+  it('says hello to user', () => {
     cy.visitKibana('/app/helloWorld');
+
+    // initial
+    cy.getByTestSubj('helloWorldDiv').as('result');
+    cy.get('@result').contains('Hello World!');
+
+    // updated
+    cy.getByTestSubj('helloWorldTextHandle').clear().type('Spider-Man');
+    cy.get('@result').should('have.text', 'Hello Spider-Man!');
+
+    // reset
+    cy.getByTestSubj('helloWorldResetHandle').click();
+    cy.get('@result').should('have.text', 'Hello World!');
   });
 });
