@@ -6,5 +6,5 @@
  */
 
 require('@kbn/babel-register').install();
-//eslint-disable-next-line @kbn/imports/uniform_imports
-require('./index.ts');
+
+require('./evaluation');
