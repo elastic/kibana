@@ -9,7 +9,7 @@ import { CLOSE_TIMELINE_BUTTON, TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../scr
 import { TIMELINE_EXIT_FULL_SCREEN_BUTTON, TIMELINE_FULL_SCREEN_BUTTON } from '../screens/timeline';
 
 export const openTimelineUsingToggle = () => {
-  cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).click();
+  cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('be.visible').click();
 };
 
 export const closeTimelineUsingCloseButton = () => {
