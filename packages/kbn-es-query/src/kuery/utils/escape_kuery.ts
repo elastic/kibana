@@ -24,7 +24,7 @@ export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot,
 
 // See the SpecialCharacter rule in kuery.peg
 function escapeSpecialCharacters(str: string) {
-  return str.replace(/[\\():<>"*]/g, '\\$&'); // $& means the whole matched string
+  return str.replace(/[\\():~<>"*]/g, '\\$&'); // $& means the whole matched string
 }
 
 // See the Keyword rule in kuery.peg

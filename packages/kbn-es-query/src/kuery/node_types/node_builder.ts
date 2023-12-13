@@ -16,6 +16,12 @@ export const nodeBuilder = {
       typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
     ]);
   },
+  infer: (fieldName: string, value: string | KueryNode): KueryNode => {
+    return nodeTypes.function.buildNodeWithArgumentNodes('infer', [
+      nodeTypes.literal.buildNode(fieldName),
+      typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
+    ]);
+  },
   or: (nodes: KueryNode[]): KueryNode => {
     return nodes.length === 1 ? nodes[0] : nodeTypes.function.buildNode('or', nodes);
   },

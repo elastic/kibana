@@ -14,6 +14,7 @@ import {
   KQL_FUNCTION_EXISTS,
   KQL_FUNCTION_NESTED,
   KQL_FUNCTION_IS,
+  KQL_FUNCTION_INFER,
   KQL_FUNCTION_NOT,
   KQL_FUNCTION_OR,
   KQL_FUNCTION_RANGE,
@@ -27,6 +28,7 @@ export type KqlFunctionName =
   | typeof KQL_FUNCTION_AND
   | typeof KQL_FUNCTION_EXISTS
   | typeof KQL_FUNCTION_IS
+  | typeof KQL_FUNCTION_INFER
   | typeof KQL_FUNCTION_NESTED
   | typeof KQL_FUNCTION_NOT
   | typeof KQL_FUNCTION_OR
@@ -85,6 +87,8 @@ export function toElasticsearchQuery(
     return functions.exists.toElasticsearchQuery(node), indexPattern, config, context;
   if (functions.is.isNode(node))
     return functions.is.toElasticsearchQuery(node, indexPattern, config, context);
+  if (functions.infer.isNode(node))
+    return functions.infer.toElasticsearchQuery(node, indexPattern, config, context);
   if (functions.nested.isNode(node))
     return functions.nested.toElasticsearchQuery(node, indexPattern, config, context);
   if (functions.not.isNode(node))
@@ -100,6 +104,7 @@ export function toKqlExpression(node: KqlFunctionNode): string {
   if (functions.and.isNode(node)) return functions.and.toKqlExpression(node);
   if (functions.exists.isNode(node)) return functions.exists.toKqlExpression(node);
   if (functions.is.isNode(node)) return functions.is.toKqlExpression(node);
+  if (functions.infer.isNode(node)) return functions.infer.toKqlExpression(node);
   if (functions.nested.isNode(node)) return functions.nested.toKqlExpression(node);
   if (functions.not.isNode(node)) return functions.not.toKqlExpression(node);
   if (functions.or.isNode(node)) return functions.or.toKqlExpression(node);

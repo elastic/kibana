@@ -86,6 +86,7 @@ NestedQuery
 Expression
   = FieldRangeExpression
   / FieldValueExpression
+  / FieldInferExpression
   / ValueExpression
 
 Field "fieldName"
@@ -112,6 +113,18 @@ FieldValueExpression
       };
     }
     return partial(field);
+  }
+
+FieldInferExpression
+  = field:Field Space* '~' Space* partial:Value {
+    if (partial.type === 'cursor') {
+      return {
+        ...partial,
+        fieldName: field.value,
+        suggestionTypes: ['value', 'conjunction']
+      };
+    }
+    return partial(field, 'infer');
   }
 
 ValueExpression
@@ -183,7 +196,7 @@ NotListOfValues
 Value "value"
   = value:QuotedString {
     if (value.type === 'cursor') return value;
-    return (field) => buildFunctionNode('is', [field, value]);
+    return (field, functionName = 'is') => buildFunctionNode(functionName, [field, value]);
   }
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
@@ -192,7 +205,7 @@ Value "value"
       error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
     }
 
-    return (field) => buildFunctionNode('is', [field, value]);
+    return (field, functionName = 'is') => buildFunctionNode(functionName, [field, value]);
   }
 
 Or "OR"
@@ -290,7 +303,7 @@ Keyword
   = Or / And / Not
 
 SpecialCharacter
-  = [\\():<>"*{}]
+  = [\\():~<>"*{}]
 
 EscapedUnicodeSequence
  = '\\' sequence:UnicodeSequence { return sequence; }
