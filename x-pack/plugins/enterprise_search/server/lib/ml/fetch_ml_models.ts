@@ -207,7 +207,7 @@ const getUserFriendlyTitle = (modelId: string, modelType: string) => {
   return MODEL_TITLES_BY_TYPE[modelType] !== undefined
     ? MODEL_TITLES_BY_TYPE[modelType]!
     : modelId === LANG_IDENT_MODEL_ID
-    ? 'Lanugage Identification'
+    ? 'Language Identification'
     : modelId;
 };
 
