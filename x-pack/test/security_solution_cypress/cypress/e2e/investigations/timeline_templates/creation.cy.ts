@@ -48,7 +48,6 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/ti
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165661
 describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
