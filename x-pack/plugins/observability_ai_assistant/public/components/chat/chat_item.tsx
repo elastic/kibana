@@ -27,7 +27,7 @@ import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
 import { ChatActionClickHandler } from './types';
 
 export interface ChatItemProps extends ChatTimelineItem {
-  onEditSubmit: (message: Message) => Promise<void>;
+  onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
@@ -35,13 +35,10 @@ export interface ChatItemProps extends ChatTimelineItem {
 }
 
 const normalMessageClassName = css`
-  .euiCommentEvent__header {
-    padding: 4px 8px;
-  }
-
   .euiCommentEvent__body {
     padding: 0;
   }
+
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
   > :last-child {
     overflow-x: hidden;
@@ -56,6 +53,10 @@ const noPanelMessageClassName = css`
   .euiCommentEvent__header {
     background: transparent;
     border-block-end: none;
+
+    > .euiPanel {
+      background: none;
+    }
   }
 
   .euiCommentEvent__body {
@@ -66,13 +67,14 @@ const noPanelMessageClassName = css`
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   display: { collapsed },
+  message: {
+    message: { function_call: functionCall, role },
+  },
   content,
   currentUser,
   element,
   error,
-  function_call: functionCall,
   loading,
-  role,
   title,
   onEditSubmit,
   onFeedbackClick,
@@ -88,10 +90,6 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
-    .euiCommentEvent__header {
-      padding: 4px 8px;
-    }
-
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};

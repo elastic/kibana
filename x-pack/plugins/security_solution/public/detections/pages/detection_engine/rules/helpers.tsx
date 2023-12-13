@@ -21,6 +21,7 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -155,7 +156,12 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: ('alert_suppression' in rule && rule.alert_suppression?.group_by) || [],
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
   groupByRadioSelection:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? GroupByOptions.PerTimePeriod
@@ -165,8 +171,14 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     unit: 'm',
   },
   suppressionMissingFields:
-    ('alert_suppression' in rule && rule.alert_suppression?.missing_fields_strategy) ||
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {
@@ -253,7 +265,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     tags,
     riskScore: {
       value: riskScore,
-      mapping: riskScoreMapping,
+      mapping: requiredOptional(riskScoreMapping),
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,

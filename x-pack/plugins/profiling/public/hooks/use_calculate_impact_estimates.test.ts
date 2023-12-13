@@ -9,7 +9,7 @@ import { useProfilingDependencies } from '../components/contexts/profiling_depen
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
 jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
@@ -21,7 +21,7 @@ describe('useCalculateImpactEstimate', () => {
         core: {
           uiSettings: {
             get: (key: string) => {
-              if (key === profilingPerCoreWatt) {
+              if (key === profilingPervCPUWattX86) {
                 return 7;
               }
               if (key === profilingCo2PerKWH) {

@@ -7,6 +7,35 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
+
+export const ASK_QUESTIONS_ABOUT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
+  {
+    defaultMessage: 'Ask questions about the',
+  }
+);
+
+export const LATEST_AND_RISKIEST_OPEN_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
+  {
+    defaultMessage:
+      'latest and riskiest open alerts in your environment. Your Anonymization settings will be applied to the alerts',
+  }
+);
+
+export const ALERTS_RANGE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel',
+  {
+    defaultMessage: 'Alerts range',
+  }
+);
+
 export const SETTINGS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.settingsTitle',
   {

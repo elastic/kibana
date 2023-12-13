@@ -22,6 +22,7 @@ import {
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
+  showDataProviderQueryBuilder,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
@@ -52,7 +53,8 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  describe('Update kqlMode for timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169882
+  describe.skip('Update kqlMode for timeline', () => {
     beforeEach(() => {
       login();
       visit(TIMELINES_URL);
@@ -60,6 +62,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
       cy.get(LOADING_INDICATOR).should('not.exist');
+      showDataProviderQueryBuilder();
       cy.get(TIMELINE_SEARCH_OR_FILTER).click();
       cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });

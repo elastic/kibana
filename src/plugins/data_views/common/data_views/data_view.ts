@@ -85,7 +85,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const scriptFields: Record<string, estypes.ScriptField> = {};
     if (!this.fields) {
       return {
-        storedFields: ['*'],
         scriptFields,
         docvalueFields: [] as Array<{ field: string; format: string }>,
         runtimeFields: {},
@@ -117,7 +116,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const runtimeFields = this.getRuntimeMappings();
 
     return {
-      storedFields: ['*'],
       scriptFields,
       docvalueFields,
       runtimeFields,

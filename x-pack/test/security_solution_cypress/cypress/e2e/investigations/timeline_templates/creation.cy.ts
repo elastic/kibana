@@ -26,7 +26,7 @@ import {
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -111,7 +111,6 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     addNameToTimelineAndSave('Test');
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
   });
 });

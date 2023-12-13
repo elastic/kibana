@@ -68,6 +68,7 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
         <EuiFlexItem>
           <span>
             <EuiButton
+              data-test-subj="serverlessSearchConnectorIndexnamePanelButton"
               color="primary"
               disabled={!isValidIndexName(newIndexName)}
               fill

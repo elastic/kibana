@@ -6,29 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import useMap from 'react-use/lib/useMap';
-import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import { useLinks } from '../embeddable/links_embeddable';
-import { ExternalLinkComponent } from './external_link/external_link_component';
-import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
-import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
 import {
   DASHBOARD_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
+import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
+import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
+import { ExternalLinkComponent } from './external_link/external_link_component';
 
 import './links_component.scss';
+import { useLinks, useLinksAttributes } from './links_hooks';
 
 export const LinksComponent = () => {
   const linksEmbeddable = useLinks();
-  const links = linksEmbeddable.select((state) => state.componentState.links);
-  const layout = linksEmbeddable.select((state) => state.componentState.layout);
+  const linksAttributes = useLinksAttributes();
 
   const [linksLoading, { set: setLinkIsLoading }] = useMap(
     Object.fromEntries(
-      (links ?? []).map((link) => {
+      (linksAttributes?.links ?? []).map((link) => {
         return [link.id, true];
       })
     )
@@ -43,12 +42,12 @@ export const LinksComponent = () => {
   }, [linksLoading, linksEmbeddable]);
 
   const orderedLinks = useMemo(() => {
-    if (!links) return [];
-    return memoizedGetOrderedLinkList(links);
-  }, [links]);
+    if (!linksAttributes?.links) return [];
+    return memoizedGetOrderedLinkList(linksAttributes?.links);
+  }, [linksAttributes]);
 
   const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
-    return (links ?? []).reduce((prev, currentLink) => {
+    return (linksAttributes?.links ?? []).reduce((prev, currentLink) => {
       return {
         ...prev,
         [currentLink.id]: {
@@ -58,7 +57,7 @@ export const LinksComponent = () => {
               <DashboardLinkComponent
                 key={currentLink.id}
                 link={currentLink}
-                layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                layout={linksAttributes?.layout ?? LINKS_VERTICAL_LAYOUT}
                 onLoading={() => setLinkIsLoading(currentLink.id, true)}
                 onRender={() => setLinkIsLoading(currentLink.id, false)}
               />
@@ -66,26 +65,26 @@ export const LinksComponent = () => {
               <ExternalLinkComponent
                 key={currentLink.id}
                 link={currentLink}
-                layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                layout={linksAttributes?.layout ?? LINKS_VERTICAL_LAYOUT}
                 onRender={() => setLinkIsLoading(currentLink.id, false)}
               />
             ),
         },
       };
     }, {});
-  }, [links, layout, setLinkIsLoading]);
+  }, [linksAttributes?.links, linksAttributes?.layout, setLinkIsLoading]);
 
   return (
     <EuiPanel
       className={`linksComponent ${
-        layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
+        linksAttributes?.layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
       }`}
       paddingSize="xs"
       data-test-subj="links--component"
     >
       <EuiListGroup
         maxWidth={false}
-        className={`${layout}LayoutWrapper`}
+        className={`${linksAttributes?.layout ?? LINKS_VERTICAL_LAYOUT}LayoutWrapper`}
         data-test-subj="links--component--listGroup"
       >
         {orderedLinks.map((link) => linkItems[link.id].content)}

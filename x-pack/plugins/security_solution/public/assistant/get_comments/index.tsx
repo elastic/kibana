@@ -66,6 +66,8 @@ export const getComments = ({
     regenerateMessage(currentConversation.id);
   };
 
+  const connectorTypeTitle = currentConversation.apiConfig.connectorTypeTitle ?? '';
+
   const extraLoadingComment = isFetchingResponse
     ? [
         {
@@ -75,6 +77,7 @@ export const getComments = ({
           children: (
             <StreamComment
               amendMessage={amendMessageOfConversation}
+              connectorTypeTitle={connectorTypeTitle}
               content=""
               regenerateMessage={regenerateMessageOfConversation}
               isLastComment
@@ -122,6 +125,7 @@ export const getComments = ({
           children: (
             <StreamComment
               amendMessage={amendMessageOfConversation}
+              connectorTypeTitle={connectorTypeTitle}
               index={index}
               isLastComment={isLastComment}
               isError={message.isError}
@@ -142,6 +146,7 @@ export const getComments = ({
         children: (
           <StreamComment
             amendMessage={amendMessageOfConversation}
+            connectorTypeTitle={connectorTypeTitle}
             content={transformedMessage.content}
             index={index}
             isLastComment={isLastComment}

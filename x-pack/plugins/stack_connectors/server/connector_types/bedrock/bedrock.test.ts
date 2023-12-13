@@ -5,13 +5,10 @@
  * 2.0.
  */
 import aws from 'aws4';
-import { Transform } from 'stream';
+import { PassThrough, Transform } from 'stream';
 import { BedrockConnector } from './bedrock';
-import { waitFor } from '@testing-library/react';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/bedrock/schema';
 import {
@@ -21,7 +18,9 @@ import {
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { AxiosError } from 'axios';
+jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
@@ -44,18 +43,19 @@ describe('BedrockConnector', () => {
     });
   });
 
+  const connector = new BedrockConnector({
+    configurationUtilities: actionsConfigMock.create(),
+    connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
+    config: {
+      apiUrl: DEFAULT_BEDROCK_URL,
+      defaultModel: DEFAULT_BEDROCK_MODEL,
+    },
+    secrets: { accessKey: '123', secret: 'secret' },
+    logger: loggingSystemMock.createLogger(),
+    services: actionsMock.createServices(),
+  });
+
   describe('Bedrock', () => {
-    const connector = new BedrockConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
-      config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
-        defaultModel: DEFAULT_BEDROCK_MODEL,
-      },
-      secrets: { accessKey: '123', secret: 'secret' },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
-    });
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
@@ -105,7 +105,7 @@ describe('BedrockConnector', () => {
       let stream;
       beforeEach(() => {
         stream = createStreamMock();
-        stream.write(encodeBedrockResponse(mockResponseString));
+        stream.write(new Uint8Array([1, 2, 3]));
         mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
@@ -199,16 +199,9 @@ describe('BedrockConnector', () => {
         });
       });
 
-      it('transforms the response into a string', async () => {
+      it('responds with a readable stream', async () => {
         const response = await connector.invokeStream(aiAssistantBody);
-
-        let responseBody: string = '';
-        response.on('data', (data: string) => {
-          responseBody += data.toString();
-        });
-        await waitFor(() => {
-          expect(responseBody).toEqual(mockResponseString);
-        });
+        expect(response instanceof PassThrough).toEqual(true);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -345,6 +338,74 @@ describe('BedrockConnector', () => {
       });
     });
   });
+
+  describe('Token dashboard', () => {
+    const mockGenAi = initDashboard as jest.Mock;
+    beforeEach(() => {
+      // @ts-ignore
+      connector.esClient.transport.request = mockRequest;
+      mockRequest.mockResolvedValue({ has_all_requested: true });
+      mockGenAi.mockResolvedValue({ success: true });
+      jest.clearAllMocks();
+    });
+    it('the create dashboard API call returns available: true when user has correct permissions', async () => {
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
+      expect(response).toEqual({ available: true });
+    });
+    it('the create dashboard API call returns available: false when user has correct permissions', async () => {
+      mockRequest.mockResolvedValue({ has_all_requested: false });
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
+      expect(response).toEqual({ available: false });
+    });
+
+    it('the create dashboard API call returns available: false when init dashboard fails', async () => {
+      mockGenAi.mockResolvedValue({ success: false });
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
+      expect(response).toEqual({ available: false });
+    });
+  });
 });
 
 function createStreamMock() {
@@ -363,17 +424,4 @@ function createStreamMock() {
       transform.end();
     },
   };
-}
-
-function encodeBedrockResponse(completion: string) {
-  return new EventStreamCodec(toUtf8, fromUtf8).encode({
-    headers: {},
-    body: Uint8Array.from(
-      Buffer.from(
-        JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
-        })
-      )
-    ),
-  });
 }

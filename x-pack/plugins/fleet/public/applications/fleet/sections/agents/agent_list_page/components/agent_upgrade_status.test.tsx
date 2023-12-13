@@ -244,8 +244,7 @@ describe('AgentUpgradeStatus', () => {
       expect(results.queryAllByText('Info')).toEqual([]);
     });
 
-    // Unskip this test when minVersion is set.
-    it.skip('should render an icon with tooltip if the agent is upgrading', async () => {
+    it('should render an icon with tooltip if the agent is upgrading', async () => {
       const results = render({
         agentUpgradeStartedAt: '2023-10-03T14:34:12Z',
         agentUpgradedAt: null,

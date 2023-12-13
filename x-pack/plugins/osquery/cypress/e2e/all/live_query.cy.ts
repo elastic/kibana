@@ -37,10 +37,10 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
-    fillInQueryTimeout('91');
+    fillInQueryTimeout('910');
     submitQuery();
     cy.contains('Timeout value must be lower than 900 seconds.');
-    fillInQueryTimeout('89');
+    fillInQueryTimeout('890');
     submitQuery();
     cy.contains('Timeout value must be lower than 900 seconds.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
@@ -58,7 +58,10 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
     });
     checkResults();
-    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist').click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist');
+    cy.get(
+      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"] [data-datagrid-interactable="true"]'
+    ).click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 

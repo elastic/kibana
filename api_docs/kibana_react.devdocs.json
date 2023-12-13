@@ -812,54 +812,6 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/time_slider/embeddable/time_slider_embeddable.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
@@ -1021,54 +973,6 @@
           },
           {
             "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
             "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
           },
           {
@@ -1126,6 +1030,54 @@
           {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
           },
           {
             "plugin": "security",
@@ -2703,30 +2655,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_add_data_control_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/editor/open_edit_control_group_flyout.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/public/control_group/actions/edit_control_action.tsx"
           },
           {
             "plugin": "dashboard",

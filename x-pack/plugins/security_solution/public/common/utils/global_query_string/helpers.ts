@@ -97,3 +97,10 @@ export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | nul
   );
   return replaceUrlParams;
 };
+
+export const createHistoryEntry = () => {
+  // NOTE: This is a workaround to make sure that new history entry is created as a result of the user action.
+  // This is needed because of the way global url state is handled in the security app.
+  // (it defaults to replace the url params instead of pushing new history entry)
+  window.history.pushState({}, '', window.location.href);
+};

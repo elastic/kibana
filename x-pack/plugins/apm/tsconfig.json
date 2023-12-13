@@ -103,7 +103,11 @@
     "@kbn/monaco",
     "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/observability-get-padded-alert-time-range-util",
+    "@kbn/core-lifecycle-server"
   ],
   "exclude": ["target/**/*"]
 }

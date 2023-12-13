@@ -22,7 +22,6 @@ describe('useSwimlaneInputResolver', () => {
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const renderCallbacks = {
-    onRenderComplete: jest.fn(),
     onLoading: jest.fn(),
     onError: jest.fn(),
   };
@@ -113,7 +112,6 @@ describe('useSwimlaneInputResolver', () => {
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
-    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       embeddableInput.next({
@@ -130,7 +128,6 @@ describe('useSwimlaneInputResolver', () => {
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(2);
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
-    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(2);
 
     await act(async () => {
       embeddableInput.next({
@@ -147,7 +144,6 @@ describe('useSwimlaneInputResolver', () => {
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(3);
-    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(3);
   });
 
   test('should not complete the observable on error', async () => {

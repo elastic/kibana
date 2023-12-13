@@ -48,7 +48,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel, panels } = useExpandableFlyoutContext();
 
-    const isExpanded: boolean = panels.left != null;
+    const isExpanded: boolean = !!panels.left;
     const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
     const collapseButton = useMemo(

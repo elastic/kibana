@@ -24,7 +24,11 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
 }) => {
   return (
     <div data-test-subj="create-api-role-descriptors-code-editor-container">
-      <EuiLink href={docLinks.roleDescriptors} target="_blank">
+      <EuiLink
+        data-test-subj="serverlessSearchSecurityPrivilegesFormLearnHowToStructureRoleDescriptorsLink"
+        href={docLinks.roleDescriptors}
+        target="_blank"
+      >
         {i18n.translate('xpack.serverlessSearch.apiKey.roleDescriptorsLinkLabel', {
           defaultMessage: 'Learn how to structure role descriptors',
         })}

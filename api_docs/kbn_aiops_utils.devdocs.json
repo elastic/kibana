@@ -336,12 +336,10 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.baselineMin",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "baselineMin",
             "description": [
-              "\nBaseline minimum value"
+              "Baseline minimum value"
             ],
             "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
@@ -351,12 +349,10 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.baselineMax",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "baselineMax",
             "description": [
-              "\nBaseline maximum value"
+              "Baseline maximum value"
             ],
             "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
@@ -366,12 +362,10 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.deviationMin",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "deviationMin",
             "description": [
-              "\nDeviation minimum value"
+              "Deviation minimum value"
             ],
             "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,
@@ -381,12 +375,10 @@
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.WindowParameters.deviationMax",
             "type": "number",
-            "tags": [
-              "type"
-            ],
+            "tags": [],
             "label": "deviationMax",
             "description": [
-              "\nDeviation maximum value"
+              "Deviation maximum value"
             ],
             "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
             "deprecated": false,

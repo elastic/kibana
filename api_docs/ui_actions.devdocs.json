@@ -1636,71 +1636,6 @@
       },
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.CategorizeFieldContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "CategorizeFieldContext",
-        "description": [],
-        "path": "src/plugins/ui_actions/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.field",
-            "type": "Object",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              }
-            ],
-            "path": "src/plugins/ui_actions/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "src/plugins/ui_actions/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.originatingApp",
-            "type": "string",
-            "tags": [],
-            "label": "originatingApp",
-            "description": [],
-            "path": "src/plugins/ui_actions/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.Presentable",
         "type": "Interface",
         "tags": [],
@@ -2302,21 +2237,6 @@
     "misc": [
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.ACTION_CATEGORIZE_FIELD",
-        "type": "string",
-        "tags": [],
-        "label": "ACTION_CATEGORIZE_FIELD",
-        "description": [],
-        "signature": [
-          "\"ACTION_CATEGORIZE_FIELD\""
-        ],
-        "path": "src/plugins/ui_actions/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.ACTION_VISUALIZE_FIELD",
         "type": "string",
         "tags": [],
@@ -2380,21 +2300,6 @@
           }
         ],
         "path": "src/plugins/ui_actions/public/actions/action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2468,53 +2373,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "uiActions",
         "id": "def-public.rowClickTrigger",
@@ -2665,15 +2523,15 @@
       "label": "UiActionsSetup",
       "description": [],
       "signature": [
-        "{ readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
+          "text": "Trigger"
         },
-        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+        ") => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2689,15 +2547,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
-          "text": "Trigger"
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
         },
-        ") => void; readonly unregisterAction: (actionId: string) => void; }"
+        "<any>) => void; }"
       ],
       "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,
@@ -2713,15 +2571,17 @@
       "label": "UiActionsStart",
       "description": [],
       "signature": [
-        "{ readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
+          "text": "Trigger"
         },
-        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+        ") => void; readonly getTrigger: (triggerId: string) => ",
+        "TriggerContract",
+        "<object>; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2737,17 +2597,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
-          "text": "Trigger"
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
         },
-        ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-        "TriggerContract",
-        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+        "<any>) => void; readonly getAction: (id: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",

@@ -13,7 +13,7 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
