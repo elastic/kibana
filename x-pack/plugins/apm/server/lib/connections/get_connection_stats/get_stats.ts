@@ -148,7 +148,7 @@ async function getAllConnectionStats({
   const afterKey = response.aggregations?.connections.after_key;
 
   if (afterKey && size < MAX_BUCKETS) {
-    const currentReponse = await getAllConnectionStats({
+    const currentResponse = await getAllConnectionStats({
       apmEventClient,
       startWithOffset,
       endWithOffset,
@@ -160,7 +160,7 @@ async function getAllConnectionStats({
 
     const buckets = [
       ...(response.aggregations?.connections.buckets ?? []),
-      ...(currentReponse.aggregations?.connections.buckets ?? []),
+      ...(currentResponse.aggregations?.connections.buckets ?? []),
     ];
 
     return {
