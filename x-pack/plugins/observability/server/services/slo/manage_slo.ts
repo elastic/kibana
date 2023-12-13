@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { getSLOTransformId } from '../../../common/slo/constants';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../common/slo/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 export class ManageSLO {
-  constructor(private repository: SLORepository, private transformManager: TransformManager) {}
+  constructor(
+    private repository: SLORepository,
+    private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager
+  ) {}
 
   async enable(sloId: string) {
     const slo = await this.repository.findById(sloId);
@@ -18,6 +22,7 @@ export class ManageSLO {
       return;
     }
 
+    await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = true;
     slo.updatedAt = new Date();
@@ -30,6 +35,7 @@ export class ManageSLO {
       return;
     }
 
+    await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = false;
     slo.updatedAt = new Date();
