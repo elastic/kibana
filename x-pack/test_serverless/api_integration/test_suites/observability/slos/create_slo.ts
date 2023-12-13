@@ -9,20 +9,15 @@ import { cleanup, generate } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { ALL_VALUE } from '@kbn/slo-schema';
+
 import {
   getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '@kbn/observability-plugin/common/slo/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-const expectedTransforms = {
-  count: 2,
-  transform0: { id: 'slo-my-custom-id-1', destIndex: '.slo-observability.sli-v3' },
-  transform1: { id: 'slo-summary-my-custom-id-1', destIndex: '.slo-observability.summary-v3' },
-  typeOfVersion: 'string',
-  typeOfCreateTime: 'number',
-};
 
-function assertTransformsResponseBody(body: GetTransformsResponseSchema) {
+function assertTransformsResponseBody(body: GetTransformsResponseSchema, expectedTransforms) {
   expect(body.count).to.eql(expectedTransforms.count);
   expect(body.transforms).to.have.length(expectedTransforms.count);
 
@@ -72,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
+      // Oops TODO delete all created SLOs
       await supertest
         .delete('/api/observability/slos/my-custom-id')
         .set('kbn-xsrf', 'foo')
@@ -108,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           objective: {
             target: 0.999,
           },
-          groupBy: '*',
+          groupBy: ALL_VALUE,
         });
         const savedObject = await kibanaServer.savedObjects.find({
           type: SO_SLO_TYPE,
@@ -119,6 +115,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('creates the rollup and summary transforms', async () => {
+        const expectedTransforms = {
+          count: 2,
+          transform0: { id: 'slo-my-custom-id-1', destIndex: '.slo-observability.sli-v3' },
+          transform1: {
+            id: 'slo-summary-my-custom-id-1',
+            destIndex: '.slo-observability.summary-v3',
+          },
+          typeOfVersion: 'string',
+          typeOfCreateTime: 'number',
+        };
         const { body, status } = await supertest
           .get(`/internal/transform/transforms`)
           .set('kbn-xsrf', 'foo')
@@ -126,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('elastic-api-version', '1')
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
-        assertTransformsResponseBody(body);
+        assertTransformsResponseBody(body, expectedTransforms);
       });
 
       it('creates ingest pipeline', async () => {
@@ -151,18 +157,153 @@ export default function ({ getService }: FtrProviderContext) {
       it('finds the created SLO', async () => {
         const createdSlo = await sloApi.waitForSloCreated({ sloId });
         expect(createdSlo.id).to.be(sloId);
+        expect(createdSlo.groupBy).to.be(ALL_VALUE);
       });
     });
 
     describe('SLO with long description', () => {
-      it('creates an SLO with description over 256 characters successfully', async () => {});
+      it('creates an SLO with description over 256 characters', async () => {
+        const sloId = 'my-custom-id-2';
+        await sloApi.create({
+          id: sloId,
+          name: 'my super long SLO name and description',
+          description:
+            'Lorem Ipsum has been the industry standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ',
+          indicator: {
+            type: 'sli.kql.custom',
+            params: {
+              index: infraDataIndex,
+              good: 'system.cpu.total.norm.pct > 1',
+              total: 'system.cpu.total.norm.pct: *',
+              timestampField: '@timestamp',
+            },
+          },
+          timeWindow: {
+            duration: '7d',
+            type: 'rolling',
+          },
+          budgetingMethod: 'occurrences',
+          objective: {
+            target: 0.999,
+          },
+          groupBy: '*',
+        });
+
+        const createdSlo = await sloApi.waitForSloCreated({ sloId });
+        expect(createdSlo.id).to.be(sloId);
+      });
     });
 
-    describe("SLO with ' character in the description", async () => {
-      // it("creates an SLO that has ' character in the description successfully", async () => {});
+    describe('SLO with special characters in the description', () => {
+      it("creates an SLO that has ' character in the description", async () => {
+        const sloId = 'my-custom-id-3';
+        await sloApi.create({
+          id: sloId,
+          name: 'my SLO with weird characters in the description',
+          description:
+            "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.",
+          indicator: {
+            type: 'sli.kql.custom',
+            params: {
+              index: infraDataIndex,
+              good: 'system.cpu.total.norm.pct > 1',
+              total: 'system.cpu.total.norm.pct: *',
+              timestampField: '@timestamp',
+            },
+          },
+          timeWindow: {
+            duration: '7d',
+            type: 'rolling',
+          },
+          budgetingMethod: 'occurrences',
+          objective: {
+            target: 0.999,
+          },
+          groupBy: '*',
+        });
+        const createdSlo = await sloApi.waitForSloCreated({ sloId });
+        expect(createdSlo.id).to.be(sloId);
+      });
     });
 
-    // TODO
-    describe('partition by SLO', () => {});
+    describe('partition by SLO', () => {
+      it('creates a partition by SLO', async () => {
+        const sloId = 'my-custom-id-4';
+        await sloApi.create({
+          id: sloId,
+          name: 'Group by SLO',
+          description: 'This is a group by SLO.',
+          indicator: {
+            type: 'sli.kql.custom',
+            params: {
+              index: infraDataIndex,
+              good: 'system.cpu.total.norm.pct > 1',
+              total: 'system.cpu.total.norm.pct: *',
+              timestampField: '@timestamp',
+            },
+          },
+          timeWindow: {
+            duration: '7d',
+            type: 'rolling',
+          },
+          budgetingMethod: 'occurrences',
+          objective: {
+            target: 0.999,
+          },
+          groupBy: 'host.name',
+        });
+        const createdSlo = await sloApi.waitForSloCreated({ sloId });
+        expect(createdSlo.id).to.be(sloId);
+        expect(createdSlo.groupBy).not.to.be(ALL_VALUE);
+        expect(createdSlo.groupBy).to.be('host.name');
+      });
+    });
+
+    describe('Total transforms', () => {
+      it('returns all the transforms for above created SLOs', async () => {
+        const expectedTransforms = {
+          count: 8,
+          transform0: { id: 'slo-my-custom-id-1', destIndex: '.slo-observability.sli-v3' },
+          transform1: { id: 'slo-my-custom-id-2-1', destIndex: '.slo-observability.sli-v3' },
+          transform2: { id: 'slo-my-custom-id-3-1', destIndex: '.slo-observability.sli-v3' },
+          transform3: { id: 'slo-my-custom-id-4-1', destIndex: '.slo-observability.sli-v3' },
+          transform4: {
+            id: 'slo-summary-my-custom-id-1',
+            destIndex: '.slo-observability.summary-v3',
+          },
+          transform5: {
+            id: 'slo-summary-my-custom-id-2-1',
+            destIndex: '.slo-observability.summary-v3',
+          },
+          transform6: {
+            id: 'slo-summary-my-custom-id-3-1',
+            destIndex: '.slo-observability.summary-v3',
+          },
+          transform7: {
+            id: 'slo-summary-my-custom-id-4-1',
+            destIndex: '.slo-observability.summary-v3',
+          },
+          typeOfVersion: 'string',
+          typeOfCreateTime: 'number',
+        };
+        const { body, status } = await supertest
+          .get(`/internal/transform/transforms`)
+          .set('kbn-xsrf', 'foo')
+          .set('x-elastic-internal-origin', 'foo')
+          .set('elastic-api-version', '1')
+          .send();
+        transform.api.assertResponseStatusCode(200, status, body);
+        assertTransformsResponseBody(body, expectedTransforms);
+      });
+    });
+
+    describe('Total SO definitions', () => {
+      it('returns SO definitions for above created SLOs', async () => {
+        const savedObject = await kibanaServer.savedObjects.find({
+          type: SO_SLO_TYPE,
+        });
+        expect(savedObject.total).to.eql(4);
+      });
+    });
   });
 }
