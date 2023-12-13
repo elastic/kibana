@@ -11,7 +11,10 @@ import type { ObservabilityAIAssistantConfig } from './config';
 export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
 
 import { config as configSchema } from './config';
-import { ObservabilityAIAssistantService } from './service';
+export type {
+  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPluginSetup,
+} from './types';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [
@@ -37,20 +40,6 @@ export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   exposeToBrowser: {},
   schema: configSchema,
 };
-
-export interface ObservabilityAIAssistantPluginSetup {
-  /**
-   * Returns a Observability AI Assistant service instance
-   */
-  service: ObservabilityAIAssistantService;
-}
-
-export interface ObservabilityAIAssistantPluginStart {
-  /**
-   * Returns a Observability AI Assistant service instance
-   */
-  service: ObservabilityAIAssistantService;
-}
 
 export const plugin = async (ctx: PluginInitializerContext<ObservabilityAIAssistantConfig>) => {
   const { ObservabilityAIAssistantPlugin } = await import('./plugin');

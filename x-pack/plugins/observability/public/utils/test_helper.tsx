@@ -36,7 +36,6 @@ const defaultConfig: ConfigSchema = {
       uptime: { enabled: false },
       observability: { enabled: false },
     },
-    thresholdRule: { enabled: false },
   },
 };
 
