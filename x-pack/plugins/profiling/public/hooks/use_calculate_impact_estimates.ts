@@ -8,7 +8,7 @@
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
@@ -22,7 +22,7 @@ interface Params {
 export type CalculateImpactEstimates = ReturnType<typeof useCalculateImpactEstimate>;
 export type ImpactEstimates = ReturnType<CalculateImpactEstimates>;
 
-const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
+export const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
 
 // The cost of an x86 CPU core per hour, in US$.
 // (ARM is 60% less based graviton 3 data, see https://aws.amazon.com/ec2/graviton/)
@@ -33,7 +33,7 @@ export function useCalculateImpactEstimate() {
     start: { core },
   } = useProfilingDependencies();
 
-  const perCoreWatts = core.uiSettings.get<number>(profilingPerCoreWatt);
+  const perCoreWatts = core.uiSettings.get<number>(profilingPervCPUWattX86);
   const co2PerTonKWH = core.uiSettings.get<number>(profilingCo2PerKWH);
   const datacenterPUE = core.uiSettings.get<number>(profilingDatacenterPUE);
 

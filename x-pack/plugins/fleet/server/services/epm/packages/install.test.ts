@@ -186,7 +186,7 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: 'not_installed',
         dryRun: false,
-        errorMessage: 'Requires basic license',
+        errorMessage: 'Installation requires basic license',
         eventType: 'package-install',
         installType: 'install',
         newVersion: '1.3.0',
@@ -269,7 +269,7 @@ describe('install', () => {
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
         version: '1.0.0',
-        buffer: Buffer.from('test_package'),
+        getBuffer: async () => Buffer.from('test_package'),
       });
 
       const response = await installPackage({

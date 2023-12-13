@@ -300,6 +300,54 @@ describe('UnifiedDataTable', () => {
         }
       `);
     });
+
+    it('should apply sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [['message', 'desc']],
+        columns: ['message'],
+      });
+
+      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
+
+    it('should not apply unknown sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [
+          ['bytes', 'desc'],
+          ['unknown', 'asc'],
+          ['message', 'desc'],
+        ],
+        columns: ['bytes', 'message'],
+      });
+
+      expect(component.find(EuiDataGrid).prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "bytes",
+            },
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
   });
 
   describe('display settings', () => {

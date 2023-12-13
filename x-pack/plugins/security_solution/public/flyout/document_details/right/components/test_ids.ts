@@ -43,6 +43,10 @@ const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
 export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
 export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
 
+export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
+export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
+export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;
+
 /* Investigation section */
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;

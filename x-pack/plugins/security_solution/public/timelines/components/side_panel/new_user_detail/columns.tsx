@@ -11,6 +11,7 @@ import { head } from 'lodash/fp';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import type {
   ManagedUsersTableColumns,
@@ -32,21 +33,20 @@ import { getSourcererScopeId } from '../../../../helpers';
 const fieldColumn: EuiBasicTableColumn<ObservedUserTable | ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,
   field: 'label',
-  render: (label: string) => (
+  render: (label: string, { field }) => (
     <span
       css={css`
         font-weight: ${euiLightVars.euiFontWeightMedium};
         color: ${euiLightVars.euiTitleColor};
       `}
     >
-      {label}
+      {label ?? field}
     </span>
   ),
 };
 
 export const getManagedUserTableColumns = (
   contextID: string,
-  scopeId: string,
   isDraggable: boolean
 ): ManagedUsersTableColumns => [
   fieldColumn,
@@ -56,11 +56,11 @@ export const getManagedUserTableColumns = (
     render: (value: ManagedUserTable['value'], { field }) => {
       return field && value ? (
         <DefaultFieldRenderer
-          rowItems={[value]}
+          rowItems={value.map((v) => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
+          sourcererScopeId={SourcererScopeName.default}
         />
       ) : (
         defaultToEmptyTag(value)

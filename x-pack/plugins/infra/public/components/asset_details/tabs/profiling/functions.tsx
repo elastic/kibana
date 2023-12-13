@@ -7,12 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingFunctionsData } from '../../hooks/use_profiling_functions_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
+import { ProfilingLinks } from './profiling_links';
 
 export function Functions() {
   const { asset } = useAssetDetailsRenderPropsContext();
@@ -41,11 +43,15 @@ export function Functions() {
   }
 
   return (
-    <EmbeddableFunctions
-      data={response ?? undefined}
-      isLoading={loading}
-      rangeFrom={from}
-      rangeTo={to}
-    />
+    <>
+      <ProfilingLinks profilingPath="functions" hostname={asset.name} />
+      <EuiSpacer />
+      <EmbeddableFunctions
+        data={response ?? undefined}
+        isLoading={loading}
+        rangeFrom={from}
+        rangeTo={to}
+      />
+    </>
   );
 }

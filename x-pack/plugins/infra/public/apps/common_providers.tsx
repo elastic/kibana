@@ -32,7 +32,7 @@ export const CommonInfraProviders: React.FC<{
 }> = ({
   children,
   triggersActionsUI,
-  observabilityAIAssistant,
+  observabilityAIAssistant: { service: observabilityAIAssistantService },
   setHeaderActionMenu,
   appName,
   storage,
@@ -44,7 +44,7 @@ export const CommonInfraProviders: React.FC<{
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+          <ObservabilityAIAssistantProvider value={observabilityAIAssistantService}>
             <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
               <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
             </HeaderActionMenuProvider>

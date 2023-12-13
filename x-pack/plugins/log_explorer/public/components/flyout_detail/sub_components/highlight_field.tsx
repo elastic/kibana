@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard, EuiTextTruncate } from '@elastic/eui';
-import React, { ReactNode, useMemo, useState } from 'react';
-import { HoverAction, HoverActionType } from './hover_action';
-import {
-  flyoutHoverActionFilterForText,
-  flyoutHoverActionFilterOutText,
-  flyoutHoverActionFilterForFieldPresentText,
-  flyoutHoverActionToggleColumnText,
-  flyoutHoverActionCopyToClipboardText,
-} from '../translations';
-import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextTruncate } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { ValuesType } from 'utility-types';
+import { HoverActionPopover } from './hover_popover_action';
+import { LogDocument } from '../types';
 
 interface HighlightFieldProps {
   field: string;
   formattedValue: string;
   icon?: ReactNode;
   label: string | ReactNode;
-  value: unknown;
+  value: ValuesType<LogDocument['flattened']>;
   width: number;
 }
 
@@ -35,60 +29,6 @@ export function HighlightField({
   width,
   ...props
 }: HighlightFieldProps) {
-  const filterForText = flyoutHoverActionFilterForText(value);
-  const filterOutText = flyoutHoverActionFilterOutText(value);
-  const actions = useDiscoverActionsContext();
-  const [columnAdded, setColumnAdded] = useState(false);
-
-  const hoverActions: HoverActionType[] = useMemo(
-    () => [
-      {
-        id: 'addToFilterAction',
-        tooltipContent: filterForText,
-        iconType: 'plusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '+'),
-        display: true,
-      },
-      {
-        id: 'removeFromFilterAction',
-        tooltipContent: filterOutText,
-        iconType: 'minusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '-'),
-        display: true,
-      },
-      {
-        id: 'filterForFieldPresentAction',
-        tooltipContent: flyoutHoverActionFilterForFieldPresentText,
-        iconType: 'filter',
-        onClick: () => actions?.addFilter && actions.addFilter('_exists_', field, '+'),
-        display: true,
-      },
-      {
-        id: 'toggleColumnAction',
-        tooltipContent: flyoutHoverActionToggleColumnText,
-        iconType: 'listAdd',
-        onClick: () => {
-          if (actions) {
-            if (columnAdded) {
-              actions?.removeColumn?.(field);
-            } else {
-              actions?.addColumn?.(field);
-            }
-            setColumnAdded(!columnAdded);
-          }
-        },
-        display: true,
-      },
-      {
-        id: 'copyToClipboardAction',
-        tooltipContent: flyoutHoverActionCopyToClipboardText,
-        iconType: 'copyClipboard',
-        onClick: () => copyToClipboard(value as string),
-        display: true,
-      },
-    ],
-    [filterForText, filterOutText, actions, field, value, columnAdded]
-  );
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
@@ -97,7 +37,7 @@ export function HighlightField({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverAction actions={hoverActions}>
+        <HoverActionPopover title={value as string} value={value} field={field}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
@@ -109,6 +49,7 @@ export function HighlightField({
               <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
                 {(truncatedText: string) => (
                   <EuiText
+                    size="s"
                     // Value returned from formatFieldValue is always sanitized
                     dangerouslySetInnerHTML={{ __html: truncatedText }}
                   />
@@ -116,7 +57,7 @@ export function HighlightField({
               </EuiTextTruncate>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HoverAction>
+        </HoverActionPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
