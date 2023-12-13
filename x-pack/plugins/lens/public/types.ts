@@ -281,7 +281,6 @@ export function isMessageRemovable(message: UserMessage): message is RemovableUs
  * Interface for the datasource registry
  */
 export interface Datasource<T = unknown, P = unknown> extends DatasourceCommon<T, P> {
-  id: string;
   alias?: string[];
 
   // Given the current state, which parts should be saved?

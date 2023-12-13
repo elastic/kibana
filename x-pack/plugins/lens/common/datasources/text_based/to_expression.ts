@@ -7,8 +7,12 @@
 
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
-import type { OriginalColumn } from '../../../common/types';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import type { OriginalColumn } from '../../types';
+import type {
+  TextBasedPrivateState,
+  TextBasedLayer,
+  IndexPatternRef,
+} from '../../../public/datasources/text_based/types';
 
 function getExpressionForLayer(layer: TextBasedLayer, refs: IndexPatternRef[]): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {

@@ -147,6 +147,8 @@ export type IndexPatternMap = Record<string, IndexPattern>;
  * A subset of datasource methods used on both client and server
  */
 export interface DatasourceCommon<T = unknown, P = unknown> {
+  id: string;
+
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments

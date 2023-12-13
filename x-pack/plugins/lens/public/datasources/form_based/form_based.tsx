@@ -25,6 +25,12 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
+import {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternMap,
+  IndexPatternRef,
+} from '../../../common/types';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -33,13 +39,9 @@ import type {
   PublicAPIProps,
   OperationDescriptor,
   FramePublicAPI,
-  IndexPatternField,
-  IndexPattern,
-  IndexPatternRef,
   DataSourceInfo,
   UserMessage,
   StateSetter,
-  IndexPatternMap,
 } from '../../types';
 import {
   changeIndexPattern,

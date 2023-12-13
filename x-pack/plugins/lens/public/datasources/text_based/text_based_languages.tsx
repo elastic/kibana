@@ -20,8 +20,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import { TextBasedDatasourceCommon } from '../../../common/datasources/text_based/text_based_languages';
 import { TextBasedDataPanel } from './datapanel';
-import { toExpression } from './to_expression';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -200,7 +200,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    ...TextBasedDatasourceCommon,
 
     checkIntegrity: () => {
       return [];
@@ -224,30 +224,6 @@ export function getTextBasedDatasource({
         return message;
       });
     },
-    initialize(
-      state?: TextBasedPersistedState,
-      savedObjectReferences?,
-      context?,
-      indexPatternRefs?,
-      indexPatterns?
-    ) {
-      const patterns = indexPatterns ? Object.values(indexPatterns) : [];
-      const refs = patterns.map((p) => {
-        return {
-          id: p.id,
-          title: p.title,
-          timeField: p.timeFieldName,
-        };
-      });
-
-      const initState = state || { layers: {} };
-      return {
-        ...initState,
-        indexPatternRefs: refs,
-        initialContext: context,
-      };
-    },
-
     syncColumns({ state }) {
       // TODO implement this for real
       return state;
@@ -333,10 +309,6 @@ export function getTextBasedDatasource({
         },
       };
     },
-
-    getLayers(state: TextBasedPrivateState) {
-      return state && state.layers ? Object.keys(state?.layers) : [];
-    },
     // there are cases where a query can return a big amount of columns
     // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
@@ -364,9 +336,6 @@ export function getTextBasedDatasource({
 
     removeColumn,
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
-      return toExpression(state, layerId);
-    },
     getSelectedFields(state) {
       return getSelectedFieldsFromColumns(
         Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
