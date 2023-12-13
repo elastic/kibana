@@ -89,7 +89,7 @@ export async function executor(
               intervalId = null;
             }
             if (err) {
-              return reject(err);
+              return reject(stderrResult ? new Error(stderrResult) : err);
             }
             resolve({
               stdout: stdoutResult,

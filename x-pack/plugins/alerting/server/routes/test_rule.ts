@@ -35,8 +35,7 @@ export const testRuleRoute = (
           const result = await rulesClient.test({ params: req.body.params });
           return res.ok({ body: result });
         } catch (e) {
-          console.log('Encountered an error testing the rule:', e);
-          throw e;
+          return res.badRequest({ body: { message: e.message } });
         }
       })
     )
