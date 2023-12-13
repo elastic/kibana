@@ -26,7 +26,7 @@ export function Functions() {
   const { from, to } = getDateRangeInTimestamp();
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.topNFunctionsLocator;
-  const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppFlamegraphLink', {
+  const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppTopFunctionsLink', {
     defaultMessage: 'Go to Universal Profiling Functions',
   });
 
