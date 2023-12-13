@@ -26,7 +26,7 @@ export const timelineTourSteps = [
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.timeline.tour.newTimeline.description"
-          defaultMessage="Click {newButton} to create a new timeline. Click {openButton} to open an existing one."
+          defaultMessage="Click {newButton} to create a new Timeline. Click {openButton} to open an existing one."
           values={{
             newButton: <EuiCode>{i18n.TIMELINE_TOUR_NEW}</EuiCode>,
             openButton: <EuiCode>{i18n.TIMELINE_TOUR_OPEN}</EuiCode>,
