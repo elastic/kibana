@@ -9,18 +9,12 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { ExamplePluginsCypressTestRunner } from './runner';
 
-/**
- * This test configuration launches Elasticsearch and Kibana services in development mode.
- * Once services are ready, a campaign of Cypress tests runs against code in the "Example Plugin" domain.
- * This configuration launches the "Cypress Test Runner" an interactive desktop app for developing test code.
- */
-
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const commonConfig = await readConfigFile(require.resolve('./_config_common'));
 
   return {
-    junit: { reportName: 'Example plugin E2E tests in Cypress App' },
+    junit: { reportName: 'Example plugin E2E tests in Cypress Test Runner' },
     ...commonConfig.getAll(),
     testRunner: ExamplePluginsCypressTestRunner,
   };

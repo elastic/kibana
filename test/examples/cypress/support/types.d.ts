@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * This file declares the additions to the Cypress API made in the file "./command.ts".
+ */
+
 declare namespace Cypress {
   interface Chainable {
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;

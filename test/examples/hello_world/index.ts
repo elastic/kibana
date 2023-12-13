@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);

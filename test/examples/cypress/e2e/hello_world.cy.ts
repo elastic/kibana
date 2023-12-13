@@ -10,16 +10,19 @@ describe('Hello World example app', () => {
   it('says hello to user', () => {
     cy.visitKibana('/app/helloWorld');
 
+    cy.getByTestSubj('helloWorldDiv').as('resultContainer');
+    cy.getByTestSubj('helloWorldTextHandle').as('textHandle');
+    cy.getByTestSubj('helloWorldResetHandle').as('resetHandle');
+
     // initial
-    cy.getByTestSubj('helloWorldDiv').as('result');
-    cy.get('@result').contains('Hello World!');
+    cy.get('@resultContainer').contains('Hello World!');
 
     // updated
-    cy.getByTestSubj('helloWorldTextHandle').clear().type('Spider-Man');
-    cy.get('@result').should('have.text', 'Hello Spider-Man!');
+    cy.get('@textHandle').clear().type('Spider-Man');
+    cy.get('@resultContainer').should('have.text', 'Hello Spider-Man!');
 
     // reset
-    cy.getByTestSubj('helloWorldResetHandle').click();
-    cy.get('@result').should('have.text', 'Hello World!');
+    cy.get('@resetHandle').click();
+    cy.get('@resultContainer').should('have.text', 'Hello World!');
   });
 });

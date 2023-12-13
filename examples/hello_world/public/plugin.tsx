@@ -23,7 +23,6 @@ const HelloAppSuspense = withSuspense(
   React.lazy(async () => {
     const { HelloApp } = await import('./app');
 
-    // demonstrate loading fallback
     return new Promise<{ default: React.FC<HelloAppProps> }>((resolve) => {
       setTimeout(() => {
         resolve({ default: HelloApp });
@@ -45,7 +44,6 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-
         ReactDOM.render(<HelloAppSuspense core={coreStart} />, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },

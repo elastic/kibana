@@ -26,10 +26,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        // Required for Cypress thingy
+        // Required for Cypress environment
         '--csp.warnLegacyBrowsers=false',
         '--csp.strict=false',
-        // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
         '--telemetry.optIn=false',
         ...findTestPluginPaths(resolve(REPO_ROOT, 'examples')),

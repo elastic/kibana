@@ -20,7 +20,7 @@ const ExamplePluginsCypressTestConfig = async (
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:' + command],
+      args: ['cypress:' + command], // use a "script" entry from the test project's package.json
       cwd: resolve(__dirname),
       env: {
         ...process.env,
@@ -31,14 +31,13 @@ const ExamplePluginsCypressTestConfig = async (
 };
 
 /**
- * Using the Cypress Test Runner provides an interactive experience, allows you to see commands as they
- * execute, while also being able to see the app or component under test.
+ * Runs the `cypress open` command to launch the Cypress Test Runner app.
  */
 export const ExamplePluginsCypressTestRunner = (context: FtrProviderContext) =>
   ExamplePluginsCypressTestConfig(context, 'open');
 
 /**
- * Running Cypress headlessly is often used in CI.
+ * Runs the `cypress run` command to run the Cypress tests headlessly.
  */
 export const ExamplePluginsCypressTestHeadless = (context: FtrProviderContext) =>
   ExamplePluginsCypressTestConfig(context, 'run');
