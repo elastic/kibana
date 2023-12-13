@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pidusage from 'pidusage';
 import ChildProcess from 'child_process';
 import fetch from 'node-fetch';
 import { promisify } from 'util';
@@ -12,7 +13,6 @@ import fs from 'fs';
 import { RuleExecutorOptions } from '../../types';
 import { StackAlertType } from '../types';
 import { ActionGroupId, Params } from './rule_type';
-const exec = promisify(ChildProcess.exec);
 const readFile = promisify(fs.readFile);
 
 // Cache the promise result so we only read once
@@ -65,24 +65,73 @@ export async function executor(
 
   // Run code in child process
   try {
-    const { stdout, stderr } = await exec(
-      `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
-      {
-        cwd: __dirname,
-        signal: controller.signal,
-        env: {
-          PATH: process.env.PATH,
-          ELASTICSEARCH_API_KEY: apiKey,
-          QUERY_DELAY_MS: queryDelay?.toString(),
-        },
+    const { stdout, stderr, duration, memoryUsage, cpuUsage } = await new Promise(
+      (resolve, reject) => {
+        let intervalId: NodeJS.Timeout | null = null;
+        const memoryUsageSamples: number[] = [];
+        const cpuUsageSamples: number[] = [];
+        const start = Date.now();
+        const childProcess = ChildProcess.exec(
+          `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
+          {
+            cwd: __dirname,
+            signal: controller.signal,
+            env: {
+              PATH: process.env.PATH,
+              ELASTICSEARCH_API_KEY: apiKey,
+              QUERY_DELAY_MS: queryDelay?.toString(),
+            },
+          },
+          (err, stdoutResult, stderrResult) => {
+            const end = Date.now();
+            if (intervalId) {
+              clearInterval(intervalId);
+              intervalId = null;
+            }
+            if (err) {
+              return reject(err);
+            }
+            resolve({
+              stdout: stdoutResult,
+              stderr: stderrResult,
+              duration: end - start,
+              memoryUsage: {
+                p50: calculatePercentile(memoryUsageSamples, 50),
+                p95: calculatePercentile(memoryUsageSamples, 95),
+                p99: calculatePercentile(memoryUsageSamples, 99),
+              },
+              cpuUsage: {
+                p50: calculatePercentile(cpuUsageSamples, 50),
+                p95: calculatePercentile(cpuUsageSamples, 95),
+                p99: calculatePercentile(cpuUsageSamples, 99),
+              },
+            });
+          }
+        );
+        intervalId = setInterval(() => {
+          pidusage(childProcess.pid!, (err, stats) => {
+            if (!err) {
+              cpuUsageSamples.push(stats.cpu);
+              memoryUsageSamples.push(stats.memory);
+            }
+          });
+        }, 1);
       }
     );
+
     if (stderr) {
       throw new Error(stderr);
     }
 
     if (stdout) {
       logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
+      logger.info(
+        `Stats from running user defined code\nDuration:${duration}\nMemory usage:${JSON.stringify(
+          memoryUsage,
+          null,
+          2
+        )}\nCPU usage:${JSON.stringify(cpuUsage, null, 2)}`
+      );
       const alertsToCreate: string[] = getDetectedAlerts(stdout);
       let alertCount = 0;
       for (const alertStr of alertsToCreate) {
@@ -143,4 +192,10 @@ function getDetectedAlerts(output: string) {
     .split('\n')
     .filter((str) => str.indexOf(reportAlertLogPrefix) === 0)
     .map((str) => str.substring(reportAlertLogPrefix.length));
+}
+
+function calculatePercentile(array: number[], percentile: number) {
+  const sortedArray = array.slice().sort();
+  const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
+  return sortedArray[index];
 }
