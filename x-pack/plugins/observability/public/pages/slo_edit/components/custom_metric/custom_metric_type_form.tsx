@@ -36,7 +36,7 @@ export function CustomMetricIndicatorTypeForm() {
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => !!field.esTypes?.includes('keyword'));
   const metricFields = indexFields.filter((field) =>
     SUPPORTED_METRIC_FIELD_TYPES.includes(field.type)
   );

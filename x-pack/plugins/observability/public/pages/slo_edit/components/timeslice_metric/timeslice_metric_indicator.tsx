@@ -37,7 +37,7 @@ export function TimesliceMetricIndicatorTypeForm() {
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => !!field.esTypes?.includes('keyword'));
   const { uiSettings } = useKibana().services;
   const threshold = watch('indicator.params.metric.threshold');
   const comparator = watch('indicator.params.metric.comparator');

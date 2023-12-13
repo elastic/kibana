@@ -23,7 +23,7 @@ export function CustomKqlIndicatorTypeForm() {
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => !!field.esTypes?.includes('keyword'));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

@@ -20,6 +20,7 @@ export interface Field {
   type: string;
   aggregatable: boolean;
   searchable: boolean;
+  esTypes?: string[];
 }
 
 export function useFetchIndexPatternFields(

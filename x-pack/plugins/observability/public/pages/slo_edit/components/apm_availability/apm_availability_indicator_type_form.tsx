@@ -30,7 +30,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(apmIndex);
-  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => !!field.esTypes?.includes('keyword'));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

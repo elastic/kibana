@@ -34,7 +34,7 @@ export function HistogramIndicatorTypeForm() {
     useFetchIndexPatternFields(index);
   const histogramFields = indexFields.filter((field) => field.type === 'histogram');
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => !!field.esTypes?.includes('keyword'));
 
   return (
     <>
