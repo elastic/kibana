@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
 import type { StorageContext } from '../../core';
 import type { Context as RpcContext } from '../types';
+
+const generateId = () => uuidv4();
 
 const validateRequestVersion = (
   requestVersion: Version | undefined,
@@ -52,6 +54,7 @@ export const getStorageContext = ({
     },
     utils: {
       getTransforms: getTransformsFactory(contentTypeId, version),
+      generateId: contentDefinition.contentIdGenerator || generateId,
     },
   };
   return storageContext;

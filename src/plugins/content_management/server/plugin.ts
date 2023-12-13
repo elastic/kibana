@@ -23,6 +23,8 @@ import {
 } from './types';
 import { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
+import { SearchIndex } from './search_index';
+import { SearchIndexClientFactory } from './search_index/search_index_client_factory';
 
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
@@ -30,9 +32,11 @@ export class ContentManagementPlugin
   private readonly logger: Logger;
   private readonly core: Core;
   readonly #eventStream?: EventStreamService;
+  readonly #searchIndex?: SearchIndex;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    const kibanaVersion = initializerContext.env.packageInfo.version;
 
     // TODO: Enable Event Stream once we ready to log events.
     // const kibanaVersion = initializerContext.env.packageInfo.version;
@@ -45,8 +49,18 @@ export class ContentManagementPlugin
     //   }),
     // });
 
+    this.#searchIndex = new SearchIndex({
+      logger: this.logger,
+      clientFactory: new SearchIndexClientFactory({
+        baseName: '.kibana',
+        kibanaVersion,
+        logger: this.logger,
+      }),
+    });
+
     this.core = new Core({
       logger: this.logger,
+      searchIndex: this.#searchIndex,
       eventStream: this.#eventStream,
     });
   }
@@ -54,6 +68,10 @@ export class ContentManagementPlugin
   public setup(core: CoreSetup) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
+    }
+
+    if (this.#searchIndex) {
+      this.#searchIndex.setup({ core });
     }
 
     const { api: coreApi, contentRegistry } = this.core.setup();
@@ -77,6 +95,11 @@ export class ContentManagementPlugin
       this.#eventStream.start();
     }
 
+    if (this.#searchIndex) {
+      console.log('Starting search index');
+      this.#searchIndex.start();
+    }
+
     return {};
   }
 
@@ -86,6 +109,13 @@ export class ContentManagementPlugin
         await this.#eventStream.stop();
       } catch (e) {
         this.logger.error(`Error during event stream stop: ${e}`);
+      }
+    }
+    if (this.#searchIndex) {
+      try {
+        await this.#searchIndex.stop();
+      } catch (e) {
+        this.logger.error(`Error during search index stop: ${e}`);
       }
     }
   }

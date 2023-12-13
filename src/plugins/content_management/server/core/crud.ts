@@ -14,6 +14,8 @@ import type {
   SearchResult,
   SearchQuery,
 } from '../../common';
+import { SearchIndex } from '../search_index';
+import { SearchIndexDoc } from '../search_index/types';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';
 
@@ -50,6 +52,7 @@ export interface SearchResponse<T = unknown> {
 export class ContentCrud<T = unknown> {
   private storage: ContentStorage<T>;
   private eventBus: EventBus;
+  private searchIndex: SearchIndex;
   public contentTypeId: string;
 
   constructor(
@@ -57,13 +60,16 @@ export class ContentCrud<T = unknown> {
     contentStorage: ContentStorage<T>,
     {
       eventBus,
+      searchIndex,
     }: {
       eventBus: EventBus;
+      searchIndex: SearchIndex;
     }
   ) {
     this.contentTypeId = contentTypeId;
     this.storage = contentStorage;
     this.eventBus = eventBus;
+    this.searchIndex = searchIndex;
   }
 
   public async get(
@@ -146,8 +152,11 @@ export class ContentCrud<T = unknown> {
   public async create(
     ctx: StorageContext,
     data: object,
-    options?: object
+    _options?: { id?: string; [key: string]: unknown }
   ): Promise<CreateItemResponse<T, any>> {
+    const id = _options?.id ?? ctx.utils.generateId();
+    const options = { ..._options, id };
+
     this.eventBus.emit({
       type: 'createItemStart',
       contentTypeId: this.contentTypeId,
@@ -156,6 +165,10 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
+      // Send the data to the search index
+      const searchDocId = `${this.contentTypeId}:${id}`;
+      await this.searchIndex.addDocument({ id: searchDocId, ...this.parseDataForSearch(data) });
+
       const result = await this.storage.create(ctx, data, options);
 
       this.eventBus.emit({
@@ -290,5 +303,10 @@ export class ContentCrud<T = unknown> {
 
       throw e;
     }
+  }
+
+  private parseDataForSearch(data: Record<any, any>): Omit<SearchIndexDoc, 'id'> {
+    const { title, description } = data;
+    return { title, description };
   }
 }

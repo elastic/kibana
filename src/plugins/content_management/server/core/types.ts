@@ -38,6 +38,7 @@ export interface StorageContext {
   };
   utils: {
     getTransforms: StorageContextGetTransformFn;
+    generateId: () => string;
   };
 }
 
@@ -53,7 +54,11 @@ export interface ContentStorage<
   bulkGet(ctx: StorageContext, ids: string[], options?: object): Promise<BulkGetResult<T, any>>;
 
   /** Create an item */
-  create(ctx: StorageContext, data: object, options?: object): Promise<CreateResult<T, any>>;
+  create(
+    ctx: StorageContext,
+    data: object,
+    options: { id: string; [key: string]: unknown }
+  ): Promise<CreateResult<T, any>>;
 
   /** Update an item */
   update(
@@ -81,6 +86,7 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   id: string;
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
+  contentIdGenerator?: () => string;
   version: {
     latest: Version;
   };

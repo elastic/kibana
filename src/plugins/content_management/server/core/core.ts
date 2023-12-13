@@ -11,6 +11,7 @@ import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+import { SearchIndex } from '../search_index';
 
 export interface CoreApi {
   /**
@@ -28,6 +29,7 @@ export interface CoreApi {
 
 export interface CoreInitializerContext {
   logger: Logger;
+  searchIndex: SearchIndex;
   eventStream?: EventStreamService;
 }
 
@@ -46,7 +48,7 @@ export class Core {
     const contentTypeValidator = (contentType: string) =>
       this.contentRegistry?.isContentRegistered(contentType) ?? false;
     this.eventBus = new EventBus(contentTypeValidator);
-    this.contentRegistry = new ContentRegistry(this.eventBus);
+    this.contentRegistry = new ContentRegistry(this.eventBus, ctx.searchIndex);
   }
 
   setup(): CoreSetup {

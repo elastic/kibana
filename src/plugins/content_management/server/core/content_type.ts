@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SearchIndex } from '../search_index';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentStorage, ContentTypeDefinition } from './types';
@@ -16,9 +17,15 @@ export class ContentType {
   /** Content crud instance. */
   private readonly contentCrud: ContentCrud;
 
-  constructor(definition: ContentTypeDefinition, eventBus: EventBus) {
+  constructor(
+    definition: ContentTypeDefinition,
+    { eventBus, searchIndex }: { eventBus: EventBus; searchIndex: SearchIndex }
+  ) {
     this._definition = definition;
-    this.contentCrud = new ContentCrud(definition.id, definition.storage, { eventBus });
+    this.contentCrud = new ContentCrud(definition.id, definition.storage, {
+      eventBus,
+      searchIndex,
+    });
   }
 
   public get id() {
