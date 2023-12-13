@@ -33,7 +33,9 @@ import { login } from '../../../../tasks/login';
 import {
   addDescriptionToTimeline,
   addNameToTimelineAndSave,
+  confirmLeaveUnsavedTimeline,
   createNewTimeline,
+  createTimelineOptionsPopoverBottomBar,
   goToEsqlTab,
   openTimelineById,
   openTimelineFromSettings,
@@ -50,8 +52,6 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const SAVED_SEARCH_UPDATE_REQ = 'SAVED_SEARCH_UPDATE_REQ';
 const SAVED_SEARCH_UPDATE_WITH_DESCRIPTION = 'SAVED_SEARCH_UPDATE_WITH_DESCRIPTION';
-const SAVED_SEARCH_CREATE_REQ = 'SAVED_SEARCH_CREATE_REQ';
-const SAVED_SEARCH_GET_REQ = 'SAVED_SEARCH_GET_REQ';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
@@ -59,16 +59,22 @@ const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168745
-describe.skip(
+describe(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@brokenInServerless'],
-    // ESQL and test involving STACK_MANAGEMENT_PAGE are broken in serverless
   },
 
   () => {
     beforeEach(() => {
+      login();
+      visitWithTimeRange(ALERTS_URL);
+      createTimelineOptionsPopoverBottomBar();
+      goToEsqlTab();
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
+    });
+
+    const handleIntercepts = () => {
       cy.intercept('PATCH', '/api/timeline', (req) => {
         if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
           req.alias = TIMELINE_PATCH_REQ;
@@ -77,16 +83,6 @@ describe.skip(
       cy.intercept('PATCH', '/api/timeline', (req) => {
         if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
           req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
-        }
-      });
-      cy.intercept('POST', '/api/content_management/rpc/get', (req) => {
-        if (req.body.hasOwnProperty('contentTypeId') && req.body.contentTypeId === 'search') {
-          req.alias = SAVED_SEARCH_GET_REQ;
-        }
-      });
-      cy.intercept('POST', '/api/content_management/rpc/create', (req) => {
-        if (req.body.hasOwnProperty('contentTypeId') && req.body.contentTypeId === 'search') {
-          req.alias = SAVED_SEARCH_CREATE_REQ;
         }
       });
 
@@ -104,13 +100,12 @@ describe.skip(
           req.alias = SAVED_SEARCH_UPDATE_WITH_DESCRIPTION;
         }
       });
-      login();
-      visitWithTimeRange(ALERTS_URL);
-      createNewTimeline();
-      goToEsqlTab();
-      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
-    });
-    context('save/restore', () => {
+    };
+
+    describe('save/restore', () => {
+      beforeEach(() => {
+        handleIntercepts();
+      });
       it('should be able create an empty timeline with default discover state', () => {
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
@@ -196,14 +191,10 @@ describe.skip(
           });
       });
     });
-    /*
-     * skipping because it is @brokenInServerless and this cypress tag was somehow not working
-     * so skipping this test both in ess and serverless.
-     *
-     * Raised issue: https://github.com/elastic/kibana/issues/165913
-     *
-     * */
-    context.skip('saved search tags', () => {
+    describe('saved search', () => {
+      beforeEach(() => {
+        handleIntercepts();
+      });
       it('should save discover saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
@@ -212,6 +203,7 @@ describe.skip(
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
         openKibanaNavigation();
         navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
+        confirmLeaveUnsavedTimeline();
         cy.get(LOADING_INDICATOR).should('not.exist');
         goToSavedObjectSettings();
         cy.get(LOADING_INDICATOR).should('not.exist');
@@ -220,21 +212,24 @@ describe.skip(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved Search for timeline - ${timelineName}`
+          `Saved search for timeline - ${timelineName}`
         );
       });
-    });
-    context('saved search', () => {
+
       it('should rename the saved search on timeline rename', () => {
+        const initialTimelineSuffix = Date.now();
+        const initialTimelineName = `Timeline-${initialTimelineSuffix}`;
+        addDiscoverEsqlQuery(esqlQuery);
+        addNameToTimelineAndSave(initialTimelineName);
+
         const timelineSuffix = Date.now();
         const timelineName = `Rename timeline-${timelineSuffix}`;
-        addDiscoverEsqlQuery(esqlQuery);
-
         addNameToTimelineAndSave(timelineName);
+
+        cy.wait(`@${SAVED_SEARCH_UPDATE_REQ}`);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then((timelineId) => {
-            cy.wait(`@${SAVED_SEARCH_UPDATE_REQ}`);
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
             // create an empty timeline
             createNewTimeline();
@@ -242,7 +237,7 @@ describe.skip(
             openTimelineFromSettings();
             openTimelineById(timelineId);
             cy.get(TIMELINE_TITLE).should('have.text', timelineName);
-            const timelineDesc = 'Timeline Description with Saved Seach';
+            const timelineDesc = 'Timeline Description with Saved Search';
             addDescriptionToTimeline(timelineDesc);
             cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
               timeout: 30000,

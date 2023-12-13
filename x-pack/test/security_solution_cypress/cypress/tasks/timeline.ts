@@ -359,6 +359,16 @@ export const saveTimeline = () => {
   });
 };
 
+export const confirmLeaveUnsavedTimeline = () => {
+  cy.get(DELETION_CONFIRMATION).click();
+};
+
+export const deleteTimeline = () => {
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
+  cy.get(DELETE_TIMELINE_BTN).click();
+  cy.get(DELETION_CONFIRMATION).click();
+};
+
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
   cy.get(STAR_ICON).click({ force: true });
