@@ -165,7 +165,11 @@ export type ExecutorType<
     ActionGroupIds,
     AlertData
   >
-) => Promise<{ state: State }>;
+) => Promise<{
+  state: State;
+  memoryUsage?: { p50: number; p95: number; p99: number };
+  cpuUsage?: { p50: number; p95: number; p99: number };
+}>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: Partial<Params>) => Params;

@@ -46,7 +46,7 @@ export async function test(context: RulesClientContext, options: { params: Param
     getRecoveredAlerts: () => [],
   };
 
-  await ruleType.executor({
+  const result = await ruleType.executor({
     apiKey,
     params: options.params,
     logger: context.logger,
@@ -57,5 +57,10 @@ export async function test(context: RulesClientContext, options: { params: Param
     },
   } as any);
 
-  return { reportedAlerts, alertLimitReached };
+  return {
+    reportedAlerts,
+    alertLimitReached,
+    cpuUsage: result.cpuUsage,
+    memoryUsage: result.memoryUsage,
+  };
 }

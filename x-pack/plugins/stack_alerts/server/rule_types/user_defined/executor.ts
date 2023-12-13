@@ -62,66 +62,69 @@ export async function executor(
 
   const alertLimit = alertsClient.getAlertLimitValue();
   let hasReachedLimit = false;
+  let cpuUsage: { p50: number; p95: number; p99: number } | undefined;
+  let memoryUsage: { p50: number; p95: number; p99: number } | undefined;
 
   // Run code in child process
   try {
-    const { stdout, stderr, duration, memoryUsage, cpuUsage } = await new Promise(
-      (resolve, reject) => {
-        let intervalId: NodeJS.Timeout | null = null;
-        const memoryUsageSamples: number[] = [];
-        const cpuUsageSamples: number[] = [];
-        const start = Date.now();
-        const childProcess = ChildProcess.exec(
-          `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
-          {
-            cwd: __dirname,
-            signal: controller.signal,
-            env: {
-              PATH: process.env.PATH,
-              ELASTICSEARCH_API_KEY: apiKey,
-              QUERY_DELAY_MS: queryDelay?.toString(),
-            },
+    const { stdout, stderr, duration, ...result } = await new Promise((resolve, reject) => {
+      let intervalId: NodeJS.Timeout | null = null;
+      const memoryUsageSamples: number[] = [];
+      const cpuUsageSamples: number[] = [];
+      const start = Date.now();
+      const childProcess = ChildProcess.exec(
+        `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
+        {
+          cwd: __dirname,
+          signal: controller.signal,
+          env: {
+            PATH: process.env.PATH,
+            ELASTICSEARCH_API_KEY: apiKey,
+            QUERY_DELAY_MS: queryDelay?.toString(),
           },
-          (err, stdoutResult, stderrResult) => {
-            const end = Date.now();
-            if (intervalId) {
-              clearInterval(intervalId);
-              intervalId = null;
-            }
-            if (err) {
-              return reject(stderrResult ? new Error(stderrResult) : err);
-            }
-            resolve({
-              stdout: stdoutResult,
-              stderr: stderrResult,
-              duration: end - start,
-              memoryUsage: {
-                p50: calculatePercentile(memoryUsageSamples, 50),
-                p95: calculatePercentile(memoryUsageSamples, 95),
-                p99: calculatePercentile(memoryUsageSamples, 99),
-              },
-              cpuUsage: {
-                p50: calculatePercentile(cpuUsageSamples, 50),
-                p95: calculatePercentile(cpuUsageSamples, 95),
-                p99: calculatePercentile(cpuUsageSamples, 99),
-              },
-            });
+        },
+        (err, stdoutResult, stderrResult) => {
+          const end = Date.now();
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
           }
-        );
-        intervalId = setInterval(() => {
-          pidusage(childProcess.pid!, (err, stats) => {
-            if (!err) {
-              cpuUsageSamples.push(stats.cpu);
-              memoryUsageSamples.push(stats.memory);
-            }
+          if (err) {
+            return reject(stderrResult ? new Error(stderrResult) : err);
+          }
+          resolve({
+            stdout: stdoutResult,
+            stderr: stderrResult,
+            duration: end - start,
+            memoryUsage: {
+              p50: calculatePercentile(memoryUsageSamples, 50),
+              p95: calculatePercentile(memoryUsageSamples, 95),
+              p99: calculatePercentile(memoryUsageSamples, 99),
+            },
+            cpuUsage: {
+              p50: calculatePercentile(cpuUsageSamples, 50),
+              p95: calculatePercentile(cpuUsageSamples, 95),
+              p99: calculatePercentile(cpuUsageSamples, 99),
+            },
           });
-        }, 1);
-      }
-    );
+        }
+      );
+      intervalId = setInterval(() => {
+        pidusage(childProcess.pid!, (err, stats) => {
+          if (!err) {
+            cpuUsageSamples.push(stats.cpu);
+            memoryUsageSamples.push(stats.memory);
+          }
+        });
+      }, 1);
+    });
 
     if (stderr) {
       throw new Error(stderr);
     }
+
+    cpuUsage = result.cpuUsage;
+    memoryUsage = result.memoryUsage;
 
     if (stdout) {
       logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
@@ -172,7 +175,7 @@ export async function executor(
     throw error;
   }
 
-  return { state: {} };
+  return { state: {}, cpuUsage, memoryUsage };
 }
 
 async function wrapUserDefinedCode(code: string) {
