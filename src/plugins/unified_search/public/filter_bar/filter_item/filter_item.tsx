@@ -62,7 +62,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   readOnly?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   filtersCount?: number;
-  dataViewService: DataViewsContract;
+  dataViews: DataViewsContract;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -401,7 +401,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 suggestionsAbstraction={props.suggestionsAbstraction}
                 docLinks={docLinks}
                 filtersCount={props.filtersCount}
-                dataViewService={props.dataViewService}
+                dataViews={props.dataViews}
               />
             </div>,
           ]}

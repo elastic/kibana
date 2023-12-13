@@ -53,7 +53,7 @@ describe('<FilterEditor />', () => {
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
         docLinks: coreMock.createStart().docLinks,
-        dataViewService: dataMock.dataViews,
+        dataViews: dataMock.dataViews,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });
@@ -101,7 +101,7 @@ describe('<FilterEditor />', () => {
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
         docLinks: coreMock.createStart().docLinks,
-        dataViewService: dataMock.dataViews,
+        dataViews: dataMock.dataViews,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });
@@ -134,7 +134,7 @@ describe('<FilterEditor />', () => {
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
         docLinks: coreMock.createStart().docLinks,
-        dataViewService: dataMock.dataViews,
+        dataViews: dataMock.dataViews,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });

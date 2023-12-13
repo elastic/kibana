@@ -84,7 +84,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           readOnly={readOnly}
           suggestionsAbstraction={props.suggestionsAbstraction}
           filtersCount={props.filters.length}
-          dataViewService={dataViews}
+          dataViews={dataViews}
         />
       </EuiFlexItem>
     ));

@@ -144,7 +144,7 @@ export interface FilterEditorComponentProps {
   suggestionsAbstraction?: SuggestionsAbstraction;
   docLinks: DocLinksStart;
   filtersCount?: number;
-  dataViewService: DataViewsContract;
+  dataViews: DataViewsContract;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
@@ -186,7 +186,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       if (!dataViewId) {
         this.setState({ isLoadingDataView: false });
       } else {
-        this.props.dataViewService
+        this.props.dataViews
           .get(dataViewId)
           .then((dataView) => {
             this.setState({

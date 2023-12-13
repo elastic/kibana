@@ -101,7 +101,7 @@ export function FilterValueLabel({
         'editFilter',
         'disableFilter',
       ]}
-      dataViewService={dataViews}
+      dataViews={dataViews}
     />
   ) : null;
 }
