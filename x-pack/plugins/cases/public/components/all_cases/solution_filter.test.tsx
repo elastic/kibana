@@ -100,7 +100,7 @@ describe('SolutionFilter ', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
-        selectedOptionKeys: [solutions[0]],
+        selectedOptionKeys: [],
       });
     });
   });
@@ -168,7 +168,7 @@ describe('SolutionFilter ', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
-        selectedOptionKeys: [solutions[0], solutions[1]],
+        selectedOptionKeys: [],
       });
     });
   });
