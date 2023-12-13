@@ -17,7 +17,7 @@ import type {
   PosturePolicyTemplate,
   ComplianceDashboardDataV2,
   BaseCspSetupStatus,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import {
   CloudPosturePage,

@@ -15,7 +15,7 @@ import {
   ComplianceDashboardData,
   ComplianceDashboardDataV2,
   PostureTrend,
-} from '@kbn/cloud-security-posture-plugin/common/types';
+} from '@kbn/cloud-security-posture-plugin/common/types_old';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {

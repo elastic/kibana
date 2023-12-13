@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { ReactNode } from 'react';
-import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { renderSearchError } from '@kbn/search-errors';
 import { getApplication } from '../../kibana_services';
 import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
@@ -60,21 +60,21 @@ export class DataRequest {
       return null;
     }
 
-    const overrideDisplay = getSearchErrorOverrideDisplay({
+    const searchErrorDisplay = renderSearchError({
       error: this._descriptor.error,
       application: getApplication(),
     });
 
-    const body = overrideDisplay?.body ? (
-      overrideDisplay.body
+    const body = searchErrorDisplay?.body ? (
+      searchErrorDisplay.body
     ) : (
       <p>{this._descriptor.error.message}</p>
     );
 
-    return overrideDisplay?.actions ? (
+    return searchErrorDisplay?.actions ? (
       <>
         {body}
-        {overrideDisplay.actions}
+        {searchErrorDisplay.actions}
       </>
     ) : (
       body

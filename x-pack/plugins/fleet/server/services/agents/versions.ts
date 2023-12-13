@@ -24,6 +24,7 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
+const MAX_REQUEST_TIMEOUT = 60 * 1000; // Only attempt to fetch product versions for one minute total
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
@@ -118,21 +119,29 @@ async function fetchAgentVersionsFromApi() {
     },
   };
 
-  const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
-  const rawBody = await response.text();
+  try {
+    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), {
+      retries: 1,
+      maxRetryTime: MAX_REQUEST_TIMEOUT,
+    });
+    const rawBody = await response.text();
 
-  // We need to handle non-200 responses gracefully here to support airgapped environments where
-  // Kibana doesn't have internet access to query this API
-  if (response.status >= 400) {
-    logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+    // We need to handle non-200 responses gracefully here to support airgapped environments where
+    // Kibana doesn't have internet access to query this API
+    if (response.status >= 400) {
+      logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+      return [];
+    }
+
+    const jsonBody = JSON.parse(rawBody);
+
+    const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
+      .filter((item: any) => item?.title?.includes('Elastic Agent'))
+      .map((item: any) => item?.version_number);
+
+    return versions;
+  } catch (error) {
+    logger.debug(`Error fetching available versions from API: ${error.message}`);
     return [];
   }
-
-  const jsonBody = JSON.parse(rawBody);
-
-  const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
-    .filter((item: any) => item?.title?.includes('Elastic Agent'))
-    .map((item: any) => item?.version_number);
-
-  return versions;
 }

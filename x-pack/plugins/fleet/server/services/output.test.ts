@@ -1841,4 +1841,66 @@ describe('Output Service', () => {
       });
     });
   });
+
+  describe('backfillAllOutputPresets', () => {
+    it('should update non-preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('non-preconfigured-output', {
+              is_preconfigured: false,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('non-preconfigured-output', {
+          is_preconfigured: false,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
+    });
+
+    it('should update preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('preconfigured-output', {
+              is_preconfigured: true,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('preconfigured-output', {
+          is_preconfigured: true,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
+    });
+  });
 });
