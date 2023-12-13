@@ -75,7 +75,8 @@ const DEFAULT_STATE = {
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
   combinedFields: [],
-  readDocCount: 0,
+  firstReadDoc: undefined,
+  lastReadDoc: undefined,
 };
 
 export class ImportView extends Component {
@@ -224,10 +225,13 @@ export class ImportView extends Component {
                   if (importer !== undefined) {
                     const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
+                    const firstReadDoc = importer.getFirstReadDoc();
+                    const lastReadDoc = importer.getLastReadDoc();
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                       reading: false,
-                      readDocCount: readResp.docCount,
+                      firstReadDoc,
+                      lastReadDoc,
                     });
 
                     if (readResp.success === false) {
@@ -579,8 +583,10 @@ export class ImportView extends Component {
                 dataStart={this.props.dataStart}
                 index={index}
                 mappingsString={mappingsString}
+                pipelineString={pipelineString}
                 fileUpload={this.props.fileUpload}
-                readDocCount={this.state.readDocCount}
+                firstReadDoc={this.state.firstReadDoc}
+                lastReadDoc={this.state.lastReadDoc}
               />
 
               {imported === true && (

@@ -180,6 +180,14 @@ export abstract class Importer implements IImporter {
 
     return result;
   }
+
+  public getFirstReadDoc() {
+    return this._docArray[0];
+  }
+
+  public getLastReadDoc() {
+    return this._docArray[this._docArray.length - 1];
+  }
 }
 
 function populateFailures(

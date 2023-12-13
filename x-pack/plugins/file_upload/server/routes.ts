@@ -28,6 +28,7 @@ import {
 } from './schemas';
 import { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
+import { getTimeFromDoc } from './get_time_from_doc';
 
 function importData(
   client: IScopedClusterClient,
@@ -269,6 +270,54 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             query,
             runtimeMappings
           );
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/time_field_range Get time field range
+   * @apiName GetTimeFieldRange
+   * @apiDescription Returns the time range for the given index and query using the specified time range.
+   *
+   * @apiSchema (body) getTimeFieldRangeSchema
+   *
+   * @apiSuccess {Object} start start of time range with epoch and string properties.
+   * @apiSuccess {Object} end end of time range with epoch and string properties.
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/get_time_from_doc',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              doc: schema.any(),
+              pipeline: schema.any(),
+              timeField: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { doc, pipeline, timeField } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await getTimeFromDoc(esClient, timeField, doc, pipeline);
 
           return response.ok({
             body: resp,
