@@ -328,7 +328,7 @@ export const removeDataProvider = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).should('be.visible').trigger('click');
+  cy.get(NEW_TIMELINE_ACTION).should('be.visible').click();
   cy.get(CREATE_NEW_TIMELINE).first().should('be.visible').click();
 };
 
