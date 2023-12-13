@@ -10,13 +10,16 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { buildEsQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { SOURCE_TYPES } from '../../../../common/constants'
 import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { AbstractVectorSource } from '../vector_source';
 import { getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta } from '../vector_source';
-import { getData } from '../../../kibana_services';
+import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson, type ESQLSearchReponse } from './convert_to_geojson';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -56,6 +59,14 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     return [this._getRequestId()];
   }
 
+  isQueryAware(): boolean {
+    return true;
+  }
+
+  getApplyGlobalQuery(): boolean {
+    return true;
+  }
+
   async getGeoJsonWithMeta(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -63,9 +74,28 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    const params = {
+    const params: { query: string; filter?: { bool: BoolQuery } } = {
       query: this._descriptor.esql
     };
+
+    const query: Query[] = [];
+    if (requestMeta.query) {
+      query.push(requestMeta.query);
+    }
+    if (requestMeta.embeddableSearchContext?.query) {
+      query.push(requestMeta.embeddableSearchContext.query);
+    }
+    const filters: Filter[] = [
+      ...requestMeta.filters,
+      ...(requestMeta.embeddableSearchContext?.filters ?? [])
+    ];
+
+    params.filter = buildEsQuery(
+      undefined,
+      query,
+      filters,
+      getEsQueryConfig(getUiSettings()),
+    );
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),
