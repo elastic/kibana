@@ -7,13 +7,14 @@
 
 import { useMemo } from 'react';
 import { useRiskEnginePrivileges } from '../../api/hooks/use_risk_engine_privileges';
+import type { MissingPrivileges } from '../../../../common/entity_analytics/risk_engine';
 import { getMissingRiskEnginePrivileges } from '../../../../common/entity_analytics/risk_engine';
 export type MissingPrivilegesResponse =
   | { isLoading: true }
   | { isLoading: false; hasAllRequiredPrivileges: true }
   | {
       isLoading: false;
-      missingPrivileges: ReturnType<typeof getMissingRiskEnginePrivileges>;
+      missingPrivileges: MissingPrivileges;
       hasAllRequiredPrivileges: false;
     };
 
