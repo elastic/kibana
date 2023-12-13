@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getOpenAlertsQuery } from './get_open_alerts_query';
+import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 
-describe('getOpenAlertsQuery', () => {
+describe('getOpenAndAcknowledgedAlertsQuery', () => {
   it('returns the expected query', () => {
     const alertsIndexPattern = 'alerts-*';
     const allow = ['field1', 'field2'];
     const size = 10;
 
-    const query = getOpenAlertsQuery({ alertsIndexPattern, allow, size });
+    const query = getOpenAndAcknowledgedAlertsQuery({ alertsIndexPattern, allow, size });
 
     expect(query).toEqual({
       allow_no_indices: true,
@@ -30,8 +30,20 @@ describe('getOpenAlertsQuery', () => {
                   must: [],
                   filter: [
                     {
-                      match_phrase: {
-                        'kibana.alert.workflow_status': 'open',
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'open',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'acknowledged',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
                     },
                     {
