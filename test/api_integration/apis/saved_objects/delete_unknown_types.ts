@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('/deprecations/_delete_unknown_types', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164387
+  describe.skip('/deprecations/_delete_unknown_types', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.load(
