@@ -87,7 +87,6 @@ export class SynthtraceEsClient<TFields extends Fields> {
     }) as Transform[];
 
     let count: number = 0;
-
     const stream = sequential(...allStreams);
     await this.client.helpers.bulk({
       concurrency: this.concurrency,
