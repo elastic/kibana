@@ -49,7 +49,9 @@ The reporting plugin has a built-in utility to check for common issues, such as 
 === Grant users access to reporting
 When security is enabled, you grant users access to {report-features} with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
 
-. Enable application privileges in Reporting. To enable, turn off the default user access control features in `kibana.yml`:
+. Enable application privileges in Reporting.
+
+.. You must turn off the default user access control features in `kibana.yml` to expose application privileges in Reporting by setting `xpack.reporting.roles.enabled` to `false`:
 +
 [source,yaml]
 ------------------------------------
