@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { SOURCE_TYPES } from '../../../../common/constants'
@@ -53,6 +53,11 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
 
   private _getRequestId(): string {
     return this._descriptor.id;
+  }
+
+  async getDisplayName() {
+    const pattern: string = getIndexPatternFromESQLQuery(this._descriptor.esql);
+    return pattern ? pattern : 'ES|QL';
   }
 
   getInspectorRequestIds(): string[] {
