@@ -38,9 +38,12 @@ import {
 } from '../../../tasks/timeline';
 import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
-  before(() => {
 describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
+  beforeEach(() => {
     login();
+    visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
+    createNewTimeline();
     /*
      * When timeline changes are pending, chrome would popup with
      * a confirm dialog stating that `you can lose unsaved changed.
@@ -50,13 +53,6 @@ describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.window().then((win) => {
       win.onbeforeunload = null;
     });
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(hostsUrl('allHosts'));
-    openTimelineUsingToggle();
-    createNewTimeline();
   });
 
   it('unchanged & unsaved timeline should NOT prompt when user navigates away', () => {
@@ -145,8 +141,11 @@ describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
 
 // In serverless it is not possible to use the navigation menu without closing the timeline
 describe('Save Timeline Prompts', { tags: ['@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
+    visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
+    createNewTimeline();
     /*
      * When timeline changes are pending, chrome would popup with
      * a confirm dialog stating that `you can lose unsaved changed.
@@ -156,13 +155,6 @@ describe('Save Timeline Prompts', { tags: ['@serverless'] }, () => {
     cy.window().then((win) => {
       win.onbeforeunload = null;
     });
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(hostsUrl('allHosts'));
-    openTimelineUsingToggle();
-    createNewTimeline();
   });
 
   it('unchanged & unsaved timeline should NOT prompt when it is closed and navigate to any page', () => {
