@@ -3,11 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "node",
-      "cheerio",
       "@emotion/react/types/css-prop",
+      "@kbn/ambient-ftr-types",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "cheerio",
+      "cypress",
+      "cypress-real-events",
+      "node"
     ]
   },
   "include": [
@@ -47,6 +49,7 @@
     "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
+    "@kbn/cypress-config",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/data-view-field-editor-plugin",
