@@ -169,10 +169,7 @@ describe('Timelines', (): void => {
       addNameToTimelineAndSave('Test');
 
       // Saved
-      cy.get(TIMELINE_STATUS).should('be.visible');
-      cy.get(TIMELINE_STATUS)
-        .invoke('text')
-        .should('match', /^Saved/);
+      cy.get(TIMELINE_STATUS).should('not.exist');
 
       executeTimelineKQL('agent.name : *');
 
@@ -180,7 +177,7 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_STATUS).should('be.visible');
       cy.get(TIMELINE_STATUS)
         .invoke('text')
-        .should('match', /^Has unsaved changes/);
+        .should('match', /^Unsaved changes/);
     });
   });
 
