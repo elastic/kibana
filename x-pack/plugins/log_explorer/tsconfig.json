@@ -39,7 +39,8 @@
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",
     "@kbn/ecs",
-    "@kbn/react-field"
+    "@kbn/react-field",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*"
