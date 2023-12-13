@@ -10,6 +10,8 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { getContext } from 'kea';
 
+import { Observable } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -122,7 +124,12 @@ describe('renderApp', () => {
     it('mounts and unmounts any HeaderActions component', () => {
       const store = getContext().store;
 
-      const unmountHeader = renderHeaderActions(MockHeaderActions, store, {} as any, mockHeaderEl);
+      const unmountHeader = renderHeaderActions(
+        MockHeaderActions,
+        store,
+        { theme$: new Observable() } as any,
+        mockHeaderEl
+      );
       expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
 
       unmountHeader();
