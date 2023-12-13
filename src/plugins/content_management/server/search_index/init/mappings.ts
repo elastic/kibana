@@ -20,7 +20,20 @@ export const mappings: estypes.MappingTypeMapping = {
         },
       },
     },
-
+    type: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
+    owner: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
+    createdAt: {
+      type: 'date',
+    },
+    updatedAt: {
+      type: 'date',
+    },
     description: {
       type: 'text',
     },

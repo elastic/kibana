@@ -315,7 +315,7 @@ export class ContentCrud<T = unknown> {
 
   private parseDataForSearch(data: Record<any, any>): SearchIndexDoc {
     const { title, description } = data;
-    return { title, description };
+    return { title, description, type: this.contentTypeId, owner: 'foo' };
   }
 
   private getIdForSeachIndex(id: string): string {

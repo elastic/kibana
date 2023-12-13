@@ -44,10 +44,15 @@ export interface SearchIndexClient {
 
 export interface SearchIndexDoc {
   readonly title: string;
+  readonly type: string;
+  readonly owner: string;
   readonly description?: string;
 }
 
-export type EsSearchIndexDoc = SearchIndexDoc;
+export interface EsSearchIndexDoc extends SearchIndexDoc {
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
 
 export interface AddDocAction {
   type: 'add';

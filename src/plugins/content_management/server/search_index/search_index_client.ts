@@ -86,7 +86,7 @@ export class SearchIndexClient implements ISearchIndexClient {
 
     for (const entry of docs) {
       const { id, doc } = entry;
-      const dto = docToDto(doc);
+      const dto = docToDto(doc, false);
 
       operations.push({ update: { _id: id } }, { doc: dto });
     }

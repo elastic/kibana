@@ -45,17 +45,23 @@ const isSearchIndexDoc = (doc: SearchIndexDoc | Partial<SearchIndexDoc>): doc is
   true;
 
 export const docToDto = <T extends SearchIndexDoc | Partial<SearchIndexDoc>>(
-  doc: T
+  doc: T,
+  isNew: boolean = true
 ): T extends SearchIndexDoc ? EsSearchIndexDoc : Partial<EsSearchIndexDoc> => {
-  if (isSearchIndexDoc(doc)) {
+  const updatedAt = new Date().toISOString();
+
+  if (isSearchIndexDoc(doc) && isNew) {
     const dto: EsSearchIndexDoc = {
       ...doc,
+      updatedAt,
+      createdAt: updatedAt,
     };
     return dto;
   }
 
   const dto: Partial<EsSearchIndexDoc> = {
     ...doc,
+    updatedAt,
   };
 
   return dto as T extends SearchIndexDoc ? EsSearchIndexDoc : Partial<EsSearchIndexDoc>;
