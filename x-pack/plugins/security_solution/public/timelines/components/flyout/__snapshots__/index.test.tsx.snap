@@ -78,7 +78,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                     <button
                       aria-label="Add new timeline or template"
                       class="euiButtonIcon add-timeline-button emotion-euiButtonIcon-xs-empty-primary"
-                      data-test-subj="settings-plus-in-circle"
+                      data-test-subj="timeline-create-open-control"
                       type="button"
                     >
                       <span
