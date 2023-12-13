@@ -35,27 +35,30 @@ export interface SearchIndexClient {
    */
   initialize(): Promise<void>;
 
-  add: (docs: SearchIndexDoc[]) => Promise<void>;
+  add: (docs: Array<{ id: string; doc: SearchIndexDoc }>) => Promise<void>;
+
+  update: (docs: Array<{ id: string; doc: Partial<SearchIndexDoc> }>) => Promise<void>;
+
+  delete: (docs: Array<{ id: string }>) => Promise<void>;
 }
 
 export interface SearchIndexDoc {
-  readonly id: string;
   readonly title: string;
   readonly description?: string;
 }
 
-export interface EsSearchIndexDoc extends SearchIndexDoc {
-  '@timestamp': string;
-}
+export type EsSearchIndexDoc = SearchIndexDoc;
 
 export interface AddDocAction {
   type: 'add';
+  id: string;
   doc: SearchIndexDoc;
 }
 
 export interface UpdateDocAction {
   type: 'update';
-  doc: Partial<SearchIndexDoc> & { id: string };
+  id: string;
+  doc: Partial<SearchIndexDoc>;
 }
 
 export interface DeleteDocAction {

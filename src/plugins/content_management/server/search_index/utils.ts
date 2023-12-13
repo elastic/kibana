@@ -40,11 +40,23 @@ export async function retry<R>(
   });
 }
 
-export const docToDto = (doc: SearchIndexDoc): EsSearchIndexDoc => {
-  const dto: EsSearchIndexDoc = {
-    '@timestamp': new Date().toISOString(),
+// Temp just for TS
+const isSearchIndexDoc = (doc: SearchIndexDoc | Partial<SearchIndexDoc>): doc is SearchIndexDoc =>
+  true;
+
+export const docToDto = <T extends SearchIndexDoc | Partial<SearchIndexDoc>>(
+  doc: T
+): T extends SearchIndexDoc ? EsSearchIndexDoc : Partial<EsSearchIndexDoc> => {
+  if (isSearchIndexDoc(doc)) {
+    const dto: EsSearchIndexDoc = {
+      ...doc,
+    };
+    return dto;
+  }
+
+  const dto: Partial<EsSearchIndexDoc> = {
     ...doc,
   };
 
-  return dto;
+  return dto as T extends SearchIndexDoc ? EsSearchIndexDoc : Partial<EsSearchIndexDoc>;
 };

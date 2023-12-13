@@ -59,7 +59,7 @@ export class SearchIndex {
 
         const addActions = data
           .filter((d): d is BufferData<AddDocAction> => d.action.type === 'add')
-          .map(({ action }) => action);
+          .map(({ action }) => action); // TODO: add utils to reconcile the data
         const updateActions = data
           .filter((d): d is BufferData<UpdateDocAction> => d.action.type === 'update')
           .map(({ action }) => action);
@@ -71,7 +71,7 @@ export class SearchIndex {
 
         if (addActions.length > 0) {
           try {
-            await this.client.add(addActions.map(({ doc }) => doc));
+            await this.client.add(addActions);
           } catch (error) {
             clientError = error;
             logger.error('Failed to add documents to Search Index...');
@@ -79,7 +79,25 @@ export class SearchIndex {
           }
         }
 
-        // TODO: Implement update and delete
+        if (updateActions.length > 0) {
+          try {
+            await this.client.update(updateActions);
+          } catch (error) {
+            clientError = error;
+            logger.error('Failed to update documents to Search Index...');
+            logger.error(error);
+          }
+        }
+
+        if (deleteActions.length > 0) {
+          try {
+            await this.client.delete(deleteActions);
+          } catch (error) {
+            clientError = error;
+            logger.error('Failed to delete documents to Search Index...');
+            logger.error(error);
+          }
+        }
 
         if (!clientError) {
           // Clear translog up to the previous second
@@ -114,7 +132,7 @@ export class SearchIndex {
       });
   }
 
-  public async addDocument(doc: SearchIndexDoc) {
+  public async addDocument(id: string, doc: SearchIndexDoc) {
     if (!this.#translogService) {
       throw new Error('Translog Service not initialized');
     }
@@ -122,7 +140,7 @@ export class SearchIndex {
     console.log('[Search Index] Adding document:', JSON.stringify({ doc }));
 
     await retry(
-      async () => this.#translogService?.store({ type: 'add', doc }),
+      async () => this.#translogService?.store({ type: 'add', id, doc }),
       'storeTranslogData',
       this.ctx.logger
     );
@@ -130,7 +148,53 @@ export class SearchIndex {
     this.#buffer.write({
       action: {
         type: 'add',
+        id,
         doc,
+      },
+      time: Date.now(),
+    });
+  }
+
+  public async updateDocument(id: string, doc: Partial<SearchIndexDoc>) {
+    if (!this.#translogService) {
+      throw new Error('Translog Service not initialized');
+    }
+
+    console.log('[Search Index] Updating document:', JSON.stringify({ id, doc }));
+
+    await retry(
+      async () => this.#translogService?.store({ type: 'update', id, doc }),
+      'storeTranslogData',
+      this.ctx.logger
+    );
+
+    this.#buffer.write({
+      action: {
+        type: 'update',
+        id,
+        doc,
+      },
+      time: Date.now(),
+    });
+  }
+
+  public async deleteDocument(id: string) {
+    if (!this.#translogService) {
+      throw new Error('Translog Service not initialized');
+    }
+
+    console.log('[Search Index] Deleting document:', JSON.stringify({ id }));
+
+    await retry(
+      async () => this.#translogService?.store({ type: 'delete', id }),
+      'storeTranslogData',
+      this.ctx.logger
+    );
+
+    this.#buffer.write({
+      action: {
+        type: 'delete',
+        id,
       },
       time: Date.now(),
     });

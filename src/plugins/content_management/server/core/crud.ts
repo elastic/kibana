@@ -165,9 +165,10 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      // Send the data to the search index
-      const searchDocId = `${this.contentTypeId}:${id}`;
-      await this.searchIndex.addDocument({ id: searchDocId, ...this.parseDataForSearch(data) });
+      await this.searchIndex.addDocument(
+        this.getIdForSeachIndex(id),
+        this.parseDataForSearch(data)
+      );
 
       const result = await this.storage.create(ctx, data, options);
 
@@ -207,6 +208,11 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
+      await this.searchIndex.updateDocument(
+        this.getIdForSeachIndex(id),
+        this.parseDataForSearch(data)
+      );
+
       const result = await this.storage.update(ctx, id, data, options);
 
       this.eventBus.emit({
@@ -245,6 +251,8 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
+      await this.searchIndex.deleteDocument(this.getIdForSeachIndex(id));
+
       const result = await this.storage.delete(ctx, id, options);
 
       this.eventBus.emit({
@@ -305,8 +313,12 @@ export class ContentCrud<T = unknown> {
     }
   }
 
-  private parseDataForSearch(data: Record<any, any>): Omit<SearchIndexDoc, 'id'> {
+  private parseDataForSearch(data: Record<any, any>): SearchIndexDoc {
     const { title, description } = data;
     return { title, description };
+  }
+
+  private getIdForSeachIndex(id: string): string {
+    return `${this.contentTypeId}:${id}`;
   }
 }

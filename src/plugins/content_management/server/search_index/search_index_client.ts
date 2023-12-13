@@ -42,19 +42,53 @@ export class SearchIndexClient implements ISearchIndexClient {
     await initializer.initialize();
   }
 
-  public async add(docs: SearchIndexDoc[]): Promise<void> {
+  public async add(docs: Array<{ id: string; doc: SearchIndexDoc }>): Promise<void> {
     if (docs.length === 0) return;
 
     const esClient = await this.deps.esClient;
-    const operations: Array<estypes.BulkOperationContainer | Omit<EsSearchIndexDoc, 'id'>> = [];
+    const operations: Array<estypes.BulkOperationContainer | EsSearchIndexDoc> = [];
 
-    console.log('Adding documents to the search index...');
+    console.log('Adding documents...');
     console.log(JSON.stringify(docs, null, 2));
 
-    for (const doc of docs) {
-      const { id, ...dto } = docToDto(doc);
+    for (const entry of docs) {
+      const { id, doc } = entry;
+      const dto = docToDto(doc);
 
-      operations.push({ create: { _id: id } }, dto);
+      operations.push({ index: { _id: id } }, dto);
+    }
+
+    const { errors, items } = await esClient.bulk(
+      {
+        index: this.#names.index,
+        operations,
+      },
+      {
+        maxRetries: 0,
+      }
+    );
+
+    if (errors) {
+      console.log(JSON.stringify(items, null, 2));
+      throw new Error('Some documents failed to be indexed xxxx.');
+    }
+  }
+
+  public async update(docs: Array<{ id: string; doc: Partial<SearchIndexDoc> }>): Promise<void> {
+    if (docs.length === 0) return;
+
+    const esClient = await this.deps.esClient;
+    const operations: Array<estypes.BulkOperationContainer | { doc: Partial<EsSearchIndexDoc> }> =
+      [];
+
+    console.log('Updating documents...');
+    console.log(JSON.stringify(docs, null, 2));
+
+    for (const entry of docs) {
+      const { id, doc } = entry;
+      const dto = docToDto(doc);
+
+      operations.push({ update: { _id: id } }, { doc: dto });
     }
 
     const { errors } = await esClient.bulk(
@@ -68,7 +102,35 @@ export class SearchIndexClient implements ISearchIndexClient {
     );
 
     if (errors) {
-      throw new Error('Some documents failed to be indexed.');
+      throw new Error('Some documents failed to be updated.');
+    }
+  }
+
+  public async delete(docs: Array<{ id: string }>): Promise<void> {
+    if (docs.length === 0) return;
+
+    const esClient = await this.deps.esClient;
+    const operations: estypes.BulkOperationContainer[] = [];
+
+    console.log('Deleting documents...');
+    console.log(JSON.stringify(docs, null, 2));
+
+    for (const doc of docs) {
+      operations.push({ delete: { _id: doc.id } });
+    }
+
+    const { errors } = await esClient.bulk(
+      {
+        index: this.#names.index,
+        operations,
+      },
+      {
+        maxRetries: 0,
+      }
+    );
+
+    if (errors) {
+      throw new Error('Some documents failed to be deleted.');
     }
   }
 }

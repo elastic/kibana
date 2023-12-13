@@ -11,14 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 export const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
-    /**
-     * Every document indexed to a data stream must contain a `@timestamp`
-     * field, mapped as a `date` or `date_nanos` field type.
-     */
-    '@timestamp': {
-      type: 'date',
-    },
-
     title: {
       type: 'text',
       fields: {
