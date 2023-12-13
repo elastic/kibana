@@ -59,13 +59,17 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
 
     createNewTimelineTemplate();
     populateTimeline();
+
+    cy.log('Add filter');
     addFilter(getTimeline().filter);
 
+    cy.log('Update date range');
     showStartEndDate(TIMELINE_DATE_PICKER_CONTAINER);
     setEndDateNow(TIMELINE_DATE_PICKER_CONTAINER);
     setStartDate('Jan 18, 2018 @ 00:00:00.000', TIMELINE_DATE_PICKER_CONTAINER);
     updateTimelineDates();
 
+    cy.log('Try to pin an event');
     cy.get(PIN_EVENT).should(
       'have.attr',
       'aria-label',
@@ -73,6 +77,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     );
     cy.get(LOCKED_ICON).should('be.visible');
 
+    cy.log('Update title and description');
     addNameAndDescriptionToTimeline(getTimeline());
 
     cy.wait('@timeline').then(({ response }) => {
@@ -81,9 +86,11 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
       markAsFavorite();
       closeTimeline();
 
+      cy.log('Open template from templates tab');
       openTimelineTemplatesTab();
       openTimelineTemplate(timelineId);
 
+      cy.log('Check that the template has been created correclty');
       cy.contains(getTimeline().title).should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
