@@ -241,10 +241,7 @@ export async function extractAndWriteSecrets(opts: {
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-  secretsToCreate.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy);
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -406,15 +403,17 @@ export async function extractAndUpdateSecrets(opts: {
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
   const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
+
   const createdSecrets = await createSecrets({
     esClient,
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
-  secretsToCreate.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    createdSecrets,
+    packagePolicyUpdate
+  );
 
   const secretReferences = [
     ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
@@ -517,14 +516,14 @@ export function diffSecretPaths(
   const toCreate: SecretPath[] = [];
   const toDelete: SecretPath[] = [];
   const noChange: SecretPath[] = [];
-  const newPathsByPath = keyBy(newPaths, 'path');
+  const newPathsByPath = keyBy(newPaths, (x) => x.path.join('.'));
 
   for (const oldPath of oldPaths) {
-    if (!newPathsByPath[oldPath.path]) {
+    if (!newPathsByPath[oldPath.path.join('.')]) {
       toDelete.push(oldPath);
     }
 
-    const newPath = newPathsByPath[oldPath.path];
+    const newPath = newPathsByPath[oldPath.path.join('.')];
     if (newPath && newPath.value.value) {
       const newValue = newPath.value?.value;
       if (!newValue?.isSecretRef) {
@@ -533,7 +532,7 @@ export function diffSecretPaths(
       } else {
         noChange.push(newPath);
       }
-      delete newPathsByPath[oldPath.path];
+      delete newPathsByPath[oldPath.path.join('.')];
     }
   }
 
@@ -655,7 +654,7 @@ function _getPackageLevelSecretPaths(
     if (packageSecretVarsByName[name]) {
       vars.push({
         value: configEntry,
-        path: `vars.${name}`,
+        path: ['vars', name],
       });
     }
     return vars;
@@ -687,7 +686,7 @@ function _getInputSecretPaths(
       inputVars.forEach(([name, configEntry]) => {
         if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
           currentInputVarPaths.push({
-            path: `inputs[${inputIndex}].vars.${name}`,
+            path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
           });
         }
@@ -702,7 +701,14 @@ function _getInputSecretPaths(
           Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
             if (streamVarDefs[name]) {
               currentInputVarPaths.push({
-                path: `inputs[${inputIndex}].streams[${streamIndex}].vars.${name}`,
+                path: [
+                  'inputs',
+                  inputIndex.toString(),
+                  'streams',
+                  streamIndex.toString(),
+                  'vars',
+                  name,
+                ],
                 value: configEntry,
               });
             }
@@ -758,4 +764,35 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
     },
     {}
   );
+}
+
+/**
+ * Given an array of secret paths, existing secrets, and a package policy, generates a
+ * new package policy object that includes resolved secret reference values at each
+ * provided path.
+ */
+function getPolicyWithSecretReferences(
+  secretPaths: SecretPath[],
+  secrets: Secret[],
+  packagePolicy: NewPackagePolicy
+) {
+  const result = JSON.parse(JSON.stringify(packagePolicy));
+
+  secretPaths.forEach((secretPath, secretPathIndex) => {
+    secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
+      if (!acc[val]) {
+        acc[val] = {};
+      }
+
+      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
+
+      if (isLast) {
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+      }
+
+      return acc[val];
+    }, result);
+  });
+
+  return result;
 }

@@ -13,7 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import type {
+  EcsRiskScore,
+  RiskScore,
+} from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -483,6 +486,7 @@ export const riskEngineRouteHelpersFactory = (
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
