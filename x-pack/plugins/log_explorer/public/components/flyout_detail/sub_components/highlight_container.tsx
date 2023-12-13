@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 interface HighlightContainerProps {
   children: React.ReactNode;
@@ -33,9 +33,7 @@ export const HighlightContainer = React.forwardRef<HTMLDivElement, HighlightCont
     return shouldRender ? (
       <div ref={ref}>
         <EuiHorizontalRule margin="xs" />
-        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={true}>
-          {flexChildren}
-        </EuiPanel>
+        {flexChildren}
       </div>
     ) : null;
   }

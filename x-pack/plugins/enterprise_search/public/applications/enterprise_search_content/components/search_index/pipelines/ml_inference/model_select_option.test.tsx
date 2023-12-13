@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
@@ -19,6 +19,7 @@ import { TrainedModelHealth } from '../ml_model_health';
 import {
   DeployModelButton,
   getContextMenuPanel,
+  LicenseBadge,
   ModelSelectOption,
   ModelSelectOptionProps,
   StartModelButton,
@@ -30,7 +31,8 @@ const DEFAULT_PROPS: ModelSelectOptionProps = {
   label: 'Model 1',
   title: 'Model 1',
   description: 'Model 1 description',
-  license: 'elastic',
+  licenseType: 'elastic',
+  modelDetailsPageUrl: 'https://my-model.ai',
   deploymentState: MlModelDeploymentState.NotDeployed,
   startTime: 0,
   targetAllocationCount: 0,
@@ -47,16 +49,16 @@ describe('ModelSelectOption', () => {
   });
   it('renders with license badge if present', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(1);
+    expect(wrapper.find(LicenseBadge)).toHaveLength(1);
   });
   it('renders without license badge if not present', () => {
     const props = {
       ...DEFAULT_PROPS,
-      license: undefined,
+      licenseType: undefined,
     };
 
     const wrapper = shallow(<ModelSelectOption {...props} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(0);
+    expect(wrapper.find(LicenseBadge)).toHaveLength(0);
   });
   it('renders with description if present', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
@@ -93,11 +95,27 @@ describe('ModelSelectOption', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
     expect(wrapper.find(TrainedModelHealth)).toHaveLength(1);
   });
+});
 
-  describe('getContextMenuPanel', () => {
-    it('gets model details link if URL is present', () => {
-      const panels = getContextMenuPanel('https://model.ai');
-      expect(panels[0].items).toHaveLength(2);
-    });
+describe('LicenseBadge', () => {
+  it('renders with link if URL is present', () => {
+    const wrapper = shallow(
+      <LicenseBadge
+        licenseType={DEFAULT_PROPS.licenseType!}
+        modelDetailsPageUrl={DEFAULT_PROPS.modelDetailsPageUrl}
+      />
+    );
+    expect(wrapper.find(EuiLink)).toHaveLength(1);
+  });
+  it('renders without link if URL is not present', () => {
+    const wrapper = shallow(<LicenseBadge licenseType={DEFAULT_PROPS.licenseType!} />);
+    expect(wrapper.find(EuiLink)).toHaveLength(0);
+  });
+});
+
+describe('getContextMenuPanel', () => {
+  it('gets model details link if URL is present', () => {
+    const panels = getContextMenuPanel('https://model.ai');
+    expect(panels[0].items).toHaveLength(2);
   });
 });

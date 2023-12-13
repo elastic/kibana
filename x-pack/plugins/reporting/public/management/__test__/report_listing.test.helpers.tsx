@@ -18,9 +18,12 @@ import {
   notificationServiceMock,
   coreMock,
 } from '@kbn/core/public/mocks';
-import type { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { mockJobs } from '../../../common/test';
 
@@ -43,9 +46,17 @@ export interface TestDependencies {
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   reportDiagnostic: typeof ReportDiagnostic;
+  data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export const mockConfig = {
+  csv: {
+    scroll: {
+      duration: '10m',
+      size: 500,
+    },
+  },
   poll: {
     jobCompletionNotifier: {
       interval: 5000,
@@ -95,9 +106,11 @@ export const createTestBed = registerTestBed(
     urlService,
     toasts,
     uiSettings,
+    data,
+    share,
     ...rest
   }: Partial<Props> & TestDependencies) => (
-    <KibanaContextProvider services={{ http, application, uiSettings }}>
+    <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
       <InternalApiClientProvider apiClient={reportingAPIClient}>
         <IlmPolicyStatusContextProvider>
           <ReportListing
@@ -152,6 +165,8 @@ export const setup = async (props?: Partial<Props>) => {
       },
     } as unknown as SharePluginSetup['url'],
     reportDiagnostic,
+    data: dataPluginMock.createStartContract(),
+    share: sharePluginMock.createStartContract(),
   };
 
   const testBed = createTestBed({ ...testDependencies, ...props });

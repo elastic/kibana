@@ -12,7 +12,7 @@ import {
   TransformSource,
   TransformTimeSync,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];

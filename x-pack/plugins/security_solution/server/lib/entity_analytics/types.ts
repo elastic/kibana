@@ -14,7 +14,7 @@ import type {
   Range,
   RiskEngineStatus,
   RiskScore,
-} from '../../../common/risk_engine';
+} from '../../../common/entity_analytics/risk_engine';
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
@@ -96,16 +96,6 @@ export interface EnableRiskEngineResponse {
 
 export interface DisableRiskEngineResponse {
   success: boolean;
-}
-
-export interface RiskEnginePrivilegesResponse {
-  privileges: {
-    elasticsearch: {
-      cluster: Record<string, boolean>;
-      index: Record<string, Record<string, boolean>>;
-    };
-  };
-  has_all_required: boolean;
 }
 
 export interface CalculateRiskScoreAggregations {

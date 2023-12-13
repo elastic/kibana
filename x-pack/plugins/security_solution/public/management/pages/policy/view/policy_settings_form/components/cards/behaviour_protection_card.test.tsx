@@ -55,7 +55,6 @@ describe('Policy Behaviour Protection Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(getByTestId(testSubj.rulesCallout));
     expect(queryByTestId(testSubj.reputationServiceCheckbox)).not.toBeInTheDocument();
   });
 
@@ -132,12 +131,6 @@ describe('Policy Behaviour Protection Card', () => {
               ...(config.notifyUser
                 ? ['Notify user', 'Notification message', '—']
                 : ['Notify user']),
-              ...(config.prebuiltRules
-                ? [
-                    'View related detection rules. ',
-                    'Prebuilt rules are tagged “Elastic” on the Detection Rules page.',
-                  ]
-                : ['View related detection rules.']),
             ]
           : baseText
       ).join('');

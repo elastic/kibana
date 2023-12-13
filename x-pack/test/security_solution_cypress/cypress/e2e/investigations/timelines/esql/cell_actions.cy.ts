@@ -15,7 +15,7 @@ import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
+import { createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -33,7 +33,7 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverGridToLoad();
     });

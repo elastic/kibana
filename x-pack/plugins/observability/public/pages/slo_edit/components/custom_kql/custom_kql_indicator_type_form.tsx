@@ -32,22 +32,20 @@ export function CustomKqlIndicatorTypeForm() {
           <IndexSelection />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <IndexFieldSelector
-            indexFields={timestampFields}
-            name="indicator.params.timestampField"
-            label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
-              defaultMessage: 'Timestamp field',
-            })}
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.timestampField.placeholder',
-              { defaultMessage: 'Select a timestamp field' }
-            )}
-            isLoading={!!index && isIndexFieldsLoading}
-            isDisabled={!index}
-            isRequired
-          />
-        </EuiFlexItem>
+        <IndexFieldSelector
+          indexFields={timestampFields}
+          name="indicator.params.timestampField"
+          label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+            defaultMessage: 'Timestamp field',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slo.sloEdit.timestampField.placeholder',
+            { defaultMessage: 'Select a timestamp field' }
+          )}
+          isLoading={!!index && isIndexFieldsLoading}
+          isDisabled={!index}
+          isRequired
+        />
       </EuiFlexGroup>
 
       <EuiFlexItem>

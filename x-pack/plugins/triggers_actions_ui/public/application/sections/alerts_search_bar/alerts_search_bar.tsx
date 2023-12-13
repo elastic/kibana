@@ -21,6 +21,7 @@ import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
+// Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,

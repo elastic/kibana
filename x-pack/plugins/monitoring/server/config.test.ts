@@ -71,6 +71,7 @@ describe('config schema', () => {
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
+              "es-client-authentication",
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
