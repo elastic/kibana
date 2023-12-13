@@ -27,7 +27,16 @@ const postMessageHandler = async ({
   params: PostMessageSubActionParams;
 }) => await externalService.postMessage({ channelIds, channels, text });
 
+const postBlockHandler = async ({
+  externalService,
+  params: { channelIds, channels, text },
+}: {
+  externalService: SlackApiService;
+  params: PostMessageSubActionParams;
+}) => await externalService.postBlock({ channelIds, channels, text });
+
 export const api = {
   validChannelId: validChannelIdHandler,
   postMessage: postMessageHandler,
+  postBlock: postBlockHandler,
 };
