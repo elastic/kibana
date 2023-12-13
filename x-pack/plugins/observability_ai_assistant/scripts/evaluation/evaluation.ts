@@ -9,7 +9,7 @@ import yargs from 'yargs';
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
 import inquirer from 'inquirer';
-import * as glob from 'glob';
+import * as fastGlob from 'fast-glob';
 import Path from 'path';
 import chalk from 'chalk';
 import * as table from 'table';
@@ -69,7 +69,7 @@ function runEvaluations() {
           const scenarios =
             (argv.files !== undefined &&
               castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
-            glob.sync(Path.join(__dirname, './scenarios/**/*.ts'));
+            fastGlob.sync(Path.join(__dirname, './scenarios/**/*.ts'));
 
           if (!scenarios.length) {
             throw new Error('No scenarios to run');
