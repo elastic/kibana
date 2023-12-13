@@ -51,6 +51,24 @@ export default function (providerContext: FtrProviderContext) {
       await Promise.all(testPkgs.map((pkg) => uninstallPackage(pkg.name, pkg.version)));
     });
 
+    describe('with single integration installation', async () => {
+      it('creates global data views for logs-* and metrics-*', async () => {
+        await installPackage(testPkgs[0].name, testPkgs[0].version);
+        const dataViews: any[] = await listDataViews();
+
+        expect(dataViews).to.have.length(2);
+        const logsDataView = dataViews.find(({ title }) => title === 'logs-*');
+        const metricsDataView = dataViews.find(({ title }) => title === 'metrics-*');
+
+        expect(logsDataView).to.be.ok();
+        expect(metricsDataView).to.be.ok();
+
+        // Each data view should be available in all spaces
+        expect(logsDataView.namespaces).to.contain('*');
+        expect(metricsDataView.namespaces).to.contain('*');
+      });
+    });
+
     describe('with subsequent integration installation', async () => {
       it('does not recreate managed data views', async () => {
         await installPackage(testPkgs[0].name, testPkgs[0].version);

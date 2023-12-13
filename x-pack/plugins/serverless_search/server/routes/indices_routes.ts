@@ -8,6 +8,8 @@
 import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
+import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
 import { RouteDependencies } from '../plugin';
 
@@ -67,6 +69,45 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
           index_names: Object.keys(result || {}).filter(
             (indexName) => !isHidden(result[indexName]) && !isClosed(result[indexName])
           ),
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/indices/{index_name}/search',
+      validate: {
+        body: schema.object({
+          searchQuery: schema.string({
+            defaultValue: '',
+          }),
+        }),
+        params: schema.object({
+          index_name: schema.string(),
+        }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({
+            defaultValue: DEFAULT_DOCS_PER_PAGE,
+            min: 0,
+          }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const indexName = decodeURIComponent(request.params.index_name);
+      const searchQuery = request.body.searchQuery;
+      const { page = 0, size = DEFAULT_DOCS_PER_PAGE } = request.query;
+      const from = page * size;
+
+      const searchResults = await fetchSearchResults(client, indexName, searchQuery, from, size);
+
+      return response.ok({
+        body: {
+          results: searchResults,
         },
         headers: { 'content-type': 'application/json' },
       });

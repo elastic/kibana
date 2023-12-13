@@ -272,10 +272,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         slo.groupBy !== ALL_VALUE ? (
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.partitionByBadge', {
-              defaultMessage: 'Partition by {partitionKey}',
+            content={i18n.translate('xpack.observability.slo.groupByBadge', {
+              defaultMessage: 'Group by {groupKey}',
               values: {
-                partitionKey: slo.groupBy,
+                groupKey: slo.groupBy,
               },
             })}
             display="block"
