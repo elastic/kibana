@@ -27,7 +27,7 @@
         "label": "getDocLinks",
         "description": [],
         "signature": [
-          "({ kibanaBranch }: ",
+          "({ kibanaBranch, buildFlavor }: ",
           "GetDocLinkOptions",
           ") => ",
           {
@@ -47,7 +47,7 @@
             "id": "def-common.getDocLinks.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaBranch }",
+            "label": "{ kibanaBranch, buildFlavor }",
             "description": [],
             "signature": [
               "GetDocLinkOptions"
@@ -69,7 +69,7 @@
         "label": "getDocLinksMeta",
         "description": [],
         "signature": [
-          "({ kibanaBranch }: ",
+          "({ kibanaBranch, buildFlavor, }: ",
           "GetDocLinksMetaOptions",
           ") => ",
           {
@@ -89,7 +89,7 @@
             "id": "def-common.getDocLinksMeta.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaBranch }",
+            "label": "{\n  kibanaBranch,\n  buildFlavor,\n}",
             "description": [],
             "signature": [
               "GetDocLinksMetaOptions"
