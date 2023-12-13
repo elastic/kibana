@@ -29,7 +29,6 @@ export function CreateSourceEditor(props: Props) {
     getIndexPatternService().getDefaultDataView()
       .then((defaultDataView) => {
         if (!ignore) {
-          setIsInitialized(true);
           if (defaultDataView) {
             const geoField = defaultDataView.fields.find((field) => {
               return ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
@@ -38,6 +37,7 @@ export function CreateSourceEditor(props: Props) {
               setEsql(`from ${defaultDataView.getIndexPattern()} | KEEP ${geoField.name} | limit 10000`);
             }
           }
+          setIsInitialized(true);
         }
       })
       .catch((err) => {

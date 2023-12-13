@@ -49,11 +49,11 @@ export type EsqlSourceDescriptor = AbstractSourceDescriptor & {
   esql: string;
   columns: EsqlColumn[];
   /*
-   * When provided, esql requests narrowed by hits within kibana global time range
+   * When provided, esql requests narrowed by kibana global time range
    */
   dateField?: string;
   /*
-   * When provided, esql requests narrowed by hits within map view port
+   * When provided, esql requests narrowed by map view port
    */
   geoField?: string;
 };

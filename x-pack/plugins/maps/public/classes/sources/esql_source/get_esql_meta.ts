@@ -11,6 +11,18 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
+export function getGeometryColumnIndex(columns: EsqlSourceDescriptor['columns']) {
+  const index = columns.findIndex(column => {
+    return column.type === 'geo_point';
+  });
+  if (index === -1) {
+    throw new Error(i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
+      defaultMessage: 'Elasticsearch ES|QL query does not return a geometry column.',
+    }))
+  }
+  return index;
+}
+
 export async function getEsqlMeta(esql: string) {
   const columns = await getColumns(esql);
   const { dateFields, geoFields } = await getFields(esql);

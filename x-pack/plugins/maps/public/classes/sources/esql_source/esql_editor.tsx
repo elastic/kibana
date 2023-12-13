@@ -7,11 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
-import { getEsqlMeta } from './get_esql_meta';
+import { getEsqlMeta, getGeometryColumnIndex } from './get_esql_meta';
 
 interface Props {
   dateField?: string;
@@ -39,50 +38,33 @@ export function EsqlEditor(props: Props) {
     let ignore = false;
     setError(undefined);
     setIsLoading(true);
-    if (!isEqual(localQuery, onSubmitQuery)) {
-      setLocalQuery(onSubmitQuery);
-    }
     getEsqlMeta((onSubmitQuery as { esql: string }).esql)
       .then((esqlMeta) => {
-        if (ignore) {
-          return;
-        }
-
-        setIsLoading(false);
-        const hasGeoColumn = esqlMeta.columns.some(column => {
-          return column.type === 'geo_point';
-        });
-        if (hasGeoColumn) {
-          setDateFields(esqlMeta.dateFields);
-          setGeoFields(esqlMeta.geoFields);
-          props.onEsqlChange({
-            columns: esqlMeta.columns,
-            esql: (onSubmitQuery as { esql: string }).esql
-          });
-        } else {
-          setError(new Error(i18n.translate('xpack.maps.source.esql.noGeoColumnErrorMsg', {
-            defaultMessage: 'Elasticsearch ES|QL query does not return a geospatial column.',
-          })));
+        if (!ignore) {
+          try {
+            getGeometryColumnIndex(esqlMeta.columns);
+            setDateFields(esqlMeta.dateFields);
+            setGeoFields(esqlMeta.geoFields);
+            props.onEsqlChange({
+              columns: esqlMeta.columns,
+              esql: (onSubmitQuery as { esql: string }).esql
+            });
+          } catch(getGeometryColumnIndexError) {
+            setError(getGeometryColumnIndexError);
+          }
+          setIsLoading(false);
         }
       })
-      .catch((err) => {
-        if (ignore) {
-          return;
+      .catch((getEsqlMetaError) => {
+        if (!ignore) {
+          setError(getEsqlMetaError);
+          setIsLoading(false);
         }
-
-        setError(err);
-        setIsLoading(false);
       });
     return () => {
       ignore = true;
     };
   }, [onSubmitQuery]);
-
-  useEffect(() => {
-    if (!isEqual(props.esql, onSubmitQuery)) {
-      setOnSubmitQuery({ esql: props.esql });
-    }
-  }, [props.esql]);
 
   useEffect(() => {
     if (!props.dateField || !dateFields.includes(props.dateField)) {

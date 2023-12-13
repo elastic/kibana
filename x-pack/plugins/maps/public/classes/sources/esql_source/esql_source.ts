@@ -6,12 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SOURCE_TYPES } from '../../../../common/constants'
-import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
+import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { AbstractVectorSource } from '../vector_source';
-import { IVectorSource } from '../vector_source';
+import type { IVectorSource, GeoJsonWithMeta } from '../vector_source';
+import { getData } from '../../../kibana_services';
+import { convertToGeoJson } from './convert_to_geojson';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -46,7 +50,27 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     return this._descriptor.id;
   }
 
-  isESSource(): true {
-    return true;
+  async getGeoJsonWithMeta(
+    layerName: string,
+    requestMeta: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
+  ): Promise<GeoJsonWithMeta> {
+    const params = {
+      query: this._descriptor.esql
+    };
+
+    const { rawResponse } = await lastValueFrom(
+      getData().search.search({ params }, {
+        strategy: 'esql',
+      })
+    );
+
+    console.log(rawResponse);
+
+    return {
+      data: convertToGeoJson(rawResponse),
+    }
   }
 }
