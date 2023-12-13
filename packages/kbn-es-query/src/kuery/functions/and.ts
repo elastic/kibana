@@ -7,13 +7,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { difference } from 'lodash';
+import { difference, isObject } from 'lodash';
 import type { JsonObject } from '@kbn/utility-types';
 import * as ast from '../ast';
 import * as infer from './infer';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode } from '../node_types';
-import type { KqlContext } from '../types';
+import { KqlContext, nodeTypes } from '../types';
 
 export const KQL_FUNCTION_AND = 'and';
 
@@ -48,7 +48,7 @@ export function toElasticsearchQuery(
   if (filtersInMustClause) {
     queries.must = children.map(toQuery);
   } else {
-    const inferNodes = children.filter(infer.isNode);
+    const inferNodes = children.filter(hasInferNode);
     const otherNodes = difference(children, inferNodes);
 
     queries.must = inferNodes.map(toQuery);
@@ -63,3 +63,12 @@ export function toElasticsearchQuery(
 export function toKqlExpression(node: KqlAndFunctionNode): string {
   return `(${node.arguments.map(ast.toKqlExpression).join(' AND ')})`;
 }
+
+const isKueryNode = (node: unknown): node is KueryNode => isObject(node) && 'type' in node;
+const hasInferNode = (node: unknown) => {
+  return (
+    isKueryNode(node) &&
+    nodeTypes.function.isNode(node) &&
+    (infer.isNode(node) || node.arguments.some(hasInferNode))
+  );
+};
