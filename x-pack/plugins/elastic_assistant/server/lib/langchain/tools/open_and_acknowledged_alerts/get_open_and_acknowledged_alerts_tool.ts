@@ -13,17 +13,17 @@ import { DynamicTool, Tool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '../../helpers';
 import { RequestBody } from '../../types';
 
-import { getOpenAlertsQuery } from './get_open_alerts_query';
+import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
 
 export const OPEN_ALERTS_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
 
 /**
- * Returns a tool for querying open alerts, or null if the request
- * doesn't have all the required parameters.
+ * Returns a tool for querying open and acknowledged alerts, or null if the
+ * request doesn't have all the required parameters.
  */
-export const getOpenAlertsTool = ({
+export const getOpenAndAcknowledgedAlertsTool = ({
   alertsIndexPattern,
   allow,
   allowReplacement,
@@ -55,7 +55,7 @@ export const getOpenAlertsTool = ({
     name: 'open-alerts',
     description: OPEN_ALERTS_TOOL_DESCRIPTION,
     func: async () => {
-      const query = getOpenAlertsQuery({
+      const query = getOpenAndAcknowledgedAlertsQuery({
         alertsIndexPattern,
         allow: allow ?? [],
         size,
