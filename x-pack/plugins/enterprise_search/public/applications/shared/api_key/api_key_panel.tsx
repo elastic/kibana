@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -80,7 +81,13 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
 
             <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
-                <EuiCode>{elasticsearchEndpoint}</EuiCode>
+                <EuiCode
+                  css={css`
+                    overflow-wrap: anywhere;
+                  `}
+                >
+                  {elasticsearchEndpoint}
+                </EuiCode>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
@@ -111,7 +118,13 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ user }) => {
 
                 <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem>
-                    <EuiCode>{cloudId}</EuiCode>
+                    <EuiCode
+                      css={css`
+                        overflow-wrap: anywhere;
+                      `}
+                    >
+                      {cloudId}
+                    </EuiCode>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
