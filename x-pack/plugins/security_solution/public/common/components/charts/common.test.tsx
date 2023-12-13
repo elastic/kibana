@@ -19,7 +19,7 @@ import {
   WrappedByAutoSizer,
   useThemes,
 } from './common';
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -181,14 +181,14 @@ describe('checkIfAllValuesAreZero', () => {
       (useUiSetting as jest.Mock).mockImplementation(() => false);
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(LIGHT_THEME);
+      expect(result.current.baseTheme).toBe(LEGACY_LIGHT_THEME);
     });
 
     it('should return dark baseTheme when isDarkMode true', () => {
       (useUiSetting as jest.Mock).mockImplementation(() => true);
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(DARK_THEME);
+      expect(result.current.baseTheme).toBe(LEGACY_DARK_THEME);
     });
   });
 });
