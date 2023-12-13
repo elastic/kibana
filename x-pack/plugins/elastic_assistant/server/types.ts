@@ -20,24 +20,9 @@ import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { RequestBody } from './lib/langchain/types';
+import type { GetRegisteredTools } from './services/app_context';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
-
-export interface GetApplicableToolsParams {
-  alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
-  assistantLangChain: boolean;
-  chain: RetrievalQAChain;
-  esClient: ElasticsearchClient;
-  modelExists: boolean;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
-  size?: number;
-}
-
-export type GetApplicableTools = (params: GetApplicableToolsParams) => Tool[];
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -50,14 +35,14 @@ export interface ElasticAssistantPluginStart {
   /**
    * Register tools to be used by the elastic assistant
    * @param pluginName Name of the plugin the tool should be registered to
-   * @param getApplicableTools Function that returns the tools for the specified plugin
+   * @param tools AssistantTools to be registered with for the given plugin
    */
-  registerTools: (pluginName: string, getApplicableTools: GetApplicableTools) => void;
+  registerTools: (pluginName: string, tools: AssistantTool[]) => void;
   /**
    * Get the registered tools
    * @param pluginName Name of the plugin to get the tools for
    */
-  getRegisteredTools: (pluginName: string) => Tool[];
+  getRegisteredTools: GetRegisteredTools;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -70,10 +55,7 @@ export interface ElasticAssistantPluginStartDependencies {
 
 export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
-  getRegisteredTools: (
-    pluginName: string,
-    getApplicableToolsParams: GetApplicableToolsParams
-  ) => Tool[];
+  getRegisteredTools: GetRegisteredTools;
   logger: Logger;
 }
 
@@ -88,3 +70,30 @@ export type GetElser = (
   request: KibanaRequest,
   savedObjectsClient: SavedObjectsClientContract
 ) => Promise<string> | never;
+
+/**
+ * Interfaces for registering tools to be used by the elastic assistant
+ */
+
+export interface AssistantTool {
+  id: string;
+  name: string;
+  description: string;
+  sourceRegister: string;
+  isSupported: (params: AssistantToolParams) => boolean;
+  getTool: (params: AssistantToolParams) => Tool | null;
+}
+
+export interface AssistantToolParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  assistantLangChain: boolean;
+  chain: RetrievalQAChain;
+  esClient: ElasticsearchClient;
+  modelExists: boolean;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
+  size?: number;
+}

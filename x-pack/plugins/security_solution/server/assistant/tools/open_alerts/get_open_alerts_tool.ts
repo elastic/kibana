@@ -6,86 +6,87 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import type { Tool } from 'langchain/tools';
 import { DynamicTool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
-import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 
+import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getOpenAlertsQuery } from './get_open_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
+import { APP_ID } from '../../../../common';
+
+export interface OpenAlertsToolParams extends AssistantToolParams {
+  alertsIndexPattern: string;
+  size: number;
+}
 
 export const OPEN_ALERTS_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
 
 /**
- * Returns a tool for querying open alerts, or null if the request
- * doesn't have all the required parameters.
+ * A tool for querying open alerts, or null if the request doesn't have all the required parameters.
  */
-export const getOpenAlertsTool = ({
-  alertsIndexPattern,
-  allow,
-  allowReplacement,
-  esClient,
-  onNewReplacements,
-  replacements,
-  request,
-  size,
-}: {
-  alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
-  esClient: ElasticsearchClient;
-  onNewReplacements?: (newReplacements: Record<string, string>) => void;
-  replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
-  size?: number;
-}): Tool | null => {
-  if (
-    !requestHasRequiredAnonymizationParams(request) ||
-    alertsIndexPattern == null ||
-    size == null ||
-    sizeIsOutOfRange(size)
-  ) {
-    return null;
-  }
+export const OPEN_ALERTS_TOOL: AssistantTool = {
+  id: 'open-alerts-tool',
+  name: 'OpenAlertsTool',
+  description: OPEN_ALERTS_TOOL_DESCRIPTION,
+  sourceRegister: APP_ID,
+  isSupported: (params: AssistantToolParams): params is OpenAlertsToolParams => {
+    const { alertsIndexPattern, request, size } = params;
+    return (
+      requestHasRequiredAnonymizationParams(request) &&
+      alertsIndexPattern != null &&
+      size != null &&
+      !sizeIsOutOfRange(size)
+    );
+  },
+  getTool(params: AssistantToolParams) {
+    if (!this.isSupported(params)) return null;
 
-  return new DynamicTool({
-    name: 'open-alerts',
-    description: OPEN_ALERTS_TOOL_DESCRIPTION,
-    func: async () => {
-      const query = getOpenAlertsQuery({
-        alertsIndexPattern,
-        allow: allow ?? [],
-        size,
-      });
+    const {
+      alertsIndexPattern,
+      allow,
+      allowReplacement,
+      esClient,
+      onNewReplacements,
+      replacements,
+      size,
+    } = params as OpenAlertsToolParams;
+    return new DynamicTool({
+      name: 'open-alerts',
+      description: OPEN_ALERTS_TOOL_DESCRIPTION,
+      func: async () => {
+        const query = getOpenAlertsQuery({
+          alertsIndexPattern,
+          allow: allow ?? [],
+          size,
+        });
 
-      const result = await esClient.search<SearchResponse>(query);
+        const result = await esClient.search<SearchResponse>(query);
 
-      // Accumulate replacements locally so we can, for example use the same
-      // replacement for a hostname when we see it in multiple alerts:
-      let localReplacements = { ...replacements };
-      const localOnNewReplacements = (newReplacements: Record<string, string>) => {
-        localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
+        // Accumulate replacements locally so we can, for example use the same
+        // replacement for a hostname when we see it in multiple alerts:
+        let localReplacements = { ...replacements };
+        const localOnNewReplacements = (newReplacements: Record<string, string>) => {
+          localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
 
-        onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
-      };
+          onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
+        };
 
-      return JSON.stringify(
-        result.hits?.hits?.map((x) =>
-          transformRawData({
-            allow: allow ?? [],
-            allowReplacement: allowReplacement ?? [],
-            currentReplacements: localReplacements, // <-- the latest local replacements
-            getAnonymizedValue,
-            onNewReplacements: localOnNewReplacements, // <-- the local callback
-            rawData: getRawDataOrDefault(x.fields),
-          })
-        )
-      );
-    },
-    tags: ['alerts', 'open-alerts'],
-  });
+        return JSON.stringify(
+          result.hits?.hits?.map((x) =>
+            transformRawData({
+              allow: allow ?? [],
+              allowReplacement: allowReplacement ?? [],
+              currentReplacements: localReplacements, // <-- the latest local replacements
+              getAnonymizedValue,
+              onNewReplacements: localOnNewReplacements, // <-- the local callback
+              rawData: getRawDataOrDefault(x.fields),
+            })
+          )
+        );
+      },
+      tags: ['alerts', 'open-alerts'],
+    });
+  },
 };

@@ -10,10 +10,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import { getAlertCountsTool } from './get_alert_counts_tool';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
+import { ALERT_COUNTS_TOOL } from './get_alert_counts_tool';
+import type { RetrievalQAChain } from 'langchain/chains';
 
-describe('getAlertCountsTool', () => {
+describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
     search: jest.fn().mockResolvedValue({}),
@@ -29,77 +30,93 @@ describe('getAlertCountsTool', () => {
       size: 20,
     },
   } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  const assistantLangChain = true;
+  const chain = {} as unknown as RetrievalQAChain;
+  const modelExists = true;
+  const rest = {
+    assistantLangChain,
+    chain,
+    modelExists,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-    const tool: DynamicTool = getAlertCountsTool({
-      alertsIndexPattern,
-      esClient,
-      replacements,
-      request,
-    }) as DynamicTool;
+  describe('getTool', () => {
+    it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
+      const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
+        alertsIndexPattern,
+        esClient,
+        replacements,
+        request,
+        ...rest,
+      }) as DynamicTool;
 
-    await tool.func('');
+      await tool.func('');
 
-    expect(esClient.search).toHaveBeenCalledWith({
-      aggs: { statusBySeverity: { terms: { field: 'kibana.alert.severity' } } },
-      index: ['alerts-index'],
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                filter: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
-                must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+      expect(esClient.search).toHaveBeenCalledWith({
+        aggs: { statusBySeverity: { terms: { field: 'kibana.alert.severity' } } },
+        index: ['alerts-index'],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
+                  must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+                },
               },
-            },
-            { range: { '@timestamp': { gte: 'now/d', lte: 'now/d' } } },
-          ],
+              { range: { '@timestamp': { gte: 'now/d', lte: 'now/d' } } },
+            ],
+          },
         },
-      },
-      size: 0,
-    });
-  });
-
-  it('returns null when the request is missing required anonymization parameters', () => {
-    const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
-      unknown,
-      unknown,
-      RequestBody
-    >;
-
-    const tool = getAlertCountsTool({
-      alertsIndexPattern,
-      esClient,
-      replacements,
-      request: requestWithMissingParams,
+        size: 0,
+      });
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when the request is missing required anonymization parameters', () => {
+      const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
+        unknown,
+        unknown,
+        RequestBody
+      >;
 
-  it('returns null when the alertsIndexPattern is undefined', () => {
-    const tool = getAlertCountsTool({
-      // alertsIndexPattern is undefined
-      esClient,
-      replacements,
-      request,
+      const tool = ALERT_COUNTS_TOOL.getTool({
+        alertsIndexPattern,
+        esClient,
+        replacements,
+        request: requestWithMissingParams,
+        ...rest,
+      });
+
+      expect(tool).toBeNull();
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when the alertsIndexPattern is undefined', () => {
+      const tool = ALERT_COUNTS_TOOL.getTool({
+        // alertsIndexPattern is undefined
+        esClient,
+        replacements,
+        request,
 
-  it('returns a tool instance with the expected tags', () => {
-    const tool = getAlertCountsTool({
-      alertsIndexPattern,
-      esClient,
-      replacements,
-      request,
-    }) as DynamicTool;
+        ...rest,
+      });
 
-    expect(tool.tags).toEqual(['alerts', 'alerts-count']);
+      expect(tool).toBeNull();
+    });
+
+    it('returns a tool instance with the expected tags', () => {
+      const tool = ALERT_COUNTS_TOOL.getTool({
+        alertsIndexPattern,
+        esClient,
+        replacements,
+        request,
+
+        ...rest,
+      }) as DynamicTool;
+
+      expect(tool.tags).toEqual(['alerts', 'alerts-count']);
+    });
   });
 });

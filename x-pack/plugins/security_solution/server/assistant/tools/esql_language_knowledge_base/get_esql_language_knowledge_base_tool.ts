@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import type { RetrievalQAChain } from 'langchain/chains';
-import type { Tool } from 'langchain/tools';
 import { ChainTool } from 'langchain/tools';
+import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { APP_ID } from '../../../../common';
 
-export const getEsqlLanguageKnowledgeBaseTool = ({
-  assistantLangChain,
-  modelExists,
-  chain,
-}: {
-  assistantLangChain: boolean;
-  chain: RetrievalQAChain;
-  /** true when the ELSER model is installed */
-  modelExists: boolean;
-}): Tool | null =>
-  assistantLangChain && modelExists
-    ? new ChainTool({
-        name: 'ESQLKnowledgeBaseTool',
-        description:
-          'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
-        chain,
-        tags: ['esql', 'query-generation', 'knowledge-base'],
-      })
-    : null;
+export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
+
+export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+  id: 'esql-knowledge-base-tool',
+  name: 'ESQLKnowledgeBaseTool',
+  description:
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+  sourceRegister: APP_ID,
+  isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
+    const { assistantLangChain, modelExists } = params;
+    return assistantLangChain && modelExists;
+  },
+  getTool(params: AssistantToolParams) {
+    if (!this.isSupported(params)) return null;
+    const { chain } = params as EsqlKnowledgeBaseToolParams;
+    return new ChainTool({
+      name: 'ESQLKnowledgeBaseTool',
+      description:
+        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+      chain,
+      tags: ['esql', 'query-generation', 'knowledge-base'],
+    });
+  },
+};

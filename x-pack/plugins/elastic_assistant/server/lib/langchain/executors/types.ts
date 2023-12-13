@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
 import { RequestBody, ResponseBody } from '../types';
-import type { GetApplicableTools } from '../../../types';
+import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams {
   alertsIndexPattern?: string;
@@ -20,9 +20,9 @@ export interface AgentExecutorParams {
   allow?: string[];
   allowReplacement?: string[];
   assistantLangChain: boolean;
+  assistantTools?: AssistantTool[];
   connectorId: string;
   esClient: ElasticsearchClient;
-  getApplicableTools?: GetApplicableTools;
   kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;

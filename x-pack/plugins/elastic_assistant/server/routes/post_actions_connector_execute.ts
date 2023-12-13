@@ -58,8 +58,8 @@ export const postActionsConnectorExecuteRoute = (
         // TODO: Add `traceId` to actions request when calling via langchain
         logger.debug('Executing via langchain, assistantLangChain: true');
 
-        // Fetch the function for fetching any tools registered by the request's originating plugin
-        const getApplicableTools = (await context.elasticAssistant).getRegisteredTools(
+        // Fetch any tools registered by the request's originating plugin
+        const assistantTools = (await context.elasticAssistant).getRegisteredTools(
           'securitySolution'
         );
 
@@ -84,10 +84,10 @@ export const postActionsConnectorExecuteRoute = (
           allowReplacement: request.body.allowReplacement,
           actions,
           assistantLangChain: request.body.assistantLangChain,
+          assistantTools,
           connectorId,
           elserId,
           esClient,
-          getApplicableTools,
           kbResource: ESQL_RESOURCE,
           langChainMessages,
           logger,

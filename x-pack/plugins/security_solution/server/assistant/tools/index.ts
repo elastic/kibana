@@ -5,45 +5,13 @@
  * 2.0.
  */
 
-import type { Tool } from 'langchain/tools';
+import type { AssistantTool } from '@kbn/elastic-assistant-plugin/server';
+import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base/get_esql_language_knowledge_base_tool';
+import { OPEN_ALERTS_TOOL } from './open_alerts/get_open_alerts_tool';
+import { ALERT_COUNTS_TOOL } from './alert_counts/get_alert_counts_tool';
 
-import type {
-  GetApplicableTools,
-  GetApplicableToolsParams,
-} from '@kbn/elastic-assistant-plugin/server';
-import { getAlertCountsTool } from './alert_counts/get_alert_counts_tool';
-import { getEsqlLanguageKnowledgeBaseTool } from './esql_language_knowledge_base/get_esql_language_knowledge_base_tool';
-import { getOpenAlertsTool } from './open_alerts/get_open_alerts_tool';
-
-export const getApplicableTools: GetApplicableTools = ({
-  alertsIndexPattern,
-  allow,
-  allowReplacement,
-  assistantLangChain,
-  chain,
-  esClient,
-  modelExists,
-  onNewReplacements,
-  replacements,
-  request,
-  size,
-}: GetApplicableToolsParams): Tool[] =>
-  [
-    getEsqlLanguageKnowledgeBaseTool({ assistantLangChain, chain, modelExists }) ?? [],
-    getAlertCountsTool({
-      alertsIndexPattern,
-      esClient,
-      replacements,
-      request,
-    }) ?? [],
-    getOpenAlertsTool({
-      alertsIndexPattern,
-      allow,
-      allowReplacement,
-      esClient,
-      onNewReplacements,
-      replacements,
-      request,
-      size,
-    }) ?? [],
-  ].flat();
+export const getAssistantTools = (): AssistantTool[] => [
+  ALERT_COUNTS_TOOL,
+  ESQL_KNOWLEDGE_BASE_TOOL,
+  OPEN_ALERTS_TOOL,
+];

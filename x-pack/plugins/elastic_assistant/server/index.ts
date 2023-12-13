@@ -17,6 +17,6 @@ export type {
   ElasticAssistantPluginStart,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStartDependencies,
-  GetApplicableTools,
-  GetApplicableToolsParams,
+  AssistantTool,
+  AssistantToolParams,
 } from './types';

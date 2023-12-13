@@ -5,51 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RetrievalQAChain } from 'langchain/chains';
+import { getAssistantTools } from '.';
 
-import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
-import { getApplicableTools } from '.';
-
-describe('getApplicableTools', () => {
-  const alertsIndexPattern = 'alerts-index';
-  const esClient = {
-    search: jest.fn().mockResolvedValue({}),
-  } as unknown as ElasticsearchClient;
-  const modelExists = true; // the ELSER model is installed
-  const onNewReplacements = jest.fn();
-  const replacements = { key: 'value' };
-  const request = {
-    body: {
-      assistantLangChain: true,
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
-      allowReplacement: ['user.name'],
-      replacements,
-      size: 20,
-    },
-  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-  const chain = {} as unknown as RetrievalQAChain;
-
+describe('getAssistantTools', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return an array of applicable tools', () => {
-    const tools = getApplicableTools({
-      alertsIndexPattern,
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      assistantLangChain: request.body.assistantLangChain,
-      chain,
-      esClient,
-      modelExists,
-      onNewReplacements,
-      replacements,
-      request,
-      size: request.body.size,
-    });
+    const tools = getAssistantTools();
 
     const minExpectedTools = 3; // 3 tools are currently implemented
 

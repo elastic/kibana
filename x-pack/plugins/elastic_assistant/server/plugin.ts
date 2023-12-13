@@ -18,12 +18,12 @@ import {
 import { once } from 'lodash';
 
 import {
+  AssistantTool,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
-  GetApplicableTools,
   GetElser,
   PLUGIN_ID,
 } from './types';
@@ -122,8 +122,8 @@ export class ElasticAssistantPlugin
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
-      registerTools: (pluginName: string, getApplicableTools: GetApplicableTools) => {
-        return appContextService.registerTools(pluginName, getApplicableTools);
+      registerTools: (pluginName: string, tools: AssistantTool[]) => {
+        return appContextService.registerTools(pluginName, tools);
       },
     };
   }

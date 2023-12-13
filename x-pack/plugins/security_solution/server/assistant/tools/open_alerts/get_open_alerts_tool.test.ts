@@ -10,197 +10,214 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
-import { getOpenAlertsTool } from './get_open_alerts_tool';
+import { OPEN_ALERTS_TOOL } from './get_open_alerts_tool';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { MAX_SIZE } from './helpers';
+import type { RetrievalQAChain } from 'langchain/chains';
 
 describe('getOpenAlertsTool', () => {
-  const alertsIndexPattern = 'alerts-index';
-  const esClient = {
-    search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
-  } as unknown as ElasticsearchClient;
-  const replacements = { key: 'value' };
-  const request = {
-    body: {
-      assistantLangChain: false,
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
-      allowReplacement: ['user.name'],
-      replacements,
-      size: 20,
-    },
-  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-    const tool: DynamicTool = getOpenAlertsTool({
-      alertsIndexPattern,
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request,
-      size: request.body.size,
-    }) as DynamicTool;
-
-    await tool.func('');
-
-    expect(esClient.search).toHaveBeenCalledWith({
-      allow_no_indices: true,
+  describe('getTool', () => {
+    const alertsIndexPattern = 'alerts-index';
+    const esClient = {
+      search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
+    } as unknown as ElasticsearchClient;
+    const replacements = { key: 'value' };
+    const request = {
       body: {
-        _source: false,
-        fields: [
-          {
-            field: '@timestamp',
-            include_unmapped: true,
-          },
-          {
-            field: 'cloud.availability_zone',
-            include_unmapped: true,
-          },
-          {
-            field: 'user.name',
-            include_unmapped: true,
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      match_phrase: {
-                        'kibana.alert.workflow_status': 'open',
-                      },
-                    },
-                    {
-                      range: {
-                        '@timestamp': {
-                          format: 'strict_date_optional_time',
-                          gte: 'now-1d/d',
-                          lte: 'now/d',
+        assistantLangChain: false,
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
+        allowReplacement: ['user.name'],
+        replacements,
+        size: 20,
+      },
+    } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+    const assistantLangChain = true;
+    const chain = {} as unknown as RetrievalQAChain;
+    const modelExists = true;
+    const rest = {
+      assistantLangChain,
+      chain,
+      modelExists,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
+      const tool: DynamicTool = OPEN_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: request.body.size,
+        ...rest,
+      }) as DynamicTool;
+
+      await tool.func('');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        allow_no_indices: true,
+        body: {
+          _source: false,
+          fields: [
+            {
+              field: '@timestamp',
+              include_unmapped: true,
+            },
+            {
+              field: 'cloud.availability_zone',
+              include_unmapped: true,
+            },
+            {
+              field: 'user.name',
+              include_unmapped: true,
+            },
+          ],
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        match_phrase: {
+                          'kibana.alert.workflow_status': 'open',
                         },
                       },
-                    },
-                  ],
-                  must: [],
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'kibana.alert.building_block_type',
+                      {
+                        range: {
+                          '@timestamp': {
+                            format: 'strict_date_optional_time',
+                            gte: 'now-1d/d',
+                            lte: 'now/d',
+                          },
+                        },
                       },
-                    },
-                  ],
-                  should: [],
+                    ],
+                    must: [],
+                    must_not: [
+                      {
+                        exists: {
+                          field: 'kibana.alert.building_block_type',
+                        },
+                      },
+                    ],
+                    should: [],
+                  },
                 },
+              ],
+            },
+          },
+          runtime_mappings: {},
+          size: 20,
+          sort: [
+            {
+              'kibana.alert.risk_score': {
+                order: 'desc',
               },
-            ],
-          },
+            },
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
         },
-        runtime_mappings: {},
-        size: 20,
-        sort: [
-          {
-            'kibana.alert.risk_score': {
-              order: 'desc',
-            },
-          },
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-      },
-      ignore_unavailable: true,
-      index: ['alerts-index'],
-    });
-  });
-
-  it('returns null when the request is missing required anonymization parameters', () => {
-    const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
-      unknown,
-      unknown,
-      RequestBody
-    >;
-
-    const tool = getOpenAlertsTool({
-      alertsIndexPattern,
-      allow: requestWithMissingParams.body.allow,
-      allowReplacement: requestWithMissingParams.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request: requestWithMissingParams,
-      size: requestWithMissingParams.body.size,
+        ignore_unavailable: true,
+        index: ['alerts-index'],
+      });
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when the request is missing required anonymization parameters', () => {
+      const requestWithMissingParams = omit('body.allow', request) as unknown as KibanaRequest<
+        unknown,
+        unknown,
+        RequestBody
+      >;
 
-  it('returns null when alertsIndexPattern is undefined', () => {
-    const tool = getOpenAlertsTool({
-      // alertsIndexPattern is undefined
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request,
-      size: request.body.size,
+      const tool = OPEN_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        allow: requestWithMissingParams.body.allow,
+        allowReplacement: requestWithMissingParams.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request: requestWithMissingParams,
+        size: requestWithMissingParams.body.size,
+        ...rest,
+      });
+
+      expect(tool).toBeNull();
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when alertsIndexPattern is undefined', () => {
+      const tool = OPEN_ALERTS_TOOL.getTool({
+        // alertsIndexPattern is undefined
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: request.body.size,
+        ...rest,
+      });
 
-  it('returns null when size is undefined', () => {
-    const tool = getOpenAlertsTool({
-      alertsIndexPattern,
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request,
-      // size is undefined
+      expect(tool).toBeNull();
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when size is undefined', () => {
+      const tool = OPEN_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        ...rest,
+        // size is undefined
+      });
 
-  it('returns null when size out of range', () => {
-    const tool = getOpenAlertsTool({
-      alertsIndexPattern,
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request,
-      size: MAX_SIZE + 1, // <-- size is out of range
+      expect(tool).toBeNull();
     });
 
-    expect(tool).toBeNull();
-  });
+    it('returns null when size out of range', () => {
+      const tool = OPEN_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: MAX_SIZE + 1, // <-- size is out of range
+        ...rest,
+      });
 
-  it('returns a tool instance with the expected tags', () => {
-    const tool = getOpenAlertsTool({
-      alertsIndexPattern,
-      allow: request.body.allow,
-      allowReplacement: request.body.allowReplacement,
-      esClient,
-      onNewReplacements: jest.fn(),
-      replacements,
-      request,
-      size: request.body.size,
-    }) as DynamicTool;
+      expect(tool).toBeNull();
+    });
 
-    expect(tool.tags).toEqual(['alerts', 'open-alerts']);
+    it('returns a tool instance with the expected tags', () => {
+      const tool = OPEN_ALERTS_TOOL.getTool({
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        esClient,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: request.body.size,
+        ...rest,
+      }) as DynamicTool;
+
+      expect(tool.tags).toEqual(['alerts', 'open-alerts']);
+    });
   });
 });
