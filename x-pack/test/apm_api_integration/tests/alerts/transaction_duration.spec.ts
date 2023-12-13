@@ -235,7 +235,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       // FLAKY: https://github.com/elastic/kibana/issues/173127
-      it.skip('shows alert count=1 for opbeans-node on service inventory', async () => {
+      it.only('shows alert count=1 for opbeans-node on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,

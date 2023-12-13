@@ -217,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('returns same avg error rate value for Transaction-based and Metric-based data', () => {
+        it.only('returns same avg error rate value for Transaction-based and Metric-based data', () => {
           [
             errorTransactionValues.serviceInventoryErrorRate,
             errorTransactionValues.errorRateChartApiMean,

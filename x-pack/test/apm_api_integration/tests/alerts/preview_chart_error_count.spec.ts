@@ -54,23 +54,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when(`without data loaded`, { config: 'basic', archives: [] }, () => {
-    it('error_count (without data)', async () => {
-      const options = getOptions();
+  registry.when(`Preview chart error count`, { config: 'basic', archives: [] }, () => {
+    describe('error_count (without data)', () => {
+      it('', async () => {
+        const options = getOptions();
 
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
-        ...options,
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+          ...options,
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorCountChartPreview.series).to.eql([]);
       });
-
-      expect(response.status).to.be(200);
-      expect(response.body.errorCountChartPreview.series).to.eql([]);
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172769
-  registry.when.skip(`with data loaded`, { config: 'basic', archives: [] }, () => {
-    describe('error_count', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/172769
+    describe.only('error_count (with data)', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
@@ -302,10 +302,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
     });
-  });
 
-  registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
-    describe('error_count', () => {
+    describe('error_count (with data) and using KQL filter', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
