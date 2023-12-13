@@ -10,21 +10,29 @@ import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { UserDefinedRuleParams } from './types';
 
 export const validateExpression = (ruleParams: UserDefinedRuleParams): ValidationResult => {
-  const { stringifiedUserCode, customContextVariables } = ruleParams;
+  const { codeOrUrl, isUrl } = ruleParams;
 
   const validationResult = { errors: {} };
   const errors = {
-    stringifiedUserCode: new Array<string>(),
+    codeOrUrl: new Array<string>(),
     customContextVariables: new Array<string>(),
   };
   validationResult.errors = errors;
 
-  if (!stringifiedUserCode) {
-    errors.stringifiedUserCode.push(
-      i18n.translate('xpack.stackAlerts.userDefined.error.stringifiedUserCodeRequired', {
-        defaultMessage: 'User defined code is required.',
-      })
-    );
+  if (!codeOrUrl) {
+    if (isUrl) {
+      errors.codeOrUrl.push(
+        i18n.translate('xpack.stackAlerts.userDefined.error.urlRequired', {
+          defaultMessage: 'Url for user defined code is required.',
+        })
+      );
+    } else {
+      errors.codeOrUrl.push(
+        i18n.translate('xpack.stackAlerts.userDefined.error.codeRequired', {
+          defaultMessage: 'User defined code is required.',
+        })
+      );
+    }
   }
 
   return validationResult;
