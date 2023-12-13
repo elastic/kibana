@@ -23,12 +23,14 @@ import { S3Settings } from './s3_settings';
 
 interface Props {
   repository: Repository | EmptyRepository;
+  isManagedRepository?: boolean;
   updateRepository: (updatedFields: Partial<Repository>) => void;
   settingErrors: RepositorySettingsValidation;
 }
 
 export const TypeSettings: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   updateRepository,
   settingErrors,
 }) => {
@@ -71,6 +73,7 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
       return (
         <RepositorySettings
           repository={repository}
+          isManagedRepository={isManagedRepository}
           updateRepositorySettings={updateRepositorySettings}
           settingErrors={settingErrors}
         />

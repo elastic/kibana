@@ -486,6 +486,7 @@ export const riskEngineRouteHelpersFactory = (
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
