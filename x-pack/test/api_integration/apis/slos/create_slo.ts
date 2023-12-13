@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .post('/api/observability/slos')
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
         .send(request)
         .expect(200);
 
@@ -73,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         indicator: {
           params: {
             filter: 'system.network.name: eth1',
-            good: 'container.cpu.user.pct < 6',
+            good: 'container.cpu.user.pct < 1',
             index: 'kbn-data-forge*',
             timestampField: '@timestamp',
             total: 'container.cpu.user.pct: *',
@@ -160,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'slo.numerator': {
                   filter: {
                     bool: {
-                      should: [{ range: { 'container.cpu.user.pct': { lt: '6' } } }],
+                      should: [{ range: { 'container.cpu.user.pct': { lt: '1' } } }],
                       minimum_should_match: 1,
                     },
                   },

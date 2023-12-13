@@ -14,7 +14,7 @@ export async function loadTestData(getService: FtrProviderContext['getService'])
   const esClient = getService('es');
   const logger = getService('log');
 
-  await generate({ esClient, lookback: 'now-15m', logger });
+  await generate({ esClient, lookback: 'now-16m', logger });
   await dataViewApi.create({
     name: DATE_VIEW,
     id: DATA_VIEW_ID,

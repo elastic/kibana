@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         indicator: {
           params: {
             filter: 'system.network.name: eth1',
-            good: 'container.cpu.user.pct < 6',
+            good: 'container.cpu.user.pct < 1',
             index: 'kbn-data-forge*',
             timestampField: '@timestamp',
             total: 'container.cpu.user.pct: *',

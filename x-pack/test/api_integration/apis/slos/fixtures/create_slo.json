@@ -6,14 +6,14 @@
       "params": {
         "index": "kbn-data-forge*",
         "filter": "system.network.name: eth1",
-        "good": "container.cpu.user.pct < 6",
+        "good": "container.cpu.user.pct < 1",
         "total": "container.cpu.user.pct: *",
         "timestampField": "@timestamp"
       }
     },
     "budgetingMethod": "occurrences",
     "timeWindow": {
-      "duration": "30d",
+      "duration": "7d",
       "type": "rolling"
     },
     "objective": {
