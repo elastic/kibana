@@ -14,6 +14,7 @@ import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-ty
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
 import { BottomBar } from './bottom_bar';
+import { ChangeHandlerProvider } from './change_handler_context';
 import { useSave } from './use_save';
 
 /**
@@ -72,25 +73,26 @@ export const Form = (props: FormProps) => {
 
   return (
     <Fragment>
-      <FieldCategories
-        {...{
-          categorizedFields,
-          categoryCounts,
-          isSavingEnabled,
-          onFieldChange,
-          onClearQuery,
-          unsavedChanges,
-        }}
-      />
-      {!isEmpty(unsavedChanges) && (
-        <BottomBar
-          onSaveAll={saveAll}
-          onClearAllUnsaved={clearAllUnsaved}
-          hasInvalidChanges={hasInvalidChanges}
-          isLoading={isLoading}
-          unsavedChangesCount={unsavedChangesCount}
+      <ChangeHandlerProvider {...{ onFieldChangeFn: onFieldChange }}>
+        <FieldCategories
+          {...{
+            categorizedFields,
+            categoryCounts,
+            isSavingEnabled,
+            onClearQuery,
+            unsavedChanges,
+          }}
         />
-      )}
+        {!isEmpty(unsavedChanges) && (
+          <BottomBar
+            onSaveAll={saveAll}
+            onClearAllUnsaved={clearAllUnsaved}
+            hasInvalidChanges={hasInvalidChanges}
+            isLoading={isLoading}
+            unsavedChangesCount={unsavedChangesCount}
+          />
+        )}
+      </ChangeHandlerProvider>
     </Fragment>
   );
 };

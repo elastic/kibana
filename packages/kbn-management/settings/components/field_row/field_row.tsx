@@ -22,10 +22,10 @@ import type {
   SettingType,
   UnsavedFieldChange,
   OnInputChangeFn,
-  OnFieldChangeFn,
 } from '@kbn/management-settings-types';
 import { isImageFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldInput } from '@kbn/management-settings-components-field-input';
+import { useOnFieldChange } from '@kbn/management-settings-components-form';
 
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 import { FieldDescription } from './description';
@@ -60,8 +60,6 @@ export interface FieldRowProps {
   field: Definition;
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
-  /** The {@link OnInputChangeFn} handler. */
-  onFieldChange: OnFieldChangeFn;
   /**
    * The onClear handler, if a value is cleared to an empty or default state.
    * @param id The id relating to the field to clear.
@@ -76,8 +74,9 @@ export interface FieldRowProps {
  * @param props The {@link FieldRowProps} for the {@link FieldRow} component.
  */
 export const FieldRow = (props: FieldRowProps) => {
-  const { isSavingEnabled, onFieldChange, field, unsavedChange } = props;
+  const { isSavingEnabled, field, unsavedChange } = props;
   const { id, groupId, isOverridden, unsavedFieldId } = field;
+  const onFieldChange = useOnFieldChange();
   const { cssFieldFormGroup } = useFieldStyles({
     field,
     unsavedChange,
