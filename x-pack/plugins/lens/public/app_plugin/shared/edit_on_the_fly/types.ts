@@ -75,7 +75,7 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   canEditTextBasedQuery?: boolean;
-  /** Optional callback for navigation from the header of the flyout */
+  /** Optional callback for cancel/apply flyout buttons */
   onApplyCb?: (input: TypedLensByValueInput['attributes']) => void;
 }
 
