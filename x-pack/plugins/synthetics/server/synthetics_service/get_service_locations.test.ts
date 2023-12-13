@@ -5,6 +5,7 @@
  * 2.0.
  */
 import axios from 'axios';
+import { getServiceLocations } from './get_service_locations';
 
 import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
@@ -38,5 +39,54 @@ describe('getServiceLocations', function () {
         },
       },
     },
+  });
+
+  it('should return all locations', async () => {
+    const locations = await getServiceLocations({
+      isDev: true,
+      config: {
+        service: {
+          manifestUrl: 'http://local.dev',
+        },
+        enabled: true,
+      },
+      // @ts-ignore
+      logger: {
+        error: jest.fn(),
+      },
+    });
+
+    expect(locations).toEqual({
+      throttling: {
+        [BandwidthLimitKey.DOWNLOAD]: 100,
+        [BandwidthLimitKey.UPLOAD]: 50,
+      },
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          isInvalid: false,
+          label: 'US Central',
+          url: 'https://local.dev',
+          isServiceManaged: true,
+          status: LocationStatus.GA,
+        },
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_east',
+          isInvalid: false,
+          label: 'US East',
+          url: 'https://local.dev',
+          isServiceManaged: true,
+          status: LocationStatus.EXPERIMENTAL,
+        },
+      ],
+    });
   });
 });
