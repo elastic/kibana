@@ -50,6 +50,7 @@ const sloSchema = t.type({
   createdAt: dateType,
   updatedAt: dateType,
   groupBy: allOrAnyString,
+  version: t.number,
 });
 
 const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
