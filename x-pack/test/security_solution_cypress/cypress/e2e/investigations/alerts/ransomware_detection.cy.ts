@@ -14,6 +14,7 @@ import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../scre
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
 import { createTimeline } from '../../../tasks/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -24,33 +25,30 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  describe('Ransomware display in Alerts Section', () => {
+  after(() => {
+    cy.task('esArchiverUnload', 'ransomware_detection');
+  });
+
+  describe('Ransomware display on Alerts Page', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
-    describe('Alerts table', () => {
-      it('shows Ransomware Alerts', () => {
-        cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
-      });
+    it('should show Ransomware Alerts in alerts table', () => {
+      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
     });
 
-    describe('Trend Chart', () => {
-      beforeEach(() => {
-        selectAlertsHistogram();
-      });
-
-      it('shows Ransomware Detection Alert in the trend chart', () => {
-        cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
-      });
+    it('should show Ransomware Prevention Alert in the trend chart', () => {
+      selectAlertsHistogram();
+      cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170846
-  describe.skip('Ransomware in Timelines', () => {
-    before(() => {
+  describe('Ransomware in Timelines', () => {
+    beforeEach(() => {
+      deleteTimelines();
       login();
       visitWithTimeRange(TIMELINES_URL);
       createTimeline();

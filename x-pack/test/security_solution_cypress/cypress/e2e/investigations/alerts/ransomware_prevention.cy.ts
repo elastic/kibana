@@ -29,31 +29,24 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
     cy.task('esArchiverUnload', 'ransomware_prevention');
   });
 
-  describe('Ransomware display in Alerts Section', () => {
+  describe('Ransomware display on Alerts Page', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
     });
 
-    describe('Alerts table', () => {
-      it('shows Ransomware Alerts', () => {
-        cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
-      });
+    it('should show Ransomware Alerts in alerts table', () => {
+      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
     });
 
-    describe('Trend Chart', () => {
-      beforeEach(() => {
-        selectAlertsHistogram();
-      });
-
-      it('shows Ransomware Prevention Alert in the trend chart', () => {
-        cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Prevention Alert');
-      });
+    it('should show Ransomware Prevention Alert in the trend chart', () => {
+      selectAlertsHistogram();
+      cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Prevention Alert');
     });
   });
 
   describe('Ransomware in Timelines', function () {
-    before(() => {
+    beforeEach(() => {
       deleteTimelines();
       createTimeline({ ...getTimeline(), query: 'event.code: "ransomware"' }).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
