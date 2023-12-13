@@ -23,6 +23,7 @@ import { TransformProvider } from './transform';
 import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
+import { SloApiProvider } from './slo';
 
 export const services = {
   ...commonServices,
@@ -41,4 +42,5 @@ export const services = {
   transform: TransformProvider,
   ingestPipelines: IngestPipelinesProvider,
   indexManagement: IndexManagementProvider,
+  slo: SloApiProvider,
 };

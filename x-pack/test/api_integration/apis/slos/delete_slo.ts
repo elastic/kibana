@@ -21,13 +21,16 @@ export default function ({ getService }: FtrProviderContext) {
     const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
+    const logger = getService('log');
     const sloEsClient = new SloEsClient(esClient);
+    const slo = getService('slo');
+    const retry = getService('retry');
 
     let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
+      await slo.deleteAllSLOs();
       _createSLOInput = getFixtureJson('create_slo');
       loadTestData(getService);
     });
@@ -37,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
+      await slo.deleteAllSLOs();
     });
 
     after(async () => {
@@ -65,71 +68,71 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(savedObject.saved_objects[0].attributes.id).eql(id);
 
-      await new Promise((resolve) => setTimeout(resolve, 120000));
+      await retry.tryForTime(150 * 1000, async () => {
+        // expect summary and rollup data to exist
+        const sloSummaryResponse = await sloEsClient.getSLOSummaryDataById(id);
+        const sloRollupResponse = await sloEsClient.getSLORollupDataById(id);
 
-      // expect summary and rollup data to exist
-      const sloSummaryResponse = await sloEsClient.getSLOSummaryDataById(id);
-      const sloRollupResponse = await sloEsClient.getSLORollupDataById(id);
+        expect(sloSummaryResponse.hits.hits.length > 0).eql(true);
+        expect(sloRollupResponse.hits.hits.length > 0).eql(true);
 
-      expect(sloSummaryResponse.hits.hits.length > 0).eql(true);
-      expect(sloRollupResponse.hits.hits.length > 0).eql(true);
+        const rollUpTransformResponse = await supertestAPI
+          .get(`/internal/transform/transforms/slo-${id}-1`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
 
-      const rollUpTransformResponse = await supertestAPI
-        .get(`/internal/transform/transforms/slo-${id}-1`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(200);
+        // expect roll up transform to be created
+        expect(rollUpTransformResponse.body.transforms[0].id).eql(`slo-${id}-1`);
 
-      // expect roll up transform to be created
-      expect(rollUpTransformResponse.body.transforms[0].id).eql(`slo-${id}-1`);
+        const summaryTransform = await supertestAPI
+          .get(`/internal/transform/transforms/slo-summary-${id}-1`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
 
-      const summaryTransform = await supertestAPI
-        .get(`/internal/transform/transforms/slo-summary-${id}-1`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(200);
+        // expect summary transform to be created
+        expect(summaryTransform.body.transforms[0].id).eql(`slo-summary-${id}-1`);
 
-      // expect summary transform to be created
-      expect(summaryTransform.body.transforms[0].id).eql(`slo-summary-${id}-1`);
-
-      await supertestAPI
-        .delete(`/api/observability/slos/${id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(204);
-
-      await new Promise((resolve) => setTimeout(resolve, 60000));
-
-      const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
-        type: SO_SLO_TYPE,
+        await supertestAPI
+          .delete(`/api/observability/slos/${id}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(204);
       });
 
-      // SO should now be deleted
-      expect(savedObjectAfterDelete.saved_objects.length).eql(0);
+      await retry.tryForTime(150 * 1000, async () => {
+        const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
+          type: SO_SLO_TYPE,
+        });
 
-      // roll up transform should be deleted
-      await supertestAPI
-        .get(`/internal/transform/transforms/slo-${id}-1`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(404);
+        // SO should now be deleted
+        expect(savedObjectAfterDelete.saved_objects.length).eql(0);
 
-      // summary transform should be deleted
-      await supertestAPI
-        .get(`/internal/transform/transforms/slo-summary-${id}-1`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send()
-        .expect(404);
+        // roll up transform should be deleted
+        await supertestAPI
+          .get(`/internal/transform/transforms/slo-${id}-1`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(404);
 
-      // expect summary and rollup documents to be deleted
-      const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
-      const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
-      expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);
-      expect(sloRollupResponseAfterDeletion.hits.hits.length).eql(0);
+        // summary transform should be deleted
+        await supertestAPI
+          .get(`/internal/transform/transforms/slo-summary-${id}-1`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(404);
+
+        // expect summary and rollup documents to be deleted
+        const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
+        const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
+        expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);
+        expect(sloRollupResponseAfterDeletion.hits.hits.length).eql(0);
+      });
     });
   });
 }

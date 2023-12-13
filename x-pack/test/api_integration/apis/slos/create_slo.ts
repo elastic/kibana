@@ -21,13 +21,18 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
+    const slo = getService('slo');
 
     let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await slo.deleteAllSLOs();
       _createSLOInput = getFixtureJson('create_slo');
+      await esClient.deleteByQuery({
+        index: 'kbn-data-forge-fake_hosts*',
+        query: { term: { 'system.network.name': 'eth1' } },
+      });
       await loadTestData(getService);
     });
 
@@ -36,11 +41,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
+      await slo.deleteAllSLOs();
     });
 
     after(async () => {
       await cleanup({ esClient, logger });
+      await esClient.deleteByQuery({
+        index: 'kbn-data-forge-fake_hosts*',
+        query: { term: { 'system.network.name': 'eth1' } },
+      });
     });
 
     it('creates a new slo and transforms', async () => {
@@ -92,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         tags: ['test'],
         timeWindow: {
-          duration: '30d',
+          duration: '7d',
           type: 'rolling',
         },
         version: 2,
@@ -119,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: {
                 bool: {
                   filter: [
-                    { range: { '@timestamp': { gte: 'now-30d/d' } } },
+                    { range: { '@timestamp': { gte: 'now-7d/d' } } },
                     {
                       bool: {
                         should: [
@@ -204,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: {
                 bool: {
                   filter: [
-                    { range: { '@timestamp': { gte: 'now-30d/m', lte: 'now/m' } } },
+                    { range: { '@timestamp': { gte: 'now-7d/m', lte: 'now/m' } } },
                     { term: { 'slo.id': id } },
                     { term: { 'slo.revision': 1 } },
                   ],
@@ -255,8 +264,8 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 errorBudgetRemaining: {
                   bucket_script: {
-                    buckets_path: { errorBudgetConsummed: 'errorBudgetConsumed' },
-                    script: '1 - params.errorBudgetConsummed',
+                    buckets_path: { errorBudgetConsumed: 'errorBudgetConsumed' },
+                    script: '1 - params.errorBudgetConsumed',
                   },
                 },
                 statusCode: {
@@ -274,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
                 latestSliTimestamp: { max: { field: '@timestamp' } },
               },
             },
-            description: `Summarise the rollup data of the SLO [id: ${id}, revision: 1].`,
+            description: `Summarise the rollup data of SLO: Test SLO for api integration [id: ${id}, revision: 1].`,
             settings: { deduce_mappings: false, unattended: true },
             _meta: { version: 3, managed: true, managed_by: 'observability' },
           },
