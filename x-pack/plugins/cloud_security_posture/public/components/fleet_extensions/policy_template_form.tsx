@@ -442,7 +442,7 @@ const AzureAccountTypeSelect = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
-            value: AZURE_SINGLE_ACCOUNT,
+            value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
           'azure.credentials.type': {
