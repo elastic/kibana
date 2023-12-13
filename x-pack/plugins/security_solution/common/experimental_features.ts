@@ -157,6 +157,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   sentinelOneManualHostActionsEnabled: false,
 
+  /**
+   * Enables executing given text input in endpoint response console
+   */
+  responseConsoleExecuteEnabled: false,
+
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
