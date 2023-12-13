@@ -6,51 +6,33 @@
  */
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import {
-  GetGlobalExecutionKPIParams,
-  INTERNAL_BASE_ACTION_API_PATH,
-  RewriteRequestCase,
-} from '../../common';
-import { verifyAccessAndContext } from './verify_access_and_context';
-import { ActionsRequestHandlerContext } from '../types';
-import { ILicenseState } from '../lib';
-import { rewriteNamespaces } from './rewrite_namespaces';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../../common';
+import { verifyAccessAndContext } from '../verify_access_and_context';
+import { ActionsRequestHandlerContext } from '../../types';
+import { ILicenseState } from '../../lib';
 
-const bodySchema = schema.object({
-  date_start: schema.string(),
-  date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+const paramsSchema = schema.object({
+  connector_type_id: schema.string(),
 });
 
-const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({
-  date_start: dateStart,
-  date_end: dateEnd,
-  namespaces,
-  ...rest
-}) => ({
-  ...rest,
-  namespaces: rewriteNamespaces(namespaces),
-  dateStart,
-  dateEnd,
-});
-
-export const getGlobalExecutionKPIRoute = (
+export const getActionTemplates = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.get(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_kpi`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/templates/{connector_type_id}`,
       validate: {
-        body: bodySchema,
+        params: paramsSchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = (await context.actions).getActionsClient();
+        const actionTemplateClient = (await context.actions).getActionTemplateClient();
         return res.ok({
-          body: await actionsClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.body)),
+          body: await actionTemplateClient.getTemplates(
+            decodeURIComponent(req.params.connector_type_id)
+          ),
         });
       })
     )

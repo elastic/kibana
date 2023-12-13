@@ -22,6 +22,7 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { createActionTemplateRoute } from './action_template/create';
+import { getActionTemplates } from './action_template/get_templates';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -48,4 +49,5 @@ export function defineRoutes(opts: RouteOptions) {
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
 
   createActionTemplateRoute(router, licenseState);
+  getActionTemplates(router, licenseState);
 }

@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFormRow, EuiCallOut, EuiSpacer, EuiButtonIcon, EuiText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiCallOut,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiText,
+  EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
@@ -18,6 +27,8 @@ import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 import { SaveActionTemplateModal } from './save_action_template_modal';
+import { useKibana } from '../../common';
+import { getActionTemplates } from '../lib/action_connector_api/get_action_templates';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.noEditorErrorTitle',
@@ -73,10 +84,16 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   canUseTemplate,
   euiCodeEditorProps = {},
 }) => {
+  const { http } = useKibana().services;
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isTemplatePopoverOpen, setIsTemplatePopoverOpen] = useState<boolean>(false);
+  const [templateOptions, setTemplateOptions] = useState<EuiSelectableOption[]>([]);
+  const [loadedTemplates, setLoadedTemplates] = useState<Array<{ name: string; template: string }>>(
+    []
+  );
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
@@ -86,6 +103,35 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputTargetValue]);
+
+  useEffect(() => {
+    async function fetchTemplate() {
+      try {
+        if (connectorTypeId) {
+          const templates = await getActionTemplates({ http, connectorTypeId });
+          setLoadedTemplates(templates);
+          setTemplateOptions((templates ?? []).map((t) => ({ label: t.name })));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchTemplate();
+  }, [http, connectorTypeId]);
+
+  const onTemplateSelect = useCallback(
+    (selectedOptions: EuiSelectableOption[]) => {
+      const selectedIndex = selectedOptions.findIndex((opt) => opt.checked === 'on');
+      if (selectedIndex > -1 && selectedIndex < loadedTemplates.length) {
+        setXJson(loadedTemplates[selectedIndex].template);
+        // Keep the documents in sync with the editor content
+        onDocumentsChange(convertToJson(loadedTemplates[selectedIndex].template));
+      }
+      setIsTemplatePopoverOpen(false);
+    },
+    [loadedTemplates, setXJson]
+  );
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
@@ -168,9 +214,9 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
         label={label}
         labelAppend={
           <>
-            {canUseTemplate && (
-              <>
-                <EuiText size="xs">
+            <EuiText size="xs">
+              {canUseTemplate && (
+                <>
                   {xJson.length > 0 && (
                     <EuiButtonIcon
                       id="saveButton"
@@ -180,22 +226,47 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
                       onClick={() => setIsModalOpen(true)}
                     />
                   )}
-                  <EuiButtonIcon
-                    id="loadButton"
-                    data-test-subj="loadButton"
-                    title="Load Template"
-                    iconType="folderOpen"
-                  />
-                </EuiText>
-              </>
-            )}
-            <AddMessageVariables
-              buttonTitle={buttonTitle}
-              messageVariables={messageVariables}
-              onSelectEventHandler={onSelectMessageVariable}
-              paramsProperty={paramsProperty}
-              showButtonTitle={showButtonTitle}
-            />
+                  <EuiPopover
+                    button={
+                      <EuiButtonIcon
+                        id="loadButton"
+                        data-test-subj="loadButton"
+                        title="Load Template"
+                        iconType="folderOpen"
+                        onClick={() => setIsTemplatePopoverOpen(true)}
+                      />
+                    }
+                    isOpen={isTemplatePopoverOpen}
+                    closePopover={() => setIsTemplatePopoverOpen(false)}
+                    panelPaddingSize="s"
+                    anchorPosition="upRight"
+                    panelStyle={{ minWidth: 350 }}
+                  >
+                    <EuiSelectable
+                      data-test-subj={'messageVariablesSelectableList'}
+                      options={templateOptions}
+                      listProps={{
+                        rowHeight: 50,
+                        showIcons: false,
+                        paddingSize: 'none',
+                        textWrap: 'wrap',
+                      }}
+                      singleSelection
+                      onChange={onTemplateSelect}
+                    >
+                      {(list) => list}
+                    </EuiSelectable>
+                  </EuiPopover>
+                </>
+              )}
+              <AddMessageVariables
+                buttonTitle={buttonTitle}
+                messageVariables={messageVariables}
+                onSelectEventHandler={onSelectMessageVariable}
+                paramsProperty={paramsProperty}
+                showButtonTitle={showButtonTitle}
+              />
+            </EuiText>
           </>
         }
         helpText={helpText}
