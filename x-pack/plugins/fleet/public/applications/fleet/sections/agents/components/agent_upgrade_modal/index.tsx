@@ -133,7 +133,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     if (!isUpdating) return;
 
     getStuckUpdatingAgentCount(agents);
-  }, [isUpdating, setUpdatingQuery, QUERY_STUCK_UPDATING, agents, updatingQuery]);
+  }, [isUpdating, setUpdatingQuery, QUERY_STUCK_UPDATING, agents]);
 
   useEffect(() => {
     const getVersions = async () => {
@@ -240,7 +240,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       const { error } =
         isSingleAgent &&
         !isScheduled &&
-        isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion)
+        isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value)
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
               force: isUpdating,
@@ -338,7 +338,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         isSubmitting ||
         noVersions ||
         (isUpdating && updatingAgents === 0) ||
-        (isSingleAgent && !isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion))
+        (isSingleAgent &&
+          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value))
       }
       confirmButtonText={
         isSingleAgent ? (
@@ -373,8 +374,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
           />
         ) : isSingleAgent ? (
-          !isAgentUpgradeable(agents[0], latestAgentVersion, selectedVersion) ? (
+          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value) ? (
             <EuiCallOut
+              data-test-subj="agentUpgradeModal.notUpgradeableCallout"
               color="warning"
               iconType="warning"
               title={
@@ -388,7 +390,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                 id="xpack.fleet.upgradeAgents.notUpgradeableMsg"
                 defaultMessage="Reason: {reason}"
                 values={{
-                  reason: getNotUpgradeableMessage(agents[0], latestAgentVersion, selectedVersion),
+                  reason: getNotUpgradeableMessage(
+                    agents[0],
+                    latestAgentVersion,
+                    selectedVersion[0].value
+                  ),
                 }}
               />
             </EuiCallOut>

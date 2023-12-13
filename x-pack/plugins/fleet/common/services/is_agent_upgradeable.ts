@@ -8,6 +8,7 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import semverGt from 'semver/functions/gt';
+import semverEq from 'semver/functions/eq';
 
 import type { Agent } from '../types';
 
@@ -45,20 +46,20 @@ export function isAgentUpgradeable(
 // Based on the previous, returns a detailed message explaining why the agent is not upgradeable
 export const getNotUpgradeableMessage = (
   agent: Agent,
-  latestAgentVersion: string,
+  latestAgentVersion?: string,
   versionToUpgrade?: string
 ) => {
   let agentVersion: string;
   if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
     agentVersion = agent.local_metadata.elastic.agent.version;
   } else {
-    return `version is missing.`;
+    return `agent version is missing.`;
   }
   if (agent.unenrolled_at) {
     return `agent was unenrolled.`;
   }
   if (agent.unenrollment_started_at) {
-    return `agent unenrollment started at ${new Date(agent.unenrollment_started_at)}.`;
+    return `agent unenrollment was started.`;
   }
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return `agent is marked as not upgradeable in elastic-agent.`;
@@ -69,24 +70,33 @@ export const getNotUpgradeableMessage = (
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return `the agent has been upgraded recently. Please wait.`;
   }
-  if (versionToUpgrade !== undefined) {
-    const agentVersionNumber = semverCoerce(agentVersion);
-    if (!agentVersionNumber) return 'agent version is not valid.';
+  const agentVersionNumber = semverCoerce(agentVersion);
+  if (!agentVersionNumber) return 'agent version is not valid.';
 
+  if (versionToUpgrade !== undefined) {
     const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
     if (!versionToUpgradeNumber) return 'target version is not valid.';
 
-    // TODO: verify this one
+    if (semverEq(agentVersionNumber, versionToUpgradeNumber))
+      return `agent is already at the selected version.`;
+
     if (semverLt(versionToUpgradeNumber, agentVersionNumber))
       return `target version is lower than current version.`;
+    // explicitly allow this case - the agent is upgradeable
+    if (semverGt(versionToUpgradeNumber, agentVersionNumber)) return undefined;
   }
 
   const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
   if (!latestAgentVersionNumber) return 'latest version is not valid.';
 
-  // TODO: verify this one
-  if (semverGt(agentVersion, latestAgentVersionNumber))
+  if (semverEq(agentVersionNumber, latestAgentVersionNumber))
+    return `agent version is already the latest.`;
+
+  if (semverGt(agentVersionNumber, latestAgentVersionNumber))
     return `agent version is lower than latest.`;
+
+  // in all the other cases, the agent is upgradeable; don't return any message.
+  return undefined;
 };
 
 const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
