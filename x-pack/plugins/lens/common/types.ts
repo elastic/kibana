@@ -11,9 +11,16 @@ import type { $Values } from '@kbn/utility-types';
 import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
-import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
-import { layerTypes } from './layer_types';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
+import { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { VisualizeEditorContext } from '../public/types';
 import { CollapseFunction } from './expressions';
+import { layerTypes } from './layer_types';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
@@ -94,4 +101,71 @@ export interface LegacyMetricState {
   titlePosition?: 'top' | 'bottom';
   size?: string;
   textAlign?: 'left' | 'right' | 'center';
+}
+
+export interface IndexPatternRef {
+  id: string;
+  title: string;
+  name?: string;
+}
+
+export type IndexPatternField = FieldSpec & {
+  displayName: string;
+  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+  /**
+   * Map of fields which can be used, but may fail partially (ranked lower than others)
+   */
+  partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
+  timeSeriesRollup?: boolean;
+  meta?: boolean;
+  runtime?: boolean;
+};
+
+export interface IndexPattern {
+  id: string;
+  fields: IndexPatternField[];
+  getFieldByName(name: string): IndexPatternField | undefined;
+  title: string;
+  name?: string;
+  timeFieldName?: string;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: FieldFormatParams;
+    }
+  >;
+  hasRestrictions: boolean;
+  spec: DataViewSpec;
+  isPersisted: boolean;
+}
+
+export type IndexPatternMap = Record<string, IndexPattern>;
+
+/**
+ * A subset of datasource methods used on both client and server
+ */
+export interface DatasourceCommon<T = unknown, P = unknown> {
+  // For initializing, either from an empty state or from persisted state
+  // Because this will be called at runtime, state might have a type of `any` and
+  // datasources should validate their arguments
+  initialize: (
+    state?: P,
+    savedObjectReferences?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+    indexPatternRefs?: IndexPatternRef[],
+    indexPatterns?: IndexPatternMap
+  ) => T;
+
+  getLayers: (state: T) => string[];
+
+  toExpression: (
+    state: T,
+    layerId: string,
+    indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
+    nowInstant: Date,
+    searchSessionId?: string
+  ) => ExpressionAstExpression | string | null;
 }

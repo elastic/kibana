@@ -29,10 +29,8 @@ import type {
   BrushTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
@@ -42,7 +40,15 @@ import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { DateRange, LayerType, SortingHint } from '../common/types';
+import type {
+  DatasourceCommon,
+  DateRange,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternMap,
+  LayerType,
+  SortingHint,
+} from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -58,46 +64,8 @@ import {
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
-import type { IndexPatternServiceAPI } from './data_views_service/service';
+import type { IndexPatternServiceAPI } from '../common/data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
-
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-  name?: string;
-}
-
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  getFieldByName(name: string): IndexPatternField | undefined;
-  title: string;
-  name?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: FieldFormatParams;
-    }
-  >;
-  hasRestrictions: boolean;
-  spec: DataViewSpec;
-  isPersisted: boolean;
-}
-
-export type IndexPatternField = FieldSpec & {
-  displayName: string;
-  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-  /**
-   * Map of fields which can be used, but may fail partially (ranked lower than others)
-   */
-  partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
-  timeSeriesRollup?: boolean;
-  meta?: boolean;
-  runtime?: boolean;
-};
 
 export interface PublicAPIProps<T> {
   state: T;
@@ -115,7 +83,6 @@ export interface EditorFrameProps {
 
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
-export type IndexPatternMap = Record<string, IndexPattern>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -313,20 +280,9 @@ export function isMessageRemovable(message: UserMessage): message is RemovableUs
 /**
  * Interface for the datasource registry
  */
-export interface Datasource<T = unknown, P = unknown> {
+export interface Datasource<T = unknown, P = unknown> extends DatasourceCommon<T, P> {
   id: string;
   alias?: string[];
-
-  // For initializing, either from an empty state or from persisted state
-  // Because this will be called at runtime, state might have a type of `any` and
-  // datasources should validate their arguments
-  initialize: (
-    state?: P,
-    savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-    indexPatternRefs?: IndexPatternRef[],
-    indexPatterns?: IndexPatternMap
-  ) => T;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -341,7 +297,6 @@ export interface Datasource<T = unknown, P = unknown> {
     newLayerId: string,
     getNewId: (id: string) => string
   ) => T;
-  getLayers: (state: T) => string[];
   removeColumn: (props: {
     prevState: T;
     layerId: string;
@@ -412,15 +367,6 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => void;
 
   onRefreshIndexPattern: () => void;
-
-  toExpression: (
-    state: T,
-    layerId: string,
-    indexPatterns: IndexPatternMap,
-    dateRange: DateRange,
-    nowInstant: Date,
-    searchSessionId?: string
-  ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
     state: T,
