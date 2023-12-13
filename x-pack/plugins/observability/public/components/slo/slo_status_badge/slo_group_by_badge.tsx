@@ -26,10 +26,10 @@ export function SloGroupByBadge({ slo, color }: Props) {
       <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.observability.slo.partitionByBadge', {
-            defaultMessage: 'Partition by {partitionKey}',
+          content={i18n.translate('xpack.observability.slo.groupByBadge', {
+            defaultMessage: 'Group by {groupKey}',
             values: {
-              partitionKey: slo.groupBy,
+              groupKey: slo.groupBy,
             },
           })}
           display="block"
