@@ -37,7 +37,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       visitWithTimeRange(hostsUrl('allHosts'));
     });
 
-    it('executes a KQL query', () => {
+    it('should execute a KQL query', () => {
       const hostExistsQuery = 'host.name: *';
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
@@ -45,7 +45,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
 
-    it('executes a Lucene query', () => {
+    it('should execute a Lucene query', () => {
       const messageProcessQuery = 'message:Process\\ zsh*';
       openTimelineUsingToggle();
       changeTimelineQueryLanguage('lucene');
