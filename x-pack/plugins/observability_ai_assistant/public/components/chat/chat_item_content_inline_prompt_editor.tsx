@@ -10,10 +10,9 @@ import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { type Message, MessageRole } from '../../../common';
 import type { ChatActionClickHandler } from './types';
-import type { ObservabilityAIAssistantChatService } from '../../types';
+import type { TelemetryType } from '../../analytics';
 
 interface Props {
-  chatService: ObservabilityAIAssistantChatService;
   content: string | undefined;
   functionCall:
     | {
@@ -24,23 +23,23 @@ interface Props {
     | undefined;
   loading: boolean;
   editing: boolean;
-  onSubmit: (message: Message) => void;
   onActionClick: ChatActionClickHandler;
+  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
+  onSubmit: (message: Message) => void;
 }
 export function ChatItemContentInlinePromptEditor({
-  chatService,
   content,
   functionCall,
   editing,
   loading,
-  onSubmit,
   onActionClick,
+  onSendTelemetry,
+  onSubmit,
 }: Props) {
   return !editing ? (
     <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
   ) : (
     <ChatPromptEditor
-      chatService={chatService}
       disabled={false}
       loading={false}
       initialPrompt={content}
@@ -48,6 +47,7 @@ export function ChatItemContentInlinePromptEditor({
       initialSelectedFunctionName={functionCall?.name}
       trigger={functionCall?.trigger}
       onSubmit={onSubmit}
+      onSendTelemetry={onSendTelemetry}
     />
   );
 }

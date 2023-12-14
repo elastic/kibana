@@ -22,11 +22,9 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { MessageRole, type Message } from '../../../common';
 import { FunctionListPopover } from './function_list_popover';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
-import type { ObservabilityAIAssistantChatService } from '../../types';
-import { USER_SENT_PROMPT } from '../../analytics/user_interaction';
+import { TELEMETRY, TelemetryType } from '../../analytics';
 
 export interface ChatPromptEditorProps {
-  chatService: ObservabilityAIAssistantChatService;
   disabled: boolean;
   loading: boolean;
   initialPrompt?: string;
@@ -34,16 +32,17 @@ export interface ChatPromptEditorProps {
   initialFunctionPayload?: string;
   trigger?: MessageRole;
   onSubmit: (message: Message) => void;
+  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
 }
 
 export function ChatPromptEditor({
-  chatService,
   disabled,
   loading,
   initialPrompt,
   initialSelectedFunctionName,
   initialFunctionPayload,
   onSubmit,
+  onSendTelemetry,
 }: ChatPromptEditorProps) {
   const isFocusTrapEnabled = Boolean(initialPrompt);
 
@@ -144,11 +143,11 @@ export function ChatPromptEditor({
         onSubmit(message);
       }
 
-      chatService.analytics.reportEvent(USER_SENT_PROMPT, message);
+      onSendTelemetry(TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat, message);
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [chatService, functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+  }, [functionPayload, loading, onSendTelemetry, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);

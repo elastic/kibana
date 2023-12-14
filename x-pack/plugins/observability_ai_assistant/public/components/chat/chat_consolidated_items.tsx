@@ -11,7 +11,6 @@ import { EuiAvatar, EuiButtonIcon, EuiComment, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ChatItem } from './chat_item';
 import type { ChatTimelineItem, ChatTimelineProps } from './chat_timeline';
-import type { ObservabilityAIAssistantChatService } from '../../types';
 
 const noPanelStyle = css`
   .euiCommentEvent {
@@ -49,21 +48,21 @@ const noPanelStyle = css`
 `;
 
 export function ChatConsolidatedItems({
-  chatService,
   consolidatedItem,
+  onActionClick,
+  onEditSubmit,
   onFeedback,
   onRegenerate,
-  onEditSubmit,
+  onSendTelemetry,
   onStopGenerating,
-  onActionClick,
 }: {
-  chatService: ObservabilityAIAssistantChatService;
   consolidatedItem: ChatTimelineItem[];
+  onActionClick: ChatTimelineProps['onActionClick'];
+  onEditSubmit: ChatTimelineProps['onEdit'];
   onFeedback: ChatTimelineProps['onFeedback'];
   onRegenerate: ChatTimelineProps['onRegenerate'];
-  onEditSubmit: ChatTimelineProps['onEdit'];
+  onSendTelemetry: ChatTimelineProps['onSendTelemetry'];
   onStopGenerating: ChatTimelineProps['onStopGenerating'];
-  onActionClick: ChatTimelineProps['onActionClick'];
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -125,16 +124,16 @@ export function ChatConsolidatedItems({
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
               {...item}
-              chatService={chatService}
+              onActionClick={onActionClick}
+              onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);
               }}
               onRegenerateClick={() => {
                 onRegenerate(item.message);
               }}
-              onEditSubmit={(message) => onEditSubmit(item.message, message)}
+              onSendTelemetry={onSendTelemetry}
               onStopGeneratingClick={onStopGenerating}
-              onActionClick={onActionClick}
             />
           ))
         : null}

@@ -25,15 +25,15 @@ import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
 import type { Message } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import type { ChatActionClickHandler } from './types';
-import type { ObservabilityAIAssistantChatService } from '../../types';
+import type { TelemetryType } from '../../analytics';
 
 export interface ChatItemProps extends ChatTimelineItem {
-  chatService: ObservabilityAIAssistantChatService;
+  onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
+  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
   onStopGeneratingClick: () => void;
-  onActionClick: ChatActionClickHandler;
 }
 
 const normalMessageClassName = css`
@@ -68,7 +68,6 @@ const noPanelMessageClassName = css`
 
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
-  chatService,
   content,
   currentUser,
   display: { collapsed },
@@ -79,11 +78,12 @@ export function ChatItem({
     message: { function_call: functionCall, role },
   },
   title,
+  onActionClick,
   onEditSubmit,
   onFeedbackClick,
   onRegenerateClick,
+  onSendTelemetry,
   onStopGeneratingClick,
-  onActionClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -127,13 +127,13 @@ export function ChatItem({
   let contentElement: React.ReactNode =
     content || loading || error ? (
       <ChatItemContentInlinePromptEditor
-        chatService={chatService}
         content={content}
         editing={editing}
         functionCall={functionCall}
         loading={loading}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
+        onSendTelemetry={onSendTelemetry}
       />
     ) : null;
 

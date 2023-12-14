@@ -27,12 +27,7 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
-import {
-  MessageFeedback,
-  MESSAGE_FEEDBACK_SCHEMA,
-} from './analytics/feedback_on_assistant_answers';
-import type { Message } from '../common';
-import { USER_SENT_PROMPT_SCHEMA } from './analytics/user_interaction';
+import { registerTelemetryEventTypes } from './analytics';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -94,8 +89,7 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
-    coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
-    coreSetup.analytics.registerEventType<Message>(USER_SENT_PROMPT_SCHEMA);
+    registerTelemetryEventTypes(coreSetup);
 
     return {};
   }

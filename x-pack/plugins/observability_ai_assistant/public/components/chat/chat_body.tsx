@@ -29,12 +29,12 @@ import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
-import { MESSAGE_FEEDBACK } from '../../analytics/feedback_on_assistant_answers';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { ChatActionClickType } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { ChatFeedback, TELEMETRY } from '../../analytics';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -140,8 +140,15 @@ export function ChatBody({
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    const feedbackEvent = { ...message, feedback };
-    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+    if (conversation.value?.conversation && 'user' in conversation.value.conversation) {
+      chatService.analytics.reportEvent<ChatFeedback>(
+        TELEMETRY.observability_ai_assistant_chat_feedback,
+        {
+          messageWithFeedback: { message, feedback },
+          conversation: conversation.value.conversation,
+        }
+      );
+    }
   };
 
   useEffect(() => {
@@ -191,12 +198,12 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              chatService={chatService}
               loading={isLoading}
               disabled
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
+              onSendTelemetry={chatService.analytics.reportEvent}
             />
             <EuiSpacer size="s" />
           </EuiPanel>
@@ -237,6 +244,7 @@ export function ChatBody({
                     const indexOf = messages.indexOf(message);
                     next(messages.slice(0, indexOf));
                   }}
+                  onSendTelemetry={chatService.analytics.reportEvent}
                   onStopGenerating={() => {
                     stop();
                   }}
@@ -284,9 +292,9 @@ export function ChatBody({
             className={promptEditorContainerClassName}
           >
             <ChatPromptEditor
-              chatService={chatService}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               loading={isLoading}
+              onSendTelemetry={chatService.analytics.reportEvent}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
