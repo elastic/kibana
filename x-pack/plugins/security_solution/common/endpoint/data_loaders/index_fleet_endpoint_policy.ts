@@ -35,6 +35,10 @@ export interface IndexedFleetEndpointPolicyResponse {
   agentPolicies: AgentPolicy[];
 }
 
+enum TimeoutsInMS {
+  TEN_SECONDS = 10 * 1000,
+  FIVE_MINUTES = 5 * 60 * 1000,
+}
 /**
  * Create an endpoint Integration Policy (and associated Agent Policy) via Fleet
  * (NOTE: ensure that fleet is setup first before calling this loading function)
@@ -127,7 +131,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     const started = new Date();
     const hasTimedOut = (): boolean => {
       const elapsedTime = Date.now() - started.getTime();
-      return elapsedTime > 5 * 60 * 1000;
+      return elapsedTime > TimeoutsInMS.FIVE_MINUTES;
     };
 
     let packagePolicy: CreatePackagePolicyResponse | undefined;
@@ -141,7 +145,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       );
 
       if (!packagePolicy) {
-        await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+        await new Promise((resolve) => setTimeout(resolve, TimeoutsInMS.TEN_SECONDS));
       }
     }
 
