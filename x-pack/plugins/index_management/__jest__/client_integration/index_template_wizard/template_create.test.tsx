@@ -547,10 +547,12 @@ describe('<TemplateCreate />', () => {
     });
 
     it.skip('should send the correct payload', async () => {
-      const { actions, find } = testBed;
+      // const { actions, find } = testBed;
+      const { find } = testBed;
 
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
 
+      /*
       await act(async () => {
         actions.clickNextButton();
       });
@@ -593,6 +595,7 @@ describe('<TemplateCreate />', () => {
           }),
         })
       );
+     */
     });
 
     it('should surface the API errors from the put HTTP request', async () => {
