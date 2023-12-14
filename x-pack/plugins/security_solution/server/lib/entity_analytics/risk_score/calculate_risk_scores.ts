@@ -63,11 +63,13 @@ const formatForResponse = ({
   criticality,
   now,
   identifierField,
+  includeNewFields = false,
 }: {
   bucket: RiskScoreBucket;
   criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
+  includeNewFields?: boolean;
 }): RiskScore => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
@@ -79,12 +81,17 @@ const formatForResponse = ({
     normalizedScoreWithCriticality - bucket.risk_details.value.normalized_score;
   const categoryFiveCount = criticalityModifier ? 1 : 0;
 
+  const newFields = {
+    category_5_score: categoryFiveScore,
+    category_5_count: categoryFiveCount,
+    criticality_level: criticality?.criticality_level,
+    criticality_modifier: criticalityModifier,
+  };
+
   return {
     '@timestamp': now,
     id_field: identifierField,
     id_value: bucket.key[identifierField],
-    criticality_level: criticality?.criticality_level,
-    criticality_modifier: criticalityModifier,
     calculated_level: calculatedLevel,
     calculated_score: bucket.risk_details.value.score,
     calculated_score_norm: normalizedScoreWithCriticality,
@@ -93,8 +100,6 @@ const formatForResponse = ({
       max: RISK_SCORING_SUM_MAX,
     }),
     category_1_count: bucket.risk_details.value.category_1_count,
-    category_5_score: categoryFiveScore,
-    category_5_count: categoryFiveCount,
     notes: bucket.risk_details.value.notes,
     inputs: bucket.inputs.hits.hits.map((riskInput) => ({
       id: riskInput._id,
@@ -106,6 +111,7 @@ const formatForResponse = ({
       risk_score: riskInput.fields?.[ALERT_RISK_SCORE]?.[0] ?? undefined,
       timestamp: riskInput.fields?.['@timestamp']?.[0] ?? undefined,
     })),
+    ...(includeNewFields ? newFields : {}),
   };
 };
 
@@ -233,6 +239,12 @@ const processScores = async ({
 }): Promise<RiskScore[]> => {
   if (buckets.length === 0) {
     return [];
+  }
+
+  if (!assetCriticalityService.isEnabled()) {
+    return buckets.map((bucket) =>
+      formatForResponse({ bucket, now, identifierField, includeNewFields: false })
+    );
   }
 
   const identifiers = buckets.map((bucket) => ({

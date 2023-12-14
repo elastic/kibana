@@ -182,6 +182,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (experimentalFeatures.riskScoringPersistence) {
       registerRiskScoringTask({
+        experimentalFeatures,
         getStartServices: core.getStartServices,
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,

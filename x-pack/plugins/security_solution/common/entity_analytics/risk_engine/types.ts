@@ -56,15 +56,15 @@ export interface RiskScore {
   '@timestamp': string;
   id_field: string;
   id_value: string;
-  criticality_level: string | undefined;
-  criticality_modifier: number | undefined;
+  criticality_level?: string | undefined;
+  criticality_modifier?: number | undefined;
   calculated_level: string;
   calculated_score: number;
   calculated_score_norm: number;
   category_1_score: number;
   category_1_count: number;
-  category_5_score: number;
-  category_5_count: number;
+  category_5_score?: number;
+  category_5_count?: number;
   notes: string[];
   inputs: RiskInputs;
 }

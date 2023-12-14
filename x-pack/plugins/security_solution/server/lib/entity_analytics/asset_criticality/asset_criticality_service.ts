@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import type { ExperimentalFeatures } from '../../../../common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
@@ -22,6 +23,7 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
+  isEnabled: () => boolean;
 }
 
 const isCriticalityIdentifierValid = (identifier: CriticalityIdentifier): boolean =>
@@ -86,11 +88,14 @@ const getCriticalitiesByIdentifiers = async ({
 
 interface AssetCriticalityServiceFactoryOptions {
   assetCriticalityDataClient: AssetCriticalityDataClient;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const assetCriticalityServiceFactory = ({
   assetCriticalityDataClient,
+  experimentalFeatures,
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
+  isEnabled: () => experimentalFeatures.entityAnalyticsAssetCriticalityEnabled,
 });

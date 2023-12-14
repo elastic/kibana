@@ -10,7 +10,10 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { assetCriticalityDataClientMock } from './asset_criticality_data_client.mock';
-import { assetCriticalityServiceFactory } from './asset_criticality_service';
+import {
+  type AssetCriticalityService,
+  assetCriticalityServiceFactory,
+} from './asset_criticality_service';
 
 const buildMockCriticalityHit = (
   overrides: Partial<AssetCriticalityRecord> = {}
@@ -30,6 +33,7 @@ describe('AssetCriticalityService', () => {
   describe('#getCriticalitiesByIdentifiers()', () => {
     let baseIdentifier: { id_field: string; id_value: string };
     let mockAssetCriticalityDataClient: AssetCriticalityDataClient;
+    let service: AssetCriticalityService;
 
     beforeEach(() => {
       mockAssetCriticalityDataClient = assetCriticalityDataClientMock.create();
@@ -38,13 +42,14 @@ describe('AssetCriticalityService', () => {
       (mockAssetCriticalityDataClient.search as jest.Mock).mockResolvedValueOnce({
         hits: { hits: [] },
       });
+      service = assetCriticalityServiceFactory({
+        assetCriticalityDataClient: mockAssetCriticalityDataClient,
+        experimentalFeatures: {},
+      });
     });
 
     describe('specifying a single identifier', () => {
       it('returns an empty response if identifier is not found', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
 
         expect(result).toEqual([]);
@@ -56,9 +61,6 @@ describe('AssetCriticalityService', () => {
           hits: { hits },
         });
 
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
 
         expect(result).toEqual(hits.map((hit) => hit._source));
@@ -67,18 +69,12 @@ describe('AssetCriticalityService', () => {
 
     describe('specifying multiple identifiers', () => {
       it('returns an empty response if identifier is not found', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
 
         expect(result).toEqual([]);
       });
 
       it('generates a single terms clause for multiple identifier values on the same field', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const multipleIdentifiers = [
           { id_field: 'user.name', id_value: 'one' },
           { id_field: 'user.name', id_value: 'other' },
@@ -109,9 +105,6 @@ describe('AssetCriticalityService', () => {
       });
 
       it('deduplicates identifiers', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const duplicateIdentifiers = [
           { id_field: 'user.name', id_value: 'same' },
           { id_field: 'user.name', id_value: 'same' },
@@ -155,9 +148,6 @@ describe('AssetCriticalityService', () => {
             hits,
           },
         });
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const result = await service.getCriticalitiesByIdentifiers([baseIdentifier]);
         expect(result).toEqual(hits.map((hit) => hit._source));
       });
@@ -165,18 +155,12 @@ describe('AssetCriticalityService', () => {
 
     describe('arguments', () => {
       it('accepts a single identifier as an array', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const identifier = { id_field: 'host.name', id_value: 'foo' };
 
         expect(() => service.getCriticalitiesByIdentifiers([identifier])).not.toThrow();
       });
 
       it('accepts multiple identifiers', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const identifiers = [
           { id_field: 'host.name', id_value: 'foo' },
           { id_field: 'user.name', id_value: 'bar' },
@@ -185,27 +169,18 @@ describe('AssetCriticalityService', () => {
       });
 
       it('throws an error if an empty array is provided', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         await expect(() => service.getCriticalitiesByIdentifiers([])).rejects.toThrowError(
           'At least one identifier must be provided'
         );
       });
 
       it('throws an error if no identifier values are provided', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         await expect(() =>
           service.getCriticalitiesByIdentifiers([{ id_field: 'host.name', id_value: '' }])
         ).rejects.toThrowError('At least one identifier must contain a valid field and value');
       });
 
       it('throws an error if no valid identifier field/value pair is provided', async () => {
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         const identifiers = [
           { id_field: '', id_value: 'foo' },
           { id_field: 'user.name', id_value: '' },
@@ -221,9 +196,6 @@ describe('AssetCriticalityService', () => {
         (mockAssetCriticalityDataClient.search as jest.Mock)
           .mockReset()
           .mockRejectedValueOnce(new Error('foo'));
-        const service = assetCriticalityServiceFactory({
-          assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        });
         await expect(() =>
           service.getCriticalitiesByIdentifiers([baseIdentifier])
         ).rejects.toThrowError('foo');

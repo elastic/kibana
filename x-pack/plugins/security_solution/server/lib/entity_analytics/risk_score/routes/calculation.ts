@@ -14,13 +14,18 @@ import {
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 
-export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskScoreCalculationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   router.versioned
     .post({
       path: RISK_SCORE_CALCULATION_URL,
@@ -46,6 +51,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
+          experimentalFeatures,
         });
 
         const riskScoreService = riskScoreServiceFactory({
