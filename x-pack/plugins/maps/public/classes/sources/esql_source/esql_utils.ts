@@ -27,7 +27,7 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 
   if (geometryColumns.length > 1) {
     throw new Error(i18n.translate('xpack.maps.source.esql.multipleGeometryColumnErrorMsg', {
-      defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'KEEP' command to narrow columns.`,
+      defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' commands to narrow columns.`,
       values: {
         count: geometryColumns.length
       }
@@ -48,6 +48,28 @@ export async function getESQLMeta(esql: string) {
     columns: await getColumns(esql),
     dateFields: await getDateFields(esql),
   };
+}
+
+/*
+ * Map column.type to field type
+ * Supported column types https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-limitations.html#_supported_types
+ */
+export function getFieldType(column: ESQLColumn) {
+  switch (column.type) {
+    case 'boolean':
+    case 'date':
+    case 'ip':
+    case 'keyword':
+    case 'text':
+      return 'string';
+    case 'double':
+    case 'int':
+    case 'long':
+    case 'unsigned_long':
+      return 'number';
+    default:
+      return undefined;
+  }
 }
 
 async function getColumns(esql: string) {

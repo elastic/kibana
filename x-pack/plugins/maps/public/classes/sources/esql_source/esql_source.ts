@@ -15,16 +15,18 @@ import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
-import { SOURCE_TYPES } from '../../../../common/constants'
+import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants'
 import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
+import type { IField } from '../../fields/field';
+import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
-import { getGeometryColumnIndex } from './get_esql_meta';
+import { getFieldType, getGeometryColumnIndex } from './esql_utils';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -62,6 +64,10 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   async getDisplayName() {
     const pattern: string = getIndexPatternFromESQLQuery(this._descriptor.esql);
     return pattern ? pattern : 'ES|QL';
+  }
+
+  async supportsFitToBounds(): Promise<boolean> {
+    return false;
   }
 
   getInspectorRequestIds() {
@@ -205,5 +211,36 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       }),
       areResultsTrimmed: false,
     };
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    const column = this._descriptor.columns.find(column => {
+      return column.name === fieldName;
+    });
+    const fieldType = column ? getFieldType(column) : undefined;
+    return column && fieldType
+      ? new InlineField({
+          fieldName: column.name,
+          source: this,
+          origin: FIELD_ORIGIN.SOURCE,
+          dataType: fieldType,
+        })
+      : null;
+  }
+
+  async getFields() {
+    const fields: IField[] = [];
+    this._descriptor.columns.forEach(column => {
+      const fieldType = getFieldType(column);
+      if (fieldType) {
+        fields.push(new InlineField({
+          fieldName: column.name,
+          source: this,
+          origin: FIELD_ORIGIN.SOURCE,
+          dataType: fieldType,
+        }))
+      }
+    });
+    return fields;
   }
 }

@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { getESQLMeta, verifyGeometryColumn } from './get_esql_meta';
+import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
   dateField?: string;
