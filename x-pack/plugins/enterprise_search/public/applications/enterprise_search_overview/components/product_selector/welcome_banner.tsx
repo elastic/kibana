@@ -13,12 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AuthenticatedUser } from '@kbn/security-plugin/public';
 
 export interface WelcomeBannerProps {
-  assetBasePath?: string;
-  image?: string;
+  image: string;
   user?: AuthenticatedUser;
 }
 
-export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, assetBasePath, image }) => (
+export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, image }) => (
   <>
     <EuiSpacer size="xxl" />
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -38,7 +37,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, assetBasePat
             <EuiText color="subdued">
               {i18n.translate('xpack.enterpriseSearch.welcomeBanner.header.titleDescription', {
                 defaultMessage:
-                  "There's endless ways to ingest and explore data with Elasticsearch, but here's a few of the most popular",
+                  'There are endless ways to ingest and explore data with Elasticsearch, but here are a few of the most popular',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -67,13 +66,8 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, assetBasePat
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <EuiImage
-          alt=""
-          src={image ? image : `${assetBasePath}/serverless_header.png`}
-          size="original"
-        />
+        <EuiImage alt="" src={image} size="original" />
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="xxl" />
   </>
 );

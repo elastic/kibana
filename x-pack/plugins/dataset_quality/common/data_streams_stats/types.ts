@@ -14,5 +14,15 @@ export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatServiceResponse = DataStreamStat[];
-export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];
+export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0] & {
+  integration?: IntegrationType;
+};
+
+export type GetDataStreamsDegradedDocsStatsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
+export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
+export type GetDataStreamsDegradedDocsStatsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
+export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
+export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];

@@ -37,24 +37,6 @@ Object {
           ],
         },
       },
-      "fid": Object {
-        "percentiles": Object {
-          "field": "transaction.experience.fid",
-          "percents": Array [
-            50,
-          ],
-        },
-      },
-      "fidRanks": Object {
-        "percentile_ranks": Object {
-          "field": "transaction.experience.fid",
-          "keyed": false,
-          "values": Array [
-            100,
-            300,
-          ],
-        },
-      },
       "lcp": Object {
         "percentiles": Object {
           "field": "transaction.marks.agent.largestContentfulPaint",

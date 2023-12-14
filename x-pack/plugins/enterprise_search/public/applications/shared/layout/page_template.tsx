@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
 import './page_template.scss';
+import { EndpointsHeaderAction } from './endpoints_header_action';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -43,6 +46,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
   setPageChrome?: React.ReactNode;
   solutionNavIcon?: string;
+  useEndpointHeaderActions?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -56,13 +60,22 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   setPageChrome,
   solutionNav,
   solutionNavIcon,
+  useEndpointHeaderActions = true,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
+  const { renderHeaderActions } = useValues(KibanaLogic);
+
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
   const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
+
+  useEffect(() => {
+    if (useEndpointHeaderActions) {
+      renderHeaderActions(EndpointsHeaderAction);
+    }
+  }, []);
   return (
     <KibanaPageTemplate
       restrictWidth={false}

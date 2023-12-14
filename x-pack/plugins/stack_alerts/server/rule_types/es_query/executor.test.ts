@@ -299,9 +299,68 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '491',
           'kibana.alert.reason':
             'Document count is 491 in the last 5m. Alert when greater than or equal to 200.',
+          'kibana.alert.title': "rule 'test-rule-name' matched query",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should create alert if compare function returns true for ungrouped alert for multi threshold param', async () => {
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        // @ts-expect-error
+        params: {
+          ...defaultProps,
+          threshold: [200, 500],
+          thresholdComparator: 'between' as Comparator,
+        },
+      });
+
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions: 'Number of matching documents is between 200 and 500',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: 'Document count is 491 in the last 5m. Alert when between 200 and 500.',
+          title: "rule 'test-rule-name' matched query",
+          value: 491,
+        },
+        id: 'query matched',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is between 200 and 500',
+          'kibana.alert.evaluation.threshold': null,
+          'kibana.alert.evaluation.value': '491',
+          'kibana.alert.reason':
+            'Document count is 491 in the last 5m. Alert when between 200 and 500.',
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
@@ -371,6 +430,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '291',
           'kibana.alert.reason':
             'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
@@ -401,6 +461,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '477',
           'kibana.alert.reason':
             'Document count is 477 in the last 5m for host-2. Alert when greater than or equal to 200.',
@@ -431,6 +492,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-3" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '999',
           'kibana.alert.reason':
             'Document count is 999 in the last 5m for host-3. Alert when greater than or equal to 200.',
@@ -482,6 +544,7 @@ describe('es_query executor', () => {
         id: 'query matched',
         payload: {
           'kibana.alert.evaluation.conditions': 'Query matched documents',
+          'kibana.alert.evaluation.threshold': 0,
           'kibana.alert.evaluation.value': '198',
           'kibana.alert.reason':
             'Document count is 198 in the last 5m. Alert when greater than or equal to 0.',
@@ -586,6 +649,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents is NOT greater than or equal to 500',
+          'kibana.alert.evaluation.threshold': 500,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m. Alert when greater than or equal to 500.',
@@ -645,6 +709,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m for host-1. Alert when greater than or equal to 200.',
@@ -668,6 +733,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is NOT greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason':
             'Document count is 0 in the last 5m for host-2. Alert when greater than or equal to 200.',
@@ -720,6 +786,7 @@ describe('es_query executor', () => {
         },
         payload: {
           'kibana.alert.evaluation.conditions': 'Query did NOT match documents',
+          'kibana.alert.evaluation.threshold': 0,
           'kibana.alert.evaluation.value': '0',
           'kibana.alert.reason': 'Document count is 0 in the last 5m. Alert when greater than 0.',
           'kibana.alert.title': "rule 'test-rule-name' recovered",

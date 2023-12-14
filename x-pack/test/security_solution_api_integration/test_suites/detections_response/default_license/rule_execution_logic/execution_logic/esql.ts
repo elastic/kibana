@@ -151,6 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.updated_by': 'elastic',
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
+        'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
       });

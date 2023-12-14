@@ -23,6 +23,8 @@
     "@kbn/core-overlays-browser",
     "@kbn/reporting-plugin",
     "@kbn/data-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-prompt-not-found",
   ],
   "exclude": [
     "target/**/*",

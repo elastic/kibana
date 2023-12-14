@@ -16,6 +16,8 @@ import { RunOptions } from './parse_run_cli_flags';
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
 
+  let version = runOptions['assume-package-version'];
+
   const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
 
   const kibanaClient = getKibanaClient({
@@ -23,9 +25,14 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
   });
 
-  const latestPackageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  if (!version) {
+    version = await kibanaClient.fetchLatestApmPackageVersion();
+    await kibanaClient.installApmPackage(version);
+  } else if (version === 'latest') {
+    version = await kibanaClient.fetchLatestApmPackageVersion();
+  }
 
-  const version = runOptions.versionOverride || latestPackageVersion;
+  logger.info(`Using package version: ${version}`);
 
   const apmEsClient = getApmEsClient({
     target: esUrl,
@@ -39,8 +46,6 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
     concurrency: runOptions.concurrency,
   });
-
-  await kibanaClient.installApmPackage(latestPackageVersion);
 
   if (runOptions.clean) {
     await apmEsClient.clean();

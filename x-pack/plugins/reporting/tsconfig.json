@@ -54,6 +54,7 @@
     "@kbn/reporting-public",
     "@kbn/core-overlays-browser",
     "@kbn/react-kibana-mount",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

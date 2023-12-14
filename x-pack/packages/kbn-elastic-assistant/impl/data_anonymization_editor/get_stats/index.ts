@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
+
 import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import { Stats, isAllowed, isAnonymized, isDenied } from '../helpers';
+import { Stats } from '../helpers';
 
 export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptContext): Stats => {
   const ZERO_STATS = {
