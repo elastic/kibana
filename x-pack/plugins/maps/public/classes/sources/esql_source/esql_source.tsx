@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -20,6 +21,7 @@ import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import type { IField } from '../../fields/field';
@@ -27,6 +29,14 @@ import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import { getFieldType, getGeometryColumnIndex } from './esql_utils';
+import { UpdateSourceEditor } from './update_source_editor';
+
+type ESQLSourceSyncMeta = Pick<
+  ESQLSourceDescriptor,
+  | 'columns'
+  | 'dateField'
+  | 'esql'
+>;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -242,5 +252,22 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       }
     });
     return fields;
+  }
+
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+    return (
+      <UpdateSourceEditor
+        onChange={onChange}
+        sourceDescriptor={this._descriptor}
+      />
+    );
+  }
+
+  getSyncMeta(): ESQLSourceSyncMeta {
+    return {
+      columns: this._descriptor.columns,
+      dateField: this._descriptor.dateField,
+      esql: this._descriptor.esql,
+    };
   }
 }
