@@ -9,4 +9,18 @@ export { dataStreamRT, dataStreamTypeRT } from './data_stream';
 export type { DataStream, DataStreamType } from './data_stream';
 export type { FetchOptions } from './fetch_options';
 export type { DatasetQualityConfig } from './plugin_config';
+export {
+  checkErrorResultRT,
+  checkFailedResultRT,
+  checkPassedResultRT,
+  checkResultRT,
+  datasetQualityCheckRT,
+  DATA_STREAM_CHECKS_PATH,
+  failReasonRT,
+  getDatastreamChecksRequestPayloadRT,
+  getDatastreamChecksResponsePayloadRT,
+  ignoredFieldFailReasonRT,
+  ingestPipelineErrorFailReasonRT,
+  skippedDatasetQualityCheckRT,
+} from './rest';
 export type { APIClientRequestParamsOf, APIReturnType } from './rest';

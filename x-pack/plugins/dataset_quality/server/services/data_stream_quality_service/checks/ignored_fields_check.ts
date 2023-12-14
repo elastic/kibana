@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './call_api';
-export * from './create_call_dataset_quality_api';
-export * from './data_stream_quality_checks';
+import { DataStreamQualityCheck } from './types';
+
+export const checkForIgnoredFields: DataStreamQualityCheck = {
+  id: 'ignored-fields',
+};
