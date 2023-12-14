@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type {
-  PluginConfigDescriptor,
-  PluginInitializer,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { configSchema, type NoDataPageConfig } from '../config';
+import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+
+import { configSchema, NoDataPageConfig } from '../config';
 
 export const config: PluginConfigDescriptor<NoDataPageConfig> = {
   exposeToBrowser: {
@@ -21,13 +17,9 @@ export const config: PluginConfigDescriptor<NoDataPageConfig> = {
   schema: configSchema,
 };
 
-export const plugin: PluginInitializer<{}, {}, {}, NoDataPagePluginStartDeps> = async (
-  initializerContext: PluginInitializerContext
-) => {
-  const { NoDataPagePlugin } = await import('./plugin');
-  return new NoDataPagePlugin(initializerContext);
-};
-
-export interface NoDataPagePluginStartDeps {
-  security?: SecurityPluginStart;
+export function plugin() {
+  return new (class NoDataPagePlugin {
+    setup() {}
+    start() {}
+  })();
 }

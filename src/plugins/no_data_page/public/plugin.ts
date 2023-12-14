@@ -6,33 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import type { NoDataPageConfig } from '../config';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { NoDataPagePluginSetup, NoDataPagePluginStart } from './types';
-import { createUseHasApiKeys } from './lib/use_has_api_keys';
+import type { NoDataPageConfig } from '../config';
 
 export class NoDataPagePlugin implements Plugin<NoDataPagePluginSetup> {
   constructor(private initializerContext: PluginInitializerContext<NoDataPageConfig>) {}
 
   public setup(core: CoreSetup): NoDataPagePluginSetup {
-    return this.initialize(core);
+    return {
+      getAnalyticsNoDataPageFlavor: () => {
+        return this.initializerContext.config.get().analyticsNoDataPageFlavor;
+      },
+    };
   }
 
   public start(core: CoreStart): NoDataPagePluginStart {
-    return this.initialize(core);
-  }
-
-  private initialize({ http }: { http: HttpSetup }): NoDataPagePluginSetup {
     return {
-      getAnalyticsNoDataPageFlavor: () =>
-        this.initializerContext.config.get().analyticsNoDataPageFlavor,
-      useHasApiKeys: createUseHasApiKeys({ http }),
+      getAnalyticsNoDataPageFlavor: () => {
+        return this.initializerContext.config.get().analyticsNoDataPageFlavor;
+      },
     };
   }
 }

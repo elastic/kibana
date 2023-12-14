@@ -6,27 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type GetAnalyticsNoDataPageFlavor = () =>
-  | 'kibana'
-  | 'serverless_search'
-  | 'serverless_observability';
-
-export interface HasApiKeysResponseData {
-  hasApiKeys: boolean;
-}
-
-export interface HasApiKeysResponse {
-  hasApiKeys: boolean | null;
-  loading: boolean;
-  error: Error | null;
-}
-
 export interface NoDataPagePluginSetup {
-  getAnalyticsNoDataPageFlavor: GetAnalyticsNoDataPageFlavor;
-  /**
-   * The response can be stubbed with null as a default, if the No Data Page is unavailable
-   */
-  useHasApiKeys: () => HasApiKeysResponse | null;
+  getAnalyticsNoDataPageFlavor: () => 'kibana' | 'serverless_search' | 'serverless_observability';
 }
 
 export type NoDataPagePluginStart = NoDataPagePluginSetup;
