@@ -171,6 +171,12 @@ export class EndpointTestResources extends FtrService {
     }
 
     if (waitUntilTransformed) {
+      console.log(
+        '~~~~~~~~~~~~~ .fleet-agents stats agentsResponse',
+        JSON.stringify(await this.esClient.indices.stats({ index: AGENTS_INDEX }))
+      );
+      const agentsResponse = await this.esClient.search({ index: AGENTS_INDEX });
+      console.log('~~~~~~~~~~~~~ agentsResponse', JSON.stringify(agentsResponse));
       const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
       await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
@@ -199,10 +205,36 @@ export class EndpointTestResources extends FtrService {
     await this.retry.waitForWithTimeout(`endpoint hosts in ${index}`, timeout, async () => {
       try {
         if (index === METADATA_UNITED_INDEX) {
+          console.log(
+            '~~~~~~~~~~~~~ .fleet-agents stats FTR before',
+            JSON.stringify(await this.esClient.indices.stats({ index: AGENTS_INDEX }))
+          );
+
+          const foo = await this.esClient.search({
+            index: METADATA_UNITED_INDEX,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'agent.id': ids,
+                    },
+                  },
+                ],
+              },
+            },
+          });
+          console.log('~~~~~~~~~~~ united metadata all', JSON.stringify(foo));
+
           // United metadata transform occasionally can't find docs in .fleet-agents.
           // Running a search on the index first eliminates this issue.
           // Replacing the search with a refresh does not resolve flakiness.
-          await this.esClient.search({ index: AGENTS_INDEX });
+          // await this.esClient.search({ index: AGENTS_INDEX });
+
+          // console.log(
+          //   '~~~~~~~~~~~~~ .fleet-agents stats FTR after',
+          //   JSON.stringify(await this.esClient.indices.stats({ index: AGENTS_INDEX }))
+          // );
         }
         const searchResponse = await this.esClient.search({
           index,
@@ -210,9 +242,24 @@ export class EndpointTestResources extends FtrService {
           body,
           rest_total_hits_as_int: true,
         });
+        if (index === METADATA_UNITED_INDEX) {
+          console.log(
+            '~~~~~~~~~~~~~ .fleet-agents stats FTR after',
+            JSON.stringify(await this.esClient.indices.stats({ index: AGENTS_INDEX }))
+          );
+          console.log('~~~~~~~~~~~~~~~~ united metadata request body', size, JSON.stringify(body));
+          console.log(
+            '~~~~~~~~~~~~~~~~~~ united metadata response',
+            JSON.stringify(searchResponse)
+          );
+        }
 
         return searchResponse.hits.total === size;
       } catch (error) {
+        if (index === METADATA_UNITED_INDEX) {
+          console.log('~~~~~~~~~~~~~ search error', error);
+        }
+
         // We ignore 404's (index might not exist)
         if (error instanceof errors.ResponseError && error.statusCode === 404) {
           return false;

@@ -40,8 +40,7 @@ describe('When accessing Endpoint Response Console', { tags: ['@ess', '@serverle
     login();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169894
-  describe.skip('from Cases', () => {
+  describe('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;

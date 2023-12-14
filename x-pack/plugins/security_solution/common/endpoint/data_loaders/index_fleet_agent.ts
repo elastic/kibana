@@ -57,7 +57,7 @@ export const indexFleetAgentForHost = usageTracker.track(
         id: agentDoc._id,
         body: agentDoc._source,
         op_type: 'create',
-        refresh: 'wait_for',
+        refresh: 'true',
       })
       .catch(wrapErrorAndRejectPromise);
 

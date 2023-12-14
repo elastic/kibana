@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
@@ -202,6 +203,17 @@ const waitForEndpoints = async (
 
   await pRetry(
     async () => {
+      if (index === METADATA_UNITED_INDEX) {
+        console.log(
+          '~~~~~~~~~~~~~ .fleet-agents stats cypress',
+          JSON.stringify(await esClient.indices.stats({ index: AGENTS_INDEX }))
+        );
+        // United metadata transform occasionally can't find docs in .fleet-agents.
+        // Running a search on the index first eliminates this issue.
+        // Replacing the search with a refresh does not resolve flakiness.
+        // await esClient.search({ index: AGENTS_INDEX });
+      }
+
       const response = await esClient.search({
         index,
         size: expectedSize,
