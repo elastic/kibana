@@ -152,6 +152,7 @@ export const getAgentData = async (
                 },
                 {
                   field: 'upgrade_details.metadata.error_msg.keyword',
+                  missing: '',
                 },
               ],
             },

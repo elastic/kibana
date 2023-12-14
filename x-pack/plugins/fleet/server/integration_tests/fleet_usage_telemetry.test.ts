@@ -237,9 +237,7 @@ describe('fleet usage telemetry', () => {
           upgrade_details: {
             target_version: '8.11.0',
             state: 'UPG_ROLLBACK',
-            metadata: {
-              error_msg: '',
-            },
+            metadata: {},
           },
         },
         {
