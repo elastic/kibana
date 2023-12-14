@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function MissingTransactionWarning() {
+export function OrphanTraceItemsWarning({
+  orphanTraceItemsCount,
+}: {
+  orphanTraceItemsCount: number;
+}) {
   return (
     <EuiToolTip
       position="left"
@@ -17,7 +21,8 @@ export function MissingTransactionWarning() {
         'xpack.apm.transactionDetails.agentMissingTransactionMessage',
         {
           defaultMessage:
-            'This trace contains spans from missing transactions. As a result these spans are not displayed in the timeline.',
+            'This trace is incomplete and {itemsCount} items could not be displayed in the timeline. This could be a temporary problem caused by ingest delay, or a permanent problem caused by some events being dropped.',
+          values: { itemsCount: orphanTraceItemsCount },
         }
       )}
       anchorClassName="eui-fullWidth"

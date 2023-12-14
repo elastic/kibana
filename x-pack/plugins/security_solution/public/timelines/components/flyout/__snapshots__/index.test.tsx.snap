@@ -66,6 +66,56 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiPopover emotion-euiPopover"
+                  id="timelineSettingsPopover"
+                >
+                  <div
+                    class="euiPopover__anchor css-16vtueo-render"
+                  >
+                    <button
+                      aria-label="Add new timeline or template"
+                      class="euiButtonIcon add-timeline-button emotion-euiButtonIcon-xs-empty-primary"
+                      data-test-subj="timeline-create-open-control"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="plusInCircle"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <button
+                aria-label="Add to favorites"
+                aria-pressed="false"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                data-test-subj="timeline-favorite-empty-star"
+                id="add-to-favorites"
+                title="Add to favorites"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="starEmpty"
+                />
+              </button>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
                 class="euiFlexItem c2 emotion-euiFlexItem-growZero"
               >
                 <button
@@ -109,30 +159,20 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 data-test-subj="timeline-status"
               >
                 <span
-                  class="emotion-euiTextColor-warning"
+                  class="euiBadge emotion-euiBadge-warning"
+                  title="Unsaved"
                 >
-                  Unsaved
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
+                  >
+                    <span
+                      class="euiBadge__text emotion-euiBadge__text"
+                    >
+                      Unsaved
+                    </span>
+                  </span>
                 </span>
               </div>
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
-            >
-              <button
-                aria-label="Add to favorites"
-                aria-pressed="false"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="timeline-favorite-empty-star"
-                title="Add to favorites"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="starEmpty"
-                />
-              </button>
             </div>
           </div>
         </div>
