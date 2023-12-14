@@ -39,7 +39,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SloSummaryCleanupTask } from './services/slo/tasks/summary_cleanup_task';
+import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -95,7 +95,7 @@ const o11yRuleTypes = [
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
-  private sloCleanupTask?: SloSummaryCleanupTask;
+  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -376,7 +376,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
      */
     plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
-    this.sloCleanupTask = new SloSummaryCleanupTask(plugins.taskManager, this.logger);
+    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
+      plugins.taskManager,
+      this.logger,
+      config
+    );
 
     return {
       getAlertDetailsConfig() {
@@ -394,7 +398,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
-    this.sloCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
   }
 
   public stop() {}
