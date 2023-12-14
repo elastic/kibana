@@ -24,6 +24,7 @@ import type {
   SearchQuery,
   SearchResult,
 } from '../../common';
+import { SearchIndexDoc } from '../search_index/types';
 
 export type StorageContextGetTransformFn = (
   definitions: ContentManagementServiceDefinitionVersioned,
@@ -89,6 +90,9 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
   contentIdGenerator?: () => string;
+  searchIndex?: {
+    parser: <T = unknown>(item: T) => Pick<SearchIndexDoc, 'title' | 'description'>;
+  };
   version: {
     latest: Version;
   };

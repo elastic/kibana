@@ -22,7 +22,7 @@ export class ContentType {
     { eventBus, searchIndex }: { eventBus: EventBus; searchIndex: SearchIndex }
   ) {
     this._definition = definition;
-    this.contentCrud = new ContentCrud(definition.id, definition.storage, {
+    this.contentCrud = new ContentCrud(definition.id, definition.storage, definition, {
       eventBus,
       searchIndex,
     });

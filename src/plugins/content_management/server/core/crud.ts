@@ -19,7 +19,7 @@ import type {
 import { SearchIndex } from '../search_index';
 import { SearchIndexDoc } from '../search_index/types';
 import type { EventBus } from './event_bus';
-import type { ContentStorage, StorageContext } from './types';
+import type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 export interface GetResponse<T = unknown, M = void> {
   contentTypeId: string;
@@ -62,6 +62,7 @@ export class ContentCrud<T = unknown> {
   constructor(
     contentTypeId: string,
     contentStorage: ContentStorage<T>,
+    private contentDefinition: ContentTypeDefinition,
     {
       eventBus,
       searchIndex,
@@ -172,10 +173,12 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      await this.searchIndex.addDocument(this.getIdForSeachIndex(id), {
-        ...this.parseDataForSearch(data, txId, userId),
-        owner: userId,
-      });
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.addDocument(this.getIdForSeachIndex(id), {
+          ...this.parseDataForSearch(data, txId, userId),
+          owner: userId,
+        });
+      }
 
       const result = await this.storage.create(ctx, data, options);
 
@@ -221,10 +224,12 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      await this.searchIndex.updateDocument(
-        this.getIdForSeachIndex(id),
-        this.parseDataForSearch(data, txId, userId)
-      );
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.updateDocument(
+          this.getIdForSeachIndex(id),
+          this.parseDataForSearch(data, txId, userId)
+        );
+      }
 
       const result = await this.storage.update(ctx, id, data, options);
 
@@ -269,7 +274,9 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      await this.searchIndex.deleteDocument(this.getIdForSeachIndex(id));
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.deleteDocument(this.getIdForSeachIndex(id));
+      }
 
       const result = await this.storage.delete(ctx, id, options);
 
@@ -333,15 +340,18 @@ export class ContentCrud<T = unknown> {
     }
   }
 
+  private isSearchIndexEnabled(): boolean {
+    return Boolean(this.contentDefinition.searchIndex);
+  }
+
   private parseDataForSearch(
     data: Record<any, any>,
     txId: string,
     userId?: string
   ): SearchIndexDoc {
-    const { title, description } = data;
     return {
-      title,
-      description,
+      title: '',
+      ...this.contentDefinition.searchIndex?.parser(data),
       type: this.contentTypeId,
       updatedBy: userId,
       updateTxId: txId,

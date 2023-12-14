@@ -69,7 +69,10 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const store = await reporting.getStore();
+    const store = await reporting.getStore({
+      req: this.req,
+      requestHandlerContext: this.context,
+    });
 
     if (!exportType.createJob) {
       throw new Error(`Export type ${exportTypeId} is not a valid instance!`);

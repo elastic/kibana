@@ -13,4 +13,11 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ContentManagementServerSetup, ContentManagementServerStart } from './types';
-export type { ContentStorage, StorageContext, MSearchConfig } from './core';
+export type {
+  ContentStorage,
+  StorageContext,
+  MSearchConfig,
+  ContentCrud,
+  GetStorageContextFn,
+  GetStorageContextFnParams,
+} from './core';

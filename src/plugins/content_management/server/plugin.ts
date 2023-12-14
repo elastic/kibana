@@ -38,6 +38,7 @@ export class ContentManagementPlugin
 {
   private readonly logger: Logger;
   private readonly core: Core;
+  private getCurrentUser: ((req: KibanaRequest) => Promise<AuthenticatedUser | null>) | undefined;
   readonly #eventStream?: EventStreamService;
   readonly #searchIndex?: SearchIndex;
 
@@ -69,6 +70,12 @@ export class ContentManagementPlugin
       logger: this.logger,
       searchIndex: this.#searchIndex,
       eventStream: this.#eventStream,
+      auth: {
+        getCurrentUser: async (req) => {
+          if (!this.getCurrentUser) return null;
+          return this.getCurrentUser(req);
+        },
+      },
     });
   }
 
@@ -83,11 +90,9 @@ export class ContentManagementPlugin
 
     const { api: coreApi, contentRegistry } = this.core.setup();
 
-    let getCurrentUser: ((req: KibanaRequest) => Promise<AuthenticatedUser | null>) | undefined;
-
     core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
       if (security.found) {
-        getCurrentUser = async (req: KibanaRequest): Promise<AuthenticatedUser | null> => {
+        this.getCurrentUser = async (req: KibanaRequest): Promise<AuthenticatedUser | null> => {
           return await security.contract.authc.getCurrentUser(req);
         };
       } else {
@@ -106,8 +111,8 @@ export class ContentManagementPlugin
       contentRegistry,
       auth: {
         getCurrentUser: async (req) => {
-          if (!getCurrentUser) return null;
-          return getCurrentUser(req);
+          if (!this.getCurrentUser) return null;
+          return this.getCurrentUser(req);
         },
       },
     });

@@ -24,7 +24,8 @@
       "embeddable",
       "screenshotMode",
       "share",
-      "features"
+      "features",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "security",

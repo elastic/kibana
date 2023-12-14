@@ -42,7 +42,10 @@ export const getStorageContext = ({
 }: {
   contentTypeId: string;
   version?: number;
-  ctx: RpcContext;
+  ctx: Pick<
+    RpcContext,
+    'contentRegistry' | 'requestHandlerContext' | 'getTransformsFactory' | 'currentUser'
+  >;
 }): StorageContext => {
   const contentDefinition = contentRegistry.getDefinition(contentTypeId);
   const version = validateRequestVersion(_version, contentDefinition.version.latest);
