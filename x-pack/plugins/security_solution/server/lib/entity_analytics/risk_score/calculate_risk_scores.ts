@@ -47,7 +47,11 @@ import type {
   CalculateScoresResponse,
   RiskScoreBucket,
 } from '../types';
-import { RISK_SCORING_INPUTS_COUNT_MAX, RISK_SCORING_SUM_MAX, RISK_SCORING_SUM_VALUE } from './constants';
+import {
+  RISK_SCORING_INPUTS_COUNT_MAX,
+  RISK_SCORING_SUM_MAX,
+  RISK_SCORING_SUM_VALUE,
+} from './constants';
 
 const formatForResponse = ({
   bucket,
