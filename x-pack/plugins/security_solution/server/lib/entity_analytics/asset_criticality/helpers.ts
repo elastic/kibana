@@ -6,6 +6,7 @@
  */
 
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
 import { CriticalityModifiers } from './constants';
 
 /**
@@ -42,7 +43,7 @@ export const applyCriticalityToScore = ({
     return score;
   }
 
-  return bayesianUpdate({ max: 100, modifiers: [modifier], score });
+  return bayesianUpdate({ max: RISK_SCORING_NORMALIZATION_MAX, modifiers: [modifier], score });
 };
 
 /**
