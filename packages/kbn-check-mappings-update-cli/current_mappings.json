@@ -2351,16 +2351,7 @@
   },
   "cloud-security-posture-settings": {
     "dynamic": false,
-    "properties": {
-      "rules": {
-        "type": "object",
-        "properties": {
-          "muted": {
-            "type": "boolean"
-          }
-        }
-      }
-    }
+    "properties": {}
   },
   "slo": {
     "dynamic": false,
