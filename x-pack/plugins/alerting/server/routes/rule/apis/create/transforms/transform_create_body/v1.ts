@@ -19,6 +19,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
     ({
       frequency,
       alerts_filter: alertsFilter,
+      alert_transform: alertTransform,
       use_alert_data_for_template: useAlertDataForTemplate,
       ...action
     }) => {
@@ -38,6 +39,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
               },
             }
           : {}),
+        ...(alertTransform ? { alertTransform } : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
       };
     }

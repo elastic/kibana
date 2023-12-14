@@ -12,3 +12,4 @@ export type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_f
 export { JsonFieldWrapper } from './json_field_wrapper';
 export { MustacheTextFieldWrapper } from './mustache_text_field_wrapper';
 export { SectionLoading } from './section_loading';
+export { CodeEditorModal } from './code_editor_modal';

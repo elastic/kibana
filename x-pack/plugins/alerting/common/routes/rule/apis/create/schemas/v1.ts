@@ -53,6 +53,7 @@ export const actionSchema = schema.object({
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
   use_alert_data_for_template: schema.maybe(schema.boolean()),
+  alert_transform: schema.maybe(schema.string()),
 });
 
 export const createBodySchema = schema.object({

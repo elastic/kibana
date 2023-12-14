@@ -905,6 +905,9 @@ export const RuleForm = ({
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
             setActionAlertsFilterProperty={setActionAlertsFilterProperty}
+            setActionTransformProperty={(transform: string, index: number) => {
+              setActionProperty('alertTransform', transform, index);
+            }}
             defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />

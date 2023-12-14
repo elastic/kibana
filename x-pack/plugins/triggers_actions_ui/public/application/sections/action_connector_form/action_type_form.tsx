@@ -68,6 +68,7 @@ import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { ActionTransform } from './action_transform';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -84,6 +85,7 @@ export type ActionTypeFormProps = {
     value: RuleActionAlertsFilterProperty,
     index: number
   ) => void;
+  setActionTransformProperty: (transform: string, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -129,6 +131,7 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
+  setActionTransformProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -528,6 +531,15 @@ export const ActionTypeForm = ({
             />
           </>
         )}
+        <EuiSpacer size="s" />
+        <ActionTransform
+          state={actionItem.alertTransform}
+          onChange={(transform?: string) => {
+            if (transform) {
+              setActionTransformProperty(transform, index);
+            }
+          }}
+        />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (

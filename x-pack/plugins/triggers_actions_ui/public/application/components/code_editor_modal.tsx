@@ -18,13 +18,14 @@ import {
 
 interface CodeEditorModalProps {
   code: string;
+  title: string;
   isOpen: boolean;
   onChange: (code: string) => void;
   onClose: () => void;
 }
 
 export const CodeEditorModal = (props: CodeEditorModalProps) => {
-  const { code, onChange, onClose, isOpen } = props;
+  const { code, title, onChange, onClose, isOpen } = props;
 
   const [codeInternal, setCodeInternal] = useState<string>('');
 
@@ -53,7 +54,7 @@ export const CodeEditorModal = (props: CodeEditorModalProps) => {
       onClose={onClose}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>User defined code</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <CodeEditor

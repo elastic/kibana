@@ -22,13 +22,15 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  CodeEditorModal,
+  RuleTypeParamsExpressionProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isString, debounce } from 'lodash';
 import { ActionVariable } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
 import type { UserDefinedRuleParams } from '../types';
-import { CodeEditorModal } from './code_editor_modal';
 import { useTestUserDefinedRule } from './use_test_user_defined_rule';
 
 export const RuleForm: React.FunctionComponent<
@@ -266,6 +268,7 @@ export const RuleForm: React.FunctionComponent<
       <EuiSpacer />
       <CodeEditorModal
         isOpen={isModalOpen}
+        title="User defined code"
         code={props.ruleParams.codeOrUrl}
         onChange={onCodeOrUrlChange}
         onClose={() => setIsModalOpen(false)}

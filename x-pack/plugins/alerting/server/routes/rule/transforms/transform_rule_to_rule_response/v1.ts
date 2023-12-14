@@ -57,6 +57,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
       frequency,
       uuid,
       alertsFilter,
+      alertTransform,
       useAlertDataForTemplate,
     }) => ({
       group,
@@ -76,6 +77,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
           }
         : {}),
       ...(uuid && { uuid }),
+      ...(alertTransform && { alert_transform: alertTransform }),
       ...(alertsFilter && { alerts_filter: alertsFilter }),
     })
   ),
