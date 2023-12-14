@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
 
 import {
@@ -16,7 +19,7 @@ import {
 export const updateRulesStates = async (
   encryptedSoClient: SavedObjectsClientContract,
   newRulesStates: CspBenchmarkRulesStates
-) => {
+): Promise<SavedObjectsUpdateResponse<CspSettings>> => {
   return await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,

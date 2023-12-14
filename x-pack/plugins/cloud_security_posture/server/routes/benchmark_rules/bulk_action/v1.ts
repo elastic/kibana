@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { CspBenchmarkRules } from '../../../../common/types/rules/v3';
+import { CspBenchmarkRules, CspBenchmarkRulesStates } from '../../../../common/types/rules/v3';
 import { buildRuleKey, setRulesStates, updateRulesStates } from './utils';
 
 const muteStatesMap = {
@@ -17,7 +17,7 @@ export const bulkActionBenchmarkRulesHandler = async (
   encryptedSoClient: SavedObjectsClientContract,
   rulesToUpdate: CspBenchmarkRules,
   action: 'mute' | 'unmute'
-) => {
+): Promise<CspBenchmarkRulesStates> => {
   const ruleKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
@@ -26,5 +26,5 @@ export const bulkActionBenchmarkRulesHandler = async (
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
 
-  return newCspSettings;
+  return newCspSettings.attributes.rules!;
 };

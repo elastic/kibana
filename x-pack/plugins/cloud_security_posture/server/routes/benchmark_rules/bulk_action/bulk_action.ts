@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
+  CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
 } from '../../../../common/types/rules/v3';
 import { CspRouter } from '../../../types';
@@ -47,7 +48,7 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
             requestBody.action
           );
 
-          const updatedBenchmarkRules = handlerResponse.attributes.rules;
+          const updatedBenchmarkRules: CspBenchmarkRulesStates = handlerResponse;
           return response.ok({
             body: {
               updated_benchmark_rules: updatedBenchmarkRules,
