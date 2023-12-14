@@ -19,9 +19,14 @@ export class SloEsClient {
       body: {
         query: {
           bool: {
-            filter: {
-              term: { 'slo.id': id },
-            },
+            filter: [
+              {
+                term: { 'slo.id': id },
+              },
+              {
+                term: { isTempDoc: false },
+              },
+            ],
           },
         },
       },
@@ -34,12 +39,26 @@ export class SloEsClient {
       body: {
         query: {
           bool: {
-            filter: {
-              term: { 'slo.id': id },
-            },
+            filter: [
+              {
+                term: { 'slo.id': id },
+              },
+            ],
           },
         },
       },
     });
+  }
+
+  public async deleteTestSourceData() {
+    try {
+      await this.esClient.deleteByQuery({
+        index: 'kbn-data-forge-fake_hosts*',
+        query: { term: { 'system.network.name': 'eth1' } },
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('SLO api integration test data not found');
+    }
   }
 }

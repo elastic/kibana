@@ -59,14 +59,24 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
   const retryTimeout = 120 * 1000;
 
   return {
-    async create(slo: SloParams) {
-      const { body } = await supertest
-        .post(`/api/observability/slos`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
-        .send(slo);
+    async create(params: SloParams) {
+      const slo = await supertest
+        .post('/api/observability/slos')
+        .set('kbn-xsrf', 'true')
+        .send(params)
+        .expect(200);
 
-      return body;
+      const { id } = slo.body;
+
+      const reqBody = [{ id: `slo-${id}-1` }, { id: `slo-summary-${id}-1` }];
+      await supertest
+        .post(`/internal/transform/schedule_now_transforms`)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .send(reqBody)
+        .expect(200);
+
+      return id;
     },
 
     async delete() {},

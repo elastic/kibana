@@ -22,16 +22,17 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
-    const sloEsClient = new SloEsClient(esClient);
     const slo = getService('slo');
     const retry = getService('retry');
+    const sloEsClient = new SloEsClient(esClient);
 
     let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
-      await slo.deleteAllSLOs();
       _createSLOInput = getFixtureJson('create_slo');
+      await slo.deleteAllSLOs();
+      await sloEsClient.deleteTestSourceData(getService);
       loadTestData(getService);
     });
 
@@ -45,20 +46,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await cleanup({ esClient, logger });
+      await sloEsClient.deleteTestSourceData(getService);
     });
 
     it('deletes new slo saved object and transforms', async () => {
       const request = createSLOInput;
 
-      const apiResponse = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .send(request)
-        .expect(200);
-
-      expect(apiResponse.body).property('id');
-
-      const { id } = apiResponse.body;
+      const id = await slo.create(request);
 
       const savedObject = await kibanaServer.savedObjects.find({
         type: SO_SLO_TYPE,
@@ -68,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(savedObject.saved_objects[0].attributes.id).eql(id);
 
-      await retry.tryForTime(150 * 1000, async () => {
+      await retry.tryForTime(300 * 1000, async () => {
         // expect summary and rollup data to exist
         const sloSummaryResponse = await sloEsClient.getSLOSummaryDataById(id);
         const sloRollupResponse = await sloEsClient.getSLORollupDataById(id);
@@ -103,31 +97,32 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(204);
       });
 
-      await retry.tryForTime(150 * 1000, async () => {
-        const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
-          type: SO_SLO_TYPE,
-        });
+      //   await retry.tryForTime(150 * 1000, async () => {
+      const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
+        type: SO_SLO_TYPE,
+      });
 
-        // SO should now be deleted
-        expect(savedObjectAfterDelete.saved_objects.length).eql(0);
+      // SO should now be deleted
+      expect(savedObjectAfterDelete.saved_objects.length).eql(0);
 
-        // roll up transform should be deleted
-        await supertestAPI
-          .get(`/internal/transform/transforms/slo-${id}-1`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .send()
-          .expect(404);
+      // roll up transform should be deleted
+      await supertestAPI
+        .get(`/internal/transform/transforms/slo-${id}-1`)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .send()
+        .expect(404);
 
-        // summary transform should be deleted
-        await supertestAPI
-          .get(`/internal/transform/transforms/slo-summary-${id}-1`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .send()
-          .expect(404);
+      // summary transform should be deleted
+      await supertestAPI
+        .get(`/internal/transform/transforms/slo-summary-${id}-1`)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
+        .send()
+        .expect(404);
 
-        // expect summary and rollup documents to be deleted
+      // expect summary and rollup documents to be deleted
+      await retry.tryForTime(60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
         const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
         expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);

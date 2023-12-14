@@ -20,5 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete_slo'));
     loadTestFile(require.resolve('./get_slo'));
     loadTestFile(require.resolve('./update_slo'));
+    loadTestFile(require.resolve('./reset_slo'));
   });
 }

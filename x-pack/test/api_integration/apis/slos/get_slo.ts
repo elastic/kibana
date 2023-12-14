@@ -11,6 +11,7 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { loadTestData } from './helper/load_test_data';
+import { SloEsClient } from './helper/es';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Get SLOs', function () {
@@ -22,74 +23,37 @@ export default function ({ getService }: FtrProviderContext) {
     const logger = getService('log');
     const transform = getService('transform');
     const retry = getService('retry');
+    const slo = getService('slo');
+    const sloEsClient = new SloEsClient(esClient);
 
     let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
-    const deleteAllSLOs = async () => {
-      const response = await supertestAPI
-        .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-      await Promise.all(
-        response.body.results.map(({ id }) => {
-          return supertestAPI
-            .delete(`/api/observability/slos/${id}`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-        })
-      );
-    };
-
     const createSLO = async (requestOverrides?: Record<string, any>) => {
-      const slo = await supertestAPI
-        .post('/api/observability/slos')
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...createSLOInput,
-          ...requestOverrides,
-        })
-        .expect(200);
-
-      const { id } = slo.body;
-
-      const reqBody = [{ id: `slo-${id}-1` }, { id: `slo-summary-${id}-1` }];
-      const { body, status } = await supertestAPI
-        .post(`/internal/transform/schedule_now_transforms`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send(reqBody)
-        .expect(200);
-
-      return id;
+      return await slo.create({
+        ...createSLOInput,
+        ...requestOverrides,
+      });
     };
 
     before(async () => {
+      await slo.deleteAllSLOs();
+      await sloEsClient.deleteTestSourceData();
+      await loadTestData(getService);
       _createSLOInput = getFixtureJson('create_slo');
     });
 
     beforeEach(async () => {
-      await deleteAllSLOs();
-      await esClient.deleteByQuery({
-        index: 'kbn-data-forge-fake_hosts*',
-        query: { term: { 'system.network.name': 'eth1' } },
-      });
-      await loadTestData(getService);
       createSLOInput = _createSLOInput;
     });
 
     afterEach(async () => {
-      await deleteAllSLOs();
+      await slo.deleteAllSLOs();
     });
 
     after(async () => {
       await cleanup({ esClient, logger });
-      await esClient.deleteByQuery({
-        index: 'kbn-data-forge-fake_hosts*',
-        query: { term: { 'system.network.name': 'eth1' } },
-      });
+      await sloEsClient.deleteTestSourceData();
     });
 
     it('gets slo by id and calculates SLI - occurances rolling', async () => {
@@ -214,6 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
           timesliceTarget: 0.95,
           timesliceWindow: '1m',
         },
+      });
+
+      const response = await esClient.search({
+        index: 'kbn-data-forge-fake_hosts*',
+        query: { term: { 'system.network.name': 'eth1' } },
       });
 
       await retry.tryForTime(300 * 1000, async () => {

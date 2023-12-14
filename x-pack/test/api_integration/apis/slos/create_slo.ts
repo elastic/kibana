@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { loadTestData } from './helper/load_test_data';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Create SLOs', function () {
@@ -29,11 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await slo.deleteAllSLOs();
       _createSLOInput = getFixtureJson('create_slo');
-      await esClient.deleteByQuery({
-        index: 'kbn-data-forge-fake_hosts*',
-        query: { term: { 'system.network.name': 'eth1' } },
-      });
-      await loadTestData(getService);
     });
 
     beforeEach(() => {
@@ -42,14 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await slo.deleteAllSLOs();
-    });
-
-    after(async () => {
-      await cleanup({ esClient, logger });
-      await esClient.deleteByQuery({
-        index: 'kbn-data-forge-fake_hosts*',
-        query: { term: { 'system.network.name': 'eth1' } },
-      });
     });
 
     it('creates a new slo and transforms', async () => {
