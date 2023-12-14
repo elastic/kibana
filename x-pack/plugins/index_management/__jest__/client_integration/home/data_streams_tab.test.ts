@@ -828,14 +828,7 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `managed-data-stream${nonBreakingSpace}Managed`,
-          'green',
-          '1',
-          '7 days',
-          'Delete',
-        ],
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
 
