@@ -148,7 +148,7 @@ export const getAgentData = async (
                   field: 'upgrade_details.target_version.keyword',
                 },
                 {
-                  field: 'upgrade_details.state.keyword',
+                  field: 'upgrade_details.state',
                 },
                 {
                   field: 'upgrade_details.metadata.error_msg.keyword',
