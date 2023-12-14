@@ -4,7 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type TypeOf, schema } from '@kbn/config-schema';
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+
+export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
+
+export const benchmarkScoreSchema = schema.object({
+  postureScore: schema.number({ defaultValue: 0, min: 0 }),
+  resourcesEvaluated: schema.number({ defaultValue: 0, min: 0 }),
+  totalFailed: schema.number({ defaultValue: 0, min: 0 }),
+  totalFindings: schema.number({ defaultValue: 0, min: 0 }),
+  totalPassed: schema.number({ defaultValue: 0, min: 0 }),
+});
+
+export type BenchmarkScore = TypeOf<typeof benchmarkScoreSchema>;
+
+export interface Benchmark {
+  package_policy: PackagePolicy;
+  agent_policy: AgentPolicyStatus;
+  rules_count: number;
+}
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
@@ -60,3 +81,10 @@ export const benchmarksQueryParamsSchema = schema.object({
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
+
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
