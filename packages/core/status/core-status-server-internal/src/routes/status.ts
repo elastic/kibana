@@ -61,27 +61,10 @@ export interface RedactedStatusHttpBody {
   };
 }
 
-type CombinedStatuses = [
-  ServiceStatus<unknown>,
-  ServiceStatus,
-  CoreStatus,
-  Record<string, ServiceStatus<unknown>>
-];
-
 const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
   summary: 'Status not yet reported',
 };
-
-const STATUS_UNAVAILABLE_NOT_REPORTED: CombinedStatuses = [
-  SERVICE_UNAVAILABLE_NOT_REPORTED,
-  SERVICE_UNAVAILABLE_NOT_REPORTED,
-  {
-    elasticsearch: SERVICE_UNAVAILABLE_NOT_REPORTED,
-    savedObjects: SERVICE_UNAVAILABLE_NOT_REPORTED,
-  },
-  {},
-];
 
 export const registerStatusRoute = ({
   router,
@@ -92,10 +75,20 @@ export const registerStatusRoute = ({
 }: Deps) => {
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
   // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
-  const combinedStatus$ = new ReplaySubject<CombinedStatuses>(1);
-  combineLatest([status.overall$, status.coreOverall$, status.core$, status.plugins$])
-    .pipe(startWith(STATUS_UNAVAILABLE_NOT_REPORTED))
-    .subscribe(combinedStatus$);
+  const combinedStatus$ = new ReplaySubject<
+    [ServiceStatus<unknown>, ServiceStatus, CoreStatus, Record<string, ServiceStatus<unknown>>]
+  >(1);
+  combineLatest([
+    status.overall$.pipe(startWith(SERVICE_UNAVAILABLE_NOT_REPORTED)),
+    status.coreOverall$.pipe(startWith(SERVICE_UNAVAILABLE_NOT_REPORTED)),
+    status.core$.pipe(
+      startWith<CoreStatus>({
+        elasticsearch: SERVICE_UNAVAILABLE_NOT_REPORTED,
+        savedObjects: SERVICE_UNAVAILABLE_NOT_REPORTED,
+      })
+    ),
+    status.plugins$.pipe(startWith({})),
+  ]).subscribe(combinedStatus$);
 
   router.get(
     {
