@@ -7,7 +7,7 @@
 
 import { ChainTool } from 'langchain/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { APP_ID } from '../../../../common';
+import { APP_UI_ID } from '../../../../common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
@@ -16,7 +16,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   name: 'ESQLKnowledgeBaseTool',
   description:
     'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
-  sourceRegister: APP_ID,
+  sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
     const { assistantLangChain, modelExists } = params;
     return assistantLangChain && modelExists;

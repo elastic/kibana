@@ -46,7 +46,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
+import { APP_ID, APP_UI_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -511,7 +511,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_ID, getAssistantTools());
+    plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

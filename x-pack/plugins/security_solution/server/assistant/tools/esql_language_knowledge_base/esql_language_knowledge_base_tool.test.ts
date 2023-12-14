@@ -12,32 +12,63 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 
-const chain = {} as RetrievalQAChain;
-
 describe('EsqlLanguageKnowledgeBaseTool', () => {
-  describe('getTool', () => {
-    const esClient = {
-      search: jest.fn().mockResolvedValue({}),
-    } as unknown as ElasticsearchClient;
-    const request = {
-      body: {
-        assistantLangChain: false,
-        alertsIndexPattern: '.alerts-security.alerts-default',
-        allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
-        allowReplacement: ['user.name'],
-        replacements: { key: 'value' },
-        size: 20,
-      },
-    } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-    const rest = {
-      esClient,
-      request,
-    };
+  const chain = {} as RetrievalQAChain;
+  const esClient = {
+    search: jest.fn().mockResolvedValue({}),
+  } as unknown as ElasticsearchClient;
+  const request = {
+    body: {
+      assistantLangChain: false,
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
+      allowReplacement: ['user.name'],
+      replacements: { key: 'value' },
+      size: 20,
+    },
+  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  const rest = {
+    chain,
+    esClient,
+    request,
+  };
 
+  describe('isSupported', () => {
+    it('returns false if assistantLangChain is false', () => {
+      const params = {
+        assistantLangChain: false,
+        modelExists: true,
+        ...rest,
+      };
+
+      expect(ESQL_KNOWLEDGE_BASE_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns false if modelExists is false (the ELSER model is not installed)', () => {
+      const params = {
+        assistantLangChain: true,
+        modelExists: false, // <-- ELSER model is not installed
+        ...rest,
+      };
+
+      expect(ESQL_KNOWLEDGE_BASE_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns true if assistantLangChain and modelExists are true', () => {
+      const params = {
+        assistantLangChain: true,
+        modelExists: true,
+        ...rest,
+      };
+
+      expect(ESQL_KNOWLEDGE_BASE_TOOL.isSupported(params)).toBe(true);
+    });
+  });
+
+  describe('getTool', () => {
     it('returns null if assistantLangChain is false', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
         assistantLangChain: false,
-        chain,
         modelExists: true,
         ...rest,
       });
@@ -48,7 +79,6 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
     it('returns null if modelExists is false (the ELSER model is not installed)', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
         assistantLangChain: true,
-        chain,
         modelExists: false, // <-- ELSER model is not installed
         ...rest,
       });
@@ -59,7 +89,6 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
     it('should return a Tool instance if assistantLangChain and modelExists are true', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
         assistantLangChain: true,
-        chain,
         modelExists: true,
         ...rest,
       });
@@ -70,7 +99,6 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
     it('should return a tool with the expected tags', () => {
       const tool = ESQL_KNOWLEDGE_BASE_TOOL.getTool({
         assistantLangChain: true,
-        chain,
         modelExists: true,
         ...rest,
       }) as DynamicTool;

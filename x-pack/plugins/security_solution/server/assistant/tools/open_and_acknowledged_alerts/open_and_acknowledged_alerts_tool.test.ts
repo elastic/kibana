@@ -11,47 +11,115 @@ import type { DynamicTool } from 'langchain/tools';
 import { omit } from 'lodash/fp';
 
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
-import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
 import { MAX_SIZE } from './helpers';
 import type { RetrievalQAChain } from 'langchain/chains';
+import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
-  describe('getTool', () => {
-    const alertsIndexPattern = 'alerts-index';
-    const esClient = {
-      search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
-    } as unknown as ElasticsearchClient;
-    const replacements = { key: 'value' };
-    const request = {
-      body: {
-        assistantLangChain: false,
-        alertsIndexPattern: '.alerts-security.alerts-default',
-        allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
-        allowReplacement: ['user.name'],
-        replacements,
-        size: 20,
-      },
-    } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-    const assistantLangChain = true;
-    const chain = {} as unknown as RetrievalQAChain;
-    const modelExists = true;
-    const rest = {
-      assistantLangChain,
-      chain,
-      modelExists,
-    };
+  const alertsIndexPattern = 'alerts-index';
+  const esClient = {
+    search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
+  } as unknown as ElasticsearchClient;
+  const replacements = { key: 'value' };
+  const request = {
+    body: {
+      assistantLangChain: false,
+      alertsIndexPattern: '.alerts-security.alerts-default',
+      allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
+      allowReplacement: ['user.name'],
+      replacements,
+      size: 20,
+    },
+  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  const assistantLangChain = true;
+  const chain = {} as unknown as RetrievalQAChain;
+  const modelExists = true;
+  const rest = {
+    assistantLangChain,
+    esClient,
+    chain,
+    modelExists,
+  };
 
-    beforeEach(() => {
-      jest.clearAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('isSupported', () => {
+    it('returns false when alertsIndexPattern is undefined', () => {
+      const params = {
+        request,
+        size: 20,
+        ...rest,
+      };
+
+      expect(OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.isSupported(params)).toBe(false);
     });
 
+    it('returns false when the request is missing required anonymization parameters', () => {
+      const requestMissingAnonymizationParams = {
+        body: {
+          assistantLangChain: false,
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          size: 20,
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      const params = {
+        request: requestMissingAnonymizationParams,
+        ...rest,
+      };
+
+      expect(OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns false when size is undefined', () => {
+      const params = {
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        ...rest,
+      };
+
+      expect(OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns false when size is out of range', () => {
+      const params = {
+        alertsIndexPattern,
+        allow: request.body.allow,
+        allowReplacement: request.body.allowReplacement,
+        onNewReplacements: jest.fn(),
+        replacements,
+        request,
+        size: MAX_SIZE + 1, // <-- size is out of range
+
+        ...rest,
+      };
+
+      expect(OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns true when anonymization fields, alertsIndexPattern, and size within reange is provided', () => {
+      const params = {
+        alertsIndexPattern,
+        size: 20,
+        request,
+        ...rest,
+      };
+
+      expect(OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.isSupported(params)).toBe(true);
+    });
+  });
+  describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
       const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request,
@@ -157,7 +225,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         alertsIndexPattern,
         allow: requestWithMissingParams.body.allow,
         allowReplacement: requestWithMissingParams.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request: requestWithMissingParams,
@@ -173,7 +240,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         // alertsIndexPattern is undefined
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request,
@@ -189,7 +255,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request,
@@ -205,7 +270,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request,
@@ -221,7 +285,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        esClient,
         onNewReplacements: jest.fn(),
         replacements,
         request,

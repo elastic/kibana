@@ -13,7 +13,7 @@ import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-pl
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
-import { APP_ID } from '../../../../common';
+import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -31,7 +31,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
   id: 'open-and-acknowledged-alerts-tool',
   name: 'OpenAndAcknowledgedAlertsTool',
   description: OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
-  sourceRegister: APP_ID,
+  sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is OpenAndAcknowledgedAlertsToolParams => {
     const { alertsIndexPattern, request, size } = params;
     return (

@@ -23,6 +23,7 @@ import {
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { getPluginNameFromRequest } from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -59,9 +60,8 @@ export const postActionsConnectorExecuteRoute = (
         logger.debug('Executing via langchain, assistantLangChain: true');
 
         // Fetch any tools registered by the request's originating plugin
-        const assistantTools = (await context.elasticAssistant).getRegisteredTools(
-          'securitySolution'
-        );
+        const pluginName = getPluginNameFromRequest({ request, logger });
+        const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
 
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;

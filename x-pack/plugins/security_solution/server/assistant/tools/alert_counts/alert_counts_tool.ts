@@ -11,7 +11,7 @@ import { DynamicTool } from 'langchain/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getAlertsCountQuery } from './get_alert_counts_query';
-import { APP_ID } from '../../../../common';
+import { APP_UI_ID } from '../../../../common';
 
 export interface AlertCountsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;
@@ -23,7 +23,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
   id: 'alert-counts-tool',
   name: 'AlertCountsTool',
   description: ALERT_COUNTS_TOOL_DESCRIPTION,
-  sourceRegister: APP_ID,
+  sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AlertCountsToolParams => {
     const { request, alertsIndexPattern } = params;
     return requestHasRequiredAnonymizationParams(request) && alertsIndexPattern != null;

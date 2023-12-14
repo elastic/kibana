@@ -43,6 +43,46 @@ describe('AlertCountsTool', () => {
     jest.clearAllMocks();
   });
 
+  describe('isSupported', () => {
+    it('returns false when the alertsIndexPattern is undefined', () => {
+      const params = {
+        esClient,
+        request,
+        ...rest,
+      };
+
+      expect(ALERT_COUNTS_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns false when the request is missing required anonymization parameters', () => {
+      const requestMissingAnonymizationParams = {
+        body: {
+          assistantLangChain: false,
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          size: 20,
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+      const params = {
+        esClient,
+        request: requestMissingAnonymizationParams,
+        ...rest,
+      };
+
+      expect(ALERT_COUNTS_TOOL.isSupported(params)).toBe(false);
+    });
+
+    it('returns true if alertsIndexPattern is defined and request includes required anonymization parameters', () => {
+      const params = {
+        alertsIndexPattern,
+        esClient,
+        request,
+        ...rest,
+      };
+
+      expect(ALERT_COUNTS_TOOL.isSupported(params)).toBe(true);
+    });
+  });
+
   describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
       const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
