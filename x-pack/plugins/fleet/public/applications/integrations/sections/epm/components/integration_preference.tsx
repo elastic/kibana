@@ -95,13 +95,13 @@ export const IntegrationPreference = ({
 
   const { docLinks, notifications } = useStartServices();
 
-  const putSettingsMutation = usePutSettingsMutation();
+  const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
 
   const updateSettings = useCallback(
     async (prerelease: boolean) => {
       try {
         setPrereleaseIntegrationsChecked(prerelease);
-        const res = await putSettingsMutation.mutateAsync({
+        const res = await mutateSettingsAsync({
           prerelease_integrations_enabled: prerelease,
         });
 
@@ -117,7 +117,7 @@ export const IntegrationPreference = ({
         });
       }
     },
-    [putSettingsMutation, notifications.toasts]
+    [mutateSettingsAsync, notifications.toasts]
   );
 
   const link = (
