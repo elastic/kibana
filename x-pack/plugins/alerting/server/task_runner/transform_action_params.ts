@@ -123,7 +123,7 @@ export async function transformActionParams({
           },
         };
 
-  let transformedVariables = {};
+  const transformedVariables: Record<string, string> = {};
   if (alertTransform) {
     // Run code in child process
     try {
@@ -138,7 +138,12 @@ export async function transformActionParams({
 
       if (stdout) {
         try {
-          transformedVariables = JSON.parse(stdout);
+          logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
+          const transformedVars: string[] = getTransformedVariables(stdout);
+          for (const varStr of transformedVars) {
+            const transformedVar: { key: string; value: string } = JSON.parse(varStr);
+            transformedVariables[transformedVar.key] = transformedVar.value;
+          }
         } catch (err) {
           logger.error(`couldn't parse the output from the alert transform`);
         }
@@ -230,4 +235,12 @@ export function transformSummaryActionParams({
     actionParams,
     variables
   );
+}
+
+const newContextPrefix = 'newContextToAdd:';
+function getTransformedVariables(output: string) {
+  return output
+    .split('\n')
+    .filter((str) => str.indexOf(newContextPrefix) === 0)
+    .map((str) => str.substring(newContextPrefix.length));
 }
