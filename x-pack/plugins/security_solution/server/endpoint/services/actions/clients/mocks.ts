@@ -131,6 +131,7 @@ const createIsolateOptionsMock = (
   overrides: Partial<IsolationRouteRequestBody> = {}
 ): DeepMutable<IsolationRouteRequestBody> => {
   const isolateOptions: IsolationRouteRequestBody = {
+    agent_type: 'endpoint',
     endpoint_ids: ['1-2-3'],
     comment: 'test comment',
   };

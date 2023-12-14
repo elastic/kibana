@@ -29,6 +29,9 @@ describe('SentinelOneActionsClient class', () => {
   let s1ActionsClient: ResponseActionsClient;
   let connectorActionsMock: ActionsClientMock;
 
+  const createS1IsolateOptions = () =>
+    responseActionsClientMock.createIsolateOptions({ agent_type: 'sentinel_one' });
+
   beforeEach(() => {
     connectorActionsMock = responseActionsClientMock.createConnectorActionsClient();
 
@@ -63,9 +66,7 @@ describe('SentinelOneActionsClient class', () => {
     connectorActionsMock.getAll.mockImplementation(async () => {
       throw new Error('oh oh');
     });
-    const responsePromise = s1ActionsClient.isolate(
-      responseActionsClientMock.createIsolateOptions()
-    );
+    const responsePromise = s1ActionsClient.isolate(createS1IsolateOptions());
 
     await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
     await expect(responsePromise).rejects.toHaveProperty(
@@ -80,9 +81,7 @@ describe('SentinelOneActionsClient class', () => {
       throw new Error('oh oh');
     });
 
-    await expect(
-      s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions())
-    ).rejects.toMatchObject({
+    await expect(s1ActionsClient.isolate(createS1IsolateOptions())).rejects.toMatchObject({
       message: `Unable to retrieve list of stack connectors: oh oh`,
       statusCode: 400,
     });
@@ -101,16 +100,14 @@ describe('SentinelOneActionsClient class', () => {
   ])('should error if: %s', async (_, getAllImplementation) => {
     (connectorActionsMock.getAll as jest.Mock).mockImplementation(getAllImplementation);
 
-    await expect(
-      s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions())
-    ).rejects.toMatchObject({
+    await expect(s1ActionsClient.isolate(createS1IsolateOptions())).rejects.toMatchObject({
       message: `No SentinelOne stack connector found`,
       statusCode: 400,
     });
   });
 
   it('should error if multiple agent ids are received', async () => {
-    const payload = responseActionsClientMock.createIsolateOptions();
+    const payload = createS1IsolateOptions();
     payload.endpoint_ids.push('second-host-id');
 
     await expect(s1ActionsClient.isolate(payload)).rejects.toMatchObject({
@@ -121,7 +118,7 @@ describe('SentinelOneActionsClient class', () => {
 
   describe(`#isolate()`, () => {
     it('should send action to sentinelone', async () => {
-      await s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions());
+      await s1ActionsClient.isolate(createS1IsolateOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
         actionId: 's1-connector-instance-id',
@@ -135,7 +132,7 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should write action request and response to endpoint indexes', async () => {
-      await s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions());
+      await s1ActionsClient.isolate(createS1IsolateOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
       // FIXME:PT once we start writing the Response, check above should be removed and new assertion added for it
@@ -148,7 +145,7 @@ describe('SentinelOneActionsClient class', () => {
               action_id: expect.any(String),
               data: { command: 'isolate', comment: 'test comment', parameters: undefined },
               expiration: expect.any(String),
-              input_type: 'endpoint',
+              input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
             agent: { id: ['1-2-3'] },
@@ -162,7 +159,7 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should return action details', async () => {
-      await s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions());
+      await s1ActionsClient.isolate(createS1IsolateOptions());
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
     });

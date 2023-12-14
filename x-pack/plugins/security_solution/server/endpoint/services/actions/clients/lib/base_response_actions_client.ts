@@ -226,7 +226,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
         action_id: uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
-        input_type: 'endpoint',
+        input_type: actionRequest.agent_type ?? 'endpoint',
         data: {
           command: actionRequest.command,
           comment: actionRequest.comment ?? undefined,

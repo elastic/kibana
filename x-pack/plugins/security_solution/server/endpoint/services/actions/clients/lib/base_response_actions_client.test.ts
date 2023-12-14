@@ -363,6 +363,15 @@ describe('ResponseActionsClientImpl base class', () => {
       ).resolves.toEqual(expectedIndexDoc);
     });
 
+    it('should set `EndpointActions.input_type` to the correct value', async () => {
+      indexDocOptions.agent_type = 'sentinel_one';
+      set(expectedIndexDoc, 'EndpointActions.input_type', 'sentinel_one');
+
+      await expect(
+        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+      ).resolves.toEqual(expectedIndexDoc);
+    });
+
     it('should include alert_ids if any were provided', async () => {
       indexDocOptions.alert_ids = ['one', 'two'];
       set(expectedIndexDoc, 'EndpointActions.data.alert_id', indexDocOptions.alert_ids);
