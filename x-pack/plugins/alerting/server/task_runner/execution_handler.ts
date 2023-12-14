@@ -639,7 +639,7 @@ export class ExecutionHandler<
           const alertAsData = summarizedAlerts.all.data.find(
             (alertHit: AlertHit) => alertHit._id === alert.getUuid()
           );
-          if (alertAsData) {
+          if (alertAsData && !alert.getAlertAsData()) {
             alert.setAlertAsData(alertAsData);
           }
         }
