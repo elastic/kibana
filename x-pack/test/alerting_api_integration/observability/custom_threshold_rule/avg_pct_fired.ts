@@ -24,6 +24,7 @@ import {
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -37,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts';
     const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     const MOCKED_AD_HOC_DATA_VIEW = {
       id: DATA_VIEW_ID,
-      title: DATE_VIEW,
+      title: DATE_VIEW_TITLE,
       timeFieldName: '@timestamp',
       sourceFilters: [],
       fieldFormats: {},
@@ -225,11 +226,10 @@ export default function ({ getService }: FtrProviderContext) {
         const parsedViewInAppUrl = parseSearchParams(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         ) as { params: LogExplorerLocatorParsedParams };
-        const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
         expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATE_VIEW,
+          dataset: DATE_VIEW_TITLE,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
         });
