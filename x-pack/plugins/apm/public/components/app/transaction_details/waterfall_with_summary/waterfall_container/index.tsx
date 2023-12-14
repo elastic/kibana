@@ -17,7 +17,7 @@ import {
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
-import { MissingTransactionWarning } from './waterfall/missing_transaction_warning';
+import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 
 interface Props {
   waterfallItemId?: string;
@@ -39,7 +39,7 @@ export function WaterfallContainer({
   if (!waterfall) {
     return null;
   }
-  const { legends, items, hasOrphanTraceItems } = waterfall;
+  const { legends, items, orphanTraceItemsCount } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(
@@ -116,9 +116,11 @@ export function WaterfallContainer({
               type={colorBy}
             />
           </EuiFlexItem>
-          {hasOrphanTraceItems ? (
+          {orphanTraceItemsCount > 0 ? (
             <EuiFlexItem grow={false}>
-              <MissingTransactionWarning />
+              <OrphanTraceItemsWarning
+                orphanTraceItemsCount={orphanTraceItemsCount}
+              />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
