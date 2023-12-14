@@ -19,6 +19,8 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiFieldText,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,12 +29,24 @@ import { ActionVariable } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
 import type { UserDefinedRuleParams } from '../types';
 import { CodeEditorModal } from './code_editor_modal';
+import { useTestUserDefinedRule } from './use_test_user_defined_rule';
 
 export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<UserDefinedRuleParams>
 > = (props) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [actionVariableOptions, setActionVariableOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+
+  const { mutate: testRule, isLoading } = useTestUserDefinedRule({
+    onSuccess: (data) => {
+      setSuccess(JSON.stringify(data, null, 2));
+    },
+    onError: (data) => {
+      setError(data.body.message);
+    },
+  });
 
   useEffect(() => {
     if (null == props.ruleParams.codeOrUrl) {
@@ -73,6 +87,84 @@ export const RuleForm: React.FunctionComponent<
     [props]
   );
 
+  const onTestRuleClick = useCallback(() => {
+    setSuccess('');
+    setError('');
+    testRule({
+      isUrl: props.ruleParams.isUrl,
+      codeOrUrl: props.ruleParams.codeOrUrl,
+      customContextVariables: props.ruleParams.customContextVariables,
+    });
+  }, [testRule, props]);
+
+  const renderTestCodeResult = () => {
+    if (isLoading) {
+      return (
+        <EuiFlexItem>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
+      );
+    }
+    if (success) {
+      return (
+        <EuiFlexItem>
+          <EuiCallOut title="Your code looks good!" color="success" iconType="check">
+            <EuiCodeBlock fontSize="m" paddingSize="m">
+              {success}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        </EuiFlexItem>
+      );
+    }
+    if (error) {
+      return (
+        <EuiFlexItem>
+          <EuiCallOut
+            title="Sorry, there was an error testing your code"
+            color="danger"
+            iconType="error"
+          >
+            <EuiCodeBlock fontSize="m" paddingSize="m">
+              {error}
+            </EuiCodeBlock>
+          </EuiCallOut>
+        </EuiFlexItem>
+      );
+    }
+  };
+
+  const renderButtons = () => {
+    const hasError =
+      (props.errors.customContextVariables as string[])?.length > 0 ||
+      (props.errors.codeOrUrl as string[])?.length > 0;
+
+    if (props.ruleParams.isUrl) {
+      return (
+        <EuiFlexItem>
+          <EuiButton color="primary" onClick={onTestRuleClick} isDisabled={hasError}>
+            Test run
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
+    return (
+      <EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton color="primary" onClick={() => setIsModalOpen(true)}>
+              Edit code
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton color="primary" onClick={onTestRuleClick} isDisabled={hasError}>
+              Test run
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  };
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -107,6 +199,7 @@ export const RuleForm: React.FunctionComponent<
                 error={(props.errors.codeOrUrl as string[])[0]}
               >
                 <EuiFieldText
+                  fullWidth
                   placeholder="Url"
                   value={props.ruleParams.codeOrUrl}
                   onChange={(e) => onCodeOrUrlChange(e.target.value)}
@@ -130,23 +223,8 @@ export const RuleForm: React.FunctionComponent<
                 </EuiCodeBlock>
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiButton color="primary" onClick={() => setIsModalOpen(true)}>
-                    Edit code
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton color="primary" disabled>
-                    Test run
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
           </>
         )}
-
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
@@ -160,7 +238,7 @@ export const RuleForm: React.FunctionComponent<
           <EuiComboBox
             fullWidth
             async
-            isInvalid={props.errors.customContextVariables?.length > 0}
+            isInvalid={(props.errors.customContextVariables as string[])?.length > 0}
             noSuggestions={!actionVariableOptions?.length}
             options={actionVariableOptions}
             data-test-subj="actionVariableComboBox"
@@ -182,6 +260,8 @@ export const RuleForm: React.FunctionComponent<
             onSearchChange={loadActionVariableOptions}
           />
         </EuiFlexItem>
+        {renderTestCodeResult()}
+        {renderButtons()}
       </EuiFlexGroup>
       <EuiSpacer />
       <CodeEditorModal

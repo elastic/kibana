@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDuration } from '../../../../../alerting/common/parse_duration.ts';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 
 if (!Deno.env.get('QUERY_DELAY_MS')) {
   throw new Error('QUERY_DELAY_MS not set');
