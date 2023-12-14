@@ -127,13 +127,13 @@ describe(
       it('Delete exception list without rule reference', () => {
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '4');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
         deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
       });
 
       it('Deletes exception list with rule reference', () => {
