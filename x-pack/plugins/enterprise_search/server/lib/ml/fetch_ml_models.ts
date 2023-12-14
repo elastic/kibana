@@ -208,8 +208,8 @@ const getUserFriendlyTitle = (modelId: string, modelType: string) => {
     ? MODEL_TITLES_BY_TYPE[modelType]!
     : modelId === LANG_IDENT_MODEL_ID
     ? i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
-    defaultMessage: 'Language Identification',
-  })
+        defaultMessage: 'Language Identification',
+      })
     : modelId;
 };
 
