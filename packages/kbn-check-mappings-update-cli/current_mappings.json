@@ -3245,6 +3245,17 @@
       },
       "subjectId": {
         "type": "keyword"
+      },
+      "data": {
+        "type": "object",
+        "properties": {
+          "old": {
+            "type": "text"
+          },
+          "new": {
+            "type": "text"
+          }
+        }
       }
     }
   }

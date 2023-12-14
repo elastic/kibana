@@ -33,11 +33,13 @@ import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
+import type { RuleAuditProps } from './rule_audit';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
+const RuleAudit = lazy(() => import('./rule_audit'));
 
 export type RuleComponentProps = {
   rule: Rule;
@@ -54,6 +56,7 @@ export type RuleComponentProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const RULE_AUDIT_TAB = 'rule_audit';
 
 export function RuleComponent({
   rule,
@@ -168,6 +171,20 @@ export function RuleComponent({
         requestRefresh,
       }),
     },
+    {
+      id: RULE_AUDIT_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.ruleAuditText', {
+        defaultMessage: 'Audit',
+      }),
+      'data-test-subj': 'ruleAuditTab',
+      content: suspendedComponentWithProps<RuleAuditProps>(
+        RuleAudit,
+        'xl'
+      )({
+        ruleId: rule.id,
+        refreshToken,
+      }),
+    },
   ];
 
   const renderTabs = () => {
@@ -202,7 +219,6 @@ export function RuleComponent({
           onEditRule: requestRefresh,
         })}
       </EuiFlexGroup>
-
       <EuiSpacer size="xl" />
       <input
         type="hidden"

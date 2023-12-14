@@ -11,13 +11,16 @@ import { AUDIT_SAVED_OBJECT_TYPE } from '../../common';
 export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
     name: AUDIT_SAVED_OBJECT_TYPE,
-    namespaceType: 'agnostic',
+    namespaceType: 'multiple-isolated',
     hidden: true,
     mappings: {
       dynamic: false,
       properties: {
         '@timestamp': {
           type: 'date',
+        },
+        namespace: {
+          type: 'keyword',
         },
         operation: {
           type: 'keyword',
@@ -30,6 +33,17 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
         },
         subjectId: {
           type: 'keyword',
+        },
+        data: {
+          type: 'object',
+          properties: {
+            old: {
+              type: 'text',
+            },
+            new: {
+              type: 'text',
+            },
+          },
         },
       },
     },

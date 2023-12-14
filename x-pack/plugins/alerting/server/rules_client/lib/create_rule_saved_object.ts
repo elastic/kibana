@@ -144,7 +144,9 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     subjectId: createdAlert.id,
     data: {
       old: null,
-      new: omit(createdAlert.attributes, ['monitoring', 'lastRun', 'executionStatus']),
+      new: JSON.stringify(
+        omit(createdAlert.attributes, ['monitoring', 'lastRun', 'executionStatus'])
+      ),
     },
   });
 

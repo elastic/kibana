@@ -16,13 +16,15 @@ export const auditLogOperation = schema.oneOf([
 
 export const auditLog = schema.object({
   '@timestamp': schema.string(),
+  id: schema.string(),
+  namespace: schema.string(),
   user: schema.string(),
   operation: auditLogOperation,
   subject: schema.string(),
   subject_id: schema.string(),
   data: schema.object({
-    old: schema.any(),
-    new: schema.any(),
+    old: schema.nullable(schema.any()),
+    new: schema.nullable(schema.any()),
   }),
 });
 
