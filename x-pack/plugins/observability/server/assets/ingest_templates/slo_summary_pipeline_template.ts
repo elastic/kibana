@@ -160,6 +160,12 @@ export const getSLOSummaryPipelineTemplate = (slo: SLO, spaceId: string) => {
           value: spaceId,
         },
       },
+      {
+        set: {
+          field: 'savedObjectId',
+          value: slo.soId ?? null,
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,

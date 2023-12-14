@@ -35,23 +35,26 @@ const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 const tagsSchema = t.array(t.string);
 const sloIdSchema = t.string;
 
-const sloSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  timeWindow: timeWindowSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  revision: t.number,
-  enabled: t.boolean,
-  tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
-  groupBy: allOrAnyString,
-  version: t.number,
-});
+const sloSchema = t.intersection([
+  t.type({
+    id: sloIdSchema,
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    settings: settingsSchema,
+    revision: t.number,
+    enabled: t.boolean,
+    tags: tagsSchema,
+    createdAt: dateType,
+    updatedAt: dateType,
+    groupBy: allOrAnyString,
+    version: t.number,
+  }),
+  t.partial({ soId: t.string }),
+]);
 
 const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
 

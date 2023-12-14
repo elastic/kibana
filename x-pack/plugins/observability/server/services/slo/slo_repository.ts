@@ -52,7 +52,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       overwrite: true,
     });
 
-    return toSLO(savedSLO.attributes);
+    return toSLO(savedSLO.attributes, savedSLO.id);
   }
 
   async findById(id: string): Promise<SLO> {
@@ -67,7 +67,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw new SLONotFound(`SLO [${id}] not found`);
     }
 
-    return toSLO(response.saved_objects[0].attributes);
+    return toSLO(response.saved_objects[0].attributes, response.saved_objects[0].id);
   }
 
   async deleteById(id: string): Promise<void> {
@@ -95,7 +95,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
         perPage: ids.length,
         filter: `slo.attributes.id:(${ids.join(' or ')})`,
       });
-      return response.saved_objects.map((slo) => toSLO(slo.attributes));
+      return response.saved_objects.map((slo) => toSLO(slo.attributes, slo.id));
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new SLONotFound(`SLOs [${ids.join(',')}] not found`);
@@ -124,7 +124,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       total: response.total,
       perPage: response.per_page,
       page: response.page,
-      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes, slo.id)),
     };
   }
 }
@@ -133,10 +133,11 @@ function toStoredSLO(slo: SLO): StoredSLO {
   return sloSchema.encode(slo);
 }
 
-function toSLO(storedSLO: StoredSLO): SLO {
+function toSLO(storedSLO: StoredSLO, savedObjectId: string): SLO {
   return pipe(
     sloSchema.decode({
       ...storedSLO,
+      soId: savedObjectId,
       // version was added in 8.12.0. This is a safeguard against SO migration issue.
       // if not present, we considered the version to be 1, e.g. not migrated.
       // We would need to call the _reset api on this SLO.

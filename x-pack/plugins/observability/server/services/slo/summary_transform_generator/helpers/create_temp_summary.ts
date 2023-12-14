@@ -51,5 +51,6 @@ export function createTempSummaryDocument(slo: SLO, spaceId: string) {
     status: 'NO_DATA',
     isTempDoc: true,
     spaceId,
+    savedObjectId: slo.soId,
   };
 }

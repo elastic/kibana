@@ -37,34 +37,35 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.repository.save(slo, { throwOnConflict: true });
+    const savedSlo = await this.repository.save(slo, { throwOnConflict: true });
 
-    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    const rollupTransformId = getSLOTransformId(savedSlo.id, savedSlo.revision);
+    const summaryTransformId = getSLOSummaryTransformId(savedSlo.id, savedSlo.revision);
     try {
-      await this.transformManager.install(slo);
+      await this.transformManager.install(savedSlo);
       await this.transformManager.start(rollupTransformId);
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(slo, this.spaceId)),
+        () =>
+          this.esClient.ingest.putPipeline(getSLOSummaryPipelineTemplate(savedSlo, this.spaceId)),
         { logger: this.logger }
       );
 
-      await this.summaryTransformManager.install(slo);
+      await this.summaryTransformManager.install(savedSlo);
       await this.summaryTransformManager.start(summaryTransformId);
 
       await retryTransientEsErrors(
         () =>
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
-            id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo, this.spaceId),
+            id: `savedSlo-${savedSlo.id}`,
+            document: createTempSummaryDocument(savedSlo, this.spaceId),
             refresh: true,
           }),
         { logger: this.logger }
       );
     } catch (err) {
       this.logger.error(
-        `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
+        `Cannot install the SLO [id: ${savedSlo.id}, revision: ${savedSlo.revision}]. Rolling back.`
       );
 
       await this.summaryTransformManager.stop(summaryTransformId);
@@ -72,15 +73,15 @@ export class CreateSLO {
       await this.transformManager.stop(rollupTransformId);
       await this.transformManager.uninstall(rollupTransformId);
       await this.esClient.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+        { id: getSLOSummaryPipelineId(savedSlo.id, savedSlo.revision) },
         { ignore: [404] }
       );
-      await this.repository.deleteById(slo.id);
+      await this.repository.deleteById(savedSlo.id);
 
       throw err;
     }
 
-    return this.toResponse(slo);
+    return this.toResponse(savedSlo);
   }
 
   private toSLO(params: CreateSLOParams): SLO {

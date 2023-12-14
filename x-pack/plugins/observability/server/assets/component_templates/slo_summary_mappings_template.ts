@@ -146,6 +146,9 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         spaceId: {
           type: 'keyword',
         },
+        savedObjectId: {
+          type: 'keyword',
+        },
       },
     },
   },

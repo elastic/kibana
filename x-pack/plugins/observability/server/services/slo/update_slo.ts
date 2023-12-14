@@ -60,7 +60,7 @@ export class UpdateSLO {
     });
 
     validateSLO(updatedSlo);
-    await this.repository.save(updatedSlo);
+    updatedSlo = await this.repository.save(updatedSlo);
 
     if (!requireRevisionBump) {
       // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
