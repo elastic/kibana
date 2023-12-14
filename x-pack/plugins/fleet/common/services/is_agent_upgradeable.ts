@@ -75,13 +75,13 @@ export const getNotUpgradeableMessage = (
 
   if (versionToUpgrade !== undefined) {
     const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
-    if (!versionToUpgradeNumber) return 'target version is not valid.';
+    if (!versionToUpgradeNumber) return 'the selected version is not valid.';
 
     if (semverEq(agentVersionNumber, versionToUpgradeNumber))
       return `agent is already at the selected version.`;
 
     if (semverLt(versionToUpgradeNumber, agentVersionNumber))
-      return `target version is lower than current version.`;
+      return `the selected version is lower than the current version.`;
     // explicitly allow this case - the agent is upgradeable
     if (semverGt(versionToUpgradeNumber, agentVersionNumber)) return undefined;
   }

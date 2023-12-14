@@ -316,7 +316,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
   it('if agent reports upgradeable, with target version < current agent version ', () => {
     expect(
       getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.8.0')
-    ).toBe('target version is lower than current version.');
+    ).toBe('the selected version is lower than the current version.');
   });
 
   it('if agent reports upgradeable, with target version == current agent version ', () => {

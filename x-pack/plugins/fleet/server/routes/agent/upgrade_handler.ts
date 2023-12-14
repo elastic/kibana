@@ -115,9 +115,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       return response.customError({
         statusCode: 400,
         body: {
-          message: `Agent ${
-            request.params.agentId
-          } is not upgradeable. Reason: ${getNotUpgradeableMessage(
+          message: `Agent ${request.params.agentId} is not upgradeable: ${getNotUpgradeableMessage(
             agent,
             latestAgentVersion,
             version
