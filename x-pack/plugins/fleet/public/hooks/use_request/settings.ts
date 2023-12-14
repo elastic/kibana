@@ -49,8 +49,8 @@ export function usePutSettingsMutation() {
 
   return useMutation({
     mutationFn: sendPutSettings,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries(['settings']);
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings']);
     },
   });
 }
