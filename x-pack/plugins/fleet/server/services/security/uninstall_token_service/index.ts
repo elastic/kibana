@@ -77,14 +77,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
-   * @param excludeManagedPolicies
+   * @param excludePolicyIds
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
     perPage?: number,
-    excludeManagedPolicies?: boolean
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -176,12 +176,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyIdFilter?: string,
     page = 1,
     perPage = 20,
-    excludeManagedPolicies?: boolean
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
-    const excludeFilter = excludeManagedPolicies ? await this.getAllPolicyIds(true) : undefined;
 
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludeFilter);
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludePolicyIds);
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
@@ -415,37 +414,21 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private async getPolicyIdsBatch(
     batchSize: number = SO_SEARCH_LIMIT,
-    page: number = 1,
-    managedPoliciesOnly?: boolean
+    page: number = 1
   ): Promise<string[]> {
-    if (managedPoliciesOnly) {
-      return (
-        await agentPolicyService.list(this.soClient, {
-          page,
-          perPage: batchSize,
-          fields: ['id', 'is_managed'],
-        })
-      ).items.reduce((acc, policy) => {
-        if (policy.is_managed) {
-          acc.push(policy.id);
-        }
-        return acc;
-      }, [] as string[]);
-    } else {
-      return (
-        await agentPolicyService.list(this.soClient, { page, perPage: batchSize, fields: ['id'] })
-      ).items.map((policy) => policy.id);
-    }
+    return (
+      await agentPolicyService.list(this.soClient, { page, perPage: batchSize, fields: ['id'] })
+    ).items.map((policy) => policy.id);
   }
 
-  private async getAllPolicyIds(managedPoliciesOnly?: boolean): Promise<string[]> {
+  private async getAllPolicyIds(): Promise<string[]> {
     const batchSize = SO_SEARCH_LIMIT;
-    let policyIdsBatch = await this.getPolicyIdsBatch(batchSize, 1, managedPoliciesOnly);
+    let policyIdsBatch = await this.getPolicyIdsBatch(batchSize);
     let policyIds = policyIdsBatch;
     let page = 2;
 
     while (policyIdsBatch.length === batchSize) {
-      policyIdsBatch = await this.getPolicyIdsBatch(batchSize, page, managedPoliciesOnly);
+      policyIdsBatch = await this.getPolicyIdsBatch(batchSize, page);
       policyIds = [...policyIds, ...policyIdsBatch];
       page++;
     }

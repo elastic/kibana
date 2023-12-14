@@ -527,12 +527,6 @@ class AgentPolicyService {
       agentPolicy.is_protected = false;
     }
 
-    if (existingAgentPolicy.is_managed && agentPolicy?.is_protected) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot enable tamper protection for hosted agent policy ${id}`
-      );
-    }
-
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
         .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))

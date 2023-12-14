@@ -16,6 +16,7 @@ import type {
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
+import { agentPolicyService } from '../../services';
 
 const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<ResponseError> = {
   statusCode: 500,
@@ -32,13 +33,20 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   }
 
   try {
+    const fleetContext = await context.fleet;
+    const soClient = fleetContext.internalSoClient;
+
+    const { items: managedPolicyIds } = await agentPolicyService.list(soClient, {
+      // kuery: [filter this'is_managed'],
+    });
+
     const { page = 1, perPage = 20, policyId } = request.query;
 
     const body = await uninstallTokenService.getTokenMetadata(
       policyId?.trim(),
       page,
       perPage,
-      true
+      managedPolicyIds
     );
 
     return response.ok({ body });
