@@ -77,7 +77,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     getCustomFieldType,
     onSupportedFieldFilter,
   });
-  const allFieldsInclNew = useRef(allFields);
+  const allFieldsToReturn = useRef(allFields);
   const hasNewFields = useRef(false);
   const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
@@ -126,22 +126,22 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     };
 
     const selectedFields = sortedSelectedFields || [];
-    const newFields = dataViewId
-      ? fieldsExistenceReader
-          .getNewFields(dataViewId)
-          .filter((field) => (isCompatibleField ? isCompatibleField(field) : true))
-      : [];
-    // remove fields from allFields that are available in newFields, because they can be provided in unmapped state
-    const allFieldsWithoutNewFields = !newFields.length
-      ? allFields
-      : allFields?.filter((field) => !newFields.find((newField) => newField.name === field.name));
-    // append new fields to the end of the list allFieldsWithoutNewFields
-    const allFieldsWithNewFields = allFieldsWithoutNewFields
-      ? [...allFieldsWithoutNewFields, ...newFields]
-      : newFields;
 
-    const sortedFields = [...((allFieldsWithNewFields as unknown as T[]) || [])].sort(sortFields);
-    allFieldsInclNew.current = sortedFields;
+    // Taking care of new fields that were ingested after the selected data view was loaded
+    // Those replace existing fields if updated, or are added to the list
+    const newFields = dataViewId
+      ? fieldsExistenceReader.getNewFields(dataViewId).filter(isCompatibleField || (() => true))
+      : [];
+    // Filtering out fields that e.g. Discover provides by analyzing the resultset, that are not part of the loaded DataView
+    // These can be replaced by the new fields, which are mapped correctly, and therefore can be used in the right way
+    const allFieldsExlNew = allFields
+      ? allFields.filter((field) => !newFields.some((newField) => newField.name === field.name))
+      : [];
+
+    const allFieldsInclNew = [...allFieldsExlNew, ...newFields] as unknown as T[];
+
+    const sortedFields = allFieldsInclNew.sort(sortFields);
+    allFieldsToReturn.current = sortedFields;
     hasNewFields.current = Boolean(newFields.length);
     const groupedFields = {
       ...getDefaultFieldGroups(),
@@ -406,7 +406,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   return {
     fieldListGroupedProps,
     fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
-    allFields: allFieldsInclNew.current,
+    allFields: allFieldsToReturn.current,
     hasNewFields: hasNewFields.current,
   };
 }
