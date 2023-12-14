@@ -54,7 +54,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       size,
     } = params as OpenAndAcknowledgedAlertsToolParams;
     return new DynamicTool({
-      name: 'open-alerts',
+      name: 'OpenAndAcknowledgedAlertsTool',
       description: OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
       func: async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({

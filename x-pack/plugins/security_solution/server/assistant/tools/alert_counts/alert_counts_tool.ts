@@ -32,7 +32,7 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
     if (!this.isSupported(params)) return null;
     const { alertsIndexPattern, esClient } = params as AlertCountsToolParams;
     return new DynamicTool({
-      name: 'alert-counts',
+      name: 'AlertCountsTool',
       description: ALERT_COUNTS_TOOL_DESCRIPTION,
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
