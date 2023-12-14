@@ -29,17 +29,19 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
     cy.task('esArchiverUnload', 'ransomware_prevention');
   });
 
-  describe('Ransomware display on Alerts Page', () => {
+  describe('Ransomware in Alerts Page', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
     });
 
-    it('should show Ransomware Alerts in alerts table', () => {
-      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
-    });
+    it('should show ransomware alerts on alerts page', () => {
+      cy.log('should show ransomware alerts in alert table');
 
-    it('should show Ransomware Prevention Alert in the trend chart', () => {
+      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Prevention Alert');
+
+      cy.log('should show ransomware prevention alert in the trend chart');
+
       selectAlertsHistogram();
       cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Prevention Alert');
     });
@@ -48,13 +50,13 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
   describe('Ransomware in Timelines', function () {
     beforeEach(() => {
       deleteTimelines();
+      login();
       createTimeline({ ...getTimeline(), query: 'event.code: "ransomware"' }).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
       });
     });
 
-    it('Renders ransomware entries in timelines table', function () {
-      login();
+    it('should render ransomware entries in timelines table', function () {
       const timeline = this.timelineId;
       visitTimeline(timeline);
       // Wait for grid to load, it should have an analyzer icon

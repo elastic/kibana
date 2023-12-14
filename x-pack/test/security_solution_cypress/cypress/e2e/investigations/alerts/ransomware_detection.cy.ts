@@ -29,18 +29,20 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
     cy.task('esArchiverUnload', 'ransomware_detection');
   });
 
-  describe('Ransomware display on Alerts Page', () => {
+  describe('Ransomware in Alerts Page', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
-    it('should show Ransomware Alerts in alerts table', () => {
-      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
-    });
+    it('should show ransomware alerts on alerts page', () => {
+      cy.log('should show ransomware alerts in alerts table');
 
-    it('should show Ransomware Prevention Alert in the trend chart', () => {
+      cy.get(ALERT_RULE_NAME).should('have.text', 'Ransomware Detection Alert');
+
+      cy.log('should show ransomware prevention alert in the trend chart');
+
       selectAlertsHistogram();
       cy.get(ALERTS_HISTOGRAM_SERIES).should('have.text', 'Ransomware Detection Alert');
     });
@@ -54,7 +56,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
       createTimeline();
     });
 
-    it('Renders ransomware entries in timelines table', () => {
+    it('should show ransomware entries in timelines table', () => {
       cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
 
       // Wait for grid to load, it should have an analyzer icon
