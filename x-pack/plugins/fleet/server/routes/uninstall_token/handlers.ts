@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-server';
 
-import { appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type {
   GetUninstallTokensMetadataRequestSchema,
@@ -16,7 +16,7 @@ import type {
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
-import { agentPolicyService } from '../../services';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<ResponseError> = {
   statusCode: 500,
@@ -36,9 +36,13 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
 
-    const { items: managedPolicyIds } = await agentPolicyService.list(soClient, {
-      // kuery: [filter this'is_managed'],
+    const { items: managedPolicies } = await agentPolicyService.list(soClient, {
+      fields: ['id'],
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
     });
+
+    const managedPolicyIds = managedPolicies.map((policy) => policy.id);
 
     const { page = 1, perPage = 20, policyId } = request.query;
 
@@ -46,7 +50,7 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
       policyId?.trim(),
       page,
       perPage,
-      managedPolicyIds
+      managedPolicyIds.length > 0 ? managedPolicyIds : undefined
     );
 
     return response.ok({ body });
