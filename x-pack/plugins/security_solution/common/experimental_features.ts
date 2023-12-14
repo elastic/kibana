@@ -162,7 +162,7 @@ export const allowedExperimentalValues = Object.freeze({
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
