@@ -55,13 +55,13 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     });
   });
 
-  it('unchanged & unsaved timeline should NOT prompt when user navigates away', () => {
+  it('should NOT prompt when navigating with an unchanged & unsaved timeline', () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
     cy.url().should('not.contain', hostsUrl('allHosts'));
   });
 
-  it('Changed & unsaved timeline should prompt when user navigates away from security solution', () => {
+  it('should prompt when navigating away from security solution with a changed & unsaved timeline', () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
     openKibanaNavigation();
@@ -70,7 +70,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
-  it('Changed & unsaved timeline should NOT prompt when user navigates away within security solution where timelines are enabled', () => {
+  it('should NOT prompt when navigating with a changed & unsaved timeline within security solution where timelines are enabled', () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
     // navigate to any other page in security solution
@@ -79,7 +79,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('Changed & unsaved timeline should prompt when user navigates away within security solution where timelines are disabled eg. admin screen', () => {
+  it('should prompt when navigating with a changed & unsaved timeline within security solution where timelines are disabled eg. admin screen', () => {
     populateTimeline();
     openKibanaNavigation();
     cy.get(MANAGE_PAGE).click();
@@ -87,7 +87,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
-  it('Changed & saved timeline should NOT prompt when user navigates away out of security solution', () => {
+  it('should NOT prompt when navigating with a changed & saved timeline out of security solution', () => {
     populateTimeline();
     addNameToTimelineAndSave('Test');
     closeTimelineUsingCloseButton();
@@ -96,7 +96,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
+  it('should NOT prompt when navigating with a changed & saved timeline within security solution where timelines are disabled', () => {
     populateTimeline();
     addNameToTimelineAndSave('Test');
     closeTimelineUsingCloseButton();
@@ -121,7 +121,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
   });
 
-  it('Changed and unsaved timeline should NOT prompt when user navigates from the page where timeline is disabled', () => {
+  it('should NOT prompt when navigating with a changed and unsaved timeline from the page where timeline is disabled', () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
     openKibanaNavigation();
@@ -157,7 +157,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     });
   });
 
-  it('unchanged & unsaved timeline should NOT prompt when it is closed and navigate to any page', () => {
+  it('should NOT prompt when navigating with an unchanged & unsaved timeline to any page', () => {
     closeTimelineUsingCloseButton();
 
     navigateToAlertsPageInServerless(); // security page with timelines enabled
@@ -168,7 +168,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('Changed & unsaved timeline should prompt when it is closed and navigate to Security page without timeline', () => {
+  it('should prompt when navigating with a changed & unsaved timeline to a security page without timeline', () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
 
@@ -179,7 +179,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
-  it('Changed & unsaved timeline should prompt when it is closed and navigate to external page', () => {
+  it('should prompt when navigating with a changed & unsaved timeline to an external page', () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
 
@@ -188,7 +188,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
-  it('Changed & saved timeline should NOT prompt when it is closed', () => {
+  it('should NOT prompt when navigating with a changed & saved timeline to pages where timelines are disabled', () => {
     populateTimeline();
     addNameToTimelineAndSave('Test');
     closeTimelineUsingCloseButton();
@@ -201,13 +201,13 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('Changed & unsaved timeline should NOT prompt when navigate to page with timeline using breadcrumbs', () => {
+  it('should NOT prompt when navigating with a changed & unsaved timeline to a page with timeline using breadcrumbs', () => {
     populateTimeline();
     navigateToHostsUsingBreadcrumb(); // hosts has timelines enabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('Changed & unsaved timeline should NOT prompt when navigate to page without timeline using breadcrumbs', () => {
+  it('should prompt when navigating with a changed & unsaved timeline to page without timeline using breadcrumbs', () => {
     populateTimeline();
     navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
@@ -215,7 +215,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.url().should('contain', EXPLORE_URL);
   });
 
-  it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
+  it('should NOT prompt when navigating with a changed & saved timeline within security solution where timelines are disabled', () => {
     populateTimeline();
     addNameToTimelineAndSave('Test');
     navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
