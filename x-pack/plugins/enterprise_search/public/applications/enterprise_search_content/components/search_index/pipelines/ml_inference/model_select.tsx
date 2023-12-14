@@ -23,10 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
-import { IndexNameLogic } from '../../index_name_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 
-import { MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelectLogic } from './model_select_logic';
 import { LicenseBadge, ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
@@ -89,8 +86,7 @@ const NoModelSelected: React.FC = () => (
 
 const SelectedModel: React.FC<SelectedModelProps> = (props) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
-  const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
-  const { formErrors } = useValues(MLInferenceLogic);
+  const { areActionButtonsDisabled, modelNotDeployedError } = useValues(ModelSelectLogic);
 
   return props.model ? (
     <EuiPanel color="subdued" title="Selected model">
@@ -152,11 +148,11 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {formErrors.modelStatus !== undefined && (
+          {modelNotDeployedError && (
             <EuiFlexItem>
               <EuiText size="xs">
                 <p>
-                  <EuiTextColor color="danger">{formErrors.modelStatus}</EuiTextColor>
+                  <EuiTextColor color="danger">{modelNotDeployedError}</EuiTextColor>
                 </p>
               </EuiText>
             </EuiFlexItem>
@@ -170,13 +166,14 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
 };
 
 export const ModelSelect: React.FC = () => {
-  const { indexName } = useValues(IndexNameLogic);
-  const { ingestionMethod } = useValues(IndexViewLogic);
   const {
-    addInferencePipelineModal: { configuration },
-  } = useValues(MLInferenceLogic);
-  const { isLoading, selectableModels, selectedModel } = useValues(ModelSelectLogic);
-  const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
+    addInferencePipelineModal: { configuration, indexName },
+    ingestionMethod,
+    isLoading,
+    selectableModels,
+    selectedModel,
+  } = useValues(ModelSelectLogic);
+  const { setInferencePipelineConfiguration } = useActions(ModelSelectLogic);
 
   const { modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
 
