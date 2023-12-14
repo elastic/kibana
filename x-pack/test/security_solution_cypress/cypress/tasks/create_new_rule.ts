@@ -548,7 +548,6 @@ export const expandEsqlQueryBar = () => {
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
   cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
-  expandEsqlQueryBar();
   fillEsqlQueryBar(rule.query);
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();

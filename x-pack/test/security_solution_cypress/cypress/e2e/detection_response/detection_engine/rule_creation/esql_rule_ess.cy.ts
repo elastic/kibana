@@ -49,6 +49,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       visit(CREATE_RULE_URL);
 
       selectEsqlRuleType();
+      expandEsqlQueryBar();
 
       // ensures ES|QL rule in technical preview on create page
       cy.get(ESQL_TYPE).contains('Technical Preview');
@@ -75,6 +76,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       visit(CREATE_RULE_URL);
 
       selectEsqlRuleType();
+      expandEsqlQueryBar();
 
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
