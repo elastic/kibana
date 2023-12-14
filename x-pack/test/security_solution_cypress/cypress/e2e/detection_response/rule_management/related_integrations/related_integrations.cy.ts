@@ -52,7 +52,7 @@ describe.skip(
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     const DATA_STREAM_NAME = 'logs-related-integrations-test';
-    const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
+    const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations (CHANGED)';
     const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
       {
         package: 'aws',
