@@ -16,6 +16,9 @@ export JOB=kibana-security-solution-chrome
 
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
+mkdir .ftr
+retry 5 5 vault kv get -format=json -field=data secret/kibana-issues/dev/security-quality-gate/role-users > .ftr/role_users.json
+
 cd x-pack/test/security_solution_cypress
 set +e
 

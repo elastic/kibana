@@ -6,3 +6,4 @@
  */
 
 export * from './rules/v3';
+export * from './benchmarks/v2';
