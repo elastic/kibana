@@ -330,7 +330,7 @@ export const executeTimelineKQL = (query: string) => {
 };
 
 export const executeTimelineSearch = (query: string) => {
-  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {
