@@ -69,7 +69,6 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'areAPIKeysEnabled'
     | 'areCrossClusterAPIKeysEnabled'
     | 'create'
-    | 'hasApiKeys'
     | 'update'
     | 'invalidate'
     | 'validate'
@@ -367,7 +366,6 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
-        hasApiKeys: apiKeys.hasApiKeys.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),

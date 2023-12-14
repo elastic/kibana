@@ -137,5 +137,19 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('GET /internal/security/has_api_keys', () => {
+      it('should return false by default', async () => {
+        await supertest
+          .get('/internal/security/has_api_keys')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const payload = response.body;
+            expect(payload).to.eql({ hasApiKeys: false });
+          });
+      });
+    });
   });
 }

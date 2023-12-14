@@ -18,12 +18,6 @@ export interface APIKeys {
   areAPIKeysEnabled(): Promise<boolean>;
 
   /**
-   * Determines if the currently logged in user has created API keys
-   * @param apiKeyPrams ValidateAPIKeyParams.
-   */
-  hasApiKeys(request: KibanaRequest, options: HasApiKeysOptions): Promise<boolean>;
-
-  /**
    * Determines if Cross-Cluster API Keys are enabled in Elasticsearch.
    */
   areCrossClusterAPIKeysEnabled(): Promise<boolean>;
@@ -120,14 +114,6 @@ export interface ValidateAPIKeyParams {
    * Generated API Key (secret)
    */
   api_key: string;
-}
-
-/**
- *
- */
-export interface HasApiKeysOptions {
-  ownerOnly: boolean;
-  validOnly: boolean;
 }
 
 /**

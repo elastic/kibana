@@ -16,7 +16,6 @@ import type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   GrantAPIKeyResult,
-  HasApiKeysOptions,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
@@ -82,32 +81,6 @@ export class APIKeys implements APIKeysType {
     this.license = license;
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
-  }
-
-  /**
-   * Determines if currently-logged-in user has created any API Keys.
-   * NOTE: The current user may not have privileges to call the requred Elasticsearch API.
-   */
-  async hasApiKeys(request: KibanaRequest, options: HasApiKeysOptions): Promise<boolean> {
-    const { ownerOnly, validOnly } = options;
-
-    try {
-      const scopedClusterClient = this.clusterClient.asScoped(request);
-      const result = await scopedClusterClient.asCurrentUser.security.getApiKey({
-        owner: ownerOnly,
-      });
-      const { api_keys: apiKeys } = result;
-
-      let countedKeys = apiKeys;
-      if (validOnly) {
-        countedKeys = countedKeys.filter((key) => !key.invalidated);
-      }
-
-      return countedKeys.length > 0;
-    } catch (e) {
-      this.logger.error(`Failed to determine if user has created any API keys`);
-      return false;
-    }
   }
 
   /**

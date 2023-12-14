@@ -8,7 +8,6 @@
 export type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
-  HasApiKeysOptions,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,

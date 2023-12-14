@@ -18,7 +18,6 @@ export type {
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
   GrantAPIKeyResult,
-  HasApiKeysOptions,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
