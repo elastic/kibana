@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
@@ -37,9 +38,9 @@ export const assetCriticalityFieldMap: FieldMap = {
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */
-export const CriticalityModifiers = {
+export const CriticalityModifiers: Record<AssetCriticalityRecord['criticality_level'], number> = {
   very_important: 2,
   important: 1.5,
   normal: 1,
   not_important: 0.5,
-} as const;
+};
