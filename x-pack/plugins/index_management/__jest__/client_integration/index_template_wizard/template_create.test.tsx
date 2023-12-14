@@ -587,8 +587,8 @@ describe('<TemplateCreate />', () => {
               },
               aliases: ALIASES,
               // lifecycle: {
-                // enabled: true,
-                // data_retention: '1d',
+              // enabled: true,
+              // data_retention: '1d',
               // },
             },
           }),
