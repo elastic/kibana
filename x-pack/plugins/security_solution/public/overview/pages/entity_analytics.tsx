@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { EntityAnalyticsRiskScores } from '../components/entity_analytics/risk_score';
 import { RiskScoreEntity } from '../../../common/search_strategy';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -16,15 +15,15 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
-
-import { EntityAnalyticsHeader } from '../components/entity_analytics/header';
-import { EntityAnalyticsAnomalies } from '../components/entity_analytics/anomalies';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useRiskEngineStatus } from '../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../entity_analytics/components/risk_score_update_panel';
 import { useHasSecurityCapability } from '../../helper_hooks';
+import { EntityAnalyticsHeader } from '../../entity_analytics/components/entity_analytics_header';
+import { EntityAnalyticsAnomalies } from '../../entity_analytics/components/entity_analytics_anomalies';
+import { EntityAnalyticsRiskScores } from '../../entity_analytics/components/entity_analytics_risk_score';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();

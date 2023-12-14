@@ -16,13 +16,13 @@ import { escapeDataProviderId } from '../../../../common/components/drag_and_dro
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
-import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
-import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
-import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../../../../entity_analytics/components/risk_score/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 export const getUserRiskScoreColumns = ({

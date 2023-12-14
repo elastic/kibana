@@ -26,12 +26,12 @@ import type { State } from '../../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
 
-import { SeverityBadges } from '../../../components/risk_score/severity/severity_badges';
-import { SeverityBar } from '../../../components/risk_score/severity/severity_bar';
-import { SeverityFilterGroup } from '../../../components/risk_score/severity/severity_filter_group';
+import { SeverityBadges } from '../../../../entity_analytics/components/severity/severity_badges';
+import { SeverityBar } from '../../../../entity_analytics/components/severity/severity_bar';
+import { SeverityFilterGroup } from '../../../../entity_analytics/components/severity/severity_filter_group';
 
-import type { SeverityCount } from '../../../components/risk_score/severity/types';
-import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
+import type { SeverityCount } from '../../../../entity_analytics/components/severity/types';
+import { RiskInformationButtonEmpty } from '../../../../entity_analytics/components/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {

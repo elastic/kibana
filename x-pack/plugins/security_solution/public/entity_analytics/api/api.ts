@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -13,6 +14,7 @@ import {
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
+  RISK_SCORE_INDEX_STATUS_API_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -108,6 +110,29 @@ export const fetchAssetCriticalityPrivileges = async (): Promise<EntityAnalytics
     {
       version: '1',
       method: 'GET',
+    }
+  );
+};
+
+export const getRiskScoreIndexStatus = async (params: {
+  query: {
+    indexName: string;
+    entity: RiskScoreEntity;
+  };
+  signal?: AbortSignal;
+}): Promise<{
+  isDeprecated: boolean;
+  isEnabled: boolean;
+}> => {
+  const { indexName, entity } = params.query;
+  return KibanaServices.get().http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(
+    RISK_SCORE_INDEX_STATUS_API_URL,
+    {
+      method: 'GET',
+      version: '1',
+      query: { indexName, entity },
+      asSystemRequest: true,
+      signal: params.signal,
     }
   );
 };

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -16,7 +17,6 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { useRiskScore } from '../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { RiskInputsPanelKey } from '../risk_inputs_left';

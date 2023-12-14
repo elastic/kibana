@@ -26,7 +26,7 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { ONE_WEEK_IN_HOURS } from '../../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
-import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreSummaryAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';

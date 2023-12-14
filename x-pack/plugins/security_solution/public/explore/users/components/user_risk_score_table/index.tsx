@@ -18,10 +18,10 @@ import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
 import { usersModel, usersSelectors, usersActions } from '../../store';
 import type { UserRiskScoreItem } from '../../../../../common/search_strategy/security_solution/users/common';
-import type { SeverityCount } from '../../../components/risk_score/severity/types';
-import { SeverityBadges } from '../../../components/risk_score/severity/severity_badges';
-import { SeverityBar } from '../../../components/risk_score/severity/severity_bar';
-import { SeverityFilterGroup } from '../../../components/risk_score/severity/severity_filter_group';
+import type { SeverityCount } from '../../../../entity_analytics/components/severity/types';
+import { SeverityBadges } from '../../../../entity_analytics/components/severity/severity_badges';
+import { SeverityBar } from '../../../../entity_analytics/components/severity/severity_bar';
+import { SeverityFilterGroup } from '../../../../entity_analytics/components/severity/severity_filter_group';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { State } from '../../../../common/store';
 import type {
@@ -31,7 +31,7 @@ import type {
   UserRiskScore,
 } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
+import { RiskInformationButtonEmpty } from '../../../../entity_analytics/components/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {

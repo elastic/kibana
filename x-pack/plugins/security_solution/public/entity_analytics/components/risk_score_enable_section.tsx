@@ -38,7 +38,7 @@ import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
 
-import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
+import { RiskInformationFlyout } from './risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';

@@ -19,9 +19,9 @@ import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoreLevel } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_LEVEL } from '../../../components/risk_score/translations';
-import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../../../../entity_analytics/components/risk_score/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 export const getHostRiskScoreColumns = ({
