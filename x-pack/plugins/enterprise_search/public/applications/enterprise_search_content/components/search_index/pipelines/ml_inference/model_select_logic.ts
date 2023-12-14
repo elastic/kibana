@@ -94,7 +94,6 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
         'apiSuccess as createModelSuccess',
         'apiError as createModelError',
       ],
-
       MLInferenceLogic,
       [
         'setInferencePipelineConfiguration as setInferencePipelineConfigurationFromMLInferenceLogic',
