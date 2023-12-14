@@ -8,7 +8,7 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 // import dateMath from '@kbn/datemath';
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 import moment, { Moment } from 'moment';
 import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
@@ -24,20 +24,20 @@ export const DocCountChart: FC<{
   statuses: Statuses;
   dataStart: DataPublicPluginStart;
   index: string;
-  mappingsString: string;
   pipelineString: string;
   fileUpload: FileUploadPluginStart;
   firstReadDoc: any;
   lastReadDoc: any;
+  timeField: string | undefined;
 }> = ({
   statuses,
   dataStart,
   index,
-  mappingsString,
   pipelineString,
   fileUpload,
   firstReadDoc,
   lastReadDoc,
+  timeField,
 }) => {
   // console.log('statuses', statuses);
   // console.log('dataStart', dataStart);
@@ -52,6 +52,9 @@ export const DocCountChart: FC<{
   // const [actualEnd, setActualEnd] = useState<Moment | undefined>(undefined);
   const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
   const [timeRangeAttempts, setTimeRangeAttempts] = useState(ATTEMPTS);
+  const [lastNonZeroTimeMs, setLastNonZeroTimeMs] = useState<
+    { index: number; time: number } | undefined
+  >(undefined);
   const recordFailure = useCallback(() => {
     // eslint-disable-next-line no-console
     console.log('incrementFailedAttempts');
@@ -60,29 +63,30 @@ export const DocCountChart: FC<{
 
   // const [finishedChecksCountDown, setFinishedChecksCountDown] = useState(FINISHED_CHECKS);
 
-  const timeFieldName: string | undefined = useMemo(() => {
-    // console.log('mappingsString', mappingsString);
+  // const timeField: string | undefined = useMemo(() => {
+  //   // console.log('mappingsString', mappingsString);
 
-    const mappings = JSON.parse(mappingsString);
-    const fields = Object.entries<{ type: string }>(mappings.properties);
-    const dateFields = fields.filter(
-      ([name, field]) => field.type === 'date' || field.type === 'date_nanos'
-    );
-    if (dateFields.length === 0) {
-      return;
-    }
+  //   const mappings = JSON.parse(mappingsString);
+  //   const dateFields = Object.entries<{ type: string }>(mappings.properties).filter(
+  //     ([, field]) => field.type === 'date' || field.type === 'date_nanos'
+  //   );
+  //   if (dateFields.length === 0) {
+  //     return;
+  //   }
 
-    const timeField = dateFields.find(([name, field]) => name === '@timestamp') ?? dateFields[0];
-    return timeField[0];
-  }, [mappingsString]);
+  //   const timeFields = dateFields.find(([name]) => name === timeFieldName) ?? dateFields[0];
+  //   return timeFields[0];
+  // }, [mappingsString, timeFieldName]);
 
   const loadData = useCallback(async () => {
-    if (timeFieldName === undefined || timeRange === undefined) {
+    if (timeField === undefined || timeRange === undefined) {
       return;
     }
 
     setLoading(true);
     timeBuckets.setInterval('auto');
+
+    // console.log(lastNonZeroTimeMs);
 
     const { start, end } = timeRange;
     // const { start, end } = await fileUpload.getTimeFieldRange(
@@ -135,8 +139,8 @@ export const DocCountChart: FC<{
     // console.log(end.epoch, newEndMs);
 
     try {
-      const startMs = start.tz('UTC-1').valueOf();
-      const endMs = end.tz('UTC-1').valueOf();
+      const startMs = lastNonZeroTimeMs === undefined ? start.valueOf() : lastNonZeroTimeMs.time;
+      const endMs = end.valueOf();
 
       if (start != null && end != null) {
         timeBuckets.setBounds({
@@ -178,7 +182,7 @@ export const DocCountChart: FC<{
               aggs: {
                 eventRate: {
                   date_histogram: {
-                    field: timeFieldName,
+                    field: timeField,
                     fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 0,
                     extended_bounds: {
@@ -196,22 +200,32 @@ export const DocCountChart: FC<{
       // @ts-expect-error
       if (resp?.rawResponse?.aggregations?.eventRate?.buckets !== undefined) {
         // @ts-expect-error
-        const dd: LineChartPoint[] = resp.rawResponse.aggregations.eventRate.buckets.map((b) => ({
+        const data: LineChartPoint[] = resp.rawResponse.aggregations.eventRate.buckets.map((b) => ({
           time: b.key,
           value: b.doc_count,
         }));
-        // console.log('dd', dd);
 
-        setEventRateChartData(dd);
+        const newData = [...eventRateChartData]
+          .splice(0, lastNonZeroTimeMs?.index ?? 0)
+          .concat(data);
+
+        setEventRateChartData(newData);
+        setLastNonZeroTimeMs(findLastTimestamp(newData));
       }
     } catch (error) {
-      // console.log('error', error);
       setLoading(false);
       recordFailure();
     }
-
-    // console.log('resp', resp);
-  }, [dataStart.search, recordFailure, index, timeBuckets, timeFieldName, timeRange]);
+  }, [
+    timeField,
+    timeRange,
+    timeBuckets,
+    lastNonZeroTimeMs,
+    dataStart.search,
+    index,
+    eventRateChartData,
+    recordFailure,
+  ]);
 
   const finishedChecks = useCallback(
     async (counter: number) => {
@@ -226,7 +240,7 @@ export const DocCountChart: FC<{
   );
 
   const loadTimeRange = useCallback(async () => {
-    if (timeFieldName === undefined || firstReadDoc === undefined || lastReadDoc === undefined) {
+    if (timeField === undefined || firstReadDoc === undefined || lastReadDoc === undefined) {
       return;
     }
     const pipeline = JSON.parse(pipelineString);
@@ -244,7 +258,7 @@ export const DocCountChart: FC<{
             ],
           },
         },
-        timeFieldName
+        timeField
       );
       realStart = start;
     } catch (error) {
@@ -262,8 +276,8 @@ export const DocCountChart: FC<{
       const lastReadDoc1 = typeof lastReadDoc === 'string' ? JSON.parse(lastReadDoc) : lastReadDoc;
 
       const [firstDocTime, lastDocTime] = await Promise.all([
-        fileUpload.getTimeFromDoc(timeFieldName, firstReadDoc1, pipeline),
-        fileUpload.getTimeFromDoc(timeFieldName, lastReadDoc1, pipeline),
+        fileUpload.getTimeFromDoc(timeField, firstReadDoc1, pipeline),
+        fileUpload.getTimeFromDoc(timeField, lastReadDoc1, pipeline),
       ]);
 
       const startMs = realStart.epoch;
@@ -279,7 +293,7 @@ export const DocCountChart: FC<{
       // console.log('loadTimeRange', error);
       recordFailure();
     }
-  }, [fileUpload, firstReadDoc, recordFailure, index, lastReadDoc, pipelineString, timeFieldName]);
+  }, [fileUpload, firstReadDoc, recordFailure, index, lastReadDoc, pipelineString, timeField]);
 
   useEffect(() => {
     // console.log(statuses);
@@ -315,7 +329,7 @@ export const DocCountChart: FC<{
   ]);
 
   if (
-    timeFieldName === undefined ||
+    timeField === undefined ||
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     timeRangeAttempts === 0 ||
@@ -335,3 +349,15 @@ export const DocCountChart: FC<{
     </>
   );
 };
+
+function findLastTimestamp(data: LineChartPoint[]) {
+  let lastNonZeroDataPoint = data[data.length - 1].time;
+  let index = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].value > 0) {
+      lastNonZeroDataPoint = data[i].time;
+      index = i;
+    }
+  }
+  return { index, time: lastNonZeroDataPoint as number };
+}

@@ -582,11 +582,11 @@ export class ImportView extends Component {
                 statuses={statuses}
                 dataStart={this.props.dataStart}
                 index={index}
-                mappingsString={mappingsString}
                 pipelineString={pipelineString}
                 fileUpload={this.props.fileUpload}
                 firstReadDoc={this.state.firstReadDoc}
                 lastReadDoc={this.state.lastReadDoc}
+                timeField={timeFieldName}
               />
 
               {imported === true && (
