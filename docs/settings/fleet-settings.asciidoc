@@ -177,6 +177,8 @@ xpack.fleet.agentPolicies:
 `xpack.fleet.outputs`::
 List of outputs that are configured when the {fleet} app starts.
 +
+Certain types of outputs have additional required and optional settings. Refer to {fleet-guide}/fleet-settings.html#output-settings[Output settings] in the {fleet} and {agent} Guide for the full list of settings for each output type.
++
 If configured in your `kibana.yml`, output settings are grayed out and
 unavailable in the {fleet} UI. To make these settings editable in the UI, do not
 configure them in the configuration file. 
@@ -191,7 +193,7 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
   `name`::: 
     Output name.
   `type`::: 
-    Type of Output. Currently we support "elasticsearch", "logstash", "kafka".
+    Type of Output. Currently we support "elasticsearch", "logstash", "kafka", and "remote_elasticsearch".
   `hosts`::: 
     Array that contains the list of host for that output.
 =====
