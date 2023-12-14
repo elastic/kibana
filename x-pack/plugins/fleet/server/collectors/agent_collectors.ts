@@ -75,6 +75,11 @@ export interface AgentData {
     version: string;
     count: number;
   }>;
+  upgrade_details: Array<{
+    target_version: string;
+    state: string;
+    error_msg: string;
+  }>;
 }
 
 const DEFAULT_AGENT_DATA = {
@@ -82,6 +87,7 @@ const DEFAULT_AGENT_DATA = {
   agents_per_policy: [],
   agents_per_version: [],
   agents_per_os: [],
+  upgrade_details: [],
 };
 
 export const getAgentData = async (
@@ -131,6 +137,21 @@ export const getAgentData = async (
                 },
                 {
                   field: 'local_metadata.os.version.keyword',
+                },
+              ],
+            },
+          },
+          upgrade_details: {
+            multi_terms: {
+              terms: [
+                {
+                  field: 'upgrade_details.target_version.keyword',
+                },
+                {
+                  field: 'upgrade_details.state.keyword',
+                },
+                {
+                  field: 'upgrade_details.metadata.error_msg.keyword',
                 },
               ],
             },
@@ -190,11 +211,20 @@ export const getAgentData = async (
       count: bucket.doc_count,
     }));
 
+    const upgradeDetails = ((response?.aggregations?.upgrade_details as any).buckets ?? []).map(
+      (bucket: any) => ({
+        target_version: bucket.key[0],
+        state: bucket.key[1],
+        error_msg: bucket.key[2],
+      })
+    );
+
     return {
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
       agents_per_os: agentsPerOS,
+      upgrade_details: upgradeDetails,
     };
   } catch (error) {
     if (error.statusCode === 404) {
