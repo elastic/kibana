@@ -98,8 +98,8 @@ export const RuleAudit = (props: RuleAuditProps) => {
     page: pagination,
     sort: { field: '@timestamp', direction: 'asc' },
     onPage: setPagination,
-    // search:'',
-    filter: `audit.attributes.subjectId: ${ruleId}`,
+    // search:'', // search by keyword
+    filter: `audit.attributes.namespace: alerting AND audit.attributes.subjectId: ${ruleId}`,
   });
 
   useEffect(() => {
