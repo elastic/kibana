@@ -556,9 +556,6 @@ describe('<TemplateCreate />', () => {
       });
       component.update();
 
-      expect(1).toEqual(1);
-
-      /*
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
         expect.objectContaining({
@@ -589,15 +586,14 @@ describe('<TemplateCreate />', () => {
                 },
               },
               aliases: ALIASES,
-              lifecycle: {
-                enabled: true,
-                data_retention: '1d',
-              },
+              // lifecycle: {
+                // enabled: true,
+                // data_retention: '1d',
+              // },
             },
           }),
         })
       );
-     */
     });
 
     it.skip('should surface the API errors from the put HTTP request', async () => {
