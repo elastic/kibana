@@ -49,7 +49,8 @@ import { createTimeline } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
+// FLAKY: https://github.com/elastic/kibana/issues/173339
+describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     login();
     deleteTimelines();
