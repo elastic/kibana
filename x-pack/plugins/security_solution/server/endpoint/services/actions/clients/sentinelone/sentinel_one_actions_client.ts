@@ -16,7 +16,10 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { dump } from '../../../../utils/dump';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  BaseActionRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
@@ -105,9 +108,20 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
+  private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
+    if (payload.endpoint_ids.length > 1) {
+      throw new ResponseActionsClientError(
+        `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
+        400
+      );
+    }
+  }
+
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    // TODO:PT support multiple agents
+    await this.validateRequest(options);
+
     const agentUUID = options.endpoint_ids[0];
-    // TODO:PT will we support multiple agent IDs? and does S1 even support that? code above needs updating
 
     await this.sendAction(SUB_ACTION.ISOLATE_HOST, {
       uuid: agentUUID,

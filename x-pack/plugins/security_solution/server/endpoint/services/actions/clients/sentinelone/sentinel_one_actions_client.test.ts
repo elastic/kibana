@@ -109,6 +109,16 @@ describe('SentinelOneActionsClient class', () => {
     });
   });
 
+  it('should error if multiple agent ids are received', async () => {
+    const payload = responseActionsClientMock.createIsolateOptions();
+    payload.endpoint_ids.push('second-host-id');
+
+    await expect(s1ActionsClient.isolate(payload)).rejects.toMatchObject({
+      message: `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
+      statusCode: 400,
+    });
+  });
+
   describe(`#isolate()`, () => {
     it('should send action to sentinelone', async () => {
       await s1ActionsClient.isolate(responseActionsClientMock.createIsolateOptions());
