@@ -55,6 +55,9 @@ const getExceptionList2 = () => ({
 
 let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
+const initialNumberOfExceptionLists = '3';
+const expectedNumberOfExceptionListsAfterDeletion = '2';
+
 describe(
   'Manage lists from "Shared Exception Lists" page',
   { tags: ['@ess', '@serverless'] },
@@ -127,13 +130,13 @@ describe(
       it('Delete exception list without rule reference', () => {
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, initialNumberOfExceptionLists);
 
         deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, expectedNumberOfExceptionListsAfterDeletion);
       });
 
       it('Deletes exception list with rule reference', () => {
@@ -142,13 +145,13 @@ describe(
 
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, initialNumberOfExceptionLists);
 
         deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
 
         // Using cy.contains because we do not care about the exact text,
         // just checking number of lists shown
-        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, expectedNumberOfExceptionListsAfterDeletion);
       });
     });
   }
