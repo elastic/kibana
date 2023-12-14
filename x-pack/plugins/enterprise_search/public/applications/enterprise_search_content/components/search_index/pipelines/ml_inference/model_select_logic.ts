@@ -24,6 +24,7 @@ import {
   StartModelApiLogicActions,
 } from '../../../../api/ml_models/start_model_api_logic';
 import { IndexViewLogic } from '../../index_view_logic';
+
 import {
   MLInferenceLogic,
   MLInferenceProcessorsActions,
@@ -57,12 +58,10 @@ export interface ModelSelectValues {
   areActionButtonsDisabled: boolean;
   createModelError: HttpError | undefined;
   createModelStatus: Status;
-  formErrorsFromMLInferenceLogic: MLInferenceProcessorsValues['formErrors'];
   ingestionMethod: string;
   ingestionMethodFromIndexViewLogic: string;
   isLoading: boolean;
   isInitialLoading: boolean;
-  modelNotDeployedError: string | undefined;
   modelStateChangeError: string | undefined;
   modelsData: FetchModelsApiResponse | undefined;
   modelsStatus: Status;
@@ -115,7 +114,6 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       MLInferenceLogic,
       [
         'addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic',
-        'formErrors as formErrorsFromMLInferenceLogic',
       ],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
@@ -160,10 +158,6 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
     ingestionMethod: [
       () => [selectors.ingestionMethodFromIndexViewLogic],
       (ingestionMethod) => ingestionMethod, // Pass-through
-    ],
-    modelNotDeployedError: [
-      () => [selectors.formErrorsFromMLInferenceLogic],
-      (formErrors: MLInferenceProcessorsValues['formErrors']) => formErrors.modelStatus,
     ],
     modelStateChangeError: [
       () => [selectors.createModelError, selectors.startModelError],

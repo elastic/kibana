@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSelectable,
   EuiText,
@@ -29,7 +30,6 @@ import { ModelSelectLogic } from './model_select_logic';
 import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
 import { i18n } from '@kbn/i18n';
-import { TrainedModelHealth } from '../ml_model_health';
 
 export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
   onClick,
@@ -47,6 +47,26 @@ export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolea
   );
 };
 
+export const ModelDeployingButton: React.FC = () => {
+  return (
+    <EuiButton disabled={true} color="primary" size="s">
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.deployingButton.label',
+            {
+              defaultMessage: 'Deploying',
+            }
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiButton>
+  );
+};
+
 export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
   onClick,
   disabled,
@@ -59,6 +79,26 @@ export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean
           defaultMessage: 'Start',
         }
       )}
+    </EuiButton>
+  );
+};
+
+export const ModelStartingButton: React.FC = () => {
+  return (
+    <EuiButton disabled={true} color="success" size="s">
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.startingButton.label',
+            {
+              defaultMessage: 'Starting',
+            }
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiButton>
   );
 };
@@ -83,7 +123,7 @@ export const NoModelSelected: React.FC = () => (
 
 export const SelectedModel: React.FC<MlModel> = (model) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
-  const { areActionButtonsDisabled, modelNotDeployedError } = useValues(ModelSelectLogic);
+  const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
 
   return (
     <EuiPanel color="subdued" title="Selected model">
@@ -113,46 +153,58 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
               </div>
             </EuiFlexItem>
           )}
-          <EuiHorizontalRule margin="xs" />
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              {model.isPlaceholder ? (
-                <EuiFlexItem grow={false}>
-                  <DeployModelButton
-                    onClick={() => createModel(model.modelId)}
-                    disabled={areActionButtonsDisabled}
-                  />
-                </EuiFlexItem>
-              ) : model.deploymentState === MlModelDeploymentState.NotDeployed ? (
-                <EuiFlexItem grow={false}>
-                  <StartModelButton
-                    onClick={() => startModel(model.modelId)}
-                    disabled={areActionButtonsDisabled}
-                  />
-                </EuiFlexItem>
-              ) : (
-                <></>
-              )}
+          {(model.isPlaceholder ||
+            [
+              MlModelDeploymentState.Downloading,
+              MlModelDeploymentState.NotDeployed,
+              MlModelDeploymentState.Starting,
+            ].includes(model.deploymentState)) && (
+            <>
+              <EuiHorizontalRule margin="xs" />
               <EuiFlexItem grow={false}>
-                {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
-                <div>
-                  <TrainedModelHealth
-                    modelState={model.deploymentState}
-                    modelStateReason={model.deploymentStateReason}
-                    isDownloadable={model.isPlaceholder}
-                  />
-                </div>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {model.isPlaceholder ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <DeployModelButton
+                          onClick={() => createModel(model.modelId)}
+                          disabled={areActionButtonsDisabled}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <p>
+                            <EuiTextColor color="danger">
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.modelNotDeployedError',
+                                { defaultMessage: 'Model must be deployed before use.' }
+                              )}
+                            </EuiTextColor>
+                          </p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </>
+                  ) : model.deploymentState === MlModelDeploymentState.Downloading ? (
+                    <EuiFlexItem grow={false}>
+                      <ModelDeployingButton />
+                    </EuiFlexItem>
+                  ) : model.deploymentState === MlModelDeploymentState.NotDeployed ? (
+                    <EuiFlexItem grow={false}>
+                      <StartModelButton
+                        onClick={() => startModel(model.modelId)}
+                        disabled={areActionButtonsDisabled}
+                      />
+                    </EuiFlexItem>
+                  ) : model.deploymentState === MlModelDeploymentState.Starting ? (
+                    <EuiFlexItem grow={false}>
+                      <ModelStartingButton />
+                    </EuiFlexItem>
+                  ) : (
+                    <></>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {modelNotDeployedError && (
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <p>
-                  <EuiTextColor color="danger">{modelNotDeployedError}</EuiTextColor>
-                </p>
-              </EuiText>
-            </EuiFlexItem>
+            </>
           )}
         </EuiFlexGroup>
       </EuiPanel>
