@@ -580,6 +580,7 @@ export function getUiSettings(
       }),
       type: 'string',
       category: ['search'],
+      requiresPageReload: true,
       schema: schema.string(),
     },
   };

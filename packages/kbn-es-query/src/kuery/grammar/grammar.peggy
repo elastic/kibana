@@ -87,6 +87,7 @@ Expression
   = FieldRangeExpression
   / FieldValueExpression
   / FieldInferExpression
+  / InferExpression
   / ValueExpression
 
 Field "fieldName"
@@ -139,6 +140,20 @@ ValueExpression
     }
     const field = buildLiteralNode(null);
     return partial(field);
+  }
+
+InferExpression
+  = '~' Space* partial:Value {
+    if (partial.type === 'cursor') {
+      const fieldName = `${partial.prefix}${partial.suffix}`.trim();
+      return {
+        ...partial,
+        fieldName,
+        suggestionTypes: ['field', 'operator', 'conjunction']
+      };
+    }
+    const field = buildLiteralNode(null);
+    return partial(field, 'infer');
   }
 
 ListOfValues
