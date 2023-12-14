@@ -22,7 +22,6 @@ export function CreateSourceEditor(props: Props) {
   const [columns, setColumns] = useState<ESQLSourceDescriptor['columns']>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
-  const [geoField, setGeoField] = useState<string | undefined>();
 
   useEffect(() => {
     let ignore = false;
@@ -59,13 +58,12 @@ export function CreateSourceEditor(props: Props) {
             columns,
             esql,
             dateField,
-            geoField,
           }
         : null;
       props.onSourceConfigChange(sourceConfig);
     },
     300,
-    [columns, esql, dateField, geoField]
+    [columns, esql, dateField]
   );
 
   useEffect(() => {
@@ -81,14 +79,12 @@ export function CreateSourceEditor(props: Props) {
       >
       <ESQLEditor
         dateField={dateField}
-        geoField={geoField}
+        onDateFieldChange={setDateField}
         esql={esql}
         onESQLChange={({ columns, esql }: { columns: ESQLSourceDescriptor['columns'], esql: string }) => {
           setColumns(columns);
           setEsql(esql);
         }}
-        onDateFieldChange={setDateField}
-        onGeoFieldChange={setGeoField}
       />
     </EuiSkeletonText>
   );

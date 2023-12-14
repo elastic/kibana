@@ -44,13 +44,9 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   esql: string;
   columns: ESQLColumn[];
   /*
-   * When provided, esql requests narrowed by kibana global time range
+   * Date field used to narrow ES|QL requests by global time range
    */
   dateField?: string;
-  /*
-   * When provided, esql requests narrowed by map view port
-   */
-  geoField?: string;
 };
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {

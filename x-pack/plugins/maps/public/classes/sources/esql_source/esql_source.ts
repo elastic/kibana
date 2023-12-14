@@ -24,6 +24,7 @@ import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_sou
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
+import { getGeometryColumnIndex } from './get_esql_meta';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -84,7 +85,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.geoField !== undefined;
+    return true;
   }
 
   async getGeoJsonWithMeta(
@@ -112,8 +113,11 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     ];
 
     if (this.isFilterByMapBounds() && requestMeta.buffer) {
-      const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField!]);
-      filters.push(extentFilter);
+      const geoField = this._descriptor.columns[getGeometryColumnIndex(this._descriptor.columns)]?.name;
+      if (geoField) {
+        const extentFilter = createExtentFilter(requestMeta.buffer, [geoField]);
+        filters.push(extentFilter);
+      }
     }
 
     if (requestMeta.applyGlobalTime) {

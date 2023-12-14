@@ -10,15 +10,13 @@ import { isEqual } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { getESQLMeta, getGeometryColumnIndex } from './get_esql_meta';
+import { getESQLMeta, verifyGeometryColumn } from './get_esql_meta';
 
 interface Props {
   dateField?: string;
-  geoField?: string;
   esql: string;
   onESQLChange: ({ columns, esql }: { columns: ESQLColumn[], esql: string }) => void;
   onDateFieldChange: (dateField?: string) => void;
-  onGeoFieldChange: (geoField?: string) => void;
 }
 
 export function ESQLEditor(props: Props) {
@@ -29,10 +27,7 @@ export function ESQLEditor(props: Props) {
   const [onSubmitQuery, setOnSubmitQuery] = useState<AggregateQuery>({ esql: props.esql });
 
   const [dateFields, setDateFields] = useState<string[]>([]);
-  const [geoFields, setGeoFields] = useState<string[]>([]);
-  //const [filterByMapBounds, setFilterByMapBounds] = useState(false);
-  //const [filterByTimeBounds, setFilterBytimeBounds] = useState(false);
-
+  
   // On submit query change - load columns, date fields, and geo fields
   useEffect(() => {
     let ignore = false;
@@ -42,9 +37,8 @@ export function ESQLEditor(props: Props) {
       .then((esqlMeta) => {
         if (!ignore) {
           try {
-            getGeometryColumnIndex(esqlMeta.columns);
+            verifyGeometryColumn(esqlMeta.columns);
             setDateFields(esqlMeta.dateFields);
-            setGeoFields(esqlMeta.geoFields);
             props.onESQLChange({
               columns: esqlMeta.columns,
               esql: (onSubmitQuery as { esql: string }).esql
@@ -71,12 +65,6 @@ export function ESQLEditor(props: Props) {
       props.onDateFieldChange(dateFields.length ? dateFields[0] : undefined);
     }
   }, [dateFields]);
-
-  useEffect(() => {
-    if (!props.geoField || !geoFields.includes(props.geoField)) {
-      props.onGeoFieldChange(geoFields.length ? geoFields[0] : undefined);
-    }
-  }, [geoFields]);
 
   return (
     <>
