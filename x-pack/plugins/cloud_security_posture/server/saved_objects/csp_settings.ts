@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { cspSettingsSchema } from '../../common/types/rules/v3';
-import { cspSettingsSavedObjectMapping } from './mappings';
+
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export const cspSettings: SavedObjectsType = {
@@ -19,5 +19,5 @@ export const cspSettings: SavedObjectsType = {
   schemas: {
     '8.12.0': cspSettingsSchema,
   },
-  mappings: cspSettingsSavedObjectMapping,
+  mappings: { properties: {} },
 };

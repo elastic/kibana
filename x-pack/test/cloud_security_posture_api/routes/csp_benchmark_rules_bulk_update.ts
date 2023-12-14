@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const generateRuleKey = (ruleParams: RuleIdentifier): string => {
     return `${ruleParams.benchmarkId};${ruleParams.benchmarkVersion};${ruleParams.ruleNumber}`;
@@ -65,7 +66,11 @@ export default function ({ getService }: FtrProviderContext) {
       await waitForPluginInitialized();
     });
 
-    afterEach(async () => {});
+    afterEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings'],
+      });
+    });
 
     it('mute rules successfully', async () => {
       const rule1 = generateRandomRule();

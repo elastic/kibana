@@ -7,13 +7,12 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getBenchmarkFilter } from '../../../../common/utils/helpers';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-
+import { getBenchmarkIdFromPackagePolicyId, getSortedCspBenchmarkRulesTemplates } from './utils';
+import type { CspBenchmarkRule } from '../../../../common/types/latest';
 import type {
-  CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/latest';
-import { getBenchmarkIdFromPackagePolicyId, getSortedCspBenchmarkRulesTemplates } from './utils';
+} from '../../../../common/types/rules/v3';
 
 export const findBenchmarkRuleHandler = async (
   soClient: SavedObjectsClientContract,
