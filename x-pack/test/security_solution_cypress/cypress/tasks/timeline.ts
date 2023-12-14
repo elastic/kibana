@@ -9,7 +9,6 @@ import { recurse } from 'cypress-recurse';
 import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
-import { BASIC_TABLE_LOADING } from '../screens/common';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
@@ -23,8 +22,6 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
-  DELETE_TIMELINE_BTN,
-  DELETION_CONFIRMATION,
   FIELD_BROWSER,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -56,13 +53,11 @@ import {
   TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
-  CLOSE_OPEN_TIMELINE_MODAL_BTN,
   TIMELINE_ADD_FIELD_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD,
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
-  EVENT_NOTE,
   TIMELINE_CORRELATION_INPUT,
   TIMELINE_CORRELATION_TAB,
   TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
@@ -81,12 +76,7 @@ import {
   TIMELINE_LUCENELANGUAGE_BUTTON,
   TIMELINE_KQLLANGUAGE_BUTTON,
   TIMELINE_QUERY,
-  PROVIDER_BADGE,
-  PROVIDER_BADGE_DELETE,
   ESQL_TAB,
-  OPEN_TIMELINE_MODAL_TIMELINE_NAMES,
-  OPEN_TIMELINE_MODAL_SEARCH_BAR,
-  OPEN_TIMELINE_MODAL,
   NEW_TIMELINE_ACTION,
   SAVE_TIMELINE_ACTION,
   TOGGLE_DATA_PROVIDER_BTN,
@@ -303,18 +293,9 @@ export const clickIdToggleField = () => {
   });
 };
 
-export const closeOpenTimelineModal = () => {
-  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
-};
-
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
   cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
-};
-
-export const removeDataProvider = () => {
-  cy.get(PROVIDER_BADGE).click();
-  cy.get(PROVIDER_BADGE_DELETE).click();
 };
 
 export const createNewTimeline = () => {
@@ -324,18 +305,6 @@ export const createNewTimeline = () => {
 
 export const openCreateTimelineOptionsPopover = () => {
   cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
-};
-
-export const createTimelineOptionsPopoverBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
-      return cy.get(CREATE_NEW_TIMELINE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
-  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
 };
 
 export const createTimelineTemplateOptionsPopoverBottomBar = () => {
@@ -348,10 +317,6 @@ export const createTimelineTemplateOptionsPopoverBottomBar = () => {
   );
 
   cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
-};
-
-export const closeCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
 };
 
 export const createNewTimelineTemplate = () => {
@@ -389,12 +354,6 @@ export const saveTimeline = () => {
     cy.get(TIMELINE_PROGRESS_BAR).should('exist');
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
   });
-};
-
-export const deleteTimeline = () => {
-  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
-  cy.get(DELETE_TIMELINE_BTN).click();
-  cy.get(DELETION_CONFIRMATION).click();
 };
 
 export const markAsFavorite = () => {
@@ -442,13 +401,6 @@ export const openActiveTimeline = () => {
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(PIN_EVENT).first().click({ force: true });
-};
-
-export const persistNoteToFirstEvent = (notes: string) => {
-  cy.get(EVENT_NOTE).first().click({ force: true });
-  cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click();
-  cy.get(NOTES_TAB_BUTTON).find('.euiBadge');
 };
 
 export const populateTimeline = () => {
@@ -523,30 +475,6 @@ export const expandEventAction = () => {
     return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length >= 1);
   });
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
-};
-
-export const setKibanaTimezoneToUTC = () =>
-  cy
-    .request({
-      method: 'POST',
-      url: 'internal/kibana/settings',
-      body: { changes: { 'dateFormat:tz': 'UTC' } },
-      headers: {
-        'kbn-xsrf': 'set-kibana-timezone-utc',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-    })
-    .then(() => {
-      cy.reload();
-    });
-
-export const openTimelineFromOpenTimelineModal = (timelineName: string) => {
-  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).should('have.lengthOf.gt', 0);
-  cy.get(BASIC_TABLE_LOADING).should('not.exist');
-  cy.get(OPEN_TIMELINE_MODAL_SEARCH_BAR).type(`${timelineName}{enter}`);
-  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).should('have.lengthOf', 1);
-  cy.get(OPEN_TIMELINE_MODAL).should('contain.text', timelineName);
-  cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).first().click();
 };
 
 export const showDataProviderQueryBuilder = () => {
