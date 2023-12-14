@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
+import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
 import type { PluginName } from '@kbn/core-base-common';
@@ -15,12 +15,12 @@ import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import {
-  ServiceStatus,
-  ServiceStatusLevel,
-  CoreStatus,
+  type ServiceStatus,
+  type ServiceStatusLevel,
+  type CoreStatus,
   ServiceStatusLevels,
 } from '@kbn/core-status-common';
-import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
+import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -61,6 +61,28 @@ export interface RedactedStatusHttpBody {
   };
 }
 
+type CombinedStatuses = [
+  ServiceStatus<unknown>,
+  ServiceStatus,
+  CoreStatus,
+  Record<string, ServiceStatus<unknown>>
+];
+
+const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
+  level: ServiceStatusLevels.unavailable,
+  summary: 'Status not yet reported',
+};
+
+const STATUS_UNAVAILABLE_NOT_REPORTED: CombinedStatuses = [
+  SERVICE_UNAVAILABLE_NOT_REPORTED,
+  SERVICE_UNAVAILABLE_NOT_REPORTED,
+  {
+    elasticsearch: SERVICE_UNAVAILABLE_NOT_REPORTED,
+    savedObjects: SERVICE_UNAVAILABLE_NOT_REPORTED,
+  },
+  {},
+];
+
 export const registerStatusRoute = ({
   router,
   config,
@@ -70,12 +92,10 @@ export const registerStatusRoute = ({
 }: Deps) => {
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
   // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
-  const combinedStatus$ = new ReplaySubject<
-    [ServiceStatus<unknown>, ServiceStatus, CoreStatus, Record<string, ServiceStatus<unknown>>]
-  >(1);
-  combineLatest([status.overall$, status.coreOverall$, status.core$, status.plugins$]).subscribe(
-    combinedStatus$
-  );
+  const combinedStatus$ = new ReplaySubject<CombinedStatuses>(1);
+  combineLatest([status.overall$, status.coreOverall$, status.core$, status.plugins$])
+    .pipe(startWith(STATUS_UNAVAILABLE_NOT_REPORTED))
+    .subscribe(combinedStatus$);
 
   router.get(
     {
