@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
@@ -127,7 +127,13 @@ export function FrameInformationWindow({
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {informationRows.map((item, index) => (
+              <EuiFlexItem key={index}>
+                <EuiStat title={item.value} description={item.label} titleSize="xs" />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <FrameInformationAIAssistant frame={frame} />

@@ -23,13 +23,12 @@ export function KeyValueList({ rows, ...props }: Props) {
       {rows.map((row, index) => (
         <React.Fragment key={index}>
           <EuiFlexItem>
-            <EuiFlexGroup direction="row">
-              <EuiFlexItem grow style={{ display: 'flex', flexDirection: 'row' }}>
+            <EuiFlexGroup direction="row" responsive={false}>
+              <EuiFlexItem style={{ display: 'flex', flexDirection: 'row' }}>
                 {row.label}:
               </EuiFlexItem>
               <EuiFlexItem
-                grow={false}
-                style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}
+                style={{ overflowWrap: 'anywhere' }}
                 data-test-subj={`${props['data-test-subj']}_${row['data-test-subj']}`}
               >
                 {row.value}
