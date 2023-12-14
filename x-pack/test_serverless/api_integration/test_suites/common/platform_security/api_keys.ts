@@ -184,12 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/internal/security/has_api_keys')
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
-          expect(body).toEqual(
-            expect.objectContaining({
-              apiKeys: expect.arrayContaining([expect.objectContaining({ id: roleMapping.id })]),
-            })
-          );
           expect(status).toBe(200);
+          expect(body).toEqual({ hasApiKeys: true });
         });
 
         it('invalidate', async () => {
