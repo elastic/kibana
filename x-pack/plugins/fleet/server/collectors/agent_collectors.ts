@@ -79,7 +79,7 @@ export interface AgentData {
     target_version: string;
     state: string;
     error_msg: string;
-    count: number;
+    agent_count: number;
   }>;
 }
 
@@ -219,7 +219,7 @@ export const getAgentData = async (
         target_version: bucket.key[0],
         state: bucket.key[1],
         error_msg: bucket.key[2],
-        count: bucket.doc_count,
+        agent_count: bucket.doc_count,
       })
     );
 

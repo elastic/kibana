@@ -159,7 +159,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Error message of the agent upgrade if failed',
         },
       },
-      count: {
+      agent_count: {
         type: 'long',
         _meta: {
           description: 'How many agents have this upgrade details',
