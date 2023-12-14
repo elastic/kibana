@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import {
   FormulaPublicApi,
