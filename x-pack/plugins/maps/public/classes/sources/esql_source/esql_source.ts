@@ -13,6 +13,7 @@ import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { buildEsQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import { getTime } from '@kbn/data-plugin/public';
 import { SOURCE_TYPES } from '../../../../common/constants'
 import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
@@ -60,16 +61,24 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     return pattern ? pattern : 'ES|QL';
   }
 
-  getInspectorRequestIds(): string[] {
+  getInspectorRequestIds() {
     return [this._getRequestId()];
   }
 
-  isQueryAware(): boolean {
+  isQueryAware() {
     return true;
   }
 
-  getApplyGlobalQuery(): boolean {
+  getApplyGlobalQuery() {
     return true;
+  }
+
+  async isTimeAware() {
+    return true;
+  }
+
+  getApplyGlobalTime() {
+    return this._descriptor.dateField !== undefined;
   }
 
   async getGeoJsonWithMeta(
@@ -94,6 +103,22 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
       ...requestMeta.filters,
       ...(requestMeta.embeddableSearchContext?.filters ?? [])
     ];
+
+    if (this.getApplyGlobalTime()) {
+      const timeRange = requestMeta.timeslice
+        ? {
+            from: new Date(requestMeta.timeslice.from).toISOString(),
+            to: new Date(requestMeta.timeslice.to).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : requestMeta.timeFilters;
+      const timeFilter = getTime(undefined, timeRange, {
+        fieldName: this._descriptor.dateField,
+      });
+      if (timeFilter) {
+        filters.push(timeFilter);
+      }
+    }
 
     params.filter = buildEsQuery(
       undefined,
