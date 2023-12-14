@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';

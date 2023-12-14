@@ -13,7 +13,7 @@ import type {
   FormBasedPersistedState,
   FormBasedPrivateState,
 } from '../../../public/datasources/form_based/types';
-import { DatasourceCommon, IndexPattern, IndexPatternRef } from '../../types';
+import type { DatasourceCommon, IndexPattern, IndexPatternRef } from '../../types';
 import { loadInitialState } from './loader';
 import { toExpression } from './to_expression';
 

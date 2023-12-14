@@ -17,7 +17,7 @@ import {
   type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '.';
-import {
+import type {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,

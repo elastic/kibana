@@ -7,7 +7,7 @@
 
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import {
+import type {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -20,10 +20,10 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DateRange, IndexPattern, IndexPatternMap } from '../../types';
 import type { GenericIndexPatternColumn } from '../../../public/datasources/form_based/form_based';
-import { operationDefinitionMap } from './operations';
+import { operationDefinitionMap } from './operations/definitions';
 import type {
   FormBasedPrivateState,
   FormBasedLayer,
@@ -34,7 +34,7 @@ import type {
 } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import { dedupeAggs } from './dedupe_aggs';
+import { dedupeAggs, extractAggId } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
 
@@ -49,8 +49,6 @@ declare global {
   }
 }
 
-// esAggs column ID manipulation functions
-export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 // Need a more complex logic for decimals percentiles
 function getAggIdPostFixForPercentile(percentile: string, decimals?: string) {
   if (!percentile && !decimals) {
@@ -233,9 +231,10 @@ function getExpressionForLayer(
         });
         aggs.push(expressionBuilder);
 
-        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-          ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
-          : `col-${index}-${aggId}`;
+        // const esAggsId = window?.ELASTIC_LENS_DELAY_SECONDS
+        //   ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+        //   : `col-${index}-${aggId}`;
+        const esAggsId = `col-${index}-${aggId}`;
 
         esAggsIdMap[esAggsId] = [
           {
@@ -255,21 +254,21 @@ function getExpressionForLayer(
       }
     });
 
-    if (window.ELASTIC_LENS_DELAY_SECONDS) {
-      aggs.push(
-        buildExpression({
-          type: 'expression',
-          chain: [
-            buildExpressionFunction('aggShardDelay', {
-              id: 'the-delay',
-              enabled: true,
-              schema: 'metric',
-              delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
-            }).toAst(),
-          ],
-        })
-      );
-    }
+    // if (window.ELASTIC_LENS_DELAY_SECONDS) {
+    //   aggs.push(
+    //     buildExpression({
+    //       type: 'expression',
+    //       chain: [
+    //         buildExpressionFunction('aggShardDelay', {
+    //           id: 'the-delay',
+    //           enabled: true,
+    //           schema: 'metric',
+    //           delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
+    //         }).toAst(),
+    //       ],
+    //     })
+    //   );
+    // }
 
     const allOperations = uniq(
       esAggEntries.map(([_, column]) => operationDefinitionMap[column.operationType])
@@ -326,9 +325,10 @@ function getExpressionForLayer(
 
       matchingEsAggColumnIds.forEach((currentId) => {
         const currentColumn = esAggsIdMap[currentId][0];
-        const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
-          ? counter + (currentColumn.isBucketed ? 0 : 1)
-          : counter;
+        // const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
+        //   ? counter + (currentColumn.isBucketed ? 0 : 1)
+        //   : counter;
+        const aggIndex = counter;
         const newId = updatePositionIndex(currentId, aggIndex);
         updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
 

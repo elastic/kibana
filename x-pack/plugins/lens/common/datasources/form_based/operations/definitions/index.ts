@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
@@ -14,12 +14,12 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataViewsService } from '@kbn/data-plugin/common';
+import type { DataViewsService } from '@kbn/data-plugin/common';
 import { termsOperation } from './terms';
-import { filtersOperation } from './filters';
-import { cardinalityOperation } from './cardinality';
-import { percentileOperation } from './percentile';
-import { percentileRanksOperation } from './percentile_ranks';
+// import { filtersOperation } from './filters';
+// import { cardinalityOperation } from './cardinality';
+// import { percentileOperation } from './percentile';
+// import { percentileRanksOperation } from './percentile_ranks';
 import {
   minOperation,
   averageOperation,
@@ -28,28 +28,29 @@ import {
   medianOperation,
   standardDeviationOperation,
 } from './metrics';
-import { dateHistogramOperation } from './date_histogram';
-import {
-  cumulativeSumOperation,
-  counterRateOperation,
-  derivativeOperation,
-  movingAverageOperation,
-  overallSumOperation,
-  overallMinOperation,
-  overallMaxOperation,
-  overallAverageOperation,
-  timeScaleOperation,
-} from './calculations';
-import { countOperation } from './count';
-import {
-  mathOperation,
-  formulaOperation,
-  timeRangeOperation,
-  nowOperation,
-  intervalOperation,
-} from './formula';
-import { staticValueOperation } from './static_value';
-import { lastValueOperation } from './last_value';
+// import { dateHistogramOperation } from './date_histogram';
+// import {
+//   cumulativeSumOperation,
+//   counterRateOperation,
+//   derivativeOperation,
+//   movingAverageOperation,
+//   overallSumOperation,
+//   overallMinOperation,
+//   overallMaxOperation,
+//   overallAverageOperation,
+//   timeScaleOperation,
+// } from './calculations';
+// import { countOperation } from './count';
+// import {
+//   mathOperation,
+//   formulaOperation,
+//   timeRangeOperation,
+//   nowOperation,
+//   intervalOperation,
+// } from './formula';
+// import { staticValueOperation } from './static_value';
+// import { lastValueOperation } from './last_value';
+// import { rangeOperation } from './ranges';
 import type {
   FramePublicAPI,
   OperationMetadata,
@@ -66,8 +67,7 @@ import type {
   DataViewDragDropOperation,
   FormBasedLayer,
 } from '../../../../../public/datasources/form_based/types';
-import { DateRange, IndexPattern, IndexPatternField, LayerType } from '../../../../types';
-import { rangeOperation } from './ranges';
+import type { DateRange, IndexPattern, IndexPatternField, LayerType } from '../../../../types';
 import type {
   FormBasedDimensionEditorProps,
   OperationSupportMatrix,
@@ -123,66 +123,66 @@ export type { StaticValueIndexPatternColumn } from './static_value';
 // If you want to implement a new operation, add the definition to this array and
 // the column type to the `GenericIndexPatternColumn` union type below.
 const internalOperationDefinitions = [
-  filtersOperation,
+  // filtersOperation,
   termsOperation,
-  dateHistogramOperation,
+  // dateHistogramOperation,
   minOperation,
   maxOperation,
   averageOperation,
-  cardinalityOperation,
+  // cardinalityOperation,
   sumOperation,
   standardDeviationOperation,
   medianOperation,
-  percentileOperation,
-  percentileRanksOperation,
-  lastValueOperation,
-  countOperation,
-  rangeOperation,
-  cumulativeSumOperation,
-  counterRateOperation,
-  derivativeOperation,
-  movingAverageOperation,
-  mathOperation,
-  formulaOperation,
-  overallSumOperation,
-  overallMinOperation,
-  overallMaxOperation,
-  overallAverageOperation,
-  staticValueOperation,
-  timeScaleOperation,
-  timeRangeOperation,
-  nowOperation,
-  intervalOperation,
+  // percentileOperation,
+  // percentileRanksOperation,
+  // lastValueOperation,
+  // countOperation,
+  // rangeOperation,
+  // cumulativeSumOperation,
+  // counterRateOperation,
+  // derivativeOperation,
+  // movingAverageOperation,
+  // mathOperation,
+  // formulaOperation,
+  // overallSumOperation,
+  // overallMinOperation,
+  // overallMaxOperation,
+  // overallAverageOperation,
+  // staticValueOperation,
+  // timeScaleOperation,
+  // timeRangeOperation,
+  // nowOperation,
+  // intervalOperation,
 ];
 
-export { termsOperation } from './terms';
-export { rangeOperation } from './ranges';
-export { filtersOperation } from './filters';
-export { dateHistogramOperation } from './date_histogram';
-export {
-  minOperation,
-  averageOperation,
-  sumOperation,
-  maxOperation,
-  standardDeviationOperation,
-} from './metrics';
-export { percentileOperation } from './percentile';
-export { percentileRanksOperation } from './percentile_ranks';
-export { countOperation } from './count';
-export { lastValueOperation } from './last_value';
-export {
-  cumulativeSumOperation,
-  counterRateOperation,
-  derivativeOperation,
-  movingAverageOperation,
-  overallSumOperation,
-  overallAverageOperation,
-  overallMaxOperation,
-  overallMinOperation,
-  timeScaleOperation,
-} from './calculations';
-export { formulaOperation } from './formula/formula';
-export { staticValueOperation } from './static_value';
+// export { termsOperation } from './terms';
+// export { rangeOperation } from './ranges';
+// export { filtersOperation } from './filters';
+// export { dateHistogramOperation } from './date_histogram';
+// export {
+//   minOperation,
+//   averageOperation,
+//   sumOperation,
+//   maxOperation,
+//   standardDeviationOperation,
+// } from './metrics';
+// export { percentileOperation } from './percentile';
+// export { percentileRanksOperation } from './percentile_ranks';
+// export { countOperation } from './count';
+// export { lastValueOperation } from './last_value';
+// export {
+//   cumulativeSumOperation,
+//   counterRateOperation,
+//   derivativeOperation,
+//   movingAverageOperation,
+//   overallSumOperation,
+//   overallAverageOperation,
+//   overallMaxOperation,
+//   overallMinOperation,
+//   timeScaleOperation,
+// } from './calculations';
+// export { formulaOperation } from './formula/formula';
+// export { staticValueOperation } from './static_value';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

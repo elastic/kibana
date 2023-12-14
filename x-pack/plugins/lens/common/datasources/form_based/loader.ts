@@ -57,7 +57,7 @@ export function loadInitialState({
   );
 
   if (currentIndexPatternId) {
-    setLastUsedIndexPatternId(storage, currentIndexPatternId);
+    setLastUsedIndexPatternId(currentIndexPatternId, storage);
   }
 
   return {
@@ -114,7 +114,8 @@ const getLastUsedIndexPatternId = (
   return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
 };
 
-export const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
+export const setLastUsedIndexPatternId = (value: string, storage?: IStorageWrapper) => {
+  if (!storage) return;
   writeToStorage(storage, 'indexPatternId', value);
 };
 

@@ -23,39 +23,39 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { DOCUMENT_FIELD_NAME } from '../../../../../constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../../public/types';
-import { OperationDefinition } from '..';
-import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
-import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage, isColumn } from '../helpers';
-import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
-import {
-  FieldInput as FieldInputBase,
-  getErrorMessage,
-} from '../../../../../../public/datasources/form_based/dimension_panel/field_input';
+import type { OperationDefinition } from '..';
+import type { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
+// import { ValuesInput } from './values_input';
+// import { getInvalidFieldMessage, isColumn } from '../helpers';
+// import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
+// import {
+//   FieldInput as FieldInputBase,
+//   getErrorMessage,
+// } from '../../../../../../public/datasources/form_based/dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
 import type { IndexPatternField } from '../../../../../../public/types';
-import {
-  getDisallowedTermsMessage,
-  getMultiTermsScriptedFieldErrorMessage,
-  getFieldsByValidationState,
-  isSortableByColumn,
-  isPercentileRankSortable,
-  isPercentileSortable,
-  getOtherBucketSwitchDefault,
-} from './helpers';
+// import {
+//   getDisallowedTermsMessage,
+//   getMultiTermsScriptedFieldErrorMessage,
+//   getFieldsByValidationState,
+//   isSortableByColumn,
+//   isPercentileRankSortable,
+//   isPercentileSortable,
+//   getOtherBucketSwitchDefault,
+// } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
   DEFAULT_SIZE,
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
-import { IncludeExcludeRow } from './include_exclude_options';
-import { shouldShowTimeSeriesOption } from '../../../pure_utils';
+import type { IncludeExcludeRow } from './include_exclude_options';
+// import { shouldShowTimeSeriesOption } from '../../../pure_utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -312,13 +312,13 @@ export const termsOperation: OperationDefinition<
       const orderColumn = layer.columns[column.params.orderBy.columnId];
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (
-        !orderColumn ||
-        !isPercentileRankSortable(orderColumn) ||
-        !isPercentileSortable(orderColumn)
-      ) {
-        orderBy = '_key';
-      }
+      // if (
+      //   !orderColumn ||
+      //   !isPercentileRankSortable(orderColumn) ||
+      //   !isPercentileSortable(orderColumn)
+      // ) {
+      //   orderBy = '_key';
+      // }
     }
 
     const orderAggColumn = column.params.orderAgg;

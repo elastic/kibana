@@ -40,7 +40,7 @@ import {
   ReferenceBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './definitions/column_types';
-import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
+// import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../expressions';
 import { documentField } from '../../../document_field';
 import { isColumnOfType } from './definitions/helpers';

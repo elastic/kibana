@@ -12,7 +12,7 @@ import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { IndexPattern, IndexPatternField } from '../../types';
+import type { IndexPattern, IndexPatternField } from '../../types';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations

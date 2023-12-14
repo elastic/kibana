@@ -59,7 +59,7 @@ export function changeIndexPattern({
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
 }) {
-  setLastUsedIndexPatternId(storage, indexPatternId);
+  setLastUsedIndexPatternId(indexPatternId, storage);
   return {
     ...state,
     layers: isSingleEmptyLayer(state.layers)
@@ -134,7 +134,7 @@ export function changeLayerIndexPattern({
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
 }) {
-  setLastUsedIndexPatternId(storage, indexPatternId);
+  setLastUsedIndexPatternId(indexPatternId, storage);
 
   const newLayers = {
     ...state.layers,

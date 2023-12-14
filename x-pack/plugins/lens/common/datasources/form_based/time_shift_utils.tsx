@@ -25,16 +25,6 @@ import type {
 } from '../../../public/datasources/form_based/types';
 import type { FramePublicAPI } from '../../../public/types';
 
-export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
-  if (isAbsoluteTimeShift(timeShiftString.trim())) {
-    return parseAbsoluteTimeShift(timeShiftString, {
-      from: dateRange.fromDate,
-      to: dateRange.toDate,
-    }).value;
-  }
-  return parseTimeShift(timeShiftString);
-}
-
 export const timeShiftOptions = [
   {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.none', {
@@ -298,23 +288,6 @@ function closestMultipleOfInterval(duration: number, interval: number) {
     return duration;
   }
   return Math.ceil(duration / interval) * interval;
-}
-
-function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
-  // workout the interval (most probably matching the ES one)
-  const interval = calcAutoIntervalNear(
-    targetBars,
-    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
-  );
-  const duration = parseTimeShiftWrapper(timeShift, dateRange);
-  if (typeof duration !== 'string') {
-    const roundingOffset = timeShift.startsWith('end') ? interval.asMilliseconds() : 0;
-    return `${
-      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
-        roundingOffset) /
-      1000
-    }s`;
-  }
 }
 
 export function resolveTimeShift(

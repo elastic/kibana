@@ -12,7 +12,10 @@ import {
 } from '@kbn/expressions-plugin/common';
 import type { GenericOperationDefinition } from './operations';
 import { groupByKey } from './get_group_by_key';
-import { extractAggId, OriginalColumn } from './to_expression';
+import type { OriginalColumn } from './to_expression';
+
+// esAggs column ID manipulation functions
+export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
 
 /**
  * Consolidates duplicate agg expression builders to increase performance
