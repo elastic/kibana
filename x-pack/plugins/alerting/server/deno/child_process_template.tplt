@@ -3,9 +3,13 @@ import process from 'node:process';
 import { esClient } from './lib/es_client.ts';
 import { alertsClient } from './lib/alerts_client.ts';
 import { getTimeRange } from './lib/get_time_range.ts';
+import { getContext } from './lib/get_context.ts';
 
 (async () => {
   try {
+    if (!Deno.env.get('PATH')) {
+      throw new Error('PATH not set');
+    }
     // INJECT CODE HERE
   } catch (e) {
     console.error('Uncaught exception', e);

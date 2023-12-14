@@ -7,7 +7,9 @@
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { Logger } from '@kbn/core/server';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import { executeUserDefinedCode } from '../deno/executor';
 import {
   RuleActionParams,
   AlertInstanceState,
@@ -17,6 +19,7 @@ import {
 } from '../types';
 
 export interface TransformActionParamsOptions {
+  logger: Logger;
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -37,6 +40,7 @@ export interface TransformActionParamsOptions {
   ruleUrl?: string;
   flapping: boolean;
   aadAlert?: AADAlert;
+  alertTransform?: string;
 }
 
 interface SummarizedAlertsWithAll {
@@ -58,7 +62,8 @@ interface SummarizedAlertsWithAll {
   };
 }
 
-export function transformActionParams({
+export async function transformActionParams({
+  logger,
   actionsPlugin,
   alertId,
   alertType,
@@ -79,7 +84,8 @@ export function transformActionParams({
   ruleUrl,
   flapping,
   aadAlert,
-}: TransformActionParamsOptions): RuleActionParams {
+  alertTransform,
+}: TransformActionParamsOptions): Promise<RuleActionParams> {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
@@ -117,11 +123,39 @@ export function transformActionParams({
           },
         };
 
+  let transformedVariables = {};
+  if (alertTransform) {
+    // Run code in child process
+    try {
+      const { stdout } = await executeUserDefinedCode({
+        logger,
+        userDefinedCode: alertTransform,
+        env: {
+          PATH: process.env.PATH,
+          ACTION_CONTEXT: JSON.stringify(variables),
+        },
+      });
+
+      if (stdout) {
+        try {
+          transformedVariables = JSON.parse(stdout);
+        } catch (err) {
+          logger.error(`couldn't parse the output from the alert transform`);
+        }
+      }
+    } catch (error) {
+      logger.error(`Error executing user-defined code - ${error.message}`);
+      throw error;
+    }
+  }
+
+  const allVariables = { ...variables, ...transformedVariables };
+
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
     actionId,
     actionParams,
-    variables
+    allVariables
   );
 }
 
