@@ -55,13 +55,17 @@ export function getComparisonImpactRow({
   const baseImpactRows = getImpactRows(base);
   const comparisonImpactRows = comparison ? getImpactRows(comparison) : [];
   return [
-    {
-      'data-test-subj': 'rank',
-      label: i18n.translate('xpack.profiling.flameGraphInformationWindow.rank', {
-        defaultMessage: 'Rank',
-      }),
-      value: getComparisonValue(base.rank, comparison?.rank),
-    },
+    ...(base.rank
+      ? [
+          {
+            'data-test-subj': 'rank',
+            label: i18n.translate('xpack.profiling.flameGraphInformationWindow.rank', {
+              defaultMessage: 'Rank',
+            }),
+            value: getComparisonValue(base.rank, comparison?.rank),
+          },
+        ]
+      : []),
     ...baseImpactRows.map((baseItem, index) => {
       const comparisonValue = comparisonImpactRows[index]?.value;
       return {
