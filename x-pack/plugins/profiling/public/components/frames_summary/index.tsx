@@ -15,6 +15,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
@@ -98,6 +99,7 @@ export function FramesSummary({
       baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,
+      hidden: isEmpty(comparisonValue),
     },
     {
       id: 'annualizedCo2',
@@ -137,34 +139,13 @@ export function FramesSummary({
     },
   ];
 
-  return (
-    <EuiAccordion
-      initialIsOpen
-      id="TopNFunctionsSummary"
-      buttonContent={
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
-              {data[0].title}
-            </EuiText>
-          </EuiFlexItem>
-          {data[0].baseIcon && (
-            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
-              {data[0].baseValue}
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    >
-      <>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="row">
-          {data.map((item) => {
+  const Summary = (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="row">
+        {data
+          .filter((item) => !item.hidden)
+          .map((item) => {
             return (
               <EuiFlexItem key={item.id}>
                 <SummaryItem
@@ -176,8 +157,41 @@ export function FramesSummary({
               </EuiFlexItem>
             );
           })}
-        </EuiFlexGroup>
-      </>
-    </EuiAccordion>
+      </EuiFlexGroup>
+    </>
+  );
+
+  return (
+    <>
+      {compressed ? (
+        <>{Summary}</>
+      ) : (
+        <EuiAccordion
+          initialIsOpen
+          id="TopNFunctionsSummary"
+          buttonContent={
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+                  {data[0].title}
+                </EuiText>
+              </EuiFlexItem>
+              {data[0].baseIcon && (
+                <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                  <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+                  {data[0].baseValue}
+                </EuiTextColor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          {Summary}
+        </EuiAccordion>
+      )}
+    </>
   );
 }
