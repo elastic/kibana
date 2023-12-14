@@ -25,14 +25,14 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run for empty', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet();
     await task.start(taskManagerStart, soClient, esClient);
     await task.runTask();
   });
 
   it('should run some slos', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet([
       { attributes: { id: '1', revision: 1 } },
       { attributes: { id: '2', revision: 1 } },
@@ -69,7 +69,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run lots of slos', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet(
       times(10000, (i) => ({
         attributes: { id: `${i}`, revision: 1 },
@@ -109,7 +109,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when lots of slo defs are there', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet(
       times(10000, (i) => ({
         attributes: { id: `${i}`, revision: 2 },
@@ -182,7 +182,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when summaries are way more then defs', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet(
       times(100, (i) => ({
         attributes: { id: `${i}`, revision: 2 },
@@ -253,7 +253,7 @@ describe('SloSummaryCleanupTask', () => {
   });
 
   it('should run when there are no Slo defs', async function () {
-    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger);
+    const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
     soClient.bulkGet = mockSOClientBulkGet();
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
       if (!searchKey) {
