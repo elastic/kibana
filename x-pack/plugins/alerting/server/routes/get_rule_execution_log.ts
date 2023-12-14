@@ -29,6 +29,12 @@ const sortFieldSchema = schema.oneOf([
   schema.object({ num_active_alerts: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_recovered_alerts: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_new_alerts: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_mem_p50: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_mem_p95: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_mem_p99: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_cpu_p50: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_cpu_p95: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ task_cpu_p99: schema.object({ order: sortOrderSchema }) }),
 ]);
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
