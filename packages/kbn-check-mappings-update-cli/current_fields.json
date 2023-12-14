@@ -8,10 +8,20 @@
     "targetNamespace",
     "targetType"
   ],
-  "config": ["buildNum"],
-  "config-global": ["buildNum"],
-  "url": ["accessDate", "createDate", "slug"],
-  "usage-counters": ["domainId"],
+  "config": [
+    "buildNum"
+  ],
+  "config-global": [
+    "buildNum"
+  ],
+  "url": [
+    "accessDate",
+    "createDate",
+    "slug"
+  ],
+  "usage-counters": [
+    "domainId"
+  ],
   "task": [
     "attempts",
     "enabled",
@@ -25,15 +35,33 @@
     "status",
     "taskType"
   ],
-  "guided-onboarding-guide-state": ["guideId", "isActive"],
+  "guided-onboarding-guide-state": [
+    "guideId",
+    "isActive"
+  ],
   "guided-onboarding-plugin-state": [],
-  "ui-metric": ["count"],
+  "ui-metric": [
+    "count"
+  ],
   "application_usage_totals": [],
-  "application_usage_daily": ["timestamp"],
-  "event_loop_delays_daily": ["lastUpdatedAt"],
-  "index-pattern": ["name", "title", "type"],
-  "sample-data-telemetry": ["installCount", "unInstallCount"],
-  "space": ["name"],
+  "application_usage_daily": [
+    "timestamp"
+  ],
+  "event_loop_delays_daily": [
+    "lastUpdatedAt"
+  ],
+  "index-pattern": [
+    "name",
+    "title",
+    "type"
+  ],
+  "sample-data-telemetry": [
+    "installCount",
+    "unInstallCount"
+  ],
+  "space": [
+    "name"
+  ],
   "spaces-usage-stats": [],
   "exception-list-agnostic": [
     "_tags",
@@ -127,17 +155,44 @@
     "size",
     "user"
   ],
-  "fileShare": ["created", "name", "token", "valid_until"],
-  "action": ["actionTypeId", "name"],
+  "fileShare": [
+    "created",
+    "name",
+    "token",
+    "valid_until"
+  ],
+  "action": [
+    "actionTypeId",
+    "name"
+  ],
   "action_task_params": [],
-  "connector_token": ["connectorId", "tokenType"],
-  "query": ["description", "title"],
+  "connector_token": [
+    "connectorId",
+    "tokenType"
+  ],
+  "query": [
+    "description",
+    "title"
+  ],
   "kql-telemetry": [],
-  "search-session": ["created", "realmName", "realmType", "sessionId", "username"],
+  "search-session": [
+    "created",
+    "realmName",
+    "realmType",
+    "sessionId",
+    "username"
+  ],
   "search-telemetry": [],
-  "file-upload-usage-collection-telemetry": ["file_upload", "file_upload.index_creation_count"],
+  "file-upload-usage-collection-telemetry": [
+    "file_upload",
+    "file_upload.index_creation_count"
+  ],
   "apm-indices": [],
-  "tag": ["color", "description", "name"],
+  "tag": [
+    "color",
+    "description",
+    "name"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",
@@ -206,9 +261,17 @@
     "updatedAt",
     "updatedBy"
   ],
-  "api_key_pending_invalidation": ["apiKeyId", "createdAt"],
-  "rules-settings": ["flapping"],
-  "maintenance-window": ["enabled", "events"],
+  "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt"
+  ],
+  "rules-settings": [
+    "flapping"
+  ],
+  "maintenance-window": [
+    "enabled",
+    "events"
+  ],
   "graph-workspace": [
     "description",
     "kibanaSavedObjectMeta",
@@ -220,12 +283,39 @@
     "version",
     "wsState"
   ],
-  "search": ["description", "title"],
-  "visualization": ["description", "kibanaSavedObjectMeta", "title", "version"],
-  "canvas-element": ["@created", "@timestamp", "content", "help", "image", "name"],
-  "canvas-workpad": ["@created", "@timestamp", "name"],
-  "canvas-workpad-template": ["help", "name", "tags", "template_key"],
-  "event-annotation-group": ["description", "title"],
+  "search": [
+    "description",
+    "title"
+  ],
+  "visualization": [
+    "description",
+    "kibanaSavedObjectMeta",
+    "title",
+    "version"
+  ],
+  "canvas-element": [
+    "@created",
+    "@timestamp",
+    "content",
+    "help",
+    "image",
+    "name"
+  ],
+  "canvas-workpad": [
+    "@created",
+    "@timestamp",
+    "name"
+  ],
+  "canvas-workpad-template": [
+    "help",
+    "name",
+    "tags",
+    "template_key"
+  ],
+  "event-annotation-group": [
+    "description",
+    "title"
+  ],
   "dashboard": [
     "controlGroupInput",
     "controlGroupInput.chainingSystem",
@@ -249,9 +339,23 @@
     "title",
     "version"
   ],
-  "links": ["description", "links", "title"],
-  "lens": ["description", "state", "title", "visualizationType"],
-  "lens-ui-telemetry": ["count", "date", "name", "type"],
+  "links": [
+    "description",
+    "links",
+    "title"
+  ],
+  "lens": [
+    "description",
+    "state",
+    "title",
+    "visualizationType"
+  ],
+  "lens-ui-telemetry": [
+    "count",
+    "date",
+    "name",
+    "type"
+  ],
   "map": [
     "bounds",
     "description",
@@ -276,8 +380,14 @@
     "type",
     "updated_at"
   ],
-  "cases-configure": ["closure_type", "created_at", "owner"],
-  "cases-connector-mappings": ["owner"],
+  "cases-configure": [
+    "closure_type",
+    "created_at",
+    "owner"
+  ],
+  "cases-connector-mappings": [
+    "owner"
+  ],
   "cases": [
     "assignees",
     "assignees.uid",
@@ -351,7 +461,9 @@
     "type"
   ],
   "cases-telemetry": [],
-  "infrastructure-monitoring-log-view": ["name"],
+  "infrastructure-monitoring-log-view": [
+    "name"
+  ],
   "metrics-data-source": [],
   "ingest_manager_settings": [
     "fleet_server_hosts",
@@ -505,9 +617,23 @@
     "package_name",
     "package_version"
   ],
-  "fleet-preconfiguration-deletion-record": ["id"],
-  "ingest-download-sources": ["host", "is_default", "name", "proxy_id", "source_id"],
-  "fleet-fleet-server-host": ["host_urls", "is_default", "is_preconfigured", "name", "proxy_id"],
+  "fleet-preconfiguration-deletion-record": [
+    "id"
+  ],
+  "ingest-download-sources": [
+    "host",
+    "is_default",
+    "name",
+    "proxy_id",
+    "source_id"
+  ],
+  "fleet-fleet-server-host": [
+    "host_urls",
+    "is_default",
+    "is_preconfigured",
+    "name",
+    "proxy_id"
+  ],
   "fleet-proxy": [
     "certificate",
     "certificate_authorities",
@@ -518,8 +644,14 @@
     "url"
   ],
   "fleet-message-signing-keys": [],
-  "fleet-uninstall-tokens": ["policy_id", "token_plain"],
-  "osquery-manager-usage-metric": ["count", "errors"],
+  "fleet-uninstall-tokens": [
+    "policy_id",
+    "token_plain"
+  ],
+  "osquery-manager-usage-metric": [
+    "count",
+    "errors"
+  ],
   "osquery-saved-query": [
     "created_at",
     "created_by",
@@ -593,9 +725,22 @@
     "version"
   ],
   "threshold-explorer-view": [],
-  "observability-onboarding-state": ["progress", "state", "type"],
-  "ml-job": ["datafeed_id", "job_id", "type"],
-  "ml-trained-model": ["job", "job.create_time", "job.job_id", "model_id"],
+  "observability-onboarding-state": [
+    "progress",
+    "state",
+    "type"
+  ],
+  "ml-job": [
+    "datafeed_id",
+    "job_id",
+    "type"
+  ],
+  "ml-trained-model": [
+    "job",
+    "job.create_time",
+    "job.job_id",
+    "model_id"
+  ],
   "ml-module": [
     "datafeeds",
     "defaultIndexPattern",
@@ -636,19 +781,41 @@
     "type",
     "urls"
   ],
-  "uptime-synthetics-api-key": ["apiKey"],
+  "uptime-synthetics-api-key": [
+    "apiKey"
+  ],
   "synthetics-param": [],
   "infrastructure-ui-source": [],
   "inventory-view": [],
   "metrics-explorer-view": [],
-  "upgrade-assistant-reindex-operation": ["indexName", "status"],
-  "upgrade-assistant-ml-upgrade-operation": ["snapshotId"],
-  "monitoring-telemetry": ["reportedClusterUuids"],
+  "upgrade-assistant-reindex-operation": [
+    "indexName",
+    "status"
+  ],
+  "upgrade-assistant-ml-upgrade-operation": [
+    "snapshotId"
+  ],
+  "monitoring-telemetry": [
+    "reportedClusterUuids"
+  ],
   "enterprise_search_telemetry": [],
   "app_search_telemetry": [],
   "workplace_search_telemetry": [],
-  "siem-ui-timeline-note": ["created", "createdBy", "eventId", "note", "updated", "updatedBy"],
-  "siem-ui-timeline-pinned-event": ["created", "createdBy", "eventId", "updated", "updatedBy"],
+  "siem-ui-timeline-note": [
+    "created",
+    "createdBy",
+    "eventId",
+    "note",
+    "updated",
+    "updatedBy"
+  ],
+  "siem-ui-timeline-pinned-event": [
+    "created",
+    "createdBy",
+    "eventId",
+    "updated",
+    "updatedBy"
+  ],
   "siem-detection-engine-rule-actions": [
     "actions",
     "actions.actionRef",
@@ -660,7 +827,10 @@
     "ruleAlertId",
     "ruleThrottle"
   ],
-  "security-rule": ["rule_id", "version"],
+  "security-rule": [
+    "rule_id",
+    "version"
+  ],
   "siem-ui-timeline": [
     "columns",
     "columns.aggregatable",
@@ -760,8 +930,15 @@
     "updated",
     "updatedBy"
   ],
-  "endpoint:user-artifact-manifest": ["artifacts", "schemaVersion"],
-  "security-solution-signals-migration": ["sourceIndex", "updated", "version"],
+  "endpoint:user-artifact-manifest": [
+    "artifacts",
+    "schemaVersion"
+  ],
+  "security-solution-signals-migration": [
+    "sourceIndex",
+    "updated",
+    "version"
+  ],
   "risk-engine-configuration": [
     "dataViewId",
     "enabled",
@@ -773,15 +950,26 @@
     "range.end",
     "range.start"
   ],
-  "policy-settings-protection-updates-note": ["note"],
+  "policy-settings-protection-updates-note": [
+    "note"
+  ],
   "apm-telemetry": [],
-  "apm-server-schema": ["schemaJson"],
-  "apm-service-group": ["color", "description", "groupName", "kuery"],
+  "apm-server-schema": [
+    "schemaJson"
+  ],
+  "apm-service-group": [
+    "color",
+    "description",
+    "groupName",
+    "kuery"
+  ],
   "apm-custom-dashboards": [
     "dashboardSavedObjectId",
     "kuery",
     "serviceEnvironmentFilterEnabled",
     "serviceNameFilterEnabled"
   ],
-  "cloud-security-posture-settings": ["rules"]
+  "cloud-security-posture-settings": [
+    "rules"
+  ]
 }
