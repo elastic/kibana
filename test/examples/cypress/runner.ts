@@ -11,6 +11,11 @@ import { resolve } from 'path';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Executes a ProcRunner that supports `cypress run` and `cypress open` CLI commands
+ * Returns a `testRunner` for an FTR configuration with tests implemented in Cypress, to be used in for E2E test campaign execution after the Kibana tests server is in a ready state.
+ * {@link test/examples/package.json} for the yarn script implementations
+ */
 const ExamplePluginsCypressTestConfig = async (
   { getService }: FtrProviderContext,
   command: 'open' | 'run'
