@@ -67,7 +67,13 @@ export const generateAgentCheck =
       })
       .every((a) => !a);
 
-export const generateAgentSelection = (selection: GroupOption[]) => {
+export const generateAgentSelection = (
+  selection: GroupOption[]
+): {
+  newAgentSelection: AgentSelection;
+  selectedAgents: AgentOptionValue[];
+  selectedGroups: SelectedGroups;
+} => {
   const newAgentSelection: AgentSelection = {
     agents: [],
     allAgentsSelected: false,
@@ -117,7 +123,10 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
         }
 
         newAgentSelection.agents.push(key);
-        newAgentSelection.offlineAgentsSelected = opt.disabled ?? false;
+        if (opt.disabled) {
+          newAgentSelection.offlineAgentsSelected = true;
+        }
+
         break;
       default:
         // this should never happen!

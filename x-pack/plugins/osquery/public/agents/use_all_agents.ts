@@ -33,9 +33,9 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
     agents: Agent[];
     groups: ReturnType<typeof processAggregations>;
     total: number;
-  }>(
-    ['agents', osqueryPolicies, searchValue, perPage, agentIds],
-    () => {
+  }>({
+    queryKey: ['agents', osqueryPolicies, searchValue, perPage, agentIds],
+    queryFn: () => {
       let kuery = '';
 
       if (osqueryPolicies?.length) {
@@ -58,18 +58,16 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
         },
       });
     },
-    {
-      enabled: isFetched && !!osqueryPolicies?.length,
-      onSuccess: () => setErrorToast(),
-      onError: (error) =>
-        // @ts-expect-error update types
-        setErrorToast(error?.body, {
-          title: i18n.translate('xpack.osquery.agents.fetchError', {
-            defaultMessage: 'Error while fetching agents',
-          }),
-          // @ts-expect-error update types
-          toastMessage: error?.body?.error,
+    enabled: isFetched && !!osqueryPolicies?.length,
+    onSuccess: () => setErrorToast(),
+    onError: (error) =>
+      // @ts-expect-error update types
+      setErrorToast(error?.body, {
+        title: i18n.translate('xpack.osquery.agents.fetchError', {
+          defaultMessage: 'Error while fetching agents',
         }),
-    }
-  );
+        // @ts-expect-error update types
+        toastMessage: error?.body?.error,
+      }),
+  });
 };
