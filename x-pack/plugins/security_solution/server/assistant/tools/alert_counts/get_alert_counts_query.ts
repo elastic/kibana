@@ -19,13 +19,36 @@ export const getAlertsCountQuery = (alertsIndexPattern: string) => ({
       filter: [
         {
           bool: {
+            must: [],
             filter: [
               {
-                match_phrase: {
-                  'kibana.alert.workflow_status': 'open',
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.workflow_status': 'open',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'kibana.alert.workflow_status': 'acknowledged',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/d',
+                    lte: 'now/d',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
             ],
+            should: [],
             must_not: [
               {
                 exists: {
@@ -33,14 +56,6 @@ export const getAlertsCountQuery = (alertsIndexPattern: string) => ({
                 },
               },
             ],
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now/d',
-              lte: 'now/d',
-            },
           },
         },
       ],

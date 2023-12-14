@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RequestBody } from '../lib/langchain/types';
 
-import { getPluginNameFromRequest } from './helpers';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
 
 describe('getPluginNameFromRequest', () => {
   const contextRequestHeaderEncoded = encodeURIComponent(
@@ -32,27 +32,36 @@ describe('getPluginNameFromRequest', () => {
   });
 
   it('extracts plugin name from "x-kbn-context" request header', async () => {
-    const pluginName = getPluginNameFromRequest({ request });
+    const pluginName = getPluginNameFromRequest({
+      request,
+      defaultPluginName: DEFAULT_PLUGIN_NAME,
+    });
     expect(pluginName).toEqual('superSolution');
   });
 
-  it('fails to extracts plugin name from undefined "x-kbn-context" request header', async () => {
+  it('fails to extract plugin name from undefined "x-kbn-context" request header, falls back to default provided', async () => {
     const invalidRequest = {
       headers: {
         'x-kbn-context': undefined,
       },
     } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-    const pluginName = getPluginNameFromRequest({ request: invalidRequest });
-    expect(pluginName).toEqual('securitySolutionUI');
+    const pluginName = getPluginNameFromRequest({
+      request: invalidRequest,
+      defaultPluginName: DEFAULT_PLUGIN_NAME,
+    });
+    expect(pluginName).toEqual(DEFAULT_PLUGIN_NAME);
   });
 
-  it('fails to extracts plugin name from malformed "x-kbn-context" invalidRequest header', async () => {
+  it('fails to extract plugin name from malformed "x-kbn-context" invalidRequest header, falls back to default provided', async () => {
     const invalidRequest = {
       headers: {
         'x-kbn-context': 'asdfku',
       },
     } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-    const pluginName = getPluginNameFromRequest({ request: invalidRequest });
-    expect(pluginName).toEqual('securitySolutionUI');
+    const pluginName = getPluginNameFromRequest({
+      request: invalidRequest,
+      defaultPluginName: DEFAULT_PLUGIN_NAME,
+    });
+    expect(pluginName).toEqual(DEFAULT_PLUGIN_NAME);
   });
 });

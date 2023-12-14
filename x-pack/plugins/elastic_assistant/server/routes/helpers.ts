@@ -11,6 +11,7 @@ import { RequestBody } from '../lib/langchain/types';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  defaultPluginName: string;
   logger?: Logger;
 }
 
@@ -26,12 +27,14 @@ export const DEFAULT_PLUGIN_NAME = 'securitySolutionUI';
  * dedicated solution, the core folks said to reach out.
  *
  * @param logger optional logger to log any errors
+ * @param defaultPluginName default plugin name to use if unable to determine from request
  * @param request Kibana Request
  *
  * @returns plugin name
  */
 export const getPluginNameFromRequest = ({
   logger,
+  defaultPluginName,
   request,
 }: GetPluginNameFromRequestParams): string => {
   try {
@@ -42,7 +45,9 @@ export const getPluginNameFromRequest = ({
       )?.name;
     }
   } catch (err) {
-    logger?.error('Error determining source plugin, using default assistant tools.');
+    logger?.error(
+      `Error determining source plugin for selecting tools, using ${defaultPluginName}.`
+    );
   }
-  return DEFAULT_PLUGIN_NAME;
+  return defaultPluginName;
 };
