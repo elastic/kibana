@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import {
   FormulaPublicApi,
@@ -18,19 +18,14 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
-import { useTheme, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
-import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
-import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { AllSeries, ReportTypes } from '../../../..';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import { AllSeries } from '../../../..';
 import { AppDataType, ReportViewType } from '../types';
-import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { DataViewState } from '../hooks/use_app_data_view';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
-import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
+import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
 export interface ExploratoryEmbeddableProps {
   id?: string;
@@ -69,87 +64,42 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function Embeddable({
-  appendTitle,
-  attributes = [],
-  axisTitlesVisibility,
-  gridlinesVisibilitySettings,
-  customHeight,
-  customTimeRange,
-  dataViewState,
-  legendIsVisible,
-  legendPosition,
-  lens,
-  onBrushEnd,
-  caseOwner = observabilityFeatureId,
-  reportConfigMap = {},
-  reportType,
-  showCalculationMethod = false,
-  title,
-  withActions = true,
-  lensFormulaHelper,
-  hideTicks,
-  align,
-  noLabel,
-  fontSize = 27,
-  lineHeight = 32,
-  searchSessionId,
-  onLoad,
-}: ExploratoryEmbeddableComponentProps) {
+export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
+  const {
+    appendTitle,
+    attributes = [],
+    axisTitlesVisibility,
+    gridlinesVisibilitySettings,
+    customHeight,
+    customTimeRange,
+    legendIsVisible,
+    legendPosition,
+    lens,
+    onBrushEnd,
+    caseOwner = observabilityFeatureId,
+    reportType,
+    showCalculationMethod = false,
+    title,
+    withActions = true,
+    hideTicks,
+    align,
+    noLabel,
+    fontSize = 27,
+    lineHeight = 32,
+    searchSessionId,
+    onLoad,
+  } = props;
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
-  const spaceId = useKibanaSpace();
-
   const series = Object.entries(attributes)[0]?.[1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
-  const theme = useTheme();
 
-  const attributesJSON = useMemo(() => {
-    try {
-      const layerConfigs: LayerConfig[] = getLayerConfigs(
-        attributes,
-        reportType,
-        theme,
-        dataViewState,
-        { ...reportConfigMap, ...obsvReportConfigMap },
-        spaceId.space?.id
-      );
-
-      if (reportType === ReportTypes.SINGLE_METRIC) {
-        const lensAttributes = new SingleMetricLensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper!
-        );
-        return lensAttributes?.getJSON('lnsLegacyMetric');
-      } else if (reportType === ReportTypes.HEATMAP) {
-        const lensAttributes = new HeatMapLensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper!
-        );
-        return lensAttributes?.getJSON('lnsHeatmap');
-      } else {
-        const lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
-        return lensAttributes?.getJSON();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, [
-    attributes,
-    dataViewState,
-    lensFormulaHelper,
-    reportConfigMap,
-    reportType,
-    spaceId.space?.id,
-    theme,
-  ]);
+  const attributesJSON = useEmbeddableAttributes(props);
 
   const timeRange = customTimeRange ?? series?.time;
 
