@@ -7,9 +7,10 @@
 
 import React from 'react';
 
+import { shallow } from 'enzyme';
+
 import { EuiLink } from '@elastic/eui';
 
-import { shallow } from 'enzyme';
 import { LicenseBadge, LicenseBadgeProps } from './license_badge';
 
 const DEFAULT_PROPS: LicenseBadgeProps = {

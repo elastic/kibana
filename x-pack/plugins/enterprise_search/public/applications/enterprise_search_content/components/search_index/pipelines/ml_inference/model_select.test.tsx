@@ -16,7 +16,13 @@ import { EuiSelectable, EuiText } from '@elastic/eui';
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { LicenseBadge } from './license_badge';
-import { DeployModelButton, ModelSelect, NoModelSelected, SelectedModel, StartModelButton } from './model_select';
+import {
+  DeployModelButton,
+  ModelSelect,
+  NoModelSelected,
+  SelectedModel,
+  StartModelButton,
+} from './model_select';
 
 const DEFAULT_VALUES = {
   addInferencePipelineModal: {

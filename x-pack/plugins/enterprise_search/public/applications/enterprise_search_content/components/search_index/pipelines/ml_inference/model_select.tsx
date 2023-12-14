@@ -23,13 +23,14 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { LicenseBadge } from './license_badge';
 import { ModelSelectLogic } from './model_select_logic';
 import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
-import { i18n } from '@kbn/i18n';
 
 export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
   onClick,
@@ -49,7 +50,7 @@ export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolea
 
 export const ModelDeployingButton: React.FC = () => {
   return (
-    <EuiButton disabled={true} color="primary" size="s">
+    <EuiButton disabled color="primary" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -85,7 +86,7 @@ export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean
 
 export const ModelStartingButton: React.FC = () => {
   return (
-    <EuiButton disabled={true} color="success" size="s">
+    <EuiButton disabled color="success" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
