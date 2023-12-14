@@ -7,21 +7,15 @@
 
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { dataStreamTypeRT } from '../../common';
 
-// https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
-export const dataStreamTypesRt = t.keyof({
-  logs: null,
-  metrics: null,
-  traces: null,
-  synthetics: null,
-  profiling: null,
-});
+export const dataStreamTypesRt = dataStreamTypeRT;
+
+export type DataStreamTypes = t.TypeOf<typeof dataStreamTypesRt>;
 
 export const typeRt = t.partial({
   type: dataStreamTypesRt,
 });
-
-export type DataStreamTypes = t.TypeOf<typeof dataStreamTypesRt>;
 
 export const rangeRt = t.type({
   start: isoToEpochRt,

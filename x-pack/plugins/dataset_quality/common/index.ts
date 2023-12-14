@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
+export { dataStreamRT, dataStreamTypeRT } from './data_stream';
+export type { DataStream, DataStreamType } from './data_stream';
 export type { FetchOptions } from './fetch_options';
+export type { DatasetQualityConfig } from './plugin_config';
 export type { APIClientRequestParamsOf, APIReturnType } from './rest';

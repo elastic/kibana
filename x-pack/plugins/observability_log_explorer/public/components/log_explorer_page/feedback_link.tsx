@@ -8,7 +8,7 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
-import { feedbackLinkTitle } from '../../common/translations';
+import { feedbackLinkTitle } from '../../../common/translations';
 
 export const FeedbackLink = React.memo(() => {
   return (

@@ -9,7 +9,7 @@ import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { datasetQualityAppTitle } from '@kbn/dataset-quality-plugin/public';
-import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
+import { ObservabilityLogExplorerPageTemplate } from '../../components/shared/page_template';
 import { useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 

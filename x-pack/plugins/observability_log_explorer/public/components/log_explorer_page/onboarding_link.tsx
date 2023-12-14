@@ -13,8 +13,8 @@ import {
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
-import { onboardingLinkTitle } from '../../common/translations';
-import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import { onboardingLinkTitle } from '../../../common/translations';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ConnectedOnboardingLink = React.memo(() => {
   const {
