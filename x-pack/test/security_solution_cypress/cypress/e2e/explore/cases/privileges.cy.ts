@@ -50,15 +50,9 @@ const testCase: TestCaseWithoutTimeline = {
 };
 
 describe('Cases privileges', { tags: ['@ess'] }, () => {
-  before(() => {
-    createUsersAndRoles(usersToCreate, rolesToCreate);
-  });
-
-  after(() => {
-    deleteUsersAndRoles(usersToCreate, rolesToCreate);
-  });
-
   beforeEach(() => {
+    deleteUsersAndRoles(usersToCreate, rolesToCreate);
+    createUsersAndRoles(usersToCreate, rolesToCreate);
     login();
     deleteAllCasesItems();
   });

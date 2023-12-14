@@ -34,10 +34,6 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
       waitForUncommonProcessesToBeLoaded();
     });
 
-    after(() => {
-      cy.task('esArchiverUnload', 'host_uncommon_processes');
-    });
-
     it('pagination updates results and page number', () => {
       cy.get(UNCOMMON_PROCESSES_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');
 

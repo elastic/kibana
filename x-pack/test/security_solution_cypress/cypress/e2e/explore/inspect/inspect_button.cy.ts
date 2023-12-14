@@ -20,7 +20,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { selectDataView } from '../../../tasks/sourcerer';
-import { postDataView } from '../../../tasks/api_calls/common';
+import { deleteDataView, postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 
@@ -29,15 +29,13 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServ
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
     cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-
-    login();
-    // Create and select data view
-    postDataView(DATA_VIEW);
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
-    cy.task('esArchiverUnload', 'risk_hosts');
+  beforeEach(() => {
+    deleteDataView(DATA_VIEW);
+    // Create and select data view
+    postDataView(DATA_VIEW);
+    login();
   });
 
   INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {
@@ -45,8 +43,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServ
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
-      login();
-
       visitWithTimeRange(url, {
         visitOptions: {
           onLoad: () => {

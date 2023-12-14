@@ -45,10 +45,6 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
       mouseoverOnToOverflowItem();
     });
 
-    after(() => {
-      cy.task('esArchiverUnload', 'network');
-    });
-
     it('Shows more items in the popover', () => {
       cy.get(DESTINATION_DOMAIN).eq(0).should('have.text', testDomainOne);
       cy.get(DESTINATION_DOMAIN).eq(1).should('have.text', testDomainTwo);

@@ -36,10 +36,6 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'network' });
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'network');
-  });
-
   beforeEach(() => {
     login();
     visit(NETWORK_URL, { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });

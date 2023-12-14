@@ -53,10 +53,12 @@ import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
+import { deleteAllCasesItems } from '../../../tasks/api_calls/common';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    deleteAllCasesItems();
     createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({

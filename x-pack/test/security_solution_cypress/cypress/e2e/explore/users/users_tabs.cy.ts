@@ -32,11 +32,6 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
     visitWithTimeRange(USERS_URL);
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
-  });
-
   describe('Users page tabs', () => {
     it(`renders all users`, () => {
       const totalUsers = 1;
