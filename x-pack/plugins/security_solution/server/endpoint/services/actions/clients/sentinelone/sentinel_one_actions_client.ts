@@ -86,7 +86,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for SentinelOne with:\b${dump(executeOptions)}`
+      `calling connector actions 'execute()' for SentinelOne with:\n${dump(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);

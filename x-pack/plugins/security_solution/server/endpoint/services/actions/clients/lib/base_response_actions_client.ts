@@ -307,6 +307,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       .index<LogsEndpointActionResponse>({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
+        refresh: 'wait_for',
       })
       .catch((err) => {
         throw new ResponseActionsClientError(
