@@ -13,6 +13,7 @@ import {
 } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
@@ -20,10 +21,10 @@ import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165744
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     login();
+    deleteTimelines();
     cy.intercept({
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
