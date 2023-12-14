@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
@@ -45,6 +45,15 @@ export function UpdateSourceEditor(props: Props) {
     // only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const dateSelectOptions = useMemo(() => {
+    return dateFields.map(dateField => {
+      return {
+        value: dateField, 
+        text: dateField
+      };
+    });
+  }, [dateFields])
 
   return (
     <>
@@ -107,6 +116,24 @@ export function UpdateSourceEditor(props: Props) {
               : undefined
             }
           />
+
+          {props.sourceDescriptor.dateField &&
+            <EuiFormRow
+              label={i18n.translate('xpack.maps.source.esqlSource.dateFieldSelectLabel', {
+                defaultMessage: 'Date field',
+              })}
+              display="columnCompressed"
+            >
+              <EuiSelect
+                options={dateSelectOptions}
+                value={props.sourceDescriptor.dateField}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                  props.onChange({ propName: 'dateField', value: e.target.value });
+                }}
+                compressed
+              />
+            </EuiFormRow>
+          }
         </EuiSkeletonText>
       </EuiPanel>
       <EuiSpacer size="s" />
