@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ESQLEditor } from './esql_editor';
+import { getDateFields } from './esql_utils';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
@@ -18,6 +19,30 @@ interface Props {
 }
 
 export function UpdateSourceEditor(props: Props) {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [dateFields, setDateFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    let ignore = false;
+    getDateFields(props.sourceDescriptor.esql)
+      .then((initialDateFields) => {
+        if (!ignore) {
+          setDateFields(initialDateFields);
+          setIsInitialized(true);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setIsInitialized(true);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+    // only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <EuiPanel>
@@ -31,19 +56,20 @@ export function UpdateSourceEditor(props: Props) {
 
         <EuiSpacer size="m" />
 
-        <ESQLEditor
-          dateField={props.sourceDescriptor.dateField}
-          onDateFieldChange={(dateField?: string) => {
-            props.onChange({ propName: 'dateField', value: dateField });
-          }}
-          esql={props.sourceDescriptor.esql}
-          onESQLChange={({ columns, esql }: { columns: ESQLSourceDescriptor['columns'], esql: string }) => {
-            props.onChange(
-              { propName: 'columns', value: columns },
-              { propName: 'esql', value: esql }
-            );
-          }}
-        />
+        <EuiSkeletonText
+          lines={3}
+          isLoading={!isInitialized}
+        >
+          <ESQLEditor
+            esql={props.sourceDescriptor.esql}
+            onESQLChange={({ columns, esql }: { columns: ESQLSourceDescriptor['columns'], esql: string }) => {
+              props.onChange(
+                { propName: 'columns', value: columns },
+                { propName: 'esql', value: esql }
+              );
+            }}
+          />
+        </EuiSkeletonText>
       </EuiPanel>
       <EuiSpacer size="s" />
     </>

@@ -22,6 +22,7 @@ export function CreateSourceEditor(props: Props) {
   const [columns, setColumns] = useState<ESQLSourceDescriptor['columns']>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
+  const [dateFields, setDateFields] = useState<string[]>([]);
 
   useEffect(() => {
     let ignore = false;
@@ -29,11 +30,22 @@ export function CreateSourceEditor(props: Props) {
       .then((defaultDataView) => {
         if (!ignore) {
           if (defaultDataView) {
-            const geoField = defaultDataView.fields.find((field) => {
-              return ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
-            });
+            let geoField: string | undefined;
+            const defaultDateFields: string[] = [];
+            for (let i = 0; i < defaultDataView.fields.length; i++) {
+              const field = defaultDataView.fields[i];
+              if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
+                geoField = field.name;
+              } else if ('date' === field.type) {
+                dateFields.push(field.name);
+              }
+            }
             if (geoField) {
-              setEsql(`from ${defaultDataView.getIndexPattern()} | KEEP ${geoField.name} | limit 10000`);
+              if (defaultDataView.timeFieldName) {
+                setDateField(defaultDataView.timeFieldName);
+              }
+              setDateFields(defaultDateFields);
+              setEsql(`from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`);
             }
           }
           setIsInitialized(true);
@@ -50,6 +62,12 @@ export function CreateSourceEditor(props: Props) {
     // only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!dateField || !dateFields.includes(dateField)) {
+      setDateField(dateFields.length ? dateFields[0] : undefined);
+    }
+  }, [dateFields]);
 
   const [, cancel] = useDebounce(
     () => {
@@ -74,15 +92,14 @@ export function CreateSourceEditor(props: Props) {
 
   return (
     <EuiSkeletonText
-        lines={3}
-        isLoading={!isInitialized}
-      >
+      lines={3}
+      isLoading={!isInitialized}
+    >
       <ESQLEditor
-        dateField={dateField}
-        onDateFieldChange={setDateField}
         esql={esql}
-        onESQLChange={({ columns, esql }: { columns: ESQLSourceDescriptor['columns'], esql: string }) => {
+        onESQLChange={({ columns, dateFields, esql }: { columns: ESQLSourceDescriptor['columns'], dateFields: string[], esql: string }) => {
           setColumns(columns);
+          setDateFields(dateFields);
           setEsql(esql);
         }}
       />

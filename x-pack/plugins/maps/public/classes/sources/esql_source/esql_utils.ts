@@ -93,7 +93,7 @@ async function getColumns(esql: string) {
   }
 }
 
-async function getDateFields(esql: string) {
+export async function getDateFields(esql: string) {
   const pattern: string = getIndexPatternFromESQLQuery(esql);
   try {
     // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported

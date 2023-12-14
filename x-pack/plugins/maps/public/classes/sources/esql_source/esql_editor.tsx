@@ -13,10 +13,8 @@ import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
-  dateField?: string;
   esql: string;
-  onESQLChange: ({ columns, esql }: { columns: ESQLColumn[], esql: string }) => void;
-  onDateFieldChange: (dateField?: string) => void;
+  onESQLChange: ({ columns, dateFields, esql }: { columns: ESQLColumn[], dateFields: string[], esql: string }) => void;
 }
 
 export function ESQLEditor(props: Props) {
@@ -26,8 +24,6 @@ export function ESQLEditor(props: Props) {
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: props.esql });
   const [onSubmitQuery, setOnSubmitQuery] = useState<AggregateQuery>({ esql: props.esql });
 
-  const [dateFields, setDateFields] = useState<string[]>([]);
-  
   // On submit query change - load columns, date fields, and geo fields
   useEffect(() => {
     let ignore = false;
@@ -38,13 +34,18 @@ export function ESQLEditor(props: Props) {
         if (!ignore) {
           try {
             verifyGeometryColumn(esqlMeta.columns);
-            setDateFields(esqlMeta.dateFields);
             props.onESQLChange({
               columns: esqlMeta.columns,
-              esql: (onSubmitQuery as { esql: string }).esql
+              dateFields: esqlMeta.dateFields,
+              esql: (onSubmitQuery as { esql: string }).esql,
             });
           } catch(getGeometryColumnIndexError) {
             setError(getGeometryColumnIndexError);
+            props.onESQLChange({
+              columns: [],
+              dateFields: [],
+              esql: '',
+            });
           }
           setIsLoading(false);
         }
@@ -59,12 +60,6 @@ export function ESQLEditor(props: Props) {
       ignore = true;
     };
   }, [onSubmitQuery]);
-
-  useEffect(() => {
-    if (!props.dateField || !dateFields.includes(props.dateField)) {
-      props.onDateFieldChange(dateFields.length ? dateFields[0] : undefined);
-    }
-  }, [dateFields]);
 
   return (
     <>
