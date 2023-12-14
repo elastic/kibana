@@ -69,9 +69,9 @@ export const getSections = ({
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
   logsLocator: LocatorPublic<LogsLocatorParams>;
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
-  dataViewId: string;
+  dataViewId?: string;
 }) => {
-  if (!transaction) return [];
+  if (!transaction || !dataViewId) return [];
 
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;

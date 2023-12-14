@@ -12,7 +12,7 @@ import { Tool } from 'langchain/tools';
 
 import { getAlertCountsTool } from './alert_counts/get_alert_counts_tool';
 import { getEsqlLanguageKnowledgeBaseTool } from './esql_language_knowledge_base/get_esql_language_knowledge_base_tool';
-import { getOpenAlertsTool } from './open_alerts/get_open_alerts_tool';
+import { getOpenAndAcknowledgedAlertsTool } from './open_and_acknowledged_alerts/get_open_and_acknowledged_alerts_tool';
 import type { RequestBody } from '../types';
 
 export interface GetApplicableTools {
@@ -50,7 +50,7 @@ export const getApplicableTools = ({
       replacements,
       request,
     }) ?? [],
-    getOpenAlertsTool({
+    getOpenAndAcknowledgedAlertsTool({
       alertsIndexPattern,
       allow,
       allowReplacement,

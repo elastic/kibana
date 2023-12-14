@@ -618,6 +618,7 @@ export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
   runtime?: any;
+  subobjects?: boolean;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
