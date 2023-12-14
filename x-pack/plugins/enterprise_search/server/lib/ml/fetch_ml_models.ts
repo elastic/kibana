@@ -6,6 +6,7 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
