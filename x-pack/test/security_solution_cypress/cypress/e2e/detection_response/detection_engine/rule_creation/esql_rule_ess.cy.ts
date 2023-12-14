@@ -34,6 +34,14 @@ import { visit } from '../../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
+const useResizeObserverWorkaround = () => {
+  cy.on('uncaught:exception', (err) => {
+    if (err.message.includes('ResizeObserver loop limit exceeded')) {
+      return false;
+    }
+  });
+};
+
 describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
@@ -42,17 +50,11 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       login();
-
-      cy.on('uncaught:exception', (err) => {
-        if (err.message.includes('ResizeObserver loop limit exceeded')) {
-          return false;
-        }
-      });
+      visit(CREATE_RULE_URL);
+      useResizeObserverWorkaround();
     });
 
     it('creates an ES|QL rule', function () {
-      visit(CREATE_RULE_URL);
-
       selectEsqlRuleType();
 
       // ensures ES|QL rule in technical preview on create page
@@ -77,8 +79,6 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
     // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
     it('creates an ES|QL rule and overrides its name', function () {
-      visit(CREATE_RULE_URL);
-
       selectEsqlRuleType();
 
       fillDefineEsqlRuleAndContinue(rule);
@@ -95,6 +95,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       login();
       visit(CREATE_RULE_URL);
+      useResizeObserverWorkaround();
     });
     it('shows error when ES|QL query is empty', function () {
       selectEsqlRuleType();
