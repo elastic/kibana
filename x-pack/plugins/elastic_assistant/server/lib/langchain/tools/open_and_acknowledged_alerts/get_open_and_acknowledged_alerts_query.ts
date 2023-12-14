@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getOpenAlertsQuery = ({
+export const getOpenAndAcknowledgedAlertsQuery = ({
   alertsIndexPattern,
   allow,
   size,
@@ -28,8 +28,20 @@ export const getOpenAlertsQuery = ({
               must: [],
               filter: [
                 {
-                  match_phrase: {
-                    'kibana.alert.workflow_status': 'open',
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'kibana.alert.workflow_status': 'open',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          'kibana.alert.workflow_status': 'acknowledged',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
                 },
                 {
