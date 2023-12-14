@@ -15,7 +15,7 @@ describe('Hello World example app', () => {
     cy.getByTestSubj('helloWorldResetHandle').as('resetHandle');
 
     // initial
-    cy.get('@resultContainer').contains('Hello World!');
+    cy.get('@resultContainer').contains('Hello Worlff!');
 
     // updated
     cy.get('@textHandle').clear().type('Spider-Man');
