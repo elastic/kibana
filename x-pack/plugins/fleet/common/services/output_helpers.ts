@@ -28,13 +28,19 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
       (p) =>
-        p.package?.name === FLEET_APM_PACKAGE ||
-        p.package?.name === FLEET_SERVER_PACKAGE ||
-        p.package?.name === FLEET_SYNTHETICS_PACKAGE
+        p.package?.name === FLEET_SERVER_PACKAGE || p.package?.name === FLEET_SYNTHETICS_PACKAGE
     );
 
   if (isRestrictedToSameClusterES) {
     return [outputType.Elasticsearch];
+  }
+
+  const isRestrictedToESType =
+    agentPolicy.package_policies &&
+    agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE);
+
+  if (isRestrictedToESType) {
+    return [outputType.Elasticsearch, outputType.RemoteElasticsearch];
   }
 
   return Object.values(outputType);

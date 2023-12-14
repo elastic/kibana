@@ -26,7 +26,7 @@ describe('getAllowedOutputTypeForPolicy', () => {
     expect(res).toContain('logstash');
   });
 
-  it('should return only elasticsearch for an agent policy with APM', () => {
+  it('should return only elasticsearch types for an agent policy with APM', () => {
     const res = getAllowedOutputTypeForPolicy({
       package_policies: [
         {
@@ -35,7 +35,7 @@ describe('getAllowedOutputTypeForPolicy', () => {
       ],
     } as any);
 
-    expect(res).toEqual(['elasticsearch']);
+    expect(res).toEqual(['elasticsearch', 'remote_elasticsearch']);
   });
 
   it('should return only elasticsearch for an agent policy with Fleet Server', () => {

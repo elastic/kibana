@@ -90,7 +90,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     const defaultOutputDisabledMessage = defaultOutputDisabled ? (
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
-        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
         values={{
           outputType: defaultOutput.type,
         }}
@@ -109,7 +109,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
             isOutputTypeUnsupported ? (
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
                 values={{
                   outputType: item.type,
                 }}
