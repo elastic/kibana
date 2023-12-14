@@ -461,7 +461,13 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let executorResult: { state: RuleState } | undefined;
+        let executorResult:
+          | {
+              state: RuleState;
+              memoryUsage?: { p50: number; p95: number; p99: number };
+              cpuUsage?: { p50: number; p95: number; p99: number };
+            }
+          | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -567,6 +573,13 @@ export class TaskRunner<
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
         ]);
+
+        if (executorResult?.cpuUsage && executorResult?.memoryUsage) {
+          this.alertingEventLogger.setUsageStats(
+            executorResult?.memoryUsage,
+            executorResult?.cpuUsage
+          );
+        }
 
         return {
           updatedRuleTypeState: executorResult?.state || undefined,

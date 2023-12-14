@@ -69,6 +69,12 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'schedule_delay',
   'timed_out',
   'maintenance_window_ids',
+  'task_mem_p50',
+  'task_mem_p95',
+  'task_mem_p99',
+  'task_cpu_p50',
+  'task_cpu_p95',
+  'task_cpu_p99',
 ] as const;
 
 export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [

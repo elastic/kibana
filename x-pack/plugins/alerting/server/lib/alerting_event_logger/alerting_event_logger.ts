@@ -147,6 +147,17 @@ export class AlertingEventLogger {
     updateEvent(this.event, { maintenanceWindowIds });
   }
 
+  public setUsageStats(
+    memoryUsage: { p50: number; p95: number; p99: number },
+    cpuUsage: { p50: number; p95: number; p99: number }
+  ) {
+    if (!this.isInitialized || !this.event) {
+      throw new Error('AlertingEventLogger not initialized');
+    }
+
+    updateEvent(this.event, { memoryUsage, cpuUsage });
+  }
+
   public setExecutionFailed(message: string, errorMessage: string) {
     if (!this.isInitialized || !this.event) {
       throw new Error('AlertingEventLogger not initialized');
@@ -365,6 +376,8 @@ interface UpdateEventOpts {
   metrics?: RuleRunMetrics;
   timings?: TaskRunnerTimings;
   maintenanceWindowIds?: string[];
+  memoryUsage?: { p50: number; p95: number; p99: number };
+  cpuUsage?: { p50: number; p95: number; p99: number };
 }
 
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
@@ -379,6 +392,8 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     timings,
     alertingOutcome,
     maintenanceWindowIds,
+    memoryUsage,
+    cpuUsage,
   } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
@@ -460,5 +475,17 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     event.kibana = event.kibana || {};
     event.kibana.alert = event.kibana.alert || {};
     event.kibana.alert.maintenance_window_ids = maintenanceWindowIds;
+  }
+
+  if (cpuUsage) {
+    event.kibana = event.kibana || {};
+    event.kibana.task = event.kibana.task || {};
+    event.kibana.task.cpu_usage = cpuUsage;
+  }
+
+  if (memoryUsage) {
+    event.kibana = event.kibana || {};
+    event.kibana.task = event.kibana.task || {};
+    event.kibana.task.memory_usage = memoryUsage;
   }
 }

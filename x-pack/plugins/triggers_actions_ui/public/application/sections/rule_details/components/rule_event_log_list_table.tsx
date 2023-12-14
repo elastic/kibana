@@ -582,6 +582,66 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         isSortable: getIsColumnSortable('schedule_delay'),
       },
       {
+        id: 'task_mem_p50',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_mem_p50',
+          {
+            defaultMessage: 'Task Memory (p50)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
+        id: 'task_mem_p95',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_mem_p95',
+          {
+            defaultMessage: 'Task Memory (p95)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
+        id: 'task_mem_p99',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_mem_p99',
+          {
+            defaultMessage: 'Task Memory (p99)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
+        id: 'task_cpu_p50',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_cpu_p50',
+          {
+            defaultMessage: 'Task CPU (p50)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
+        id: 'task_cpu_p95',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_cpu_p95',
+          {
+            defaultMessage: 'Task CPU (p95)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
+        id: 'task_cpu_p99',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.task_cpu_p99',
+          {
+            defaultMessage: 'Task CPU (p99)',
+          }
+        ),
+        isSortable: true,
+      },
+      {
         id: 'timed_out',
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timedOut',
