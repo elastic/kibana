@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -13,7 +13,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { KibanaSavedObjectsSLORepository } from '..';
+import { SLORepository } from '..';
 import { ObservabilityConfig } from '../../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
@@ -46,7 +46,7 @@ export class SloOrphanSummaryCleanupTask {
   private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
-  private soClient?: SavedObjectsClientContract;
+  private repository?: SLORepository;
   private esClient?: ElasticsearchClient;
   private config: ObservabilityConfig;
 
@@ -77,8 +77,7 @@ export class SloOrphanSummaryCleanupTask {
   runTask = async () => {
     const runAt = new Date().toISOString();
 
-    if (this.soClient && this.esClient) {
-      const repository = new KibanaSavedObjectsSLORepository(this.soClient);
+    if (this.repository && this.esClient) {
       let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
       do {
@@ -89,7 +88,7 @@ export class SloOrphanSummaryCleanupTask {
         }
 
         searchAfterKey = searchAfter;
-        const sloDefinitions = await repository.findAllByIds(
+        const sloDefinitions = await this.repository.findAllByIds(
           sloSummaryIds.map(({ id }) => id),
           ALL_SPACES_ID
         );
@@ -210,11 +209,11 @@ export class SloOrphanSummaryCleanupTask {
 
   public async start(
     taskManager: TaskManagerStartContract,
-    soClient: SavedObjectsClientContract,
+    repository: SLORepository,
     esClient: ElasticsearchClient
   ) {
     this.taskManager = taskManager;
-    this.soClient = soClient;
+    this.repository = repository;
     this.esClient = esClient;
 
     if (!taskManager) {

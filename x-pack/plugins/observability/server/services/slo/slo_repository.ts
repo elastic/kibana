@@ -17,7 +17,7 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 
 export interface SLORepository {
   save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
-  findAllByIds(ids: string[]): Promise<SLO[]>;
+  findAllByIds(ids: string[], namespace?: string): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
   search(

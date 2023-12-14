@@ -9,44 +9,44 @@ import { getDeleteQueryFilter, SloOrphanSummaryCleanupTask } from './orphan_summ
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { cloneDeep, times } from 'lodash';
-import { SLORepository } from '..';
+import { times } from 'lodash';
+import { SLORepository } from '../slo_repository';
 import { createSLORepositoryMock } from '../mocks';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
 const logger = loggerMock.create();
-const soClient = savedObjectsClientMock.create();
 const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 describe('SloSummaryCleanupTask', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   let mockRepository: jest.Mocked<SLORepository>;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
+    jest.clearAllMocks();
   });
 
   it('should run for empty', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind();
-    await task.start(taskManagerStart, soClient, esClient);
+    await task.start(taskManagerStart, mockRepository, esClient);
+
+    task.fetchSloSummariesIds = jest.fn().mockReturnValue({ sloSummaryIds: [] });
+
+    mockRepository.findAllByIds = jest.fn();
     await task.runTask();
   });
 
   it('should run some slos', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind([
-      { attributes: { id: '1', revision: 1 } },
-      { attributes: { id: '2', revision: 1 } },
-      { attributes: { id: '3', revision: 1 } },
-      { attributes: { id: '3', revision: 2 } },
+    mockRepository.findAllByIds = jest.fn().mockResolvedValue([
+      { id: '1', revision: 1 },
+      { id: '2', revision: 1 },
+      { id: '3', revision: 1 },
     ]);
+
+    await task.start(taskManagerStart, mockRepository, esClient);
+
     task.fetchSloSummariesIds = jest.fn().mockReturnValue({
       sloSummaryIds: [
         { id: '1', revision: 1 },
@@ -57,7 +57,7 @@ describe('SloSummaryCleanupTask', () => {
         { id: '3', revision: 0 },
       ],
     });
-    await task.start(taskManagerStart, soClient, esClient);
+
     await task.runTask();
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalled();
@@ -78,9 +78,10 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run lots of slos', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind(
+    mockRepository.findAllByIds = jest.fn().mockResolvedValue(
       times(10000, (i) => ({
-        attributes: { id: `${i}`, revision: 1 },
+        id: `${i}`,
+        revision: 1,
       }))
     );
     task.fetchSloSummariesIds = jest.fn().mockReturnValue({
@@ -95,7 +96,7 @@ describe('SloSummaryCleanupTask', () => {
         { id: '4', revision: 1 },
       ],
     });
-    await task.start(taskManagerStart, soClient, esClient);
+    await task.start(taskManagerStart, mockRepository, esClient);
     await task.runTask();
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(1);
@@ -118,9 +119,10 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when lots of slo defs are there', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind(
+    mockRepository.findAllByIds = jest.fn().mockResolvedValue(
       times(10000, (i) => ({
-        attributes: { id: `${i}`, revision: 2 },
+        id: `${i}`,
+        revision: 2,
       }))
     );
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
@@ -152,7 +154,7 @@ describe('SloSummaryCleanupTask', () => {
         ],
       };
     });
-    await task.start(taskManagerStart, soClient, esClient);
+    await task.start(taskManagerStart, mockRepository, esClient);
     await task.runTask();
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
@@ -191,9 +193,10 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when summaries are way more then defs', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind(
+    mockRepository.findAllByIds = jest.fn().mockResolvedValue(
       times(100, (i) => ({
-        attributes: { id: `${i}`, revision: 2 },
+        id: `${i}`,
+        revision: 2,
       }))
     );
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
@@ -225,7 +228,7 @@ describe('SloSummaryCleanupTask', () => {
         ],
       };
     });
-    await task.start(taskManagerStart, soClient, esClient);
+    await task.start(taskManagerStart, mockRepository, esClient);
     await task.runTask();
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
@@ -262,7 +265,7 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when there are no Slo defs', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    mockRepository.findAllByIds = mockSOClientFind();
+    mockRepository.findAllByIds = jest.fn().mockResolvedValue([]);
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
       if (!searchKey) {
         return {
@@ -292,7 +295,7 @@ describe('SloSummaryCleanupTask', () => {
         ],
       };
     });
-    await task.start(taskManagerStart, soClient, esClient);
+    await task.start(taskManagerStart, mockRepository, esClient);
     await task.runTask();
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
@@ -318,7 +321,3 @@ describe('SloSummaryCleanupTask', () => {
     });
   });
 });
-
-export const mockSOClientFind = (slos: any = null) => {
-  return cloneDeep(slos);
-};
