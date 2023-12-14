@@ -1249,6 +1249,7 @@
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",
     "@kbn/ftr-common-functional-services": "link:packages/kbn-ftr-common-functional-services",
+    "@kbn/ftr-common-functional-ui-services": "link:packages/kbn-ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:packages/kbn-ftr-screenshot-filename",
     "@kbn/generate": "link:packages/kbn-generate",
     "@kbn/get-repo-files": "link:packages/kbn-get-repo-files",
