@@ -34,6 +34,8 @@ export default defineCypressConfig({
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
+      console.log('github pr labels', process.env.GITHUB_PR_LABELS);
+
       on('after:spec', getFailedSpecVideos);
 
       return config;
