@@ -107,18 +107,27 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    * benchmark id
    */
   benchmarkId: schema.maybe(
-    schema.oneOf([schema.literal('cis_k8s'), schema.literal('cis_eks'), schema.literal('cis_aws')])
+    schema.oneOf([
+      schema.literal('cis_k8s'),
+      schema.literal('cis_eks'),
+      schema.literal('cis_aws'),
+      schema.literal('cis_azure'),
+      schema.literal('cis_gcp'),
+    ])
   ),
 
+  benchmarkVersion: schema.maybe(schema.string()),
   /**
    * package_policy_id
    */
   packagePolicyId: schema.maybe(schema.string()),
+  policyId: schema.maybe(schema.string()),
 
   /**
    * rule section
    */
   section: schema.maybe(schema.string()),
+  ruleNumber: schema.maybe(schema.string()),
 });
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
@@ -128,4 +137,9 @@ export interface FindCspBenchmarkRuleResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface BenchmarkRuleSelectParams {
+  section?: string;
+  ruleNumber?: string;
 }

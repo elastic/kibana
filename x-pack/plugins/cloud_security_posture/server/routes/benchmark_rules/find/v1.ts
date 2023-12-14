@@ -8,7 +8,7 @@ import semverValid from 'semver/functions/valid';
 import semverCompare from 'semver/functions/compare';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { getBenchmarkFilter } from '../../../../common/utils/helpers';
+import { getBenchmarkFilterQuery } from '../../../../common/utils/helpers';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
@@ -69,7 +69,11 @@ export const findRuleHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkFilter(benchmarkId, options.section),
+    // filter: getBenchmarkFilterQuery(benchmarkId, options.benchmarkVersion || '', options.section),
+    filter: getBenchmarkFilterQuery(benchmarkId, options.benchmarkVersion || '', {
+      section: options.section,
+      ruleNumber: options.ruleNumber,
+    }),
   });
 
   const cspBenchmarkRules = cspCspBenchmarkRulesSo.saved_objects.map(

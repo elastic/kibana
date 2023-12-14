@@ -19,21 +19,25 @@ import {
 
 export type RulesQuery = Pick<
   FindCspBenchmarkRuleRequest,
-  'section' | 'search' | 'page' | 'perPage'
+  'section' | 'search' | 'page' | 'perPage' | 'ruleNumber'
 >;
 export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 
 export const useFindCspBenchmarkRule = (
-  { search, page, perPage, section }: RulesQuery,
-  packagePolicyId: string
+  { search, page, perPage, section, ruleNumber }: RulesQuery,
+  benchmarkId: string,
+  benchmarkVersion: string
 ) => {
   const { http } = useKibana().services;
 
   return useQuery(
-    [CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE, { section, search, page, perPage, packagePolicyId }],
+    [
+      CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+      { section, search, page, perPage, benchmarkId, benchmarkVersion, ruleNumber },
+    ],
     () => {
       return http.get<FindCspBenchmarkRuleResponse>(FIND_CSP_BENCHMARK_RULE_ROUTE_PATH, {
-        query: { packagePolicyId, page, perPage, search, section },
+        query: { benchmarkId, page, perPage, search, section, benchmarkVersion, ruleNumber },
         version: FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION,
       });
     }

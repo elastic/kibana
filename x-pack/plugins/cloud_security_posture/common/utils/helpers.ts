@@ -31,7 +31,7 @@ import type {
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
-import type { BenchmarksCisId } from '../types/latest';
+import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
@@ -204,4 +204,40 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
       return 'Google Cloud Provider';
   }
   return null;
+};
+// export const getBenchmarkFilterQuery = (
+//   id: BenchmarkId,
+//   version: string,
+//   section?: string
+// ): string =>
+//   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"${
+//     section
+//       ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+//       : ''
+//   }`;
+
+// export const getBenchmarkFilterQuery = (
+//   id: BenchmarkId,
+//   version: string,
+//   selectParams?: BenchmarkRuleSelectParams
+// ): string =>
+//   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"${
+//     selectParams?.section || selectParams?.ruleNumber
+//       ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams?.section}"`
+//       : ''
+//   }`;
+
+export const getBenchmarkFilterQuery = (
+  id: BenchmarkId,
+  version: string,
+  selectParams?: BenchmarkRuleSelectParams
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
+  const sectionQuery = ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams?.section}"`;
+  const ruleNumberQuery = ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams?.ruleNumber}"`;
+  if (!selectParams?.section && !selectParams?.ruleNumber) return baseQuery;
+  else if (selectParams.section && selectParams.ruleNumber)
+    return baseQuery + sectionQuery + ruleNumberQuery;
+  else if (selectParams.section) return baseQuery + sectionQuery;
+  else return baseQuery + ruleNumberQuery;
 };
