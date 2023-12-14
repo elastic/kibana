@@ -56,16 +56,16 @@ export const getNotUpgradeableMessage = (
     return `agent version is missing.`;
   }
   if (agent.unenrolled_at) {
-    return `agent was unenrolled.`;
+    return `agent has been unenrolled.`;
   }
   if (agent.unenrollment_started_at) {
-    return `agent unenrollment was started.`;
+    return `agent is being unenrolled.`;
   }
   if (!agent.local_metadata.elastic.agent.upgradeable) {
-    return `agent is marked as not upgradeable in elastic-agent.`;
+    return `agent cannot be upgraded through Fleet. It may be running in a container.`;
   }
   if (isAgentUpgrading(agent)) {
-    return `upgrade was already started.`;
+    return `agent is already being upgraded.`;
   }
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     return `the agent has been upgraded recently. Please wait.`;
@@ -78,10 +78,10 @@ export const getNotUpgradeableMessage = (
     if (!versionToUpgradeNumber) return 'the selected version is not valid.';
 
     if (semverEq(agentVersionNumber, versionToUpgradeNumber))
-      return `agent is already at the selected version.`;
+      return `agent is already running on the selected version..`;
 
     if (semverLt(versionToUpgradeNumber, agentVersionNumber))
-      return `the selected version is lower than the current version.`;
+      return `agent does not support downgrades.`;
     // explicitly allow this case - the agent is upgradeable
     if (semverGt(versionToUpgradeNumber, agentVersionNumber)) return undefined;
   }
@@ -90,10 +90,10 @@ export const getNotUpgradeableMessage = (
   if (!latestAgentVersionNumber) return 'latest version is not valid.';
 
   if (semverEq(agentVersionNumber, latestAgentVersionNumber))
-    return `agent version is already the latest.`;
+    return `agent is already running on the latest available version.`;
 
   if (semverGt(agentVersionNumber, latestAgentVersionNumber))
-    return `agent version is lower than latest.`;
+    return `agent is running on a version greater than the latest available version.`;
 
   // in all the other cases, the agent is upgradeable; don't return any message.
   return undefined;

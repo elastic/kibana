@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'Agent agent1 is not upgradeable: agent is already at the selected version.'
+          'Agent agent1 is not upgradeable: agent is already running on the selected version..'
         );
       });
 
@@ -259,7 +259,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'Agent agent1 is not upgradeable: the selected version is lower than the current version.'
+          'Agent agent1 is not upgradeable: agent does not support downgrades.'
         );
       });
 
@@ -307,7 +307,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'Agent agent1 is not upgradeable: agent is marked as not upgradeable in elastic-agent.'
+          'Agent agent1 is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container.'
         );
       });
 
