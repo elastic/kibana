@@ -21,7 +21,7 @@ interface CreateOrUpdateComponentTemplateOpts {
   totalFieldsLimit: number;
 }
 
-const getIndexTemplatesUsingComponentTemplate = async (
+const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
   esClient: ElasticsearchClient,
   componentTemplateName: string,
   totalFieldsLimit: number,
@@ -86,7 +86,7 @@ const createOrUpdateComponentTemplateHelper = async (
       // number of new ECS fields pushes the composed mapping above the limit, this error will
       // occur. We have to update the field limit inside the index template now otherwise we
       // can never update the component template
-      await getIndexTemplatesUsingComponentTemplate(
+      await putIndexTemplateTotalFieldsLimitUsingComponentTemplate(
         esClient,
         template.name,
         totalFieldsLimit,

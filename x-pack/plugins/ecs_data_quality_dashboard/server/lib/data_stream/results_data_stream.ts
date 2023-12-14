@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { DataStream } from '@kbn/data-stream';
+import { SpaceDataStream } from '@kbn/data-stream';
 import { ecsFieldMap } from '@kbn/data-stream/ecs';
 import { resultsFieldMap } from './results_field_map';
 
-export const TOTAL_FIELDS_LIMIT = 2500;
-const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-ecs-mappings';
+const TOTAL_FIELDS_LIMIT = 2500;
+
+export const RESULTS_DATA_STREAM_NAME = '.kibana-dqa-dashboard-results';
+
+const RESULTS_INDEX_TEMPLATE_NAME = '.kibana-dqa-dashboard-results-index-template';
 const RESULTS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-results-mappings';
-const INDEX_TEMPLATE_NAME = '.kibana-dqa-dashboard-index-template';
+const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-ecs-mappings';
 
 export type CreateResultsDataStream = (params: {
   kibanaVersion: string;
-  space?: string;
-}) => DataStream;
+  namespace?: string;
+}) => SpaceDataStream;
 
-export const createResultsDataStream: CreateResultsDataStream = ({
-  kibanaVersion,
-  space = 'default',
-}) => {
-  const resultsDataStream = new DataStream(`.kibana-dqa-dashboard-${space}-results`, {
+export const createResultsDataStream: CreateResultsDataStream = ({ kibanaVersion }) => {
+  const resultsDataStream = new SpaceDataStream(RESULTS_DATA_STREAM_NAME, {
     kibanaVersion,
     totalFieldsLimit: TOTAL_FIELDS_LIMIT,
   });
@@ -31,18 +31,20 @@ export const createResultsDataStream: CreateResultsDataStream = ({
   resultsDataStream.setComponentTemplate({
     name: ECS_COMPONENT_TEMPLATE_NAME,
     fieldMap: ecsFieldMap,
-    includeSettings: true,
   });
   resultsDataStream.setComponentTemplate({
     name: RESULTS_COMPONENT_TEMPLATE_NAME,
     fieldMap: resultsFieldMap,
-    includeSettings: true,
   });
 
   resultsDataStream.setIndexTemplate({
-    name: INDEX_TEMPLATE_NAME,
+    name: RESULTS_INDEX_TEMPLATE_NAME,
     componentTemplateRefs: [RESULTS_COMPONENT_TEMPLATE_NAME, ECS_COMPONENT_TEMPLATE_NAME],
-    namespace: space,
+    template: {
+      lifecycle: {
+        data_retention: '90d',
+      },
+    },
   });
 
   return resultsDataStream;

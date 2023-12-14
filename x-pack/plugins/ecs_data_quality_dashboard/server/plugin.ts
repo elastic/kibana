@@ -14,10 +14,13 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { DataStream } from '@kbn/data-stream';
+import type { SpaceDataStream } from '@kbn/data-stream';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   EcsDataQualityDashboardPluginSetup,
   EcsDataQualityDashboardPluginStart,
+  PluginSetupDependencies,
+  DataQualityDashboardRequestHandlerContext,
 } from './types';
 import {
   getILMExplainRoute,
@@ -32,7 +35,7 @@ export class EcsDataQualityDashboardPlugin
   implements Plugin<EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart>
 {
   private readonly logger: Logger;
-  private readonly resultsDataStream: DataStream;
+  private readonly resultsDataStream: SpaceDataStream;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -43,7 +46,7 @@ export class EcsDataQualityDashboardPlugin
     });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     this.logger.debug('ecsDataQualityDashboard: Setup');
 
     core.getStartServices().then(([{ elasticsearch }]) => {
@@ -54,14 +57,31 @@ export class EcsDataQualityDashboardPlugin
       });
     });
 
-    const router = core.http.createRouter();
+    core.http.registerRouteHandlerContext<
+      DataQualityDashboardRequestHandlerContext,
+      'dataQualityDashboard'
+    >('dataQualityDashboard', (_context, request) => {
+      const spaceId = plugins.spaces.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      return {
+        spaceId,
+        getResultsIndexName: async () => {
+          const indexName = await this.resultsDataStream.getSpaceIndexName(spaceId);
+          if (indexName) {
+            return indexName;
+          }
+          return this.resultsDataStream.installSpace(spaceId);
+        },
+      };
+    });
+
+    const router = core.http.createRouter<DataQualityDashboardRequestHandlerContext>();
 
     // Register server side APIs
     getIndexMappingsRoute(router, this.logger);
     getIndexStatsRoute(router, this.logger);
     getUnallowedFieldValuesRoute(router, this.logger);
     getILMExplainRoute(router, this.logger);
-    resultsRoute(router, this.logger, this.resultsDataStream);
+    resultsRoute(router, this.logger);
     return {};
   }
 

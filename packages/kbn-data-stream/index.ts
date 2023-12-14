@@ -7,6 +7,7 @@
  */
 
 export { DataStream } from './src/data_stream';
+export { SpaceDataStream } from './src/space_data_stream';
 export type {
   DataStreamParams,
   SetComponentTemplateParams,

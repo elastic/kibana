@@ -12,49 +12,60 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ClusterPutComponentTemplateRequest,
+  IndicesIndexSettings,
   IndicesPutIndexTemplateIndexTemplateMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from './field_maps/types';
-import { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';
+import { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
 
 interface GetComponentTemplateOpts {
   name: string;
   fieldMap: FieldMap;
+  settings?: IndicesIndexSettings;
   dynamic?: 'strict' | boolean;
-  includeSettings?: boolean;
 }
 
 export const getComponentTemplate = ({
-  fieldMap,
   name,
-  dynamic,
-  includeSettings,
-}: GetComponentTemplateOpts): ClusterPutComponentTemplateRequest =>
-  getComponentTemplateFromFieldMap({
-    name,
-    fieldMap,
-    dynamic,
-    includeSettings,
-  });
+  fieldMap,
+  settings,
+  dynamic = 'strict',
+}: GetComponentTemplateOpts): ClusterPutComponentTemplateRequest => ({
+  name,
+  _meta: {
+    managed: true,
+  },
+  template: {
+    settings: {
+      number_of_shards: 1,
+      'index.mapping.total_fields.limit':
+        Math.ceil(Object.keys(fieldMap).length / 1000) * 1000 + 500,
+      ...settings,
+    },
+    mappings: mappingFromFieldMap(fieldMap, dynamic),
+  },
+});
 
 interface GetIndexTemplateOpts {
   name: string;
   indexPatterns: string[];
-  componentTemplateRefs: string[];
   kibanaVersion: string;
-  namespace: string;
   totalFieldsLimit: number;
+  componentTemplateRefs?: string[];
+  namespace?: string;
   template?: IndicesPutIndexTemplateIndexTemplateMapping;
+  hidden?: boolean;
 }
 
 export const getIndexTemplate = ({
   name,
   indexPatterns,
-  componentTemplateRefs,
   kibanaVersion,
-  namespace,
   totalFieldsLimit,
+  componentTemplateRefs,
+  namespace = 'default',
   template = {},
+  hidden = true,
 }: GetIndexTemplateOpts): IndicesPutIndexTemplateRequest => {
   const indexMetadata: Metadata = {
     kibana: {
@@ -67,14 +78,14 @@ export const getIndexTemplate = ({
   return {
     name,
     body: {
-      data_stream: { hidden: true },
+      data_stream: { hidden },
       index_patterns: indexPatterns,
       composed_of: componentTemplateRefs,
       template: {
         ...template,
         settings: {
+          hidden,
           auto_expand_replicas: '0-1',
-          hidden: true,
           'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': totalFieldsLimit,
           ...template.settings,
@@ -83,10 +94,6 @@ export const getIndexTemplate = ({
           dynamic: false,
           _meta: indexMetadata,
           ...template.mappings,
-        },
-        lifecycle: {
-          data_retention: '7d',
-          ...template.lifecycle,
         },
       },
       _meta: indexMetadata,

@@ -8,6 +8,7 @@
 
 import type {
   ClusterPutComponentTemplateRequest,
+  IndicesIndexSettings,
   IndicesPutIndexTemplateIndexTemplateMapping,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -27,13 +28,21 @@ export interface DataStreamParams {
 export interface SetComponentTemplateParams {
   name: string;
   fieldMap: FieldMap;
-  includeSettings?: boolean;
+  settings?: IndicesIndexSettings;
+  dynamic?: 'strict' | boolean;
 }
 export interface SetIndexTemplateParams {
   name: string;
-  componentTemplateRefs: string[];
+  componentTemplateRefs?: string[];
   namespace?: string;
   template?: IndicesPutIndexTemplateIndexTemplateMapping;
+  hidden?: boolean;
+}
+
+export interface GetInstallFnParams {
+  logger: Logger;
+  pluginStop$: Subject<void>;
+  tasksTimeoutMs?: number;
 }
 export interface InstallParams {
   logger: Logger;
@@ -45,13 +54,13 @@ export interface InstallParams {
 const DEFAULT_FIELDS_LIMIT = 2500;
 
 export class DataStream {
-  private readonly kibanaVersion: string;
-  private readonly totalFieldsLimit: number;
-  private componentTemplates: ClusterPutComponentTemplateRequest[] = [];
-  private indexTemplates: IndicesPutIndexTemplateRequest[] = [];
-  private installed: boolean;
+  protected readonly kibanaVersion: string;
+  protected readonly totalFieldsLimit: number;
+  protected componentTemplates: ClusterPutComponentTemplateRequest[] = [];
+  protected indexTemplates: IndicesPutIndexTemplateRequest[] = [];
+  protected installed: boolean;
 
-  constructor(private readonly name: string, options: DataStreamParams) {
+  constructor(protected readonly name: string, options: DataStreamParams) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;
@@ -61,39 +70,29 @@ export class DataStream {
     return this.name;
   }
 
-  public setComponentTemplate({ name, fieldMap, includeSettings }: SetComponentTemplateParams) {
+  public setComponentTemplate(params: SetComponentTemplateParams) {
     if (this.installed) {
-      throw new Error(`Cannot set component template after install`);
+      throw new Error('Cannot set component template after install');
     }
-    this.componentTemplates.push(getComponentTemplate({ name, fieldMap, includeSettings }));
+    this.componentTemplates.push(getComponentTemplate(params));
   }
 
-  public setIndexTemplate({
-    name,
-    componentTemplateRefs,
-    template,
-    namespace = 'default',
-  }: SetIndexTemplateParams) {
+  public setIndexTemplate(params: SetIndexTemplateParams) {
     if (this.installed) {
-      throw new Error(`Cannot set index template after install`);
+      throw new Error('Cannot set index template after install');
     }
     this.indexTemplates.push(
       getIndexTemplate({
-        name,
-        template,
-        componentTemplateRefs,
+        ...params,
         indexPatterns: [this.name],
         kibanaVersion: this.kibanaVersion,
         totalFieldsLimit: this.totalFieldsLimit,
-        namespace,
       })
     );
   }
 
-  public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
-    this.installed = true;
-
-    const promiseWithTimeout = async (promise: Promise<void>, description?: string) =>
+  protected getInstallFn({ logger, pluginStop$, tasksTimeoutMs }: GetInstallFnParams) {
+    return async (promise: Promise<void>, description?: string) =>
       installWithTimeout({
         installFn: () => promise,
         logger,
@@ -101,11 +100,20 @@ export class DataStream {
         pluginStop$,
         description,
       });
+  }
+
+  public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
+    if (this.installed) {
+      throw new Error('Cannot re-install data stream');
+    }
+    this.installed = true;
+
+    const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
     // Install component templates in parallel
     await Promise.all(
       this.componentTemplates.map((componentTemplate) =>
-        promiseWithTimeout(
+        installFn(
           createOrUpdateComponentTemplate({
             template: componentTemplate,
             esClient,
@@ -120,7 +128,7 @@ export class DataStream {
     // Install index templates in parallel
     await Promise.all(
       this.indexTemplates.map((indexTemplate) =>
-        promiseWithTimeout(
+        installFn(
           createOrUpdateIndexTemplate({
             template: indexTemplate,
             esClient,
@@ -132,7 +140,7 @@ export class DataStream {
     );
 
     // create data stream when everything is ready
-    await promiseWithTimeout(
+    await installFn(
       createOrUpdateDataStream({
         name: this.name,
         esClient,

@@ -6,14 +6,17 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { DataStream } from '@kbn/data-stream';
 
 import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
+import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { createResultFromDocument } from './parser';
 
-export const getResultsRoute = (router: IRouter, logger: Logger, dataStream: DataStream) => {
+export const getResultsRoute = (
+  router: IRouter<DataQualityDashboardRequestHandlerContext>,
+  logger: Logger
+) => {
   router.versioned
     .get({
       path: RESULTS_ROUTE_PATH,
@@ -30,17 +33,21 @@ export const getResultsRoute = (router: IRouter, logger: Logger, dataStream: Dat
         },
       },
       async (context, request, response) => {
+        const { dataQualityDashboard } = await context.resolve(['core', 'dataQualityDashboard']);
+        const { getResultsIndexName } = dataQualityDashboard;
+
         const resp = buildResponse(response);
 
         try {
-          // const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          // const outcome = await esClient.search({
-          //   index: dataStream.getName(),
-          //   body: document,
-          // });
+          const index = await getResultsIndexName();
+          const esClient = (await context.core).elasticsearch.client.asInternalUser;
+          const outcome = await esClient.search({
+            index,
+            query: {},
+          });
 
-          // return response.ok({ body: { result: createResultFromDocument(outcome) } });
-          return response.ok({ body: [] });
+          return response.ok({ body: { result: createResultFromDocument(outcome) } });
+          // return response.ok({ body: [] });
         } catch (err) {
           logger.error(JSON.stringify(err));
 
@@ -52,12 +59,3 @@ export const getResultsRoute = (router: IRouter, logger: Logger, dataStream: Dat
       }
     );
 };
-
-type IndexArray = Array<{ _indexName: string } & Record<string, unknown>>;
-type IndexObject = Record<string, Record<string, unknown>>;
-
-const indexObjectToIndexArray = (obj: IndexObject): IndexArray =>
-  Object.entries(obj).map(([key, value]) => ({ ...value, _indexName: key }));
-
-const indexArrayToIndexObject = (arr: IndexArray): IndexObject =>
-  Object.fromEntries(arr.map(({ _indexName, ...value }) => [_indexName, value]));
