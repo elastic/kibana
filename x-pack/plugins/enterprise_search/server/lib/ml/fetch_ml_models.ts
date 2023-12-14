@@ -154,7 +154,7 @@ const enrichModelWithDownloadStatus = async (
 
   if (modelConfigWithDefinitionStatus && modelConfigWithDefinitionStatus.count > 0) {
     model.deploymentState = modelConfigWithDefinitionStatus.trained_model_configs[0].fully_defined
-      ? MlModelDeploymentState.Downloaded
+      ? MlModelDeploymentState.NotDeployed
       : MlModelDeploymentState.Downloading;
   }
 };

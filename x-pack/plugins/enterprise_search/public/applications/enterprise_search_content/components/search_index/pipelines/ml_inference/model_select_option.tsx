@@ -61,6 +61,7 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
   modelId,
   title,
   description,
+  isPlaceholder,
   licenseType,
   modelDetailsPageUrl,
   deploymentState,
@@ -112,6 +113,7 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
           <TrainedModelHealth
             modelState={deploymentState}
             modelStateReason={deploymentStateReason}
+            isDownloadable={isPlaceholder}
           />
         </div>
       </EuiFlexItem>

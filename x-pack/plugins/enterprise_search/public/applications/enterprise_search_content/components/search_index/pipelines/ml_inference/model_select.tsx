@@ -31,6 +31,7 @@ import { ModelSelectLogic } from './model_select_logic';
 import { LicenseBadge, ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
 import { i18n } from '@kbn/i18n';
+import { TrainedModelHealth } from '../ml_model_health';
 
 export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
   onClick,
@@ -39,7 +40,7 @@ export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolea
   return (
     <EuiButton onClick={onClick} disabled={disabled} color="primary" iconType="download" size="s">
       {i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.deployButton.label',
+        'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.deployButton.label',
         {
           defaultMessage: 'Deploy',
         }
@@ -55,7 +56,7 @@ export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean
   return (
     <EuiButton onClick={onClick} disabled={disabled} color="success" iconType="play" size="s">
       {i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.startButton.label',
+        'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.startButton.label',
         {
           defaultMessage: 'Start',
         }
@@ -69,9 +70,19 @@ export type SelectedModelProps = {
 };
 
 const NoModelSelected: React.FC = () => (
-  <EuiPanel color="subdued">
-    <EuiText textAlign="center">
-      Select an available model to add to your inference pipeline
+  <EuiPanel
+    color="subdued"
+    style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}
+  >
+    <EuiText textAlign="center" color="subdued" size="s">
+      {i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.noModelSelectedPanel.text',
+        { defaultMessage: 'Select an available model to add to your inference pipeline' }
+      )}
     </EuiText>
   </EuiPanel>
 );
@@ -79,8 +90,7 @@ const NoModelSelected: React.FC = () => (
 const SelectedModel: React.FC<SelectedModelProps> = (props) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
   const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
-
-  console.log('props.model', props.model)
+  const { formErrors } = useValues(MLInferenceLogic);
 
   return props.model ? (
     <EuiPanel color="subdued" title="Selected model">
@@ -110,25 +120,46 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
               </div>
             </EuiFlexItem>
           )}
-          {(props.model.isPlaceholder || props.model.deploymentState === MlModelDeploymentState.Downloaded) && (
-            <>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexItem grow={false}>
-                {props.model.isPlaceholder ? (
+          <EuiHorizontalRule margin="xs" />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {props.model.isPlaceholder ? (
+                <EuiFlexItem grow={false}>
                   <DeployModelButton
                     onClick={() => createModel(props.model!.modelId)}
                     disabled={areActionButtonsDisabled}
                   />
-                ) : props.model.deploymentState === MlModelDeploymentState.Downloaded ? (
+                </EuiFlexItem>
+              ) : props.model.deploymentState === MlModelDeploymentState.NotDeployed ? (
+                <EuiFlexItem grow={false}>
                   <StartModelButton
                     onClick={() => startModel(props.model!.modelId)}
                     disabled={areActionButtonsDisabled}
                   />
-                ) : (
-                  <></>
-                )}
+                </EuiFlexItem>
+              ) : (
+                <></>
+              )}
+              <EuiFlexItem grow={false}>
+                {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
+                <div>
+                  <TrainedModelHealth
+                    modelState={props.model.deploymentState}
+                    modelStateReason={props.model.deploymentStateReason}
+                    isDownloadable={props.model.isPlaceholder}
+                  />
+                </div>
               </EuiFlexItem>
-            </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {formErrors.modelStatus !== undefined && (
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <p>
+                  <EuiTextColor color="danger">{formErrors.modelStatus}</EuiTextColor>
+                </p>
+              </EuiText>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiPanel>
@@ -159,8 +190,6 @@ export const ModelSelect: React.FC = () => {
   const onChange = (options: ModelSelectOptionProps[]) => {
     const selectedModel = options.find((option) => option.checked === 'on');
 
-    console.log('selectedModel', selectedModel)
-
     setInferencePipelineConfiguration({
       ...configuration,
       inferenceConfig: undefined,
@@ -184,8 +213,7 @@ export const ModelSelect: React.FC = () => {
           singleSelection="always"
           listProps={{
             bordered: true,
-            rowHeight: useIsWithinMaxBreakpoint('s') ? 180 : 90,
-            // showIcons: false,
+            rowHeight: useIsWithinMaxBreakpoint('s') ? 128 : 96,
             onFocusBadge: false,
           }}
           height={360}

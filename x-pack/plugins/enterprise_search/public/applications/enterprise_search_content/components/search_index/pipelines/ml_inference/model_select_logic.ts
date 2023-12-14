@@ -24,7 +24,11 @@ import {
   StartModelApiLogic,
   StartModelApiLogicActions,
 } from '../../../../api/ml_models/start_model_api_logic';
-import { MLInferenceLogic } from './ml_inference_logic';
+import {
+  AddInferencePipelineModal,
+  MLInferenceLogic,
+  MLInferenceProcessorsValues,
+} from './ml_inference_logic';
 
 export interface ModelSelectActions {
   createModel: (modelId: string) => { modelId: string };
@@ -45,6 +49,7 @@ export interface ModelSelectActions {
 }
 
 export interface ModelSelectValues {
+  addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal'];
   areActionButtonsDisabled: boolean;
   createModelError: HttpError | undefined;
   createModelStatus: Status;
@@ -96,7 +101,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
       MLInferenceLogic,
-      ['selectedMLModel']
+      ['addInferencePipelineModal', 'selectedMLModel'],
     ],
   },
   events: ({ actions }) => ({
@@ -141,8 +146,9 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       (response: FetchModelsApiResponse) => response ?? [],
     ],
     selectedModel: [
-      () => [selectors.selectableModels, selectors.selectedMLModel],
-      (models: MlModel[], model?: TrainedModel) => model && models.find((m) => m.modelId === model.model_id),
+      () => [selectors.selectableModels, selectors.addInferencePipelineModal],
+      (models: MlModel[], addInferencePipelineModal: AddInferencePipelineModal) =>
+        models.find((m) => m.modelId === addInferencePipelineModal.configuration.modelID),
     ],
     isLoading: [() => [selectors.isInitialLoading], (isInitialLoading) => isInitialLoading],
   }),
