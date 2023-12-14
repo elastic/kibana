@@ -92,7 +92,7 @@ export async function mountManagementSection(
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     theme,
     savedObjectsManagement,
-    url
+    url,
   };
 
   const editPath = '/dataView/:id/field/:fieldName';

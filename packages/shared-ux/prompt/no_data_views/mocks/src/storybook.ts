@@ -47,7 +47,7 @@ export class StorybookMock extends AbstractStorybookMock<
   getProps() {
     return {
       onDataViewCreated: action('onDataViewCreated'),
-      esqlLink: 'test link'
+      esqlLink: 'test link',
     };
   }
 

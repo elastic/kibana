@@ -12,9 +12,9 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import { AppNavLinkStatus } from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -74,7 +74,7 @@ export interface ManagementAppMountParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
   theme$: Observable<CoreTheme>;
-  url: SharePluginStart['url']
+  url: SharePluginStart['url'];
 }
 
 export interface CreateManagementItemArgs {

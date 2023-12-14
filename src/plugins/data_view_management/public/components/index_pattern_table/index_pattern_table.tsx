@@ -73,7 +73,7 @@ interface Props extends RouteComponentProps {
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 const helperFunction = async (dataViews: DataViewsServicePublic, url: SharePluginStart['url']) => {
-  console.log(dataViews, url)
+  console.log(dataViews, url);
   const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
   console.log('\n\n\n\n\n\n default data view', defaultDataView);
   const params = {
@@ -108,7 +108,7 @@ export const IndexPatternTable = ({
     docLinks,
     url,
   } = useKibana<IndexPatternManagmentContext>().services;
-  console.log('url line 111 in index pattern table', url)
+  console.log('url line 111 in index pattern table', url);
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
