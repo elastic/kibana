@@ -44,7 +44,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173267
+  registry.when.skip('transaction duration alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
