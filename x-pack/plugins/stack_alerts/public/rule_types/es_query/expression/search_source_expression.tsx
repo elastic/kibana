@@ -93,7 +93,7 @@ export const SearchSourceExpression = ({
           termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
           excludeHitsFromPreviousRun:
             excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-          sourceFields: sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
+          sourceFields,
         });
         setSearchSource(createdSearchSource);
       } catch (error) {

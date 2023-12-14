@@ -96,7 +96,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
         if (action.type === 'index') {
           setParam('timeField', searchSource.getField('index')?.timeFieldName);
-          setParam('sourceField', undefined);
         }
       } else {
         setParam(action.type, action.payload);
@@ -131,8 +130,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
-    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
     dispatch({ type: 'index', payload: newDataView });
+    dispatch({ type: 'sourceFields', payload: undefined });
+    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {

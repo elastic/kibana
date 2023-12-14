@@ -1002,4 +1002,59 @@ describe('buildAgg', () => {
       },
     });
   });
+
+  it('should correctly apply the sourceFieldsParams if specified on a grouped query', async () => {
+    expect(
+      buildAggregation({
+        aggType: 'avg',
+        aggField: 'event.duration',
+        termField: 'event.action',
+        termSize: 10,
+        sourceFieldsParams: [{ label: 'event.provider', searchPath: 'event.provider' }],
+        condition: { resultLimit: 1000, conditionScript: 'params.compareValue > -1L' },
+        topHitsSize: 100,
+      })
+    ).toEqual({
+      groupAgg: {
+        aggs: {
+          conditionSelector: {
+            bucket_selector: {
+              buckets_path: {
+                compareValue: 'metricAgg',
+              },
+              script: 'params.compareValue > -1L',
+            },
+          },
+          'event.provider': {
+            terms: {
+              field: 'event.provider',
+              size: 10,
+            },
+          },
+          metricAgg: {
+            avg: {
+              field: 'event.duration',
+            },
+          },
+          topHitsAgg: {
+            top_hits: {
+              size: 100,
+            },
+          },
+        },
+        terms: {
+          field: 'event.action',
+          order: {
+            metricAgg: 'desc',
+          },
+          size: 10,
+        },
+      },
+      groupAggCount: {
+        stats_bucket: {
+          buckets_path: 'groupAgg._count',
+        },
+      },
+    });
+  });
 });

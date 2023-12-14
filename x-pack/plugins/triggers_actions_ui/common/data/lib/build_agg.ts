@@ -135,8 +135,11 @@ export const buildAggregation = ({
   // add sourceField aggregations
   if (sourceFieldsParams && sourceFieldsParams.length > 0) {
     sourceFieldsParams.forEach((field) => {
-      aggParent.aggs[field.label] = {
-        terms: { field: field.searchPath, size: MAX_SOURCE_FIELDS_TO_COPY },
+      aggParent.aggs = {
+        ...aggParent.aggs,
+        [field.label]: {
+          terms: { field: field.searchPath, size: MAX_SOURCE_FIELDS_TO_COPY },
+        },
       };
     });
   }
