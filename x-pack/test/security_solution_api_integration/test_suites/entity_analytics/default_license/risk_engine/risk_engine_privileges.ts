@@ -228,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
             username: 'no_cluster_manage_index_templates',
             password: USER_PASSWORD,
           },
-          FORBIDDEN_STATUS_CDOE
+          403
         );
       });
     });
