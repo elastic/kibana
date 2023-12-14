@@ -75,14 +75,14 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     closeTimelineUsingCloseButton();
     // navigate to any other page in security solution
     openKibanaNavigation();
-    cy.get(CASES_PAGE).click();
+    navigateFromKibanaCollapsibleTo(CASES_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
   it('should prompt when navigating with a changed & unsaved timeline within security solution where timelines are disabled eg. admin screen', () => {
     populateTimeline();
     openKibanaNavigation();
-    cy.get(MANAGE_PAGE).click();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
     cy.get(MODAL_CONFIRMATION_BTN).click();
   });
@@ -101,7 +101,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     addNameToTimelineAndSave('Test');
     closeTimelineUsingCloseButton();
     openKibanaNavigation();
-    cy.get(MANAGE_PAGE).click();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
@@ -109,7 +109,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
     openKibanaNavigation();
-    cy.get(MANAGE_PAGE).click();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
     cy.get(MODAL_CONFIRMATION_BTN).click();
 
@@ -117,7 +117,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     // timeline save modal is NOT present
 
     openKibanaNavigation();
-    cy.get(ALERTS_PAGE).click();
+    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
     cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
   });
 
@@ -125,7 +125,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     populateTimeline();
     closeTimelineUsingCloseButton();
     openKibanaNavigation();
-    cy.get(MANAGE_PAGE).click();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
     cy.get(MODAL_CONFIRMATION_BTN).click();
     // now we have come from MANAGE_PAGE where timeline is disabled
