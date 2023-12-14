@@ -68,9 +68,9 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
-  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
+  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({ ['filterBar']: true });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
-
+  const [url, setUrl] = useState<string>('')
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
@@ -93,7 +93,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return `${url}${embedParam}`;
   };
 
-  const makeIframeTag = (url?: string) => {
+  const makeIframeTag = (url: string) => {
     if (!url) {
       return;
     }
@@ -136,12 +136,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
     if (forSavedObject && shareableUrlForSavedObject) {
-      url = shareableUrlForSavedObject;
+      setUrl(shareableUrlForSavedObject);
     }
     if (!url) {
-      url = shareableUrl || window.location.href;
+      setUrl(shareableUrl || window.location.href);
     }
     return updateUrlParams(url);
   };
@@ -177,7 +176,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
         })
       );
     }
-    setUrl();
+    setUrlHelper();
   };
 
   const isNotSaved = () => {
@@ -189,11 +188,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       return;
     }
 
-    const url = getSnapshotUrl(true);
+    setUrl(getSnapshotUrl(true));
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
-      return;
+      return url;
     }
 
     // Get the application route, after the hash, and remove the #.
@@ -230,26 +229,24 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return parsedUrl.toString();
   };
 
-  const setUrl = () => {
-    let url: string | undefined;
-
+  const setUrlHelper = () => {
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      url = getSavedObjectUrl();
-    } else if (isShortUrl !== undefined) {
-      url = shortUrlCache;
+      setUrl(getSavedObjectUrl()!);
+    } else if (isShortUrl !== undefined && shortUrlCache !== undefined) {
+      setUrl(shortUrlCache);
     } else {
-      url = getSnapshotUrl();
+      setUrl(getSnapshotUrl());
     }
 
-    if (url) {
-      url = addUrlAnonymousAccessParameters(url);
+    if (url !== '') {
+      setUrl(addUrlAnonymousAccessParameters(url));
     }
 
-    if (isEmbedded) {
-      url = makeIframeTag(url);
+    if (isEmbedded && url !== undefined) {
+      setUrl(makeIframeTag(url)!);
     }
 
-    setUrl();
+    setUrl(url);
   };
 
   const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
@@ -257,7 +254,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
 
     if (!isChecked || shortUrlCache !== undefined) {
       setIsShortUrl(true);
-      setUrl();
+      setUrlHelper();
       return;
     }
 
@@ -304,22 +301,21 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     );
   };
 
-  const checkboxOnChangeHandler = (id: string): void => {
-    const newCheckboxMap = {
-      ...checkboxSelectedMap,
-      ...{
-        [id]: !checkboxSelectedMap,
-      },
-    };
-    setCheckboxIdSelectedMap(newCheckboxMap);
-  };
-
   const checkboxOptions = [
     { id: 'filterBar', label: 'Filter bar', 'data-test-sub': 'filter-bar-embed' },
     { id: 'query', label: 'Query', 'data-test-sub': 'query-embed' },
     { id: 'timeFilter', label: 'Time filter', 'data-test-sub': 'time-filter-embed' },
     { id: 'topMenu', label: 'Top menu', 'data-test-sub': 'top-menu-embed' },
   ];
+
+  const checkboxOnChangeHandler = (id: string): void => {
+    setCheckboxIdSelectedMap((prev) => {
+      return {
+        ...prev,
+        [id]: prev[id] ? !prev[id] : true,
+      }
+    });
+  };
 
   const radioOptions = [
     { id: 'savedObject', label: 'Saved object' },

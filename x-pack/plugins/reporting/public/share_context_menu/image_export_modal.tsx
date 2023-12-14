@@ -24,12 +24,11 @@ import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import url from 'url';
+import { Url as reportUrlFromUrl } from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ExportUrlAsType } from '@kbn/share-plugin/public/components/url_panel_content';
 import { i18n } from '@kbn/i18n';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { JobParamsProviderOptions } from '.';
@@ -38,6 +37,12 @@ import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_c
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 import { LocatorPublic } from '../shared_imports';
+import { AnonymousAccessServiceContract } from '@kbn/share-plugin/common';
+
+export enum ExportUrlAsType {
+  EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
+  EXPORT_URL_AS_SNAPSHOT = 'snapshot',
+}
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -59,6 +64,7 @@ export interface ReportingModalProps {
   shareableUrlForSavedObject?: string;
   shareUrlForLocatorParams?: string;
   shareableUrl?: string;
+  isEmbedded?: boolean;
 }
 
 interface UrlParams {
@@ -118,19 +124,22 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const isSaved = Boolean(objectId);
   const isMounted = useMountedState();
   const [, setIsStale] = useState(false);
+  const [url, setUrl] = useState('')
+  const [reportUrl, setReportUrl] = useState<reportUrlFromUrl | undefined>(undefined)
   const [shortUrl, setIsCreatingShortUrl] = useState<boolean | string>(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<string>('printablePdfV2');
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
-  const [, setIsShortUrl] = useState<boolean>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
+  const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
 
   const getAbsoluteReportGenerationUrl = () => {
     if (getJobParams(apiClient, jobProviderOptions, selectedRadio) !== undefined) {
@@ -138,7 +147,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         selectedRadio,
         apiClient.getDecoratedJobParams(getJobParams(apiClient, jobProviderOptions, selectedRadio)!)
       );
-      return url.resolve(window.location.href, relativePath);
+      return reportUrl?.resolve(window.location.href, relativePath);
     }
   };
 
@@ -173,12 +182,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
     if (forSavedObject && props.shareableUrlForSavedObject) {
-      url = props.shareableUrlForSavedObject;
+      setUrl(props.shareableUrlForSavedObject);
     }
     if (!url) {
-      url = props.shareableUrl || window.location.href;
+      setUrl(props.shareableUrl || window.location.href);
     }
     return updateUrlParams(url);
   };
@@ -364,6 +372,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         })
       );
     }
+    setUrlHelper();
   };
 
   const renderExportURL = () => {
@@ -380,11 +389,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       return;
     }
 
-    const url = getSnapshotUrl(true);
+    setUrl(getSnapshotUrl(true));
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
-      return;
+      return url;
     }
 
     // Get the application route, after the hash, and remove the #.
@@ -407,15 +416,47 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     return updateUrlParams(formattedUrl);
   };
 
-  const setUrl = () => {
-    if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      getSavedObjectUrl();
-    } else if (shortUrl) {
-      setShortUrlCache(shortUrlCache);
-    } else {
-      getSnapshotUrl();
+
+  const addUrlAnonymousAccessParameters = (url: string): string => {
+    if (!anonymousAccessParameters) {
+      return url;
     }
-    setUrl();
+
+    const parsedUrl = new URL(url);
+
+    for (const [name, value] of Object.entries(anonymousAccessParameters)) {
+      parsedUrl.searchParams.set(name, value);
+    }
+
+    return parsedUrl.toString();
+  };
+
+  const makeIframeTag = (url: string) => {
+    if (!url) {
+      return;
+    }
+
+    return `<iframe src="${url}" height="600" width="800"></iframe>`;
+  }; 
+
+  const setUrlHelper = () => {
+    if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
+      setUrl(getSavedObjectUrl()!);
+    } else if (isShortUrl !== undefined && shortUrlCache !== undefined) {
+      setUrl(shortUrlCache);
+    } else {
+      setUrl(getSnapshotUrl());
+    }
+
+    if (url !== '') {
+      setUrl(addUrlAnonymousAccessParameters(url));
+    }
+
+    if (props.isEmbedded && url !== undefined) {
+      setUrl(makeIframeTag(url)!);
+    }
+
+    setUrl(url);
   };
 
   const renderCopyURLButton = ({
