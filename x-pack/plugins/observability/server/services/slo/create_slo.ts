@@ -57,7 +57,7 @@ export class CreateSLO {
         () =>
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
-            id: `savedSlo-${savedSlo.id}`,
+            id: `slo-${savedSlo.id}`,
             document: createTempSummaryDocument(savedSlo, this.spaceId),
             refresh: true,
           }),
