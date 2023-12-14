@@ -32,7 +32,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
@@ -55,6 +54,7 @@ import {
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { mlJobService } from '../../services/job_service';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import { ml } from '../../services/ml_api_service';
 
 class RuleEditorFlyoutUI extends Component {
@@ -105,8 +105,7 @@ class RuleEditorFlyoutUI extends Component {
         i18n.translate(
           'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
           {
-            defaultMessage:
-              'Unable to configure job rules as an error occurred obtaining details for job ID {jobId}',
+            defaultMessage: 'Unable to configure job rules as no job found with ID {jobId}',
             values: { jobId: anomaly.jobId },
           }
         )
@@ -153,10 +152,11 @@ class RuleEditorFlyoutUI extends Component {
             filterListIds,
           });
         })
-        .catch((resp) => {
-          console.log('Error loading list of filters:', resp);
+        .catch((error) => {
           const { toasts } = this.props.kibana.services.notifications;
-          toasts.addDanger(
+          const toastNotificationService = toastNotificationServiceProvider(toasts);
+          toastNotificationService.displayErrorToast(
+            error,
             i18n.translate(
               'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
               {
@@ -374,8 +374,9 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        toasts.addDanger(
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
             {
@@ -426,18 +427,17 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        let errorMessage = i18n.translate(
-          'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
-          {
-            defaultMessage: 'Error deleting rule from {jobId} detector',
-            values: { jobId },
-          }
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate(
+            'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+            {
+              defaultMessage: 'Error deleting rule from {jobId} detector',
+              values: { jobId },
+            }
+          )
         );
-        if (error.error) {
-          errorMessage += ` : ${extractErrorMessage(error.error)}`;
-        }
-        toasts.addDanger(errorMessage);
       });
   };
 
@@ -467,8 +467,9 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.log(`Error adding ${item} to filter ${filterId}:`, error);
-        toasts.addDanger(
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
             {

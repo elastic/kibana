@@ -20,6 +20,7 @@ import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
@@ -160,10 +161,11 @@ class NewCalendarUI extends Component {
         await ml.addCalendar(calendar);
         await this.returnToCalendarsManagementPage();
       } catch (error) {
-        console.log('Error saving calendar', error);
         this.setState({ saving: false });
         const { toasts } = this.props.kibana.services.notifications;
-        toasts.addDanger(
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate('xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage', {
             defaultMessage: 'An error occurred creating calendar {calendarId}',
             values: { calendarId: calendar.calendarId },
@@ -181,10 +183,11 @@ class NewCalendarUI extends Component {
       await ml.updateCalendar(calendar);
       await this.returnToCalendarsManagementPage();
     } catch (error) {
-      console.log('Error saving calendar', error);
       this.setState({ saving: false });
       const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
+      const toastNotificationService = toastNotificationServiceProvider(toasts);
+      toastNotificationService.displayErrorToast(
+        error,
         i18n.translate('xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage', {
           defaultMessage:
             'An error occurred saving calendar {calendarId}. Try refreshing the page.',

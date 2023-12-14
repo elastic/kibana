@@ -30,6 +30,7 @@ import { parseUrlState } from '@kbn/ml-url-state';
 
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -161,11 +162,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
         const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error obtaining URL for test:', error);
-
         const { toasts } = notifications;
-        toasts.addDanger(
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
             {
