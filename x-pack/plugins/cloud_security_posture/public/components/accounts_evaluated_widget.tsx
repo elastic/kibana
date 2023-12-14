@@ -85,7 +85,7 @@ export const AccountsEvaluatedWidget = ({
             transition: ${euiTheme.animation.normal} ease-in;
             border-bottom: ${euiTheme.border.thick};
             border-color: transparent;
-
+            text-wrap: nowrap;
             :hover {
               cursor: pointer;
               border-color: ${euiTheme.colors.darkestShade};
