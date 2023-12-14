@@ -27,7 +27,7 @@ const emptyFilterOptions: FilterOptions = {
   severity: [],
   status: [],
   tags: [],
-  assignees: null,
+  assignees: [],
   reporters: [],
   owner: [],
   category: [],
