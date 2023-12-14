@@ -25,49 +25,53 @@ export function CreateSourceEditor(props: Props) {
     let ignore = false;
     getIndexPatternService().getDefaultDataView()
       .then((defaultDataView) => {
-        if (!ignore) {
-          if (defaultDataView) {
-            let geoField: string | undefined;
-            const initialDateFields: string[] = [];
-            for (let i = 0; i < defaultDataView.fields.length; i++) {
-              const field = defaultDataView.fields[i];
-              if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
-                geoField = field.name;
-              } else if ('date' === field.type) {
-                initialDateFields.push(field.name);
-              }
-            }
-            
-            if (geoField) {
-              let initialDateField: string | undefined;
-              if (defaultDataView.timeFieldName) {
-                initialDateField = defaultDataView.timeFieldName;
-              } else if (initialDateFields.length) {
-                initialDateField = initialDateFields[0];
-              }
-              const initialEsql = `from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
-              setDateField(initialDateField);
-              setEsql(initialEsql);
-              props.onSourceConfigChange({
-                columns: [
-                  {
-                    name: geoField,
-                    type: 'geo_point',
-                  }
-                ],
-                dateField: initialDateField,
-                esql: initialEsql,
-              });
+        if (ignore) {
+          return;
+        }
+        
+        if (defaultDataView) {
+          let geoField: string | undefined;
+          const initialDateFields: string[] = [];
+          for (let i = 0; i < defaultDataView.fields.length; i++) {
+            const field = defaultDataView.fields[i];
+            if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
+              geoField = field.name;
+            } else if ('date' === field.type) {
+              initialDateFields.push(field.name);
             }
           }
-          setIsInitialized(true);
+          
+          if (geoField) {
+            let initialDateField: string | undefined;
+            if (defaultDataView.timeFieldName) {
+              initialDateField = defaultDataView.timeFieldName;
+            } else if (initialDateFields.length) {
+              initialDateField = initialDateFields[0];
+            }
+            const initialEsql = `from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
+            setDateField(initialDateField);
+            setEsql(initialEsql);
+            props.onSourceConfigChange({
+              columns: [
+                {
+                  name: geoField,
+                  type: 'geo_point',
+                }
+              ],
+              dateField: initialDateField,
+              esql: initialEsql,
+            });
+          }
         }
       })
       .catch((err) => {
-        if (!ignore) {
-          setIsInitialized(true);
+        if (ignore) {
+          return
         }
       });
+
+      setIsInitialized(true);
+
     return () => {
       ignore = true;
     };

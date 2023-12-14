@@ -29,16 +29,19 @@ export function UpdateSourceEditor(props: Props) {
     let ignore = false;
     getDateFields(props.sourceDescriptor.esql)
       .then((initialDateFields) => {
-        if (!ignore) {
-          setDateFields(initialDateFields);
-          setIsInitialized(true);
+        if (ignore) {
+          return;
         }
+        setDateFields(initialDateFields);
       })
       .catch((err) => {
-        if (!ignore) {
-          setIsInitialized(true);
+        if (ignore) {
+          return;
         }
       });
+
+    setIsInitialized(true);
+
     return () => {
       ignore = true;
     };
@@ -74,14 +77,14 @@ export function UpdateSourceEditor(props: Props) {
         >
           <ESQLEditor
             esql={props.sourceDescriptor.esql}
-            onESQLChange={({ columns, dateFields: nextDateFields, esql }: { columns: ESQLSourceDescriptor['columns'], dateFields: string[]; esql: string }) => {
-              setDateFields(nextDateFields);
+            onESQLChange={(change: { columns: ESQLSourceDescriptor['columns'], dateFields: string[]; esql: string }) => {
+              setDateFields(change.dateFields);
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'columns', value: columns },
-                { propName: 'esql', value: esql }
+                { propName: 'columns', value: change.columns },
+                { propName: 'esql', value: change.esql }
               ];
-              if (props.sourceDescriptor.dateField && !nextDateFields.includes(props.sourceDescriptor.dateField)) {
-                changes.push({ propName: 'dateField', value: nextDateFields.length ? nextDateFields[0] : undefined });
+              if (props.sourceDescriptor.dateField && !change.dateFields.includes(props.sourceDescriptor.dateField)) {
+                changes.push({ propName: 'dateField', value: change.dateFields.length ? change.dateFields[0] : undefined });
               }
               props.onChange(...changes);
             }}
