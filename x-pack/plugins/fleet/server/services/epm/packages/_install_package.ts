@@ -381,7 +381,7 @@ export async function _installPackage({
         await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
       });
     }
-    logger.debug(`Package install - Installation complete}`);
+    logger.debug(`Package install - Installation complete`);
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
     if (SavedObjectsErrorHelpers.isConflictError(err)) {

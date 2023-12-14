@@ -154,7 +154,6 @@ export const MetricVis = ({
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
-  const chartTheme = getThemeService().useChartsTheme();
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
@@ -167,8 +166,7 @@ export const MetricVis = ({
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
-
-  const baseTheme = getThemeService().useChartsBaseTheme();
+  const chartBaseTheme = getThemeService().useChartsBaseTheme();
 
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
@@ -275,7 +273,7 @@ export const MetricVis = ({
   } = config;
   const numRows = metricConfigs.length / maxCols;
 
-  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+  const minHeight = chartBaseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
@@ -327,18 +325,18 @@ export const MetricVis = ({
             locale={i18n.getLocale()}
             theme={[
               {
-                background: { color: 'transparent' },
+                background: { color: defaultColor },
                 metric: {
-                  background: defaultColor,
                   barBackground: euiThemeVars.euiColorLightShade,
+                  emptyBackground: euiThemeVars.euiColorEmptyShade,
+                  blendingBackground: euiThemeVars.euiColorEmptyShade,
                 },
-                ...chartTheme,
               },
               ...(Array.isArray(settingsThemeOverrides)
                 ? settingsThemeOverrides
                 : [settingsThemeOverrides]),
             ]}
-            baseTheme={baseTheme}
+            baseTheme={chartBaseTheme}
             onRenderChange={onRenderChange}
             onElementClick={
               filterable

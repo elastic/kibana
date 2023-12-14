@@ -13,3 +13,4 @@ export * from './risk_levels';
 export * from './types';
 export * from './indices';
 export * from './constants';
+export * from './privileges';
