@@ -44,6 +44,7 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
+  differsOnlyInPatch,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -164,7 +165,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const displayVersions = minVersion
-      ? availableVersions.filter((v) => semverGt(v, minVersion))
+      ? availableVersions.filter(
+          (v) => semverGt(v, minVersion) || differsOnlyInPatch(v, minVersion, false)
+        )
       : availableVersions;
 
     const options = displayVersions.map((option) => ({
