@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import type { TypeOf } from '@kbn/config-schema';
-import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
+import type { HttpResponseOptions } from '@kbn/core/server';
 
 import { pick } from 'lodash';
 
@@ -41,7 +38,6 @@ import type {
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
-  GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageByUploadRequestSchema,
@@ -60,21 +56,17 @@ import {
   getCategories,
   getPackages,
   getInstalledPackages,
-  getFile,
   getPackageInfo,
   isBulkInstallError,
   installPackage,
   removeInstallation,
   getLimitedPackages,
-  getInstallation,
   getBulkAssets,
   getTemplateInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
 import { appContextService, checkAllowedPackages } from '../../services';
-import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
@@ -201,80 +193,6 @@ export const getLimitedListHandler: FleetRequestHandler<
     return response.ok({
       body,
     });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const getFileHandler: FleetRequestHandler<
-  TypeOf<typeof GetFileRequestSchema.params>
-> = async (context, request, response) => {
-  try {
-    const { pkgName, pkgVersion, filePath } = request.params;
-    const savedObjectsClient = (await context.fleet).internalSoClient;
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const useLocalFile = pkgVersion === installation?.version;
-
-    if (useLocalFile) {
-      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
-      const fileBuffer = getArchiveEntry(assetPath);
-      // only pull local installation if we don't have it cached
-      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
-
-      // error, if neither is available
-      if (!fileBuffer && !storedAsset) {
-        return response.custom({
-          body: `installed package file not found: ${filePath}`,
-          statusCode: 404,
-        });
-      }
-
-      // if storedAsset is not available, fileBuffer *must* be
-      // b/c we error if we don't have at least one, and storedAsset is the least likely
-      const { buffer, contentType } = storedAsset
-        ? {
-            contentType: storedAsset.media_type,
-            buffer: storedAsset.data_utf8
-              ? Buffer.from(storedAsset.data_utf8, 'utf8')
-              : Buffer.from(storedAsset.data_base64, 'base64'),
-          }
-        : {
-            contentType: mime.contentType(path.extname(assetPath)),
-            buffer: fileBuffer,
-          };
-
-      if (!contentType) {
-        return response.custom({
-          body: `unknown content type for file: ${filePath}`,
-          statusCode: 400,
-        });
-      }
-
-      return response.custom({
-        body: buffer,
-        statusCode: 200,
-        headers: {
-          ...CACHE_CONTROL_10_MINUTES_HEADER,
-          'content-type': contentType,
-        },
-      });
-    } else {
-      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-      const headersToProxy: KnownHeaders[] = ['content-type'];
-      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-        const value = registryResponse.headers.get(knownHeader);
-        if (value !== null) {
-          headers[knownHeader] = value;
-        }
-        return headers;
-      }, {} as ResponseHeaders);
-
-      return response.custom({
-        body: registryResponse.body,
-        statusCode: registryResponse.status,
-        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
-      });
-    }
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
