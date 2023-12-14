@@ -87,6 +87,7 @@ const createDiscoverPhrasesFilter = ({
   ({
     meta: {
       key,
+      negate,
       type: FILTERS.PHRASES,
       params: values,
     },
@@ -116,17 +117,16 @@ const createDiscoverExistsFilter = ({
 export const getDiscoverFiltersFromState = (filters: Filter[] = [], controls?: ControlOptions) => [
   ...filters,
   ...(controls
-    ? Object.keys(controls).map((key) =>
+    ? (Object.keys(controls) as Array<keyof ControlOptions>).map((key) =>
         controls[key as keyof ControlOptions]?.selection.type === 'exists'
           ? createDiscoverExistsFilter({
               key,
-              negate: controls[key as keyof ControlOptions]?.mode === 'exclude',
+              negate: controls[key]?.mode === 'exclude',
             })
           : createDiscoverPhrasesFilter({
               key,
-              values: (controls[key as keyof ControlOptions]?.selection as OptionsListControlOption)
-                .selectedOptions,
-              negate: controls[key as keyof ControlOptions]?.mode === 'exclude',
+              values: (controls[key]?.selection as OptionsListControlOption).selectedOptions,
+              negate: controls[key]?.mode === 'exclude',
             })
       )
     : []),

@@ -23,7 +23,7 @@ export const LogExplorerLink = React.memo(
     const [dataset, namespace] = dataStreamStat.title.split('-');
     const integration = dataStreamStat.integration?.name;
 
-    const params = {
+    const params: SingleDatasetLocatorParams = {
       dataset,
       timeRange: {
         from: 'now-1d',
@@ -36,16 +36,15 @@ export const LogExplorerLink = React.memo(
           values: [namespace],
         },
       },
-    } as SingleDatasetLocatorParams;
+    };
 
-    const urlToLogExplorer = share.url.locators
-      .get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID)
-      ?.getRedirectUrl(params);
+    const singleDatasetLocator =
+      share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
+
+    const urlToLogExplorer = singleDatasetLocator?.getRedirectUrl(params);
 
     const navigateToLogExplorer = () => {
-      share.url.locators
-        .get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID)
-        ?.navigate(params) as Promise<void>;
+      singleDatasetLocator?.navigate(params) as Promise<void>;
     };
 
     const logExplorerLinkProps = getRouterLinkProps({
