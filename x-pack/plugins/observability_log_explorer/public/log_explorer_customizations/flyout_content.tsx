@@ -13,6 +13,9 @@ import type { LogAIAssistantDocument } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
+type RenderFlyoutContentCustomization =
+  Required<LogExplorerCustomizations>['flyout']['renderContent'];
+
 const ObservabilityLogAIAssistant = ({ doc }: LogExplorerFlyoutContentProps) => {
   const { services } = useKibanaContextForPlugin();
   const { LogAIAssistant } = services.logsShared;
@@ -22,19 +25,17 @@ const ObservabilityLogAIAssistant = ({ doc }: LogExplorerFlyoutContentProps) => 
   return <LogAIAssistant key={doc.id} doc={mappedDoc} />;
 };
 
-export const renderFlyoutContent: Required<LogExplorerCustomizations>['flyout']['renderContent'] = (
-  renderPreviousContent,
-  props
-) => {
-  return (
-    <>
-      {renderPreviousContent()}
-      <EuiFlexItem>
-        <ObservabilityLogAIAssistant {...props} />
-      </EuiFlexItem>
-    </>
-  );
-};
+export const renderFlyoutContent: RenderFlyoutContentCustomization =
+  (renderPreviousContent) => (props) => {
+    return (
+      <>
+        {renderPreviousContent(props)}
+        <EuiFlexItem>
+          <ObservabilityLogAIAssistant {...props} />
+        </EuiFlexItem>
+      </>
+    );
+  };
 
 /**
  * Utils

@@ -45,6 +45,8 @@ export function defineActionTypes(
       params: { schema: schema.object({}, { defaultValue: {} }) },
     },
     async executor() {
+      // add a delay so the execution time is non-zero
+      await new Promise((r) => setTimeout(r, 1000));
       throw new Error('this action is intended to fail');
     },
   };

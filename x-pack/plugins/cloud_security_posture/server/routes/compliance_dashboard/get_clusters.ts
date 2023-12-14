@@ -16,7 +16,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { CspFinding } from '../../../common/schemas/csp_finding';
-import type { Cluster } from '../../../common/types';
+import type { Cluster } from '../../../common/types_old';
 import { getPostureStatsFromAggs, failedFindingsAggQuery } from './get_grouped_findings_evaluation';
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';

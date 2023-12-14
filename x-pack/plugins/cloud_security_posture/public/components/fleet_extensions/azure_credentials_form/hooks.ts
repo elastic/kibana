@@ -19,7 +19,7 @@ import {
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 import { CLOUDBEAT_AZURE } from '../../../../common/constants';
-import { AzureCredentialsType } from '../../../../common/types';
+import { AzureCredentialsType } from '../../../../common/types_old';
 
 export type SetupFormat = 'arm_template' | 'manual';
 

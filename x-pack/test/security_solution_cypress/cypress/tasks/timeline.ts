@@ -21,7 +21,6 @@ import {
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   CLOSE_TIMELINE_BTN,
-  COMBO_BOX,
   COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
   DELETE_TIMELINE_BTN,
@@ -52,7 +51,6 @@ import {
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   CREATE_NEW_TIMELINE_TEMPLATE,
-  OPEN_TIMELINE_TEMPLATE_ICON,
   TIMELINE_SAVE_MODAL,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
@@ -94,8 +92,9 @@ import {
   TOGGLE_DATA_PROVIDER_BTN,
   SAVE_TIMELINE_ACTION_BTN,
 } from '../screens/timeline';
-import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-import { drag, drop } from './common';
+
+import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
+import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -156,15 +155,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const goToEsqlTab = () => {
-  recurse(
-    () => cy.get(ESQL_TAB).should('be.visible').click(),
-    ($el) => expect($el).to.have.class('euiTab-isSelected'),
-    {
-      delay: 500,
-    }
-  );
-};
+export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);
 
 export const goToCorrelationTab = () => {
   cy.get(TIMELINE_CORRELATION_TAB).click();
@@ -211,8 +202,7 @@ export const addEqlToTimeline = (eql: string) => {
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).trigger('click');
+  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -336,6 +326,30 @@ export const openCreateTimelineOptionsPopover = () => {
   cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
 };
 
+export const createTimelineOptionsPopoverBottomBar = () => {
+  recurse(
+    () => {
+      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+      return cy.get(CREATE_NEW_TIMELINE).eq(0);
+    },
+    (sub) => sub.is(':visible')
+  );
+
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
+};
+
+export const createTimelineTemplateOptionsPopoverBottomBar = () => {
+  recurse(
+    () => {
+      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+      return cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
+    },
+    (sub) => sub.is(':visible')
+  );
+
+  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
+};
+
 export const closeCreateTimelineOptionsPopover = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
 };
@@ -403,10 +417,12 @@ export const openTimelineFromSettings = () => {
   cy.get(OPEN_TIMELINE_ICON).click();
 };
 
-export const openTimelineTemplateFromSettings = (id: string) => {
-  openTimelineFromSettings();
-  cy.get(OPEN_TIMELINE_TEMPLATE_ICON).click({ force: true });
-  cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
+export const openTimelineTemplate = (id: string) => {
+  cy.get(TIMELINE_TITLE_BY_ID(id)).click();
+};
+
+export const openTimelineTemplatesTab = () => {
+  cy.get(TIMELINES_TAB_TEMPLATE).click();
 };
 
 export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
