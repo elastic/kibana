@@ -32,7 +32,11 @@ import type {
   PackageSpecTags,
 } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import {
+  indexPatternTypes,
+  getIndexPatternSavedObjects,
+  makeManagedIndexPatternsGlobal,
+} from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { KibanaSOReferenceError } from '../../../../errors';
@@ -114,12 +118,14 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
+  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -151,6 +157,8 @@ export async function installKibanaAssets(options: {
     refresh: false,
     managed: true,
   });
+
+  await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
@@ -196,6 +204,7 @@ export async function installKibanaAssetsAndReferences({
   );
 
   const importedAssets = await installKibanaAssets({
+    savedObjectsClient,
     logger,
     savedObjectsImporter,
     pkgName,

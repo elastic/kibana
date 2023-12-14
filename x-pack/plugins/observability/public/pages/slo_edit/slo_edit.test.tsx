@@ -74,7 +74,6 @@ const mockKibana = () => {
       },
       charts: {
         theme: {
-          useChartsTheme: () => {},
           useChartsBaseTheme: () => {},
         },
       },
