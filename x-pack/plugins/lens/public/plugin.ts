@@ -594,7 +594,8 @@ export class LensPlugin {
     const editInLensAction = new ConfigureInLensPanelAction(
       startDependencies,
       core.overlays,
-      core.theme
+      core.theme,
+      core.application
     );
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 

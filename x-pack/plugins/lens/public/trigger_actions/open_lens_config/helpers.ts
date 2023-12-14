@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import { skip, take } from 'rxjs/operators';
 import './helpers.scss';
 import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
-import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isLensEmbeddable } from '../utils';
@@ -18,6 +19,7 @@ interface Context {
   startDependencies: LensPluginStartDependencies;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
+  application: ApplicationStart;
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
@@ -26,13 +28,21 @@ export async function isActionCompatible(embeddable: IEmbeddable) {
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
 }
 
-export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {
+export async function executeAction({
+  embeddable,
+  startDependencies,
+  overlays,
+  theme,
+  application,
+}: Context) {
   const isCompatibleAction = await isActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
     throw new IncompatibleActionError();
   }
+
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+
   const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
@@ -62,5 +72,13 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
       }
     );
     overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
+
+    /**
+     * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
+     * Dashboard app, such as Canvas, where `overlayTracker` is not available
+     */
+    application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
+      if (!overlayTracker) handle.close();
+    });
   }
 }
