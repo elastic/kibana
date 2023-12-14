@@ -95,6 +95,10 @@ export const getRuleExecutor = ({
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
+      const alertLimit = alertFactory.alertLimit.getValue();
+      let hasReachedLimit = false;
+      let scheduledActionsCount = 0;
+
       for (const result of results) {
         const {
           instanceId,
@@ -113,6 +117,11 @@ export const getRuleExecutor = ({
           `/app/observability/slos/${slo.id}${urlQuery}`
         );
         if (shouldAlert) {
+          if (scheduledActionsCount >= alertLimit) {
+            // need to set this so that warning is displayed in the UI and in the logs
+            hasReachedLimit = true;
+            break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+          }
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -160,6 +169,7 @@ export const getRuleExecutor = ({
 
           alert.scheduleActions(windowDef.actionGroup, context);
           alert.replaceState({ alertState: AlertStates.ALERT });
+          scheduledActionsCount++;
         }
       }
 
@@ -195,6 +205,7 @@ export const getRuleExecutor = ({
 
         recoveredAlert.setContext(context);
       }
+      alertFactory.alertLimit.setLimitReached(hasReachedLimit);
     }
 
     return { state: {} };
