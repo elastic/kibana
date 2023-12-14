@@ -596,7 +596,7 @@ describe('<TemplateCreate />', () => {
       );
     });
 
-    it.skip('should surface the API errors from the put HTTP request', async () => {
+    it('should surface the API errors from the put HTTP request', async () => {
       const { component, actions, find, exists } = testBed;
 
       const error = {
