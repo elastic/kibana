@@ -5,38 +5,36 @@
  * 2.0.
  */
 
-import { PartialTheme } from '@elastic/charts';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { LIGHT_THEME, DARK_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 
-export function useChartTheme(): PartialTheme[] {
+export function useChartThemes(): { baseTheme: Theme; theme: PartialTheme[] } {
   const theme = useTheme();
-  const baseChartTheme = theme.darkMode
-    ? EUI_CHARTS_THEME_DARK.theme
-    : EUI_CHARTS_THEME_LIGHT.theme;
+  const baseTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
 
-  return useMemo(
-    () => [
-      {
-        chartMargins: {
-          left: 10,
-          right: 10,
-          top: 35,
-          bottom: 10,
-        },
-        background: {
-          color: 'transparent',
-        },
-        lineSeriesStyle: {
-          point: { visible: false },
-        },
-        areaSeriesStyle: {
-          point: { visible: false },
-        },
+  return useMemo(() => {
+    const themeOverrides: PartialTheme = {
+      chartMargins: {
+        left: 10,
+        right: 10,
+        top: 35,
+        bottom: 10,
       },
-      baseChartTheme,
-    ],
-    [baseChartTheme]
-  );
+      background: {
+        color: 'transparent',
+      },
+      lineSeriesStyle: {
+        point: { visible: false },
+      },
+      areaSeriesStyle: {
+        point: { visible: false },
+      },
+    };
+
+    return {
+      theme: [themeOverrides],
+      baseTheme,
+    };
+  }, [baseTheme]);
 }
