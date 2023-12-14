@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  ADD_FILTER,
-  SERVER_SIDE_EVENT_COUNT,
-  TIMELINE_KQLMODE_FILTER,
-  TIMELINE_KQLMODE_SEARCH,
-  TIMELINE_SEARCH_OR_FILTER,
-} from '../../../screens/timeline';
+import { ADD_FILTER, SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 import { login } from '../../../tasks/login';
@@ -22,7 +16,8 @@ import {
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
-  showDataProviderQueryBuilder,
+  selectKqlFilterMode,
+  selectKqlSearchMode,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
@@ -64,12 +59,10 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
       cy.get(LOADING_INDICATOR).should('not.exist');
-      showDataProviderQueryBuilder();
-      cy.get(TIMELINE_SEARCH_OR_FILTER).click();
     });
 
     it('should be able to update timeline kqlMode with filter', () => {
-      cy.get(TIMELINE_KQLMODE_FILTER).click();
+      selectKqlFilterMode();
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
@@ -79,7 +72,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
     });
 
     it('should be able to update timeline kqlMode with search', () => {
-      cy.get(TIMELINE_KQLMODE_SEARCH).click();
+      selectKqlSearchMode();
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);

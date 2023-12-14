@@ -81,6 +81,9 @@ import {
   SAVE_TIMELINE_ACTION,
   TOGGLE_DATA_PROVIDER_BTN,
   SAVE_TIMELINE_ACTION_BTN,
+  TIMELINE_SEARCH_OR_FILTER,
+  TIMELINE_KQLMODE_FILTER,
+  TIMELINE_KQLMODE_SEARCH,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -477,8 +480,20 @@ export const expandEventAction = () => {
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
 };
 
-export const showDataProviderQueryBuilder = () => {
+const showDataProviderQueryBuilder = () => {
   cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'false');
   cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
   cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'true');
+};
+
+export const selectKqlFilterMode = () => {
+  showDataProviderQueryBuilder();
+  cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+  cy.get(TIMELINE_KQLMODE_FILTER).click();
+};
+
+export const selectKqlSearchMode = () => {
+  showDataProviderQueryBuilder();
+  cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+  cy.get(TIMELINE_KQLMODE_SEARCH).click();
 };
