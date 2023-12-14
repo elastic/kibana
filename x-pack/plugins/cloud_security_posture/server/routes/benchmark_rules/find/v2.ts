@@ -6,34 +6,25 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { getBenchmarkFilter } from '../../../../common/utils/helpers';
+import { getBenchmarkFilterQuery } from '../../../../common/utils/helpers';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/rules/v3';
-
-import {
-  getBenchmarkIdFromPackagePolicyId,
-  getSortedCspBenchmarkRulesTemplates,
-} from './utilities';
+} from '../../../../common/types/latest';
+import { getSortedCspBenchmarkRulesTemplates } from './utilities';
 
 export const findRuleHandler = async (
   soClient: SavedObjectsClientContract,
   options: FindCspBenchmarkRuleRequest
 ): Promise<FindCspBenchmarkRuleResponse> => {
-  if (
-    (!options.packagePolicyId && !options.benchmarkId) ||
-    (options.packagePolicyId && options.benchmarkId)
-  ) {
-    throw new Error('Please provide either benchmarkId or packagePolicyId, but not both');
+  if (!options.benchmarkId) {
+    throw new Error('Please provide BenchmarkId');
   }
 
-  const benchmarkId = options.benchmarkId
-    ? options.benchmarkId
-    : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
+  const benchmarkId = options.benchmarkId ? options.benchmarkId : '';
 
   const cspCspBenchmarkRulesSo = await soClient.find<CspBenchmarkRule>({
     type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
@@ -43,7 +34,10 @@ export const findRuleHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkFilter(benchmarkId, options.section),
+    filter: getBenchmarkFilterQuery(benchmarkId, options.benchmarkVersion || '', {
+      section: options.section,
+      ruleNumber: options.ruleNumber,
+    }),
   });
 
   const cspBenchmarkRules = cspCspBenchmarkRulesSo.saved_objects.map(

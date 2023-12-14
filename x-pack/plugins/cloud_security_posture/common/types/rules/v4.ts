@@ -6,45 +6,17 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { BenchmarksCisId } from '../latest';
 
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
+export type {
+  cspBenchmarkRuleMetadataSchema,
+  CspBenchmarkRuleMetadata,
+  cspBenchmarkRuleSchema,
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleResponse,
+} from './v3';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
-
-// Since version 8.7.0
-export const cspBenchmarkRuleMetadataSchema = schema.object({
-  audit: schema.string(),
-  benchmark: schema.object({
-    name: schema.string(),
-    posture_type: schema.maybe(
-      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
-    ),
-    id: schema.string(),
-    version: schema.string(),
-    rule_number: schema.maybe(schema.string()),
-  }),
-  default_value: schema.maybe(schema.string()),
-  description: schema.string(),
-  id: schema.string(),
-  impact: schema.maybe(schema.string()),
-  name: schema.string(),
-  profile_applicability: schema.string(),
-  rationale: schema.string(),
-  references: schema.maybe(schema.string()),
-  rego_rule_id: schema.string(),
-  remediation: schema.string(),
-  section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
-  version: schema.string(),
-});
-
-export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
-
-export const cspBenchmarkRuleSchema = schema.object({
-  metadata: cspBenchmarkRuleMetadataSchema,
-});
-
-export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
@@ -115,24 +87,23 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
       schema.literal('cis_gcp'),
     ])
   ),
+
   /**
-   * package_policy_id
+   * benchmark version
    */
-  packagePolicyId: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string()),
 
   /**
    * rule section
    */
   section: schema.maybe(schema.string()),
+  ruleNumber: schema.maybe(schema.string()),
 });
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
-export interface FindCspBenchmarkRuleResponse {
-  items: CspBenchmarkRule[];
-  total: number;
-  page: number;
-  perPage: number;
+export interface BenchmarkRuleSelectParams {
+  section?: string;
+  ruleNumber?: string;
 }
-
-export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+export type PageUrlParams = Record<'benchmarkId' | 'benchmarkVersion', BenchmarksCisId | string>;

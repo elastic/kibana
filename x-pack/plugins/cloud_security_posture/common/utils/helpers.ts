@@ -229,7 +229,7 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
 
 export const getBenchmarkFilterQuery = (
   id: BenchmarkId,
-  version: string,
+  version?: string,
   selectParams?: BenchmarkRuleSelectParams
 ): string => {
   const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;

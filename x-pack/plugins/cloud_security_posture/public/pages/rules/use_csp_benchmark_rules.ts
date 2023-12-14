@@ -13,7 +13,6 @@ import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION,
   FIND_CSP_BENCHMARK_RULE_ROUTE_PATH,
 } from '../../../common/constants';
 
@@ -26,7 +25,7 @@ export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 export const useFindCspBenchmarkRule = (
   { search, page, perPage, section, ruleNumber }: RulesQuery,
   benchmarkId: string,
-  benchmarkVersion: string
+  benchmarkVersion?: string
 ) => {
   const { http } = useKibana().services;
 
@@ -38,7 +37,7 @@ export const useFindCspBenchmarkRule = (
     () => {
       return http.get<FindCspBenchmarkRuleResponse>(FIND_CSP_BENCHMARK_RULE_ROUTE_PATH, {
         query: { benchmarkId, page, perPage, search, section, benchmarkVersion, ruleNumber },
-        version: FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION,
+        version: '2',
       });
     }
   );

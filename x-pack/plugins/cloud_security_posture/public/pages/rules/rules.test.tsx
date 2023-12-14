@@ -13,7 +13,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
-import type { PageUrlParams } from './rules_container';
+import { PageUrlParams } from '../../../common/types/rules/v3';
 import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -9,9 +9,9 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/rules/v3';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { createPackagePolicy } from './helper';
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPackagePolicy } from '../helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -35,6 +35,66 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       agentPolicyId = agentPolicyResponse.item.id;
+      await kibanaServer.savedObjects.create({
+        id: `TEST-ID-1234567`,
+        type: 'csp-rule-template',
+        overwrite: true,
+        attributes: {
+          metadata: {
+            audit: "MOCK'",
+            benchmark: {
+              id: 'cis_k8s',
+              name: 'CIS Kubernetes V1.23',
+              posture_type: 'kspm',
+              rule_number: '2.1.2',
+              version: 'v1.9.1',
+            },
+            default_value: '',
+            description: 'MOCK.',
+            id: '1d6ff20d-4803-574b-80d2-e47031d9baa2-MOCK',
+            impact: '',
+            name: 'MOCK',
+            profile_applicability: '* Level 2',
+            rationale: 'Mock Rationale.',
+            references: 'Mock Ref',
+            rego_rule_id: 'cis_2_1_2_mock',
+            remediation: 'Mock Remediation',
+            section: 'Beta',
+            tags: ['CIS', 'CIS 2.1.2'],
+            version: '1.0',
+          },
+        },
+      });
+      await kibanaServer.savedObjects.create({
+        id: `TEST-ID-7654321`,
+        type: 'csp-rule-template',
+        overwrite: true,
+        attributes: {
+          metadata: {
+            audit: "MOCK'",
+            benchmark: {
+              id: 'cis_k8s',
+              name: 'CIS Kubernetes V1.23',
+              posture_type: 'kspm',
+              rule_number: '2.1.2',
+              version: 'v1.9.1',
+            },
+            default_value: '',
+            description: 'MOCK.',
+            id: '1d6ff20d-4803-574b-80d2-e47031d9baa2-MOCK',
+            impact: '',
+            name: 'MOCK',
+            profile_applicability: '* Level 2',
+            rationale: 'Mock Rationale.',
+            references: 'Mock Ref',
+            rego_rule_id: 'cis_2_1_2_mock',
+            remediation: 'Mock Remediation',
+            section: 'Alpha',
+            tags: ['CIS', 'CIS 2.1.2'],
+            version: '1.0',
+          },
+        },
+      });
     });
 
     afterEach(async () => {
@@ -42,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return 500 error code when not provide package policy id or benchmark id`, async () => {
+    it(`Should return 500 error code when not provide benchmark id`, async () => {
       await createPackagePolicy(
         supertest,
         agentPolicyId,
@@ -54,63 +114,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: { message: string } } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .expect(500);
 
       expect(body.message).to.eql(
-        'Please provide either benchmarkId or packagePolicyId, but not both',
-        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
+        'Please provide BenchmarkId',
+        `expected message to be 'Please provide BenchmarkId' but got ${body.message} instead`
       );
     });
 
-    it(`Should return 500 error code when provide both package policy id and benchmark id`, async () => {
-      await createPackagePolicy(
-        supertest,
-        agentPolicyId,
-        'kspm',
-        'cloudbeat/cis_k8s',
-        'vanilla',
-        'kspm'
-      );
-
-      const { body }: { body: { message: string } } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('kbn-xsrf', 'xxxx')
-        .query({
-          packagePolicyId: 'your-package-policy-id',
-          benchmarkId: 'cis_aws',
-        })
-        .expect(500);
-
-      expect(body.message).to.eql(
-        'Please provide either benchmarkId or packagePolicyId, but not both',
-        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
-      );
-    });
-
-    it(`Should return 404 status code when the package policy ID does not exist`, async () => {
-      const { body }: { body: { statusCode: number; error: string } } = await supertest
-        .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('kbn-xsrf', 'xxxx')
-        .query({
-          packagePolicyId: 'non-existing-packagePolicy-id',
-        })
-        .expect(404);
-
-      expect(body.statusCode).to.eql(
-        404,
-        `expected status code to be 404 but got ${body.statusCode} instead`
-      );
-      expect(body.error).to.eql(
-        'Not Found',
-        `expected error message to be 'Not Found' but got ${body.error} instead`
-      );
-    });
-
-    it(`Should return 200 status code and filter rules by benchmarkId`, async () => {
+    it(`Should return 200 status code and filter rules by benchmarkId and benchmarkVersion`, async () => {
       await createPackagePolicy(
         supertest,
         agentPolicyId,
@@ -122,10 +136,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
         })
         .expect(200);
 
@@ -153,10 +168,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           fields: ['metadata.name', 'metadata.section', 'metadata.id'],
         })
         .expect(200);
@@ -186,10 +202,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           sortField: 'metadata.section',
           sortOrder: 'asc',
         })
@@ -207,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return 200 status code and paginate rules with a limit of PerPage`, async () => {
-      const perPage = 10;
+      const perPage = 2;
 
       await createPackagePolicy(
         supertest,
@@ -220,10 +237,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: FindCspBenchmarkRuleResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
+          benchmarkVersion: '1.9.1',
           perPage,
         })
         .expect(200);
