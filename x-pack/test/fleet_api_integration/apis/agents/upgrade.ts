@@ -307,7 +307,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'agent agent1 is not upgradeable: agent is marked as not upgradeable in elastic-agent.'
+          'Agent agent1 is not upgradeable: agent is marked as not upgradeable in elastic-agent.'
         );
       });
 
