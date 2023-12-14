@@ -20,8 +20,6 @@ import {
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
-jest.spyOn(console, 'warn').mockImplementation();
-
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -531,11 +529,6 @@ describe('<TemplateCreate />', () => {
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         dataStream: {},
-        lifecycle: {
-          enabled: true,
-          value: 1,
-          unit: 'd',
-        },
         allowAutoCreate: true,
       });
       // Component templates
@@ -588,10 +581,6 @@ describe('<TemplateCreate />', () => {
                 },
               },
               aliases: ALIASES,
-              lifecycle: {
-                enabled: true,
-                data_retention: '1d',
-              },
             },
           }),
         })
@@ -619,44 +608,59 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  test('preview data stream', async () => {
-    await act(async () => {
-      testBed = await setup(httpSetup);
-    });
-    testBed.component.update();
+  describe('DSL', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
 
-    const { actions } = testBed;
-    // Logistics
-    await actions.completeStepOne({
-      name: TEMPLATE_NAME,
-      indexPatterns: DEFAULT_INDEX_PATTERNS,
-      dataStream: {},
-      lifecycle: {
-        enabled: true,
-        value: 1,
-        unit: 'd',
-      },
-    });
-
-    await act(async () => {
-      await actions.previewTemplate();
+      await testBed.actions.completeStepOne({
+        name: TEMPLATE_NAME,
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
+        dataStream: {},
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
+      });
     });
 
-    expect(httpSetup.post).toHaveBeenLastCalledWith(
-      `${API_BASE_PATH}/index_templates/simulate`,
-      expect.objectContaining({
-        body: JSON.stringify({
-          template: {
-            lifecycle: {
-              enabled: true,
-              data_retention: '1d',
+    test('should include DSL in summary when set in step 1', async () => {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        testBed.find('formWizardStep-5').simulate('click');
+      });
+      component.update();
+
+      expect(find('lifecycleValue').text()).toContain('1 day');
+    });
+
+    test('preview data stream', async () => {
+      const { actions } = testBed;
+
+      await act(async () => {
+        await actions.previewTemplate();
+      });
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/simulate`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
-          },
-          index_patterns: DEFAULT_INDEX_PATTERNS,
-          data_stream: {},
-          allow_auto_create: false,
-        }),
-      })
-    );
+            index_patterns: DEFAULT_INDEX_PATTERNS,
+            data_stream: {},
+            allow_auto_create: false,
+          }),
+        })
+      );
+    });
   });
 });
