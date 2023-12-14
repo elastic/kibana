@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { intersection, isUndefined } from 'lodash';
+import { intersection, isObject, isUndefined } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFields } from './utils/get_fields';
 import { getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
 import { KqlFunctionNode, KqlLiteralNode, KqlWildcardNode, nodeTypes } from '../node_types';
-import type { KqlContext } from '../types';
+import type { KqlContext, KueryNode } from '../types';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
@@ -30,6 +30,16 @@ export interface KqlInferFunctionNode extends KqlFunctionNode {
 export function isNode(node: KqlFunctionNode): node is KqlInferFunctionNode {
   return node.function === KQL_FUNCTION_INFER;
 }
+
+const isKueryNode = (node: unknown): node is KueryNode => isObject(node) && 'type' in node;
+
+export const nodeContains = (node: unknown) => {
+  return (
+    isKueryNode(node) &&
+    nodeTypes.function.isNode(node) &&
+    (isNode(node) || node.arguments.some(nodeContains))
+  );
+};
 
 export function buildNodeParams(fieldName: string, value: any) {
   if (isUndefined(fieldName)) {

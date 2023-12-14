@@ -80,8 +80,6 @@ import {
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
-  KueryNode,
-  nodeTypes,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -912,21 +910,12 @@ export class SearchSource {
     );
 
     if (!hasScoreSort) {
-      const isNode = (node: unknown): node is KueryNode => isObject(node) && 'type' in node;
-      const hasInferNode = (node: unknown) => {
-        return (
-          isNode(node) &&
-          nodeTypes.function.isNode(node) &&
-          (functions.infer.isNode(node) || node.arguments.some(hasInferNode))
-        );
-      };
-
       const queryArray = Array.isArray(query) ? query : [query];
       const anyQueryHasInferNode = queryArray.some(
         (currentQuery) =>
           isOfQueryType(currentQuery) &&
           currentQuery.language === 'kuery' &&
-          hasInferNode(fromKueryExpression(currentQuery.query))
+          functions.infer.nodeContains(fromKueryExpression(currentQuery.query))
       );
 
       if (anyQueryHasInferNode) {
