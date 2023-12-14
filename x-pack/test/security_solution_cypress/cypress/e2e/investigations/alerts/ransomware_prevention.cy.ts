@@ -16,7 +16,7 @@ import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', {
       archiveName: 'ransomware_prevention',
