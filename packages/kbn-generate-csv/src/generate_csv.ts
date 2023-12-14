@@ -10,21 +10,31 @@ import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import { zipObject } from 'lodash';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type {
   IEsSearchRequest,
+  IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchSource,
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
-import { ES_SEARCH_STRATEGY, cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
+import {
+  ES_SEARCH_STRATEGY,
+  cellHasFormulas,
+  tabifyDocs,
+  ESQL_SEARCH_STRATEGY,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+} from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import type { Datatable } from '@kbn/expressions-plugin/server';
+import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/server';
 import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import {
   AuthenticationExpiredError,
   CancellationToken,
@@ -49,6 +59,24 @@ interface Clients {
 interface Dependencies {
   searchSourceStart: ISearchStartSearchSource;
   fieldFormatsRegistry: IFieldFormatsRegistry;
+}
+
+interface ESQLSearchParams {
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
+  query: string;
+  filter?: unknown;
+  locale?: string;
+}
+
+interface ESQLSearchReponse {
+  columns?: Array<{
+    name: string;
+    type: string;
+  }>;
+  values: unknown[][];
 }
 
 export class CsvGenerator {
@@ -155,6 +183,7 @@ export class CsvGenerator {
     );
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
+    this.logger.debug(`Search request: ${JSON.stringify(searchBody)}`);
     if (searchBody == null) {
       throw new Error('Could not retrieve the search body!');
     }
@@ -226,12 +255,16 @@ export class CsvGenerator {
     }): string => {
       let cell: string[] | string | object;
       // check truthiness to guard against _score, _type, etc
-      if (tableColumn && dataTableCell) {
-        try {
-          cell = formatters[tableColumn].convert(dataTableCell);
-        } catch (err) {
-          this.logger.error(err);
-          cell = '-';
+      if (tableColumn && dataTableCell != null) {
+        if (formatters[tableColumn]) {
+          try {
+            cell = formatters[tableColumn].convert(dataTableCell);
+          } catch (err) {
+            this.logger.error(err);
+            cell = '-';
+          }
+        } else {
+          cell = `${dataTableCell}`;
         }
 
         const isIdField = tableColumn === '_id'; // _id field can not be formatted or mutated
@@ -355,6 +388,12 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
+
+    const query = searchSource.getField('query');
+    if (query && 'esql' in query) {
+      return this.generateDataFromESQL();
+    }
+
     let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
@@ -531,5 +570,109 @@ export class CsvGenerator {
   private formatPit(pitId: string | undefined) {
     const byteSize = pitId ? Buffer.byteLength(pitId, 'utf-8') : 0;
     return pitId?.substring(0, 12) + `[${byteSize} bytes]`;
+  }
+
+  private async generateDataFromESQL(): Promise<TaskRunResult> {
+    const [settings, searchSource] = await Promise.all([
+      getExportSettings(
+        this.clients.uiSettings,
+        this.config,
+        this.job.browserTimezone,
+        this.logger
+      ),
+      this.dependencies.searchSourceStart.create(this.job.searchSource),
+    ]);
+
+    let reportingError: undefined | ReportingError;
+    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
+    const warnings: string[] = [];
+
+    const searchBody = searchSource.getSearchRequestBody();
+    const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
+      params: {
+        // @ts-ignore
+        query: searchSource.getField('query')!.esql,
+        filter: searchBody.query,
+        locale: 'en', // TODO: get locale from request
+      },
+    };
+
+    this.logger.debug(`Search params: ${JSON.stringify(searchParams)}`);
+
+    try {
+      const { rawResponse } = await lastValueFrom(
+        this.clients.data.search(searchParams, {
+          strategy: ESQL_SEARCH_STRATEGY,
+          // TODO: not supported by esql search strategy
+          // transport: {
+          //   maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+          //   requestTimeout: settings.scroll.duration,
+          // },
+        })
+      );
+      this.logger.debug(`Raw response: ${JSON.stringify(rawResponse)}`);
+
+      const results: ESQLSearchReponse = rawResponse;
+
+      const columns =
+        results.columns?.map(({ name, type }) => ({
+          id: name,
+          name,
+          meta: { type: normalizeType(type) },
+        })) ?? [];
+      const columnNames = columns.map(({ name }) => name);
+      const rows = results.values.map((row) => zipObject(columnNames, row));
+
+      const table: Datatable = {
+        type: 'datatable',
+        columns,
+        rows,
+      };
+
+      const header =
+        Array.from(columnNames).map(this.escapeValues(settings)).join(settings.separator) + '\n';
+      builder.tryAppend(header);
+
+      await this.generateRows(new Set(columnNames), table, builder, {}, settings);
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof esErrors.ResponseError) {
+        if ([401, 403].includes(err.statusCode ?? 0)) {
+          reportingError = new AuthenticationExpiredError();
+          warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+        } else {
+          warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
+        }
+      } else {
+        warnings.push(i18nTexts.unknownError(err?.message ?? err));
+      }
+    }
+
+    return {
+      content_type: CONTENT_TYPE_CSV,
+      csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
+      max_size_reached: this.maxSizeReached,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
+      warnings,
+      error_code: reportingError?.code,
+    };
+  }
+}
+
+function normalizeType(type: string): DatatableColumnType {
+  switch (type) {
+    case ES_FIELD_TYPES._INDEX:
+    case ES_FIELD_TYPES.GEO_POINT:
+    case ES_FIELD_TYPES.IP:
+      return KBN_FIELD_TYPES.STRING;
+    case '_version':
+      return KBN_FIELD_TYPES.NUMBER;
+    case 'datetime':
+      return KBN_FIELD_TYPES.DATE;
+    default:
+      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
   }
 }
