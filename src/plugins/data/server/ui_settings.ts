@@ -570,5 +570,17 @@ export function getUiSettings(
       category: ['search'],
       schema: schema.number(),
     },
+    [UI_SETTINGS.SEARCH_DEFAULT_TEXT_EXPANSION_MODEL]: {
+      name: i18n.translate('data.advancedSettings.defaultTextExpansionModel', {
+        defaultMessage: 'Default text expansion model',
+      }),
+      value: '',
+      description: i18n.translate('data.advancedSettings.defaultTextExpansionModelDesc', {
+        defaultMessage: 'Sets the default ML model to use for text expansion semantic searches.',
+      }),
+      type: 'string',
+      category: ['search'],
+      schema: schema.string(),
+    },
   };
 }

@@ -21,11 +21,13 @@ export function getEsQueryConfig(config: KibanaConfig): EsQueryConfig {
     UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
   );
   const dateFormatTZ = config.get('dateFormat:tz');
+  const textExpansionModel = config.get(UI_SETTINGS.SEARCH_DEFAULT_TEXT_EXPANSION_MODEL);
 
   return {
     allowLeadingWildcards,
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
     dateFormatTZ,
+    textExpansionModel,
   };
 }

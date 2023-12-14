@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { isUndefined } from 'lodash';
+import { intersection, isUndefined } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFields } from './utils/get_fields';
 import { getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
-import type { KqlFunctionNode, KqlLiteralNode, KqlWildcardNode } from '../node_types';
+import { KqlFunctionNode, KqlLiteralNode, KqlWildcardNode, nodeTypes } from '../node_types';
 import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
+import * as is from './is';
 
 export const KQL_FUNCTION_INFER = 'infer';
 
@@ -48,12 +49,23 @@ export function buildNodeParams(fieldName: string, value: any) {
   };
 }
 
+const textExpansionTypes = ['sparse_vector', 'rank_features'];
+
 export function toElasticsearchQuery(
   node: KqlInferFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: KqlContext = {}
 ): QueryDslQueryContainer {
+  if (!config.textExpansionModel) {
+    const isFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes(
+      'is',
+      node.arguments
+    ) as is.KqlIsFunctionNode;
+
+    return is.toElasticsearchQuery(isFunctionNode, indexPattern, config, context);
+  }
+
   const {
     arguments: [fieldNameArg, valueArg],
   } = node;
@@ -64,12 +76,9 @@ export function toElasticsearchQuery(
     context?.nested ? context.nested.path : undefined
   );
 
-  if (fullFieldNameArg.value === null) {
-    throw new Error('fieldName is a required argument');
-  }
-
-  const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
-  const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) ?? [] : [];
+  const fieldName = fullFieldNameArg.value ? fullFieldNameArg : nodeTypes.wildcard.buildNode('*');
+  const value = isUndefined(valueArg) ? valueArg : ast.toElasticsearchQuery(valueArg);
+  const fields = indexPattern ? getFields(fieldName, indexPattern) ?? [] : [];
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -81,6 +90,7 @@ export function toElasticsearchQuery(
       name: ast.toElasticsearchQuery(fullFieldNameArg) as unknown as string,
       scripted: false,
       type: '',
+      esTypes: ['sparse_vector'],
     });
   }
 
@@ -104,18 +114,20 @@ export function toElasticsearchQuery(
     }
   };
 
-  const queries = fields.map(
-    (field: DataViewFieldBase) =>
-      wrapWithNestedQuery(field, {
-        text_expansion: {
-          [field.name]: {
-            model_id: '.elser_model_2',
-            model_text: value,
+  const queries = fields
+    .filter((field) => intersection(field.esTypes, textExpansionTypes).length > 0)
+    .map(
+      (field: DataViewFieldBase) =>
+        wrapWithNestedQuery(field, {
+          text_expansion: {
+            [field.name]: {
+              model_id: config.textExpansionModel,
+              model_text: value,
+            },
           },
-        },
-      }),
-    []
-  );
+        }),
+      []
+    );
 
   return queries.length === 1
     ? queries[0]

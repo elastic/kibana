@@ -28,6 +28,7 @@ export function buildQueryFromKuery(
     dateFormatTZ,
     nestedIgnoreUnmapped,
     caseInsensitive,
+    textExpansionModel,
   }: KueryQueryOptions = {
     filtersInMustClause: false,
   }
@@ -41,6 +42,7 @@ export function buildQueryFromKuery(
     dateFormatTZ,
     nestedIgnoreUnmapped,
     caseInsensitive,
+    textExpansionModel,
   });
 }
 
