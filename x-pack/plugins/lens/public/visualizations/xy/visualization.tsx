@@ -792,7 +792,7 @@ export const getXyVisualization = ({
 
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
-      accessors == null || accessors.length === 0;
+      accessors == null || accessors?.length === 0;
 
     const dataLayers = getDataLayers(state.layers);
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
@@ -809,7 +809,7 @@ export const getXyVisualization = ({
       // filter out those layers with no accessors at all
       const filteredLayers = dataLayers.filter(
         ({ accessors, xAccessor, splitAccessor, layerType }) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
+          accessors?.length > 0 || xAccessor != null || splitAccessor != null
       );
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
@@ -875,7 +875,7 @@ export const getXyVisualization = ({
       const filteredLayers = [
         ...getDataLayers(state.layers),
         ...getReferenceLayers(state.layers),
-      ].filter(({ accessors }) => accessors.length > 0);
+      ].filter(({ accessors }) => accessors?.length > 0);
 
       const accessorsWithArrayValues = [];
 
