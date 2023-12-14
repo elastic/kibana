@@ -52,6 +52,16 @@ export class DeleteSLO {
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
+    const stuff = await this.esClient.search({
+      index: SLO_DESTINATION_INDEX_PATTERN,
+      size: 30,
+      query: {
+        match: {
+          'slo.id': sloId,
+        },
+      },
+    });
+    console.log('stuff', JSON.stringify(stuff));
     await this.esClient.deleteByQuery({
       index: SLO_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,

@@ -49,10 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
       await sloEsClient.deleteTestSourceData(getService);
     });
 
-    it('deletes new slo saved object and transforms', async () => {
+    it.only('deletes new slo saved object and transforms', async () => {
       const request = createSLOInput;
 
       const id = await slo.create(request);
+
+      console.log('id', id);
 
       const savedObject = await kibanaServer.savedObjects.find({
         type: SO_SLO_TYPE,
@@ -124,7 +126,12 @@ export default function ({ getService }: FtrProviderContext) {
       // expect summary and rollup documents to be deleted
       await retry.tryForTime(60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await sloEsClient.getSLOSummaryDataById(id);
+        console.log('sloSummaryResponseAfterDeletion', sloSummaryResponseAfterDeletion);
         const sloRollupResponseAfterDeletion = await sloEsClient.getSLORollupDataById(id);
+        console.log(
+          'sloRollupResponseAfterDeletion',
+          JSON.stringify(sloRollupResponseAfterDeletion.hits.hits)
+        );
         expect(sloSummaryResponseAfterDeletion.hits.hits.length).eql(0);
         expect(sloRollupResponseAfterDeletion.hits.hits.length).eql(0);
       });
