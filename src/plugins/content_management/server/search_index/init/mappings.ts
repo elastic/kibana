@@ -34,8 +34,21 @@ export const mappings: estypes.MappingTypeMapping = {
     updatedAt: {
       type: 'date',
     },
+    updatedBy: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
     description: {
       type: 'text',
+    },
+    /**
+     * Transaction ID which allows to trace the update back to the original
+     * request or to correlate multiple events. For example, one user action
+     * can result in multiple events, all of which will have the same `txId`.
+     */
+    updateTxId: {
+      type: 'keyword',
+      ignore_above: 256,
     },
   },
 };

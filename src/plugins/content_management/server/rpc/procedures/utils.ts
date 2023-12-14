@@ -38,7 +38,7 @@ const validateRequestVersion = (
 export const getStorageContext = ({
   contentTypeId,
   version: _version,
-  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory },
+  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory, currentUser },
 }: {
   contentTypeId: string;
   version?: number;
@@ -48,6 +48,7 @@ export const getStorageContext = ({
   const version = validateRequestVersion(_version, contentDefinition.version.latest);
   const storageContext: StorageContext = {
     requestHandlerContext,
+    currentUser,
     version: {
       request: version,
       latest: contentDefinition.version.latest,

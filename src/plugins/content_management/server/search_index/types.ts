@@ -45,8 +45,10 @@ export interface SearchIndexClient {
 export interface SearchIndexDoc {
   readonly title: string;
   readonly type: string;
-  readonly owner: string;
   readonly description?: string;
+  readonly owner?: string;
+  readonly updatedBy?: string;
+  readonly updateTxId: string;
 }
 
 export interface EsSearchIndexDoc extends SearchIndexDoc {

@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { v4 as uuidv4 } from 'uuid';
+
 import type {
   GetResult,
   BulkGetResult,
@@ -48,6 +50,8 @@ export interface SearchResponse<T = unknown> {
   contentTypeId: string;
   result: SearchResult<T>;
 }
+
+const generateTxId = () => uuidv4();
 
 export class ContentCrud<T = unknown> {
   private storage: ContentStorage<T>;
@@ -156,19 +160,22 @@ export class ContentCrud<T = unknown> {
   ): Promise<CreateItemResponse<T, any>> {
     const id = _options?.id ?? ctx.utils.generateId();
     const options = { ..._options, id };
+    const userId = ctx.currentUser?.profile_uid;
+    const txId = generateTxId();
 
     this.eventBus.emit({
       type: 'createItemStart',
       contentTypeId: this.contentTypeId,
       data,
       options,
+      txId,
     });
 
     try {
-      await this.searchIndex.addDocument(
-        this.getIdForSeachIndex(id),
-        this.parseDataForSearch(data)
-      );
+      await this.searchIndex.addDocument(this.getIdForSeachIndex(id), {
+        ...this.parseDataForSearch(data, txId, userId),
+        owner: userId,
+      });
 
       const result = await this.storage.create(ctx, data, options);
 
@@ -177,6 +184,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         data: result,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -187,6 +195,7 @@ export class ContentCrud<T = unknown> {
         data,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -199,18 +208,22 @@ export class ContentCrud<T = unknown> {
     data: object,
     options?: object
   ): Promise<UpdateItemResponse<T, any>> {
+    const userId = ctx.currentUser?.profile_uid;
+    const txId = generateTxId();
+
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
       contentTypeId: this.contentTypeId,
       data,
       options,
+      txId,
     });
 
     try {
       await this.searchIndex.updateDocument(
         this.getIdForSeachIndex(id),
-        this.parseDataForSearch(data)
+        this.parseDataForSearch(data, txId, userId)
       );
 
       const result = await this.storage.update(ctx, id, data, options);
@@ -221,6 +234,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         data: result,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -232,6 +246,7 @@ export class ContentCrud<T = unknown> {
         data,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -243,11 +258,14 @@ export class ContentCrud<T = unknown> {
     id: string,
     options?: object
   ): Promise<DeleteItemResponse> {
+    const txId = generateTxId();
+
     this.eventBus.emit({
       type: 'deleteItemStart',
       contentId: id,
       contentTypeId: this.contentTypeId,
       options,
+      txId,
     });
 
     try {
@@ -260,6 +278,7 @@ export class ContentCrud<T = unknown> {
         contentId: id,
         contentTypeId: this.contentTypeId,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -270,6 +289,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -313,9 +333,19 @@ export class ContentCrud<T = unknown> {
     }
   }
 
-  private parseDataForSearch(data: Record<any, any>): SearchIndexDoc {
+  private parseDataForSearch(
+    data: Record<any, any>,
+    txId: string,
+    userId?: string
+  ): SearchIndexDoc {
     const { title, description } = data;
-    return { title, description, type: this.contentTypeId, owner: 'foo' };
+    return {
+      title,
+      description,
+      type: this.contentTypeId,
+      updatedBy: userId,
+      updateTxId: txId,
+    };
   }
 
   private getIdForSeachIndex(id: string): string {

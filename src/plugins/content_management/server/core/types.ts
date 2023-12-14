@@ -13,6 +13,7 @@ import type {
   ContentManagementServiceDefinitionVersioned,
 } from '@kbn/object-versioning';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 import type {
   GetResult,
@@ -32,6 +33,7 @@ export type StorageContextGetTransformFn = (
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
+  currentUser: AuthenticatedUser | null;
   version: {
     request: Version;
     latest: Version;

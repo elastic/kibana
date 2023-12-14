@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
 import { MSearchService } from '../../core/msearch';
@@ -21,12 +22,15 @@ import { wrapError } from './error_wrapper';
 interface RouteContext {
   rpc: RpcService<RpcContext, ProcedureName>;
   contentRegistry: ContentRegistry;
+  auth: {
+    getCurrentUser: (request: KibanaRequest) => Promise<AuthenticatedUser | null>;
+  };
 }
 
 export function initRpcRoutes(
   procedureNames: readonly ProcedureName[],
   router: IRouter,
-  { rpc, contentRegistry }: RouteContext
+  { rpc, contentRegistry, auth }: RouteContext
 ) {
   if (procedureNames.length === 0) {
     throw new Error(`No procedure names provided.`);
@@ -53,9 +57,11 @@ export function initRpcRoutes(
     },
     async (requestHandlerContext, request, response) => {
       try {
+        const currentUser = await auth.getCurrentUser(request);
         const context: RpcContext = {
           contentRegistry,
           requestHandlerContext,
+          currentUser,
           getTransformsFactory: getServiceObjectTransformFactory,
           mSearchService: new MSearchService({
             getSavedObjectsClient: async () =>

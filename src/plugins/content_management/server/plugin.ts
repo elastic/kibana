@@ -12,7 +12,10 @@ import type {
   Plugin,
   PluginInitializerContext,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { Core } from './core';
 import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
 import type { Context as RpcContext } from './rpc';
@@ -25,6 +28,10 @@ import { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
 import { SearchIndex } from './search_index';
 import { SearchIndexClientFactory } from './search_index/search_index_client_factory';
+
+interface ContentManagementPluginStartDependencies {
+  security?: SecurityPluginStart;
+}
 
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
@@ -65,7 +72,7 @@ export class ContentManagementPlugin
     });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<ContentManagementPluginStartDependencies>) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
     }
@@ -76,6 +83,20 @@ export class ContentManagementPlugin
 
     const { api: coreApi, contentRegistry } = this.core.setup();
 
+    let getCurrentUser: ((req: KibanaRequest) => Promise<AuthenticatedUser | null>) | undefined;
+
+    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
+      if (security.found) {
+        getCurrentUser = async (req: KibanaRequest): Promise<AuthenticatedUser | null> => {
+          return await security.contract.authc.getCurrentUser(req);
+        };
+      } else {
+        this.logger.warn(
+          'Security plugin is not enabled, content management will not be able to store owner information.'
+        );
+      }
+    });
+
     const rpc = new RpcService<RpcContext>();
     registerProcedures(rpc);
 
@@ -83,6 +104,12 @@ export class ContentManagementPlugin
     initRpcRoutes(procedureNames, router, {
       rpc,
       contentRegistry,
+      auth: {
+        getCurrentUser: async (req) => {
+          if (!getCurrentUser) return null;
+          return getCurrentUser(req);
+        },
+      },
     });
 
     return {
@@ -90,13 +117,12 @@ export class ContentManagementPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: ContentManagementPluginStartDependencies) {
     if (this.#eventStream) {
       this.#eventStream.start();
     }
 
     if (this.#searchIndex) {
-      console.log('Starting search index');
       this.#searchIndex.start();
     }
 

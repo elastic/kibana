@@ -7,12 +7,15 @@
  */
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Version } from '@kbn/object-versioning';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import type { ContentRegistry, StorageContextGetTransformFn } from '../core';
 import type { MSearchService } from '../core/msearch';
 
 export interface Context {
   contentRegistry: ContentRegistry;
   requestHandlerContext: RequestHandlerContext;
+  currentUser: AuthenticatedUser | null;
   getTransformsFactory: (
     contentTypeId: string,
     requestVersion: Version,
