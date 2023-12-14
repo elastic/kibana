@@ -207,7 +207,9 @@ const getUserFriendlyTitle = (modelId: string, modelType: string) => {
   return MODEL_TITLES_BY_TYPE[modelType] !== undefined
     ? MODEL_TITLES_BY_TYPE[modelType]!
     : modelId === LANG_IDENT_MODEL_ID
-    ? 'Language Identification'
+    ? i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
+    defaultMessage: 'Language Identification',
+  })
     : modelId;
 };
 
