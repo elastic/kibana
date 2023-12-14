@@ -80,6 +80,7 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
             cspContext.soClient,
             requestBody
           );
+
           return response.ok({ body: cspBenchmarkRules });
         } catch (err) {
           const error = transformError(err);

@@ -25,7 +25,7 @@ import { useSecuritySolutionContext } from '../../application/security_solution_
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
-import { PageUrlParams } from '../../../common/types/latest';
+import { BenchmarksCisId, PageUrlParams } from '../../../common/types/latest';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { euiTheme } = useEuiTheme();
@@ -61,7 +61,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
                     title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
                       defaultMessage: '{integrationName} - Rules',
                       values: {
-                        integrationName: getBenchmarkCisName(params.benchmarkId),
+                        integrationName: getBenchmarkCisName(params.benchmarkId as BenchmarksCisId),
                       },
                     })}
                   />

@@ -106,4 +106,5 @@ export interface BenchmarkRuleSelectParams {
   section?: string;
   ruleNumber?: string;
 }
+
 export type PageUrlParams = Record<'benchmarkId' | 'benchmarkVersion', BenchmarksCisId | string>;
