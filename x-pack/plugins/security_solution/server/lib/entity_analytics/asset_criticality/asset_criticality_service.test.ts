@@ -7,6 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
+import type { ExperimentalFeatures } from '../../../../common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { assetCriticalityDataClientMock } from './asset_criticality_data_client.mock';
@@ -44,7 +45,7 @@ describe('AssetCriticalityService', () => {
       });
       service = assetCriticalityServiceFactory({
         assetCriticalityDataClient: mockAssetCriticalityDataClient,
-        experimentalFeatures: {},
+        experimentalFeatures: {} as ExperimentalFeatures,
       });
     });
 
