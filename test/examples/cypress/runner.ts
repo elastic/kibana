@@ -26,7 +26,7 @@ const ExamplePluginsCypressTestConfig = async (
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:' + command], // use a "script" entry from the test project's package.json
+      args: ['cypress:' + command], // references a yarn script in the nearest package.json
       cwd: resolve(__dirname),
       env: {
         ...process.env,
