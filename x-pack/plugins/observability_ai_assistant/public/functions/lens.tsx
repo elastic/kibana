@@ -4,12 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import { type LensChartLoadEvent } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useState } from 'react';
+import type {
+  LensEmbeddableInput,
+  LensPublicStart,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import React, { useState, useCallback, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { Assign } from 'utility-types';
 import type { LensFunctionArguments } from '../../common/functions/lens';
@@ -38,6 +50,7 @@ function Lens({
   start,
   end,
   lens,
+  uiActions,
   dataViews,
   timeField,
 }: {
@@ -46,6 +59,7 @@ function Lens({
   start: string;
   end: string;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
   dataViews: DataViewsServicePublic;
   timeField: string;
 }) {
@@ -61,26 +75,75 @@ function Lens({
   }, [indexPattern]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(undefined);
+  const [lensLoadEvent, setLensLoadEvent] = useState<LensChartLoadEvent | null>(null);
+
+  const onLoad = useCallback(
+    (
+      isLoading: boolean,
+      adapters: LensChartLoadEvent['adapters'] | undefined,
+      lensEmbeddableOutput$?: LensChartLoadEvent['embeddableOutput$'],
+      lensEmbeddable?: LensChartLoadEvent['embeddable']
+    ) => {
+      const adapterTables = adapters?.tables?.tables;
+      if (adapterTables && !isLoading) {
+        setLensLoadEvent({
+          adapters,
+          embeddableOutput$: lensEmbeddableOutput$,
+          embeddable: lensEmbeddable,
+        });
+      }
+    },
+    []
+  );
+
+  // initialization
+  useEffect(() => {
+    if (formulaAsync.value && dataViewAsync.value && !lensInput) {
+      const attributes = new LensAttributesBuilder({
+        visualization: new XYChart({
+          layers: [xyDataLayer],
+          formulaAPI: formulaAsync.value.formula,
+          dataView: dataViewAsync.value,
+        }),
+      }).build();
+
+      const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
+        id: indexPattern,
+        attributes,
+        timeRange: {
+          from: start,
+          to: end,
+          mode: 'relative' as const,
+        },
+      };
+      setLensInput(lensEmbeddableInput);
+    }
+  }, [dataViewAsync.value, end, formulaAsync.value, indexPattern, lensInput, start, xyDataLayer]);
 
   if (!formulaAsync.value || !dataViewAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
-  const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
-      dataView: dataViewAsync.value,
-    }),
-  }).build();
-
-  const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
-    id: indexPattern,
-    attributes,
-    timeRange: {
-      from: start,
-      to: end,
-      mode: 'relative' as const,
+  const triggerOptions = {
+    ...lensInput,
+    lensEvent: lensLoadEvent,
+    onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
+      if (lensInput) {
+        const newInput = {
+          ...lensInput,
+          attributes: newAttributes,
+        };
+        setLensInput(newInput);
+      }
+    },
+    onApply: (newAttributes: TypedLensByValueInput['attributes']) => {
+      // const newInput = {
+      //   ...lensInput,
+      //   attributes: newAttributes,
+      // };
+      // ToDo: Run onApply to save the configuration on the convo
+      // onActionClick({ type: ChatActionClickType.updateVisualization, newInput, query });
     },
   };
 
@@ -90,45 +153,62 @@ function Lens({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="observabilityAiAssistantLensOpenInLensButton"
-                iconType="lensApp"
-                onClick={() => {
-                  lens.navigateToPrefilledEditor(lensEmbeddableInput);
-                }}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.openInLens', {
-                  defaultMessage: 'Open in Lens',
+              <EuiToolTip
+                content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
+                  defaultMessage: 'Edit visualization',
                 })}
-              </EuiButton>
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  data-test-subj="observabilityAiAssistantLensOpenInLensButton"
+                  iconType="pencil"
+                  onClick={() => uiActions.getTrigger('IN_APP_EDIT_TRIGGER').exec(triggerOptions)}
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistant.lensESQLFunction.edit',
+                    {
+                      defaultMessage: 'Edit visualization',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="observabilityAiAssistantLensSaveButton"
-                iconType="save"
-                onClick={() => {
-                  setIsSaveModalOpen(() => true);
-                }}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.lensFunction.save', {
-                  defaultMessage: 'Save',
+              <EuiToolTip
+                content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.save', {
+                  defaultMessage: 'Save visualization',
                 })}
-              </EuiButton>
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="save"
+                  onClick={() => setIsSaveModalOpen(true)}
+                  data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistant.lensESQLFunction.save',
+                    {
+                      defaultMessage: 'Save visualization',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <lens.EmbeddableComponent
-            {...lensEmbeddableInput}
-            style={{
-              height: 240,
-            }}
-          />
+          {lensInput && (
+            <lens.EmbeddableComponent
+              {...lensInput}
+              style={{
+                height: 240,
+              }}
+              onLoad={onLoad}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
-          initialInput={lensEmbeddableInput}
+          initialInput={lensInput}
           onClose={() => {
             setIsSaveModalOpen(() => false);
           }}
@@ -180,6 +260,7 @@ export function registerLensRenderFunction({
           start={start}
           end={end}
           lens={pluginsStart.lens}
+          uiActions={pluginsStart.uiActions}
           dataViews={pluginsStart.dataViews}
           timeField={timeField}
         />
