@@ -551,6 +551,6 @@ export const openTimelineFromOpenTimelineModal = (timelineName: string) => {
 
 export const showDataProviderQueryBuilder = () => {
   cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'false');
-  cy.get(TOGGLE_DATA_PROVIDER_BTN).trigger('click');
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
   cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'true');
 };
