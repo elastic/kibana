@@ -47,10 +47,6 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
         login();
       });
 
-      after(() => {
-        cy.task('esArchiverUnload', 'threat_indicator');
-      });
-
       it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {
         visit(
           `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`

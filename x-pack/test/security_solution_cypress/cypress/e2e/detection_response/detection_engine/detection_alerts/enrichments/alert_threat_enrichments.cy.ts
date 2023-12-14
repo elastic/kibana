@@ -37,9 +37,6 @@ describe(
       // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
-      login();
-
-      disableExpandableFlyout();
     });
 
     after(() => {
@@ -48,10 +45,11 @@ describe(
     });
 
     beforeEach(() => {
-      login();
+      disableExpandableFlyout();
       createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
         (rule) => visitRuleDetailsPage(rule.body.id)
       );
+      login();
     });
 
     // TODO: https://github.com/elastic/kibana/issues/161539

@@ -53,9 +53,6 @@ describe.skip('Use Value list in exception entry', { tags: ['@ess', '@serverless
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-  });
   beforeEach(() => {
     login();
     deleteValueLists([KNOWN_VALUE_LIST_FILES.TEXT]);

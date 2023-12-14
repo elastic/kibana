@@ -10,6 +10,7 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
+import { deleteTimelines } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 
@@ -97,17 +98,14 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServer
     });
   });
   describe('Alerts checkbox', () => {
-    before(() => {
-      login();
+    beforeEach(() => {
+      deleteTimelines();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
-    });
-
-    beforeEach(() => {
       login();
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();

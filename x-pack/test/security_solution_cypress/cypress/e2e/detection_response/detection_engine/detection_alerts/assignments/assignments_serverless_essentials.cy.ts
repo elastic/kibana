@@ -37,14 +37,6 @@ describe.skip(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-
-      // Login into accounts so that they got activated and visible in user profiles list
-      login(ROLES.t1_analyst);
-      login(ROLES.t2_analyst);
-      login(ROLES.t3_analyst);
-      login(ROLES.soc_manager);
-      login(ROLES.detections_admin);
-      login(ROLES.platform_engineer);
     });
 
     after(() => {
@@ -52,9 +44,16 @@ describe.skip(
     });
 
     beforeEach(() => {
-      loadPageAs(ALERTS_URL);
+      // Login into accounts so that they got activated and visible in user profiles list
+      login(ROLES.t1_analyst);
+      login(ROLES.t2_analyst);
+      login(ROLES.t3_analyst);
+      login(ROLES.soc_manager);
+      login(ROLES.detections_admin);
+      login(ROLES.platform_engineer);
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
+      loadPageAs(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 

@@ -26,18 +26,16 @@ import {
   resetSourcerer,
   saveSourcerer,
 } from '../../../../tasks/sourcerer';
-import { postDataView } from '../../../../tasks/api_calls/common';
+import { deleteDataView, postDataView } from '../../../../tasks/api_calls/common';
 import { SOURCERER } from '../../../../screens/sourcerer';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    dataViews.forEach((dataView: string) => postDataView(dataView));
-  });
-
   beforeEach(() => {
+    dataViews.forEach((dataView: string) => deleteDataView(dataView));
+    dataViews.forEach((dataView: string) => postDataView(dataView));
     cy.clearLocalStorage();
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

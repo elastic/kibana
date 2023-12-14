@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { startBasicLicense } from '../../../../../tasks/api_calls/licensing';
 import { login } from '../../../../../tasks/login';
 import { getNewRule } from '../../../../../objects/rule';
 import { expandFirstAlert } from '../../../../../tasks/alerts';
@@ -21,31 +22,14 @@ import {
 describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-    login();
-    cy.request({
-      method: 'POST',
-      url: '/api/license/start_basic?acknowledge=true',
-      headers: {
-        'kbn-xsrf': 'cypress-creds',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-    }).then(({ body }) => {
-      cy.log(`body: ${JSON.stringify(body)}`);
-      expect(body).contains({
-        acknowledged: true,
-        basic_was_started: true,
-      });
-    });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   beforeEach(() => {
-    loadPageAs(ALERTS_URL);
+    login();
     deleteAlertsAndRules();
     createRule(getNewRule({ rule_id: 'new custom rule' }));
+    startBasicLicense();
+    loadPageAs(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

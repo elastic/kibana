@@ -71,10 +71,6 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     });
 
-    after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
-    });
-
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

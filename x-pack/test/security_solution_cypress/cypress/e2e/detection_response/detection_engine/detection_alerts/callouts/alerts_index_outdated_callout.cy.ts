@@ -37,7 +37,7 @@ describe(
   'Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set',
   { tags: ['@ess', '@skipInServerless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.
       // Otherwise the app will be disabled and show a "welcome"-like page.
       login();

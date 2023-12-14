@@ -23,14 +23,10 @@ describe('Alert user assignment - ESS', { tags: ['@ess'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
-  });
-
   beforeEach(() => {
-    loadPageAs(ALERTS_URL);
     deleteAlertsAndRules();
     createRule(getNewRule({ rule_id: 'new custom rule' }));
+    loadPageAs(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

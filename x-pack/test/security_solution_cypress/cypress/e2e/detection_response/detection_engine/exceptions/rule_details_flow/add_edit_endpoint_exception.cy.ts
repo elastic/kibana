@@ -60,10 +60,6 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
-  });
-
   beforeEach(() => {
     deleteExceptionLists();
     deleteEndpointExceptionList();

@@ -7,6 +7,10 @@
 
 import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  deleteAlertsAndRules,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/common';
+import {
   expectedExportedExceptionList,
   getExceptionList,
 } from '../../../../../../objects/exception';
@@ -56,7 +60,9 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     describe('Create/Export/Delete List', () => {
-      before(() => {
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        deleteExceptionLists();
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule
@@ -79,9 +85,6 @@ describe(
         createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) => {
           exceptionListResponse = response;
         });
-      });
-
-      beforeEach(() => {
         login();
         visit(EXCEPTIONS_URL);
         waitForExceptionsTableToBeLoaded();

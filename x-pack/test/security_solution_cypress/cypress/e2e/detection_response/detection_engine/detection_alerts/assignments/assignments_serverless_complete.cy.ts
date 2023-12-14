@@ -37,7 +37,9 @@ describe.skip(
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+    });
 
+    beforeEach(() => {
       // Login into accounts so that they got activated and visible in user profiles list
       login(ROLES.t1_analyst);
       login(ROLES.t2_analyst);
@@ -45,13 +47,6 @@ describe.skip(
       login(ROLES.soc_manager);
       login(ROLES.detections_admin);
       login(ROLES.platform_engineer);
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_multiple');
-    });
-
-    beforeEach(() => {
       loadPageAs(ALERTS_URL);
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
