@@ -530,9 +530,9 @@ describe('<TemplateCreate />', () => {
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         dataStream: {},
         // lifecycle: {
-          // enabled: true,
-          // value: 1,
-          // unit: 'd',
+        // enabled: true,
+        // value: 1,
+        // unit: 'd',
         // },
         allowAutoCreate: true,
       });
