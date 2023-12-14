@@ -66,6 +66,10 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   const location = useLocation();
   const dataViewId = useDataViewId();
 
+  if (!dataViewId) {
+    return null;
+  }
+
   const href = getDiscoverHref({
     basePath: core.http.basePath,
     query,

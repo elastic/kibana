@@ -11,15 +11,15 @@ import { getDataViewId } from '../../common/data_view_constants';
 import { ApmPluginStartDeps } from '../plugin';
 
 export function useDataViewId() {
-  const [dataViewId, setDataViewId] = useState<string>(
-    getDataViewId('default')
-  );
+  const [dataViewId, setDataViewId] = useState<string | undefined>();
   const { spaces } = useKibana<ApmPluginStartDeps>().services;
 
   useEffect(() => {
     const fetchSpaceId = async () => {
       const space = await spaces?.getActiveSpace();
-      setDataViewId(getDataViewId(space?.id ?? 'default'));
+      if (space?.id) {
+        setDataViewId(getDataViewId(space?.id));
+      }
     };
 
     fetchSpaceId();
