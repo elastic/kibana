@@ -8,10 +8,8 @@
 import React from 'react';
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   EuiTextColor,
   EuiTextTruncate,
@@ -19,7 +17,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
+import { LicenseBadge } from './license_badge';
 
 import { MlModel } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
@@ -29,42 +27,12 @@ export type ModelSelectOptionProps = MlModel & {
   checked?: 'on';
 };
 
-export interface LicenseBadgeProps {
-  licenseType: string;
-  modelDetailsPageUrl?: string;
-}
-
-export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, modelDetailsPageUrl }) => {
-  const licenseLabel = i18n.translate(
-    'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
-    {
-      defaultMessage: 'License: {licenseType}',
-      values: {
-        licenseType,
-      },
-    }
-  );
-
-  return (
-    <EuiBadge color="hollow">
-      {modelDetailsPageUrl ? (
-        <EuiLink target="_blank" href={modelDetailsPageUrl}>
-          {licenseLabel}
-        </EuiLink>
-      ) : (
-        <p>{licenseLabel}</p>
-      )}
-    </EuiBadge>
-  );
-};
-
 export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
   modelId,
   title,
   description,
   isPlaceholder,
   licenseType,
-  modelDetailsPageUrl,
   deploymentState,
   deploymentStateReason,
 }) => {
@@ -91,10 +59,7 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
                   <EuiFlexItem grow={false}>
                     {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
                     <div>
-                      <LicenseBadge
-                        licenseType={licenseType}
-                        modelDetailsPageUrl={modelDetailsPageUrl}
-                      />
+                      <LicenseBadge licenseType={licenseType} />
                     </div>
                   </EuiFlexItem>
                 )}

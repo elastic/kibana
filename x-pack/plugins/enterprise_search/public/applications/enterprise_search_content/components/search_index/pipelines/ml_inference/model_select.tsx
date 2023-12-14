@@ -24,8 +24,9 @@ import {
 
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
+import { LicenseBadge } from './license_badge';
 import { ModelSelectLogic } from './model_select_logic';
-import { LicenseBadge, ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
+import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
 import { i18n } from '@kbn/i18n';
 import { TrainedModelHealth } from '../ml_model_health';
@@ -62,11 +63,7 @@ export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean
   );
 };
 
-export type SelectedModelProps = {
-  model: MlModel | undefined;
-};
-
-const NoModelSelected: React.FC = () => (
+export const NoModelSelected: React.FC = () => (
   <EuiPanel
     color="subdued"
     style={{
@@ -84,34 +81,34 @@ const NoModelSelected: React.FC = () => (
   </EuiPanel>
 );
 
-const SelectedModel: React.FC<SelectedModelProps> = (props) => {
+export const SelectedModel: React.FC<MlModel> = (model) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
   const { areActionButtonsDisabled, modelNotDeployedError } = useValues(ModelSelectLogic);
 
-  return props.model ? (
+  return (
     <EuiPanel color="subdued" title="Selected model">
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4>{props.model.title}</h4>
+              <h4>{model.title}</h4>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTextColor color="subdued">{props.model.modelId}</EuiTextColor>
+            <EuiTextColor color="subdued">{model.modelId}</EuiTextColor>
           </EuiFlexItem>
-          {props.model.description && (
+          {model.description && (
             <EuiFlexItem>
-              <EuiText size="xs">{props.model.description}</EuiText>
+              <EuiText size="xs">{model.description}</EuiText>
             </EuiFlexItem>
           )}
-          {props.model.licenseType && (
+          {model.licenseType && (
             <EuiFlexItem grow={false}>
               {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
               <div>
                 <LicenseBadge
-                  licenseType={props.model.licenseType}
-                  modelDetailsPageUrl={props.model.modelDetailsPageUrl}
+                  licenseType={model.licenseType}
+                  modelDetailsPageUrl={model.modelDetailsPageUrl}
                 />
               </div>
             </EuiFlexItem>
@@ -119,17 +116,17 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
           <EuiHorizontalRule margin="xs" />
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              {props.model.isPlaceholder ? (
+              {model.isPlaceholder ? (
                 <EuiFlexItem grow={false}>
                   <DeployModelButton
-                    onClick={() => createModel(props.model!.modelId)}
+                    onClick={() => createModel(model.modelId)}
                     disabled={areActionButtonsDisabled}
                   />
                 </EuiFlexItem>
-              ) : props.model.deploymentState === MlModelDeploymentState.NotDeployed ? (
+              ) : model.deploymentState === MlModelDeploymentState.NotDeployed ? (
                 <EuiFlexItem grow={false}>
                   <StartModelButton
-                    onClick={() => startModel(props.model!.modelId)}
+                    onClick={() => startModel(model.modelId)}
                     disabled={areActionButtonsDisabled}
                   />
                 </EuiFlexItem>
@@ -140,9 +137,9 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
                 {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
                 <div>
                   <TrainedModelHealth
-                    modelState={props.model.deploymentState}
-                    modelStateReason={props.model.deploymentStateReason}
-                    isDownloadable={props.model.isPlaceholder}
+                    modelState={model.deploymentState}
+                    modelStateReason={model.deploymentStateReason}
+                    isDownloadable={model.isPlaceholder}
                   />
                 </div>
               </EuiFlexItem>
@@ -160,8 +157,6 @@ const SelectedModel: React.FC<SelectedModelProps> = (props) => {
         </EuiFlexGroup>
       </EuiPanel>
     </EuiPanel>
-  ) : (
-    <NoModelSelected />
   );
 };
 
@@ -213,7 +208,7 @@ export const ModelSelect: React.FC = () => {
             rowHeight: useIsWithinMaxBreakpoint('s') ? 128 : 96,
             onFocusBadge: false,
           }}
-          height={360}
+          height={384}
           onChange={onChange}
           renderOption={renderOption}
           isLoading={isLoading}
@@ -228,7 +223,7 @@ export const ModelSelect: React.FC = () => {
         </EuiSelectable>
       </EuiFlexItem>
       <EuiFlexItem>
-        <SelectedModel model={selectedModel} />
+        {selectedModel ? <SelectedModel {...selectedModel} /> : <NoModelSelected />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
