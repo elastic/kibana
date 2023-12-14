@@ -42,6 +42,12 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       login();
+
+      cy.on('uncaught:exception', (err) => {
+        if (err.message.includes('ResizeObserver loop limit exceeded')) {
+          return false;
+        }
+      });
     });
 
     it('creates an ES|QL rule', function () {
