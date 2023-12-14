@@ -35,6 +35,8 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/deeplinks-analytics",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
