@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
   ]);
 
-  describe('Header menu', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173165
+  describe.skip('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
@@ -50,7 +51,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Discover fallback link', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogExplorer.navigateTo({
+          pageState: {
+            // avoid aligning with the test data, because that's what Discover
+            // does later in this test and we wouldn't be able to check the time
+            // range state transfer
+            time: {
+              from: '2023-08-03T00:00:00.000Z',
+              to: '2023-08-03T12:00:00.000Z',
+              mode: 'absolute',
+            },
+          },
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
@@ -95,7 +107,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Discover tabs', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogExplorer.navigateTo({
+          pageState: {
+            // avoid aligning with the test data, because that's what Discover
+            // does later in this test and we wouldn't be able to check the time
+            // range state transfer
+            time: {
+              from: '2023-08-03T00:00:00.000Z',
+              to: '2023-08-03T12:00:00.000Z',
+              mode: 'absolute',
+            },
+          },
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 

@@ -67,8 +67,6 @@ const ROLES = [
   },
 ];
 
-const FORBIDDEN_STATUS_CDOE = 403;
-
 const ALL_ROLE_NAMES = ROLES.map((role) => role.name);
 
 const allRolesExcept = (role: string) => ALL_ROLE_NAMES.filter((r) => r !== role);
@@ -206,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
             username: 'no_cluster_manage_index_templates',
             password: USER_PASSWORD,
           },
-          FORBIDDEN_STATUS_CDOE
+          403
         );
       });
     });
@@ -218,7 +216,7 @@ export default ({ getService }: FtrProviderContext) => {
             username: 'no_cluster_manage_index_templates',
             password: USER_PASSWORD,
           },
-          FORBIDDEN_STATUS_CDOE
+          403
         );
       });
     });
@@ -230,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
             username: 'no_cluster_manage_index_templates',
             password: USER_PASSWORD,
           },
-          FORBIDDEN_STATUS_CDOE
+          403
         );
       });
     });

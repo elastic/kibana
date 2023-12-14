@@ -104,7 +104,6 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     charts: {
       theme: {
-        useChartsTheme: () => ({} as Theme),
         useChartsBaseTheme: () => ({} as Theme),
       },
     },
