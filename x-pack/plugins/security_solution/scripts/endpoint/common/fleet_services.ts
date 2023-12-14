@@ -250,7 +250,9 @@ export const waitForHostToEnroll = async (
   while (!metadataFound && !hasTimedOutMetadataLookup()) {
     metadataFound = await retryOnError(
       async () =>
-        fetchEndpointMetadataList(kbnClient).then((response) => {
+        fetchEndpointMetadataList(kbnClient, {
+          kuery: `united.endpoint.agent.id:  "${agentId}" or united.endpoint.host.hostname: "${hostname}"`,
+        }).then((response) => {
           return response.data.filter(
             (record) =>
               record.metadata.host.hostname === hostname && record.host_status === 'healthy'
@@ -717,7 +719,7 @@ interface EnrollHostVmWithFleetOptions {
 /**
  * Installs the Elastic agent on the provided Host VM and enrolls with it Fleet.
  *
- * NOTE: this method assumes that FLeet-Server is already setup and running.
+ * NOTE: this method assumes that Fleet-Server is already setup and running.
  *
  * @param hostVm
  * @param kbnClient
