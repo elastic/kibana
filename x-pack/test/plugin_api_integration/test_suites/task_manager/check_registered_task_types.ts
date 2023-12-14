@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
-        'SLO:SUMMARIES-CLEANUP-TASK',
+        'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
