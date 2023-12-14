@@ -30,6 +30,7 @@ import {
 export interface GroupedFieldsParams<T extends FieldListItem> {
   dataViewId: string | null; // `null` is for text-based queries
   allFields: T[] | null; // `null` is for loading indicator
+  allFieldsWithValues?: string[];
   services: {
     dataViews: DataViewsContract;
     core: Pick<CoreStart, 'docLinks'>;
@@ -60,6 +61,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
   dataViewId,
   allFields,
+  allFieldsWithValues,
   services,
   isAffectedByGlobalFilter = false,
   popularFieldsLimit,
@@ -76,6 +78,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     services,
     getCustomFieldType,
     onSupportedFieldFilter,
+    allFieldsWithValues,
   });
   const allFieldsToReturn = useRef(allFields);
   const hasNewFields = useRef(false);

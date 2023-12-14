@@ -27,6 +27,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,6 +67,8 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
   selectedFieldTypes: FieldTypeKnown[];
   onSupportedFieldFilter?: (field: T) => boolean;
   onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
+  onChangeDocSampleFilter: (value: boolean) => unknown;
+  docSampleFilter: boolean;
 }
 
 /**
@@ -87,6 +90,8 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   selectedFieldTypes,
   onSupportedFieldFilter,
   onChange,
+  onChangeDocSampleFilter,
+  docSampleFilter,
 }: FieldTypeFilterProps<T>) {
   const testSubj = `${dataTestSubject}FieldTypeFilter`;
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -254,6 +259,15 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
         <EuiPopoverFooter>
           <EuiPanel color="transparent" paddingSize="m">
             <EuiText size="s">
+              <p>
+                <EuiSwitch
+                  label={i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
+                    defaultMessage: 'Use document sample',
+                  })}
+                  checked={docSampleFilter}
+                  onChange={(e) => onChangeDocSampleFilter(e.target.checked)}
+                />
+              </p>
               <p>
                 {i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
                   defaultMessage: 'Learn more about',

@@ -386,6 +386,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}
       allFields={sidebarState.allFields}
+      allFieldsWithValues={Object.keys(sidebarState.fieldCounts ?? {})}
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
       fullWidth

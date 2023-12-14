@@ -53,7 +53,10 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * All fields: fields from data view and unmapped fields or columns from text-based search
    */
   allFields: DataViewField[] | null;
-
+  /**
+   * Name of fields that have values in the sample documents
+   */
+  allFieldsWithValues?: string[];
   /**
    * Whether to render the field list or not (we don't show it unless documents are loaded)
    */
@@ -146,6 +149,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   buttonAddFieldVariant,
   isSidebarCollapsed,
   allFields,
+                                                                                           allFieldsWithValues,
   dataView,
   trackUiMetric,
   showFieldList = true,
@@ -214,6 +218,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   } = useGroupedFields<DataViewField>({
     dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
     allFields,
+    allFieldsWithValues,
     popularFieldsLimit:
       searchMode !== 'documents' || stateService.creationOptions.disablePopularFields
         ? 0

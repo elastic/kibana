@@ -21,6 +21,7 @@ const htmlId = htmlIdGenerator('fieldList');
  */
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
+  allFieldsWithValues: string[];
   getCustomFieldType?: GetCustomFieldType<T>;
   onSupportedFieldFilter?: (field: T) => boolean;
   services: {
@@ -47,11 +48,13 @@ export interface FieldFiltersResult<T extends FieldListItem> {
  */
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
   allFields,
+  allFieldsWithValues,
   getCustomFieldType,
   onSupportedFieldFilter,
   services,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
+  const [docSampleFilter, setDocSampleFilter] = useState<boolean>(false);
   const [nameFilter, setNameFilter] = useState<string>('');
   const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
@@ -70,15 +73,20 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         nameFilter,
         onChangeNameFilter: setNameFilter,
         screenReaderDescriptionId,
+        docSampleFilter,
+        onChangeDocSampleFilter: setDocSampleFilter,
       },
       onFilterField:
-        fieldSearchHighlight?.length || selectedFieldTypes.length > 0
+        fieldSearchHighlight?.length || selectedFieldTypes.length > 0 || docSampleFilter
           ? (field: T) => {
               if (fieldSearchHighlight && !fieldNameWildcardMatcher(field, fieldSearchHighlight)) {
                 return false;
               }
               if (selectedFieldTypes.length > 0) {
                 return selectedFieldTypes.includes(getFieldIconType(field, getCustomFieldType));
+              }
+              if (docSampleFilter) {
+                return allFieldsWithValues.includes(field.name);
               }
               return true;
             }
@@ -94,5 +102,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     nameFilter,
     setNameFilter,
     screenReaderDescriptionId,
+    docSampleFilter,
+    allFieldsWithValues,
   ]);
 }
