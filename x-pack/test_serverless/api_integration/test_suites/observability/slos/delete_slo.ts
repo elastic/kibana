@@ -12,7 +12,10 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOSummaryPipelineId,
 } from '@kbn/observability-plugin/common/slo/constants';
+import { ElasticsearchClient } from '@kbn/core/server';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -25,6 +28,21 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const dataViewApi = getService('dataViewApi');
 
+  const fetchSloSummaryPipeline = async (
+    client: ElasticsearchClient,
+    sloId: string,
+    sloRevision: number
+  ) => {
+    try {
+      return await esClient.ingest.getPipeline({
+        id: getSLOSummaryPipelineId(sloId, sloRevision),
+      });
+    } catch (error) {
+      // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If there are no SLO
+      // pipelines then return an empty record of pipelines
+      return {};
+    }
+  };
   describe('delete_slo', () => {
     let infraDataIndex: string;
     const sloId = 'my-custom-id1';
@@ -100,16 +118,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('deletes the ingest pipeline', async () => {
-        const response = await sloApi.waitForSloToBeDeleted(sloId);
+        const sloRevision = 1;
+        const pipelineResponse = await fetchSloSummaryPipeline(esClient, sloId, sloRevision);
+        const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+        expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
+        await sloApi.waitForSloToBeDeleted(sloId);
+        const pipelineResponseAfterDelete = await fetchSloSummaryPipeline(
+          esClient,
+          sloId,
+          sloRevision
+        );
+        expect(Object.keys(pipelineResponseAfterDelete).length).to.be(0);
       });
 
       it('deletes the rollup and summary data', async () => {
         const response = await sloApi.waitForSloToBeDeleted(sloId);
       });
-
-      it('deletes the associated rules', async () => {
-        const response = await sloApi.waitForSloToBeDeleted(sloId);
-      });
+      // TODO
+      it('deletes the associated rules', async () => {});
     });
   });
 }
