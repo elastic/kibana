@@ -54,6 +54,8 @@ export const executeUserDefinedCode = async ({
           if (err) {
             return reject(stderrResult ? new Error(stderrResult) : err);
           }
+          memoryUsageSamples.sort((a, b) => a - b);
+          cpuUsageSamples.sort((a, b) => a - b);
           resolve({
             stdout: stdoutResult,
             stderr: stderrResult,
@@ -73,14 +75,16 @@ export const executeUserDefinedCode = async ({
       );
       childProcess.stdin?.write(wrappedCode);
       childProcess.stdin?.end();
-      intervalId = setInterval(() => {
+      function collectStats() {
         pidusage(childProcess.pid!, (err, stats) => {
           if (!err) {
             cpuUsageSamples.push(stats.cpu);
             memoryUsageSamples.push(stats.memory);
           }
         });
-      }, 1);
+      }
+      intervalId = setInterval(collectStats, 100);
+      collectStats();
     });
 
     if (stderr) {
@@ -105,8 +109,7 @@ async function wrapUserDefinedCode(code: string) {
   );
 }
 
-function calculatePercentile(array: number[], percentile: number) {
-  const sortedArray = array.slice().sort();
+function calculatePercentile(sortedArray: number[], percentile: number) {
   const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
   return sortedArray[index];
 }

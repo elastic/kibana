@@ -1,0 +1,6 @@
+const memoryHog: number[][] = [];
+
+// Allocate and retain objects in memory
+for (let i = 0; i < 100; i++) {
+  memoryHog.push(new Array(1024 * 1024).fill(1));
+}
