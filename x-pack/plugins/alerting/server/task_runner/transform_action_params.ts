@@ -41,6 +41,7 @@ export interface TransformActionParamsOptions {
   flapping: boolean;
   aadAlert?: AADAlert;
   alertTransform?: string;
+  apiKey?: string | null;
 }
 
 interface SummarizedAlertsWithAll {
@@ -85,6 +86,7 @@ export async function transformActionParams({
   flapping,
   aadAlert,
   alertTransform,
+  apiKey,
 }: TransformActionParamsOptions): Promise<RuleActionParams> {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -131,6 +133,7 @@ export async function transformActionParams({
         env: {
           PATH: process.env.PATH,
           ACTION_CONTEXT: JSON.stringify(variables),
+          ELASTICSEARCH_API_KEY: apiKey,
         },
       });
 

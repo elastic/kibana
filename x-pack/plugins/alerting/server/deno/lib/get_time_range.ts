@@ -7,13 +7,13 @@
 
 import { parseDuration } from '../../../common/parse_duration.ts';
 
-if (!Deno.env.get('QUERY_DELAY_MS')) {
-  throw new Error('QUERY_DELAY_MS not set');
-}
-
-const delay = Number.parseInt(Deno.env.get('QUERY_DELAY_MS'), 10);
-
 export function getTimeRange(window?: string): { dateStart: string; dateEnd: string } {
+  if (!Deno.env.get('QUERY_DELAY_MS')) {
+    throw new Error('QUERY_DELAY_MS not set');
+  }
+
+  const delay = Number.parseInt(Deno.env.get('QUERY_DELAY_MS'), 10);
+
   let timeWindow: number = 0;
   if (window) {
     try {

@@ -11,6 +11,9 @@ import { getContext, addToContext } from './lib/get_context.ts';
       throw new Error('PATH not set');
     }
     // INJECT CODE HERE
+    if (typeof run === 'function') {
+      await run({ esClient, alertsClient, getTimeRange });
+    }
   } catch (e) {
     console.error('Uncaught exception', e);
     process.exit(1);

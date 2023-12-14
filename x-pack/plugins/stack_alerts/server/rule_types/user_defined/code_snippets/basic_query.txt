@@ -1,22 +1,24 @@
-const result = await esClient.search({
-  index: '.kibana_task_manager',
-  query: {
-      match_all: {}
-  },
-  size: 1000,
-});
+async function run({ esClient, alertsClient, getTimeRange }) {
+  const result = await esClient.search({
+    index: '.kibana_task_manager',
+    query: {
+        match_all: {}
+    },
+    size: 1000,
+  });
 
-const docs = result.hits.hits;
-const taskTypeMap: Record<string, unknown> = {};
+  const docs = result.hits.hits;
+  const taskTypeMap: Record<string, unknown> = {};
 
-for (const doc of docs) {
-  if (!taskTypeMap[doc._source.task.taskType]) {
-      taskTypeMap[doc._source.task.taskType] = 1;
-  } else {
-      taskTypeMap[doc._source.task.taskType]++;
+  for (const doc of docs) {
+    if (!taskTypeMap[doc._source.task.taskType]) {
+        taskTypeMap[doc._source.task.taskType] = 1;
+    } else {
+        taskTypeMap[doc._source.task.taskType]++;
+    }
   }
-}
 
-for (const key of Object.keys(taskTypeMap)) {
-  alertsClient.report({ id: key, count: taskTypeMap[key] });
+  for (const key of Object.keys(taskTypeMap)) {
+    alertsClient.report({ id: key, payload: { 'kibana.alert.evaluation.value': taskTypeMap[key] } });
+  }
 }

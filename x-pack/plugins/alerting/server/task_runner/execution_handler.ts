@@ -316,6 +316,7 @@ export class ExecutionHandler<
             flapping: executableAlert.getFlapping(),
             ruleUrl: ruleUrl?.absoluteUrl,
             alertTransform,
+            apiKey: this.apiKey,
           };
 
           if (executableAlert.isAlertAsData()) {
