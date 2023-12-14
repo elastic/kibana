@@ -73,7 +73,7 @@ export async function executor(
       const cpuUsageSamples: number[] = [];
       const start = Date.now();
       const childProcess = ChildProcess.exec(
-        `cat <<'EOF' | deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt - \n${wrappedCode}\nEOF`,
+        `deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt -`,
         {
           cwd: __dirname,
           signal: controller.signal,
@@ -109,6 +109,8 @@ export async function executor(
           });
         }
       );
+      childProcess.stdin?.write(wrappedCode);
+      childProcess.stdin?.end();
       intervalId = setInterval(() => {
         pidusage(childProcess.pid!, (err, stats) => {
           if (!err) {
