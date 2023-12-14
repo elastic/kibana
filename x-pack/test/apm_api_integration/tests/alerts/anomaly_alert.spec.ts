@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
@@ -86,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               windowSize: 5,
               windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
-              anomalyDetectorTypes: ['txLatency'],
+              anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });
@@ -97,6 +98,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             logger,
           });
           expect(ruleStatus).to.be('active');
+        });
+
+        it('produces an alert with the correct reason', async () => {
+          expect(alerts[0]['kibana.alert.reason']).to.be(
+            'warning latency anomaly with a score of 80, was detected in the last 5 mins for foo.'
+          );
         });
       });
     }
