@@ -64,7 +64,6 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       cy.get(LOADING_INDICATOR).should('not.exist');
       showDataProviderQueryBuilder();
       cy.get(TIMELINE_SEARCH_OR_FILTER).click();
-      cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });
 
     it('should be able to update timeline kqlMode with filter', () => {
