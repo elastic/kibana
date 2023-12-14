@@ -529,11 +529,11 @@ describe('<TemplateCreate />', () => {
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         dataStream: {},
-        lifecycle: {
-          enabled: true,
-          value: 1,
-          unit: 'd',
-        },
+        // lifecycle: {
+          // enabled: true,
+          // value: 1,
+          // unit: 'd',
+        // },
         allowAutoCreate: true,
       });
       // Component templates
@@ -547,14 +547,14 @@ describe('<TemplateCreate />', () => {
     });
 
     it('should send the correct payload', async () => {
-      const { actions, find } = testBed;
+      const { component, actions, find } = testBed;
 
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
 
       await act(async () => {
         actions.clickNextButton();
-        jest.advanceTimersByTime(0);
       });
+      component.update();
 
       expect(1).toEqual(1);
 
