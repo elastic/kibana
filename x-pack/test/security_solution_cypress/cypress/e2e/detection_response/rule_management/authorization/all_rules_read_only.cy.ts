@@ -7,6 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { getNewRule } from '../../../../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
@@ -27,11 +28,9 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  before(() => {
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: '1', enabled: false }));
     login(ROLES.t1_analyst);
     visitRulesManagementTable();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);

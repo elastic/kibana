@@ -243,12 +243,9 @@ describe.skip(
     });
 
     describe('related Integrations Advanced Setting is disabled', () => {
-      before(() => {
-        disableRelatedIntegrations();
-      });
-
-      after(() => {
+      beforeEach(() => {
         enableRelatedIntegrations();
+        disableRelatedIntegrations();
       });
 
       describe('rules management table', () => {

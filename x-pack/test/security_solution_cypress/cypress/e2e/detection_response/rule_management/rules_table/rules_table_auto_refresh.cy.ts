@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
@@ -33,16 +34,13 @@ import { getNewRule } from '../../../../objects/rule';
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
 describe('Rules table: auto-refresh', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    login();
+  beforeEach(() => {
+    deleteAlertsAndRules();
     setRulesTableAutoRefreshIntervalSetting({
       enabled: true,
       refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
     });
     createRule(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
-  });
-
-  beforeEach(() => {
     login();
   });
 

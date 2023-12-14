@@ -7,6 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -96,11 +97,9 @@ function expectDefaultRulesTableState(): void {
 }
 
 describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createTestRules();
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createTestRules();
     login();
     resetRulesTableState();
   });
@@ -199,7 +198,6 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
 
     describe('and on the rules management tab', () => {
       beforeEach(() => {
-        login();
         visit(RULES_MANAGEMENT_URL);
       });
 
@@ -253,7 +251,6 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
 
     describe('and on the rules monitoring tab', () => {
       beforeEach(() => {
-        login();
         visit(RULES_MONITORING_URL);
       });
 
@@ -268,10 +265,6 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
   });
 
   describe('upon state format upgrade', async () => {
-    beforeEach(() => {
-      login();
-    });
-
     describe('and having state in the url', () => {
       it('ignores unsupported state key', () => {
         visitRulesTableWithState({
@@ -315,7 +308,6 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
   describe('when persisted state is partially unavailable', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
-        login();
         visit(RULES_MANAGEMENT_URL);
       });
 
@@ -349,7 +341,6 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
   describe('when corrupted', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
-        login();
         visit(RULES_MANAGEMENT_URL);
       });
 
