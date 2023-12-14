@@ -18,7 +18,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { AfterKeys, IdentifierType } from '../../../../../common/entity_analytics/risk_engine';
+import {
+  type AfterKeys,
+  type IdentifierType,
+  RiskScoreEntity,
+} from '../../../../../common/entity_analytics/risk_engine';
 import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -31,7 +35,6 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine/types';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
