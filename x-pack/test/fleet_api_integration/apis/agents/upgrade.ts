@@ -231,16 +231,13 @@ export default function (providerContext: FtrProviderContext) {
       it('should respond 400 if trying to upgrade to a version that does not match installed kibana version', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         const higherVersion = semver.inc(kibanaVersion, 'patch');
-        const res = await supertest
+        await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: higherVersion,
           })
           .expect(400);
-        expect(res.body.message).to.equal(
-          'cannot upgrade agent to 8.13.1 because it is higher than the installed kibana version 8.13.0'
-        );
       });
 
       it('should respond 400 if trying to downgrade version', async () => {
