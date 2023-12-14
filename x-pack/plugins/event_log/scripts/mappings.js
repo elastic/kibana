@@ -29,6 +29,32 @@ exports.EcsCustomPropertyMappings = {
           schedule_delay: {
             type: 'long',
           },
+          cpu_usage: {
+            properties: {
+              p50: {
+                type: 'long',
+              },
+              p95: {
+                type: 'long',
+              },
+              p99: {
+                type: 'long',
+              },
+            },
+          },
+          memory_usage: {
+            properties: {
+              p50: {
+                type: 'long',
+              },
+              p95: {
+                type: 'long',
+              },
+              p99: {
+                type: 'long',
+              },
+            },
+          },
         },
       },
       // alerting specific fields

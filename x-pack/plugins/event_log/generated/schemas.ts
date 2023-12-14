@@ -108,6 +108,20 @@ export const EventSchema = schema.maybe(
             id: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            cpu_usage: schema.maybe(
+              schema.object({
+                p50: schema.number(),
+                p95: schema.number(),
+                p99: schema.number(),
+              })
+            ),
+            memory_usage: schema.maybe(
+              schema.object({
+                p50: schema.number(),
+                p95: schema.number(),
+                p99: schema.number(),
+              })
+            ),
           })
         ),
         alerting: schema.maybe(

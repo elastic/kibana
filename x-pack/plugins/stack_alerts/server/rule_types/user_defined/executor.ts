@@ -130,13 +130,6 @@ export async function executor(
 
     if (stdout) {
       logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
-      logger.info(
-        `Stats from running user defined code\nDuration:${duration}\nMemory usage:${JSON.stringify(
-          memoryUsage,
-          null,
-          2
-        )}\nCPU usage:${JSON.stringify(cpuUsage, null, 2)}`
-      );
       const alertsToCreate: string[] = getDetectedAlerts(stdout);
       let alertCount = 0;
       for (const alertStr of alertsToCreate) {

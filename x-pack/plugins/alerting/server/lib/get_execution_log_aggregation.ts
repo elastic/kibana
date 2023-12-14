@@ -30,6 +30,12 @@ const MESSAGE_FIELD = 'message';
 const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
+const TASK_MEM_P50_FIELD = 'kibana.task.memory_usage.p50';
+const TASK_MEM_P95_FIELD = 'kibana.task.memory_usage.p95';
+const TASK_MEM_P99_FIELD = 'kibana.task.memory_usage.p99';
+const TASK_CPU_P50_FIELD = 'kibana.task.cpu_usage.p50';
+const TASK_CPU_P95_FIELD = 'kibana.task.cpu_usage.p95';
+const TASK_CPU_P99_FIELD = 'kibana.task.cpu_usage.p99';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
@@ -86,6 +92,12 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeMessageAndMaintenanceWindow: estypes.AggregationsTopHitsAggregate;
     maintenanceWindowIds: estypes.AggregationsTopHitsAggregate;
+    taskMemoryP50: estypes.AggregationsMaxAggregate;
+    taskMemoryP95: estypes.AggregationsMaxAggregate;
+    taskMemoryP99: estypes.AggregationsMaxAggregate;
+    taskCpuP50: estypes.AggregationsMaxAggregate;
+    taskCpuP95: estypes.AggregationsMaxAggregate;
+    taskCpuP99: estypes.AggregationsMaxAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
@@ -131,6 +143,12 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_active_alerts: 'ruleExecution>numActiveAlerts',
   num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
   num_new_alerts: 'ruleExecution>numNewAlerts',
+  task_mem_p50: 'ruleExecution>taskMemoryP50',
+  task_mem_p95: 'ruleExecution>taskMemoryP95',
+  task_mem_p99: 'ruleExecution>taskMemoryP99',
+  task_cpu_p50: 'ruleExecution>taskCpuP50',
+  task_cpu_p95: 'ruleExecution>taskCpuP95',
+  task_cpu_p99: 'ruleExecution>taskCpuP99',
 };
 
 export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['filter']) => {
@@ -404,6 +422,36 @@ export function getExecutionLogAggregation({
                     field: DURATION_FIELD,
                   },
                 },
+                taskMemoryP50: {
+                  max: {
+                    field: TASK_MEM_P50_FIELD,
+                  },
+                },
+                taskMemoryP95: {
+                  max: {
+                    field: TASK_MEM_P95_FIELD,
+                  },
+                },
+                taskMemoryP99: {
+                  max: {
+                    field: TASK_MEM_P99_FIELD,
+                  },
+                },
+                taskCpuP50: {
+                  max: {
+                    field: TASK_CPU_P50_FIELD,
+                  },
+                },
+                taskCpuP95: {
+                  max: {
+                    field: TASK_CPU_P95_FIELD,
+                  },
+                },
+                taskCpuP99: {
+                  max: {
+                    field: TASK_CPU_P99_FIELD,
+                  },
+                },
                 outcomeMessageAndMaintenanceWindow: {
                   top_hits: {
                     size: 1,
@@ -418,6 +466,12 @@ export function getExecutionLogAggregation({
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
                         MAINTENANCE_WINDOW_IDS_FIELD,
+                        TASK_MEM_P50_FIELD,
+                        TASK_MEM_P95_FIELD,
+                        TASK_MEM_P99_FIELD,
+                        TASK_CPU_P50_FIELD,
+                        TASK_CPU_P95_FIELD,
+                        TASK_CPU_P99_FIELD,
                       ],
                     },
                   },
@@ -481,6 +535,24 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const scheduleDelayUs = bucket?.ruleExecution?.scheduleDelay?.value
     ? bucket.ruleExecution.scheduleDelay.value
     : 0;
+  const taskMemoryP50 = bucket?.ruleExecution?.taskMemoryP50?.value
+    ? bucket?.ruleExecution?.taskMemoryP50?.value
+    : 0;
+  const taskMemoryP95 = bucket?.ruleExecution?.taskMemoryP95?.value
+    ? bucket?.ruleExecution?.taskMemoryP95?.value
+    : 0;
+  const taskMemoryP99 = bucket?.ruleExecution?.taskMemoryP99?.value
+    ? bucket?.ruleExecution?.taskMemoryP99?.value
+    : 0;
+  const taskCpuP50 = bucket?.ruleExecution?.taskCpuP50?.value
+    ? bucket?.ruleExecution?.taskCpuP50?.value
+    : 0;
+  const taskCpuP95 = bucket?.ruleExecution?.taskCpuP95?.value
+    ? bucket?.ruleExecution?.taskCpuP95?.value
+    : 0;
+  const taskCpuP99 = bucket?.ruleExecution?.taskCpuP99?.value
+    ? bucket?.ruleExecution?.taskCpuP99?.value
+    : 0;
   const timedOut = (bucket?.timeoutMessage?.doc_count ?? 0) > 0;
 
   const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
@@ -535,6 +607,12 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     space_ids: spaceIds,
     rule_name: ruleName,
     maintenance_window_ids: maintenanceWindowIds,
+    task_mem_p50: taskMemoryP50,
+    task_mem_p95: taskMemoryP95,
+    task_mem_p99: taskMemoryP99,
+    task_cpu_p50: taskCpuP50,
+    task_cpu_p95: taskCpuP95,
+    task_cpu_p99: taskCpuP99,
   };
 }
 
