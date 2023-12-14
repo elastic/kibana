@@ -32,10 +32,10 @@ interface Props {
   comparisonColor?: string;
   titleHint?: string;
   hasBorder?: boolean;
-  size?: EuiTextProps['size'];
+  compressed?: boolean;
 }
 
-function Title({ title, size = 'm' }: { title: string; size?: EuiTextProps['size'] }) {
+function Title({ title, size }: { title: string; size?: EuiTextProps['size'] }) {
   return (
     <EuiText style={{ fontWeight: 'bold' }} textAlign="left" size={size}>
       {title}
@@ -48,13 +48,11 @@ function BaseValue({
   value,
   icon,
   color,
-  size = 'relative',
 }: {
   id: string;
   value: string;
   icon?: string;
   color?: string;
-  size?: EuiTextProps['size'];
 }) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -64,11 +62,9 @@ function BaseValue({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiText size={size}>
-          <EuiTextColor style={{ fontWeight: 'bold' }} color={color} data-test-subj={`${id}_value`}>
-            {value}
-          </EuiTextColor>
-        </EuiText>
+        <EuiTextColor style={{ fontWeight: 'bold' }} color={color} data-test-subj={`${id}_value`}>
+          {value}
+        </EuiTextColor>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -91,21 +87,20 @@ export function SummaryItem({
   comparisonIcon,
   titleHint,
   hasBorder = false,
-  size = 'm',
+  compressed = false,
 }: Props) {
+  const textSize = compressed ? 's' : 'm';
   return (
     <EuiPanel hasShadow={false} hasBorder={hasBorder}>
       <EuiStat
-        title={
-          <BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} size={size} />
-        }
-        titleSize="m"
+        title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
+        titleSize={textSize}
         description={
           <>
             {titleHint ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <Title title={title} size={size} />
+                  <Title title={title} size={textSize} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={titleHint}>
@@ -114,7 +109,7 @@ export function SummaryItem({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <Title title={title} size={size} />
+              <Title title={title} size={textSize} />
             )}
             <EuiSpacer />
           </>
@@ -123,7 +118,7 @@ export function SummaryItem({
         isLoading={isLoading}
       >
         {!isLoading && comparisonValue ? (
-          <EuiText color={comparisonColor} size={size}>
+          <EuiText color={comparisonColor} size={textSize}>
             {comparisonIcon ? (
               <EuiIcon
                 data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiTextProps, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
@@ -44,7 +44,7 @@ export interface Props {
   totalSeconds: number;
   rank?: number;
   showSymbolsStatus?: boolean;
-  size?: EuiTextProps['size'];
+  compressed?: boolean;
 }
 
 export function FrameInformationWindow({
@@ -57,7 +57,7 @@ export function FrameInformationWindow({
   totalSamples,
   totalSeconds,
   rank,
-  size,
+  compressed,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
@@ -139,7 +139,7 @@ export function FrameInformationWindow({
         ) : null}
         <EuiFlexItem>
           <FramesSummary
-            size={size}
+            compressed={compressed}
             hasBorder
             isLoading={false}
             baseValue={{

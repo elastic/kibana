@@ -322,7 +322,7 @@ export function DifferentialTopNFunctionsGrid({
       />
       {rowsInformation && (
         <FrameInformationTooltip
-          size="m"
+          compressed
           comparisonRank={rowsInformation.comparisonRow?.rank}
           comparisonFrame={
             rowsInformation.comparisonRow

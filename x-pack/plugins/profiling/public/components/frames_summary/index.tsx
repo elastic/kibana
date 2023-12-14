@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -34,7 +33,7 @@ interface Props {
   comparisonValue?: FrameValue;
   isLoading: boolean;
   hasBorder?: boolean;
-  size?: EuiTextProps['size'];
+  compressed?: boolean;
 }
 
 const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
@@ -50,7 +49,7 @@ export function FramesSummary({
   comparisonValue,
   isLoading,
   hasBorder,
-  size = 'm',
+  compressed,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
     ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
@@ -165,10 +164,15 @@ export function FramesSummary({
       <>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="row">
-          {data.map((item, idx) => {
+          {data.map((item) => {
             return (
-              <EuiFlexItem key={idx}>
-                <SummaryItem {...item} isLoading={isLoading} hasBorder={hasBorder} size={size} />
+              <EuiFlexItem key={item.id}>
+                <SummaryItem
+                  {...item}
+                  isLoading={isLoading}
+                  hasBorder={hasBorder}
+                  compressed={compressed}
+                />
               </EuiFlexItem>
             );
           })}
