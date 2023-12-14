@@ -16,6 +16,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/developer-examples-plugin"
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-utility"
   ]
 }
