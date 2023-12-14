@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { EuiText } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
@@ -107,6 +109,12 @@ export function AnomalyRuleType(props: Props) {
         defaultMessage: 'Detector types',
       })}
     >
+      <EuiText size="xs" color="subdued">
+        <FormattedMessage
+          id="xpack.apm.anomalyRuleType.anomalyDetector.infoLabel"
+          defaultMessage="At least one detector should be selected"
+        />
+      </EuiText>
       <SelectAnomalyDetector
         values={params.anomalyDetectorTypes}
         onChange={(values) => {

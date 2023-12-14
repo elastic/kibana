@@ -54,7 +54,10 @@ import {
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
-import { getApmMlDetectorIndex } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import {
+  getApmMlDetectorIndex,
+  getApmMlDetectorType,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -159,10 +162,6 @@ export function registerAnomalyRuleType({
 
         const { dateStart } = getTimeRange(window);
 
-        const detectorIndices = ruleParams.anomalyDetectorTypes.map((type) =>
-          getApmMlDetectorIndex(type)
-        );
-
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
@@ -189,7 +188,12 @@ export function registerAnomalyRuleType({
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
-                  ...termsQuery('detector_index', detectorIndices),
+                  ...termsQuery(
+                    'detector_index',
+                    ...(ruleParams.anomalyDetectorTypes?.map((type) =>
+                      getApmMlDetectorIndex(type)
+                    ) ?? [])
+                  ),
                 ] as QueryDslQueryContainer[],
               },
             },
@@ -215,6 +219,7 @@ export function registerAnomalyRuleType({
                         { field: 'job_id' },
                         { field: 'timestamp' },
                         { field: 'bucket_span' },
+                        { field: 'detector_index' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -249,6 +254,7 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                detectorIndex: latest.detector_index as number,
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
               };
@@ -263,6 +269,7 @@ export function registerAnomalyRuleType({
             environment,
             transactionType,
             score,
+            detectorIndex,
             timestamp,
             bucketSpan,
           } = anomaly;
@@ -285,7 +292,7 @@ export function registerAnomalyRuleType({
             severityLevel,
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
-            anomalyDetectorTypes: params.anomalyDetectorTypes,
+            detectorType: getApmMlDetectorType(detectorIndex),
           });
 
           const alertId = [

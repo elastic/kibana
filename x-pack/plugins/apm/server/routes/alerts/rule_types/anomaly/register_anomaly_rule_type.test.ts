@@ -94,7 +94,15 @@ describe('Transaction duration anomaly alert', () => {
                   {
                     doc_count: 1,
                     latest_score: {
-                      top: [{ metrics: { record_score: 0, job_id: '1' } }],
+                      top: [
+                        {
+                          metrics: {
+                            record_score: 0,
+                            job_id: '1',
+                            detector_index: 0, // latency index
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -159,6 +167,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '1',
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
+                            detector_index: 0, // latency index
                           },
                         },
                       ],
@@ -173,6 +182,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '2',
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
+                            detector_index: 0, // latency index
                           },
                         },
                       ],
@@ -213,7 +223,7 @@ describe('Transaction duration anomaly alert', () => {
         threshold: 'minor',
         triggerValue: 'critical',
         reason:
-          'critical anomaly with a score of 80 and detector type txLatency, was detected in the last 5 mins for foo.',
+          'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',
         viewInAppUrl:
           'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
         alertDetailsUrl: 'mockedAlertsLocator > getLocation',
