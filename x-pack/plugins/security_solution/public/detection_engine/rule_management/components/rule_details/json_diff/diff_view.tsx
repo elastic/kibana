@@ -27,6 +27,13 @@ import unidiff from 'unidiff';
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
+import {
+  TABLE_CLASS_NAME,
+  CODE_CLASS_NAME,
+  GUTTER_CLASS_NAME,
+  DARK_THEME_CLASS_NAME,
+  COLORS,
+} from './constants';
 
 interface UseExpandReturn {
   expandRange: (start: number, end: number) => void;
@@ -138,11 +145,6 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   return diffFile;
 };
 
-const TABLE_CLASS_NAME = 'rule-update-diff-table';
-const CODE_CLASS_NAME = 'rule-update-diff-code';
-const GUTTER_CLASS_NAME = 'rule-update-diff-gutter';
-const DARK_THEME_CLASS_NAME = 'rule-update-diff-dark-theme';
-
 const CustomStyles: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -163,53 +165,53 @@ const CustomStyles: React.FC = ({ children }) => {
     /* Gutter of a line with deletions */
     .${GUTTER_CLASS_NAME}.diff-gutter-delete {
       font-weight: bold;
-      background: rgb(255, 215, 213);
+      background: ${COLORS.light.gutterBackground.deletion};
     }
     .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-delete {
-      background: rgba(248, 81, 73, 0.3);
+      background: ${COLORS.dark.gutterBackground.deletion};
     }
 
     /* Gutter of a line with insertions */
     .${GUTTER_CLASS_NAME}.diff-gutter-insert {
       font-weight: bold;
-      background: rgb(204, 255, 216);
+      background: ${COLORS.light.gutterBackground.insertion};
     }
     .${DARK_THEME_CLASS_NAME} .${GUTTER_CLASS_NAME}.diff-gutter-insert {
-      background: rgba(63, 185, 80, 0.3);
+      background: ${COLORS.dark.gutterBackground.insertion};
     }
 
     /* Background of a line with deletions */
     .${CODE_CLASS_NAME}.diff-code-delete {
-      background: rgb(255, 235, 233);
+      background: ${COLORS.light.lineBackground.deletion};
     }
     .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete {
-      background: rgba(248, 81, 73, 0.1);
+      background: ${COLORS.dark.lineBackground.deletion};
     }
 
     /* Background of a line with insertions */
     .${CODE_CLASS_NAME}.diff-code-insert {
-      background: rgb(230, 255, 236);
+      background: ${COLORS.light.lineBackground.insertion};
     }
     .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert {
-      background: rgba(46, 160, 67, 0.15);
+      background: ${COLORS.dark.lineBackground.insertion};
     }
 
     /* Accented background of removed characters / words */
     .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
       font-weight: 700;
-      background: rgba(255, 129, 130, 0.4);
+      background: ${COLORS.light.characterBackground.deletion};
     }
     .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-delete .diff-code-edit {
-      background: rgba(248, 81, 73, 0.4);
+      background: ${COLORS.dark.characterBackground.deletion};
     }
 
     /* Accented background of inserted characters / words */
     .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
       font-weight: 700;
-      background: rgb(171, 242, 188);
+      background: ${COLORS.light.characterBackground.insertion};
     }
     .${DARK_THEME_CLASS_NAME} .${CODE_CLASS_NAME}.diff-code-insert .diff-code-edit {
-      background: rgba(46, 160, 67, 0.4);
+      background: ${COLORS.dark.characterBackground.insertion};
     }
   `;
 
