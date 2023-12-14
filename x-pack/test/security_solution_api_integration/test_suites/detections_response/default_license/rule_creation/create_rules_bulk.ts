@@ -42,10 +42,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  // Marking as ESS and brokenInServerless as it's currently exposed in both, but if this is already
-  // deprecated, it should cease being exposed in Serverless prior to GA, in which case this
-  // test would be run for ESS only.
-  describe('@ess @brokenInServerless @skipInQA create_rules_bulk', () => {
+  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
+  describe('@ess @serverless create_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);

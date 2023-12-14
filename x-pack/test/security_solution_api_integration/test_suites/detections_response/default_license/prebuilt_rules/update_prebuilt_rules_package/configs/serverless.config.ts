@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine Serverless / Update Prebuilt Rules Package - API Integration Tests',
+      'Rules Management - Update Prebuilt Rules Integration Tests - Serverless Env - Complete License',
   },
 });

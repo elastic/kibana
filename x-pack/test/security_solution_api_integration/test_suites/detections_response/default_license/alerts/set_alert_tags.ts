@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
