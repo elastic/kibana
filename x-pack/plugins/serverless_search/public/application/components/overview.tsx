@@ -36,6 +36,7 @@ import type {
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
+import { CloudDetailsPanel, PipelinePanel } from '@kbn/search-api-panels';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -52,8 +53,6 @@ import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
-import { PipelinePanel } from './pipeline_panel';
-import { CloudDetailsPanel } from './overview/cloud_details';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -311,7 +310,13 @@ export const ElasticsearchOverview = () => {
               }}
             />
           }
-          leftPanelContent={<PipelinePanel />}
+          leftPanelContent={
+            <PipelinePanel
+              clusterImage={`${assetBasePath}/cluster.svg`}
+              cutImage={`${assetBasePath}/cut.svg`}
+              reporterImage={`${assetBasePath}/reporter.svg`}
+            />
+          }
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',
