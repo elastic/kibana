@@ -516,6 +516,7 @@ async function installPackageCommon(options: {
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
+  logger.info(`Install - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `);
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -564,7 +565,8 @@ async function installPackageCommon(options: {
     }
     const elasticSubscription = getElasticSubscription(packageInfo);
     if (!licenseService.hasAtLeast(elasticSubscription)) {
-      const err = new Error(`Requires ${elasticSubscription} license`);
+      logger.error(`Installation requires ${elasticSubscription} license`);
+      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
@@ -606,6 +608,7 @@ async function installPackageCommon(options: {
       skipDataStreamRollover,
     })
       .then(async (assets) => {
+        logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
           soClient: savedObjectsClient,
           pkgName: packageInfo.name,
@@ -759,7 +762,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
 
     if (matchingBundledPackage) {
       logger.debug(
-        `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
+        `Found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
 
       const archiveBuffer = await matchingBundledPackage.getBuffer();
@@ -780,7 +783,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       return { ...response, installSource: 'bundled' };
     }
 
-    logger.debug(`kicking off install of ${pkgkey} from registry`);
+    logger.debug(`Kicking off install of ${pkgkey} from registry`);
     const response = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
@@ -803,6 +806,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     } = args;
+    logger.debug(`Installing package by upload`);
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -816,6 +820,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     return response;
   } else if (args.installSource === 'custom') {
     const { pkgName, force, datasets, spaceId, kibanaVersion } = args;
+    logger.debug(`Kicking off install of custom package ${pkgName}`);
     const response = await installCustomPackage({
       savedObjectsClient,
       pkgName,

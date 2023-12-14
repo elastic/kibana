@@ -5,3 +5,6 @@
  * 2.0.
  */
 export * from './delete_all_event_log_execution_events';
+export * from './index_event_log_execution_events';
+export * from './wait_for_event_log_execute_complete';
+export * from './get_event_log_execute_complete_by_id';
