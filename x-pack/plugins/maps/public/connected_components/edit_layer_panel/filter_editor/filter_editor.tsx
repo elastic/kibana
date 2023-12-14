@@ -224,7 +224,12 @@ export class FilterEditor extends Component<Props, State> {
         })}
         applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
-        isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
+        disabledReason={this.props.isFeatureEditorOpenForLayer
+          ? i18n.translate('xpack.maps.filterEditor.isGlobalTimeNotApplied', {
+              defaultMessage: 'Global time is not applied to the layer while editing features',
+            })
+          : undefined
+        }
       />
     ) : null;
 

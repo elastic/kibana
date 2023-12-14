@@ -93,11 +93,11 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   async isTimeAware() {
-    return true;
+    return !!this._descriptor.dateField;
   }
 
   getApplyGlobalTime() {
-    return this._descriptor.dateField !== undefined;
+    return !!this._descriptor.dateField;
   }
 
   isFilterByMapBounds() {

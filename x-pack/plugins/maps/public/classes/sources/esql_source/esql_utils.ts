@@ -106,7 +106,7 @@ export async function getDateFields(esql: string) {
       });
   } catch (error) {
     throw new Error(i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-      defaultMessage: `Unable to load date fields from pattern: {pattern}. {errorMessage}`,
+      defaultMessage: `Unable to load date fields from index pattern: {pattern}. {errorMessage}`,
       values: {
         errorMessage: error.message,
         pattern,
