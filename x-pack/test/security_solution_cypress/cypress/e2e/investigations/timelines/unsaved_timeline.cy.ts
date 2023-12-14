@@ -38,7 +38,7 @@ import {
 } from '../../../tasks/timeline';
 import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
-describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
+describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
@@ -140,7 +140,7 @@ describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
 });
 
 // In serverless it is not possible to use the navigation menu without closing the timeline
-describe('Save Timeline Prompts', { tags: ['@serverless'] }, () => {
+describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
