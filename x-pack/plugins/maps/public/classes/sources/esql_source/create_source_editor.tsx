@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { EuiSkeletonText } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
@@ -19,10 +18,8 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [columns, setColumns] = useState<ESQLSourceDescriptor['columns']>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
-  const [dateFields, setDateFields] = useState<string[]>([]);
 
   useEffect(() => {
     let ignore = false;
@@ -31,21 +28,36 @@ export function CreateSourceEditor(props: Props) {
         if (!ignore) {
           if (defaultDataView) {
             let geoField: string | undefined;
-            const defaultDateFields: string[] = [];
+            const initialDateFields: string[] = [];
             for (let i = 0; i < defaultDataView.fields.length; i++) {
               const field = defaultDataView.fields[i];
               if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
                 geoField = field.name;
               } else if ('date' === field.type) {
-                dateFields.push(field.name);
+                initialDateFields.push(field.name);
               }
             }
+            
             if (geoField) {
+              let initialDateField: string | undefined;
               if (defaultDataView.timeFieldName) {
-                setDateField(defaultDataView.timeFieldName);
+                initialDateField = defaultDataView.timeFieldName;
+              } else if (initialDateFields.length) {
+                initialDateField = initialDateFields[0];
               }
-              setDateFields(defaultDateFields);
-              setEsql(`from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`);
+              const initialEsql = `from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
+              setDateField(initialDateField);
+              setEsql(initialEsql);
+              props.onSourceConfigChange({
+                columns: [
+                  {
+                    name: geoField,
+                    type: 'geo_point',
+                  }
+                ],
+                dateField: initialDateField,
+                esql: initialEsql,
+              });
             }
           }
           setIsInitialized(true);
@@ -63,33 +75,6 @@ export function CreateSourceEditor(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!dateField || !dateFields.includes(dateField)) {
-      setDateField(dateFields.length ? dateFields[0] : undefined);
-    }
-  }, [dateFields]);
-
-  const [, cancel] = useDebounce(
-    () => {
-      const sourceConfig = esql && esql.length
-        ? {
-            columns,
-            esql,
-            dateField,
-          }
-        : null;
-      props.onSourceConfigChange(sourceConfig);
-    },
-    300,
-    [columns, esql, dateField]
-  );
-
-  useEffect(() => {
-    return () => {
-      cancel();
-    };
-  }, [cancel]);
-
   return (
     <EuiSkeletonText
       lines={3}
@@ -97,10 +82,21 @@ export function CreateSourceEditor(props: Props) {
     >
       <ESQLEditor
         esql={esql}
-        onESQLChange={({ columns, dateFields, esql }: { columns: ESQLSourceDescriptor['columns'], dateFields: string[], esql: string }) => {
-          setColumns(columns);
-          setDateFields(dateFields);
-          setEsql(esql);
+        onESQLChange={(change: { columns: ESQLSourceDescriptor['columns'], dateFields: string[], esql: string }) => {
+          let nextDateField = dateField;
+          if (!dateField || !change.dateFields.includes(dateField)) {
+            nextDateField = change.dateFields.length ? change.dateFields[0] : undefined;
+          }
+          setDateField(nextDateField);
+          setEsql(change.esql);
+          const sourceConfig = change.esql && change.esql.length
+            ? {
+                columns: change.columns,
+                dateField: nextDateField,
+                esql: change.esql,
+              }
+            : null;
+          props.onSourceConfigChange(sourceConfig);
         }}
       />
     </EuiSkeletonText>

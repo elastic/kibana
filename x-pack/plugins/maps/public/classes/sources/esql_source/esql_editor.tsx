@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { isEqual } from 'lodash';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
@@ -18,58 +19,50 @@ interface Props {
 }
 
 export function ESQLEditor(props: Props) {
+  const isMounted = useMountedState();
+
   const [error, setError] = useState<Error | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: props.esql });
-  const [onSubmitQuery, setOnSubmitQuery] = useState<AggregateQuery>({ esql: props.esql });
-
-  // On submit query change - load columns, date fields, and geo fields
-  useEffect(() => {
-    let ignore = false;
-    setError(undefined);
-    setIsLoading(true);
-    getESQLMeta((onSubmitQuery as { esql: string }).esql)
-      .then((esqlMeta) => {
-        if (!ignore) {
-          try {
-            verifyGeometryColumn(esqlMeta.columns);
-            props.onESQLChange({
-              columns: esqlMeta.columns,
-              dateFields: esqlMeta.dateFields,
-              esql: (onSubmitQuery as { esql: string }).esql,
-            });
-          } catch(getGeometryColumnIndexError) {
-            setError(getGeometryColumnIndexError);
-            props.onESQLChange({
-              columns: [],
-              dateFields: [],
-              esql: '',
-            });
-          }
-          setIsLoading(false);
-        }
-      })
-      .catch((getESQLMetaError) => {
-        if (!ignore) {
-          setError(getESQLMetaError);
-          setIsLoading(false);
-        }
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [onSubmitQuery]);
 
   return (
     <>
       <TextBasedLangEditor
         query={localQuery}
         onTextLangQueryChange={setLocalQuery}
-        onTextLangQuerySubmit={(q) => {
-          if (q) {
-            setOnSubmitQuery(q);
+        onTextLangQuerySubmit={async (query) => {
+          if (!query) {
+            return;
           }
+          
+          setError(undefined);
+          setIsLoading(true);
+
+          try {
+            const esql = (query as { esql: string }).esql;
+            const esqlMeta = await getESQLMeta(esql);
+            if (!isMounted()) {
+              return;
+            }
+            verifyGeometryColumn(esqlMeta.columns);
+            props.onESQLChange({
+              columns: esqlMeta.columns,
+              dateFields: esqlMeta.dateFields,
+              esql,
+            });
+          } catch(error) {
+            if (!isMounted()) {
+              return;
+            }
+            setError(error);
+            props.onESQLChange({
+              columns: [],
+              dateFields: [],
+              esql: '',
+            });
+          }
+
+          setIsLoading(false);
         }}
         errors={error ? [error] : undefined}
         expandCodeEditor={(status: boolean) => {
@@ -79,7 +72,7 @@ export function ESQLEditor(props: Props) {
         hideMinimizeButton
         editorIsInline
         hideRunQueryText
-        disableSubmitAction={isLoading || isEqual(localQuery, onSubmitQuery)}
+        disableSubmitAction={isLoading || isEqual(localQuery, props.esql)}
       />
     </>
   );
