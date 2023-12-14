@@ -7,6 +7,7 @@
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type LensChartLoadEvent } from '@kbn/visualization-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { generateId } from '../../id_generator';
@@ -31,6 +32,7 @@ export async function executeEditEmbeddableAction({
   core,
   attributes,
   embeddableId,
+  lensEvent,
   onUpdate,
   onApply,
 }: {
@@ -38,6 +40,7 @@ export async function executeEditEmbeddableAction({
   core: CoreStart;
   attributes: TypedLensByValueInput['attributes'];
   embeddableId?: string;
+  lensEvent?: LensChartLoadEvent;
   onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
   onApply?: (input: TypedLensByValueInput['attributes']) => void;
 }) {
@@ -58,7 +61,7 @@ export async function executeEditEmbeddableAction({
   if (!factory) {
     return undefined;
   }
-  const embeddable = await factory.create(input);
+  const embeddable = lensEvent?.embeddable ?? (await factory.create(input));
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
     executeAction({

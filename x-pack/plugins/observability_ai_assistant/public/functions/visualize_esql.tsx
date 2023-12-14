@@ -17,9 +17,9 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { getLensAttributes } from '@kbn/visualization-utils';
+import { type LensChartLoadEvent, getLensAttributes } from '@kbn/visualization-utils';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
 import type {
@@ -70,6 +70,26 @@ function VisualizeESQL({
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
     initialInput as TypedLensByValueInput
   );
+  const [lensLoadEvent, setLensLoadEvent] = useState<LensChartLoadEvent | null>(null);
+
+  const onLoad = useCallback(
+    (
+      isLoading: boolean,
+      adapters: LensChartLoadEvent['adapters'] | undefined,
+      lensEmbeddableOutput$?: LensChartLoadEvent['embeddableOutput$'],
+      lensEmbeddable?: LensChartLoadEvent['embeddable']
+    ) => {
+      const adapterTables = adapters?.tables?.tables;
+      if (adapterTables && !isLoading) {
+        setLensLoadEvent({
+          adapters,
+          embeddableOutput$: lensEmbeddableOutput$,
+          embeddable: lensEmbeddable,
+        });
+      }
+    },
+    []
+  );
 
   // initialization
   useEffect(() => {
@@ -111,6 +131,7 @@ function VisualizeESQL({
 
   const triggerOptions = {
     ...lensInput,
+    lensEvent: lensLoadEvent,
     onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
       const newInput = {
         ...lensInput,
@@ -176,6 +197,7 @@ function VisualizeESQL({
             style={{
               height: 240,
             }}
+            onLoad={onLoad}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

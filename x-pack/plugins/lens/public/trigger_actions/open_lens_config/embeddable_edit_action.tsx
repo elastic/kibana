@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { type LensChartLoadEvent } from '@kbn/visualization-utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
 
@@ -15,6 +16,7 @@ const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
 interface Context {
   attributes?: TypedLensByValueInput['attributes'];
   id?: string;
+  lensEvent?: LensChartLoadEvent;
   onUpdate?: (input: TypedLensByValueInput['attributes']) => void;
   onApply?: (input: TypedLensByValueInput['attributes']) => void;
 }
@@ -47,7 +49,7 @@ export class EditLensEmbeddableAction implements Action<Context> {
     return isEmbeddableEditActionCompatible(this.core);
   }
 
-  public async execute({ attributes, id, onUpdate, onApply }: Context) {
+  public async execute({ attributes, id, lensEvent, onUpdate, onApply }: Context) {
     const { executeEditEmbeddableAction } = await getAsyncHelpers();
     if (attributes) {
       executeEditEmbeddableAction({
@@ -55,6 +57,7 @@ export class EditLensEmbeddableAction implements Action<Context> {
         core: this.core,
         attributes,
         embeddableId: id,
+        lensEvent,
         onUpdate,
         onApply,
       });

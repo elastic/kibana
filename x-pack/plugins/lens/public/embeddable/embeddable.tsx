@@ -168,7 +168,8 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onLoad?: (
     isLoading: boolean,
     adapters?: Partial<DefaultInspectorAdapters>,
-    output$?: Observable<LensEmbeddableOutput>
+    output$?: Observable<LensEmbeddableOutput>,
+    embeddable?: AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   ) => void;
   onFilter?: (
     data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
@@ -975,7 +976,7 @@ export class Embeddable
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false, adapters, this.getOutput$());
+      this.input.onLoad(false, adapters, this.getOutput$(), this);
     }
 
     const { type, error } = data as { type: string; error: ErrorLike };
