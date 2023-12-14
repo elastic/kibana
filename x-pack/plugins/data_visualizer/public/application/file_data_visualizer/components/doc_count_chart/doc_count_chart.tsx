@@ -8,7 +8,7 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 // import dateMath from '@kbn/datemath';
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useRef } from 'react';
 import { lastValueFrom } from 'rxjs';
 import moment, { Moment } from 'moment';
 import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
@@ -17,7 +17,7 @@ import { EventRateChart, LineChartPoint } from './event_rate_chart';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
-const FINISHED_CHECKS = 5;
+const FINISHED_CHECKS = 3;
 const ATTEMPTS = 3;
 
 export const DocCountChart: FC<{
@@ -55,6 +55,7 @@ export const DocCountChart: FC<{
   const [lastNonZeroTimeMs, setLastNonZeroTimeMs] = useState<
     { index: number; time: number } | undefined
   >(undefined);
+  const loadFullData = useRef(false);
   const recordFailure = useCallback(() => {
     // eslint-disable-next-line no-console
     console.log('incrementFailedAttempts');
@@ -139,7 +140,10 @@ export const DocCountChart: FC<{
     // console.log(end.epoch, newEndMs);
 
     try {
-      const startMs = lastNonZeroTimeMs === undefined ? start.valueOf() : lastNonZeroTimeMs.time;
+      const startMs =
+        loadFullData.current === true || lastNonZeroTimeMs === undefined
+          ? start.valueOf()
+          : lastNonZeroTimeMs.time;
       const endMs = end.valueOf();
 
       if (start != null && end != null) {
@@ -315,6 +319,7 @@ export const DocCountChart: FC<{
     } else if (loading === false && statuses.uploadProgress === 100 && finished === false) {
       setFinished(true);
       finishedChecks(FINISHED_CHECKS);
+      loadFullData.current = true;
     }
   }, [
     finished,
