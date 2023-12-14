@@ -14,8 +14,17 @@ const hasDataRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ hasData: boolean }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const hasData = await hasHistoricalAgentData(apmEventClient);
-    return { hasData };
+    const hasDataInWarmDataTiers = await hasHistoricalAgentData(
+      apmEventClient,
+      { limitByDataTier: true }
+    );
+
+    if (hasDataInWarmDataTiers) {
+      return { hasData: true };
+    }
+
+    const hasDataUnbounded = await hasHistoricalAgentData(apmEventClient);
+    return { hasData: hasDataUnbounded };
   },
 });
 
