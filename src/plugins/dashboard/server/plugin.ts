@@ -63,7 +63,7 @@ export class DashboardPlugin
       })
     );
 
-    setupQueryExtractionRoute(core, plugins.lens.docToExpression);
+    setupQueryExtractionRoute(core, plugins.lens.extractQueries);
 
     plugins.contentManagement.register({
       id: CONTENT_ID,

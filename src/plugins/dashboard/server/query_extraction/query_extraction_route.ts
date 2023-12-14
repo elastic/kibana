@@ -16,7 +16,7 @@ import { convertSavedDashboardPanelToPanelState, type DashboardAttributes } from
 
 export const setupQueryExtractionRoute = (
   { http, getStartServices }: CoreSetup,
-  docToExpression: LensServerPluginSetup['docToExpression']
+  extractQueries: LensServerPluginSetup['extractQueries']
 ) => {
   const router = http.createRouter();
 
@@ -59,32 +59,39 @@ export const setupQueryExtractionRoute = (
 
           const supportedPanels = panels.filter(({ type }) => type === 'lens');
 
-          const panelState = convertSavedDashboardPanelToPanelState<LensByValueInput>(
-            supportedPanels[0]
-          );
+          const queriesByPanel: Array<{ title?: string; queries: object[] }> = [];
 
-          // TODO not sure if this is type safe
-          const attributes = panelState.explicitInput.attributes!;
+          for (const panel of supportedPanels) {
+            const panelState = convertSavedDashboardPanelToPanelState<LensByValueInput>(panel);
 
-          // copied from initializeSavedVis in Lens embeddable
-          const savedVis = {
-            ...attributes,
-            type: 'lens',
-            // savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
-          };
+            // TODO not sure if this is type safe
+            const attributes = panelState.explicitInput.attributes!;
 
-          const expression = await docToExpression(
-            savedVis,
-            {
-              elasticsearch: (await context.core).elasticsearch.client.asCurrentUser,
-              savedObjects: client,
-            },
-            request
-          );
+            // copied from initializeSavedVis in Lens embeddable
+            const savedVis = {
+              ...attributes,
+              type: 'lens',
+              // savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
+            };
+
+            const queries = await extractQueries(
+              savedVis,
+              {
+                elasticsearch: (await context.core).elasticsearch.client.asCurrentUser,
+                savedObjects: client,
+              },
+              request
+            );
+
+            queriesByPanel.push({
+              title: panel.title,
+              queries,
+            });
+          }
 
           return response.ok({
             body: {
-              expression,
+              panels: queriesByPanel,
             },
           });
         } catch (e) {
