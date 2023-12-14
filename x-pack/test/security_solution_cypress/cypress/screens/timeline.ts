@@ -108,9 +108,6 @@ export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
 export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
 
-export const OPEN_TIMELINE_TEMPLATE_ICON =
-  '[data-test-subj="open-timeline-modal-body-filter-template"]';
-
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
 export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
