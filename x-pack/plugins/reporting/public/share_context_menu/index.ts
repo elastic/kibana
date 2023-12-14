@@ -15,6 +15,7 @@ import type {
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { BrowserUrlService } from '@kbn/share-plugin/public';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 export { reportingScreenshotShareProvider } from './register_pdf_png_reporting';
 
@@ -29,6 +30,7 @@ export interface ExportPanelShareOpts {
   theme: ThemeServiceSetup;
   overlays: OverlayStart;
   i18nStart: CoreStart['i18n'];
+  urlService: BrowserUrlService;
 }
 
 export interface ReportingSharingData {

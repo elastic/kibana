@@ -24,6 +24,7 @@ export const reportingScreenshotShareProvider = ({
   theme,
   overlays,
   i18nStart,
+  urlService,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -76,13 +77,13 @@ export const reportingScreenshotShareProvider = ({
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
-    const jobProviderOptions: JobParamsProviderOptions = {
+    const jobProviderOpts: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
       sharingData,
     };
 
-    const isV2Job = isJobV2Params(jobProviderOptions);
+    const isV2Job = isJobV2Params(jobProviderOpts);
     const requiresSavedState = !isV2Job;
     const reportingModalTitle = i18n.translate('xpack.reporting.shareContextModal.buttonLabel', {
       defaultMessage: 'Exports',
@@ -102,8 +103,9 @@ export const reportingScreenshotShareProvider = ({
             requiresSavedState={requiresSavedState}
             isDirty={isDirty}
             theme={theme}
-            jobProviderOptions={jobProviderOptions}
+            jobProviderOptions={jobProviderOpts}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
+            urlService={urlService}
           />,
           { theme, i18n: i18nStart }
         ),

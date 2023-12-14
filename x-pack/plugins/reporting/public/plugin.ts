@@ -30,7 +30,11 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, durationToNumber } from '@kbn/reporting-common';
 import type { JobId } from '@kbn/reporting-common/types';
 import type { ClientConfigType } from '@kbn/reporting-public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  BrowserUrlService,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { ReportingSetup, ReportingStart } from '.';
@@ -72,6 +76,7 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  urlService: BrowserUrlService;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -149,6 +154,7 @@ export class ReportingPublicPlugin
       screenshotMode: screenshotModeSetup,
       share: shareSetup,
       uiActions: uiActionsSetup,
+      urlService: urlSetup,
     } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
@@ -225,7 +231,7 @@ export class ReportingPublicPlugin
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
-    const reportingStart = this.getContract(share, core);
+    const reportingStart = this.getContract(shareSetup, core);
     const { toasts } = core.notifications;
 
     startServices$.subscribe(([core, { licensing }]) => {
@@ -241,6 +247,7 @@ export class ReportingPublicPlugin
             theme: core.theme,
             overlays: core.overlays,
             i18nStart: core.i18n,
+            urlService: urlSetup,
           })
         );
 
@@ -256,6 +263,7 @@ export class ReportingPublicPlugin
               theme: core.theme,
               overlays: core.overlays,
               i18nStart: core.i18n,
+              urlService: urlSetup,
             })
           );
         }
