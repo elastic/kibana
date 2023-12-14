@@ -516,7 +516,6 @@ describe('AllCasesListGeneric', () => {
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           searchFields: ['title', 'description'],
-          owner: ['securitySolution'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -645,82 +644,6 @@ describe('AllCasesListGeneric', () => {
   });
 
   describe('Solutions', () => {
-    it('should set the owner to all available solutions when deselecting all solutions', async () => {
-      const { getByTestId } = render(
-        <TestProviders owner={[]}>
-          <AllCasesList />
-        </TestProviders>
-      );
-
-      expect(useGetCasesMock).toHaveBeenCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution', 'observability'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
-
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
-
-      expect(useGetCasesMock).toBeCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-
-      userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
-
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution', 'observability'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-    });
-
     it('should hide the solutions filter if the owner is provided', async () => {
       const { queryByTestId } = render(
         <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
@@ -729,30 +652,6 @@ describe('AllCasesListGeneric', () => {
       );
 
       expect(queryByTestId('options-filter-popover-button-owner')).toBeFalsy();
-    });
-
-    it('should call useGetCases with the correct owner on initial render', async () => {
-      render(
-        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
-          <AllCasesList />
-        </TestProviders>
-      );
-
-      expect(useGetCasesMock).toHaveBeenCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
     });
   });
 
@@ -1102,7 +1001,6 @@ describe('AllCasesListGeneric', () => {
         expect(useGetCasesMock).toHaveBeenLastCalledWith({
           filterOptions: {
             ...DEFAULT_FILTER_OPTIONS,
-            owner: [SECURITY_SOLUTION_OWNER],
             assignees: [],
           },
           queryParams: DEFAULT_QUERY_PARAMS,
