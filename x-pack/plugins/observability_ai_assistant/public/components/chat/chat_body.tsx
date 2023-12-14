@@ -13,6 +13,8 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  euiScrollBarStyles,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -36,10 +38,6 @@ import { ChatActionClickType } from './types';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
 import { MESSAGE_FEEDBACK } from '../../analytics/schema';
-
-const timelineClassName = css`
-  overflow-y: auto;
-`;
 
 const loadingSpinnerContainerClassName = css`
   align-self: center;
@@ -75,6 +73,7 @@ export function ChatBody({
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
+  const euiTheme = useEuiTheme();
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
 
@@ -197,7 +196,13 @@ export function ChatBody({
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName}>
+        <EuiFlexItem
+          grow
+          className={css`
+            overflow-y: auto;
+            ${euiScrollBarStyles(euiTheme)}
+          `}
+        >
           <div ref={timelineContainerRef}>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
               <ChatTimeline
