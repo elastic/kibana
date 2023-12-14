@@ -20,7 +20,6 @@ import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/ai
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
 import {
-  ContextualInsight,
   useObservabilityAIAssistant,
   type Message,
   MessageRole,
@@ -54,7 +53,11 @@ interface SignificantFieldValue {
 
 export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logsShared } = services;
+  const {
+    dataViews,
+    logsShared,
+    observabilityAIAssistant: { ContextualInsight },
+  } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<

@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
-  ContextualInsight,
   type Message,
   ObservabilityAIAssistantPluginStart,
   MessageRole,
@@ -17,6 +16,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
@@ -31,6 +31,9 @@ export interface LogAIAssistantDeps extends LogAIAssistantProps {
 }
 
 export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
+  const {
+    observabilityAIAssistant: { ContextualInsight },
+  } = useKibanaContextForPlugin().services;
   const aiAssistant = useObservabilityAIAssistant();
 
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {

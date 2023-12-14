@@ -38,6 +38,7 @@ import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import { InsightProps } from './components/insight/insight';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -94,10 +95,13 @@ export type ChatRegistrationRenderFunction = ({}: {
 
 export interface ObservabilityAIAssistantPluginStart {
   service: ObservabilityAIAssistantService;
+  ContextualInsight: React.ForwardRefExoticComponent<InsightProps>;
+  ObservabilityAIAssistantActionMenuItem: () => JSX.Element;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -106,6 +110,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
+
 export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;

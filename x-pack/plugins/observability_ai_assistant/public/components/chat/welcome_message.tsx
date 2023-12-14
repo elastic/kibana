@@ -43,22 +43,19 @@ export function WelcomeMessage({
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
 
-  const services = useKibana().services;
-
   const {
     application: { navigateToApp, capabilities },
-  } = services;
-
-  const ConnectorFlyout = services.triggersActionsUi
-    ? services.triggersActionsUi.getAddConnectorFlyout
-    : services.plugins.start && services.plugins.start.triggersActionsUi
-    ? services.plugins.start.triggersActionsUi.getAddConnectorFlyout
-    : null;
+    plugins: {
+      start: {
+        triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
+      },
+    },
+  } = useKibana().services;
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
 
   const handleConnectorClick = () => {
-    if (ConnectorFlyout && capabilities.management?.insightsAndAlerting?.triggersActions) {
+    if (capabilities.management?.insightsAndAlerting?.triggersActions) {
       setConnectorFlyoutOpen(true);
     } else {
       navigateToApp('management', {
@@ -122,7 +119,7 @@ export function WelcomeMessage({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {ConnectorFlyout && connectorFlyoutOpen ? (
+      {connectorFlyoutOpen ? (
         <ConnectorFlyout
           featureId="generativeAI"
           onConnectorCreated={onConnectorCreated}

@@ -16,6 +16,7 @@ export interface PluginContextValue {
   appMountParameters: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  ObservabilityAIAssistantActionMenuItem: () => JSX.Element;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

@@ -8,10 +8,7 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ObservabilityAIAssistantActionMenuItem,
-  useObservabilityAIAssistantOptional,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { useObservabilityAIAssistantOptional } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
@@ -20,6 +17,7 @@ export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
   const {
     appMountParameters: { setHeaderActionMenu },
+    ObservabilityAIAssistantActionMenuItem,
   } = usePluginContext();
 
   const aiAssistant = useObservabilityAIAssistantOptional();

@@ -86,6 +86,8 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
+  const { ObservabilityAIAssistantActionMenuItem } = plugins.observabilityAIAssistant;
+
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
@@ -108,6 +110,7 @@ export const renderApp = ({
                     appMountParameters,
                     observabilityRuleTypeRegistry,
                     ObservabilityPageTemplate,
+                    ObservabilityAIAssistantActionMenuItem,
                   }}
                 >
                   <Router history={history}>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { lazy } from 'react';
 import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
@@ -17,6 +17,8 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { createService } from './service/create_service';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
@@ -117,9 +119,34 @@ export class ObservabilityAIAssistantPlugin
       });
     });
 
+    const ObservabilityAIAssistantActionMenuItem = withSuspense(
+      lazy(() =>
+        import('./components/action_menu_item/action_menu_item').then((m) => ({
+          default: m.ObservabilityAIAssistantActionMenuItem,
+        }))
+      )
+    );
+
+    const ContextualInsight = withSuspense(
+      lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight })))
+    );
+
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      ContextualInsight,
+      ObservabilityAIAssistantActionMenuItem: () => (
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            plugins: {
+              start: pluginsStart,
+            },
+          }}
+        >
+          <ObservabilityAIAssistantActionMenuItem />
+        </KibanaContextProvider>
+      ),
     };
   }
 }

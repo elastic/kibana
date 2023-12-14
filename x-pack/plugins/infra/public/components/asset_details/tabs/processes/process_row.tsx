@@ -27,8 +27,8 @@ import {
   useObservabilityAIAssistant,
   type Message,
   MessageRole,
-  ContextualInsight,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
@@ -38,7 +38,11 @@ interface Props {
   supportAIAssistant?: boolean;
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
+  const {
+    observabilityAIAssistant: { ContextualInsight },
+  } = useKibanaContextForPlugin().services;
   const aiAssistant = useObservabilityAIAssistant();
+
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
     if (!command) {
       return undefined;

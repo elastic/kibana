@@ -5,8 +5,6 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { lazy } from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
   ObservabilityAIAssistantPluginSetup,
@@ -17,18 +15,6 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 export { mockService as mockObservabilityAIAssistantService } from './utils/storybook_decorator';
-
-export const ContextualInsight = withSuspense(
-  lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight })))
-);
-
-export const ObservabilityAIAssistantActionMenuItem = withSuspense(
-  lazy(() =>
-    import('./components/action_menu_item/action_menu_item').then((m) => ({
-      default: m.ObservabilityAIAssistantActionMenuItem,
-    }))
-  )
-);
 
 export { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 

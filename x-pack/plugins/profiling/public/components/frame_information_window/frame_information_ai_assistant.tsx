@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ContextualInsight,
   Message,
   MessageRole,
   useObservabilityAIAssistant,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
 import { Frame } from '.';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   frame?: Frame;
@@ -21,6 +21,9 @@ interface Props {
 
 export function FrameInformationAIAssistant({ frame }: Props) {
   const aiAssistant = useObservabilityAIAssistant();
+  const {
+    observabilityAIAssistant: { ContextualInsight },
+  } = useProfilingDependencies().start;
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
     if (frame?.functionName && frame.exeFileName) {

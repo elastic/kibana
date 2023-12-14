@@ -8,11 +8,11 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useObservabilityAIAssistant,
-  ContextualInsight,
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
@@ -25,6 +25,9 @@ export function ErrorSampleContextualInsight({
   error: APMError;
   transaction?: Transaction;
 }) {
+  const {
+    observabilityAIAssistant: { ContextualInsight },
+  } = useApmPluginContext();
   const aiAssistant = useObservabilityAIAssistant();
 
   const [logStacktrace, setLogStacktrace] = useState('');
