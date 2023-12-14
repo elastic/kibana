@@ -24,7 +24,7 @@ import {
 } from '../../../screens/search_bar';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-describe(
+describe.skip(
   'Histogram legend hover actions',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {

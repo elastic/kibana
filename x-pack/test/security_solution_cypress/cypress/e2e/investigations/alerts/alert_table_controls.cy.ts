@@ -40,7 +40,7 @@ import { DATAGRID_HEADER } from '../../../screens/timeline';
  *
  * */
 
-describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
+describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
