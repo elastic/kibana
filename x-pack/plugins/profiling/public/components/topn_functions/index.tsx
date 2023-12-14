@@ -347,7 +347,6 @@ export const TopNFunctionsGrid = forwardRef(
             frame={convertRowToFrame(selectedRow)}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
-            showAIAssistant={!isEmbedded}
             showSymbolsStatus={!isEmbedded}
           />
         )}

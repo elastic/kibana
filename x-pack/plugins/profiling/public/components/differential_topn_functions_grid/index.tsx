@@ -26,7 +26,7 @@ import {
 import { orderBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
-import { ComparisonFrameInformationTooltip } from '../frame_information_window/comparison_frame_information_tooltip';
+import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from '../topn_functions/function_row';
 import { convertRowToFrame, getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
 import { getColumns } from './get_columns';
@@ -321,7 +321,8 @@ export function DifferentialTopNFunctionsGrid({
         }}
       />
       {rowsInformation && (
-        <ComparisonFrameInformationTooltip
+        <FrameInformationTooltip
+          size="m"
           comparisonRank={rowsInformation.comparisonRow?.rank}
           comparisonFrame={
             rowsInformation.comparisonRow

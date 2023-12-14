@@ -7,17 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  ANNUAL_SECONDS,
+  CalculateImpactEstimates,
+} from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
-import {
-  ANNUAL_SECONDS,
-  CalculateImpactEstimates,
-} from '../../hooks/use_calculate_impact_estimates';
-import { NOT_AVAILABLE_LABEL } from '../../../common';
 
 interface Params {
   countInclusive: number;
@@ -39,7 +38,7 @@ export interface ImpactRow {
 }
 
 const getComparisonValue = <T,>(value: T, comparisonValue?: T) =>
-  `${value ?? NOT_AVAILABLE_LABEL} vs ${comparisonValue ?? NOT_AVAILABLE_LABEL}`;
+  comparisonValue ? `${value} vs ${comparisonValue}` : value;
 
 /**
  * e.g.:
