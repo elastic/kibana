@@ -62,7 +62,7 @@ export class CsvSearchSourceExportType extends ExportType<
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    this.logger = this.logger.get('csv-searchsource-export');
+    this.logger = this.logger.get(this.id);
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {

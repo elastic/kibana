@@ -66,7 +66,7 @@ export class CsvV2ExportType extends ExportType<
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    this.logger = this.logger.get('csv-export-v2');
+    this.logger = this.logger.get(this.id);
   }
 
   public createJob = async (

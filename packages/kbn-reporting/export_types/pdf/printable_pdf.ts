@@ -53,7 +53,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    this.logger = this.logger.get('png-export-v1');
+    this.logger = this.logger.get(this.id);
   }
 
   public createJob = async (
