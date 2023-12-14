@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiText,
   EuiTextColor,
+  EuiTextTruncate,
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
@@ -73,11 +74,15 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4>{title}</h4>
+              <h4>
+                <EuiTextTruncate text={title} />
+              </h4>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTextColor color="subdued">{modelId}</EuiTextColor>
+            <EuiTextColor color="subdued">
+              <EuiTextTruncate text={modelId} />
+            </EuiTextColor>
           </EuiFlexItem>
           {(licenseType || description) && (
             <EuiFlexItem>
@@ -96,9 +101,7 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
                 {description && (
                   <EuiFlexItem style={{ overflow: 'hidden' }}>
                     <EuiText size="xs">
-                      <div className="eui-textTruncate" title={description}>
-                        {description}
-                      </div>
+                      <EuiTextTruncate text={description} />
                     </EuiText>
                   </EuiFlexItem>
                 )}
