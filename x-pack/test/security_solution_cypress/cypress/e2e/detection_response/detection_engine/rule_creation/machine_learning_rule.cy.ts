@@ -6,6 +6,7 @@
  */
 import { isArray } from 'lodash';
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../../helpers/rules';
 import { getMachineLearningRule } from '../../../../objects/rule';
 
@@ -64,6 +65,7 @@ describe(
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
+      deleteAlertsAndRules();
       login();
       visit(CREATE_RULE_URL);
     });

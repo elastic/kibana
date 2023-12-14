@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteExceptionLists } from '../../../../../../tasks/api_calls/common';
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 import {
@@ -40,7 +41,7 @@ const getExceptionList2 = () => ({
 describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
-
+    deleteExceptionLists();
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
       createRule({

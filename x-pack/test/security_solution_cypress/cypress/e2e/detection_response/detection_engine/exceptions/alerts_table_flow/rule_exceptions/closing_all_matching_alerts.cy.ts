@@ -10,7 +10,11 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   waitForAlerts,
 } from '../../../../../../tasks/alerts';
-import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_calls/common';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../../../../tasks/api_calls/common';
 import { login } from '../../../../../../tasks/login';
 import { visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
@@ -32,12 +36,11 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', 'exceptions');
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-
-    login();
+    deleteDataView('exceptions-*');
     postDataView('exceptions-*');
+    login();
     createRule(
       getNewRule({
         query: 'agent.name:*',
@@ -48,9 +51,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
     ).then((rule) => visitRuleDetailsPage(rule.body.id));
 
     waitForAlertsToPopulate();
-  });
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
   });
 
   // TODO: https://github.com/elastic/kibana/issues/161539

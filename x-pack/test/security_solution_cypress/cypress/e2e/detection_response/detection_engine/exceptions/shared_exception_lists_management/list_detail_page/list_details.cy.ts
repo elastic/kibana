@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  deleteAlertsAndRules,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/common';
 import { getExceptionList } from '../../../../../../objects/exception';
 import { getNewRule } from '../../../../../../objects/rule';
 
@@ -43,8 +47,8 @@ const EXCEPTION_LIST_NAME = 'Newly created list';
 
 describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    login();
-
+    deleteAlertsAndRules();
+    deleteExceptionLists();
     // Create exception list associated with a rule
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
       createRule(
@@ -61,6 +65,7 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
       )
     );
     createRule(getNewRule({ name: 'Rule to link to shared list' }));
+    login();
     visit(EXCEPTIONS_URL);
   });
 

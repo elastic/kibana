@@ -80,13 +80,10 @@ describe(
 
       context('On Rule Details page', () => {
         beforeEach(() => {
+          deleteCustomRule();
           createRule(getNewRule()).then((rule) =>
             loadPageAsReadOnlyUser(ruleDetailsUrl(rule.body.id))
           );
-        });
-
-        afterEach(() => {
-          deleteCustomRule();
         });
 
         it('We show one primary callout', () => {
@@ -130,13 +127,10 @@ describe(
 
       context('On Rule Details page', () => {
         beforeEach(() => {
+          deleteCustomRule();
           createRule(getNewRule()).then((rule) =>
             loadPageAsPlatformEngineer(ruleDetailsUrl(rule.body.id))
           );
-        });
-
-        afterEach(() => {
-          deleteCustomRule();
         });
 
         it('We show no callouts', () => {

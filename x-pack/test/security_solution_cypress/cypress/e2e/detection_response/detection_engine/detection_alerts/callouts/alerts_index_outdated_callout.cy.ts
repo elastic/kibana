@@ -83,13 +83,10 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
+            deleteCustomRule();
             createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
-          });
-
-          afterEach(() => {
-            deleteCustomRule();
           });
 
           it('We show 1 primary callout', () => {
@@ -132,13 +129,10 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
+            deleteCustomRule();
             createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
-          });
-
-          afterEach(() => {
-            deleteCustomRule();
           });
 
           it('We show 1 primary callout', () => {
@@ -181,13 +175,10 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
+            deleteCustomRule();
             createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
               loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
             );
-          });
-
-          afterEach(() => {
-            deleteCustomRule();
           });
 
           it('We show 1 primary callout', () => {

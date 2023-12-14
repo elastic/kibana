@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
@@ -30,6 +31,7 @@ describe('Create DataView runtime field', { tags: ['@ess', '@serverless'] }, () 
   beforeEach(() => {
     deleteRuntimeField('security-solution-default', alertRunTimeField);
     deleteRuntimeField('security-solution-default', timelineRuntimeField);
+    deleteAlertsAndRules();
     login();
   });
 

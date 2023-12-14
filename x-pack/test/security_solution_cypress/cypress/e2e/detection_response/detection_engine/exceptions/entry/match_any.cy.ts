@@ -52,10 +52,6 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(RULE_STATUS).should('have.text', '—');
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-  });
-
   it('Creates exception item', () => {
     cy.log('open add exception modal');
     openExceptionFlyoutFromEmptyViewerPrompt();

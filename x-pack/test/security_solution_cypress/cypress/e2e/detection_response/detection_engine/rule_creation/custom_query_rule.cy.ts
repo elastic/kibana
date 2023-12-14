@@ -22,10 +22,6 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
 
-  beforeEach(() => {
-    deleteAlertsAndRules();
-  });
-
   describe('Custom detection rules creation', () => {
     beforeEach(() => {
       deleteAlertsAndRules();

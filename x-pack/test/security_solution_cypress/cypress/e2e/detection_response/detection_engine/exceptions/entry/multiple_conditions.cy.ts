@@ -44,10 +44,6 @@ describe(
       }).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
-    after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
-    });
-
     const exceptionName = 'My item name';
 
     it('Use multipe AND conditions and validate it generates one exception', () => {

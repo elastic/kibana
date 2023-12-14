@@ -46,20 +46,15 @@ describe.skip(
     const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
     const ADDITIONAL_ENTRY = 'host.hostname';
 
-    beforeEach(() => {
+    before(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      login();
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+    });
 
-      waitForAlertsToPopulate();
-    });
-    after(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+    beforeEach(() => {
       deleteAlertsAndRules();
-    });
-    afterEach(() => {
-      cy.task('esArchiverUnload', 'endpoint');
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      login();
+      waitForAlertsToPopulate();
     });
 
     it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {

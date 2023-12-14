@@ -49,20 +49,17 @@ describe.skip(
     const ITEM_NAME_EDIT = 'Sample Exception List Item';
     const ADDITIONAL_ENTRY = 'host.hostname';
 
-    beforeEach(() => {
+    before(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      login();
-      deleteAlertsAndRules();
+    });
 
-      cy.task('esArchiverLoad', { archiveName: 'endpoint' });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
       createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'endpoint');
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {

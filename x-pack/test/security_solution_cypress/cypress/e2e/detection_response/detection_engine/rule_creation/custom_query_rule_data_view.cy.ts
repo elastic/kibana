@@ -85,16 +85,13 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       if (rule.data_view_id != null) {
+        deleteDataView(rule.data_view_id);
+      }
+      if (rule.data_view_id != null) {
         postDataView(rule.data_view_id);
       }
       deleteAlertsAndRules();
       login();
-    });
-
-    afterEach(() => {
-      if (rule.data_view_id != null) {
-        deleteDataView(rule.data_view_id);
-      }
     });
 
     it('Creates and enables a new rule', function () {

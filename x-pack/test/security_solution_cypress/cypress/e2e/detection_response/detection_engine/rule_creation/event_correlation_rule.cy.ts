@@ -152,7 +152,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);

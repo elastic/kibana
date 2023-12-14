@@ -99,10 +99,6 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     cy.get(RULE_STATUS).should('have.text', '—');
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
-  });
-
   it('Validates empty entry values correctly', () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();

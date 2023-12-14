@@ -19,7 +19,7 @@ import {
 } from '../../../../screens/create_new_rule';
 import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { createTimeline } from '../../../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules, deleteTimelines } from '../../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   expandAdvancedSettings,
@@ -50,6 +50,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
+    deleteTimelines();
     createTimeline(getTimeline())
       .then((response) => {
         return response.body.data.persistTimeline.timeline.savedObjectId;

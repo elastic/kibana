@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteExceptionLists } from '../../../../../../tasks/api_calls/common';
 import {
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
@@ -27,6 +28,7 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
     login();
     visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
+    deleteExceptionLists();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });
 
