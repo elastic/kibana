@@ -32,11 +32,19 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.discover', {
             defaultMessage: 'Discover',
           }),
-          link: 'discover',
+          link: 'observability-log-explorer',
+          // prevent this entry from ever becoming active, effectively falling through to the obs-log-explorer child
+          getIsActive: () => false,
           renderAs: 'item',
           children: [
             {
-              // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+              link: 'discover',
+              sideNavStatus: 'hidden',
+              // avoid duplicate "Discover" breadcrumbs
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              // show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
               link: 'observability-log-explorer',
               sideNavStatus: 'hidden',
             },
