@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
-import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
+import type { ESQLColumn } from '@kbn/es-types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
-export function getGeometryColumnIndex(columns: EsqlSourceDescriptor['columns']) {
+export function getGeometryColumnIndex(columns: ESQLColumn[]) {
   const index = columns.findIndex(column => {
     return column.type === 'geo_point';
   });
@@ -23,7 +23,7 @@ export function getGeometryColumnIndex(columns: EsqlSourceDescriptor['columns'])
   return index;
 }
 
-export async function getEsqlMeta(esql: string) {
+export async function getESQLMeta(esql: string) {
   const columns = await getColumns(esql);
   const { dateFields, geoFields } = await getFields(esql);
   return {
@@ -45,7 +45,7 @@ async function getColumns(esql: string) {
       })
     );
 
-    return (resp.rawResponse as unknown as { columns: EsqlSourceDescriptor['columns'] }).columns;
+    return (resp.rawResponse as unknown as { columns: ESQLColumn[] }).columns;
   } catch (error) {
     throw new Error(i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
       defaultMessage: 'Unable to load columns. {errorMessage}',

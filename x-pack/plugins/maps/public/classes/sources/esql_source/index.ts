@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { EsqlSource } from './esql_source';
+export { ESQLSource } from './esql_source';
 export { esqlLayerWizardConfig } from './esql_layer_wizard';

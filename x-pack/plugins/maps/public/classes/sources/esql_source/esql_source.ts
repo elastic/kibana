@@ -12,31 +12,32 @@ import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { buildEsQuery, getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/es-query';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import { SOURCE_TYPES } from '../../../../common/constants'
-import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
+import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { AbstractVectorSource } from '../vector_source';
-import { getLayerFeaturesRequestName } from '../vector_source';
-import type { IVectorSource, GeoJsonWithMeta } from '../vector_source';
+import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
+import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import { getData, getUiSettings } from '../../../kibana_services';
-import { convertToGeoJson, type ESQLSearchReponse } from './convert_to_geojson';
+import { convertToGeoJson } from './convert_to_geojson';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class EsqlSource extends AbstractVectorSource implements IVectorSource {
-  readonly _descriptor: EsqlSourceDescriptor;
+export class ESQLSource extends AbstractVectorSource implements IVectorSource {
+  readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(
-    descriptor: Partial<EsqlSourceDescriptor>
-  ): EsqlSourceDescriptor {
+    descriptor: Partial<ESQLSourceDescriptor>
+  ): ESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error(
-        'Cannot create EsqlSourceDescriptor when esql is not provided'
+        'Cannot create ESQLSourceDescriptor when esql is not provided'
       );
     }
     return {
@@ -48,8 +49,8 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     };
   }
 
-  constructor(descriptor: EsqlSourceDescriptor) {
-    super(EsqlSource.createDescriptor(descriptor));
+  constructor(descriptor: ESQLSourceDescriptor) {
+    super(ESQLSource.createDescriptor(descriptor));
     this._descriptor = descriptor;
   }
 

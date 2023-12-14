@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
+
 import type { Query, AggregateQuery } from '../filters';
 
 type Language = keyof AggregateQuery;
@@ -70,7 +70,7 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   return '';
 }
 
-export function getLimitFromESQLQuery(esql: string): number | undefined {
+export function getLimitFromESQLQuery(esql: string): number {
   const limitCommands = esql.match(new RegExp(/LIMIT\s[0-9]+/, 'ig'));
   if (!limitCommands) {
     return DEFAULT_ESQL_LIMIT;

@@ -9,6 +9,7 @@
 
 import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
+import type { ESQLColumn } from '@kbn/es-types';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
@@ -19,12 +20,6 @@ import {
   MVT_FIELD_TYPE,
   SOURCE_TYPES,
 } from '../constants';
-
-// TODO replace once type is defined in estypes
-export type EsqlColumn = {
-  name: string;
-  type: string;
-}
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -43,11 +38,11 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   tooltipProperties: string[];
 };
 
-export type EsqlSourceDescriptor = AbstractSourceDescriptor & {
+export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
   id: string;
   esql: string;
-  columns: EsqlColumn[];
+  columns: ESQLColumn[];
   /*
    * When provided, esql requests narrowed by kibana global time range
    */

@@ -8,20 +8,20 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { ESQLColumn } from '@kbn/es-types';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
-import { getEsqlMeta, getGeometryColumnIndex } from './get_esql_meta';
+import { getESQLMeta, getGeometryColumnIndex } from './get_esql_meta';
 
 interface Props {
   dateField?: string;
   geoField?: string;
   esql: string;
-  onEsqlChange: ({ columns, esql }: { columns: EsqlSourceDescriptor['columns'], esql: string }) => void;
+  onESQLChange: ({ columns, esql }: { columns: ESQLColumn[], esql: string }) => void;
   onDateFieldChange: (dateField?: string) => void;
   onGeoFieldChange: (geoField?: string) => void;
 }
 
-export function EsqlEditor(props: Props) {
+export function ESQLEditor(props: Props) {
   const [error, setError] = useState<Error | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,14 +38,14 @@ export function EsqlEditor(props: Props) {
     let ignore = false;
     setError(undefined);
     setIsLoading(true);
-    getEsqlMeta((onSubmitQuery as { esql: string }).esql)
+    getESQLMeta((onSubmitQuery as { esql: string }).esql)
       .then((esqlMeta) => {
         if (!ignore) {
           try {
             getGeometryColumnIndex(esqlMeta.columns);
             setDateFields(esqlMeta.dateFields);
             setGeoFields(esqlMeta.geoFields);
-            props.onEsqlChange({
+            props.onESQLChange({
               columns: esqlMeta.columns,
               esql: (onSubmitQuery as { esql: string }).esql
             });
@@ -55,9 +55,9 @@ export function EsqlEditor(props: Props) {
           setIsLoading(false);
         }
       })
-      .catch((getEsqlMetaError) => {
+      .catch((getESQLMetaError) => {
         if (!ignore) {
-          setError(getEsqlMetaError);
+          setError(getESQLMetaError);
           setIsLoading(false);
         }
       });

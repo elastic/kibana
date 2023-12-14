@@ -8,12 +8,12 @@
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { sourceTitle, EsqlSource } from './esql_source';
+import { sourceTitle, ESQLSource } from './esql_source';
 import {
   LAYER_WIZARD_CATEGORY,
   WIZARD_ID,
 } from '../../../../common/constants';
-import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
+import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
 
@@ -26,14 +26,14 @@ export const esqlLayerWizardConfig: LayerWizard = {
   isBeta: true,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (
-      sourceConfig: Partial<EsqlSourceDescriptor> | null
+      sourceConfig: Partial<ESQLSourceDescriptor> | null
     ) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
       }
 
-      const sourceDescriptor = EsqlSource.createDescriptor(sourceConfig);
+      const sourceDescriptor = ESQLSource.createDescriptor(sourceConfig);
       const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);
     };

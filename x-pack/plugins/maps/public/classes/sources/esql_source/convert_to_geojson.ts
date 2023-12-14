@@ -8,15 +8,8 @@
 // @ts-ignore
 import { parse } from 'wellknown';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
-import type { EsqlColumn } from '../../../../common/descriptor_types';
+import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getGeometryColumnIndex } from './get_esql_meta';
-
-// TODO replace once types are defined in estypes
-type Hit = unknown[];
-export interface ESQLSearchReponse {
-  columns: EsqlColumn[];
-  values: Hit[];
-}
 
 export function convertToGeoJson(resp: ESQLSearchReponse): FeatureCollection {
   const geometryIndex = getGeometryColumnIndex(resp.columns);

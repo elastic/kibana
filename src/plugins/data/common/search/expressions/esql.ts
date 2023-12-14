@@ -20,6 +20,7 @@ import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
@@ -88,14 +89,6 @@ interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
-}
-
-interface ESQLSearchReponse {
-  columns?: Array<{
-    name: string;
-    type: string;
-  }>;
-  values: unknown[][];
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {

@@ -9,17 +9,17 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { EuiSkeletonText } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
-import type { EsqlSourceDescriptor } from '../../../../common/descriptor_types';
+import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
-import { EsqlEditor } from './esql_editor';
+import { ESQLEditor } from './esql_editor';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<EsqlSourceDescriptor> | null) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESQLSourceDescriptor> | null) => void;
 }
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [columns, setColumns] = useState<EsqlSourceDescriptor['columns']>([]);
+  const [columns, setColumns] = useState<ESQLSourceDescriptor['columns']>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
   const [geoField, setGeoField] = useState<string | undefined>();
@@ -79,11 +79,11 @@ export function CreateSourceEditor(props: Props) {
         lines={3}
         isLoading={!isInitialized}
       >
-      <EsqlEditor
+      <ESQLEditor
         dateField={dateField}
         geoField={geoField}
         esql={esql}
-        onEsqlChange={({ columns, esql }: { columns: EsqlSourceDescriptor['columns'], esql: string }) => {
+        onESQLChange={({ columns, esql }: { columns: ESQLSourceDescriptor['columns'], esql: string }) => {
           setColumns(columns);
           setEsql(esql);
         }}
