@@ -71,6 +71,7 @@ import {
   deleteSecrets,
   extractAndUpdateOutputSecrets,
   extractAndWriteOutputSecrets,
+  isOutputSecretStorageEnabled,
 } from './secrets';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
@@ -120,12 +121,6 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
-}
-
-function isOutputSecretsEnabled() {
-  const { outputSecretsStorage } = appContextService.getExperimentalFeatures();
-
-  return !!outputSecretsStorage;
 }
 
 async function getAgentPoliciesPerOutput(
@@ -588,7 +583,7 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    if (isOutputSecretsEnabled()) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -802,7 +797,7 @@ class OutputService {
         );
       }
     }
-    if (isOutputSecretsEnabled()) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
