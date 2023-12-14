@@ -73,10 +73,14 @@ export const setupQueryExtractionRoute = (
             // savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
           };
 
-          const expression = await docToExpression(savedVis, {
-            elasticsearch: (await context.core).elasticsearch.client.asCurrentUser,
-            savedObjects: client,
-          });
+          const expression = await docToExpression(
+            savedVis,
+            {
+              elasticsearch: (await context.core).elasticsearch.client.asCurrentUser,
+              savedObjects: client,
+            },
+            request
+          );
 
           return response.ok({
             body: {
