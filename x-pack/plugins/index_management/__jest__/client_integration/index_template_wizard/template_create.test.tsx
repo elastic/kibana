@@ -20,7 +20,7 @@ import {
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
-jest.spyOn(console, "warn").mockImplementation();
+jest.spyOn(console, 'warn').mockImplementation();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
