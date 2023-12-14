@@ -13,10 +13,9 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { KibanaSavedObjectsSLORepository } from '..';
 import { ObservabilityConfig } from '../../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
-import { StoredSLO } from '../../../domain/models';
-import { SO_SLO_TYPE } from '../../../saved_objects';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -79,6 +78,7 @@ export class SloOrphanSummaryCleanupTask {
     const runAt = new Date().toISOString();
 
     if (this.soClient && this.esClient) {
+      const repository = new KibanaSavedObjectsSLORepository(this.soClient);
       let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
       do {
@@ -89,22 +89,15 @@ export class SloOrphanSummaryCleanupTask {
         }
 
         searchAfterKey = searchAfter;
-        const sloDefinitions = (
-          await this.soClient.bulkGet<Pick<StoredSLO, 'id' | 'revision'>>(
-            sloSummaryIds.map(({ id }) => ({
-              id,
-              type: SO_SLO_TYPE,
-            })),
-            {
-              namespace: ALL_SPACES_ID,
-            }
-          )
-        ).saved_objects.filter((so) => !so.error);
+        const sloDefinitions = await repository.findAllByIds(
+          sloSummaryIds.map(({ id }) => id),
+          ALL_SPACES_ID
+        );
 
         const sloSummaryIdsToDelete = sloSummaryIds.filter(
           ({ id, revision }) =>
             !sloDefinitions.find(
-              ({ attributes }) => attributes.id === id && attributes.revision === revision
+              (attributes) => attributes.id === id && attributes.revision === revision
             )
         );
 

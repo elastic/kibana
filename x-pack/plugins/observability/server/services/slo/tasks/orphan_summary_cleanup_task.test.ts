@@ -12,6 +12,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { cloneDeep, times } from 'lodash';
+import { SLORepository } from '..';
+import { createSLORepositoryMock } from '../mocks';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
@@ -24,16 +26,22 @@ describe('SloSummaryCleanupTask', () => {
     jest.clearAllMocks();
   });
 
+  let mockRepository: jest.Mocked<SLORepository>;
+
+  beforeEach(() => {
+    mockRepository = createSLORepositoryMock();
+  });
+
   it('should run for empty', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet();
+    mockRepository.findAllByIds = mockSOClientFind();
     await task.start(taskManagerStart, soClient, esClient);
     await task.runTask();
   });
 
   it('should run some slos', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet([
+    mockRepository.findAllByIds = mockSOClientFind([
       { attributes: { id: '1', revision: 1 } },
       { attributes: { id: '2', revision: 1 } },
       { attributes: { id: '3', revision: 1 } },
@@ -70,7 +78,7 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run lots of slos', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet(
+    mockRepository.findAllByIds = mockSOClientFind(
       times(10000, (i) => ({
         attributes: { id: `${i}`, revision: 1 },
       }))
@@ -110,7 +118,7 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when lots of slo defs are there', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet(
+    mockRepository.findAllByIds = mockSOClientFind(
       times(10000, (i) => ({
         attributes: { id: `${i}`, revision: 2 },
       }))
@@ -183,7 +191,7 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when summaries are way more then defs', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet(
+    mockRepository.findAllByIds = mockSOClientFind(
       times(100, (i) => ({
         attributes: { id: `${i}`, revision: 2 },
       }))
@@ -254,7 +262,7 @@ describe('SloSummaryCleanupTask', () => {
 
   it('should run when there are no Slo defs', async function () {
     const task = new SloOrphanSummaryCleanupTask(taskManagerSetup, logger, {} as any);
-    soClient.bulkGet = mockSOClientBulkGet();
+    mockRepository.findAllByIds = mockSOClientFind();
     task.fetchSloSummariesIds = jest.fn().mockImplementation(async (searchKey) => {
       if (!searchKey) {
         return {
@@ -311,23 +319,6 @@ describe('SloSummaryCleanupTask', () => {
   });
 });
 
-export const mockSOClientBulkGet = (slos: any = null) => {
-  const result = cloneDeep(slos);
-  return jest.fn().mockImplementation(
-    (
-      ids: Array<{
-        id: string;
-      }>
-    ) => {
-      return {
-        saved_objects: ids.map(({ id }) => {
-          return (
-            result?.find((slo: any) => slo.attributes.id === id) ?? {
-              error: {},
-            }
-          );
-        }),
-      };
-    }
-  );
+export const mockSOClientFind = (slos: any = null) => {
+  return cloneDeep(slos);
 };
