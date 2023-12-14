@@ -84,6 +84,7 @@ export async function executor(
             actionGroup: ActionGroupId,
             state: alert.state,
             context: alert.context,
+            payload: alert.payload,
           });
         } catch (e) {
           logger.warn(`Couldn't parse reported alert ${alertStr}`);

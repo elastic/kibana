@@ -1,6 +1,8 @@
-function fibonacci(n) {
-  if (n <= 1) return n;
-  return fibonacci(n - 1) + fibonacci(n - 2);
-}
+async function run({ esClient, alertsClient, getTimeRange }) {
+  function fibonacci(n) {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+  }
 
-fibonacci(45);
+  fibonacci(45);
+}

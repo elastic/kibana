@@ -52,7 +52,22 @@ export const RuleForm: React.FunctionComponent<
 
   useEffect(() => {
     if (null == props.ruleParams.codeOrUrl) {
-      props.setRuleParams('codeOrUrl', 'console.log("your code appears here!");');
+      props.setRuleParams(
+        'codeOrUrl',
+        [
+          'async function run({ esClient, alertsClient, getTimeRange }) {',
+          '  const result = await esClient.search({',
+          '    // You know, for search',
+          '  });',
+          '',
+          '  for (const hit of result.hits.hits) {',
+          '    alertsClient.report({',
+          '      // Build the alert',
+          '    });',
+          '  }',
+          '}',
+        ].join('\n')
+      );
     }
     if (null == props.ruleParams.isUrl) {
       props.setRuleParams('isUrl', false);
