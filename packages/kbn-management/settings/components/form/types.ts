@@ -51,3 +51,11 @@ interface KibanaDependencies {
  * render a {@link Form} component and its dependents.
  */
 export type FormKibanaDependencies = KibanaDependencies & FieldRowKibanaDependencies;
+
+/**
+ * An interface representing an unsaved setting change in the form.
+ */
+export interface UnsavedChange {
+  id: string;
+  change: UnsavedFieldChange;
+}

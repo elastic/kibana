@@ -18,7 +18,7 @@ import { FieldCategory, type FieldCategoryProps } from './category';
  */
 export interface FieldCategoriesProps
   extends Pick<FieldCategoryProps, 'onClearQuery'>,
-    Pick<FieldRowProps, 'onFieldChange' | 'isSavingEnabled'> {
+    Pick<FieldRowProps, 'isSavingEnabled'> {
   /** Categorized fields for display. */
   categorizedFields: CategorizedFields;
   categoryCounts: { [category: string]: number };
@@ -38,7 +38,6 @@ export const FieldCategories = ({
   unsavedChanges = {},
   onClearQuery,
   isSavingEnabled,
-  onFieldChange,
 }: FieldCategoriesProps) => (
   <>
     {Object.entries(categorizedFields).map(([category, { count, fields }]) => (
@@ -51,7 +50,7 @@ export const FieldCategories = ({
           <FieldRow
             key={field.id}
             unsavedChange={unsavedChanges[field.id]}
-            {...{ field, isSavingEnabled, onFieldChange }}
+            {...{ field, isSavingEnabled }}
           />
         ))}
       </FieldCategory>

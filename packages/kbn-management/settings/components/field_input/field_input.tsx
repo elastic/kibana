@@ -42,6 +42,7 @@ import {
   isUndefinedFieldUnsavedChange,
 } from '@kbn/management-settings-field-definition/is';
 
+import { useChangesDispatch } from '@kbn/management-settings-components-form';
 import {
   BooleanInput,
   CodeEditorInput,
@@ -61,8 +62,6 @@ export interface FieldInputProps<T extends SettingType = SettingType> {
   field: Pick<FieldDefinition<T>, 'type' | 'id' | 'name' | 'ariaAttributes'>;
   /** An {@link UnsavedFieldChange} for the component, if any. */
   unsavedChange?: UnsavedFieldChange<T>;
-  /** The `onInputChange` handler for the input. */
-  onInputChange: OnInputChangeFn<T>;
   /** True if the input can be saved, false otherwise. */
   isSavingEnabled: boolean;
   /** True if the value within the input is invalid, false otherwise. */
@@ -82,7 +81,23 @@ const getMismatchError = (type: SettingType, unsavedType?: SettingType) =>
  * @param props The props for the {@link FieldInput} component.
  */
 export const FieldInput = React.forwardRef<ResetInputRef, FieldInputProps>((props, ref) => {
-  const { field, unsavedChange, onInputChange, isSavingEnabled } = props;
+  const { field, unsavedChange, isSavingEnabled } = props;
+  const changeDispatch = useChangesDispatch();
+
+  const onInputChange: OnInputChangeFn = (update) => {
+    if (!update) {
+      changeDispatch({
+        type: 'deleted',
+        id: field.id,
+      });
+    }
+
+    changeDispatch({
+      type: 'added',
+      id: field.id,
+      change: update,
+    });
+  };
 
   // Create a ref for those input fields that require an imperative handle.
   const inputRef = useRef<ResetInputRef>(null);

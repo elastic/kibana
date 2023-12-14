@@ -21,13 +21,12 @@ import type {
   ResetInputRef,
   SettingType,
   UnsavedFieldChange,
-  OnInputChangeFn,
-  OnFieldChangeFn,
 } from '@kbn/management-settings-types';
 import { isImageFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldInput } from '@kbn/management-settings-components-field-input';
 
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
+import { useChangesDispatch } from '@kbn/management-settings-components-form';
 import { FieldDescription } from './description';
 import { FieldTitle } from './title';
 import { useFieldStyles } from './field_row.styles';
@@ -60,8 +59,6 @@ export interface FieldRowProps {
   field: Definition;
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
-  /** The {@link OnInputChangeFn} handler. */
-  onFieldChange: OnFieldChangeFn;
   /**
    * The onClear handler, if a value is cleared to an empty or default state.
    * @param id The id relating to the field to clear.
@@ -76,7 +73,7 @@ export interface FieldRowProps {
  * @param props The {@link FieldRowProps} for the {@link FieldRow} component.
  */
 export const FieldRow = (props: FieldRowProps) => {
-  const { isSavingEnabled, onFieldChange, field, unsavedChange } = props;
+  const { isSavingEnabled, field, unsavedChange } = props;
   const { id, groupId, isOverridden, unsavedFieldId } = field;
   const { cssFieldFormGroup } = useFieldStyles({
     field,
@@ -86,10 +83,7 @@ export const FieldRow = (props: FieldRowProps) => {
   // Create a ref for those input fields that use a `reset` handle.
   const ref = useRef<ResetInputRef>(null);
 
-  // Route any change to the `onFieldChange` handler, along with the field id.
-  const onInputChange: OnInputChangeFn = (update) => {
-    onFieldChange(id, update);
-  };
+  const changeDispatch = useChangesDispatch();
 
   const onReset = () => {
     ref.current?.reset();
@@ -97,9 +91,16 @@ export const FieldRow = (props: FieldRowProps) => {
     const update = { type: field.type, unsavedValue: field.defaultValue };
 
     if (hasUnsavedChange(field, update)) {
-      onInputChange(update);
+      changeDispatch({
+        type: 'added',
+        id: field.id,
+        change: update,
+      });
     } else {
-      onInputChange();
+      changeDispatch({
+        type: 'deleted',
+        id: field.id,
+      });
     }
   };
 
@@ -111,9 +112,16 @@ export const FieldRow = (props: FieldRowProps) => {
     // Indicate a field is being cleared for a new value by setting its unchanged
     // value to`undefined`. Currently, this only applies to `image` fields.
     if (field.savedValue !== undefined && field.savedValue !== null) {
-      onInputChange({ type: field.type, unsavedValue: undefined });
+      changeDispatch({
+        type: 'added',
+        id: field.id,
+        change: { type: field.type, unsavedValue: undefined },
+      });
     } else {
-      onInputChange();
+      changeDispatch({
+        type: 'deleted',
+        id: field.id,
+      });
     }
   };
 
@@ -162,7 +170,7 @@ export const FieldRow = (props: FieldRowProps) => {
             <FieldInput
               isSavingEnabled={isSavingEnabled && !isOverridden}
               isInvalid={unsavedChange?.isInvalid}
-              {...{ field, unsavedChange, ref, onInputChange }}
+              {...{ field, unsavedChange, ref }}
             />
             {unsavedScreenReaderMessage}
           </>

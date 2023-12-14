@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useReducer } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import { FieldCategories } from '@kbn/management-settings-components-field-category';
-import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
+import { ChangesDispatchProvider, changesReducer, initialChanges } from './changes_context';
+import { UnsavedChange } from './types';
 
 /**
  * Props for a {@link Form} component.
@@ -37,17 +38,15 @@ export interface FormProps {
 export const Form = (props: FormProps) => {
   const { fields, isSavingEnabled, categoryCounts, onClearQuery } = props;
 
-  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
-    {}
-  );
+  const [unsavedChanges, dispatch] = useReducer(changesReducer, initialChanges);
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  const unsavedChangesCount = Object.keys(unsavedChanges).length;
-  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
+  const unsavedChangesCount = unsavedChanges.length;
+  const hasInvalidChanges = unsavedChanges.includes((el: UnsavedChange) => el.change.isInvalid);
 
   const clearAllUnsaved = () => {
-    setUnsavedChanges({});
+    dispatch({ type: 'cleared' });
   };
 
   const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved });
@@ -58,39 +57,30 @@ export const Form = (props: FormProps) => {
     setIsLoading(false);
   };
 
-  const onFieldChange: OnFieldChangeFn = (id, change) => {
-    if (!change) {
-      const { [id]: unsavedChange, ...rest } = unsavedChanges;
-      setUnsavedChanges(rest);
-      return;
-    }
-
-    setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
-  };
-
   const categorizedFields = categorizeFields(fields);
 
   return (
     <Fragment>
-      <FieldCategories
-        {...{
-          categorizedFields,
-          categoryCounts,
-          isSavingEnabled,
-          onFieldChange,
-          onClearQuery,
-          unsavedChanges,
-        }}
-      />
-      {!isEmpty(unsavedChanges) && (
-        <BottomBar
-          onSaveAll={saveAll}
-          onClearAllUnsaved={clearAllUnsaved}
-          hasInvalidChanges={hasInvalidChanges}
-          isLoading={isLoading}
-          unsavedChangesCount={unsavedChangesCount}
+      <ChangesDispatchProvider {...{ dispatch }}>
+        <FieldCategories
+          {...{
+            categorizedFields,
+            categoryCounts,
+            isSavingEnabled,
+            onClearQuery,
+            unsavedChanges,
+          }}
         />
-      )}
+        {!isEmpty(unsavedChanges) && (
+          <BottomBar
+            onSaveAll={saveAll}
+            onClearAllUnsaved={clearAllUnsaved}
+            hasInvalidChanges={hasInvalidChanges}
+            isLoading={isLoading}
+            unsavedChangesCount={unsavedChangesCount}
+          />
+        )}
+      </ChangesDispatchProvider>
     </Fragment>
   );
 };
