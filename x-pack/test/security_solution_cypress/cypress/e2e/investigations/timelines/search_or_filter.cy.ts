@@ -25,6 +25,7 @@ import {
   showDataProviderQueryBuilder,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
@@ -32,6 +33,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
+      deleteTimelines();
       visitWithTimeRange(hostsUrl('allHosts'));
     });
 
@@ -57,6 +59,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
   describe.skip('Update kqlMode for timeline', () => {
     beforeEach(() => {
       login();
+      deleteTimelines();
       visit(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
