@@ -79,6 +79,7 @@ export interface AgentData {
     target_version: string;
     state: string;
     error_msg: string;
+    count: number;
   }>;
 }
 
@@ -143,6 +144,7 @@ export const getAgentData = async (
           },
           upgrade_details: {
             multi_terms: {
+              size: 1000,
               terms: [
                 {
                   field: 'upgrade_details.target_version.keyword',
@@ -217,6 +219,7 @@ export const getAgentData = async (
         target_version: bucket.key[0],
         state: bucket.key[1],
         error_msg: bucket.key[2],
+        count: bucket.doc_count,
       })
     );
 

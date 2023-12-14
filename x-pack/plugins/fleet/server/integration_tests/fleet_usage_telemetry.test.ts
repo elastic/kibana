@@ -581,16 +581,19 @@ describe('fleet usage telemetry', () => {
       target_version: '8.12.0',
       state: 'UPG_FAILED',
       error_msg: 'Download failed',
+      count: 1,
     });
     expect(usage?.upgrade_details).toContainEqual({
       target_version: '8.12.0',
       state: 'UPG_FAILED',
       error_msg: 'Agent crash detected',
+      count: 1,
     });
     expect(usage?.upgrade_details).toContainEqual({
       target_version: '8.11.0',
       state: 'UPG_ROLLBACK',
       error_msg: '',
+      count: 1,
     });
   });
 });
