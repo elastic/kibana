@@ -25,14 +25,14 @@ import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
 import type { Message } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import type { ChatActionClickHandler } from './types';
-import type { TelemetryType } from '../../analytics';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
 export interface ChatItemProps extends ChatTimelineItem {
   onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
-  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGeneratingClick: () => void;
 }
 

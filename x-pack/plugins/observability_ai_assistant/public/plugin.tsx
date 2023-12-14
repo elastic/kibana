@@ -89,7 +89,7 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
-    registerTelemetryEventTypes(coreSetup);
+    registerTelemetryEventTypes(coreSetup.analytics);
 
     return {};
   }

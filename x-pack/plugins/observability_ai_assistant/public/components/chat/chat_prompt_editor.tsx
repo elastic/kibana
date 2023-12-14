@@ -22,7 +22,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { MessageRole, type Message } from '../../../common';
 import { FunctionListPopover } from './function_list_popover';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
-import { TELEMETRY, TelemetryType } from '../../analytics';
+import { TelemetryEventTypeWithPayload, TELEMETRY } from '../../analytics';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
@@ -32,7 +32,7 @@ export interface ChatPromptEditorProps {
   initialFunctionPayload?: string;
   trigger?: MessageRole;
   onSubmit: (message: Message) => void;
-  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
 }
 
 export function ChatPromptEditor({
@@ -143,7 +143,10 @@ export function ChatPromptEditor({
         onSubmit(message);
       }
 
-      onSendTelemetry(TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat, message);
+      onSendTelemetry({
+        type: TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat,
+        payload: message,
+      });
     } catch (_) {
       setPrompt(currentPrompt);
     }

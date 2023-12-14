@@ -34,7 +34,7 @@ import { WelcomeMessage } from './welcome_message';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { ChatActionClickType } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
-import { ChatFeedback, TELEMETRY } from '../../analytics';
+import { TELEMETRY, sendEvent } from '../../analytics';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -141,13 +141,13 @@ export function ChatBody({
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value.conversation) {
-      chatService.analytics.reportEvent<ChatFeedback>(
-        TELEMETRY.observability_ai_assistant_chat_feedback,
-        {
+      sendEvent(chatService.analytics, {
+        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        payload: {
           messageWithFeedback: { message, feedback },
           conversation: conversation.value.conversation,
-        }
-      );
+        },
+      });
     }
   };
 
@@ -203,7 +203,9 @@ export function ChatBody({
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
-              onSendTelemetry={chatService.analytics.reportEvent}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
             />
             <EuiSpacer size="s" />
           </EuiPanel>
@@ -244,7 +246,9 @@ export function ChatBody({
                     const indexOf = messages.indexOf(message);
                     next(messages.slice(0, indexOf));
                   }}
-                  onSendTelemetry={chatService.analytics.reportEvent}
+                  onSendTelemetry={(eventWithPayload) =>
+                    sendEvent(chatService.analytics, eventWithPayload)
+                  }
                   onStopGenerating={() => {
                     stop();
                   }}
@@ -294,7 +298,9 @@ export function ChatBody({
             <ChatPromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               loading={isLoading}
-              onSendTelemetry={chatService.analytics.reportEvent}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));

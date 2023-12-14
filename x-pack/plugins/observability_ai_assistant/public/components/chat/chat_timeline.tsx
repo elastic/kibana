@@ -14,7 +14,7 @@ import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
 import type { ObservabilityAIAssistantChatService } from '../../types';
-import type { TelemetryType } from '../../analytics';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { ChatState } from '../../hooks/use_chat';
@@ -55,7 +55,7 @@ export interface ChatTimelineProps {
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
-  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGenerating: () => void;
   onActionClick: ChatActionClickHandler;
 }
@@ -121,7 +121,7 @@ export function ChatTimeline({
             onFeedback={onFeedback}
             onRegenerate={onRegenerate}
             onEditSubmit={onEdit}
-            onSendTelemetry={chatService.analytics.reportEvent}
+            onSendTelemetry={onSendTelemetry}
             onStopGenerating={onStopGenerating}
           />
         ) : (

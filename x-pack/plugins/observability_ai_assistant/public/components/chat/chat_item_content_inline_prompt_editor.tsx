@@ -10,7 +10,7 @@ import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { type Message, MessageRole } from '../../../common';
 import type { ChatActionClickHandler } from './types';
-import type { TelemetryType } from '../../analytics';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
 interface Props {
   content: string | undefined;
@@ -24,7 +24,7 @@ interface Props {
   loading: boolean;
   editing: boolean;
   onActionClick: ChatActionClickHandler;
-  onSendTelemetry: (telemetryType: TelemetryType, payload: any) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
 }
 export function ChatItemContentInlinePromptEditor({

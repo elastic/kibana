@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
-import { InsightFeedback, TELEMETRY } from '../../analytics';
+import { sendEvent, TELEMETRY } from '../../analytics';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
@@ -81,13 +81,13 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
-                    chatService.analytics.reportEvent<InsightFeedback>(
-                      TELEMETRY.observability_ai_assistant_insight_feedback,
-                      {
+                    sendEvent(chatService.analytics, {
+                      type: TELEMETRY.observability_ai_assistant_insight_feedback,
+                      payload: {
                         feedback,
                         message: lastAssistantResponse,
-                      }
-                    );
+                      },
+                    });
                   }
                 }}
               />

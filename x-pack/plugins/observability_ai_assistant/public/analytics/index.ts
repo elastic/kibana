@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
-
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { Message } from '../../common';
 import {
   eventType as chatFeedbackEventType,
   chatFeedbackEventSchema,
@@ -22,16 +22,7 @@ import {
   userSentPromptEventSchema,
 } from './schemas/user_sent_prompt';
 
-export type { ChatFeedback };
-export type { InsightFeedback };
-
 const schemas = [chatFeedbackEventSchema, insightFeedbackEventSchema, userSentPromptEventSchema];
-
-export const registerTelemetryEventTypes = (coreSetup: CoreSetup) => {
-  schemas.forEach((schema) => {
-    coreSetup.analytics.registerEventType<{}>(schema);
-  });
-};
 
 export const TELEMETRY = {
   [chatFeedbackEventType]: chatFeedbackEventType,
@@ -39,4 +30,20 @@ export const TELEMETRY = {
   [userSentPromptEventType]: userSentPromptEventType,
 } as const;
 
-export type TelemetryType = keyof typeof TELEMETRY;
+export type TelemetryEventTypeWithPayload =
+  | { type: typeof chatFeedbackEventType; payload: ChatFeedback }
+  | { type: typeof insightFeedbackEventType; payload: InsightFeedback }
+  | { type: typeof userSentPromptEventType; payload: Message };
+
+export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
+  schemas.forEach((schema) => {
+    analytics.registerEventType<{}>(schema);
+  });
+};
+
+export function sendEvent(
+  analytics: AnalyticsServiceStart,
+  eventType: TelemetryEventTypeWithPayload
+): void {
+  analytics.reportEvent(eventType.type, eventType.payload);
+}
