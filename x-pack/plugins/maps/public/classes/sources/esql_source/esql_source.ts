@@ -10,12 +10,13 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { buildEsQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { buildEsQuery, getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/es-query';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import { SOURCE_TYPES } from '../../../../common/constants'
 import type { EsqlSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { AbstractVectorSource } from '../vector_source';
 import { getLayerFeaturesRequestName } from '../vector_source';
@@ -81,6 +82,10 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     return this._descriptor.dateField !== undefined;
   }
 
+  isFilterByMapBounds() {
+    return this._descriptor.geoField !== undefined;
+  }
+
   async getGeoJsonWithMeta(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -88,6 +93,7 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
+    const limit = getLimitFromESQLQuery(this._descriptor.esql);
     const params: { query: string; filter?: { bool: BoolQuery } } = {
       query: this._descriptor.esql
     };
@@ -104,7 +110,12 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
       ...(requestMeta.embeddableSearchContext?.filters ?? [])
     ];
 
-    if (this.getApplyGlobalTime()) {
+    if (this.isFilterByMapBounds() && requestMeta.buffer) {
+      const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField!]);
+      filters.push(extentFilter);
+    }
+
+    if (requestMeta.applyGlobalTime) {
       const timeRange = requestMeta.timeslice
         ? {
             from: new Date(requestMeta.timeslice.from).toISOString(),
@@ -151,8 +162,43 @@ export class EsqlSource extends AbstractVectorSource implements IVectorSource {
 
     requestResponder.ok({ json: rawResponse, requestParams });
 
+    const esqlSearchResponse = rawResponse as unknown as ESQLSearchReponse;
+    const resultsCount = esqlSearchResponse.values.length;
     return {
-      data: convertToGeoJson(rawResponse as unknown as ESQLSearchReponse),
+      data: convertToGeoJson(esqlSearchResponse),
+      meta: {
+        resultsCount,
+        areResultsTrimmed: resultsCount >= limit,
+      },
     }
+  }
+
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    if (!meta) {
+      // no tooltip content needed when there is no feature collection or meta
+      return {
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
+    if (meta.areResultsTrimmed) {
+      return {
+        tooltipContent: i18n.translate('xpack.maps.esqlSearch.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {count} rows.`,
+          values: { count: meta.resultsCount?.toLocaleString() },
+        }),
+        areResultsTrimmed: true,
+      };
+    }
+
+    return {
+      tooltipContent: i18n.translate('xpack.maps.esqlSearch.rowCountMsg', {
+        defaultMessage: `Found {count} rows.`,
+        values: { count: meta.resultsCount?.toLocaleString() },
+      }),
+      areResultsTrimmed: false,
+    };
   }
 }
