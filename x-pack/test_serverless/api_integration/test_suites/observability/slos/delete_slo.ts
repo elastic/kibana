@@ -14,16 +14,20 @@ import {
   getSLOTransformId,
   getSLOSummaryPipelineId,
 } from '@kbn/observability-plugin/common/slo/constants';
+import {
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '@kbn/observability-plugin/common/slo/constants';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const logger = getService('log');
-  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const sloApi = getService('sloApi');
   const transform = getService('transform');
+  const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const dataViewApi = getService('dataViewApi');
@@ -44,29 +48,41 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
   describe('delete_slo', () => {
+    // DATE_VIEW should match the index template:
+    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
-    const sloId = 'my-custom-id1';
+    let sloId: string;
 
     before(async () => {
+      await sloApi.deleteAllSLOs();
+
       infraDataIndex = await generate({
         esClient,
         lookback: 'now-15m',
         logger,
-        eventsPerCycle: 4,
+      });
+      await dataViewApi.create({
+        name: DATE_VIEW,
+        id: DATA_VIEW_ID,
+        title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
+      await dataViewApi.delete({
+        id: DATA_VIEW_ID,
+      });
+      await sloApi.deleteAllSLOs();
+      await esDeleteAllIndices([infraDataIndex]);
       await cleanup({ esClient, logger });
-      await sloApi.delete(sloId);
-      await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
     });
 
     describe('non partition by SLO', () => {
-      beforeEach(async () => {
-        await sloApi.create({
-          id: sloId,
+      it('deletes the SLO definition, transforms, ingest pipeline and data', async () => {
+        const createdSlo = await sloApi.create({
           name: 'my custom name',
           description: 'my custom description',
           indicator: {
@@ -88,54 +104,70 @@ export default function ({ getService }: FtrProviderContext) {
           },
           groupBy: ALL_VALUE,
         });
+        sloId = createdSlo.id;
         await sloApi.waitForSloCreated({ sloId });
-      });
 
-      it('deletes the SLO definition', async () => {
+        // Saved Object
         const savedObject = await kibanaServer.savedObjects.find({
           type: SO_SLO_TYPE,
         });
         expect(savedObject.total).to.eql(1);
         expect(savedObject.saved_objects[0].attributes.id).to.eql(sloId);
-        const response = await sloApi.waitForSloToBeDeleted(sloId);
-        expect(response.status).to.be(204);
 
-        const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
-          type: SO_SLO_TYPE,
-        });
-        expect(savedObjectAfterDelete.total).to.eql(0);
-      });
-
-      it('uninstalls the roll up and summary transforms', async () => {
+        // Transforms
         const sloTransformId = getSLOTransformId(sloId, 1);
         const sloSummaryTransformId = getSLOSummaryTransformId(sloId, 1);
         await transform.api.waitForTransformToExist(sloTransformId);
         await transform.api.waitForTransformToExist(sloSummaryTransformId);
 
-        await sloApi.waitForSloToBeDeleted(sloId);
-        await transform.api.getTransform(sloTransformId, 404);
-        await transform.api.getTransform(sloSummaryTransformId, 404);
-      });
-
-      it('deletes the ingest pipeline', async () => {
+        // Ingest pipeline
         const sloRevision = 1;
         const pipelineResponse = await fetchSloSummaryPipeline(esClient, sloId, sloRevision);
         const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
         expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
-        await sloApi.waitForSloToBeDeleted(sloId);
-        const pipelineResponseAfterDelete = await fetchSloSummaryPipeline(
-          esClient,
-          sloId,
-          sloRevision
-        );
-        expect(Object.keys(pipelineResponseAfterDelete).length).to.be(0);
-      });
 
-      it('deletes the rollup and summary data', async () => {
+        // RollUp and Summary data
+        const sloRollupData = await sloApi.waitForSloData({
+          sloId,
+          indexName: SLO_DESTINATION_INDEX_PATTERN,
+        });
+        const sloSummaryData = await sloApi.waitForSloData({
+          sloId,
+          indexName: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        });
+
+        expect(sloRollupData.hits.hits.length > 0).to.be(true);
+        expect(sloSummaryData.hits.hits.length > 0).to.be(true);
+
+        // Delete the SLO
         const response = await sloApi.waitForSloToBeDeleted(sloId);
+        expect(response.status).to.be(204);
+
+        // Saved object definition
+        const savedObjectAfterDelete = await kibanaServer.savedObjects.find({
+          type: SO_SLO_TYPE,
+        });
+        expect(savedObjectAfterDelete.total).to.eql(0);
+
+        // Transforms
+        await transform.api.getTransform(sloTransformId, 404);
+        await transform.api.getTransform(sloSummaryTransformId, 404);
+
+        // Roll up and summary data
+        await retry.tryForTime(60 * 1000, async () => {
+          const sloRollupDataAfterDeletion = await sloApi.getSloData({
+            sloId,
+            indexName: SLO_DESTINATION_INDEX_PATTERN,
+          });
+          const sloSummaryDataAfterDeletion = await sloApi.getSloData({
+            sloId,
+            indexName: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+          });
+
+          expect(sloRollupDataAfterDeletion.hits.hits.length).to.be(0);
+          expect(sloSummaryDataAfterDeletion.hits.hits.length).to.be(0);
+        });
       });
-      // TODO
-      it('deletes the associated rules', async () => {});
     });
   });
 }

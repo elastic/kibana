@@ -29,7 +29,7 @@ export interface SloBurnRateRuleParams {
 }
 
 interface SloParams {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   indicator: {
@@ -128,30 +128,54 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async waitForSloInIndex<T>({
-      indexName,
-    }: {
-      indexName: string;
-    }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      if (!ruleId) {
-        throw new Error(`'ruleId' is undefined`);
-      }
+    async getSloData({ sloId, indexName }: { sloId: string; indexName: string }) {
+      const response = await es.search({
+        index: indexName,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { 'slo.id': sloId } }],
+            },
+          },
+        },
+      });
+      return response;
+    },
+    async waitForSloData({ sloId, indexName }: { sloId: string; indexName: string }) {
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await es.search<T>({
+        const response = await es.search({
           index: indexName,
           body: {
             query: {
-              term: {
-                'kibana.alert.rule.uuid': ruleId,
+              bool: {
+                filter: [{ term: { 'slo.id': sloId } }],
               },
             },
           },
         });
         if (response.hits.hits.length === 0) {
-          throw new Error('No hits found');
+          throw new Error(`No hits found at index [${indexName}] for slo [${sloId}] `);
         }
         return response;
       });
+    },
+    async deleteAllSLOs() {
+      const response = await supertest
+        .get(`/api/observability/slos/_definitions`)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'foo')
+        .send()
+        .expect(200);
+      await Promise.all(
+        response.body.results.map(({ id }: { id: string }) => {
+          return supertest
+            .delete(`/api/observability/slos/${id}`)
+            .set('kbn-xsrf', 'true')
+            .set('x-elastic-internal-origin', 'foo')
+            .send()
+            .expect(204);
+        })
+      );
     },
   };
 }

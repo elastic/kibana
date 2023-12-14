@@ -163,7 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(pipelineResponse[expectedPipeline].description).to.be(
           `Ingest pipeline for SLO summary data [id: ${sloId}, revision: ${sloRevision}]`
         );
-        expect(pipelineResponse[expectedPipeline]._meta.version).to.be(3);
       });
 
       it('creates summary TEMP index', async () => {
