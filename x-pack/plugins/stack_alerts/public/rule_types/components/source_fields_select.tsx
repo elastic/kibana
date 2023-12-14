@@ -12,7 +12,7 @@ import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { validSourceFields } from '../../../common/constants';
+import { MAX_SELECTABLE_SOURCE_FIELDS, validSourceFields } from '../../../common/constants';
 import { SourceField } from '../es_query/types';
 
 interface SourceFieldsOption {
@@ -59,11 +59,11 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
 
     setSourceFieldsOptions(options);
 
-    // if no sourceFields, auto select the current options
-    if (!sourceFields || sourceFields.length === 0) {
+    // if not sourceFields, auto select the current options
+    if (!sourceFields) {
       const fields: SourceField[] = [];
       options.forEach((f) => {
-        if (f.value) {
+        if (f.value && fields.length < MAX_SELECTABLE_SOURCE_FIELDS) {
           fields.push({ label: f.label, searchPath: f.value });
         }
       });

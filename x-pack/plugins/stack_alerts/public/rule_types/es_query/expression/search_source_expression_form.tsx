@@ -96,6 +96,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
         if (action.type === 'index') {
           setParam('timeField', searchSource.getField('index')?.timeFieldName);
+          setParam('sourceField', undefined);
         }
       } else {
         setParam(action.type, action.payload);
@@ -118,7 +119,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields: ruleParams.sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
+      sourceFields: ruleParams.sourceFields,
     }
   );
 

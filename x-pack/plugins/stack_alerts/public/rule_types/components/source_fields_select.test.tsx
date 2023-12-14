@@ -136,8 +136,6 @@ describe('SourceFields', () => {
       );
       expect(screen.getByTestId('option-host.name')).toBeInTheDocument();
     });
-
-    // expect(result.getByTestId('option-host.name')).toBeInTheDocument();
   });
 
   it('should remove duplicate and non-aggregatable esFields and handle keyword esFields', async () => {

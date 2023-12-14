@@ -173,7 +173,7 @@ export const EsqlQueryExpression: React.FC<
     }
 
     if (resetSourceFields) {
-      setParam('sourceFields', DEFAULT_VALUES.SOURCE_FIELDS);
+      setParam('sourceFields', undefined);
     }
     setEsFields(fields);
   };
@@ -197,7 +197,7 @@ export const EsqlQueryExpression: React.FC<
             setParam('esqlQuery', q);
             refreshTimeFields(q);
             refreshEsFields(q);
-          }, 500)}
+          }, 1000)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
           onTextLangQuerySubmit={() => {}}

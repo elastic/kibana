@@ -73,7 +73,7 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields: sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
+      sourceFields,
     }
   );
 
@@ -231,7 +231,7 @@ export const EsQueryExpression: React.FC<
               termSize: DEFAULT_VALUES.TERM_SIZE,
               searchType: SearchType.esQuery,
               excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-              sourceFields: DEFAULT_VALUES.SOURCE_FIELDS,
+              sourceFields: undefined,
             });
           } else {
             await refreshEsFields(indices);
