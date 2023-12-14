@@ -98,7 +98,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/calculate-auto",
     "@kbn/task-manager-plugin",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": [
