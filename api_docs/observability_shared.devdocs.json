@@ -1268,17 +1268,19 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useChartTheme",
+        "id": "def-public.useChartThemes",
         "type": "Function",
         "tags": [],
-        "label": "useChartTheme",
+        "label": "useChartThemes",
         "description": [],
         "signature": [
-          "() => ",
+          "() => { baseTheme: ",
+          "Theme",
+          "; theme: ",
           "RecursivePartial",
           "<",
           "Theme",
-          ">[]"
+          ">[]; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_chart_theme.tsx",
         "deprecated": false,
