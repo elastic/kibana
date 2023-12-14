@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import {
   FormulaPublicApi,
@@ -38,7 +39,6 @@ export interface ExploratoryEmbeddableProps {
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
   customHeight?: string;
-  customLensAttrs?: any; // Takes LensAttributes
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
@@ -75,7 +75,6 @@ export default function Embeddable({
   axisTitlesVisibility,
   gridlinesVisibilitySettings,
   customHeight,
-  customLensAttrs,
   customTimeRange,
   dataViewState,
   legendIsVisible,
@@ -110,36 +109,47 @@ export default function Embeddable({
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
 
-  const layerConfigs: LayerConfig[] = getLayerConfigs(
-    attributes,
-    reportType,
-    theme,
-    dataViewState,
-    { ...reportConfigMap, ...obsvReportConfigMap },
-    spaceId.space?.id
-  );
-
-  let lensAttributes;
-  let attributesJSON = customLensAttrs;
-  if (!customLensAttrs) {
+  const attributesJSON = useMemo(() => {
     try {
+      const layerConfigs: LayerConfig[] = getLayerConfigs(
+        attributes,
+        reportType,
+        theme,
+        dataViewState,
+        { ...reportConfigMap, ...obsvReportConfigMap },
+        spaceId.space?.id
+      );
+
       if (reportType === ReportTypes.SINGLE_METRIC) {
-        lensAttributes = new SingleMetricLensAttributes(
+        const lensAttributes = new SingleMetricLensAttributes(
           layerConfigs,
           reportType,
           lensFormulaHelper!
         );
-        attributesJSON = lensAttributes?.getJSON('lnsLegacyMetric');
+        return lensAttributes?.getJSON('lnsLegacyMetric');
       } else if (reportType === ReportTypes.HEATMAP) {
-        lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
-        attributesJSON = lensAttributes?.getJSON('lnsHeatmap');
+        const lensAttributes = new HeatMapLensAttributes(
+          layerConfigs,
+          reportType,
+          lensFormulaHelper!
+        );
+        return lensAttributes?.getJSON('lnsHeatmap');
       } else {
-        lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
-        attributesJSON = lensAttributes?.getJSON();
+        const lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+        return lensAttributes?.getJSON();
       }
-      // eslint-disable-next-line no-empty
-    } catch (error) {}
-  }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [
+    attributes,
+    dataViewState,
+    lensFormulaHelper,
+    reportConfigMap,
+    reportType,
+    spaceId.space?.id,
+    theme,
+  ]);
 
   const timeRange = customTimeRange ?? series?.time;
 
@@ -182,16 +192,19 @@ export default function Embeddable({
     };
   }
 
-  if (!attributesJSON && layerConfigs.length < 1) {
+  if (!attributesJSON) {
     return null;
   }
 
   if (!LensComponent) {
-    return <EuiText>No lens component</EuiText>;
+    return (
+      <EuiText>
+        {i18n.translate('xpack.exploratoryView.embeddable.noLensComponentTextLabel', {
+          defaultMessage: 'No lens component',
+        })}
+      </EuiText>
+    );
   }
-
-  attributesJSON.state.searchSessionId = searchSessionId;
-  attributesJSON.searchSessionId = searchSessionId;
 
   return (
     <Wrapper
@@ -229,7 +242,7 @@ export default function Embeddable({
         data-test-subj="exploratoryView"
         style={{ height: '100%' }}
         timeRange={timeRange}
-        attributes={{ ...attributesJSON, title: undefined, hidePanelTitles: true, description: '' }}
+        attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
