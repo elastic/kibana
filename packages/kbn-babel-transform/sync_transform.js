@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-const babel = require('@babel/core');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const swc = require('@swc/core');
+// const babel = require('@babel/core');
 
-const { getBabelOptions } = require('./options');
+const { getSwcOptions } = require('./options');
+// const { getBabelOptions } = require('./options');
 
 /**
  * transform the source code at the given path with babel
@@ -19,11 +22,16 @@ const { getBabelOptions } = require('./options');
  * @returns
  */
 function transformCode(path, source, config = {}) {
-  const options = getBabelOptions(path, config);
+  // const options = getBabelOptions(path, config);
+  const swcOptions = getSwcOptions(path, config);
+  // const result =
+  //   source === undefined
+  //     ? babel.transformFileSync(path, options)
+  //     : babel.transformSync(source, options);
   const result =
     source === undefined
-      ? babel.transformFileSync(path, options)
-      : babel.transformSync(source, options);
+      ? swc.transformFileSync(path, swcOptions)
+      : swc.transformSync(source, swcOptions);
 
   if (!result || !result.code) {
     throw new Error(`babel failed to transpile [${path}]`);
