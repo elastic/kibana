@@ -185,11 +185,15 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
+
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
+      }
     });
     component.update();
 
     if (lifecycle && lifecycle.enabled) {
-      act(() => {
+      await act(async () => {
         form.toggleEuiSwitch('dataRetentionToggle.input');
       });
       component.update();
@@ -200,14 +204,8 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     await act(async () => {
-      if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
-      }
-
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
-
     component.update();
   };
 

@@ -20,6 +20,8 @@ import {
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
+jest.spyOn(console, "warn").mockImplementation();
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -529,11 +531,11 @@ describe('<TemplateCreate />', () => {
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         dataStream: {},
-        // lifecycle: {
-        // enabled: true,
-        // value: 1,
-        // unit: 'd',
-        // },
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
         allowAutoCreate: true,
       });
       // Component templates
@@ -586,10 +588,10 @@ describe('<TemplateCreate />', () => {
                 },
               },
               aliases: ALIASES,
-              // lifecycle: {
-              // enabled: true,
-              // data_retention: '1d',
-              // },
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
