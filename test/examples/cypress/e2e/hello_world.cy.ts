@@ -26,3 +26,8 @@ describe('Hello World example app', () => {
     cy.get('@resultContainer').should('have.text', 'Hello World!');
   });
 });
+
+// Since there are no imports, we must use
+// the empty export statement to make this a
+// module rather than a global script.
+export {};
