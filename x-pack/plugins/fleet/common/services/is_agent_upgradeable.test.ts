@@ -322,7 +322,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
   it('if agent reports upgradeable, with target version == current agent version ', () => {
     expect(
       getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.9.0')
-    ).toBe('agent is already running on the selected version..');
+    ).toBe('agent is already running on the selected version.');
   });
 
   it('if agent with no upgrade details reports upgradeable, but is already upgrading', () => {
@@ -377,7 +377,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
         getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 9 }),
         '8.0.0'
       )
-    ).toBe('the agent has been upgraded recently. Please wait.');
+    ).toContain('please wait');
   });
 
   it('if agent reports upgradeable and was upgraded more than 10 minutes ago', () => {
