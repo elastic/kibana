@@ -6,36 +6,34 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { FlamegraphLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/flamegraph_locator';
+import { TopNFunctionsLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/topn_functions_locator';
 import { HOST_FIELD } from '../../../../../common/constants';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 const PROFILING_FEEDBACK_URL = 'https://ela.st/profiling-feedback';
 
-export type ProfilingPath = 'flamegraphs' | 'functions';
-
 interface Props {
   hostname: string;
-  profilingPath: ProfilingPath;
+  from: string;
+  to: string;
+  profilingLinkLocator: FlamegraphLocator | TopNFunctionsLocator;
+  profilingLinkLabel: string;
 }
 
-export function ProfilingLinks({ hostname, profilingPath }: Props) {
-  const { services } = useKibanaContextForPlugin();
-  const queryParams = new URLSearchParams({
+export function ProfilingLinks({
+  hostname,
+  from,
+  to,
+  profilingLinkLocator,
+  profilingLinkLabel,
+}: Props) {
+  const profilingLinkURL = profilingLinkLocator.getRedirectUrl({
     kuery: `${HOST_FIELD}:"${hostname}"`,
+    rangeFrom: from,
+    rangeTo: to,
   });
-  const profilingLinkURL = services.http.basePath.prepend(
-    `/app/profiling/${profilingPath}?${queryParams}`
-  );
-  const profilingLinkLabel =
-    profilingPath === 'flamegraphs'
-      ? i18n.translate('xpack.infra.flamegraph.profilingAppFlamegraphLink', {
-          defaultMessage: 'Go to Universal Profiling Flamegraph',
-        })
-      : i18n.translate('xpack.infra.flamegraph.profilingAppFunctionsLink', {
-          defaultMessage: 'Go to Universal Profiling Functions',
-        });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd">
