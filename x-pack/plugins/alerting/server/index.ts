@@ -70,6 +70,7 @@ export {
 } from './alerts_service';
 export { sanitizeBulkErrorResponse } from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export { executeUserDefinedCode } from './deno/executor';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { AlertingPlugin } = await import('./plugin');

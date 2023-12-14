@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import pidusage from 'pidusage';
-import ChildProcess from 'child_process';
+import { executeUserDefinedCode } from '@kbn/alerting-plugin/server';
 import fetch from 'node-fetch';
-import { promisify } from 'util';
-import fs from 'fs';
 import { RuleExecutorOptions } from '../../types';
 import { StackAlertType } from '../types';
 import { ActionGroupId, Params } from './rule_type';
-const readFile = promisify(fs.readFile);
-
-// Cache the promise result so we only read once
-const childProcessTemplatePromise = readFile(`${__dirname}/child_process_template.tplt`, 'utf8');
 
 export async function executor(
   options: RuleExecutorOptions<Params, {}, {}, {}, typeof ActionGroupId, StackAlertType>
@@ -57,9 +50,6 @@ export async function executor(
     userDefinedCode = params.codeOrUrl;
   }
 
-  // Wrap customCode with our own code file to provide utilities
-  const wrappedCode = await wrapUserDefinedCode(userDefinedCode);
-
   const alertLimit = alertsClient.getAlertLimitValue();
   let hasReachedLimit = false;
   let cpuUsage: { p50: number; p95: number; p99: number } | undefined;
@@ -67,66 +57,16 @@ export async function executor(
 
   // Run code in child process
   try {
-    const { stdout, stderr, duration, ...result } = await new Promise((resolve, reject) => {
-      let intervalId: NodeJS.Timeout | null = null;
-      const memoryUsageSamples: number[] = [];
-      const cpuUsageSamples: number[] = [];
-      const start = Date.now();
-      const childProcess = ChildProcess.exec(
-        `deno run --allow-net=127.0.0.1:9200 --allow-env --allow-sys --no-prompt -`,
-        {
-          cwd: __dirname,
-          signal: controller.signal,
-          env: {
-            PATH: process.env.PATH,
-            ELASTICSEARCH_API_KEY: apiKey,
-            QUERY_DELAY_MS: queryDelay?.toString(),
-          },
-        },
-        (err, stdoutResult, stderrResult) => {
-          const end = Date.now();
-          if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
-          }
-          if (err) {
-            return reject(stderrResult ? new Error(stderrResult) : err);
-          }
-          resolve({
-            stdout: stdoutResult,
-            stderr: stderrResult,
-            duration: end - start,
-            memoryUsage: {
-              p50: calculatePercentile(memoryUsageSamples, 50),
-              p95: calculatePercentile(memoryUsageSamples, 95),
-              p99: calculatePercentile(memoryUsageSamples, 99),
-            },
-            cpuUsage: {
-              p50: calculatePercentile(cpuUsageSamples, 50),
-              p95: calculatePercentile(cpuUsageSamples, 95),
-              p99: calculatePercentile(cpuUsageSamples, 99),
-            },
-          });
-        }
-      );
-      childProcess.stdin?.write(wrappedCode);
-      childProcess.stdin?.end();
-      intervalId = setInterval(() => {
-        pidusage(childProcess.pid!, (err, stats) => {
-          if (!err) {
-            cpuUsageSamples.push(stats.cpu);
-            memoryUsageSamples.push(stats.memory);
-          }
-        });
-      }, 1);
+    const { stdout, ...result } = await executeUserDefinedCode({
+      logger,
+      userDefinedCode,
+      env: {
+        PATH: process.env.PATH,
+        ELASTICSEARCH_API_KEY: apiKey,
+        QUERY_DELAY_MS: queryDelay?.toString(),
+      },
+      abortController: controller,
     });
-
-    if (stderr) {
-      throw new Error(stderr);
-    }
-
-    cpuUsage = result.cpuUsage;
-    memoryUsage = result.memoryUsage;
 
     if (stdout) {
       logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
@@ -160,6 +100,9 @@ export async function executor(
       }
     }
 
+    cpuUsage = result.cpuUsage;
+    memoryUsage = result.memoryUsage;
+
     if (timeoutId) {
       clearTimeout(timeoutId);
       timeoutId = null;
@@ -173,27 +116,10 @@ export async function executor(
   return { state: {}, cpuUsage, memoryUsage };
 }
 
-async function wrapUserDefinedCode(code: string) {
-  const template = await childProcessTemplatePromise;
-  return template.replace(
-    '// INJECT CODE HERE',
-    code
-      .split('\n')
-      .map((s) => `    ${s}`)
-      .join('\n')
-  );
-}
-
 const reportAlertLogPrefix = 'alertsClient:report:';
 function getDetectedAlerts(output: string) {
   return output
     .split('\n')
     .filter((str) => str.indexOf(reportAlertLogPrefix) === 0)
     .map((str) => str.substring(reportAlertLogPrefix.length));
-}
-
-function calculatePercentile(array: number[], percentile: number) {
-  const sortedArray = array.slice().sort();
-  const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
-  return sortedArray[index];
 }
