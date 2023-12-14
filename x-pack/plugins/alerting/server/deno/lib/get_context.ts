@@ -14,3 +14,7 @@ const actionContext = JSON.parse(Deno.env.get('ACTION_CONTEXT'));
 export function getContext() {
   return actionContext;
 }
+
+export function addToContext(key: string, value: string) {
+  console.log(`newContextToAdd:${JSON.stringify({ key, value })}`);
+}
