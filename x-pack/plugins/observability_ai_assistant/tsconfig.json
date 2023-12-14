@@ -53,7 +53,7 @@
     "@kbn/tooling-log",
     "@kbn/babel-register",
     "@kbn/dev-cli-runner",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-analytics-browser"
   ],
   "exclude": ["target/**/*"]
 }
