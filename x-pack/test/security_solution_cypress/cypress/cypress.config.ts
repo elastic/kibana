@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { getFailedSpecVideos } from './support/filter_videos';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -32,6 +33,9 @@ export default defineCypressConfig({
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+
+      on('after:spec', getFailedSpecVideos);
+
       return config;
     },
   },
