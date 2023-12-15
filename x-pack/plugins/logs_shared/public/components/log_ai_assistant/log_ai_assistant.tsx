@@ -16,7 +16,6 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
@@ -24,16 +23,15 @@ export interface LogAIAssistantDocument {
 
 export interface LogAIAssistantProps {
   doc: LogAIAssistantDocument | undefined;
+  ContextualInsight: ObservabilityAIAssistantPluginStart['ContextualInsight'];
 }
 
 export interface LogAIAssistantDeps extends LogAIAssistantProps {
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart['service'];
+  ContextualInsight: ObservabilityAIAssistantPluginStart['ContextualInsight'];
 }
 
-export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
-  const {
-    observabilityAIAssistant: { ContextualInsight },
-  } = useKibanaContextForPlugin().services;
+export const LogAIAssistant = withProviders(({ doc, ContextualInsight }: LogAIAssistantProps) => {
   const aiAssistant = useObservabilityAIAssistant();
 
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {

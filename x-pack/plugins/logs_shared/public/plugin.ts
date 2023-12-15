@@ -35,6 +35,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
     const LogAIAssistant = createLogAIAssistant({
       observabilityAIAssistant: observabilityAIAssistant.service,
+      ContextualInsight: observabilityAIAssistant.ContextualInsight,
     });
 
     return {

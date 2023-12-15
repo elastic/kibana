@@ -40,7 +40,7 @@ function unregisterAll() {
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
-const { ObservabilityAIAssistantActionMenuItem } =
+const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
 const withCore = makeDecorator({
@@ -104,6 +104,7 @@ const withCore = makeDecorator({
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               ObservabilityAIAssistantActionMenuItem,
+              ContextualInsight,
             }}
           >
             <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>

@@ -13,6 +13,7 @@ export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
 
 interface LogAIAssistantFactoryDeps {
   observabilityAIAssistant: LogAIAssistantDeps['observabilityAIAssistant'];
+  ContextualInsight: LogAIAssistantDeps['ContextualInsight'];
 }
 
 export type LogAIAssistantComponent = ComponentType<
@@ -21,8 +22,13 @@ export type LogAIAssistantComponent = ComponentType<
 
 export function createLogAIAssistant({
   observabilityAIAssistant: aiAssistantService,
+  ContextualInsight,
 }: LogAIAssistantFactoryDeps): LogAIAssistantComponent {
   return ({ observabilityAIAssistant = aiAssistantService, ...props }) => (
-    <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />
+    <LogAIAssistant
+      observabilityAIAssistant={observabilityAIAssistant}
+      contextualInsight={ContextualInsight}
+      {...props}
+    />
   );
 }
