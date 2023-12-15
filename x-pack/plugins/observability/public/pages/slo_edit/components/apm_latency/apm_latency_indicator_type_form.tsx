@@ -30,7 +30,7 @@ export function ApmLatencyIndicatorTypeForm() {
 
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(apmIndex);
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -178,13 +178,13 @@ export function ApmLatencyIndicatorTypeForm() {
       </EuiFlexGroup>
 
       <IndexFieldSelector
-        indexFields={partitionByFields}
+        indexFields={groupByFields}
         name="groupBy"
         defaultValue={ALL_VALUE}
         label={
           <span>
             {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-              defaultMessage: 'Partition by',
+              defaultMessage: 'Group by',
             })}{' '}
             <EuiIconTip
               content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
@@ -195,7 +195,7 @@ export function ApmLatencyIndicatorTypeForm() {
           </span>
         }
         placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-          defaultMessage: 'Select an optional field to partition by',
+          defaultMessage: 'Select an optional field to group by',
         })}
         isLoading={!!apmIndex && isIndexFieldsLoading}
         isDisabled={!apmIndex}
