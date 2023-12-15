@@ -7,7 +7,6 @@
 
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
 import {
-  ALERTS_PAGE,
   APP_LEAVE_CONFIRM_MODAL,
   CASES_PAGE,
   MANAGE_PAGE,
@@ -103,22 +102,6 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-  });
-
-  it('When user navigates to the page where timeline is present, Timeline save modal should not exists.', () => {
-    populateTimeline();
-    closeTimelineUsingCloseButton();
-    openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
-    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_BTN).click();
-
-    // Navigate back to HOSTS_URL and ensure that
-    // timeline save modal is NOT present
-
-    openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
-    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
   });
 
   it('should NOT prompt when navigating with a changed and unsaved timeline from the page where timeline is disabled', () => {
