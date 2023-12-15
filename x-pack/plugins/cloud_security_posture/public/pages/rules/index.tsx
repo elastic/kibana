@@ -29,13 +29,13 @@ import { BenchmarksCisId, PageUrlParams } from '../../../common/types/latest';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { euiTheme } = useEuiTheme();
-  const integrationInfo = useCspBenchmarkIntegrationsV2();
+  const benchmarksInfo = useCspBenchmarkIntegrationsV2();
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
-  const [packageInfo] = integrationInfo.data?.items || [];
+  const [packageInfo] = benchmarksInfo.data?.items || [];
 
   return (
-    <CloudPosturePage query={integrationInfo}>
+    <CloudPosturePage query={benchmarksInfo}>
       <EuiPageHeader
         alignItems={'bottom'}
         bottomBorder

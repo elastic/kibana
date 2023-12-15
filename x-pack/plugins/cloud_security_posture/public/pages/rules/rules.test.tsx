@@ -115,7 +115,7 @@ describe('<Rules />', () => {
     expect(useCspBenchmarkIntegrationsV2).toHaveBeenCalled();
   });
 
-  it('Display Success State', async () => {
+  it('Display success state when result request is resolved', async () => {
     const params = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
     const Component = getTestComponent(params);
     const result = createReactQueryResponse({
@@ -143,5 +143,6 @@ describe('<Rules />', () => {
     render(<Component />);
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(useCspBenchmarkIntegrationsV2).toHaveBeenCalled();
   });
 });

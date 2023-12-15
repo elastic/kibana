@@ -186,8 +186,9 @@ export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
       return 'CIS EKS';
     case 'cis_gcp':
       return 'CIS GCP';
+    default:
+      return null;
   }
-  return null;
 };
 
 export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
@@ -202,30 +203,10 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
       return 'Amazon Elastic Kubernetes Service';
     case 'cis_gcp':
       return 'Google Cloud Provider';
+    default:
+      return null;
   }
-  return null;
 };
-// export const getBenchmarkFilterQuery = (
-//   id: BenchmarkId,
-//   version: string,
-//   section?: string
-// ): string =>
-//   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"${
-//     section
-//       ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
-//       : ''
-//   }`;
-
-// export const getBenchmarkFilterQuery = (
-//   id: BenchmarkId,
-//   version: string,
-//   selectParams?: BenchmarkRuleSelectParams
-// ): string =>
-//   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"${
-//     selectParams?.section || selectParams?.ruleNumber
-//       ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams?.section}"`
-//       : ''
-//   }`;
 
 export const getBenchmarkFilterQuery = (
   id: BenchmarkId,
