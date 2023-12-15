@@ -157,10 +157,16 @@ export class UptimePlugin
           title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
             defaultMessage: 'Overview',
           }),
-          path: '/synthetics',
-          navLinkStatus: config?.serverless?.enabled
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          path: '/',
+          navLinkStatus: AppNavLinkStatus.visible,
+        },
+        {
+          id: 'management',
+          title: i18n.translate('xpack.synthetics.managementPage.linkText', {
+            defaultMessage: 'Management',
+          }),
+          path: '/monitors',
+          navLinkStatus: AppNavLinkStatus.visible,
         },
       ],
       mount: async (params: AppMountParameters) => {

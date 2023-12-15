@@ -30,7 +30,8 @@ export type AppId =
   | ObservabilityOverviewApp
   | ObservabilityOnboardingApp
   | ApmApp
-  | MetricsApp;
+  | MetricsApp
+  | SyntheticsApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -55,7 +56,12 @@ export type ApmLinkId =
 
 export type SyntheticsLinkId = 'overview' | 'management';
 
-export type LinkId = LogsLinkId | ObservabilityOverviewLinkId | MetricsLinkId | ApmLinkId;
+export type LinkId =
+  | LogsLinkId
+  | ObservabilityOverviewLinkId
+  | MetricsLinkId
+  | ApmLinkId
+  | SyntheticsLinkId;
 
 export type DeepLinkId =
   | AppId

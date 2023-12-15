@@ -191,6 +191,12 @@ export const navigationTree: NavigationTreeDefinition = {
                 return pathNameSerialized.startsWith(prepend('/app/synthetics'));
               },
             },
+            {
+              link: 'synthetics:management',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/synthetics/monitors'));
+              },
+            },
           ],
         },
       ],
