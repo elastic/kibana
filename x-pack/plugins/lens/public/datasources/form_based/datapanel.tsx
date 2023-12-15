@@ -299,11 +299,14 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     frame.dataViews.indexPatterns,
     data.search.session,
   ]);
+
   useEffect(() => {
     if (hasNewFields) {
       refreshFieldList();
     }
-  }, [hasNewFields, refreshFieldList]);
+    // Preventing a race condition, making sure refreshFieldList is just executed once when hasNewFields is true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasNewFields]);
 
   const editField = useMemo(
     () =>
