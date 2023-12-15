@@ -170,7 +170,7 @@ export function registerEsqlFunction({
         functions: string[];
       };
 
-      const keywords = args.commands.concat(args.functions).concat('SYNTAX');
+      const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 

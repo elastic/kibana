@@ -1,17 +1,17 @@
-ES|QL processing commands
-ES|QL processing commands change an input table by adding, removing, or
-changing rows and columns.
-[A processing command changing an input table]
+Processing commands
+
+ES|QL processing commands change an input table by adding, removing, or changing
+rows and columns.
 ES|QL supports these processing commands:
--   DISSECT
--   DROP
--   ENRICH
--   EVAL
--   GROK
--   KEEP
--   LIMIT
--   MV_EXPAND
--   RENAME
--   SORT
--   STATS ... BY
--   WHERE
+DISSECT
+DROP
+ENRICH
+EVAL
+GROK
+KEEP
+LIMIT
+MV_EXPAND
+RENAME
+SORT
+STATS ... BY
+WHERE

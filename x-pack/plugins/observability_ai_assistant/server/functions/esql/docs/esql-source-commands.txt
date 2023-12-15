@@ -1,8 +1,7 @@
-ES|QL source commands
-An ES|QL source command produces a table, typically with data from
-Elasticsearch.
-[A source command producing a table from Elasticsearch]
+Source commands
+
+An ES|QL source command produces a table, typically with data from Elasticsearch. An ES|QL query must start with a source command.
 ES|QL supports these source commands:
--   FROM
--   ROW
--   SHOW <item>
+FROM
+ROW
+SHOW

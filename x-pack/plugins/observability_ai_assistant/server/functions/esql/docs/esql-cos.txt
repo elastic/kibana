@@ -1,15 +1,7 @@
 COS
-[]
-Cosine trigonometric function.
-    ROW a=1.8
-    | EVAL cos=COS(a)
-  a:double   cos:double
-  ---------- ---------------------
-  1.8        -0.2272020946930871
+
+
+Cosine trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL cos=COS(a)
 Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double

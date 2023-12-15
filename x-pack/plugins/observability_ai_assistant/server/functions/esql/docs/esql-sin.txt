@@ -1,15 +1,7 @@
 SIN
-[]
-Sine trigonometric function.
-    ROW a=1.8
-    | EVAL sin=SIN(a)
-  a:double   sin:double
-  ---------- --------------------
-  1.8        0.9738476308781951
+
+
+Sine trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL sin=SIN(a)
 Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double

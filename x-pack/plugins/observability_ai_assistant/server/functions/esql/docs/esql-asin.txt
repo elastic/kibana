@@ -1,15 +1,7 @@
 ASIN
-[]
+
+
 Inverse sine trigonometric function.
-    ROW a=.9
-    | EVAL asin=ASIN(a)
-  a:double   asin:double
-  ---------- --------------------
-  .9         1.1197695149986342
+ROW a=.9
+| EVAL asin=ASIN(a)
 Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double

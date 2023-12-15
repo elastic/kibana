@@ -1,67 +1,13 @@
 POW
-[]
-Returns the value of a base (first argument) raised to the power of an
-exponent (second argument). Both arguments must be numeric.
-    ROW base = 2.0, exponent = 2
-    | EVAL result = POW(base, exponent)
-  base:double   exponent:integer   result:double
-  ------------- ------------------ ---------------
-  2.0           2                  4.0
-Type rules
-The type of the returned value is determined by the types of the base
-and exponent. The following rules are applied to determine the result
-type:
--   If either of the base or exponent are of a floating point type, the
-    result will be a double
--   Otherwise, if either the base or the exponent are 64-bit (long or
-    unsigned long), the result will be a long
--   Otherwise, the result will be a 32-bit integer (this covers all
-    other numeric types, including int, short and byte)
-For example, using simple integers as arguments will lead to an integer
-result:
-    ROW base = 2, exponent = 2
-    | EVAL s = POW(base, exponent)
-  base:integer   exponent:integer   s:integer
-  -------------- ------------------ -----------
-  2              2                  4
-The actual power function is performed using double precision values for
-all cases. This means that for very large non-floating point values
-there is a small chance that the operation can lead to slightly
-different answers than expected. However, a more likely outcome of very
-large non-floating point values is numerical overflow.
-Arithmetic errors
-Arithmetic errors and numeric overflow do not result in an error.
-Instead, the result will be null and a warning for the
-ArithmeticException added. For example:
-    ROW x = POW(9223372036854775808, 2)
-  warning:Line 1:9: evaluation of [POW(9223372036854775808, 2)] failed, treating result as null. Only first 20 failures recorded.
-  ---------------------------------------------------------------------------------------------------------------------------------
-  warning:java.lang.ArithmeticException: long overflow
-  x:long
-  --------
-  null
-If it is desired to protect against numerical overruns, use to_double on
-either of the arguments:
-    ROW x = POW(9223372036854775808, TO_DOUBLE(1))
-  x:double
-  ----------------------
-  9.223372036854776E18
-Fractional exponents
-The exponent can be a fraction, which is similar to performing a root.
+
+
+Returns the value of a base (first argument) raised to the power of an exponent (second argument).
+Both arguments must be numeric. The output is always a double.  Note that it is still possible to overflow
+a double result here; in that case, null will be returned.
+ROW base = 2.0, exponent = 2
+| EVAL result = POW(base, exponent)
+Fractional exponentseditThe exponent can be a fraction, which is similar to performing a root.
 For example, the exponent of 0.5 will give the square root of the base:
-    ROW base = 4, exponent = 0.5
-    | EVAL s = POW(base, exponent)
-  base:integer   exponent:double   s:double
-  -------------- ----------------- ----------
-  4              0.5               2.0
-Table of supported input and output types
-For clarity, the following table describes the output result type for
-all combinations of numeric input types:
-  base      exponent   result
-  --------- ---------- ---------
-  double    double     double
-  double    integer    double
-  integer   double     double
-  integer   integer    integer
-  long      double     double
-  long      integer    long
+ROW base = 4, exponent = 0.5
+| EVAL s = POW(base, exponent)
+Table of supported input and output typeseditFor clarity, the following table describes the output result type for all combinations of numeric input types:

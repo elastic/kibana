@@ -1,4 +1,0 @@
-IS_NAN
-Returns a boolean that indicates whether its input is not a number.
-    ROW d = 1.0
-    | EVAL s = IS_NAN(d)

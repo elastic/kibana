@@ -1,15 +1,7 @@
 ATAN
-[]
+
+
 Inverse tangent trigonometric function.
-    ROW a=12.9
-    | EVAL atan=ATAN(a)
-  a:double   atan:double
-  ---------- --------------------
-  12.9       1.4934316673669235
+ROW a=12.9
+| EVAL atan=ATAN(a)
 Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double

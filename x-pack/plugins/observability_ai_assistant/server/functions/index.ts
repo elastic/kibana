@@ -57,7 +57,8 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
         
-        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries yourself. Even if the "recall" function was used before that, follow it up with the "esql" function.
+        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+        Even if the "recall" function was used before that, follow it up with the "esql" function.
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "esql" function, but be explicit about it potentially being incorrect.
         `

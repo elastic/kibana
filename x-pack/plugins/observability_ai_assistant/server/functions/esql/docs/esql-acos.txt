@@ -1,15 +1,11 @@
 ACOS
-[]
-Inverse cosine trigonometric function.
-    ROW a=.9
-    | EVAL acos=ACOS(a)
-  a:double   acos:double
-  ---------- ---------------------
-  .9         0.45102681179626236
-Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+DescriptionReturns the arccosine of n as an
+angle, expressed in radians.Supported types
+Example
+ROW a=.9
+| EVAL acos=ACOS(a)

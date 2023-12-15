@@ -1,39 +1,47 @@
-commands
 ENRICH
-You can use ENRICH to add data from your existing indices to incoming
-records. It’s similar to ingest enrich, but it works at query time.
-    ROW language_code = "1"
-    | ENRICH languages_policy
-  language_code:keyword   language_name:keyword
-  ----------------------- -----------------------
-  1                       English
-ENRICH requires an enrich policy to be executed. The enrich policy
-defines a match field (a key field) and a set of enrich fields.
-ENRICH will look for records in the enrich index based on the match
-field value. The matching key in the input dataset can be defined using
-ON <field-name>; if it’s not specified, the match will be performed on a
-field with the same name as the match field defined in the enrich
+
+Syntax
+ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]
+Parameters
+policy
+The name of the enrich policy. You need to create
+and execute the enrich policy first.
+match_field
+The match field. ENRICH uses its value to look for records in the enrich
+index. If not specified, the match will be performed on the column with the same
+name as the match_field defined in the enrich policy.
+fieldX
+The enrich fields from the enrich index that are added to the result as new
+columns. If a column with the same name as the enrich field already exists, the
+existing column will be replaced by the new column. If not specified, each of
+the enrich fields defined in the policy is added
+new_nameX
+Enables you to change the name of the column that’s added for each of the enrich
+fields. Defaults to the enrich field name.
+DescriptionENRICH enables you to add data from existing indices as new columns using an
+enrich policy. Refer to Data enrichment for information about setting up a
 policy.
-    ROW a = "1"
-    | ENRICH languages_policy ON a
-  a:keyword   language_name:keyword
-  ----------- -----------------------
-  1           English
-You can specify which attributes (between those defined as enrich fields
-in the policy) have to be added to the result, using
-WITH <field1>, <field2>... syntax.
-    ROW a = "1"
-    | ENRICH languages_policy ON a WITH language_name
-  a:keyword   language_name:keyword
-  ----------- -----------------------
-  1           English
-Attributes can also be renamed using WITH new_name=<field1>
-    ROW a = "1"
-    | ENRICH languages_policy ON a WITH name = language_name
-  a:keyword   name:keyword
-  ----------- --------------
-  1           English
-By default (if no WITH is defined), ENRICH will add all the enrich
-fields defined in the enrich policy to the result.
-In case of name collisions, the newly created fields will override the
-existing fields.
+Before you can use ENRICH, you need to create
+and execute an enrich policy.
+ExamplesThe following example uses the languages_policy enrich policy to add a new
+column for each enrich field defined in the policy. The match is performed using
+the match_field defined in the enrich policy and
+requires that the input table has a column with the same name (language_code
+in this example). ENRICH will look for records in the
+enrich index based on the match field value.
+ROW language_code = "1"
+| ENRICH languages_policy
+To use a column with a different name than the match_field defined in the
+policy as the match field, use ON <column-name>:
+ROW a = "1"
+| ENRICH languages_policy ON a
+By default, each of the enrich fields defined in the policy is added as a
+column. To explicitly select the enrich fields that are added, use
+WITH <field1>, <field2>, ...:
+ROW a = "1"
+| ENRICH languages_policy ON a WITH language_name
+You can rename the columns that are added using WITH new_name=<field1>:
+ROW a = "1"
+| ENRICH languages_policy ON a WITH name = language_name
+In case of name collisions, the newly created columns will override existing
+columns.

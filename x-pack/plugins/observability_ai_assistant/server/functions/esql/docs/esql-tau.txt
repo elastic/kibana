@@ -1,7 +1,5 @@
 TAU
-[]
+
+
 The ratio of a circle’s circumference to its radius.
-    ROW TAU()
-  TAU():double
-  -------------------
-  6.283185307179586
+ROW TAU()

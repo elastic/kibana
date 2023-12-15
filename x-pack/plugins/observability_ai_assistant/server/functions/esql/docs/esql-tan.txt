@@ -1,15 +1,7 @@
 TAN
-[]
-Tangent trigonometric function.
-    ROW a=1.8
-    | EVAL tan=TAN(a)
-  a:double   tan:double
-  ---------- --------------------
-  1.8        -4.286261674628062
+
+
+Tangent trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL tan=TAN(a)
 Supported types:
-  n               result
-  --------------- --------
-  double          double
-  integer         double
-  long            double
-  unsigned_long   double
