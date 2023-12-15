@@ -45,7 +45,7 @@ import {
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
-import { createTimeline } from '../../../tasks/timelines';
+import { createTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
@@ -77,7 +77,8 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   it('should not be able to create/update timeline with only read privileges', () => {
     logout();
     login(ROLES.t1_analyst);
-    visitWithTimeRange(OVERVIEW_URL);
+    visitWithTimeRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
     openTimelineUsingToggle();
     createNewTimeline();
     cy.get(TIMELINE_PANEL).should('be.visible');
