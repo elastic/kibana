@@ -27,6 +27,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/170373
+  // FLAKY: https://github.com/elastic/kibana/issues/171444
   describe.skip('Execute operations:', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
