@@ -26,7 +26,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('File operations:', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170424
+  describe.skip('File operations:', () => {
     const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
     const fileContent = 'This is a test file for the get-file command.';
