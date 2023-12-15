@@ -102,7 +102,7 @@ export const LogEntryFlyout = ({
 }: LogEntryFlyoutProps) => {
   const {
     services: {
-      observabilityAIAssistant: { service: observabilityAIAssistantService },
+      observabilityAIAssistant: { service: observabilityAIAssistantService, ContextualInsight },
     },
   } = useKibanaContextForPlugin();
 
@@ -187,6 +187,7 @@ export const LogEntryFlyout = ({
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem grow={false}>
               <LogAIAssistant
+                ContextualInsight={ContextualInsight}
                 observabilityAIAssistant={observabilityAIAssistantService}
                 doc={logEntry}
               />
