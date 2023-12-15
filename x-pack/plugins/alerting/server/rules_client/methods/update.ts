@@ -319,8 +319,12 @@ async function updateAlert<Params extends RuleTypeParams>(
     subject: AuditSubject.RULE,
     subjectId: id,
     data: {
-      old: omit(currentRule.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
-      new: omit(updatedObject.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
+      old: JSON.stringify(
+        omit(currentRule.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey'])
+      ),
+      new: JSON.stringify(
+        omit(updatedObject.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey'])
+      ),
     },
   });
 

@@ -90,7 +90,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     subject: AuditSubject.RULE,
     subjectId: id,
     data: {
-      old: attributes,
+      old: JSON.stringify(attributes),
       new: null,
     },
   });

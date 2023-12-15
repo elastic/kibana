@@ -23,7 +23,7 @@ export class AuditService {
 
   public async log(params: AuditServiceLogParams): Promise<AuditLog | void> {
     try {
-      return this.context.client.log({ namespace: this.namespace, ...params });
+      return await this.context.client.log({ namespace: this.namespace, ...params });
     } catch (e) {
       this.context.logger.error(`Audit log couldn't be saved, error: ${e.message}`);
     }
