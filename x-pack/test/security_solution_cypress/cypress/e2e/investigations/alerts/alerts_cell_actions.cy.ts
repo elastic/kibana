@@ -93,7 +93,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Add to timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172231
+  describe.skip('Add to timeline', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
