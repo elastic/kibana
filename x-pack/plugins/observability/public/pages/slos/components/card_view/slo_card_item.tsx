@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
-  DARK_THEME,
   isMetricElementEvent,
+  LEGACY_DARK_THEME,
   Metric,
   MetricTrendShape,
   Settings,
@@ -153,7 +153,8 @@ export function SloCardChart({
   return (
     <Chart>
       <Settings
-        baseTheme={DARK_THEME}
+        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+        baseTheme={LEGACY_DARK_THEME}
         onElementClick={([d]) => {
           if (isMetricElementEvent(d)) {
             navigateToUrl(sloDetailsUrl);
