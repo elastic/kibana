@@ -32,6 +32,7 @@ export default function (ctx: FtrProviderContext) {
     'header',
     'unifiedFieldList',
     'settings',
+    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -448,20 +449,7 @@ export default function (ctx: FtrProviderContext) {
       it('allows to access only via a permitted index alias', async () => {
         await globalNav.badgeExistsOrFail('Read only');
 
-        // can't access logstash index directly
-        // swapping index patterns so we get an updated field list
-        // this is necessary since we don't have access to data view management
-        // nor can we force reload the browser in a test
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await PageObjects.discover.selectIndexPattern('logstash-*');
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await PageObjects.discover.selectIndexPattern('logstash-*');
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
-
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await PageObjects.settings.refreshDataViewFieldList();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');

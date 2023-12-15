@@ -93,6 +93,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
     const versionQueryParam = indexFilter ? {} : { apiVersion: version };
+    const ftrCacheBuster = localStorage.getItem('dataViews:ftrCacheBuster');
 
     return this._request<FieldsForWildcardResponse>(
       path,
@@ -106,6 +107,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         fields,
         allow_hidden: allowHidden,
         ...versionQueryParam,
+        ...(ftrCacheBuster ? { ftrCacheBuster } : {}),
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh

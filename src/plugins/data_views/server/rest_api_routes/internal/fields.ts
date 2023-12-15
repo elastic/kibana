@@ -137,10 +137,14 @@ export const registerFields = async (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  router.versioned
-    .get({ path, access: 'internal', enableQueryVersion: true })
-    .addVersion(
-      { version: '1', validate: { request: { query: querySchema }, response: validate.response } },
-      handler(isRollupsEnabled)
-    );
+  router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
+    {
+      version: '1',
+      validate: {
+        request: { query: querySchema.extends({}, { unknowns: 'ignore' }) },
+        response: validate.response,
+      },
+    },
+    handler(isRollupsEnabled)
+  );
 };
