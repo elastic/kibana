@@ -26,7 +26,7 @@ import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { deleteTimelines } from '../../../tasks/api_calls/common';
-import { login, logout } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
@@ -75,7 +75,6 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should not be able to create/update timeline with only read privileges', () => {
-    logout();
     login(ROLES.t1_analyst);
     visitWithTimeRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
