@@ -147,7 +147,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Copy to clipboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172233
+  describe.skip('Copy to clipboard', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
