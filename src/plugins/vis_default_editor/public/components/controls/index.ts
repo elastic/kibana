@@ -15,6 +15,7 @@ export { HasExtendedBoundsParamEditor } from './has_extended_bounds';
 export { IncludeExcludeParamEditor } from './include_exclude';
 export { IpRangesParamEditor } from './ip_ranges';
 export { IpRangeTypeParamEditor } from './ip_range_type';
+export { IsIpv6ParamEditor } from './is_ipv6';
 export { MetricAggParamEditor } from './metric_agg';
 export { MinDocCountParamEditor } from './min_doc_count';
 export { MissingBucketParamEditor } from './missing_bucket';

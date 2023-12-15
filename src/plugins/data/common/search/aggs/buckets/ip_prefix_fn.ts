@@ -65,6 +65,19 @@ export const aggIpPrefix = (): FunctionDefinition => ({
         defaultMessage: 'Length of the network prefix',
       }),
     },
+    prefixLength64: {
+      types: ['number'],
+      required: true,
+      help: i18n.translate('data.search.aggs.buckets.ipPrefix.prefixLength64.help', {
+        defaultMessage: 'Length of the network prefix',
+      }),
+    },
+    isIpv6: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.ipPrefix.isIpv6.help', {
+        defaultMessage: 'Defines whether the prefix applies to IPv6 addresses',
+      }),
+    },
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.ipPrefix.json.help', {

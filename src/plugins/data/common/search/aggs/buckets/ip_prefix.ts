@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { noop, map, omitBy, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { BucketAggType } from './bucket_agg_type';
@@ -23,6 +22,8 @@ const ipPrefixTitle = i18n.translate('data.search.aggs.buckets.ipPrefixTitle', {
 export interface AggParamsIpPrefix extends BaseAggParams {
   field: string;
   prefixLength?: number;
+  prefixLength64?: number;
+  isIpv6?: boolean;
 }
 
 export const getIpPrefixBucketAgg = () =>
@@ -57,8 +58,29 @@ export const getIpPrefixBucketAgg = () =>
         name: 'prefixLength',
         default: '0',
         type: 'number',
+        shouldShow: (agg) => !agg.getParam('isIpv6'),
         write: (aggConfig, output) => {
-          output.params.prefix_length = aggConfig.params.prefixLength;
+	  if(!aggConfig.params.isIpv6) {
+            output.params.prefix_length = aggConfig.params.prefixLength;
+	  }
+        },
+      },
+      {
+        name: 'prefixLength64',
+        default: '0',
+        type: 'number',
+        shouldShow: (agg) => agg.getParam('isIpv6'),
+        write: (aggConfig, output) => {
+	  if(aggConfig.params.isIpv6) {
+            output.params.prefix_length = aggConfig.params.prefixLength64;
+	  }
+        },
+      },
+      {
+        name: 'isIpv6',
+        default: false,
+        write: (aggConfig, output) => {
+          output.params.is_ipv6 = aggConfig.params.isIpv6;
         },
       },
     ],

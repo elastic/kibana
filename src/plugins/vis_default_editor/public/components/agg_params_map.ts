@@ -33,6 +33,8 @@ const buckets = {
   },
   [BUCKET_TYPES.IP_PREFIX]: {
     prefixLength: controls.PrefixLengthParamEditor,
+    prefixLength64: controls.PrefixLengthParamEditor,
+    isIpv6: controls.IsIpv6ParamEditor,
   },
   [BUCKET_TYPES.IP_RANGE]: {
     ipRangeType: controls.IpRangeTypeParamEditor,

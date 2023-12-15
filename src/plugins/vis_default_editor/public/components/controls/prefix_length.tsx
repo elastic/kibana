@@ -13,12 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
-export interface IpPrefixParamEditorProps extends AggParamEditorProps<number | ''> {
+export interface PrefixLengthParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;
   disabled?: boolean;
 }
 
 function PrefixLengthParamEditor({
+  aggParam,
   disabled,
   iconTip,
   value,
@@ -33,7 +34,10 @@ function PrefixLengthParamEditor({
       {iconTip}
     </>
   );
-  const isValid = disabled || (Number(value) >= 0 && Number(value) <= 32);
+
+  const maxValue = aggParam.displayName == "prefixLength64" ? 128 : 32;
+  
+  const isValid = disabled || (Number(value) >= 0 && Number(value) <= maxValue);
 
   useEffect(() => {
     setValidity(isValid);
@@ -54,7 +58,7 @@ function PrefixLengthParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={0}
-        max={32}
+        max={maxValue}
         disabled={disabled}
         data-test-subj="prefixLengthParamEditor"
       />
