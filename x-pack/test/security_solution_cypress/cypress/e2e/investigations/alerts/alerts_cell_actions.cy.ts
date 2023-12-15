@@ -127,7 +127,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Show Top N', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172232
+  describe.skip('Show Top N', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
