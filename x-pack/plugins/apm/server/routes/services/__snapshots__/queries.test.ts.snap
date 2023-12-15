@@ -10,10 +10,11 @@ Object {
     ],
   },
   "body": Object {
+    "query": undefined,
     "size": 0,
+    "terminate_after": 1,
     "track_total_hits": 1,
   },
-  "terminate_after": 1,
 }
 `;
 
