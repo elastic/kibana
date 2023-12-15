@@ -29,6 +29,7 @@ import {
   Settings,
   TooltipType,
   Tooltip,
+  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
@@ -223,22 +224,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     };
   }, []);
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
-  const customChartTheme: typeof chartTheme = useMemo(() => {
+  const chartThemeOverrides = useMemo<PartialTheme>(() => {
     return color
       ? {
-          ...chartTheme,
           barSeriesStyle: {
-            ...chartTheme.barSeriesStyle,
             rect: {
-              ...(chartTheme.barSeriesStyle?.rect || {}),
               fill: color,
             },
           },
         }
-      : chartTheme;
-  }, [chartTheme, color]);
+      : {};
+  }, [color]);
 
   const {
     isLoading,
@@ -486,7 +483,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               <Tooltip type={TooltipType.None} />
               <Settings
                 locale={i18n.getLocale()}
-                theme={customChartTheme}
+                theme={chartThemeOverrides}
                 baseTheme={chartBaseTheme}
                 xDomain={
                   fromDateParsed && toDateParsed
@@ -538,7 +535,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             <Settings
               locale={i18n.getLocale()}
               rotation={90}
-              theme={customChartTheme}
+              theme={chartThemeOverrides}
               baseTheme={chartBaseTheme}
             />
 
