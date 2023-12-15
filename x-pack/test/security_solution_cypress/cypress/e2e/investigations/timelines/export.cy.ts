@@ -20,6 +20,7 @@ import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
+import { closeToast } from '../../../tasks/common/toast';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
@@ -48,7 +49,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
     });
-    cy.get('[data-test-subj="toastCloseButton"]').click();
+    closeToast();
 
     cy.log('Export a custom timeline via bulk actions');
 
@@ -58,7 +59,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
     });
-    cy.get('[data-test-subj="toastCloseButton"]').click();
+    closeToast();
 
     cy.log('Export all custom timelines via bulk actions');
 
