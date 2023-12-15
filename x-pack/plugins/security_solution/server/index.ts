@@ -17,6 +17,7 @@ export const plugin = async (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 
+// testing a change
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
