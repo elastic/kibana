@@ -33,6 +33,7 @@ import {
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 
@@ -102,7 +103,9 @@ export function getTemplate({
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
-    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+    throw new PackageInvalidArchiveError(
+      `Error template for ${templateIndexPattern} contains a final_pipeline`
+    );
   }
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
@@ -219,9 +222,11 @@ function _generateMappings(
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
   hasDynamicTemplateMappings: boolean;
+  subobjects?: boolean;
 } {
   let hasNonDynamicTemplateMappings = false;
   let hasDynamicTemplateMappings = false;
+  let subobjects: boolean | undefined;
   const props: Properties = {};
 
   function addParentObjectAsStaticProperty(field: Field) {
@@ -234,6 +239,7 @@ function _generateMappings(
     const fieldProps = {
       type: 'object',
       dynamic: true,
+      ...(field.subobjects !== undefined && { subobjects: field.subobjects }),
     };
 
     props[field.name] = fieldProps;
@@ -427,9 +433,20 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new Error(
-              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            throw new PackageInvalidArchiveError(
+              `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
+        }
+
+        // When a wildcard field specifies the subobjects setting,
+        // the parent intermediate object should set the subobjects
+        // setting.
+        //
+        // For example, if a wildcard field `foo.*` has subobjects,
+        // we should set subobjects on the intermediate object `foo`.
+        //
+        if (field.subobjects !== undefined && path.includes('*')) {
+          subobjects = field.subobjects;
         }
 
         if (dynProperties && matchingType) {
@@ -472,6 +489,9 @@ function _generateMappings(
               hasDynamicTemplateMappings = true;
             } else {
               return;
+            }
+            if (mappings.subobjects !== undefined) {
+              fieldProps.subobjects = mappings.subobjects;
             }
             break;
           case 'group-nested':
@@ -580,6 +600,10 @@ function _generateMappings(
           fieldProps.time_series_dimension = field.dimension;
         }
 
+        if (field.subobjects !== undefined) {
+          fieldProps.subobjects = field.subobjects;
+        }
+
         // Even if we don't add the property because it has a wildcard, notify
         // the parent that there is some kind of property, so the intermediate object
         // is still created.
@@ -598,7 +622,12 @@ function _generateMappings(
     });
   }
 
-  return { properties: props, hasNonDynamicTemplateMappings, hasDynamicTemplateMappings };
+  return {
+    properties: props,
+    hasNonDynamicTemplateMappings,
+    hasDynamicTemplateMappings,
+    subobjects,
+  };
 }
 
 function generateDynamicAndEnabled(field: Field) {
@@ -908,7 +937,9 @@ const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClien
       alias: dataStreamName,
     });
   } catch (error) {
-    throw new Error(`cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
+    throw new PackageESError(
+      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
+    );
   }
 };
 
@@ -1055,7 +1086,11 @@ const updateExistingDataStream = async ({
         { logger }
       );
     } catch (err) {
-      throw new Error(`could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+      // Check if this error can happen because of invalid settings;
+      // We are returning a 500 but in that case it should be a 400 instead
+      throw new PackageESError(
+        `Could not update lifecycle settings for ${dataStreamName}: ${err.message}`
+      );
     }
   }
 
@@ -1078,6 +1113,8 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    throw new Error(`could not update index template settings for ${dataStreamName}`);
+    // Same as above - Check if this error can happen because of invalid settings;
+    // We are returning a 500 but in that case it should be a 400 instead
+    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
   }
 };

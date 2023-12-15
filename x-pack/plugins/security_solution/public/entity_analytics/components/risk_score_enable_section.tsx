@@ -36,7 +36,7 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
+import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
 
 import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
@@ -296,7 +296,11 @@ export const RiskScoreEnableSection = () => {
               )}
               {!isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                  <EuiFlexItem>{isLoading && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
+                  <EuiFlexItem>
+                    {isLoading && (
+                      <EuiLoadingSpinner data-test-subj="risk-score-status-loading" size="m" />
+                    )}
+                  </EuiFlexItem>
                   <EuiFlexItem
                     css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}
                     data-test-subj="risk-score-status"

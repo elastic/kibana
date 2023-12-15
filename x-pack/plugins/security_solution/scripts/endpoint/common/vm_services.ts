@@ -249,6 +249,7 @@ const createVagrantVm = async ({
           VMNAME: name,
           CACHED_AGENT_SOURCE: agentFullFilePath,
           CACHED_AGENT_FILENAME: agentFileName,
+          AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
         },
         // Only `pipe` STDERR to parent process
         stdio: ['inherit', 'inherit', 'pipe'],

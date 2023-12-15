@@ -12,11 +12,11 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  isMustacheAutocompleteOn: true,
+  isMustacheAutocompleteOn: false,
   sentinelOneConnectorOn: false,
 });
 
-type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
+export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;

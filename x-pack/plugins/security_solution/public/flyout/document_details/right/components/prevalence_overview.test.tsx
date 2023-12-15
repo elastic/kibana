@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -35,7 +36,7 @@ const NO_DATA_MESSAGE = 'No prevalence data available.';
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) =>
   render(

@@ -23,7 +23,7 @@ export function CustomKqlIndicatorTypeForm() {
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -32,22 +32,20 @@ export function CustomKqlIndicatorTypeForm() {
           <IndexSelection />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <IndexFieldSelector
-            indexFields={timestampFields}
-            name="indicator.params.timestampField"
-            label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
-              defaultMessage: 'Timestamp field',
-            })}
-            placeholder={i18n.translate(
-              'xpack.observability.slo.sloEdit.timestampField.placeholder',
-              { defaultMessage: 'Select a timestamp field' }
-            )}
-            isLoading={!!index && isIndexFieldsLoading}
-            isDisabled={!index}
-            isRequired
-          />
-        </EuiFlexItem>
+        <IndexFieldSelector
+          indexFields={timestampFields}
+          name="indicator.params.timestampField"
+          label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+            defaultMessage: 'Timestamp field',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slo.sloEdit.timestampField.placeholder',
+            { defaultMessage: 'Select a timestamp field' }
+          )}
+          isLoading={!!index && isIndexFieldsLoading}
+          isDisabled={!index}
+          isRequired
+        />
       </EuiFlexGroup>
 
       <EuiFlexItem>
@@ -137,13 +135,13 @@ export function CustomKqlIndicatorTypeForm() {
       </EuiFlexItem>
 
       <IndexFieldSelector
-        indexFields={partitionByFields}
+        indexFields={groupByFields}
         name="groupBy"
         defaultValue={ALL_VALUE}
         label={
           <span>
             {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-              defaultMessage: 'Partition by',
+              defaultMessage: 'Group by',
             })}{' '}
             <EuiIconTip
               content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
@@ -154,7 +152,7 @@ export function CustomKqlIndicatorTypeForm() {
           </span>
         }
         placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-          defaultMessage: 'Select an optional field to partition by',
+          defaultMessage: 'Select an optional field to group by',
         })}
         isLoading={!!index && isIndexFieldsLoading}
         isDisabled={!index}

@@ -5,80 +5,44 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
-import useObservable from 'react-use/lib/useObservable';
-import { type BehaviorSubject, distinctUntilChanged, filter, take } from 'rxjs';
-import styled from '@emotion/styled';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import {
   EuiBetaBadge,
-  EuiButton,
   EuiHeader,
-  EuiHeaderLink,
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { css } from '@emotion/react';
-import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
+import styled from '@emotion/styled';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { PluginKibanaContextValue } from '../utils/use_kibana';
-import {
-  betaBadgeDescription,
-  betaBadgeTitle,
-  discoverLinkTitle,
-  feedbackLinkTitle,
-  onboardingLinkTitle,
-} from '../../common/translations';
-import { getRouterLinkProps } from '../utils/get_router_link_props';
-import { ObservabilityLogExplorerAppMountParameters } from '../types';
+import { LogExplorerTabs } from '@kbn/discover-plugin/public';
+import React, { useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { filter, take } from 'rxjs';
+import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import { ConnectedDiscoverLink } from './discover_link';
+import { FeedbackLink } from './feedback_link';
+import { ConnectedOnboardingLink } from './onboarding_link';
 
-interface LogExplorerTopNavMenuProps {
-  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
-  services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
-  state$: BehaviorSubject<LogExplorerStateContainer>;
-  theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
-}
+export const LogExplorerTopNavMenu = () => {
+  const {
+    services: { serverless },
+  } = useKibanaContextForPlugin();
 
-export const LogExplorerTopNavMenu = ({
-  setHeaderActionMenu,
-  services,
-  state$,
-  theme$,
-}: LogExplorerTopNavMenuProps) => {
-  const { serverless } = services;
-
-  return Boolean(serverless) ? (
-    <ServerlessTopNav services={services} state$={state$} />
-  ) : (
-    <StatefulTopNav
-      services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
-      state$={state$}
-      theme$={theme$}
-    />
-  );
+  return Boolean(serverless) ? <ServerlessTopNav /> : <StatefulTopNav />;
 };
 
-const ServerlessTopNav = ({
-  services,
-  state$,
-}: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
+const ServerlessTopNav = () => {
+  const { services } = useKibanaContextForPlugin();
+
   return (
-    <EuiHeader data-test-subj="logExplorerHeaderMenu">
+    <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
-          </EuiHeaderLinks>
+          <LogExplorerTabs services={services} selectedTab="log-explorer" />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
@@ -97,36 +61,41 @@ const ServerlessTopNav = ({
           />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
-          <FeedbackLink />
+          <EuiHeaderLinks gutterSize="xs">
+            <ConnectedDiscoverLink />
+            <FeedbackLink />
+          </EuiHeaderLinks>
           <VerticalRule />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
-          <OnboardingLink services={services} />
+          <ConnectedOnboardingLink />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
     </EuiHeader>
   );
 };
 
-const StatefulTopNav = ({
-  setHeaderActionMenu,
-  services,
-  state$,
-  theme$,
-}: LogExplorerTopNavMenuProps) => {
+const StatefulTopNav = () => {
+  const {
+    services: {
+      appParams: { setHeaderActionMenu },
+      chrome,
+      i18n,
+      theme,
+    },
+  } = useKibanaContextForPlugin();
+
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
    */
   const [previousAppendExtension$] = useState(() =>
-    services.chrome.getBreadcrumbsAppendExtension$().pipe(filter(Boolean), take(1))
+    chrome.getBreadcrumbsAppendExtension$().pipe(filter(Boolean), take(1))
   );
 
   const previousAppendExtension = useObservable(previousAppendExtension$);
 
   useEffect(() => {
-    const { chrome, i18n, theme } = services;
-
     if (chrome) {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
@@ -159,116 +128,21 @@ const StatefulTopNav = ({
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [services, previousAppendExtension]);
+  }, [chrome, i18n, previousAppendExtension, theme]);
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
-            <OnboardingLink services={services} />
+            <ConnectedDiscoverLink />
+            <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
     </HeaderMenuPortal>
   );
 };
-
-const DiscoverLink = React.memo(
-  ({ services, state$ }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-    const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
-      state$.pipe(
-        distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
-          if (!prev.appState || !curr.appState) return false;
-          return deepEqual(
-            [
-              prev.appState.columns,
-              prev.appState.filters,
-              prev.appState.index,
-              prev.appState.query,
-            ],
-            [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
-          );
-        })
-      ),
-      { appState: {}, logExplorerState: {} }
-    );
-
-    const discoverLinkParams = {
-      columns: appState?.columns,
-      filters: appState?.filters,
-      query: appState?.query,
-      dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
-    };
-
-    const discoverUrl = services.discover.locator?.getRedirectUrl(discoverLinkParams);
-
-    const navigateToDiscover = () => {
-      services.discover.locator?.navigate(discoverLinkParams);
-    };
-
-    const discoverLinkProps = getRouterLinkProps({
-      href: discoverUrl,
-      onClick: navigateToDiscover,
-    });
-
-    return (
-      <EuiHeaderLink
-        {...discoverLinkProps}
-        color="primary"
-        iconType="discoverApp"
-        data-test-subj="logExplorerDiscoverFallbackLink"
-      >
-        {discoverLinkTitle}
-      </EuiHeaderLink>
-    );
-  }
-);
-
-const OnboardingLink = React.memo(({ services }: Pick<LogExplorerTopNavMenuProps, 'services'>) => {
-  const locator = services.share.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-
-  const onboardingUrl = locator?.useUrl({});
-
-  const navigateToOnboarding = () => {
-    locator?.navigate({});
-  };
-
-  const onboardingLinkProps = getRouterLinkProps({
-    href: onboardingUrl,
-    onClick: navigateToOnboarding,
-  });
-
-  return (
-    <EuiButton
-      {...onboardingLinkProps}
-      fill
-      size="s"
-      iconType="indexOpen"
-      data-test-subj="logExplorerOnboardingLink"
-    >
-      {onboardingLinkTitle}
-    </EuiButton>
-  );
-});
-
-const FeedbackLink = React.memo(() => {
-  return (
-    <EuiHeaderLink
-      color="primary"
-      href={LOG_EXPLORER_FEEDBACK_LINK}
-      iconType="popout"
-      iconSide="right"
-      iconSize="s"
-      target="_blank"
-    >
-      {feedbackLinkTitle}
-    </EuiHeaderLink>
-  );
-});
 
 const VerticalRule = styled.span`
   width: 1px;

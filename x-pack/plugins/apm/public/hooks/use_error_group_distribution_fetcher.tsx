@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
 
@@ -22,7 +22,10 @@ export function useErrorGroupDistributionFetcher({
 }) {
   const {
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
-  } = useApmParams('/services/{serviceName}/errors');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/errors',
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

@@ -41,8 +41,8 @@ describe('fetch', () => {
     await expect(readFile(TEMP_FILE, 'utf8')).resolves.toBe('foobar');
   });
 
-  test('returns the md5 hex hash of the http body', async () => {
-    const hash = createHash('md5').update('foobar').digest('hex');
+  test('returns the sha1 hex hash of the http body', async () => {
+    const hash = createHash('sha256').update('foobar').digest('hex');
 
     await expect(fetch('url', TEMP_FILE)).resolves.toEqual(hash);
   });

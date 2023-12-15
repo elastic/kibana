@@ -39,7 +39,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
       {
         id: 'root',
         title: '',
-        path: [...node.path, 'root'],
+        path: `${node.path}.root`,
         children: [...node.children],
       },
     ];

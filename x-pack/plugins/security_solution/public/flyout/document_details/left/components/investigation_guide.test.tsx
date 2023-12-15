@@ -18,6 +18,7 @@ jest.mock('../../shared/hooks/use_investigation_guide');
 
 const NO_DATA_TEXT =
   "There's no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.";
+const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
 
 const renderInvestigationGuide = (context: LeftPanelContext = mockContextValue) => (
   <TestProviders>
@@ -75,5 +76,16 @@ describe('<InvestigationGuide />', () => {
     });
     const { getByTestId } = render(renderInvestigationGuide());
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_TEXT);
+  });
+
+  it('should render preview message when flyout is in preview', () => {
+    (useInvestigationGuide as jest.Mock).mockReturnValue({
+      loading: false,
+      error: true,
+    });
+    const { getByTestId } = render(
+      renderInvestigationGuide({ ...mockContextValue, isPreview: true })
+    );
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 });

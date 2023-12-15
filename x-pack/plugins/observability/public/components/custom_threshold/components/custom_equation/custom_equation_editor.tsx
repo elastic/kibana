@@ -16,12 +16,13 @@ import {
   EuiExpression,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { adjustThresholdBasedOnFormat } from '../../helpers/adjust_threshold_based_on_format';
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
@@ -63,15 +64,25 @@ export function CustomEquationEditor({
     expression?.metrics ?? [NEW_METRIC]
   );
   const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
-  const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
+  const [equation, setEquation] = useState<string | undefined>(expression?.equation);
   const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
+
+  useEffect(() => {
+    setCustomMetrics(expression?.metrics ?? [NEW_METRIC]);
+    setEquation(expression?.equation);
+  }, [expression?.metrics, expression?.equation]);
 
   const handleAddNewRow = useCallback(() => {
     setCustomMetrics((previous) => {
       const currentVars = previous?.map((m) => m.name) ?? [];
       const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
-      debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
+      debouncedOnChange({
+        ...expression,
+        metrics: nextMetrics,
+        equation,
+        threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+      });
       return nextMetrics;
     });
   }, [debouncedOnChange, equation, expression]);
@@ -81,7 +92,12 @@ export function CustomEquationEditor({
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
         const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
-        debouncedOnChange({ ...expression, metrics: finalMetrics, equation });
+        debouncedOnChange({
+          ...expression,
+          metrics: finalMetrics,
+          equation,
+          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+        });
         return finalMetrics;
       });
     },
@@ -92,7 +108,12 @@ export function CustomEquationEditor({
     (metric: CustomThresholdExpressionMetric) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
-        debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
+        debouncedOnChange({
+          ...expression,
+          metrics: nextMetrics,
+          equation,
+          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+        });
         return nextMetrics;
       });
     },

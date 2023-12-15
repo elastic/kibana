@@ -500,7 +500,7 @@
               "type": "string",
               "default": "OR",
               "examples": [
-                "OR"
+                "AND"
               ]
             }
           },
@@ -568,7 +568,10 @@
             "in": "query",
             "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "examples": [
+                "threshold +-test*"
+              ]
             }
           },
           {
@@ -578,7 +581,10 @@
             "schema": {
               "oneOf": [
                 {
-                  "type": "string"
+                  "type": "string",
+                  "examples": [
+                    "name"
+                  ]
                 },
                 {
                   "type": "array",

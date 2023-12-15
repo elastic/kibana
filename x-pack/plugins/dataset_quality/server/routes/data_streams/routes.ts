@@ -7,11 +7,14 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt } from '../../types/api_types';
-import { DataStreamsStatResponse } from '../../types/data_stream';
+import { DataStreamStat } from '../../types/data_stream';
+import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
+import { Integration } from '../../types/integration';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
+import { getDegradedDocsPaginated } from './get_degraded_docs';
+import { DegradedDocs } from '../../../common/api_types';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -26,7 +29,10 @@ const statsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<DataStreamsStatResponse> {
+  async handler(resources): Promise<{
+    dataStreamsStats: DataStreamStat[];
+    integrations: Integration[];
+  }> {
     const { context, params, plugins } = resources;
     const coreContext = await context.core;
 
@@ -58,12 +64,48 @@ const statsRoute = createDatasetQualityServerRoute({
       }));
 
     return {
-      items: values(merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: values(
+        merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
+      ),
       integrations,
+    };
+  },
+});
+
+const degradedDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      dataStreamTypesRt,
+      t.partial({
+        datasetQuery: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    degradedDocs: DegradedDocs[];
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const degradedDocs = await getDegradedDocsPaginated({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      degradedDocs,
     };
   },
 });
 
 export const dataStreamsRouteRepository = {
   ...statsRoute,
+  ...degradedDocsRoute,
 };

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import { ServerError } from '../types';
 import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
 
@@ -36,6 +37,7 @@ export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
     triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
     ({ signal }) => bulkGetCases(http, { ids: caseIds }, signal),
     {
+      context: AlertsTableQueryContext,
       enabled: caseIds.length > 0 && fetchCases,
       select: transformCases,
       onError: (error: ServerError) => {
