@@ -78,8 +78,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }
 
       describe('with ml jobs', () => {
-        it('checks if alert is active', async () => {
-          const createdRule = await createApmRule({
+        let ruleId: string;
+        let createdRule: any;
+        before(async () => {
+          createdRule = await createApmRule({
             supertest,
             name: 'Latency anomaly | service-a',
             params: {
@@ -91,7 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });
-
+        });
+        it('checks if alert is active', async () => {
           const ruleStatus = await waitForActiveRule({
             ruleId: createdRule.id,
             supertest,
@@ -101,6 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('produces an alert with the correct reason', async () => {
+          const alerts = await waitForAlertsForRule({ es, ruleId });
           expect(alerts[0]['kibana.alert.reason']).to.be(
             'warning latency anomaly with a score of 80, was detected in the last 5 mins for foo.'
           );
