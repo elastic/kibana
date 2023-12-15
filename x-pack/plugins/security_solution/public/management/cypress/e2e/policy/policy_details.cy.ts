@@ -45,6 +45,7 @@ describe(
       const updatedTestNote = 'updated test note';
 
       // FLAKY: https://github.com/elastic/kibana/issues/169187
+      // FLAKY: https://github.com/elastic/kibana/issues/169188
       describe.skip('Renders and saves protection updates', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
