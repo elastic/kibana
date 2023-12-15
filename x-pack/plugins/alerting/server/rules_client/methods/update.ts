@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
+import { AuditLogOperation, AuditSubject } from '@kbn/audit-plugin/common';
 import {
   PartialRule,
   RawRule,
@@ -311,6 +312,17 @@ async function updateAlert<Params extends RuleTypeParams>(
       `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
   }
+
+  await context.auditService.log({
+    user: username || '',
+    operation: AuditLogOperation.UPDATE,
+    subject: AuditSubject.RULE,
+    subjectId: id,
+    data: {
+      old: omit(currentRule.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
+      new: omit(updatedObject.attributes, ['monitoring', 'lastRun', 'executionStatus', 'apiKey']),
+    },
+  });
 
   return getPartialRuleFromRaw(
     context,

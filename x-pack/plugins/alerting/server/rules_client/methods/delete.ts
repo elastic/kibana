@@ -6,6 +6,7 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AuditLogOperation, AuditSubject } from '@kbn/audit-plugin/common';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
@@ -82,6 +83,17 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     })
   );
   const removeResult = await context.unsecuredSavedObjectsClient.delete('alert', id);
+
+  await context.auditService.log({
+    user: (await context.getUserName()) || '',
+    operation: AuditLogOperation.DELETE,
+    subject: AuditSubject.RULE,
+    subjectId: id,
+    data: {
+      old: attributes,
+      new: null,
+    },
+  });
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,

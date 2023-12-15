@@ -25,7 +25,7 @@ export class AuditService {
     try {
       return this.context.client.log({ namespace: this.namespace, ...params });
     } catch (e) {
-      this.context.logger.info("Audit log couldn't be saved");
+      this.context.logger.error(`Audit log couldn't be saved, error: ${e.message}`);
     }
   }
 
