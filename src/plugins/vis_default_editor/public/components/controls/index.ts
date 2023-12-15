@@ -24,6 +24,7 @@ export { OtherBucketParamEditor } from './other_bucket';
 export { OrderAggParamEditor } from './order_agg';
 export { PercentilesEditor } from './percentiles';
 export { PercentileRanksEditor } from './percentile_ranks';
+export { PrefixLengthParamEditor } from './prefix_length';
 export { RangesControl } from './range_control';
 export { RawJsonParamEditor } from './raw_json';
 export { ScaleMetricsParamEditor } from './scale_metrics';
