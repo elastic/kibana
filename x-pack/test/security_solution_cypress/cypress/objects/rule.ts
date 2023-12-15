@@ -350,7 +350,7 @@ export const getNewTermsRule = (
   note: '# test markdown',
   new_terms_fields: ['host.name'],
   history_window_start: 'now-51000h',
-  interval: '24h',
+  interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
   ...rewrites,
