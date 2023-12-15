@@ -66,7 +66,6 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
   it('should NOT prompt when navigating with a changed & unsaved timeline within security solution where timelines are enabled', () => {
@@ -83,7 +82,6 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
   it('should NOT prompt when navigating with a changed & saved timeline out of security solution', () => {
@@ -159,7 +157,6 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
     navigateToExplorePageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
   it('should prompt when navigating with a changed & unsaved timeline to an external page', () => {
@@ -168,7 +165,6 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
 
     navigateToDiscoverPageInServerless();
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-    cy.get(MODAL_CONFIRMATION_BTN).click();
   });
 
   it('should NOT prompt when navigating with a changed & saved timeline to pages where timelines are disabled', () => {
