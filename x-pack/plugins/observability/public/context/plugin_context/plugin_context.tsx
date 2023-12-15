@@ -6,8 +6,9 @@
  */
 
 import { AppMountParameters } from '@kbn/core/public';
-import { createContext } from 'react';
+import { createContext, ForwardRefExoticComponent } from 'react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import { ConfigSchema } from '../../plugin';
 
@@ -17,6 +18,7 @@ export interface PluginContextValue {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   ObservabilityAIAssistantActionMenuItem: () => JSX.Element;
+  ContextualInsight: ForwardRefExoticComponent<InsightProps>;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

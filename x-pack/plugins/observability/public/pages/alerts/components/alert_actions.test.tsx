@@ -22,6 +22,7 @@ import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
 import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -72,6 +73,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
+  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
+  ContextualInsight: (<div>insights</div>) as unknown as React.ExoticComponent<InsightProps>,
 }));
 
 describe('ObservabilityActions component', () => {

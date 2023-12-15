@@ -19,6 +19,24 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   },
 } as any);
 
+jest.mock('../../hooks/use_kibana', () => {
+  const originalModule = jest.requireActual('../../hooks/use_kibana');
+  return {
+    ...originalModule,
+    useKibana: () => {
+      const { services } = originalModule.useKibana();
+      return {
+        services: {
+          ...services,
+          observabilityAIAssistant: {
+            ObservabilityAIAssistantActionMenuItem: () => <div>hello</div>,
+          },
+        },
+      };
+    },
+  };
+});
+
 describe('Action Menu', function () {
   afterAll(() => {
     jest.clearAllMocks();

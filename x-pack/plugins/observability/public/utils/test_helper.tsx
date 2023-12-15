@@ -18,6 +18,7 @@ import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { ConfigSchema } from '../plugin';
@@ -62,6 +63,7 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
           exploratoryView: {
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
+            // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
             ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
           },
         }}
@@ -72,6 +74,12 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             config: merge(defaultConfig, config),
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+            ObservabilityAIAssistantActionMenuItem: () => <div>im a button</div>,
+            ContextualInsight: (
+              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+              <div>I give insight</div>
+            ) as unknown as ForwardRefExoticComponent<InsightProps>,
           }}
         >
           <QueryClientProvider client={queryClient}>

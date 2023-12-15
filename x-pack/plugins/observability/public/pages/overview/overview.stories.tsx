@@ -13,6 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
 import {
@@ -99,6 +100,10 @@ const withCore = makeDecorator({
               config,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
+              ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
+              ContextualInsight: (
+                <div>I give insight</div>
+              ) as unknown as React.ForwardRefExoticComponent<InsightProps>,
             }}
           >
             <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>

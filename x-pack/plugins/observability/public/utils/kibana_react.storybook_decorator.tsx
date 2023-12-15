@@ -117,6 +117,10 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
           config,
           observabilityRuleTypeRegistry,
           ObservabilityPageTemplate: KibanaPageTemplate,
+          ObservabilityAIAssistantActionMenuItem: () => <div>im a button</div>,
+          ContextualInsight: (
+            <div>I give insight</div>
+          ) as unknown as React.ForwardRefExoticComponent<unknown>,
         }}
       >
         <MemoryRouter>

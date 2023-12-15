@@ -25,6 +25,7 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { ThemeProvider } from '@emotion/react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 mockUseKibanaReturnValue.services.application.capabilities = {
@@ -67,6 +68,10 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
+  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
+  ContextualInsight: (
+    <div>I give insight</div>
+  ) as unknown as React.ForwardRefExoticComponent<InsightProps>,
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,

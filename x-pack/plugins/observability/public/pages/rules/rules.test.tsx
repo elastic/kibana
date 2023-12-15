@@ -17,6 +17,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -48,6 +49,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
+  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
+  ContextualInsight: (<div>insights</div>) as unknown as React.ExoticComponent<InsightProps>,
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,

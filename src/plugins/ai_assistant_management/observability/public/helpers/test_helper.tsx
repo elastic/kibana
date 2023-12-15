@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ForwardRefExoticComponent } from 'react';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
@@ -16,6 +16,7 @@ import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 
 import { mockObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import type { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
@@ -64,6 +65,12 @@ export const render = (component: React.ReactNode, params?: { show: boolean }) =
             notifications: coreStart.notifications,
             observabilityAIAssistant: {
               service: mockObservabilityAIAssistantService,
+              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+              ObservabilityAIAssistantActionMenuItem: () => <div>im a button</div>,
+              ContextualInsight: (
+                // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                <div>I give insight</div>
+              ) as unknown as ForwardRefExoticComponent<InsightProps>,
               useGenAIConnectors: () => ({
                 loading: false,
                 selectConnector: () => {},
