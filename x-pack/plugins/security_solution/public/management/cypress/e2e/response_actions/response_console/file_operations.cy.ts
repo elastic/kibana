@@ -27,6 +27,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/170424
+  // FLAKY: https://github.com/elastic/kibana/issues/173456
   describe.skip('File operations:', () => {
     const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
