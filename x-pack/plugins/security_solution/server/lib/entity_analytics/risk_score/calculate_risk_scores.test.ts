@@ -191,10 +191,6 @@ describe('calculateRiskScores()', () => {
           calculated_score_norm: expect.any(Number),
           category_1_score: expect.any(Number),
           category_1_count: expect.any(Number),
-          category_5_score: expect.any(Number),
-          category_5_count: expect.any(Number),
-          criticality_level: undefined,
-          criticality_modifier: undefined,
           notes: expect.any(Array),
         })
       );
