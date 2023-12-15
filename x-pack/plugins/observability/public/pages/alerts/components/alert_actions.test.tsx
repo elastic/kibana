@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from '@testing-library/react-hooks';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
@@ -22,7 +23,6 @@ import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
 import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
-import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -42,6 +42,9 @@ mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.moc
 );
 
 mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
+
+const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
+  observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../../utils/kibana_react', () => ({
   __esModule: true,
@@ -73,8 +76,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
-  ContextualInsight: (<div>insights</div>) as unknown as React.ExoticComponent<InsightProps>,
+  ObservabilityAIAssistantActionMenuItem,
+  ContextualInsight,
 }));
 
 describe('ObservabilityActions component', () => {

@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { ForwardRefExoticComponent } from 'react';
+import React from 'react';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
-
-import { mockObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import type { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
@@ -63,20 +61,7 @@ export const render = (component: React.ReactNode, params?: { show: boolean }) =
             http: coreStart.http,
             application: coreStart.application,
             notifications: coreStart.notifications,
-            observabilityAIAssistant: {
-              service: mockObservabilityAIAssistantService,
-              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-              ObservabilityAIAssistantActionMenuItem: () => <div>im a button</div>,
-              ContextualInsight: (
-                // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-                <div>I give insight</div>
-              ) as unknown as ForwardRefExoticComponent<InsightProps>,
-              useGenAIConnectors: () => ({
-                loading: false,
-                selectConnector: () => {},
-                reloadConnectors: () => {},
-              }),
-            },
+            observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
             uiSettings: coreStart.uiSettings,
             setBreadcrumbs: () => {},
           }}

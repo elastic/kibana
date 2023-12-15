@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from './rules';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -17,9 +18,11 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+
+const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
+  observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -49,8 +52,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
-  ContextualInsight: (<div>insights</div>) as unknown as React.ExoticComponent<InsightProps>,
+  ObservabilityAIAssistantActionMenuItem,
+  ContextualInsight,
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,

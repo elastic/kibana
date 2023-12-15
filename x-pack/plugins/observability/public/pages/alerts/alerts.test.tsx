@@ -15,6 +15,7 @@ import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintena
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { AlertsPage } from './alerts';
@@ -25,7 +26,6 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { ThemeProvider } from '@emotion/react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 mockUseKibanaReturnValue.services.application.capabilities = {
@@ -35,6 +35,9 @@ mockUseKibanaReturnValue.services.application.capabilities = {
     show: true,
   },
 };
+
+const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
+  observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -68,10 +71,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
-  ContextualInsight: (
-    <div>I give insight</div>
-  ) as unknown as React.ForwardRefExoticComponent<InsightProps>,
+  ObservabilityAIAssistantActionMenuItem,
+  ContextualInsight,
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,

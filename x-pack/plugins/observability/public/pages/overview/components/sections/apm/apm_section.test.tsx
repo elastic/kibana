@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
@@ -18,7 +19,6 @@ import { HasDataContextValue } from '../../../../../context/has_data_context/has
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { InsightProps } from '@kbn/observability-ai-assistant-plugin/public/components/insight/insight';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -27,6 +27,9 @@ jest.mock('react-router-dom', () => ({
   }),
   useHistory: jest.fn(),
 }));
+
+const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
+  observabilityAIAssistantPluginMock.createStartContract();
 
 describe('APMSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
@@ -62,10 +65,8 @@ describe('APMSection', () => {
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
-      ObservabilityAIAssistantActionMenuItem: () => <div>button</div>,
-      ContextualInsight: (
-        <div>I give insight</div>
-      ) as unknown as React.ForwardRefExoticComponent<InsightProps>,
+      ObservabilityAIAssistantActionMenuItem,
+      ContextualInsight,
     }));
   });
 
