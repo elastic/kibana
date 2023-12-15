@@ -147,6 +147,7 @@ export function UXAppRoot({
             inspector,
             observability,
             observabilityShared,
+            observabilityAIAssistant,
             embeddable,
             exploratoryView,
             data,
