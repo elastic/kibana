@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
+import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { ESQLEditor } from './esql_editor';
 import { getDateFields } from './esql_utils';
 
@@ -184,6 +185,13 @@ export function UpdateSourceEditor(props: Props) {
               />
             </EuiFormRow>
           }
+
+          <ForceRefreshCheckbox
+            applyForceRefresh={props.sourceDescriptor.applyForceRefresh}
+            setApplyForceRefresh={(applyForceRefresh: boolean) => {
+              props.onChange({ propName: 'applyForceRefresh', value: applyForceRefresh });
+            }}
+          />
         </EuiSkeletonText>
       </EuiPanel>
       <EuiSpacer size="s" />

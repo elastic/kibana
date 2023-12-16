@@ -64,6 +64,8 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
         typeof descriptor.narrowByGlobalSearch !== 'undefined' ? descriptor.narrowByGlobalSearch : true,
       narrowByMapBounds:
         typeof descriptor.narrowByMapBounds !== 'undefined' ? descriptor.narrowByMapBounds : true,
+      applyForceRefresh:
+        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
   }
 
@@ -103,6 +105,10 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   getApplyGlobalTime() {
     return !!this._descriptor.dateField;
+  }
+
+  getApplyForceRefresh() {
+    return this._descriptor.applyForceRefresh;
   }
 
   isFilterByMapBounds() {

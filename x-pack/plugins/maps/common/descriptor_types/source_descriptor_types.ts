@@ -49,6 +49,7 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   dateField?: string;
   narrowByGlobalSearch: boolean;
   narrowByMapBounds: boolean;
+  applyForceRefresh: boolean;
 };
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
