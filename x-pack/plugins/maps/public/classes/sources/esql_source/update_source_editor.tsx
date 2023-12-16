@@ -71,7 +71,7 @@ export function UpdateSourceEditor(props: Props) {
       label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
         defaultMessage: `Narrow ES|QL statement by global time`,
       })}
-      checked={!!props.sourceDescriptor.dateField}
+      checked={dateFields.length === 0 ? false : !!props.sourceDescriptor.dateField}
       onChange={(event: EuiSwitchEvent) => {
         if (!event.target.checked) {
           props.onChange({ propName: 'dateField', value: undefined });
@@ -82,6 +82,7 @@ export function UpdateSourceEditor(props: Props) {
           props.onChange({ propName: 'dateField', value: dateFields[0] });
         }
       }}
+      disabled={dateFields.length === 0}
       compressed
     />
   );
