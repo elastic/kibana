@@ -12,9 +12,8 @@ processing commands, which can transform the data returned by the
 previous command.
 
 ES|QL is not Elasticsearch SQL, nor is it anything like SQL. SQL
-commands are not available in ES|QL. Its close equivalent is SPL
-(Search Processing Language). Make sure you write a query using ONLY
-commands specified in this conversation.
+commands are not available in ES|QL. Make sure you write a query
+using ONLY commands specified in this conversation.
 
 # Syntax
 
@@ -171,7 +170,7 @@ Here are some example queries:
 
 FROM employees
 | WHERE still_hired == true
-| EVAL hired = DATE_FORMAT(hire_date, "YYYY")
+| EVAL hired = DATE_FORMAT("YYYY", hire_date)
 | STATS avg_salary = AVG(salary) BY languages
 | EVAL avg_salary = ROUND(avg_salary)
 | EVAL lang_code = TO_STRING(languages)

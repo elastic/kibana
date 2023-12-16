@@ -184,7 +184,51 @@ export function registerEsqlFunction({
               \`\`\`
 
               Prefer to use commands and functions for which you have documentation.
-              `
+              
+              Pay special attention to these instructions. Not following these instructions to the tee
+              will lead to excruciating consequences for the user.
+              
+              #1
+              Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation functions in stats commands, NOT in SORT or EVAL.
+              Rationale: Only aggregation functions are supported in STATS commands, and aggregation functions are only supported in STATS commands. 
+              Action: Create new columns using EVAL first and then aggregate over them in STATS commands. Do not use aggregation functions anywhere else, such as SORT or EVAL.
+              Example: EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0) | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
+
+              #2
+              Directive: Use the \`=\` operator to create new columns in STATS and EVAL, DO NOT UNDER ANY CIRCUMSTANCES use \`AS\`.
+              Rationale: The \`=\` operator is used for aliasing. Using \`AS\` leads to syntax errors.
+              Action: When creating a new column in a command, use the = operator.
+              Example: STATS total_requests = COUNT(*)
+
+              #3
+              Directive: Use placeholder values for information that is missing.
+              Rationale: It is critical to generate a syntactically valid query.
+              Action: When you don't know the arguments to a function because information is missing, use placeholder values.
+              Example: "Here's an ES|QL query that generates a timeseries of 50 buckets calculating the average duration. I've used 
+              "2023-01-23T12:15:00.000Z" and "2023-01-23T12:30:00.000Z" as placeholder values. Replace them with the start
+              and end date that work for your use case."
+
+              #4
+              Directive: Wrap string literals in double quotes.
+              Rationale: It is critical to generate a syntactically valid query.
+              Action: When using string literals in function calls, wrap them in double quotes, not single quotes.
+              Example: DATE_EXTRACT("year", @timestamp)
+              
+              At the start of every message, YOU MUST, for every instruction that is relevant to the query you want to construct,
+              repeat its directives, verbatim, at the start of every message. Exclude the rationales, actions, and examples. Follow
+              it up by using a delimiter: --
+              
+              Example:
+              
+              #1: <directive>
+              #2: <directive>
+              #3: <directive>
+
+              --
+
+              Here is an ES|QL query that you can use:
+
+              <query>`
             ),
             {
               '@timestamp': new Date().toISOString(),
@@ -205,27 +249,6 @@ export function registerEsqlFunction({
                 name: 'get_esql_info',
                 content: JSON.stringify({
                   documentation: messagesToInclude,
-                  commonMistakes: `
-                    What follows are patterns of common mistakes and their corrections.
-                    DO NOT UNDER ANY CIRCUMSTANCES repeat these mistakes.
-
-                    // aggregation functions do not support other functions
-                    mistake: | STATS failures = SUM(CASE(event.outcome == "failure", 1, 0)) BY my_grouping_name
-                    correction: | EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0) | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-                    // STATS ... BY does not support arithmetic operations
-                    mistake: | STATS failure_rate = SUM(is_failure) / SUM(is_success_or_failure)
-                    correction: | STATS total_failures = SUM(is_failure), total_successes_or_failures = SUM(is_success_or_failure) | EVAL failure_rate = total_failures / total_successes_or_failures | DROP total_failures, total_successes_or_failures
-
-                    // aliasing happens with the = operator, not the AS keyword.
-                    // DO NOT UNDER ANY CIRCUMSTANCES use the AS keyword
-                    mistake: | STATS COUNT(*) AS total_requests 
-                    mistake: | STATS SUM(request_latency) AS total_duration
-                    correction: | STATS total_requests = COUNT(*)
-
-                    // AUTO_BUCKET requires four arguments
-                    mistake: | EVAL bucket = AUTO_BUCKET(@timestamp, 50)
-                    correction: | EVAL bucket = AUTO_BUCKET(@timestamp, 50, <start-date>, <end-date>)
-                    correction: | EVAL bucket = AUTO_BUCKET(@timestamp, 50, "2023-01-23T12:15:00.000Z", "2023-01-23T12:30:00.000Z")`,
                 }),
               },
             },
@@ -237,7 +260,46 @@ export function registerEsqlFunction({
         })
       ).pipe(processOpenAiStream());
 
-      return esqlResponse$;
+      return esqlResponse$.pipe((source) => {
+        return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
+          let cachedContent: string = '';
+
+          function includesDivider() {
+            const firstDividerIndex = cachedContent.indexOf('--');
+            return firstDividerIndex !== -1;
+          }
+
+          source.subscribe({
+            next: (message) => {
+              if (includesDivider()) {
+                subscriber.next(message);
+              }
+              cachedContent += message.choices[0].delta.content || '';
+            },
+            complete: () => {
+              if (!includesDivider()) {
+                subscriber.next({
+                  created: 0,
+                  id: '',
+                  model: '',
+                  object: 'chat.completion.chunk',
+                  choices: [
+                    {
+                      delta: {
+                        content: cachedContent,
+                      },
+                    },
+                  ],
+                });
+              }
+              subscriber.complete();
+            },
+            error: (error) => {
+              subscriber.error(error);
+            },
+          });
+        });
+      });
     }
   );
 }
