@@ -14,7 +14,8 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiTitle
+  EuiTitle,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
@@ -22,7 +23,6 @@ import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ESQLEditor } from './esql_editor';
 import { getDateFields } from './esql_utils';
-import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
@@ -30,7 +30,6 @@ interface Props {
 }
 
 export function UpdateSourceEditor(props: Props) {
-  const [applyGlobalTime, setApplyGlobalTime] = useState(!!props.sourceDescriptor.dateField);
   const [dateFields, setDateFields] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -65,7 +64,27 @@ export function UpdateSourceEditor(props: Props) {
         text: dateField
       };
     });
-  }, [dateFields])
+  }, [dateFields]);
+
+  const narrowByTimeInput = (
+    <EuiSwitch
+      label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+        defaultMessage: `Narrow ES|QL statement by global time`,
+      })}
+      checked={!!props.sourceDescriptor.dateField}
+      onChange={(event: EuiSwitchEvent) => {
+        if (!event.target.checked) {
+          props.onChange({ propName: 'dateField', value: undefined });
+          return;
+        }
+
+        if (dateFields.length) {
+          props.onChange({ propName: 'dateField', value: dateFields[0] });
+        }
+      }}
+      compressed
+    />
+  );
 
   return (
     <>
@@ -103,44 +122,49 @@ export function UpdateSourceEditor(props: Props) {
 
           <EuiFormRow>
             <EuiSwitch
-              label={i18n.translate('xpack.maps.esqlSource.extentFilterLabel', {
+              label={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
                 defaultMessage: 'Narrow ES|QL statement by visible map area',
               })}
-              checked={props.sourceDescriptor.filterByMapBounds}
+              checked={props.sourceDescriptor.narrowByMapBounds}
               onChange={(event: EuiSwitchEvent) => {
-                props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
+                props.onChange({ propName: 'narrowByMapBounds', value: event.target.checked });
               }}
               compressed
             />
           </EuiFormRow>
 
-          <GlobalTimeCheckbox 
-            applyGlobalTime={applyGlobalTime}
-            label={i18n.translate('xpack.maps.esqlSource.applyGlobalTimeCheckboxLabel', {
-              defaultMessage: `Narrow ES|QL statement by global time`,
-            })}
-            setApplyGlobalTime={(applyGlobalTime: boolean) => {
-              if (!applyGlobalTime) {
-                props.onChange({ propName: 'dateField', value: undefined });
-                setApplyGlobalTime(false);
-                return;
-              }
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
+                defaultMessage: `Narrow ES|QL statement by global search`,
+              })}
+              checked={props.sourceDescriptor.narrowByGlobalSearch}
+              onChange={(event: EuiSwitchEvent) => {
+                props.onChange({ propName: 'narrowByGlobalSearch', value: event.target.checked });
+              }}
+              compressed
+            />
+          </EuiFormRow>
 
-              if (dateFields.length) {
-                props.onChange({ propName: 'dateField', value: dateFields[0] });
-                setApplyGlobalTime(true);
-              }
-            }}
-            disabledReason={dateFields.length === 0
-              ? i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
-                  defaultMessage: `No date fields are available from index pattern: {pattern}.`,
-                  values: {
-                    pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
-                  }
-                })
-              : undefined
+          <EuiFormRow>
+            {
+              dateFields.length === 0
+                ? (
+                    <EuiToolTip
+                      position="top" 
+                      content={i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
+                        defaultMessage: `No date fields are available from index pattern: {pattern}.`,
+                        values: {
+                          pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
+                        }
+                      })}
+                    >
+                      {narrowByTimeInput}
+                    </EuiToolTip>
+                  )
+                : narrowByTimeInput
             }
-          />
+          </EuiFormRow>
 
           {props.sourceDescriptor.dateField &&
             <EuiFormRow

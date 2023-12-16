@@ -36,7 +36,7 @@ type ESQLSourceSyncMeta = Pick<
   | 'columns'
   | 'dateField'
   | 'esql'
-  | 'filterByMapBounds'
+  | 'narrowByMapBounds'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -60,8 +60,10 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
       columns: descriptor.columns ? descriptor.columns : [],
-      filterByMapBounds:
-        typeof descriptor.filterByMapBounds !== 'undefined' ? descriptor.filterByMapBounds : true,
+      narrowByGlobalSearch:
+        typeof descriptor.narrowByGlobalSearch !== 'undefined' ? descriptor.narrowByGlobalSearch : true,
+      narrowByMapBounds:
+        typeof descriptor.narrowByMapBounds !== 'undefined' ? descriptor.narrowByMapBounds : true,
     };
   }
 
@@ -92,7 +94,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   getApplyGlobalQuery() {
-    return true;
+    return this._descriptor.narrowByGlobalSearch;
   }
 
   async isTimeAware() {
@@ -104,7 +106,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.filterByMapBounds;
+    return this._descriptor.narrowByMapBounds;
   }
 
   async getGeoJsonWithMeta(
@@ -120,18 +122,21 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     };
 
     const query: Query[] = [];
-    if (requestMeta.query) {
-      query.push(requestMeta.query);
+    const filters: Filter[] = [];
+    if (this._descriptor.narrowByGlobalSearch) {
+      if (requestMeta.query) {
+        query.push(requestMeta.query);
+      }
+      if (requestMeta.embeddableSearchContext?.query) {
+        query.push(requestMeta.embeddableSearchContext.query);
+      }
+      filters.push(...requestMeta.filters);
+      if (requestMeta.embeddableSearchContext) {
+        filters.push(...requestMeta.embeddableSearchContext.filters);
+      }
     }
-    if (requestMeta.embeddableSearchContext?.query) {
-      query.push(requestMeta.embeddableSearchContext.query);
-    }
-    const filters: Filter[] = [
-      ...requestMeta.filters,
-      ...(requestMeta.embeddableSearchContext?.filters ?? [])
-    ];
 
-    if (this.isFilterByMapBounds() && requestMeta.buffer) {
+    if (this._descriptor.narrowByMapBounds && requestMeta.buffer) {
       const geoField = this._descriptor.columns[getGeometryColumnIndex(this._descriptor.columns)]?.name;
       if (geoField) {
         const extentFilter = createExtentFilter(requestMeta.buffer, [geoField]);
@@ -271,7 +276,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       columns: this._descriptor.columns,
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
-      filterByMapBounds: this._descriptor.filterByMapBounds,
+      narrowByMapBounds: this._descriptor.narrowByMapBounds,
     };
   }
 }
