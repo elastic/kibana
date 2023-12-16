@@ -189,12 +189,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
 
     if (lifecycle && lifecycle.enabled) {
-      act(() => {
+      await act(async () => {
         form.toggleEuiSwitch('dataRetentionToggle.input');
       });
       component.update();
 
-      act(() => {
+      await act(async () => {
         form.setInputValue('valueDataRetentionField', String(lifecycle.value));
       });
     }
