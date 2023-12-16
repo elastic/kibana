@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -21,13 +22,14 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiTableSortingType,
+  EuiTitle,
   Pagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Delta, diff } from 'jsondiffpatch';
-import { isObject } from 'lodash';
+
+import { get, isEmpty, isUndefined } from 'lodash';
 import { AuditLog } from '@kbn/audit-plugin/common';
+import { useKibana } from '../../../..';
 import { RefreshToken } from './types';
 import { useLoadAlertingAudit } from '../../../hooks/use_load_audt';
 
@@ -36,11 +38,15 @@ export interface RuleAuditProps {
   refreshToken?: RefreshToken;
 }
 
+const DELETED = 'deleted';
+
 export const RuleAudit = (props: RuleAuditProps) => {
   const { ruleId, refreshToken } = props;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAudit, setSelectedAudit] = useState<AuditLog | null>(null);
   const isInitialized = useRef(false);
+
+  const { audit: auditService } = useKibana().services;
 
   const columns: Array<EuiBasicTableColumn<AuditLog>> = useMemo(
     () => [
@@ -128,86 +134,88 @@ export const RuleAudit = (props: RuleAuditProps) => {
     }
   };
 
-  const getDiff = (auditLog: AuditLog) => {
-    return diff(JSON.parse(auditLog.data.old || '{}'), JSON.parse(auditLog.data.new || '{}')) || {};
+  const addChange = ({
+    key,
+    value,
+    oldValue,
+  }: {
+    key: string;
+    value: string;
+    oldValue?: string;
+  }) => {
+    return (
+      <>
+        <EuiFlexGroup responsive={false} gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="default">{key} :</EuiBadge>
+          </EuiFlexItem>
+          {!isUndefined(oldValue) ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">{oldValue}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                <EuiIcon type="sortRight" />
+              </EuiFlexItem>
+            </>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={value === DELETED ? 'danger' : 'success'}>{value}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size={'xs'} />
+      </>
+    );
   };
 
-  const printDiff = (delta: Delta, path: string[] = []) => {
+  const addTitle = (title: string) => {
+    return (
+      <>
+        <EuiSpacer size={'m'} />
+        <EuiTitle size="s">
+          <h3>{title}</h3>
+        </EuiTitle>
+        <EuiSpacer size={'s'} />
+      </>
+    );
+  };
+
+  const printDiff = (auditLog: AuditLog) => {
+    const diff = auditService!.getAuditDiff(auditLog);
     const result: React.ReactNode[] = [];
 
-    const flatten = (obj: Delta): void => {
-      for (const [key, value] of Object.entries(obj)) {
-        if (key === '_t') continue;
-        if (Array.isArray(value)) {
-          const oldValue = value[0];
-          const newValue = value[1];
-          const isCreate = value[1] === undefined;
-          if (isCreate) {
-            result.push(
-              <>
-                <EuiFlexGroup responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="default">{[...path, key].join('.')} :</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isObject(oldValue) ? (
-                      printDiff(oldValue)
-                    ) : (
-                      <EuiBadge color="success">{JSON.stringify(oldValue)}</EuiBadge>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size={'xs'} />
-              </>
-            );
-          } else {
-            result.push(
-              <>
-                <EuiFlexGroup responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="default">{[...path, key].join('.')} :</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isObject(oldValue) ? (
-                      printDiff(oldValue, path)
-                    ) : (
-                      <EuiBadge color="warning">{JSON.stringify(oldValue)}</EuiBadge>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="success">
-                      {isObject(newValue) ? printDiff(newValue) : JSON.stringify(newValue)}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size={'xs'} />
-              </>
-            );
-          }
-        } else if (isObject(value)) {
-          path.push(key);
-          flatten(value);
-        } else {
-          result.push(
-            <>
-              <EuiFlexGroup responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="default">{[...path, key].join('.')} :</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="success">{JSON.stringify(value)}</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size={'xs'} />
-            </>
-          );
-        }
-      }
-      path = [];
-    };
-    flatten(delta);
+    if (!isEmpty(diff.added)) {
+      result.push(addTitle('Added'));
+      Object.entries(diff.added).map(([key, value]) => {
+        result.push(addChange({ key, value: JSON.stringify(value) }));
+      });
+    }
 
-    return <div>{result.map((change) => change)}</div>;
+    if (!isEmpty(diff.updated)) {
+      result.push(addTitle('Updated'));
+      Object.entries(diff.updated).map(([key, value]) => {
+        const newPath = key.replace(/.(\d+)/g, '[$1]');
+        const oldValue = get(JSON.parse(selectedAudit?.data.old), newPath);
+        result.push(
+          addChange({ key, value: JSON.stringify(value), oldValue: JSON.stringify(oldValue) })
+        );
+      });
+    }
+
+    if (!isEmpty(diff.deleted)) {
+      result.push(addTitle('Deleted'));
+      Object.entries(diff.deleted).map(([key, value]) => {
+        result.push(addChange({ key, value: DELETED }));
+      });
+    }
+
+    return (
+      <div>
+        {result.map((change, index) => (
+          <div key={`change-${index}`}>{change}</div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -230,9 +238,7 @@ export const RuleAudit = (props: RuleAuditProps) => {
           <EuiModalHeader>
             <EuiModalHeaderTitle>Changes</EuiModalHeaderTitle>
           </EuiModalHeader>
-          <EuiModalBody>
-            <pre>{printDiff(getDiff(selectedAudit))}</pre>
-          </EuiModalBody>
+          <EuiModalBody>{printDiff(selectedAudit)}</EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={() => setShowModal(false)} fill>
               {i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditModal.close', {

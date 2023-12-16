@@ -6,6 +6,12 @@
  */
 
 import { AuditPlugin } from './plugin';
+export type {
+  AuditPluginSetupDeps,
+  AuditPluginStartDeps,
+  AuditPluginSetup,
+  AuditPluginStart,
+} from './types';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

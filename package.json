@@ -925,6 +925,7 @@
     "d3-transition": "^3.0.1",
     "dedent": "^0.7.0",
     "deep-freeze-strict": "^1.1.1",
+    "deep-object-diff": "^1.1.9",
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "diff": "^5.1.0",

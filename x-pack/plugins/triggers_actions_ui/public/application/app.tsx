@@ -32,6 +32,7 @@ import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { AuditPluginStart } from '@kbn/audit-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -75,6 +76,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   expressions: ExpressionsStart;
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
+  audit?: AuditPluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

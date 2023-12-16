@@ -7,6 +7,7 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { CoreSetup } from '@kbn/core/public';
+import { getAuditDiff } from './get_audit_diff';
 import {
   AuditPluginSetup,
   AuditPluginSetupDeps,
@@ -21,7 +22,11 @@ export class AuditPlugin
 {
   public setup(core: AuditCoreSetup, deps: AuditPluginSetupDeps): AuditPluginSetup {}
 
-  public start(core: CoreStart, plugins: AuditPluginStartDeps): AuditPluginStart {}
+  public start(core: CoreStart, plugins: AuditPluginStartDeps): AuditPluginStart {
+    return {
+      getAuditDiff,
+    };
+  }
 
   public stop() {}
 }

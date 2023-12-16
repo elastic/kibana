@@ -7,6 +7,8 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { AuditDiff } from './get_audit_diff';
+import { AuditLog } from '../common';
 
 export interface AuditPluginSetupDeps {
   uiActions: UiActionsSetup;
@@ -17,4 +19,7 @@ export interface AuditPluginStartDeps {
 }
 
 export type AuditPluginSetup = void;
-export type AuditPluginStart = void;
+
+export interface AuditPluginStart {
+  getAuditDiff: (auditLog: AuditLog) => AuditDiff;
+}
