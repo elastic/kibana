@@ -16,7 +16,7 @@ import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
-import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants'
+import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants'
 import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { DataRequest } from '../../util/data_request';
@@ -113,6 +113,14 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   isFilterByMapBounds() {
     return this._descriptor.narrowByMapBounds;
+  }
+
+  async getSupportedShapeTypes() {
+    return [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  supportsJoins() {
+    return false; // Joins will be part of ESQL statement and not client side join
   }
 
   async getGeoJsonWithMeta(
