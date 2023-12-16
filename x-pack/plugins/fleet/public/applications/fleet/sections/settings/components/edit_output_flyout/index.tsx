@@ -570,38 +570,57 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             <>
               <EuiSpacer size="l" />
               <EuiFormRow
+                fullWidth
                 label={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.performanceTuningLabel"
                     defaultMessage="Performance tuning"
                   />
                 }
-              >
-                <>
-                  <EuiSelect
-                    data-test-subj="settingsOutputsFlyout.presetInput"
-                    {...inputs.presetInput.props}
-                    onChange={(e) => inputs.presetInput.setValue(e.target.value)}
-                    disabled={
-                      inputs.presetInput.props.disabled ||
-                      outputYmlIncludesReservedPerformanceKey(
-                        inputs.additionalYamlConfigInput.value,
-                        safeLoad
-                      )
-                    }
-                    options={[
-                      { value: 'balanced', text: 'Balanced' },
-                      { value: 'custom', text: 'Custom' },
-                      { value: 'throughput', text: 'Throughput' },
-                      { value: 'scale', text: 'Scale' },
-                      { value: 'latency', text: 'Latency' },
-                    ]}
+                helpText={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.performanceTuningHelpText"
+                    defaultMessage="Performance tuning presets are curated output settings for common use cases. You can also select {custom} to specify your own settings in the Advanced YAML Configuration box below. For a detailed list of settings configured by each preset, see {link}."
+                    values={{
+                      custom: <strong>Custom</strong>,
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.fleet.performancePresets}
+                          external
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.settings.editOutputFlyout.performanceTuningHelpTextLink"
+                            defaultMessage="our documentation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
                   />
-                </>
+                }
+              >
+                <EuiSelect
+                  data-test-subj="settingsOutputsFlyout.presetInput"
+                  {...inputs.presetInput.props}
+                  onChange={(e) => inputs.presetInput.setValue(e.target.value)}
+                  disabled={
+                    inputs.presetInput.props.disabled ||
+                    outputYmlIncludesReservedPerformanceKey(
+                      inputs.additionalYamlConfigInput.value,
+                      safeLoad
+                    )
+                  }
+                  options={[
+                    { value: 'balanced', text: 'Balanced' },
+                    { value: 'custom', text: 'Custom' },
+                    { value: 'throughput', text: 'Throughput' },
+                    { value: 'scale', text: 'Scale' },
+                    { value: 'latency', text: 'Latency' },
+                  ]}
+                />
               </EuiFormRow>
             </>
           )}
-
           {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
