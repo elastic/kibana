@@ -6,7 +6,16 @@
  */
 
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiPanel, EuiSelect, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiTitle
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
@@ -33,14 +42,14 @@ export function UpdateSourceEditor(props: Props) {
           return;
         }
         setDateFields(initialDateFields);
+        setIsInitialized(true);
       })
       .catch((err) => {
         if (ignore) {
           return;
         }
+        setIsInitialized(true);
       });
-
-    setIsInitialized(true);
 
     return () => {
       ignore = true;
@@ -92,10 +101,23 @@ export function UpdateSourceEditor(props: Props) {
 
           <EuiSpacer size="m" />
 
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('xpack.maps.esqlSource.extentFilterLabel', {
+                defaultMessage: 'Narrow ES|QL statement by visible map area',
+              })}
+              checked={props.sourceDescriptor.filterByMapBounds}
+              onChange={(event: EuiSwitchEvent) => {
+                props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
+              }}
+              compressed
+            />
+          </EuiFormRow>
+
           <GlobalTimeCheckbox 
             applyGlobalTime={applyGlobalTime}
             label={i18n.translate('xpack.maps.esqlSource.applyGlobalTimeCheckboxLabel', {
-              defaultMessage: `Apply global time to ES|QL statement`,
+              defaultMessage: `Narrow ES|QL statement by global time`,
             })}
             setApplyGlobalTime={(applyGlobalTime: boolean) => {
               if (!applyGlobalTime) {

@@ -63,14 +63,14 @@ export function CreateSourceEditor(props: Props) {
             });
           }
         }
+        setIsInitialized(true);
       })
       .catch((err) => {
         if (ignore) {
-          return
+          return;
         }
+        setIsInitialized(true);
       });
-
-      setIsInitialized(true);
 
     return () => {
       ignore = true;

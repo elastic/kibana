@@ -36,6 +36,7 @@ type ESQLSourceSyncMeta = Pick<
   | 'columns'
   | 'dateField'
   | 'esql'
+  | 'filterByMapBounds'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -59,6 +60,8 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
       columns: descriptor.columns ? descriptor.columns : [],
+      filterByMapBounds:
+        typeof descriptor.filterByMapBounds !== 'undefined' ? descriptor.filterByMapBounds : true,
     };
   }
 
@@ -101,7 +104,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   isFilterByMapBounds() {
-    return true;
+    return this._descriptor.filterByMapBounds;
   }
 
   async getGeoJsonWithMeta(
@@ -268,6 +271,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       columns: this._descriptor.columns,
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
+      filterByMapBounds: this._descriptor.filterByMapBounds,
     };
   }
 }
