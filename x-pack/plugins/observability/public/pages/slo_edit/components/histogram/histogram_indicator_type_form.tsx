@@ -34,7 +34,7 @@ export function HistogramIndicatorTypeForm() {
     useFetchIndexPatternFields(index);
   const histogramFields = indexFields.filter((field) => field.type === 'histogram');
   const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const groupByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <>
@@ -139,13 +139,13 @@ export function HistogramIndicatorTypeForm() {
         </EuiFlexItem>
 
         <IndexFieldSelector
-          indexFields={partitionByFields}
+          indexFields={groupByFields}
           name="groupBy"
           defaultValue={ALL_VALUE}
           label={
             <span>
               {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-                defaultMessage: 'Partition by',
+                defaultMessage: 'Group by',
               })}{' '}
               <EuiIconTip
                 content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
@@ -156,7 +156,7 @@ export function HistogramIndicatorTypeForm() {
             </span>
           }
           placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-            defaultMessage: 'Select an optional field to partition by',
+            defaultMessage: 'Select an optional field to group by',
           })}
           isLoading={!!index && isIndexFieldsLoading}
           isDisabled={!index}

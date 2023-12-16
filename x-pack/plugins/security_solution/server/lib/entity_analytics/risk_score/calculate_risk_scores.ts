@@ -22,8 +22,8 @@ import type {
   IdentifierType,
   RiskWeights,
   RiskScore,
-} from '../../../../common/risk_engine';
-import { RiskCategories } from '../../../../common/risk_engine';
+} from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {

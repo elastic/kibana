@@ -14,7 +14,8 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
