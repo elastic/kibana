@@ -63,8 +63,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
     }
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173465
-  describe.skip('Host Isolation:', () => {
+  describe('Host Isolation:', () => {
     beforeEach(() => {
       login();
     });
