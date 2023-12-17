@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
@@ -35,7 +36,6 @@ import {
   CREATE_RULE_SEARCH_PARAM,
   useAddRuleFlyoutState,
 } from '../hooks/use_add_rule_flyout_state';
-import { useCopyToJson } from '../hooks/use_copy_to_json';
 import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
@@ -80,7 +80,6 @@ export function SloEditForm({ slo }: Props) {
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;
-  const handleCopyToJson = useCopyToJson({ trigger, getValues });
 
   const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
     useSectionFormValidation({
@@ -241,17 +240,10 @@ export function SloEditForm({ slo }: Props) {
               })}
             </EuiButtonEmpty>
 
-            <EuiButtonEmpty
-              color="primary"
-              iconType="copyClipboard"
-              data-test-subj="sloFormCopyJsonButton"
-              disabled={isCreateSloLoading || isUpdateSloLoading}
-              onClick={handleCopyToJson}
-            >
-              {i18n.translate('xpack.observability.slo.sloEdit.copyJsonButton', {
-                defaultMessage: 'Copy JSON',
-              })}
-            </EuiButtonEmpty>
+            <EquivalentApiRequest
+              isCreateSloLoading={isCreateSloLoading}
+              isUpdateSloLoading={isUpdateSloLoading}
+            />
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>
