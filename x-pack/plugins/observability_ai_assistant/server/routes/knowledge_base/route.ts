@@ -50,9 +50,9 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<{}> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    // if (!client) {
-    throw notImplemented();
-    // }
+    if (!client) {
+      throw notImplemented();
+    }
 
     await client.setupKnowledgeBase();
 
