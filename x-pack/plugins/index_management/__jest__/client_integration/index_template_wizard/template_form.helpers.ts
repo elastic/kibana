@@ -149,7 +149,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     lifecycle,
     allowAutoCreate,
   }: Partial<TemplateDeserialized> = {}) => {
-    const { component, form, find, exists } = testBed;
+    const { component, form, find } = testBed;
 
     if (name) {
       act(() => {
