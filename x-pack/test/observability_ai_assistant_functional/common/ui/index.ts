@@ -48,18 +48,10 @@ export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
   getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
-  // const find = getService('find');
-  // const testSubjects = getService('testSubjects');
-  // const flyoutService = getService('flyout');
-  // const pageObjects = getPageObjects(['common']);
-  // const retry = getService('retry');
-  // const toasts = getService('toasts');
-  // const retryOnStale = getService('retryOnStale');
   const browser = getService('browser');
   const deployment = getService('deployment');
   const security = getService('security');
   const pageObjects = getPageObjects(['common']);
-  // const kibanaServer = getService('kibanaServer');
 
   const roleName = 'observability-ai-assistant-functional-test-role';
 
