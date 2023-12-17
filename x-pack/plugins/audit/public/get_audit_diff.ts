@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNumber, isObject } from 'lodash';
+import { isNumber, isObject, isString } from 'lodash';
 import { diff, Delta } from 'jsondiffpatch';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import { AuditLog } from '../common';
@@ -25,21 +25,21 @@ export interface AuditDiff {
   [key: string]:
     | {
         operation: AuditDiffOperation.ADD;
-        new: string;
+        new: string | number;
       }
     | {
         operation: AuditDiffOperation.DELETE;
-        old: string;
+        old: string | number;
       }
     | {
         operation: AuditDiffOperation.UPDATE;
-        new: string;
-        old: string;
+        new: string | number;
+        old: string | number;
       }
     | {
         operation: AuditDiffOperation.MOVE;
-        new: number;
-        old: number;
+        new: string | number;
+        old: string | number;
       };
 }
 
@@ -52,6 +52,13 @@ const flattenDiff = (delta: Delta): AuditDiff => {
     isLeaf(node) && node[0] === '' && isNumber(node[1]) && isNumber(node[2]);
   const isDelete = (node: Delta) => isLeaf(node) && node[1] === 0 && node[2] === 0;
   const isArray = (node: Delta) => node._t === 'a';
+
+  const stringify = (value: any) => {
+    if (isNumber(value) || isString(value)) {
+      return value;
+    }
+    return JSON.stringify(value);
+  };
 
   function flatten(_d: Delta, prefix = '', isParentArray = false) {
     for (const [key, value] of Object.entries(_d)) {
@@ -74,23 +81,23 @@ const flattenDiff = (delta: Delta): AuditDiff => {
 
       if (isLeaf(value)) {
         if (isAdd(value)) {
-          result[path] = { operation: AuditDiffOperation.ADD, new: JSON.stringify(value[0]) };
+          result[path] = { operation: AuditDiffOperation.ADD, new: stringify(value[0]) };
         } else if (isDelete(value)) {
           result[path] = {
             operation: AuditDiffOperation.DELETE,
-            old: value[0],
+            old: stringify(value[0]),
           };
         } else if (isMove(value)) {
           result[path] = {
             operation: AuditDiffOperation.MOVE,
-            old: value[2],
-            new: value[1],
+            old: stringify(value[2]),
+            new: stringify(value[1]),
           };
         } else {
           result[path] = {
             operation: AuditDiffOperation.UPDATE,
-            old: value[0],
-            new: value[1],
+            old: stringify(value[0]),
+            new: stringify(value[1]),
           };
         }
       }

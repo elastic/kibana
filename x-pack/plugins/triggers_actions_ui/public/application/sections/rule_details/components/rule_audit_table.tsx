@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { AuditDiffOperation, AuditLog } from '@kbn/audit-plugin/common';
+import { AuditDiffOperation, AuditLog, AuditLogOperation } from '@kbn/audit-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
 import copy from 'copy-to-clipboard';
@@ -81,50 +81,72 @@ export const RuleAuditTable = (props: {
     },
   ];
 
-  const diffColumns: Array<
+  const diffColumns = (
+    operation: AuditLogOperation
+  ): Array<
     EuiBasicTableColumn<{
       operation: AuditDiffOperation;
       key: string;
       oldValue: any;
       newValue: any;
     }>
-  > = [
-    {
-      name: 'Operation',
-      field: 'operation',
-      width: '10%',
-      render: (value, record) => {
-        if (value === AuditDiffOperation.ADD) {
-          return <EuiBadge color="success">{value}</EuiBadge>;
-        }
-        if (value === AuditDiffOperation.DELETE) {
-          return <EuiBadge color="danger">{value}</EuiBadge>;
-        }
-        if (value === AuditDiffOperation.UPDATE) {
-          return <EuiBadge color="warning">{value}</EuiBadge>;
-        }
-        return <EuiBadge color="accent">{value}</EuiBadge>;
+  > => {
+    const cols = [
+      {
+        name: 'Operation',
+        field: 'operation',
+        width: '10%',
+        render: (value: string) => {
+          if (value === AuditDiffOperation.ADD) {
+            return <EuiBadge color="success">{value}</EuiBadge>;
+          }
+          if (value === AuditDiffOperation.DELETE) {
+            return <EuiBadge color="danger">{value}</EuiBadge>;
+          }
+          if (value === AuditDiffOperation.UPDATE) {
+            return <EuiBadge color="warning">{value}</EuiBadge>;
+          }
+          return <EuiBadge color="accent">{value}</EuiBadge>;
+        },
       },
-    },
-    {
-      field: 'key',
-      name: 'Key',
-      width: '20%',
-      render: (value, record) => {
-        return <EuiBadge color="default">{value}</EuiBadge>;
+      {
+        field: 'key',
+        name: 'Key',
+        width: '20%',
+        render: (value: string) => {
+          return <EuiBadge color="default">{value}</EuiBadge>;
+        },
       },
-    },
-    {
-      width: '35%',
-      field: 'oldValue',
-      name: 'Old Value',
-    },
-    {
-      width: '35%',
-      field: 'newValue',
-      name: 'New Value',
-    },
-  ];
+    ];
+
+    if (
+      operation === AuditLogOperation.UPDATE ||
+      operation === AuditLogOperation.DELETE ||
+      operation === AuditLogOperation.GET
+    ) {
+      cols.push({
+        width: '35%',
+        field: 'oldValue',
+        name: 'Old Value',
+        render: (value: string) => {
+          return <pre>{value || '-'}</pre>;
+        },
+      });
+    }
+
+    if (operation === AuditLogOperation.CREATE || operation === AuditLogOperation.UPDATE) {
+      cols.push({
+        width: '35%',
+        field: 'newValue',
+        name: 'New Value',
+        render: (value: string) => {
+          return <pre>{value || '-'}</pre>;
+        },
+      });
+    }
+
+    return cols;
+  };
 
   const printDiff = (auditLog: AuditLog) => {
     const diff = auditService!.getAuditDiff(auditLog);
@@ -156,9 +178,10 @@ export const RuleAuditTable = (props: {
       <EuiBasicTable
         items={diffItems}
         itemId="id"
-        columns={diffColumns}
+        columns={diffColumns(auditLog.operation as AuditLogOperation)}
         data-test-subj="diffTable"
         isExpandable={false}
+        tableLayout="auto"
       />
     );
   };
