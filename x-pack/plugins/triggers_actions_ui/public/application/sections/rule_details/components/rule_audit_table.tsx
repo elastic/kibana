@@ -11,9 +11,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -24,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { AuditDiffOperation, AuditLog } from '@kbn/audit-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
+import copy from 'copy-to-clipboard';
 import { Pagination } from '../../../lib/audit_api/find_audit';
 import { useKibana } from '../../../..';
 
@@ -45,101 +44,122 @@ export const RuleAuditTable = (props: {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedAudit, setSelectedAudit] = useState<AuditLog | null>(null);
 
-  const columns: Array<EuiBasicTableColumn<AuditLog>> = useMemo(
-    () => [
-      {
-        field: '@timestamp',
-        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.timestamp', {
-          defaultMessage: 'Timestamp',
-        }),
-      },
-      {
-        field: 'user',
-        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.user', {
-          defaultMessage: 'User',
-        }),
-      },
-      {
-        field: 'operation',
-        name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.operation', {
-          defaultMessage: 'Operation',
-        }),
-      },
-      {
-        name: 'Actions',
-        actions: [
-          {
-            name: <span>Show diff</span>,
-            description: 'Show the modified properties',
-            icon: 'search',
-            type: 'icon',
-            onClick: (auditLog) => {
-              setSelectedAudit(auditLog);
-              setShowModal(!showModal);
-            },
-            'data-test-subj': 'action-diff',
+  const columns: Array<EuiBasicTableColumn<AuditLog>> = [
+    {
+      field: '@timestamp',
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.timestamp', {
+        defaultMessage: 'Timestamp',
+      }),
+    },
+    {
+      field: 'user',
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.user', {
+        defaultMessage: 'User',
+      }),
+    },
+    {
+      field: 'operation',
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditColumn.operation', {
+        defaultMessage: 'Operation',
+      }),
+    },
+    {
+      name: 'Actions',
+      actions: [
+        {
+          name: <span>Show diff</span>,
+          description: 'Show the modified properties',
+          icon: 'search',
+          type: 'icon',
+          onClick: (auditLog) => {
+            setSelectedAudit(auditLog);
+            setShowModal(!showModal);
           },
-        ],
-      },
-    ],
-    [showModal]
-  );
+          'data-test-subj': 'action-diff',
+        },
+      ],
+    },
+  ];
 
-  const getBadge = (operation: AuditDiffOperation) => {
-    let color = 'warning';
-    if (operation === AuditDiffOperation.ADD) {
-      color = 'success';
-    }
-    if (operation === AuditDiffOperation.DELETE) {
-      color = 'danger';
-    }
-    return (
-      <EuiFlexItem grow={false} style={{ width: 60 }}>
-        <EuiBadge color={color}>{operation}</EuiBadge>
-      </EuiFlexItem>
-    );
-  };
+  const diffColumns: Array<
+    EuiBasicTableColumn<{
+      operation: AuditDiffOperation;
+      key: string;
+      oldValue: any;
+      newValue: any;
+    }>
+  > = [
+    {
+      name: 'Operation',
+      field: 'operation',
+      width: '10%',
+      render: (value, record) => {
+        if (value === AuditDiffOperation.ADD) {
+          return <EuiBadge color="success">{value}</EuiBadge>;
+        }
+        if (value === AuditDiffOperation.DELETE) {
+          return <EuiBadge color="danger">{value}</EuiBadge>;
+        }
+        if (value === AuditDiffOperation.UPDATE) {
+          return <EuiBadge color="warning">{value}</EuiBadge>;
+        }
+        return <EuiBadge color="accent">{value}</EuiBadge>;
+      },
+    },
+    {
+      field: 'key',
+      name: 'Key',
+      width: '20%',
+      render: (value, record) => {
+        return <EuiBadge color="default">{value}</EuiBadge>;
+      },
+    },
+    {
+      width: '35%',
+      field: 'oldValue',
+      name: 'Old Value',
+    },
+    {
+      width: '35%',
+      field: 'newValue',
+      name: 'New Value',
+    },
+  ];
 
   const printDiff = (auditLog: AuditLog) => {
     const diff = auditService!.getAuditDiff(auditLog);
+    const diffItems = Object.entries(diff).map(([key, value]) => {
+      if (value.operation === AuditDiffOperation.ADD) {
+        return {
+          operation: value.operation,
+          key,
+          newValue: value.new,
+          oldValue: '',
+        };
+      }
+      if (value.operation === AuditDiffOperation.DELETE) {
+        return {
+          operation: value.operation,
+          key,
+          newValue: '',
+          oldValue: value.old,
+        };
+      }
+      return {
+        operation: value.operation,
+        key,
+        newValue: value.new,
+        oldValue: value.old,
+      };
+    });
     return (
-      <div>
-        {Object.entries(diff).map(([key, value]) => (
-          <div key={key}>
-            <EuiFlexGroup responsive={false} gutterSize="xs">
-              {getBadge(value.operation)}
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="default">{key} :</EuiBadge>
-              </EuiFlexItem>
-              {value.operation === AuditDiffOperation.ADD ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={'success'}>{value.new}</EuiBadge>
-                </EuiFlexItem>
-              ) : null}
-              {value.operation === AuditDiffOperation.DELETE ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={'danger'}>{value.old}</EuiBadge>
-                </EuiFlexItem>
-              ) : null}
-              {value.operation === AuditDiffOperation.UPDATE ||
-              value.operation === AuditDiffOperation.MOVE ? (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={'warning'}>{value.old}</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-                    <EuiIcon type="sortRight" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={'success'}>{value.new}</EuiBadge>
-                  </EuiFlexItem>
-                </>
-              ) : null}
-            </EuiFlexGroup>
-            <EuiSpacer size={'xs'} />
-          </div>
-        ))}
-      </div>
+      <EuiBasicTable
+        items={diffItems}
+        itemId="id"
+        columns={diffColumns}
+        data-test-subj="diffTable"
+        isExpandable={false}
+      />
     );
   };
 
@@ -171,12 +191,44 @@ export const RuleAuditTable = (props: {
         }}
       />
       {showModal && selectedAudit ? (
-        <EuiModal onClose={() => setShowModal(false)}>
+        <EuiModal onClose={() => setShowModal(false)} maxWidth={1280}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>Changes</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>{printDiff(selectedAudit)}</EuiModalBody>
           <EuiModalFooter>
+            {selectedAudit?.data.old ? (
+              <EuiButtonEmpty
+                onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  copy(selectedAudit?.data.old, { debug: true });
+                }}
+              >
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleDetails.auditModal.copyOldValue',
+                  {
+                    defaultMessage: 'Copy Old Record',
+                  }
+                )}
+              </EuiButtonEmpty>
+            ) : null}
+
+            {selectedAudit?.data.new ? (
+              <EuiButtonEmpty
+                onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  copy(selectedAudit?.data.new, { debug: true });
+                }}
+              >
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleDetails.auditModal.copyOldValue',
+                  {
+                    defaultMessage: 'Copy New Record',
+                  }
+                )}
+              </EuiButtonEmpty>
+            ) : null}
+
             <EuiButton
               onClick={() => {
                 setShowModal(false);

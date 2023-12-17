@@ -60,7 +60,7 @@ const flattenDiff = (delta: Delta): AuditDiff => {
       }
       let wrappedKey = key;
       if (isParentArray) {
-        wrappedKey = `[${key}]`;
+        wrappedKey = `[${key.replace(/_/, '')}]`;
       }
       const path = `${prefix}${wrappedKey}`;
 
@@ -78,7 +78,7 @@ const flattenDiff = (delta: Delta): AuditDiff => {
         } else if (isDelete(value)) {
           result[path] = {
             operation: AuditDiffOperation.DELETE,
-            old: JSON.stringify(value[0]),
+            old: value[0],
           };
         } else if (isMove(value)) {
           result[path] = {
@@ -89,8 +89,8 @@ const flattenDiff = (delta: Delta): AuditDiff => {
         } else {
           result[path] = {
             operation: AuditDiffOperation.UPDATE,
-            old: JSON.stringify(value[0]),
-            new: JSON.stringify(value[1]),
+            old: value[0],
+            new: value[1],
           };
         }
       }
@@ -104,5 +104,5 @@ const flattenDiff = (delta: Delta): AuditDiff => {
 
 export const getAuditDiff = (auditLog: AuditLog) => {
   const { old: oldValue, new: newValue } = auditLog.data;
-  return flattenDiff(diff(JSON.parse(oldValue), JSON.parse(newValue)) || {});
+  return flattenDiff(diff(JSON.parse(oldValue || '{}'), JSON.parse(newValue || '{}')) || {});
 };
