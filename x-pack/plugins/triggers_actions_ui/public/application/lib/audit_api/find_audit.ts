@@ -7,10 +7,14 @@
 
 import { AuditLog, AUDIT_FIND_PATH } from '@kbn/audit-plugin/common';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { Pagination } from '@elastic/eui';
 import { KueryNode } from '@kbn/es-query';
 import { FindAuditResponseV1 } from '@kbn/audit-plugin/common/routes/audit/response';
 import { Sorting } from '../../../types';
+
+export interface Pagination {
+  index: number;
+  size: number;
+}
 
 export interface LoadAuditProps {
   http: HttpSetup;
@@ -45,8 +49,8 @@ export async function loadAuditByRuleId({
 }: LoadAuditProps): Promise<LoadAuditByRuleIdResponse> {
   const result = await http.post<FindAuditResponseV1>(AUDIT_FIND_PATH, {
     body: JSON.stringify({
-      page: page.pageIndex + 1,
-      per_page: page.pageSize,
+      page: page.index + 1,
+      per_page: page.size,
       sort_field: sort.field,
       sort_order: sort.direction,
       search,

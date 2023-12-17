@@ -7,9 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { Pagination } from '@elastic/eui';
 import { KueryNode } from '@kbn/es-query';
-import { loadAuditByRuleId, LoadAuditProps } from '../lib/audit_api/find_audit';
+import { loadAuditByRuleId, LoadAuditProps, Pagination } from '../lib/audit_api/find_audit';
 import { useKibana } from '../../common/lib/kibana';
 
 type UseLoadAlertingAuditProps = Omit<LoadAuditProps, 'http'> & {
@@ -26,6 +25,7 @@ export const useLoadAlertingAudit = (props: UseLoadAlertingAuditProps) => {
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const {
     refetch,
     isLoading,
@@ -43,8 +43,8 @@ export const useLoadAlertingAudit = (props: UseLoadAlertingAuditProps) => {
       });
     },
     onSuccess: (response) => {
-      if (!response?.data?.length && page.pageIndex > 0) {
-        onPage({ ...page, pageIndex: 0 });
+      if (!response?.data?.length && page.index > 0) {
+        onPage({ size: page.size, index: 0 });
       }
     },
     onError: () => {
@@ -56,6 +56,7 @@ export const useLoadAlertingAudit = (props: UseLoadAlertingAuditProps) => {
     },
     keepPreviousData: true,
     cacheTime: 0,
+    retry: false,
   });
 
   return {

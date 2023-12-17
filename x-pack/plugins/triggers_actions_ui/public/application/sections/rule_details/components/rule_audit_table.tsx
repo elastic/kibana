@@ -4,13 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export {
-  AUDIT_SAVED_OBJECT_TYPE,
-  AUDIT_FIND_PATH,
-  AuditLogOperation,
-  AuditSubject,
-} from './constants';
-
-export type { AuditLog } from './types';
-export { AuditDiffOperation } from './types';

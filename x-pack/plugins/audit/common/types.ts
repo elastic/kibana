@@ -21,3 +21,10 @@ export interface AuditLog {
   subjectId: AuditLogSchemaType['subjectId'];
   data: AuditLogSchemaType['data'];
 }
+
+export enum AuditDiffOperation {
+  ADD = 'add',
+  DELETE = 'delete',
+  UPDATE = 'update',
+  MOVE = 'move',
+}

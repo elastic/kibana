@@ -22,13 +22,11 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiTableSortingType,
-  EuiTitle,
-  Pagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { get, isEmpty, isUndefined } from 'lodash';
-import { AuditLog } from '@kbn/audit-plugin/common';
+import { AuditDiffOperation, AuditLog } from '@kbn/audit-plugin/common';
+import { Pagination } from '../../../lib/audit_api/find_audit';
 import { useKibana } from '../../../..';
 import { RefreshToken } from './types';
 import { useLoadAlertingAudit } from '../../../hooks/use_load_audt';
@@ -37,8 +35,6 @@ export interface RuleAuditProps {
   ruleId: string;
   refreshToken?: RefreshToken;
 }
-
-const DELETED = 'deleted';
 
 export const RuleAudit = (props: RuleAuditProps) => {
   const { ruleId, refreshToken } = props;
@@ -88,11 +84,9 @@ export const RuleAudit = (props: RuleAuditProps) => {
     [showModal]
   );
 
-  const [pagination, setPagination] = useState<Pagination>({
-    pageIndex: 0,
-    pageSize: 5,
-    totalItemCount: 0,
-    pageSizeOptions: [5, 50, 100],
+  const [page, setPage] = useState<Pagination>({
+    index: 0,
+    size: 5,
   });
 
   const [sort, setSort] = useState<EuiTableSortingType<AuditLog>['sort']>({
@@ -101,9 +95,9 @@ export const RuleAudit = (props: RuleAuditProps) => {
   });
 
   const { audit, loadAlertingAudit } = useLoadAlertingAudit({
-    page: pagination,
-    sort: { field: '@timestamp', direction: 'asc' },
-    onPage: setPagination,
+    page,
+    sort,
+    onPage: setPage,
     // search:'', // search by keyword
     filter: `audit.attributes.namespace: alerting AND audit.attributes.subjectId: ${ruleId}`,
   });
@@ -116,103 +110,59 @@ export const RuleAudit = (props: RuleAuditProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshToken]);
 
-  const onTableChange = ({ page: tablePage, sort: tableSort }: Criteria<AuditLog>) => {
-    if (tablePage) {
-      const { index: pageIndex, size: pageSize } = tablePage;
-      setPagination({
-        ...pagination,
-        pageIndex,
-        pageSize,
-      });
+  const getBadge = (operation: AuditDiffOperation) => {
+    let color = 'warning';
+    if (operation === AuditDiffOperation.ADD) {
+      color = 'success';
     }
-    if (tableSort) {
-      const { field: sortField, direction: sortDirection } = tableSort;
-      setSort({
-        field: sortField,
-        direction: sortDirection,
-      });
+    if (operation === AuditDiffOperation.DELETE) {
+      color = 'danger';
     }
-  };
-
-  const addChange = ({
-    key,
-    value,
-    oldValue,
-  }: {
-    key: string;
-    value: string;
-    oldValue?: string;
-  }) => {
     return (
-      <>
-        <EuiFlexGroup responsive={false} gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{key} :</EuiBadge>
-          </EuiFlexItem>
-          {!isUndefined(oldValue) ? (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{oldValue}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-                <EuiIcon type="sortRight" />
-              </EuiFlexItem>
-            </>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={value === DELETED ? 'danger' : 'success'}>{value}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size={'xs'} />
-      </>
-    );
-  };
-
-  const addTitle = (title: string) => {
-    return (
-      <>
-        <EuiSpacer size={'m'} />
-        <EuiTitle size="s">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiSpacer size={'s'} />
-      </>
+      <EuiFlexItem grow={false} style={{ width: 60 }}>
+        <EuiBadge color={color}>{operation}</EuiBadge>
+      </EuiFlexItem>
     );
   };
 
   const printDiff = (auditLog: AuditLog) => {
     const diff = auditService!.getAuditDiff(auditLog);
-    const result: React.ReactNode[] = [];
-
-    if (!isEmpty(diff.added)) {
-      result.push(addTitle('Added'));
-      Object.entries(diff.added).map(([key, value]) => {
-        result.push(addChange({ key, value: JSON.stringify(value) }));
-      });
-    }
-
-    if (!isEmpty(diff.updated)) {
-      result.push(addTitle('Updated'));
-      Object.entries(diff.updated).map(([key, value]) => {
-        const newPath = key.replace(/.(\d+)/g, '[$1]');
-        const oldValue = get(JSON.parse(selectedAudit?.data.old), newPath);
-        result.push(
-          addChange({ key, value: JSON.stringify(value), oldValue: JSON.stringify(oldValue) })
-        );
-      });
-    }
-
-    if (!isEmpty(diff.deleted)) {
-      result.push(addTitle('Deleted'));
-      Object.entries(diff.deleted).map(([key, value]) => {
-        result.push(addChange({ key, value: DELETED }));
-      });
-    }
-
     return (
       <div>
-        {result.map((change, index) => (
-          <div key={`change-${index}`}>{change}</div>
+        {Object.entries(diff).map(([key, value]) => (
+          <div key={key}>
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              {getBadge(value.operation)}
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="default">{key} :</EuiBadge>
+              </EuiFlexItem>
+              {value.operation === AuditDiffOperation.ADD ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={'success'}>{value.new}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+              {value.operation === AuditDiffOperation.DELETE ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={'danger'}>{value.old}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+              {value.operation === AuditDiffOperation.UPDATE ||
+              value.operation === AuditDiffOperation.MOVE ? (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={'warning'}>{value.old}</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                    <EuiIcon type="sortRight" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={'success'}>{value.new}</EuiBadge>
+                  </EuiFlexItem>
+                </>
+              ) : null}
+            </EuiFlexGroup>
+            <EuiSpacer size={'xs'} />
+          </div>
         ))}
       </div>
     );
@@ -228,10 +178,22 @@ export const RuleAudit = (props: RuleAuditProps) => {
         columns={columns}
         sorting={{ sort }}
         data-test-subj="auditList"
-        pagination={pagination}
+        pagination={{
+          pageIndex: page.index,
+          pageSize: page.size,
+          totalItemCount: audit.totalItemCount,
+          pageSizeOptions: [5, 50, 100],
+        }}
         itemIdToExpandedRowMap={{}}
         isExpandable={false}
-        onChange={onTableChange}
+        onChange={({ page: changedPage, sort: changedSort }: Criteria<AuditLog>) => {
+          if (changedPage) {
+            setPage(changedPage);
+          }
+          if (changedSort) {
+            setSort(changedSort);
+          }
+        }}
       />
       {showModal && selectedAudit ? (
         <EuiModal onClose={() => setShowModal(false)}>
@@ -240,7 +202,13 @@ export const RuleAudit = (props: RuleAuditProps) => {
           </EuiModalHeader>
           <EuiModalBody>{printDiff(selectedAudit)}</EuiModalBody>
           <EuiModalFooter>
-            <EuiButton onClick={() => setShowModal(false)} fill>
+            <EuiButton
+              onClick={() => {
+                setShowModal(false);
+                setSelectedAudit(null);
+              }}
+              fill
+            >
               {i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.auditModal.close', {
                 defaultMessage: 'Close',
               })}
