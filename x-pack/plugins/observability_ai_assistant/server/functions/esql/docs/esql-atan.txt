@@ -1,0 +1,7 @@
+ATAN
+
+
+Inverse tangent trigonometric function.
+ROW a=12.9
+| EVAL atan=ATAN(a)
+Supported types:
