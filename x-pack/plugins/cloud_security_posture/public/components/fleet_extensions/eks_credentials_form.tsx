@@ -5,22 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFieldText,
-  EuiFieldPassword,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { AwsInputVarFields } from './aws_credentials_form/aws_input_var_fields';
 
 const AWSSetupInfoContent = () => (
   <>
@@ -278,38 +270,4 @@ const AwsCredentialTypeSelector = ({
     idSelected={type}
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
-);
-
-const AwsInputVarFields = ({
-  fields,
-  onChange,
-}: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
-  onChange: (key: string, value: string) => void;
-}) => (
-  <div>
-    {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
-        <>
-          {field.type === 'password' && (
-            <EuiFieldPassword
-              id={field.id}
-              type="dual"
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-          {field.type === 'text' && (
-            <EuiFieldText
-              id={field.id}
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-        </>
-      </EuiFormRow>
-    ))}
-  </div>
 );
