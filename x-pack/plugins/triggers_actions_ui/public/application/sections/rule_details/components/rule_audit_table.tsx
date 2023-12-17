@@ -31,17 +31,15 @@ import { useKibana } from '../../../..';
 // page={page} sort={sort} onPage={setPage} onSort={setSort}
 
 export const RuleAuditTable = (props: {
-  audit: {
-    isLoading: boolean;
-    data: any[];
-    totalItemCount: number;
-  };
+  isLoading: boolean;
+  items: AuditLog[];
+  total: number;
   page: Pagination;
   sort: EuiTableSortingType<AuditLog>['sort'];
   onSort: (sort: EuiTableSortingType<AuditLog>['sort']) => void;
   onPage: (page: Pagination) => void;
 }) => {
-  const { audit, page, sort, onPage, onSort } = props;
+  const { items, total, isLoading, page, sort, onPage, onSort } = props;
   const { audit: auditService } = useKibana().services;
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -149,8 +147,8 @@ export const RuleAuditTable = (props: {
     <div data-test-subj="ruleAuditTable">
       <EuiSpacer />
       <EuiBasicTable
-        loading={audit.isLoading}
-        items={audit.data}
+        loading={isLoading}
+        items={items}
         itemId="id"
         columns={columns}
         sorting={{ sort }}
@@ -158,7 +156,7 @@ export const RuleAuditTable = (props: {
         pagination={{
           pageIndex: page.index,
           pageSize: page.size,
-          totalItemCount: audit.totalItemCount,
+          totalItemCount: total,
           pageSizeOptions: [5, 50, 100],
         }}
         itemIdToExpandedRowMap={{}}

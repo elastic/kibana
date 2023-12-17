@@ -26,12 +26,7 @@ export const useLoadAlertingAudit = (props: UseLoadAlertingAuditProps) => {
     notifications: { toasts },
   } = useKibana().services;
 
-  const {
-    refetch,
-    isLoading,
-    data: auditResponse,
-    isFetching,
-  } = useQuery({
+  const { refetch, isLoading, data, isFetching } = useQuery({
     queryKey: ['loadAlertingAudit', page, sort],
     queryFn: () => {
       return loadAuditByRuleId({
@@ -60,11 +55,9 @@ export const useLoadAlertingAudit = (props: UseLoadAlertingAuditProps) => {
   });
 
   return {
-    audit: {
-      isLoading: isLoading || isFetching,
-      data: auditResponse?.data ?? [],
-      totalItemCount: auditResponse?.total ?? 0,
-    },
+    isLoading: isLoading || isFetching,
+    items: data?.data ?? [],
+    total: data?.total ?? 0,
     loadAlertingAudit: refetch,
   };
 };

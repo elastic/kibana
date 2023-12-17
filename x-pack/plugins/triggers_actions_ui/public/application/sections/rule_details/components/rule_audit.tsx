@@ -32,7 +32,7 @@ export const RuleAudit = (props: RuleAuditProps) => {
     direction: 'asc',
   });
 
-  const { audit, loadAlertingAudit } = useLoadAlertingAudit({
+  const { isLoading, items, total, loadAlertingAudit } = useLoadAlertingAudit({
     page,
     sort,
     onPage: setPage,
@@ -50,7 +50,15 @@ export const RuleAudit = (props: RuleAuditProps) => {
 
   return (
     <div data-test-subj="ruleAuditContainer">
-      <RuleAuditTable audit={audit} page={page} sort={sort} onPage={setPage} onSort={setSort} />
+      <RuleAuditTable
+        isLoading={isLoading}
+        items={items}
+        total={total}
+        page={page}
+        sort={sort}
+        onPage={setPage}
+        onSort={setSort}
+      />
     </div>
   );
 };
