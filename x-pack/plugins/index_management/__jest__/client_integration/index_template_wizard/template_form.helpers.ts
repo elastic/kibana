@@ -149,7 +149,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     lifecycle,
     allowAutoCreate,
   }: Partial<TemplateDeserialized> = {}) => {
-    const { component, form, find } = testBed;
+    const { component, form, find, exists } = testBed;
 
     if (name) {
       act(() => {
@@ -185,6 +185,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
+
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
+      }
     });
     component.update();
 
@@ -194,18 +198,11 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       });
       component.update();
 
-      await act(async () => {
-        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
-      });
+      form.setInputValue('valueDataRetentionField', String(lifecycle.value));
     }
 
     await act(async () => {
-      if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
-      }
-
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();

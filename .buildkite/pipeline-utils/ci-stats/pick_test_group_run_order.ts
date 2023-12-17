@@ -247,7 +247,7 @@ export async function pickTestGroupRunOrder() {
   const target = jestUnitConfigs.find((e) => e.includes('index_management'));
   if (target) {
     console.log('Found', { target });
-    jestUnitConfigs = new Array(80).fill(target);
+    jestUnitConfigs = new Array(150).fill(target);
   } else {
     console.log('Not found target.');
   }
