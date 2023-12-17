@@ -63,11 +63,17 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
         {criticality.query.isLoading || criticality.mutation.isLoading ? (
           <EuiLoadingSpinner size="s" />
         ) : (
-          <EuiFlexGroup direction="row" alignItems="center" wrap={false}>
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            justifyContent="spaceEvenly"
+            wrap={false}
+          >
             <EuiFlexItem>
               <EuiText size="s">
                 {criticality.status === 'update' && criticality.query.data?.criticality_level ? (
                   <EuiHealth
+                    data-test-subj="asset-criticality-level"
                     color={CRITICALITY_LEVEL_COLOR[criticality.query.data.criticality_level]}
                   >
                     {CRITICALITY_LEVEL_TITLE[criticality.query.data.criticality_level]}
@@ -137,7 +143,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
           valueOfSelected={value}
           onChange={setNewValue}
           aria-label={PICK_ASSET_CRITICALITY}
-          data-test-subj="asset-criticality-modal-select-dropdown"
+          data-test-subj="asset-criticality-modal-select"
         />
       </EuiModalBody>
       <EuiModalFooter>
@@ -146,7 +152,6 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
             id="xpack.securitySolution.entityAnalytics.assetCriticality.cancelButton"
             defaultMessage="Cancel"
           />
-          {'Cancel'}
         </EuiButtonEmpty>
 
         <EuiButton
@@ -173,7 +178,11 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
 const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel> => ({
   value: level,
   dropdownDisplay: (
-    <EuiHealth color={CRITICALITY_LEVEL_COLOR[level]} style={{ lineHeight: 'inherit' }}>
+    <EuiHealth
+      color={CRITICALITY_LEVEL_COLOR[level]}
+      style={{ lineHeight: 'inherit' }}
+      data-test-subj="asset-criticality-modal-select-option"
+    >
       <strong>{CRITICALITY_LEVEL_TITLE[level]}</strong>
       <EuiText size="s" color="subdued">
         <p>{CRITICALITY_LEVEL_DESCRIPTION[level]}</p>

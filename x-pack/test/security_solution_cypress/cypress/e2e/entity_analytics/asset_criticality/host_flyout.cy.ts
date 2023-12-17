@@ -5,30 +5,37 @@
  * 2.0.
  */
 
+import { getNewRule } from '../../../objects/rule';
 import {
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
   HOST_DETAILS_FLYOUT_SECTION_HEADER,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
   toggleAssetCriticalityAccordion,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
   toggleAssetCriticalityModal,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_DROPDOWN,
-} from '../../../../screens/expandable_flyout/host_details_right_panel';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { expandFirstAlertHostExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
-import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+} from '../../../screens/expandable_flyout/host_details_right_panel';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { expandFirstAlertHostExpandableFlyout } from '../../../tasks/expandable_flyout/common';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 describe(
-  'Alert host details expandable flyout right panel',
-  { tags: ['@ess', '@serverless'] },
+  'Host details flyout',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        enableExperimental: ['entityAnalyticsAssetCriticalityEnabled'],
+      },
+    },
+  },
   () => {
     const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
@@ -41,7 +48,7 @@ describe(
       expandFirstAlertHostExpandableFlyout();
     });
 
-    describe('Expandable flyout', () => {
+    describe('Host flyout', () => {
       it('should display header section', () => {
         cy.log('header and content');
 
@@ -57,7 +64,7 @@ describe(
         );
 
         toggleAssetCriticalityAccordion();
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Change');
+        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Create');
       });
 
       it('should display asset criticality modal', () => {
@@ -74,12 +81,16 @@ describe(
         cy.log('asset criticality update');
 
         toggleAssetCriticalityModal();
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_DROPDOWN)
-          .should('be.visible')
-          .select('High');
+        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT).should('be.visible').click();
+
+        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION)
+          .contains('Important')
+          .click();
 
         cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN).should('be.visible').click();
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL).contains('High').should('be.visible');
+        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+          .contains('Important')
+          .should('be.visible');
       });
     });
   }

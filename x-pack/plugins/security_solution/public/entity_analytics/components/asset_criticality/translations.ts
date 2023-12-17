@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { CriticalityLevel } from './common';
 
 export const PICK_ASSET_CRITICALITY = i18n.translate(
-  'xpack.securitySolution.timeline.sidePanel.hostDetails.assetCriticality.pick',
+  'xpack.securitySolution.entityAnalytics.assetCriticality.pickerText',
   {
     defaultMessage: 'Pick asset criticality level',
   }
