@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useEffect, useRef, CSSProperties } from 'react';
-import { Chart, Metric, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
+import {
+  Chart,
+  LEGACY_LIGHT_THEME,
+  Metric,
+  Settings,
+  type MetricWNumber,
+  type MetricWTrend,
+} from '@elastic/charts';
 import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartPlaceholder } from '../../../../../components/lens';
@@ -61,6 +68,10 @@ export const MetricChartWrapper = React.memo(
                 }
               `}
             >
+              <Settings
+                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                baseTheme={LEGACY_LIGHT_THEME}
+              />
               <Metric id={id} data={[[metricsData]]} />
             </Chart>
           </EuiToolTip>

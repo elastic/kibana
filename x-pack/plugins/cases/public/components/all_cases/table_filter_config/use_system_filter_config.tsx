@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import type { FilterOptions } from '../../../../common/ui';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
@@ -17,7 +16,6 @@ import * as i18n from '../translations';
 import { SeverityFilter } from '../severity_filter';
 import { AssigneesFilterPopover } from '../assignees_filter';
 import type { CurrentUserProfile } from '../../types';
-import type { AssigneesFilteringSelection } from '../../user_profiles/types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
 interface UseFilterConfigProps {
@@ -28,13 +26,10 @@ interface UseFilterConfigProps {
   countInProgressCases: number | null;
   countOpenCases: number | null;
   currentUserProfile: CurrentUserProfile;
-  handleSelectedAssignees: (newAssignees: AssigneesFilteringSelection[]) => void;
   hiddenStatuses?: CaseStatuses[];
-  initialFilterOptions: Partial<FilterOptions>;
   isLoading: boolean;
   isSelectorView?: boolean;
   onFilterOptionsChange: FilterChangeHandler;
-  selectedAssignees: AssigneesFilteringSelection[];
   tags: string[];
 }
 
@@ -46,13 +41,10 @@ export const getSystemFilterConfig = ({
   countInProgressCases,
   countOpenCases,
   currentUserProfile,
-  handleSelectedAssignees,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
-  selectedAssignees,
   tags,
 }: UseFilterConfigProps): FilterConfig[] => {
   const onSystemFilterChange = ({
@@ -60,7 +52,7 @@ export const getSystemFilterConfig = ({
     selectedOptionKeys,
   }: {
     filterId: string;
-    selectedOptionKeys: string[];
+    selectedOptionKeys: Array<string | null>;
   }) => {
     onFilterOptionsChange({
       [filterId]: selectedOptionKeys,
@@ -74,7 +66,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          severity: initialFilterOptions.severity || [],
+          severity: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -91,7 +83,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          status: initialFilterOptions.status || [],
+          status: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -112,16 +104,16 @@ export const getSystemFilterConfig = ({
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
       getEmptyOptions: () => {
         return {
-          assignees: initialFilterOptions.assignees || [],
+          assignees: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => {
         return (
           <AssigneesFilterPopover
-            selectedAssignees={selectedAssignees}
+            selectedAssignees={filterOptions?.assignees}
             currentUserProfile={currentUserProfile}
             isLoading={isLoading}
-            onSelectionChange={handleSelectedAssignees}
+            onSelectionChange={onSystemFilterChange}
           />
         );
       },
@@ -133,7 +125,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          tags: initialFilterOptions.tags || [],
+          tags: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -155,7 +147,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       getEmptyOptions: () => {
         return {
-          category: initialFilterOptions.category || [],
+          category: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -177,7 +169,7 @@ export const getSystemFilterConfig = ({
       isAvailable: availableSolutions.length > 1,
       getEmptyOptions: () => {
         return {
-          owner: initialFilterOptions.owner || [],
+          owner: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
@@ -199,13 +191,10 @@ export const useSystemFilterConfig = ({
   countInProgressCases,
   countOpenCases,
   currentUserProfile,
-  handleSelectedAssignees,
   hiddenStatuses,
-  initialFilterOptions,
   isLoading,
   isSelectorView,
   onFilterOptionsChange,
-  selectedAssignees,
   tags,
 }: UseFilterConfigProps) => {
   const filterConfig = getSystemFilterConfig({
@@ -216,13 +205,10 @@ export const useSystemFilterConfig = ({
     countInProgressCases,
     countOpenCases,
     currentUserProfile,
-    handleSelectedAssignees,
     hiddenStatuses,
-    initialFilterOptions,
     isLoading,
     isSelectorView,
     onFilterOptionsChange,
-    selectedAssignees,
     tags,
   });
 
