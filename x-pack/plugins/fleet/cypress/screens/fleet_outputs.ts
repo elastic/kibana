@@ -15,6 +15,18 @@ import {
   SETTINGS_SAVE_BTN,
 } from './fleet';
 
+export const selectESOutput = () => {
+  visit('/app/fleet/settings');
+  cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
+  cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
+};
+
+export const selectRemoteESOutput = () => {
+  visit('/app/fleet/settings');
+  cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
+  cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('remote_elasticsearch');
+};
+
 export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
@@ -70,6 +82,17 @@ export const loadESOutput = () =>
     is_default: false,
     is_default_monitoring: false,
     hosts: ['https://bla.co'],
+  });
+
+export const loadRemoteESOutput = () =>
+  loadOutput({
+    name: 'remote_es',
+    type: 'remote_elasticsearch',
+    is_default: false,
+    is_default_monitoring: false,
+    hosts: ['https://bla.co'],
+    secrets: { service_token: 'token' },
+    preset: 'balanced',
   });
 
 export const loadLogstashOutput = () =>

@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';
 
+import { OutputHealth } from '../edit_output_flyout/output_health';
+
 import { DefaultBadges } from './badges';
 
 export interface OutputsTableProps {
@@ -76,14 +78,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           </EuiFlexGroup>
         ),
         width: '288px',
-        name: i18n.translate('xpack.fleet.settings.outputsTable.nameColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
       },
       {
         width: '172px',
         render: (output: Output) => displayOutputType(output.type),
-        name: i18n.translate('xpack.fleet.settings.outputsTable.typeColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
       },
@@ -100,14 +102,24 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             ))}
           </FlexGroupWithMinWidth>
         ),
-        name: i18n.translate('xpack.fleet.settings.outputsTable.hostColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.hostColumnTitle', {
           defaultMessage: 'Hosts',
+        }),
+      },
+      {
+        render: (output: Output) => {
+          return output?.id && output.type === 'remote_elasticsearch' ? (
+            <OutputHealth output={output} showBadge={true} />
+          ) : null;
+        },
+        name: i18n.translate('xpack.fleet.settings.outputsTable.statusColumnTitle', {
+          defaultMessage: 'Status',
         }),
       },
       {
         render: (output: Output) => <DefaultBadges output={output} />,
         width: '200px',
-        name: i18n.translate('xpack.fleet.settings.outputSection.defaultColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputSection.defaultColumnTitle', {
           defaultMessage: 'Default',
         }),
       },
@@ -145,7 +157,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             </EuiFlexGroup>
           );
         },
-        name: i18n.translate('xpack.fleet.settings.outputSection.actionsColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputSection.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
       },

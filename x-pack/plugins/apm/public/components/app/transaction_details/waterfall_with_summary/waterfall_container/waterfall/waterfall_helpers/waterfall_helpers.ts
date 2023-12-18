@@ -48,7 +48,7 @@ export interface IWaterfall {
   totalErrorsCount: number;
   traceDocsTotal: number;
   maxTraceItems: number;
-  hasOrphanTraceItems: boolean;
+  orphanTraceItemsCount: number;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -416,7 +416,7 @@ function getErrorCountByParentId(
   }, {});
 }
 
-export const getHasOrphanTraceItems = (
+export const getOrphanTraceItemsCount = (
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>
 ) => {
   const waterfallItemsIds = new Set(
@@ -427,9 +427,13 @@ export const getHasOrphanTraceItems = (
     )
   );
 
-  return traceDocs.some(
-    (item) => item.parent?.id && !waterfallItemsIds.has(item.parent.id)
-  );
+  let missingTraceItemsCounter = 0;
+  traceDocs.some((item) => {
+    if (item.parent?.id && !waterfallItemsIds.has(item.parent.id)) {
+      missingTraceItemsCounter++;
+    }
+  });
+  return missingTraceItemsCounter;
 };
 
 export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
@@ -446,7 +450,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       totalErrorsCount: 0,
       traceDocsTotal: 0,
       maxTraceItems: 0,
-      hasOrphanTraceItems: false,
+      orphanTraceItemsCount: 0,
     };
   }
 
@@ -482,7 +486,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
 
-  const hasOrphanTraceItems = getHasOrphanTraceItems(traceItems.traceDocs);
+  const orphanTraceItemsCount = getOrphanTraceItemsCount(traceItems.traceDocs);
 
   return {
     entryWaterfallTransaction,
@@ -498,6 +502,6 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     totalErrorsCount: traceItems.errorDocs.length,
     traceDocsTotal: traceItems.traceDocsTotal,
     maxTraceItems: traceItems.maxTraceItems,
-    hasOrphanTraceItems,
+    orphanTraceItemsCount,
   };
 }

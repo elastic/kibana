@@ -39,6 +39,8 @@ const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
 };
 
+const DEFAULT_SIZE = 20;
+
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
   getElser: GetElser
@@ -98,6 +100,11 @@ export const postEvaluateRoute = (
           throwIfSystemAction: false,
         });
 
+        // Fetch any tools registered by the request's originating plugin
+        const assistantTools = (await context.elasticAssistant).getRegisteredTools(
+          'securitySolution'
+        );
+
         // Get a scoped esClient for passing to the agents for retrieval, and
         // writing results to the output index
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -109,12 +116,17 @@ export const postEvaluateRoute = (
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
+            alertsIndexPattern: '',
+            allow: [],
+            allowReplacement: [],
             params: {
               subAction: 'invokeAI',
               subActionParams: {
                 messages: [],
               },
             },
+            replacements: {},
+            size: DEFAULT_SIZE,
             assistantLangChain: true,
           },
         };
@@ -134,6 +146,8 @@ export const postEvaluateRoute = (
               agentEvaluator: (langChainMessages, exampleId) =>
                 AGENT_EXECUTOR_MAP[agentName]({
                   actions,
+                  assistantLangChain: true,
+                  assistantTools,
                   connectorId,
                   esClient,
                   elserId,

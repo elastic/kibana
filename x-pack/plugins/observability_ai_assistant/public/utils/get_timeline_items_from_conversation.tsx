@@ -219,7 +219,7 @@ export function getTimelineItemsfromConversation({
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
           actions.canCopy = true;
-          actions.canGiveFeedback = false;
+          actions.canGiveFeedback = true;
           display.hide = false;
 
           // is a function suggestion by the assistant

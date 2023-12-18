@@ -15,6 +15,7 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -28,11 +29,18 @@ import {
   CustomMetricExpressionParams,
   BaseMetricExpressionParams,
   aggType,
+  ThresholdParams,
+  MetricExpressionParams,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 
+export type CustomThresholdPrefillOptions = Partial<
+  Omit<ThresholdParams, 'criteria'> & { criteria: Array<Partial<MetricExpressionParams>> }
+>;
+
 export interface AlertContextMeta {
   adHocDataViewList: DataView[];
+  currentOptions?: CustomThresholdPrefillOptions;
 }
 
 export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | 'timeUnit'> & {
@@ -66,7 +74,7 @@ export interface InfraClientStartDeps {
   lens: LensPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: unknown; // OsqueryPluginStart;
+  osquery?: OsqueryPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;

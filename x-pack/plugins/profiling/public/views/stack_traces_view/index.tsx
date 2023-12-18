@@ -21,6 +21,7 @@ import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_te
 import { StackedBarChart } from '../../components/stacked_bar_chart';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
 import { getTracesViewRouteParams } from './utils';
+import { RouteBreadcrumb } from '../../routing/route_breadcrumb';
 
 export function StackTracesView() {
   const routePath = useProfilingRoutePath();
@@ -41,6 +42,7 @@ export function StackTracesView() {
     query,
     profilingRouter,
   });
+  const selectedTab = tabs.find((tab) => tab.isSelected);
 
   const {
     services: { fetchTopN },
@@ -89,102 +91,104 @@ export function StackTracesView() {
   }
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs}>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow>
-          <EuiPanel>
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <EuiButtonGroup
-                  idSelected={displayAs}
-                  type="single"
-                  onChange={(nextValue) => {
-                    profilingRouter.push(routePath, {
-                      path,
-                      query: {
-                        ...query,
-                        displayAs: nextValue,
-                      },
-                    });
-                  }}
-                  options={[
-                    {
-                      id: StackTracesDisplayOption.StackTraces,
-                      iconType: 'visLine',
-                      label: i18n.translate(
-                        'xpack.profiling.stackTracesView.stackTracesCountButton',
-                        {
-                          defaultMessage: 'Stack traces',
-                        }
-                      ),
-                    },
-                    {
-                      id: StackTracesDisplayOption.Percentage,
-                      iconType: 'percent',
-                      label: i18n.translate('xpack.profiling.stackTracesView.percentagesButton', {
-                        defaultMessage: 'Percentages',
-                      }),
-                    },
-                  ]}
-                  legend={i18n.translate('xpack.profiling.stackTracesView.displayOptionLegend', {
-                    defaultMessage: 'Display option',
-                  })}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem style={{ alignContent: 'center' }}>
-                <AsyncComponent size="xl" {...state} style={{ height: 400 }}>
-                  <StackedBarChart
-                    height={400}
-                    charts={data?.charts ?? []}
-                    asPercentages={displayAs === StackTracesDisplayOption.Percentage}
-                    onBrushEnd={(nextRange) => {
+    <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
+      <ProfilingAppPageTemplate tabs={tabs}>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow>
+            <EuiPanel>
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem>
+                  <EuiButtonGroup
+                    idSelected={displayAs}
+                    type="single"
+                    onChange={(nextValue) => {
                       profilingRouter.push(routePath, {
                         path,
                         query: {
                           ...query,
-                          rangeFrom: nextRange.rangeFrom,
-                          rangeTo: nextRange.rangeTo,
+                          displayAs: nextValue,
                         },
                       });
                     }}
-                    showFrames={topNType === TopNType.Traces}
-                    onClick={topNType === TopNType.Threads ? onStackedBarClick : undefined}
+                    options={[
+                      {
+                        id: StackTracesDisplayOption.StackTraces,
+                        iconType: 'visLine',
+                        label: i18n.translate(
+                          'xpack.profiling.stackTracesView.stackTracesCountButton',
+                          {
+                            defaultMessage: 'Stack traces',
+                          }
+                        ),
+                      },
+                      {
+                        id: StackTracesDisplayOption.Percentage,
+                        iconType: 'percent',
+                        label: i18n.translate('xpack.profiling.stackTracesView.percentagesButton', {
+                          defaultMessage: 'Percentages',
+                        }),
+                      },
+                    ]}
+                    legend={i18n.translate('xpack.profiling.stackTracesView.displayOptionLegend', {
+                      defaultMessage: 'Display option',
+                    })}
                   />
-                </AsyncComponent>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
-            <ChartGrid
-              charts={data?.charts ?? []}
-              limit={limit}
-              showFrames={topNType === TopNType.Traces}
-            />
-          </AsyncComponent>
-        </EuiFlexItem>
-        {(data?.charts.length ?? 0) > limit && (
-          <EuiFlexItem>
-            <EuiButton
-              data-test-subj="profilingStackTracesViewShowMoreButton"
-              onClick={() => {
-                profilingRouter.push(routePath, {
-                  path,
-                  query: {
-                    ...query,
-                    limit: limit + 10,
-                  },
-                });
-              }}
-            >
-              {i18n.translate('xpack.profiling.stackTracesView.showMoreButton', {
-                defaultMessage: 'Show more',
-              })}
-            </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ alignContent: 'center' }}>
+                  <AsyncComponent size="xl" {...state} style={{ height: 400 }}>
+                    <StackedBarChart
+                      height={400}
+                      charts={data?.charts ?? []}
+                      asPercentages={displayAs === StackTracesDisplayOption.Percentage}
+                      onBrushEnd={(nextRange) => {
+                        profilingRouter.push(routePath, {
+                          path,
+                          query: {
+                            ...query,
+                            rangeFrom: nextRange.rangeFrom,
+                            rangeTo: nextRange.rangeTo,
+                          },
+                        });
+                      }}
+                      showFrames={topNType === TopNType.Traces}
+                      onClick={topNType === TopNType.Threads ? onStackedBarClick : undefined}
+                    />
+                  </AsyncComponent>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </ProfilingAppPageTemplate>
+          <EuiFlexItem grow>
+            <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
+              <ChartGrid
+                charts={data?.charts ?? []}
+                limit={limit}
+                showFrames={topNType === TopNType.Traces}
+              />
+            </AsyncComponent>
+          </EuiFlexItem>
+          {(data?.charts.length ?? 0) > limit && (
+            <EuiFlexItem>
+              <EuiButton
+                data-test-subj="profilingStackTracesViewShowMoreButton"
+                onClick={() => {
+                  profilingRouter.push(routePath, {
+                    path,
+                    query: {
+                      ...query,
+                      limit: limit + 10,
+                    },
+                  });
+                }}
+              >
+                {i18n.translate('xpack.profiling.stackTracesView.showMoreButton', {
+                  defaultMessage: 'Show more',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </ProfilingAppPageTemplate>
+    </RouteBreadcrumb>
   );
 }
