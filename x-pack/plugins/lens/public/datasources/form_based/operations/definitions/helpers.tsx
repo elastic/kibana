@@ -63,7 +63,6 @@ export function getInvalidFieldMessage(
   );
 
   if (isInvalid) {
-    console.log('isInvalid');
     // Missing fields have priority over wrong type
     // This has been moved as some transferable checks also perform exist checks internally and fail eventually
     // but that would make type mismatch error appear in place of missing fields scenarios

@@ -10,6 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { FullValidationConfig } from '@kbn/core-http-server';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -135,7 +136,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
             fields: fields.columns.map((fld) => {
               return {
                 name: fld.name,
-                type: 'string',
+                type: castEsToKbnFieldTypeName(fld.type),
                 esTypes: [fld.type],
                 searchable: true,
                 aggregatable: true,

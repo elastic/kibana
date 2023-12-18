@@ -205,7 +205,7 @@ export const enhancedEsSearchStrategyProvider = (
         obj.subscribe((res) => {
           console.log('RES', res.rawResponse.hits?.hits[0]);
         });
-        */
+*/
         return obj;
       }
 
