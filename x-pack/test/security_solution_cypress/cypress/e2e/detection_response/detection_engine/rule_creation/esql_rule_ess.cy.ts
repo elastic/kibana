@@ -35,6 +35,13 @@ import { visit } from '../../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
+const workaroundForResizeObserver = () =>
+  cy.on('uncaught:exception', (err) => {
+    if (err.message.includes('ResizeObserver loop limit exceeded')) {
+      return false;
+    }
+  });
+
 describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
@@ -47,6 +54,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
     it('creates an ES|QL rule', function () {
       visit(CREATE_RULE_URL);
+      workaroundForResizeObserver();
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
@@ -74,6 +82,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
     it('creates an ES|QL rule and overrides its name', function () {
       visit(CREATE_RULE_URL);
+      workaroundForResizeObserver();
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
@@ -94,6 +103,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       visit(CREATE_RULE_URL);
     });
     it('shows error when ES|QL query is empty', function () {
+      workaroundForResizeObserver();
+
       selectEsqlRuleType();
       expandEsqlQueryBar();
       getDefineContinueButton().click();
@@ -102,6 +113,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
 
     it('proceeds further once invalid query is fixed', function () {
+      workaroundForResizeObserver();
+
       selectEsqlRuleType();
       expandEsqlQueryBar();
       getDefineContinueButton().click();
@@ -116,6 +129,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
 
     it('shows error when non-aggregating ES|QL query does not [metadata] operator', function () {
+      workaroundForResizeObserver();
+
       const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
       selectEsqlRuleType();
       expandEsqlQueryBar();
@@ -128,6 +143,8 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
 
     it('shows error when non-aggregating ES|QL query does not return _id field', function () {
+      workaroundForResizeObserver();
+
       const invalidNonAggregatingQuery =
         'from auditbeat* [metadata _id, _version, _index] | keep agent.* | limit 5';
 
@@ -142,6 +159,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
 
     it('shows error when ES|QL query is invalid', function () {
+      workaroundForResizeObserver();
       const invalidEsqlQuery =
         'from auditbeat* [metadata _id, _version, _index] | not_existing_operator';
       visit(CREATE_RULE_URL);
