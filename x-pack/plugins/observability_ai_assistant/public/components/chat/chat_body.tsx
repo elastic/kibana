@@ -14,6 +14,8 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -40,8 +42,9 @@ const fullHeightClassName = css`
   height: 100%;
 `;
 
-const timelineClassName = css`
+const timelineClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  ${scrollBarStyles}
 `;
 
 const promptEditorClassname = css`
@@ -104,6 +107,8 @@ export function ChatBody({
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -217,7 +222,7 @@ export function ChatBody({
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName}>
+        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)}>
           <div ref={timelineContainerRef} className={fullHeightClassName}>
             <EuiPanel
               grow
