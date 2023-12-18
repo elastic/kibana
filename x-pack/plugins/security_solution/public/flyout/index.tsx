@@ -24,13 +24,16 @@ import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
-import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
 import type { AssetDocumentLeftPanelProps } from './entity_details/asset_document_left';
 import {
   AssetDocumentLeftPanel,
   AssetDocumentLeftPanelKey,
 } from './entity_details/asset_document_left';
+import type { RiskInputsExpandableFlyoutProps } from '../entity_analytics/components/risk_inputs_flyout_panel';
+import {
+  RiskInputsPanel,
+  RiskInputsPanelKey,
+} from '../entity_analytics/components/risk_inputs_flyout_panel';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.

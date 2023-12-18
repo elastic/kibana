@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import type {
@@ -16,7 +17,6 @@ import type {
 } from '../../../timelines/components/side_panel/new_user_detail/types';
 import { ObservedUser } from '../../../timelines/components/side_panel/new_user_detail/observed_user';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { RiskSummary } from '../shared/components/risk_summary';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 

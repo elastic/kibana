@@ -7,11 +7,11 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { mockRiskScoreState } from '../../user_right/mocks';
+import { TestProviders } from '../../../common/mock';
+import { mockRiskScoreState } from '../../../flyout/entity_details/user_right/mocks';
 import { RiskSummary } from './risk_summary';
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('RiskSummary', () => {
   it('renders risk summary table', () => {

@@ -22,15 +22,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../../timelines/components/side_panel/new_user_detail/constants';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
-import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreSummaryAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { RiskInputsPanelKey } from '../../risk_inputs_left';
+import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
+import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { RiskInputsPanelKey } from '../risk_inputs_flyout_panel';
+import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;

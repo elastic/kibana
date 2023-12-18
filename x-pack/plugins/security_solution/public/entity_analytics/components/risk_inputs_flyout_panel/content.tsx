@@ -12,12 +12,12 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { FlyoutBody } from '../../../flyout/shared/components/flyout_body';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import { ActionColumn } from './components/action_column';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { RiskInputsUtilityBar } from './components/utility_bar';
 import { useAlertsByIds } from '../../../common/containers/alerts/use_alerts_by_ids';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 
 export interface RiskInputsPanelContentProps extends Record<string, unknown> {
   riskInputs: RiskInputs;

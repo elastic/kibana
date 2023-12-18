@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { RiskInputsPanelKey } from '../../../entity_analytics/components/risk_inputs_flyout_panel';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
@@ -19,7 +20,6 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { RiskInputsPanelKey } from '../risk_inputs_left';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
