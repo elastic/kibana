@@ -1654,7 +1654,7 @@
     "terser-webpack-plugin": "^4.2.3",
     "tough-cookie": "^4.1.3",
     "tree-kill": "^1.2.2",
-    "ts-morph": "^20.0.0",
+    "ts-morph": "^15.1.0",
     "tsd": "^0.20.0",
     "typescript": "4.7.4",
     "url-loader": "^2.2.0",
