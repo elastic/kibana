@@ -71,6 +71,7 @@ import {
   AgentPolicyNotFoundError,
   PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
+  FleetError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -125,23 +126,23 @@ class AgentPolicyService {
       id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
+    const logger = appContextService.getLogger();
+    logger.debug(`Starting update of agent policy ${id}`);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
-      throw new Error('Agent policy not found');
+      throw new AgentPolicyNotFoundError('Agent policy not found');
     }
 
     if (
       existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
       agentPolicy.status !== agentPolicyStatuses.Active
     ) {
-      throw new Error(
+      throw new FleetError(
         `Agent policy ${id} cannot be updated because it is ${existingAgentPolicy.status}`
       );
     }
-
-    const logger = appContextService.getLogger();
 
     if (options.removeProtection) {
       logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
@@ -166,7 +167,7 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-
+    logger.debug(`Agent policy ${id} update completed`);
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
@@ -190,7 +191,7 @@ class AgentPolicyService {
       is_preconfigured: true,
     };
 
-    if (!id) throw new Error('Missing ID');
+    if (!id) throw new AgentPolicyNotFoundError('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, id as string);
   }
@@ -254,6 +255,7 @@ class AgentPolicyService {
     this.checkTamperProtectionLicense(agentPolicy);
 
     const logger = appContextService.getLogger();
+    logger.debug(`Creating new agent policy`);
 
     if (agentPolicy?.is_protected) {
       logger.warn(
@@ -282,7 +284,7 @@ class AgentPolicyService {
 
     await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
-
+    logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
   }
 
@@ -320,7 +322,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicySO.error) {
-      throw new Error(agentPolicySO.error.message);
+      throw new FleetError(agentPolicySO.error.message);
     }
 
     const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
@@ -356,7 +358,7 @@ class AgentPolicyService {
           } else if (agentPolicySO.error.statusCode === 404) {
             throw new AgentPolicyNotFoundError(`Agent policy ${agentPolicySO.id} not found`);
           } else {
-            throw new Error(agentPolicySO.error.message);
+            throw new FleetError(agentPolicySO.error.message);
           }
         }
 
@@ -498,6 +500,9 @@ class AgentPolicyService {
       authorizationHeader?: HTTPAuthorizationHeader | null;
     }
   ): Promise<AgentPolicy> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Starting update of agent policy ${id}`);
+
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
         id,
@@ -508,13 +513,11 @@ class AgentPolicyService {
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
-      throw new Error('Agent policy not found');
+      throw new AgentPolicyNotFoundError('Agent policy not found');
     }
 
     this.checkTamperProtectionLicense(agentPolicy);
     await this.checkForValidUninstallToken(agentPolicy, id);
-
-    const logger = appContextService.getLogger();
 
     if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
       logger.warn(
@@ -558,10 +561,13 @@ class AgentPolicyService {
     newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Starting copy of agent policy ${id}`);
+
     // Copy base agent policy
     const baseAgentPolicy = await this.get(soClient, id, true);
     if (!baseAgentPolicy) {
-      throw new Error('Agent policy not found');
+      throw new AgentPolicyNotFoundError('Agent policy not found');
     }
     const newAgentPolicy = await this.create(
       soClient,
@@ -631,11 +637,11 @@ class AgentPolicyService {
     // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
-      throw new Error('Copied agent policy not found');
+      throw new AgentPolicyNotFoundError('Copied agent policy not found');
     }
 
     await this.deployPolicy(soClient, newAgentPolicy.id);
-
+    logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
 
@@ -799,6 +805,9 @@ class AgentPolicyService {
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Deleting agent policy ${id}`);
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id,
@@ -807,7 +816,7 @@ class AgentPolicyService {
 
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
-      throw new Error('Agent policy not found');
+      throw new AgentPolicyNotFoundError('Agent policy not found');
     }
 
     if (agentPolicy.is_managed && !options?.force) {
@@ -822,7 +831,7 @@ class AgentPolicyService {
     });
 
     if (total > 0) {
-      throw new Error('Cannot delete agent policy that is assigned to agent(s)');
+      throw new FleetError('Cannot delete agent policy that is assigned to agent(s)');
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
@@ -860,7 +869,7 @@ class AgentPolicyService {
     if (options?.removeFleetServerDocuments) {
       await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
-
+    logger.debug(`Deleted agent policy ${id}`);
     return {
       id,
       name: agentPolicy.name,
@@ -954,7 +963,7 @@ class AgentPolicyService {
         return acc;
       }, [] as BulkResponseItem[]);
 
-      logger.debug(
+      logger.warn(
         `Failed to index documents during policy deployment: ${JSON.stringify(erroredDocuments)}`
       );
     }
@@ -1225,7 +1234,7 @@ class AgentPolicyService {
       );
 
       if (uninstallTokenError) {
-        throw new Error(
+        throw new FleetError(
           `Cannot enable Agent Tamper Protection: ${uninstallTokenError.error.message}`
         );
       }

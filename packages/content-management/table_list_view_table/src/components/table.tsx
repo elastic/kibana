@@ -21,13 +21,13 @@ import {
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
   TableListViewTableProps,
-  UserContentCommonSchema,
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';

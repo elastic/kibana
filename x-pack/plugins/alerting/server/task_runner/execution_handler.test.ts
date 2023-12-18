@@ -14,6 +14,7 @@ import {
 } from '@kbn/actions-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -1699,15 +1700,89 @@ describe('Execution Handler', () => {
     );
   });
 
-  test('does not schedule summary actions when there is an active maintenance window', async () => {
+  test('does not schedule summary actions when there are alerts with MW ids in memory', async () => {
+    const newAlert1 = generateAlert({
+      id: 1,
+      maintenanceWindowIds: ['mw1'],
+    });
+
+    const newAlert2 = generateAlert({
+      id: 2,
+      maintenanceWindowIds: ['mw2'],
+    });
+
+    // The alerts that come back from getSummarizedAlerts might not have
+    // the MW Ids attached yet, due to lack of refresh: true in the
+    // update call to update the alert MW Ids
+    const newAlert1AAD = {
+      ...mockAAD,
+      [ALERT_UUID]: newAlert1[1].getUuid(),
+    };
+
+    const newAlert2AAD = {
+      ...mockAAD,
+      [ALERT_UUID]: newAlert2[2].getUuid(),
+    };
+
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 2,
-        data: [
-          { ...mockAAD, kibana: { alert: { uuid: '1' } } },
-          { ...mockAAD, kibana: { alert: { uuid: '2' } } },
-        ],
+        data: [newAlert1AAD, newAlert2AAD],
       },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+
+    alertsClient.getProcessedAlerts.mockReturnValue({
+      '1': newAlert1[1],
+      '2': newAlert2[2],
+    });
+
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              uuid: '1',
+              id: '1',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+            },
+          ],
+        },
+        maintenanceWindowIds: ['test-id-active'],
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      '(3) alerts have been filtered out for: testActionTypeId:1'
+    );
+  });
+
+  test('does not schedule summary actions when there is an active maintenance window', async () => {
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: { count: 0, data: [] },
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
@@ -1746,15 +1821,11 @@ describe('Execution Handler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
 
     expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(1) alert has been filtered out for: testActionTypeId:1'
-    );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      2,
-      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-active.'
+      '(3) alerts have been filtered out for: testActionTypeId:1'
     );
   });
 
@@ -1770,17 +1841,14 @@ describe('Execution Handler', () => {
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
 
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      1,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-1.'
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-1.'
     );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      2,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-2.'
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-2.'
     );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
-      3,
-      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
   });
 

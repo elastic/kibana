@@ -101,7 +101,9 @@ export const LogEntryFlyout = ({
   logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
-    services: { observabilityAIAssistant },
+    services: {
+      observabilityAIAssistant: { service: observabilityAIAssistantService },
+    },
   } = useKibanaContextForPlugin();
 
   const {
@@ -184,7 +186,10 @@ export const LogEntryFlyout = ({
         >
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} doc={logEntry} />
+              <LogAIAssistant
+                observabilityAIAssistant={observabilityAIAssistantService}
+                doc={logEntry}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />

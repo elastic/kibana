@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.search.searchFor('log explorer');
 
       const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-      expect(results[0].label).to.eql('Log Explorer');
+      expect(results[0].label).to.eql('Logs Explorer');
 
       await PageObjects.svlCommonNavigation.search.hideSearch();
     });

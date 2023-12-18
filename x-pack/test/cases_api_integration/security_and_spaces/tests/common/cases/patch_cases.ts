@@ -23,6 +23,7 @@ import {
   getPostCaseRequest,
   postCaseReq,
   postCaseResp,
+  postCommentUserReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -500,6 +501,115 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(openCases[0].duration).to.be(null);
           });
         }
+      });
+
+      it('should return the expected total comments and alerts', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
+            index: '.siem-signals-default-000001',
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: AttachmentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: updatedCase.version,
+                title: 'new title',
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(data).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should return the expected total comments and alerts for multiple cases', async () => {
+        const postedCase1 = await createCase(supertest, postCaseReq);
+        const postedCase2 = await createCase(supertest, postCaseReq);
+        const updatedCaseVersions = [];
+
+        for (const postedCaseId of [postedCase1.id, postedCase2.id]) {
+          await createComment({
+            supertest,
+            caseId: postedCaseId,
+            params: postCommentUserReq,
+            expectedHttpCode: 200,
+          });
+
+          const updatedCase = await createComment({
+            supertest,
+            caseId: postedCaseId,
+            params: {
+              alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
+              index: '.siem-signals-default-000001',
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: AttachmentType.alert,
+              owner: 'securitySolutionFixture',
+            },
+          });
+
+          updatedCaseVersions.push(updatedCase.version);
+        }
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase1.id,
+                version: updatedCaseVersions[0],
+                title: 'new title',
+              },
+              {
+                id: postedCase2.id,
+                version: updatedCaseVersions[1],
+                title: 'new title',
+              },
+            ],
+          },
+        });
+
+        const dataCase1 = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        expect(dataCase1).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
+
+        const dataCase2 = removeServerGeneratedPropertiesFromCase(patchedCases[1]);
+        expect(dataCase2).to.eql({
+          ...postCaseResp(),
+          title: 'new title',
+          totalComment: 1,
+          totalAlerts: 1,
+          updated_by: defaultUser,
+        });
       });
     });
 
