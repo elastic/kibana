@@ -62,34 +62,34 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress | Runs the default Cypress command |
 | cypress:open:ess | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
 | cypress:open:serverless | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a mocked serverless environment. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
-| cypress:run:ess | Runs all tests tagged as ESS placed in the `e2e` directory excluding `investigations`,`explore` and `detection_response` directories in headless mode |
+| cypress:run:entity_analytics:ess | Runs all tests tagged as ESS placed in the `e2e/entity_analytics` directory in headless mode |
 | cypress:run:cases:ess | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
 | cypress:ess | Runs all ESS tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
-
 | cypress:rule_management:run:ess | Runs all tests tagged as ESS in the `e2e/detection_response/rule_management` excluding `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:rule_management:prebuilt_rules:run:ess | Runs all tests tagged as ESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:run:respops:ess | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
-| cypress:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e` directory excluding `investigations`, `explore` and `detections_response` directories in headless mode |
+| cypress:run:entity_analytics:serverless | Runs all tests tagged as SERVERLESS in the `e2e/entity_analytics` directory in headless mode |
 | cypress:rule_management:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` excluding `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:rule_management:prebuilt_rules:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:detection_engine:run:ess | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine` excluding `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:detection_engine:exceptions:run:ess | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:detection_engine:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` excluding `e2e/detection_response/detection_engine` directory in headless mode |
+| cypress:ai_assistant:run:ess | Runs all tests tagged as ESS in the `e2e/ai_assistant` directory in headless mode |
+| cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
 | cypress:detection_engine:exceptions:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:investigations:run:ess | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
 | cypress:investigations:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
 | cypress:open:qa:serverless | Opens the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment. The kibana instance will reload when you make code changes. This is the recommended way to debug tests in QA. Follow the readme in order to learn about the known limitations. |
-| cypress:run:qa:serverless | Runs all tests tagged as SERVERLESS placed in the `e2e` directory excluding `investigations`, `explore` and `rule_management` directories in headless mode using the QA environment and real MKI projects.|
+| cypress:run:qa:serverless:entity_analytics | Runs all tests tagged as SERVERLESS placed in the `e2e/entity_analytics` directory in headless mode using the QA environment and real MKI projects.|
 | cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
 | cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` directory, excluding `e2e/detection_response/rule_management/prebuilt_rules` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine:exceptions | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode using the QA environment and reak MKI projects. |
-
-
+| cypress:run:qa:serverless:ai_assistant | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode using the QA environment and reak MKI projects. |
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
@@ -121,6 +121,9 @@ If you belong to one of the teams listed in the table, please add new e2e specs 
 | `e2e/investigations` | Threat Hunting Investigations |
 | `e2e/detection_response/rule_management` | Detection Rule Management |
 | `e2e/detection_response/detection_engine` | Detection Engine |
+| `e2e/ai_assistant` | AI Assistant |
+| `e2e/entity_analytics` | Entity Analytics |
+
 
 ### fixtures/
 
@@ -217,11 +220,12 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | Script Name | Description |
 | ----------- | ----------- |
 | cypress:open:serverless | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a mocked serverless environment. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
-| cypress:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
+| cypress:entity_analytics:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/entity_analytics` directory in headless mode |
 | cypress:investigations:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
 | cypress:rule_management:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` excluding `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
 | cypress:rule_management:prebuilt_rules:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode |
+| cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
@@ -271,6 +275,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:ai_assistant | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode using the QA environment and reak MKI projects. |
 
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
@@ -299,8 +304,51 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-#### Known limitations 
-- Currently RBAC cannot be tested.
+Store the email and password of the account you used to login in the QA Environment at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
+
+```json
+{
+  "admin": {
+    "email": "<email>",
+    "password": "<password>"
+  }
+}
+```
+
+#### Testing with different roles 
+
+If you want to execute a test using Cypress on visual mode with MKI, you need to make sure you have the user created in your organization, and add it tot he `.ftr/role_users.json`:
+
+```json
+{
+  "admin": {
+    "email": "<email>",
+    "password": "<password>"
+  },
+  "<roleName>": {
+    "email": "<email>",
+    "password": "<password>"
+  }
+}
+```
+
+As role names please use:
+- admin
+- detections_admin
+- editor
+- endpoint_operations_analyst
+- endpoint_policy_manager
+- none
+- platform_engineer
+- rule_author
+- soc_manager
+- t1_analyst
+- t2_analyst
+- t3_analyst
+- threat_intelligence_analyst
+- viewer
+
+The above should be the same used on the automation.
 
 #### PLIs
 

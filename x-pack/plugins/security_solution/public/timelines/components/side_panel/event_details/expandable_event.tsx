@@ -175,7 +175,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {scopeId !== TableId.rulePreview && (
+            {isAlert && scopeId !== TableId.rulePreview && (
               <EuiFlexItem grow={false}>
                 <Assignees
                   eventId={eventId}

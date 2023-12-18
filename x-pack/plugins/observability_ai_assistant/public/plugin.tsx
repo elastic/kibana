@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { createService } from './service/create_service';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetup,
@@ -26,7 +27,7 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
-import { MessageFeedback, MESSAGE_FEEDBACK_SCHEMA } from './analytics/schema';
+import { registerTelemetryEventTypes } from './analytics';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -88,7 +89,7 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
-    coreSetup.analytics.registerEventType<MessageFeedback>(MESSAGE_FEEDBACK_SCHEMA);
+    registerTelemetryEventTypes(coreSetup.analytics);
 
     return {};
   }
@@ -106,19 +107,19 @@ export class ObservabilityAIAssistantPlugin
       shareStart: pluginsStart.share,
     }));
 
-    service.register(async ({ signal, registerContext, registerFunction }) => {
+    service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./functions');
 
       return mod.registerFunctions({
         service,
-        signal,
         pluginsStart,
-        coreStart,
-        registerContext,
-        registerFunction,
+        registerRenderFunction,
       });
     });
 
-    return service;
+    return {
+      service,
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+    };
   }
 }

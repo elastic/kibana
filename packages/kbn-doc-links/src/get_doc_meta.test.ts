@@ -10,16 +10,20 @@ import { getDocLinksMeta } from './get_doc_meta';
 
 describe('getDocLinksMeta', () => {
   it('returns the correct version for the `main` branch', () => {
-    expect(getDocLinksMeta({ kibanaBranch: 'main' }).version).toEqual('master');
+    expect(getDocLinksMeta({ kibanaBranch: 'main', buildFlavor: 'traditional' }).version).toEqual(
+      'master'
+    );
   });
 
   it('returns the correct version for other branches', () => {
-    expect(getDocLinksMeta({ kibanaBranch: '7.x' }).version).toEqual('7.x');
+    expect(getDocLinksMeta({ kibanaBranch: '7.x', buildFlavor: 'traditional' }).version).toEqual(
+      '7.x'
+    );
   });
 
   it('returns the correct website url', () => {
-    expect(getDocLinksMeta({ kibanaBranch: '7.x' }).elasticWebsiteUrl).toEqual(
-      'https://www.elastic.co/'
-    );
+    expect(
+      getDocLinksMeta({ kibanaBranch: '7.x', buildFlavor: 'traditional' }).elasticWebsiteUrl
+    ).toEqual('https://www.elastic.co/');
   });
 });

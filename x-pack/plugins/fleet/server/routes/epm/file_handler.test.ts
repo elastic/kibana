@@ -66,7 +66,9 @@ describe('getFileHandler', () => {
   });
 
   it('should return the file for bundled package and an existing file', async () => {
-    mockedGetBundledPackageByPkgKey.mockResolvedValue({} as any);
+    mockedGetBundledPackageByPkgKey.mockResolvedValue({
+      getBuffer: () => Promise.resolve(),
+    } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
         pkgName: 'test',
@@ -97,7 +99,9 @@ describe('getFileHandler', () => {
   });
 
   it('should a 404 for bundled package with a non existing file', async () => {
-    mockedGetBundledPackageByPkgKey.mockResolvedValue({} as any);
+    mockedGetBundledPackageByPkgKey.mockResolvedValue({
+      getBuffer: () => Promise.resolve(),
+    } as any);
     const request = httpServerMock.createKibanaRequest({
       params: {
         pkgName: 'test',

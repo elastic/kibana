@@ -62,6 +62,7 @@ export interface SecurityCellActions {
   showTopN: CellActionFactory;
   copyToClipboard: CellActionFactory;
   toggleColumn: CellActionFactory;
+  toggleUserAssetField: CellActionFactory;
 }
 
 // All security cell actions names
