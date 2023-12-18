@@ -108,10 +108,13 @@ export function DeployDFAModelFlyoutProvider(
       const editor = await configElement.findByClassName('kibanaCodeEditor');
       await editor.click();
       const input = await find.activeElement();
-      await input.clearValueWithKeyboard();
-      // Ensure the editor is cleared before adding input
-      const editorContentAfterClearing = await input.getAttribute('value');
-      expect(editorContentAfterClearing).to.eql('');
+
+      await retry.tryForTime(5000, async () => {
+        await input.clearValueWithKeyboard();
+        // Ensure the editor is cleared before adding input
+        const editorContentAfterClearing = await input.getAttribute('value');
+        expect(editorContentAfterClearing).to.eql('');
+      });
 
       for (const chr of value) {
         await retry.tryForTime(5000, async () => {
