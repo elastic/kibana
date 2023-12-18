@@ -545,7 +545,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     overviewRulerBorder: false,
     readOnly:
-      isLoading || isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isLoading ||
+      isDisabled ||
+      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
   };
 
   if (isCompactFocused) {

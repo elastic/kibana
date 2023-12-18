@@ -13,9 +13,12 @@ import { getData, getIndexPatternService } from '../../../kibana_services';
 
 export const ESQL_GEO_POINT_TYPE = 'geo_point';
 
-const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
-  defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
-});
+const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
+  'xpack.maps.source.esql.noGeometryColumnErrorMsg',
+  {
+    defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
+  }
+);
 
 function isGeometryColumn(column: ESQLColumn) {
   return column.type === ESQL_GEO_POINT_TYPE;
@@ -28,12 +31,14 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
   }
 
   if (geometryColumns.length > 1) {
-    throw new Error(i18n.translate('xpack.maps.source.esql.multipleGeometryColumnErrorMsg', {
-      defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' to narrow columns.`,
-      values: {
-        count: geometryColumns.length
-      }
-    }));
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.multipleGeometryColumnErrorMsg', {
+        defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' to narrow columns.`,
+        values: {
+          count: geometryColumns.length,
+        },
+      })
+    );
   }
 }
 
@@ -81,17 +86,22 @@ async function getColumns(esql: string) {
 
   try {
     const resp = await lastValueFrom(
-      getData().search.search({ params }, {
-        strategy: 'esql',
-      })
+      getData().search.search(
+        { params },
+        {
+          strategy: 'esql',
+        }
+      )
     );
 
     return (resp.rawResponse as unknown as { columns: ESQLColumn[] }).columns;
   } catch (error) {
-    throw new Error(i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
-      defaultMessage: 'Unable to load columns. {errorMessage}',
-      values: { errorMessage: error.message }
-    }))
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
+        defaultMessage: 'Unable to load columns. {errorMessage}',
+        values: { errorMessage: error.message },
+      })
+    );
   }
 }
 
@@ -100,19 +110,21 @@ export async function getDateFields(esql: string) {
   try {
     // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
     return (await getIndexPatternService().getFieldsForWildcard({ pattern }))
-      .filter(field => {
+      .filter((field) => {
         return field.type === 'date';
       })
-      .map(field => {
+      .map((field) => {
         return field.name;
       });
   } catch (error) {
-    throw new Error(i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-      defaultMessage: `Unable to load date fields from index pattern: {pattern}. {errorMessage}`,
-      values: {
-        errorMessage: error.message,
-        pattern,
-      }
-    }))
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
+        defaultMessage: `Unable to load date fields from index pattern: {pattern}. {errorMessage}`,
+        values: {
+          errorMessage: error.message,
+          pattern,
+        },
+      })
+    );
   }
 }

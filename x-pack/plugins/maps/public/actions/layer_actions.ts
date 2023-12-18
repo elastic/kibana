@@ -859,7 +859,7 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
 
   const source = layer.getSource();
   if ('getInspectorRequestIds' in source) {
-    (source as IVectorSource).getInspectorRequestIds().forEach(id => {
+    (source as IVectorSource).getInspectorRequestIds().forEach((id) => {
       adapters.requests!.resetRequest(id);
     });
   }

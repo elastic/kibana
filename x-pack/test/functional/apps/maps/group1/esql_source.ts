@@ -15,13 +15,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('esql', () => {
     before(async () => {
-      await security.testUser.setRoles(
-        [
-          'global_maps_all',
-          'test_logstash_reader',
-        ],
-        { skipBrowserRefresh: true }
-      );
+      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
+        skipBrowserRefresh: true,
+      });
       await PageObjects.maps.loadSavedMap('esql example');
     });
 

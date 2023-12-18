@@ -17,39 +17,33 @@ describe('convertToGeoJson', () => {
       values: [
         ['POINT (-87.66208335757256 32.68147221766412)', 6901],
         ['POINT (-76.41376560553908 39.32566332165152)', 484],
-      ]
-    }
+      ],
+    };
     const featureCollection = convertToGeoJson(resp);
     expect(featureCollection).toEqual({
       type: 'FeatureCollection',
       features: [
         {
           geometry: {
-            coordinates: [
-              -87.66208335757256,
-              32.68147221766412,
-            ],
+            coordinates: [-87.66208335757256, 32.68147221766412],
             type: 'Point',
           },
           properties: {
-            bytes: 6901
+            bytes: 6901,
           },
           type: 'Feature',
         },
         {
           geometry: {
-            coordinates: [
-              -76.41376560553908,
-              39.32566332165152,
-            ],
+            coordinates: [-76.41376560553908, 39.32566332165152],
             type: 'Point',
           },
           properties: {
-            bytes: 484
+            bytes: 484,
           },
           type: 'Feature',
-        }
-      ]
+        },
+      ],
     });
   });
 });

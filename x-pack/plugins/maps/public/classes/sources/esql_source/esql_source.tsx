@@ -16,8 +16,11 @@ import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
-import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants'
-import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type {
+  ESQLSourceDescriptor,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
@@ -33,10 +36,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
-  | 'columns'
-  | 'dateField'
-  | 'esql'
-  | 'narrowByMapBounds'
+  'columns' | 'dateField' | 'esql' | 'narrowByMapBounds'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -46,13 +46,9 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
 export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   readonly _descriptor: ESQLSourceDescriptor;
 
-  static createDescriptor(
-    descriptor: Partial<ESQLSourceDescriptor>
-  ): ESQLSourceDescriptor {
+  static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
-      throw new Error(
-        'Cannot create ESQLSourceDescriptor when esql is not provided'
-      );
+      throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
     return {
       ...descriptor,
@@ -61,7 +57,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       esql: descriptor.esql!,
       columns: descriptor.columns ? descriptor.columns : [],
       narrowByGlobalSearch:
-        typeof descriptor.narrowByGlobalSearch !== 'undefined' ? descriptor.narrowByGlobalSearch : true,
+        typeof descriptor.narrowByGlobalSearch !== 'undefined'
+          ? descriptor.narrowByGlobalSearch
+          : true,
       narrowByMapBounds:
         typeof descriptor.narrowByMapBounds !== 'undefined' ? descriptor.narrowByMapBounds : true,
       applyForceRefresh:
@@ -132,7 +130,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   ): Promise<GeoJsonWithMeta> {
     const limit = getLimitFromESQLQuery(this._descriptor.esql);
     const params: { query: string; filter?: { bool: BoolQuery } } = {
-      query: this._descriptor.esql
+      query: this._descriptor.esql,
     };
 
     const query: Query[] = [];
@@ -151,7 +149,8 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     }
 
     if (this._descriptor.narrowByMapBounds && requestMeta.buffer) {
-      const geoField = this._descriptor.columns[getGeometryColumnIndex(this._descriptor.columns)]?.name;
+      const geoField =
+        this._descriptor.columns[getGeometryColumnIndex(this._descriptor.columns)]?.name;
       if (geoField) {
         const extentFilter = createExtentFilter(requestMeta.buffer, [geoField]);
         filters.push(extentFilter);
@@ -174,33 +173,33 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       }
     }
 
-    params.filter = buildEsQuery(
-      undefined,
-      query,
-      filters,
-      getEsQueryConfig(getUiSettings()),
-    );
+    params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),
       {
-        id: this._getRequestId()
+        id: this._getRequestId(),
       }
     );
     requestResponder.json(params);
 
     const { rawResponse, requestParams } = await lastValueFrom(
-      getData().search.search({ params }, {
-        strategy: 'esql',
-      }).pipe(
-        tap({
-          error(error) {
-            requestResponder.error({
-              json: 'attributes' in error ? error.attributes : { message: error.message },
-            });
-          },
-        })
-      )
+      getData()
+        .search.search(
+          { params },
+          {
+            strategy: 'esql',
+          }
+        )
+        .pipe(
+          tap({
+            error(error) {
+              requestResponder.error({
+                json: 'attributes' in error ? error.attributes : { message: error.message },
+              });
+            },
+          })
+        )
     );
 
     requestResponder.ok({ json: rawResponse, requestParams });
@@ -213,7 +212,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
         resultsCount,
         areResultsTrimmed: resultsCount >= limit,
       },
-    }
+    };
   }
 
   getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
@@ -246,7 +245,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   getFieldByName(fieldName: string): IField | null {
-    const column = this._descriptor.columns.find(column => {
+    const column = this._descriptor.columns.find((column) => {
       return column.name === fieldName;
     });
     const fieldType = column ? getFieldType(column) : undefined;
@@ -262,27 +261,24 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   async getFields() {
     const fields: IField[] = [];
-    this._descriptor.columns.forEach(column => {
+    this._descriptor.columns.forEach((column) => {
       const fieldType = getFieldType(column);
       if (fieldType) {
-        fields.push(new InlineField({
-          fieldName: column.name,
-          source: this,
-          origin: FIELD_ORIGIN.SOURCE,
-          dataType: fieldType,
-        }))
+        fields.push(
+          new InlineField({
+            fieldName: column.name,
+            source: this,
+            origin: FIELD_ORIGIN.SOURCE,
+            dataType: fieldType,
+          })
+        );
       }
     });
     return fields;
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    return (
-      <UpdateSourceEditor
-        onChange={onChange}
-        sourceDescriptor={this._descriptor}
-      />
-    );
+    return <UpdateSourceEditor onChange={onChange} sourceDescriptor={this._descriptor} />;
   }
 
   getSyncMeta(): ESQLSourceSyncMeta {

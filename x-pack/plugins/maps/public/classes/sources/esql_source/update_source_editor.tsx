@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
@@ -59,10 +59,10 @@ export function UpdateSourceEditor(props: Props) {
   }, []);
 
   const dateSelectOptions = useMemo(() => {
-    return dateFields.map(dateField => {
+    return dateFields.map((dateField) => {
       return {
-        value: dateField, 
-        text: dateField
+        value: dateField,
+        text: dateField,
       };
     });
   }, [dateFields]);
@@ -101,20 +101,27 @@ export function UpdateSourceEditor(props: Props) {
 
         <EuiSpacer size="m" />
 
-        <EuiSkeletonText
-          lines={3}
-          isLoading={!isInitialized}
-        >
+        <EuiSkeletonText lines={3} isLoading={!isInitialized}>
           <ESQLEditor
             esql={props.sourceDescriptor.esql}
-            onESQLChange={(change: { columns: ESQLSourceDescriptor['columns'], dateFields: string[]; esql: string }) => {
+            onESQLChange={(change: {
+              columns: ESQLSourceDescriptor['columns'];
+              dateFields: string[];
+              esql: string;
+            }) => {
               setDateFields(change.dateFields);
               const changes: OnSourceChangeArgs[] = [
                 { propName: 'columns', value: change.columns },
-                { propName: 'esql', value: change.esql }
+                { propName: 'esql', value: change.esql },
               ];
-              if (props.sourceDescriptor.dateField && !change.dateFields.includes(props.sourceDescriptor.dateField)) {
-                changes.push({ propName: 'dateField', value: change.dateFields.length ? change.dateFields[0] : undefined });
+              if (
+                props.sourceDescriptor.dateField &&
+                !change.dateFields.includes(props.sourceDescriptor.dateField)
+              ) {
+                changes.push({
+                  propName: 'dateField',
+                  value: change.dateFields.length ? change.dateFields[0] : undefined,
+                });
               }
               props.onChange(...changes);
             }}
@@ -149,26 +156,24 @@ export function UpdateSourceEditor(props: Props) {
           </EuiFormRow>
 
           <EuiFormRow>
-            {
-              dateFields.length === 0
-                ? (
-                    <EuiToolTip
-                      position="top" 
-                      content={i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
-                        defaultMessage: `No date fields are available from index pattern: {pattern}.`,
-                        values: {
-                          pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
-                        }
-                      })}
-                    >
-                      {narrowByTimeInput}
-                    </EuiToolTip>
-                  )
-                : narrowByTimeInput
-            }
+            {dateFields.length === 0 ? (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
+                  defaultMessage: `No date fields are available from index pattern: {pattern}.`,
+                  values: {
+                    pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
+                  },
+                })}
+              >
+                {narrowByTimeInput}
+              </EuiToolTip>
+            ) : (
+              narrowByTimeInput
+            )}
           </EuiFormRow>
 
-          {props.sourceDescriptor.dateField &&
+          {props.sourceDescriptor.dateField && (
             <EuiFormRow
               label={i18n.translate('xpack.maps.source.esqlSource.dateFieldSelectLabel', {
                 defaultMessage: 'Date field',
@@ -184,7 +189,7 @@ export function UpdateSourceEditor(props: Props) {
                 compressed
               />
             </EuiFormRow>
-          }
+          )}
 
           <ForceRefreshCheckbox
             applyForceRefresh={props.sourceDescriptor.applyForceRefresh}

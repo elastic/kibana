@@ -16,7 +16,15 @@ import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {
   esql: string;
-  onESQLChange: ({ columns, dateFields, esql }: { columns: ESQLColumn[], dateFields: string[], esql: string }) => void;
+  onESQLChange: ({
+    columns,
+    dateFields,
+    esql,
+  }: {
+    columns: ESQLColumn[];
+    dateFields: string[];
+    esql: string;
+  }) => void;
 }
 
 export function ESQLEditor(props: Props) {
@@ -36,7 +44,7 @@ export function ESQLEditor(props: Props) {
           if (!query) {
             return;
           }
-          
+
           if (warning) {
             setWarning(undefined);
           }
@@ -53,19 +61,21 @@ export function ESQLEditor(props: Props) {
             }
             verifyGeometryColumn(esqlMeta.columns);
             if (esqlMeta.columns.length >= 6) {
-              setWarning(i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
-                defaultMessage: `ES|QL statement returns {count} columns. For faster maps, use 'DROP' or 'KEEP' to narrow columns.`,
-                values: {
-                  count: esqlMeta.columns.length
-                }
-              }))
+              setWarning(
+                i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+                  defaultMessage: `ES|QL statement returns {count} columns. For faster maps, use 'DROP' or 'KEEP' to narrow columns.`,
+                  values: {
+                    count: esqlMeta.columns.length,
+                  },
+                })
+              );
             }
             props.onESQLChange({
               columns: esqlMeta.columns,
               dateFields: esqlMeta.dateFields,
               esql,
             });
-          } catch(error) {
+          } catch (error) {
             if (!isMounted()) {
               return;
             }

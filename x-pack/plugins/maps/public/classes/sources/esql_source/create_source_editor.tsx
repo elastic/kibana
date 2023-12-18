@@ -24,12 +24,13 @@ export function CreateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    getIndexPatternService().getDefaultDataView()
+    getIndexPatternService()
+      .getDefaultDataView()
       .then((defaultDataView) => {
         if (ignore) {
           return;
         }
-        
+
         if (defaultDataView) {
           let geoField: string | undefined;
           const initialDateFields: string[] = [];
@@ -41,7 +42,7 @@ export function CreateSourceEditor(props: Props) {
               initialDateFields.push(field.name);
             }
           }
-          
+
           if (geoField) {
             let initialDateField: string | undefined;
             if (defaultDataView.timeFieldName) {
@@ -57,7 +58,7 @@ export function CreateSourceEditor(props: Props) {
                 {
                   name: geoField,
                   type: ESQL_GEO_POINT_TYPE,
-                }
+                },
               ],
               dateField: initialDateField,
               esql: initialEsql,
@@ -81,26 +82,28 @@ export function CreateSourceEditor(props: Props) {
   }, []);
 
   return (
-    <EuiSkeletonText
-      lines={3}
-      isLoading={!isInitialized}
-    >
+    <EuiSkeletonText lines={3} isLoading={!isInitialized}>
       <ESQLEditor
         esql={esql}
-        onESQLChange={(change: { columns: ESQLSourceDescriptor['columns'], dateFields: string[], esql: string }) => {
+        onESQLChange={(change: {
+          columns: ESQLSourceDescriptor['columns'];
+          dateFields: string[];
+          esql: string;
+        }) => {
           let nextDateField = dateField;
           if (!dateField || !change.dateFields.includes(dateField)) {
             nextDateField = change.dateFields.length ? change.dateFields[0] : undefined;
           }
           setDateField(nextDateField);
           setEsql(change.esql);
-          const sourceConfig = change.esql && change.esql.length
-            ? {
-                columns: change.columns,
-                dateField: nextDateField,
-                esql: change.esql,
-              }
-            : null;
+          const sourceConfig =
+            change.esql && change.esql.length
+              ? {
+                  columns: change.columns,
+                  dateField: nextDateField,
+                  esql: change.esql,
+                }
+              : null;
           props.onSourceConfigChange(sourceConfig);
         }}
       />
