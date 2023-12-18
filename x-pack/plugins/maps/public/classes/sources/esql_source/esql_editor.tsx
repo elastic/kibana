@@ -75,11 +75,11 @@ export function ESQLEditor(props: Props) {
               dateFields: esqlMeta.dateFields,
               esql,
             });
-          } catch (error) {
+          } catch (err) {
             if (!isMounted()) {
               return;
             }
-            setError(error);
+            setError(err);
             props.onESQLChange({
               columns: [],
               dateFields: [],

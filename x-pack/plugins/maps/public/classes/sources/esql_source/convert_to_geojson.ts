@@ -37,7 +37,6 @@ export function convertToGeoJson(resp: ESQLSearchReponse): FeatureCollection {
       });
     } catch (parseError) {
       // TODO surface parse error in some kind of warning
-      console.log(parseError);
     }
   }
 

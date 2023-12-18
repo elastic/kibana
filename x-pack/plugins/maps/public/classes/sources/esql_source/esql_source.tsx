@@ -245,8 +245,8 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   getFieldByName(fieldName: string): IField | null {
-    const column = this._descriptor.columns.find((column) => {
-      return column.name === fieldName;
+    const column = this._descriptor.columns.find(({ name }) => {
+      return name === fieldName;
     });
     const fieldType = column ? getFieldType(column) : undefined;
     return column && fieldType
