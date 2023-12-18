@@ -88,7 +88,8 @@ export function ESQLEditor(props: Props) {
         hideMinimizeButton
         editorIsInline
         hideRunQueryText
-        disableSubmitAction={isLoading || isEqual(localQuery, props.esql)}
+        isLoading={isLoading}
+        disableSubmitAction={isEqual(localQuery, props.esql)}
       />
     </>
   );
