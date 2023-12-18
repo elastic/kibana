@@ -39,7 +39,7 @@ interface Props {
   inputTargetValue?: string | null;
   label: string;
   errors?: string[];
-  areaLabel?: string;
+  ariaLabel?: string;
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
   onBlur?: () => void;
@@ -62,7 +62,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   label,
   errors,
-  areaLabel,
+  ariaLabel,
   onDocumentsChange,
   helpText,
   onBlur,
@@ -193,7 +193,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           width="100%"
           height="200px"
           data-test-subj={`${paramsProperty}JsonEditor`}
-          aria-label={areaLabel}
+          aria-label={ariaLabel}
           {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
           onChange={(xjson: string) => {

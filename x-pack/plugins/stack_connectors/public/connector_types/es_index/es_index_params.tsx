@@ -199,7 +199,7 @@ export const IndexParamsFields = ({
       dataTestSubj="documentToIndex"
       inputTargetValue={documentToIndex}
       label={documentsFieldLabel}
-      areaLabel={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
+      ariaLabel={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
         defaultMessage: 'Code editor',
       })}
       errors={errors.documents as string[]}

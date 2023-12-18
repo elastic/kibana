@@ -27,7 +27,7 @@ const TorqParamsFields: React.FunctionComponent<ActionParamsProps<TorqActionPara
       paramsProperty={'body'}
       inputTargetValue={body}
       label={i18n.BODY_FIELD_LABEL}
-      areaLabel={i18n.BODY_FIELD_ARIA_LABEL}
+      ariaLabel={i18n.BODY_FIELD_ARIA_LABEL}
       errors={errors.body as string[]}
       onDocumentsChange={(json: string) => {
         editAction('body', json, index);

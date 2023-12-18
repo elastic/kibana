@@ -27,7 +27,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
       label={i18n.translate('xpack.stackConnectors.components.webhook.bodyFieldLabel', {
         defaultMessage: 'Body',
       })}
-      areaLabel={i18n.translate(
+      ariaLabel={i18n.translate(
         'xpack.stackConnectors.components.webhook.bodyCodeEditorAriaLabel',
         {
           defaultMessage: 'Code editor',

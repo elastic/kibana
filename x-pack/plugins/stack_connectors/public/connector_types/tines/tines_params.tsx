@@ -307,7 +307,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             paramsProperty={'body'}
             inputTargetValue={body}
             label={i18n.BODY_LABEL}
-            areaLabel={i18n.BODY_ARIA_LABEL}
+            ariaLabel={i18n.BODY_ARIA_LABEL}
             errors={errors.body as string[]}
             onDocumentsChange={(json: string) => {
               editSubActionParams({ body: json });

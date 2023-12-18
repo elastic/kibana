@@ -67,7 +67,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         paramsProperty={'body'}
         inputTargetValue={body}
         label={i18n.BODY}
-        areaLabel={i18n.BODY_DESCRIPTION}
+        ariaLabel={i18n.BODY_DESCRIPTION}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
           editSubActionParams({ body: json });

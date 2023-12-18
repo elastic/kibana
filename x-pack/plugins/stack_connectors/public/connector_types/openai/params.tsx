@@ -67,7 +67,7 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
       label={i18n.translate('xpack.stackConnectors.components.genAi.bodyFieldLabel', {
         defaultMessage: 'Body',
       })}
-      areaLabel={i18n.translate('xpack.stackConnectors.components.genAi.bodyCodeEditorAriaLabel', {
+      ariaLabel={i18n.translate('xpack.stackConnectors.components.genAi.bodyCodeEditorAriaLabel', {
         defaultMessage: 'Code editor',
       })}
       errors={errors.body as string[]}
