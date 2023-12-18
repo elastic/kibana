@@ -11,25 +11,20 @@ import {
   type EuiBasicTableProps,
   type Pagination,
   type CriteriaWithPagination,
-  EuiLink,
-  EuiToolTip,
-  EuiAvatar,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { generatePath } from 'react-router-dom';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimestampTableCell } from '../../components/timestamp_table_cell';
-import type { Benchmark } from '../../../common/types_old';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { benchmarksNavigation } from '../../common/navigation/constants';
+import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
-import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
+import { ComplianceScoreBar } from '../../components/compliance_score_bar';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
+import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -41,36 +36,49 @@ interface BenchmarksTableProps
   'data-test-subj'?: string;
 }
 
-const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-  const { http } = useKibana().services;
-  const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
-
-  return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
-};
-
-const IntegrationButtonLink = ({
-  packageName,
-  policyId,
-  packagePolicyId,
-}: {
-  packageName: string;
-  packagePolicyId: string;
-  policyId: string;
-}) => {
-  const { application } = useKibana().services;
-
-  return (
-    <EuiLink
-      href={application.getUrlForApp('security', {
-        path: generatePath(benchmarksNavigation.rules.path, {
-          packagePolicyId,
-          policyId,
-        }),
-      })}
-    >
-      {packageName}
-    </EuiLink>
-  );
+export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkK8sAccountPlural"
+          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
+          values={{ accountCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_azure':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAzureAccountPlural"
+          defaultMessage="{accountCount, plural, one {# subscription} other {# subscriptions}}"
+          values={{ accountCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_aws':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAwsAccountPlural"
+          defaultMessage="{accountCount, plural, one {# account} other {# accounts}}"
+          values={{ accountCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_eks':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkEksAccountPlural"
+          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
+          values={{ accountCount: accountEvaluation || 0 }}
+        />
+      );
+    case 'cis_gcp':
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkGcpAccountPlural"
+          defaultMessage="{accountCount, plural, one {# project} other {# projects}}"
+          values={{ accountCount: accountEvaluation || 0 }}
+        />
+      );
+  }
 };
 
 const ErrorMessageComponent = (error: { error: unknown }) => (
@@ -108,105 +116,83 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
 
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
-    field: 'package_policy.name',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationNameColumnTitle', {
-      defaultMessage: 'Integration Name',
+    field: 'id',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
+      defaultMessage: 'Benchmark',
     }),
-    render: (packageName, benchmark) => (
-      <IntegrationButtonLink
-        packageName={packageName}
-        packagePolicyId={benchmark.package_policy.id}
-        policyId={benchmark.package_policy.policy_id}
-      />
-    ),
+    truncateText: true,
+    width: '17.5%',
+    sortable: true,
+    render: (benchmarkId: BenchmarksCisId) => {
+      return getBenchmarkCisName(benchmarkId);
+    },
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
+  },
+  {
+    field: 'version',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkVersion', {
+      defaultMessage: 'Version',
+    }),
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
+    width: '17.5%',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.VERSION,
   },
   {
-    field: 'rules_count',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
-      defaultMessage: 'Rules',
+    field: 'id',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.applicableTo', {
+      defaultMessage: 'Applicable To',
     }),
     truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.RULES,
-  },
-  {
-    field: 'package_policy',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
-      defaultMessage: 'Integration',
-    }),
-    dataType: 'string',
-    truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
-    render: (field: PackagePolicy) => {
-      const enabledIntegration = getEnabledCspIntegrationDetails(field);
-      return enabledIntegration?.integration?.shortName || ' ';
-    },
-  },
-  {
-    field: 'package_policy',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.monitoringColumnTitle', {
-      defaultMessage: 'Monitoring',
-    }),
-    dataType: 'string',
-    truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.MONITORING,
-    render: (field: PackagePolicy) => {
-      const enabledIntegration = getEnabledCspIntegrationDetails(field);
-      return enabledIntegration?.enabledIntegrationOption?.name || ' ';
-    },
-  },
-  {
-    field: 'agent_policy.name',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.agentPolicyColumnTitle', {
-      defaultMessage: 'Agent Policy',
-    }),
-    render: (name, benchmark) => (
-      <AgentPolicyButtonLink name={name} id={benchmark.agent_policy.id} />
-    ),
-    truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.AGENT_POLICY,
-  },
-  {
-    field: 'agent_policy.agents',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.numberOfAgentsColumnTitle', {
-      defaultMessage: 'Number of Agents',
-    }),
-    truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.NUMBER_OF_AGENTS,
-  },
-  {
-    field: 'package_policy.created_by',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdByColumnTitle', {
-      defaultMessage: 'Created by',
-    }),
-    dataType: 'string',
-    truncateText: true,
-    sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_BY,
-    render: (createdBy: Benchmark['package_policy']['created_by']) => {
+    width: '30%',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.APPLICABLE_TO,
+    render: (benchmarkId: BenchmarksCisId) => {
       return (
-        <EuiToolTip position="top" content={createdBy} anchorClassName="eui-textTruncate">
-          <span>
-            <EuiAvatar size="s" name={createdBy} /> {createdBy}
-          </span>
-        </EuiToolTip>
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       );
     },
   },
   {
-    field: 'package_policy.created_at',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdAtColumnTitle', {
-      defaultMessage: 'Created',
+    field: 'evaluation',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluated', {
+      defaultMessage: 'Evaluated',
     }),
-    dataType: 'date',
+    dataType: 'string',
     truncateText: true,
-    render: (timestamp: Benchmark['package_policy']['created_at']) => (
-      <TimestampTableCell timestamp={timestamp} />
-    ),
-    sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
+    width: '17.5%',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
+    render: (complianceScore: Benchmark['evaluation'], data) => {
+      return getBenchmarkPlurals(data.id, data.evaluation);
+    },
+  },
+  {
+    field: 'score',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.score', {
+      defaultMessage: 'Compliance',
+    }),
+    dataType: 'string',
+    truncateText: true,
+    width: '7.5%',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.COMPLIANCE,
+    render: (data: BenchmarkScore) => {
+      if (data.totalFindings > 0)
+        return (
+          <ComplianceScoreBar totalPassed={data?.totalPassed} totalFailed={data?.totalFailed} />
+        );
+      return (
+        <FormattedMessage
+          id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
+          defaultMessage="No Findings"
+        />
+      );
+    },
   },
 ];
 
@@ -228,8 +214,8 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
-    setQuery({ page: { ...page, index: page.index + 1 }, sort });
+  const onChange = ({ page }: CriteriaWithPagination<Benchmark>) => {
+    setQuery({ page: { ...page, index: page.index + 1 } });
   };
 
   if (error) {
@@ -241,14 +227,15 @@ export const BenchmarksTable = ({
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
       columns={BENCHMARKS_TABLE_COLUMNS}
-      itemId={(item) => [item.agent_policy.id, item.package_policy.id].join('/')}
+      itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}
       tableLayout="fixed"
       loading={loading}
       noItemsMessage={noItemsMessage}
       error={error}
-      sorting={sorting}
+      /* Disabled Sorting until we have the final Benchmark table */
+      // sorting={sorting}
     />
   );
 };
