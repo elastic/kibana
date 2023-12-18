@@ -21,7 +21,7 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/co
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
 export const getDeleteQueryFilter = (
-  sloSummaryIdsToDelete: Array<{ id: string; revision?: number }>
+  sloSummaryIdsToDelete: Array<{ id: string; revision: number }>
 ) => {
   return sloSummaryIdsToDelete.map(({ id, revision }) => {
     return {
@@ -76,8 +76,6 @@ export class SloOrphanSummaryCleanupTask {
   }
 
   runTask = async () => {
-    const runAt = new Date().toISOString();
-
     if (this.soClient && this.esClient) {
       let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
@@ -85,7 +83,7 @@ export class SloOrphanSummaryCleanupTask {
         const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
 
         if (sloSummaryIds.length === 0) {
-          return { state: { lastRunAt: runAt } };
+          return;
         }
 
         searchAfterKey = searchAfter;
@@ -118,8 +116,6 @@ export class SloOrphanSummaryCleanupTask {
         }
       } while (searchAfterKey);
     }
-
-    return { state: { lastRunAt: runAt } };
   };
 
   fetchSloSummariesIds = async (
@@ -232,6 +228,7 @@ export class SloOrphanSummaryCleanupTask {
 
     if (!taskManager) {
       this.logger.info('[SLO] Missing required service during startup, skipping task.');
+      return;
     }
 
     if (this.config.sloOrphanSummaryCleanUpTaskEnabled) {
