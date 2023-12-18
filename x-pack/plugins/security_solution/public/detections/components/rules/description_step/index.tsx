@@ -216,8 +216,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    // only query and threshold rules can have duration property
-    if (!isQueryRule(ruleType) && !isThresholdRule(ruleType)) {
+    const ruleCanHaveDuration = isQueryRule(ruleType) || isThresholdRule(ruleType);
+    if (!ruleCanHaveDuration) {
       return [];
     }
 
