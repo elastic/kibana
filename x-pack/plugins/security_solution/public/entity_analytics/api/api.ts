@@ -103,6 +103,27 @@ export const useEntityAnalyticsRoutes = () => {
       method: 'GET',
     });
 
+  const getRiskScoreIndexStatus = ({
+    query,
+    signal,
+  }: {
+    query: {
+      indexName: string;
+      entity: RiskScoreEntity;
+    };
+    signal?: AbortSignal;
+  }): Promise<{
+    isDeprecated: boolean;
+    isEnabled: boolean;
+  }> =>
+    http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(RISK_SCORE_INDEX_STATUS_API_URL, {
+      version: '1',
+      method: 'GET',
+      query,
+      asSystemRequest: true,
+      signal,
+    });
+
   return {
     fetchRiskScorePreview,
     fetchRiskEngineStatus,
@@ -111,28 +132,6 @@ export const useEntityAnalyticsRoutes = () => {
     disableRiskEngine,
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
+    getRiskScoreIndexStatus,
   };
-};
-
-export const getRiskScoreIndexStatus = async (params: {
-  query: {
-    indexName: string;
-    entity: RiskScoreEntity;
-  };
-  signal?: AbortSignal;
-}): Promise<{
-  isDeprecated: boolean;
-  isEnabled: boolean;
-}> => {
-  const { indexName, entity } = params.query;
-  return KibanaServices.get().http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(
-    RISK_SCORE_INDEX_STATUS_API_URL,
-    {
-      method: 'GET',
-      version: '1',
-      query: { indexName, entity },
-      asSystemRequest: true,
-      signal: params.signal,
-    }
-  );
 };

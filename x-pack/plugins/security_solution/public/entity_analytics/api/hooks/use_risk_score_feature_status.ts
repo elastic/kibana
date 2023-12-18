@@ -10,7 +10,7 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../helper_hooks';
-import { getRiskScoreIndexStatus } from '../api';
+import { useEntityAnalyticsRoutes } from '../api';
 
 interface RiskScoresFeatureStatus {
   error: unknown;
@@ -31,6 +31,7 @@ export const useRiskScoreFeatureStatus = (
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+  const { getRiskScoreIndexStatus } = useEntityAnalyticsRoutes();
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
