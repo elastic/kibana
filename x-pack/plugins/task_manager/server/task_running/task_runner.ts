@@ -57,6 +57,7 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
+import { TaskValidator } from '../task_validator';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -109,6 +110,7 @@ type Opts = {
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
   requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+  allowReadingInvalidState: boolean;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -158,6 +160,7 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+  private readonly taskValidator: TaskValidator;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -182,6 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     requeueInvalidTasksConfig,
+    allowReadingInvalidState,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -196,6 +200,11 @@ export class TaskManagerRunner implements TaskRunner {
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
     this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
+    this.taskValidator = new TaskValidator({
+      logger: this.logger,
+      definitions: this.definitions,
+      allowReadingInvalidState,
+    });
   }
 
   /**
@@ -306,8 +315,11 @@ export class TaskManagerRunner implements TaskRunner {
       childOf: this.instance.task.traceparent,
     });
 
+    // Validate state
+    const validatedTaskInstance = this.validateTaskState(this.instance.task);
+
     const modifiedContext = await this.beforeRun({
-      taskInstance: this.instance.task,
+      taskInstance: validatedTaskInstance,
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -331,13 +343,23 @@ export class TaskManagerRunner implements TaskRunner {
 
       const taskValidationResult = await this.validateTask(modifiedContext);
 
-      const result = taskValidationResult?.error
+      const hasSkipError = !isUndefined(taskValidationResult?.error);
+      let shouldSkip = false;
+      let shouldKeepSkipAttempts = false;
+
+      if (hasSkipError) {
+        const reachedMaxSkipAttempts = this.hasReachedMaxSkipAttempts(modifiedContext.taskInstance);
+        shouldSkip = !reachedMaxSkipAttempts;
+        shouldKeepSkipAttempts = reachedMaxSkipAttempts;
+      }
+
+      const result = shouldSkip
         ? taskValidationResult
         : await this.executionContext.withContext(ctx, () =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
 
-      const validatedResult = this.validateResult(result);
+      const validatedResult = this.validateResult(shouldKeepSkipAttempts, result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
@@ -360,6 +382,17 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
+    }
+  }
+
+  private validateTaskState(taskInstance: ConcreteTaskInstance) {
+    const { taskType, id } = taskInstance;
+    try {
+      const validatedTask = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return validatedTask;
+    } catch (error) {
+      this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${error.message}`);
+      throw error;
     }
   }
 
@@ -543,11 +576,17 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private validateResult(
+    shouldKeepSkipAttempts: boolean,
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
     return isFailedRunResult(result)
       ? asErr({ ...result, error: result.error })
-      : asOk(result || EMPTY_RUN_RESULT);
+      : asOk({
+          ...(result || EMPTY_RUN_RESULT),
+          ...(shouldKeepSkipAttempts
+            ? { skipAttempts: this.requeueInvalidTasksConfig.max_attempts }
+            : {}),
+        });
   }
 
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
@@ -651,14 +690,14 @@ export class TaskManagerRunner implements TaskRunner {
           state,
           attempts = 0,
           skipAttempts,
-        }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
+        }: SuccessfulRunResult & { attempts: number }) => {
           const { startedAt, schedule, numSkippedRuns } = this.instance.task;
           const { taskRunError } = unwrap(result);
           let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
           // therefore we use "taskRunError" to be sure that there wasn't any error
-          if (isUndefined(skipAttempts) && taskRunError === undefined) {
+          if (isUndefined(skipAttempts) && isUndefined(taskRunError)) {
             requeueInvalidTaskAttempts = 0;
           }
 
@@ -826,6 +865,18 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition.maxAttempts !== undefined
       ? this.definition.maxAttempts
       : this.defaultMaxAttempts;
+  }
+
+  private hasReachedMaxSkipAttempts(taskInstance: ConcreteTaskInstance) {
+    const { taskType, id, numSkippedRuns = 0 } = taskInstance;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+
+    if (numSkippedRuns >= maxAttempts) {
+      this.logger.warn(`Task Manager has reached the max skip attempts for task ${taskType}/${id}`);
+      return true;
+    }
+
+    return false;
   }
 }
 
