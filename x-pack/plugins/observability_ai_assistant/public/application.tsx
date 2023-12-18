@@ -42,6 +42,7 @@ export function Application({
         <KibanaContextProvider
           services={{
             ...coreStart,
+            ...pluginsStart,
             plugins: {
               start: pluginsStart,
             },

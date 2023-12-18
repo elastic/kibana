@@ -60,7 +60,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       />
     ),
     'data-test-subj': 'fieldCell',
-    width: '50%',
+    width: '30%',
   },
   {
     field: 'description',
@@ -71,7 +71,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       />
     ),
     'data-test-subj': 'valueCell',
-    width: '50%',
+    width: '70%',
     render: (description: {
       field: string;
       values: string[] | null | undefined;

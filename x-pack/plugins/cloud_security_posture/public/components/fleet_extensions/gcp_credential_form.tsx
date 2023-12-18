@@ -31,7 +31,7 @@ import {
   SETUP_ACCESS_CLOUD_SHELL,
   SETUP_ACCESS_MANUAL,
 } from '../../../common/constants';
-import { RadioGroup } from './csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from './csp_boxed_radio_group';
 import {
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
@@ -231,12 +231,7 @@ export const gcpField: GcpInputFields = {
   },
 };
 
-const getSetupFormatOptions = (): Array<{
-  id: SetupFormatGCP;
-  label: string;
-  disabled: boolean;
-  testId: string;
-}> => [
+const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: SETUP_ACCESS_CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
