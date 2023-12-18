@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
-import type { FeatureKeys } from '../../..';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -317,8 +316,18 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     return doc;
   }
 
-  protected notifyUsage(featureKey: FeatureKeys): void {
-    this.options.endpointService.getFeatureUsageService().notifyUsage(featureKey);
+  protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {
+    const usageService = this.options.endpointService.getFeatureUsageService();
+    const featureKey = usageService.getResponseActionFeatureKey(responseAction);
+
+    if (!featureKey) {
+      this.log.warn(
+        `Response action [${responseAction}] does not have a usage feature key defined!`
+      );
+      return;
+    }
+
+    usageService.notifyUsage(featureKey);
   }
 
   public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {

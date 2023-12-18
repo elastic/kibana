@@ -21,6 +21,7 @@ export const FEATURE_KEYS = {
   SUSPEND_PROCESS: 'Suspend process',
   RUNNING_PROCESSES: 'Get running processes',
   GET_FILE: 'Get file',
+  UPLOAD: 'Upload file',
   EXECUTE: 'Execute command',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
@@ -28,19 +29,20 @@ export const FEATURE_KEYS = {
 
 export type FeatureKeys = keyof typeof FEATURE_KEYS;
 
-const RESPONSE_ACTION_FEATURE_KEYS: ReadonlyMap<ResponseActionsApiCommandNames, FeatureKeys> =
-  new Map([
-    ['isolate', 'HOST_ISOLATION'],
-    ['unisolate', 'HOST_ISOLATION'],
-    ['kill-process', 'KILL_PROCESS'],
-    ['suspend-process', 'SUSPEND_PROCESS'],
-    ['running-processes', 'RUNNING_PROCESSES'],
-    ['get-file', 'GET_FILE'],
-    ['execute', 'EXECUTE'],
-  ]);
+const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNames, FeatureKeys>> =
+  {
+    isolate: 'HOST_ISOLATION',
+    unisolate: 'HOST_ISOLATION',
+    'kill-process': 'KILL_PROCESS',
+    'suspend-process': 'SUSPEND_PROCESS',
+    'running-processes': 'RUNNING_PROCESSES',
+    'get-file': 'GET_FILE',
+    execute: 'EXECUTE',
+    upload: 'UPLOAD',
+  };
 
 export const getResponseActionFeatureKey = (
   responseAction: ResponseActionsApiCommandNames
 ): FeatureKeys | undefined => {
-  return RESPONSE_ACTION_FEATURE_KEYS.get(responseAction);
+  return RESPONSE_ACTIONS_FEATURE_KEY[responseAction];
 };

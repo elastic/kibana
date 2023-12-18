@@ -121,6 +121,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // TODO:PT support multiple agents
     await this.validateRequest(options);
 
+    this.notifyUsage('isolate');
+
     const agentUUID = options.endpoint_ids[0];
 
     await this.sendAction(SUB_ACTION.ISOLATE_HOST, {
