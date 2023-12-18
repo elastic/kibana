@@ -21,6 +21,7 @@ import {
   waitForHostToEnroll,
 } from '../../../../scripts/endpoint/common/fleet_services';
 import type { DownloadedAgentInfo } from '../../../../scripts/endpoint/common/agent_downloads_service';
+import { cleanupDownloads } from '../../../../scripts/endpoint/common/agent_downloads_service';
 import {
   downloadAndStoreAgent,
   isAgentDownloadFromDiskAvailable,
@@ -66,7 +67,7 @@ export const createAndEnrollEndpointHostCI = async ({
   const fileNameNoExtension = getAgentFileName(version);
   const agentFileName = `${fileNameNoExtension}.tar.gz`;
   let agentDownload: DownloadedAgentInfo | undefined;
-
+  await cleanupDownloads();
   // Check if agent file is already on disk before downloading it again
   agentDownload = isAgentDownloadFromDiskAvailable(agentFileName);
 
