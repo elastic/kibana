@@ -77,14 +77,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
-   * @param excludeCloud
+   * @param policyIdExcludeFilter
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
     perPage?: number,
-    excludeCloud?: string
+    policyIdExcludeFilter?: string
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -176,12 +176,14 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyIdFilter?: string,
     page = 1,
     perPage = 20,
-    excludeCloud?: string
+    policyIdExcludeFilter?: string
   ): Promise<GetUninstallTokensMetadataResponse> {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
-    const excludeFilter = excludeCloud ?? undefined;
 
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludeFilter);
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(
+      includeFilter,
+      policyIdExcludeFilter
+    );
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
