@@ -48,6 +48,7 @@ import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import { getQueryParamsLocalStorageKey } from './use_all_cases_state';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -650,25 +651,30 @@ describe('AllCasesListGeneric', () => {
       'should not show next page when cases are more than 10K and last page is displayed pageSize %s',
       async (item) => {
         const lastPage = MAX_DOCS_PER_PAGE / item;
+        // set local storage with custom query params
+        const APP_ID = 'testAppId';
+        const LOCALSTORAGE_QUERY_PARAMS_KEY = getQueryParamsLocalStorageKey(APP_ID);
+        localStorage.setItem(
+          LOCALSTORAGE_QUERY_PARAMS_KEY,
+          JSON.stringify({ perPage: item, page: lastPage - 1 })
+        );
 
         useGetCasesMock.mockReturnValue({
           ...defaultGetCases,
           data: {
             ...defaultGetCases.data,
+            page: lastPage - 1,
+            perPage: item,
             total: MAX_DOCS_PER_PAGE + item,
-          },
-          queryParams: {
-            ...DEFAULT_QUERY_PARAMS,
-            page: lastPage,
           },
         });
 
-        appMockRenderer.render(<AllCasesList />);
+        appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-        expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
-        expect(screen.queryByTestId(`pagination-button-${lastPage + 1}`)).not.toBeInTheDocument();
+        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(screen.queryByTestId(`pagination-button-${lastPage}`)).not.toBeInTheDocument();
 
-        userEvent.click(screen.getByTestId('pagination-button-next'));
+        userEvent.click(await screen.findByTestId(`pagination-button-${lastPage - 1}`));
 
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-next')).toHaveAttribute('disabled');

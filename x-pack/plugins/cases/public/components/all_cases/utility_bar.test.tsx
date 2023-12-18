@@ -179,6 +179,7 @@ describe('Utility bar', () => {
   it.each(allCasesPageSize)(`renders showing cases message correctly`, (size) => {
     const newPageIndex = MAX_DOCS_PER_PAGE / size - 1;
     const pageStart = size * newPageIndex + 1;
+    const visibleCases = size * (newPageIndex + 1);
 
     appMockRender.render(
       <CasesTableUtilityBar
@@ -191,7 +192,7 @@ describe('Utility bar', () => {
     );
 
     expect(
-      screen.getByText(`Showing ${pageStart} to ${size} of ${MAX_DOCS_PER_PAGE} cases`)
+      screen.getByText(`Showing ${pageStart} to ${visibleCases} of ${MAX_DOCS_PER_PAGE} cases`)
     ).toBeInTheDocument();
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });

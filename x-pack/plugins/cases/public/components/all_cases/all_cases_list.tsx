@@ -164,7 +164,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
 
     const pagination = useMemo(() => {
-      let totalCases = data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
+      const totalCases = data.total > MAX_DOCS_PER_PAGE ? MAX_DOCS_PER_PAGE : data.total;
 
       return {
         pageIndex: queryParams.page - 1,
