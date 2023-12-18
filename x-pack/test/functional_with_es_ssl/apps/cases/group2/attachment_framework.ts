@@ -318,6 +318,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           }
         });
 
+        it('filters with multiple selection', async () => {
+          await openModal();
+
+          let popupAlreadyOpen = false;
+          for (const [owner] of createdCases.entries()) {
+            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
+            popupAlreadyOpen = true;
+          }
+          await cases.casesTable.waitForTableToFinishLoading();
+
+          for (const caseId of createdCases.values()) {
+            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+          }
+          await closeModal();
+        });
+
         it('attaches correctly', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
