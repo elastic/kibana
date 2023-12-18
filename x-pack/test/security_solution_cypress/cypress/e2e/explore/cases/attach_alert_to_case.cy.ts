@@ -29,8 +29,9 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', () => {
+  context('Privileges: read only', { tags: ['@ess'] }, () => {
     beforeEach(() => {
+      // ess only role
       loadDetectionsPage(ROLES.reader);
     });
 
