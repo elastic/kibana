@@ -14,6 +14,7 @@ import type { Message } from '../../../common';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import type { ChatActionClickHandler } from './types';
 import type { ObservabilityAIAssistantChatService } from '../../types';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { ChatState } from '../../hooks/use_chat';
@@ -54,13 +55,13 @@ export interface ChatTimelineProps {
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGenerating: () => void;
   onActionClick: ChatActionClickHandler;
 }
 
 export function ChatTimeline({
   messages,
-  knowledgeBase,
   chatService,
   hasConnector,
   currentUser,
@@ -68,6 +69,7 @@ export function ChatTimeline({
   onEdit,
   onFeedback,
   onRegenerate,
+  onSendTelemetry,
   onStopGenerating,
   onActionClick,
   chatState,
@@ -115,17 +117,19 @@ export function ChatTimeline({
           <ChatConsolidatedItems
             key={index}
             consolidatedItem={item}
+            onActionClick={onActionClick}
             onFeedback={onFeedback}
             onRegenerate={onRegenerate}
             onEditSubmit={onEdit}
+            onSendTelemetry={onSendTelemetry}
             onStopGenerating={onStopGenerating}
-            onActionClick={onActionClick}
           />
         ) : (
           <ChatItem
             // use index, not id to prevent unmounting of component when message is persisted
             key={index}
             {...item}
+            onActionClick={onActionClick}
             onFeedbackClick={(feedback) => {
               onFeedback(item.message, feedback);
             }}
@@ -135,8 +139,8 @@ export function ChatTimeline({
             onEditSubmit={(message) => {
               onEdit(item.message, message);
             }}
+            onSendTelemetry={onSendTelemetry}
             onStopGeneratingClick={onStopGenerating}
-            onActionClick={onActionClick}
           />
         );
       })}
