@@ -42,7 +42,7 @@ import {
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const backToCases = () => {
-  cy.get(BACK_TO_CASES_BTN).click({ force: true });
+  cy.get(BACK_TO_CASES_BTN).click();
 };
 
 export const filterStatusOpen = () => {
@@ -84,14 +84,14 @@ export const attachTimeline = (newCase: TestCase) => {
 };
 
 export const createCase = () => {
-  cy.get(SUBMIT_BTN).click({ force: true });
+  cy.get(SUBMIT_BTN).click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
 };
 
 export const fillJiraConnectorOptions = (jiraConnector: JiraConnectorOptions) => {
-  cy.get(CONNECTOR_SELECTOR).click({ force: true });
-  cy.get(SELECT_JIRA).click({ force: true });
+  cy.get(CONNECTOR_SELECTOR).click();
+  cy.get(SELECT_JIRA).click();
   cy.get(SELECT_ISSUE_TYPE).should('exist');
   cy.get(SELECT_ISSUE_TYPE).select(jiraConnector.issueType);
 
@@ -102,8 +102,8 @@ export const fillJiraConnectorOptions = (jiraConnector: JiraConnectorOptions) =>
 export const fillServiceNowConnectorOptions = (
   serviceNowConnectorOpions: ServiceNowconnectorOptions
 ) => {
-  cy.get(CONNECTOR_SELECTOR).click({ force: true });
-  cy.get(SELECT_SN).click({ force: true });
+  cy.get(CONNECTOR_SELECTOR).click();
+  cy.get(SELECT_SN).click();
   cy.get(SELECT_SEVERITY).should('exist');
   cy.get(SELECT_URGENCY).should('exist');
   cy.get(SELECT_IMPACT).should('exist');
@@ -115,13 +115,13 @@ export const fillServiceNowConnectorOptions = (
 export const fillIbmResilientConnectorOptions = (
   ibmResilientConnector: IbmResilientConnectorOptions
 ) => {
-  cy.get(CONNECTOR_SELECTOR).click({ force: true });
-  cy.get(SELECT_RESILIENT).click({ force: true });
+  cy.get(CONNECTOR_SELECTOR).click();
+  cy.get(SELECT_RESILIENT).click();
   cy.get(SELECT_INCIDENT_TYPE).should('exist');
   cy.get(SELECT_SEVERITY).should('exist');
   ibmResilientConnector.incidentTypes.forEach((incidentType) => {
     cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`, { force: true });
   });
-  cy.get(CONNECTOR_RESILIENT).click({ force: true });
+  cy.get(CONNECTOR_RESILIENT).click();
   cy.get(SELECT_SEVERITY).select(ibmResilientConnector.severity);
 };

@@ -32,17 +32,15 @@ export const expandNotes = () => {
 
 export const importTimeline = (timeline: string) => {
   cy.get(IMPORT_TIMELINE_BTN).click();
-  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).attachFile(timeline);
   cy.get(INPUT_FILE).trigger('change');
-  cy.get(IMPORT_BTN).last().click({ force: true });
+  cy.get(IMPORT_BTN).last().click();
   cy.get(INPUT_FILE).should('not.exist');
 };
 
 export const openTimeline = (id?: string) => {
-  cy.get(id ? TIMELINE(id) : TIMELINE_NAME)
-    .should('be.visible')
-    .click();
+  cy.get(id ? TIMELINE(id) : TIMELINE_NAME).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
@@ -70,7 +68,7 @@ export const exportSelectedTimelines = () => {
 };
 
 export const createTimeline = () =>
-  cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).should('be.visible').click();
+  cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
 
 export const createTimelineFromFirstTemplateInList = () => {
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();

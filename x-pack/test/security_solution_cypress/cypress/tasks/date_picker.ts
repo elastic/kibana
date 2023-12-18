@@ -57,12 +57,12 @@ export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CO
 };
 
 export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
-  cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
+  cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click();
   cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
 };
 
 export const updateTimelineDates = () => {
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click({ force: true });
+  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click();
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
 };
 

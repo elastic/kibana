@@ -86,7 +86,7 @@ export const deselectSourcererOptions = (patternNames: string[]) => {
 
 export const saveSourcerer = () => {
   clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
+  return cy.get(SOURCERER.saveButton).click();
 };
 
 export const resetSourcerer = () => {

@@ -30,7 +30,7 @@ import {
  */
 export const toggleOverviewTabAboutSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER).click();
 };
 
 /* Investigation section */
@@ -52,7 +52,7 @@ export const toggleOverviewTabInvestigationSection = () => {
  */
 export const toggleOverviewTabInsightsSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER).click();
 };
 
 /**
@@ -112,7 +112,7 @@ export const toggleOverviewTabVisualizationsSection = () => {
  */
 export const toggleOverviewTabResponseSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).click();
 };
 
 /**
@@ -158,5 +158,5 @@ export const clickAlertReasonButton = () => {
  */
 export const navigateToResponseDetails = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).click();
 };

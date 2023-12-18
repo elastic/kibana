@@ -26,7 +26,7 @@ export const addServiceNowConnector = (connector: Connector) => {
   cy.get(URL).type(connector.URL);
   cy.get(USERNAME).type(connector.username);
   cy.get(PASSWORD).type(connector.password);
-  cy.get(SAVE_BTN).click({ force: true });
+  cy.get(SAVE_BTN).click();
 };
 
 export const openAddNewConnectorOption = () => {
@@ -45,6 +45,6 @@ export const verifyNewConnectorSelected = (connector: Connector) => {
 };
 
 export const selectLastConnectorCreated = (id: string) => {
-  cy.get(CONNECTORS_DROPDOWN).click({ force: true });
+  cy.get(CONNECTORS_DROPDOWN).click();
   cy.get(CONNECTOR(id)).click();
 };

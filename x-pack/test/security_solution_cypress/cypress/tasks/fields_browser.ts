@@ -67,7 +67,7 @@ export const filterFieldsBrowser = (fieldName: string) => {
 };
 
 export const toggleCategoryFilter = () => {
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click();
 };
 
 export const toggleCategory = (category: string) => {
@@ -89,14 +89,14 @@ export const removeField = (fieldName: string) => {
 };
 
 export const resetFields = () => {
-  cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
+  cy.get(FIELDS_BROWSER_RESET_FIELDS).click();
 };
 
 export const activateViewSelected = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
-  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click();
 };
 export const activateViewAll = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
-  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click();
 };
