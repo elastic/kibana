@@ -7,27 +7,30 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  type Message,
+  MessageRole,
+  type ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
 }
 
 export interface LogAIAssistantProps {
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   doc: LogAIAssistantDocument | undefined;
 }
 
-export const LogAIAssistant = ({ doc }: LogAIAssistantProps) => {
-  const {
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantContextualInsight,
-    },
-  } = useKibanaContextForPlugin().services;
-
+export const LogAIAssistant = ({
+  doc,
+  observabilityAIAssistant: {
+    service: observabilityAIAssistantService,
+    ObservabilityAIAssistantContextualInsight,
+  },
+}: LogAIAssistantProps) => {
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;

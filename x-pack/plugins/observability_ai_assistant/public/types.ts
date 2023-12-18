@@ -96,7 +96,7 @@ export type ChatRegistrationRenderFunction = ({}: {
 export interface ObservabilityAIAssistantPluginStart {
   service: ObservabilityAIAssistantService;
   ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps>;
-  ObservabilityAIAssistantActionMenuItem: React.ForwardRefExoticComponent<{}>;
+  ObservabilityAIAssistantActionMenuItem: () => JSX.Element;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
 }
 

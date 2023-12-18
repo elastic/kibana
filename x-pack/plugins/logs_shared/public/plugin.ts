@@ -25,7 +25,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
     const { http } = core;
-    const { data, dataViews } = plugins;
+    const { data, dataViews, observabilityAIAssistant } = plugins;
 
     const logViews = this.logViews.start({
       http,
@@ -33,7 +33,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       search: data.search,
     });
 
-    const LogAIAssistant = createLogAIAssistant();
+    const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
 
     return {
       logViews,

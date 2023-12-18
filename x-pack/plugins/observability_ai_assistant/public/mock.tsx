@@ -77,10 +77,10 @@ function createStartContract(): ObservabilityAIAssistantPluginStart {
   return {
     service: mockService,
 
-    ObservabilityAIAssistantActionMenuItem: (
+    ObservabilityAIAssistantActionMenuItem: () => (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>Im a button</div>
-    ) as unknown as ForwardRefExoticComponent<{}>,
+    ),
     ObservabilityAIAssistantContextualInsight: (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>I give insight</div>
