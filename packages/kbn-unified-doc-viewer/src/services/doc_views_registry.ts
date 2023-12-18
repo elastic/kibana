@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocView, DocViewInput, DocViewInputFn } from './types';
+import type { DocView, DocViewFactory } from './types';
 
 export enum ElasticRequestState {
   Loading,
@@ -18,24 +16,49 @@ export enum ElasticRequestState {
 }
 
 export class DocViewsRegistry {
-  private docViews: DocView[] = [];
+  private docViews: Map<string, DocView>;
 
-  /**
-   * Extends and adds the given doc view to the registry array
-   */
-  addDocView(docViewRaw: DocViewInput | DocViewInputFn) {
-    const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
-    this.docViews.push({
-      ...docView,
-      shouldShow: docView.shouldShow ?? (() => true),
-    });
+  constructor(initialValue?: DocViewsRegistry | DocView[]) {
+    if (initialValue instanceof DocViewsRegistry) {
+      this.docViews = new Map(initialValue.docViews);
+    } else if (Array.isArray(initialValue)) {
+      this.docViews = new Map(initialValue.map((docView) => [docView.id, docView]));
+    } else {
+      this.docViews = new Map();
+    }
   }
-  /**
-   * Returns a sorted array of doc_views for rendering tabs
-   */
-  getDocViewsSorted(hit: DataTableRecord) {
-    return this.docViews
-      .filter((docView) => docView.shouldShow(hit))
-      .sort((a, b) => (Number(a.order) > Number(b.order) ? 1 : -1));
+
+  getAll() {
+    return [...this.docViews.values()];
+  }
+
+  add(docViewRaw: DocView | DocViewFactory) {
+    const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
+
+    if (this.docViews.has(docView.id)) {
+      throw new Error(
+        `DocViewsRegistry#add: a DocView is already registered with id "${docView.id}".`
+      );
+    }
+
+    this.docViews.set(docView.id, docView);
+    // Sort the doc views at insertion time to perform this operation once and not on every retrieval.
+    this.sortDocViews();
+  }
+
+  removeById(id: string) {
+    this.docViews.delete(id);
+  }
+
+  clone() {
+    return new DocViewsRegistry(this);
+  }
+
+  private sortDocViews() {
+    const sortedEntries = [...this.docViews.entries()].sort(
+      ([_currKey, curr], [_nextKey, next]) => curr.order - next.order
+    );
+
+    this.docViews = new Map(sortedEntries);
   }
 }
