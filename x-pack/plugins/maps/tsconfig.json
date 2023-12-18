@@ -79,6 +79,8 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/content-management-table-list-view-common",
     "@kbn/text-based-languages",
+    "@kbn/es-types",
+    "@kbn/data-service",
   ],
   "exclude": [
     "target/**/*",
