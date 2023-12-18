@@ -25,6 +25,10 @@ const MODEL_INFERENCE_CONFIG_PROPERTIES = {
 
 type SupportedModelInferenceConfigPropertiesType = keyof typeof MODEL_INFERENCE_CONFIG_PROPERTIES;
 
+interface MLIngestInferenceProcessor extends IngestInferenceProcessor {
+  inference_config: MLInferencePipelineInferenceConfig;
+}
+
 // Currently, estypes doesn't include pipeline processor types with the trained model processors
 type MLInferencePipelineInferenceConfig = IngestInferenceConfig & {
   zero_shot_classification?: estypes.MlZeroShotClassificationInferenceOptions;
@@ -34,9 +38,9 @@ type MLInferencePipelineInferenceConfig = IngestInferenceConfig & {
 interface GetInferencePropertiesFromPipelineConfigReturnType {
   inputField: string;
   inferenceConfig?: MLInferencePipelineInferenceConfig;
-  inferenceObj?: any;
+  inferenceObj?: IngestInferenceProcessor | MLIngestInferenceProcessor;
   fieldMap?: IngestInferenceProcessor['field_map'];
-  labels?: string | string[];
+  labels?: string[];
   multi_label?: boolean;
   question?: string;
 }
@@ -47,12 +51,21 @@ function isSupportedInferenceConfigPropertyType(
   return typeof arg === 'string' && Object.keys(MODEL_INFERENCE_CONFIG_PROPERTIES).includes(arg);
 }
 
-function isMlInferencePipelineInferenceConfig(
+export function isMlInferencePipelineInferenceConfig(
   arg: unknown
 ): arg is MLInferencePipelineInferenceConfig {
   return (
     isPopulatedObject(arg, [SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING]) ||
     isPopulatedObject(arg, [SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION])
+  );
+}
+
+export function isMlIngestInferenceProcessor(arg: unknown): arg is MLIngestInferenceProcessor {
+  return (
+    isPopulatedObject(arg) &&
+    arg.hasOwnProperty('inference_config') &&
+    (isPopulatedObject(arg.inference_config, [SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING]) ||
+      isPopulatedObject(arg.inference_config, [SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION]))
   );
 }
 

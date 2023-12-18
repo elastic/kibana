@@ -29,7 +29,11 @@ import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
 import { TextExpansionInference } from './models/text_expansion';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
-import { getInferencePropertiesFromPipelineConfig } from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
+import {
+  getInferencePropertiesFromPipelineConfig,
+  isMlIngestInferenceProcessor,
+  isMlInferencePipelineInferenceConfig,
+} from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
@@ -139,31 +143,43 @@ export const SelectedModel: FC<Props> = ({
             const updatedPipeline = cloneDeep(externalPipelineConfig);
             const { inferenceObj: externalInference, inferenceConfig: externalInferenceConfig } =
               getInferencePropertiesFromPipelineConfig(taskType, updatedPipeline);
-            // Always update target field change
-            externalInference.field_map = testFieldMap;
 
-            if (externalInferenceConfig === undefined) {
-              externalInference.inference_config = testInferenceConfig;
-            } else {
-              // Only update the properties that change in the test step to avoid overwriting user edits
-              if (
-                taskType === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION &&
-                labels &&
-                multiLabel !== undefined
-              ) {
-                externalInference.inference_config[
-                  SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
-                ].multi_label = multiLabel;
-                externalInference.inference_config[
-                  SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
-                ].labels = labels;
+            if (externalInference) {
+              // Always update target field change
+              externalInference.field_map = testFieldMap;
+
+              if (externalInferenceConfig === undefined) {
+                externalInference.inference_config = testInferenceConfig;
               } else if (
-                taskType === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING &&
-                question !== undefined
+                isMlIngestInferenceProcessor(externalInference) &&
+                isMlInferencePipelineInferenceConfig(externalInference.inference_config)
               ) {
-                externalInference.inference_config[
-                  SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING
-                ].question = question;
+                // Only update the properties that change in the test step to avoid overwriting user edits
+                if (
+                  taskType === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION &&
+                  labels &&
+                  multiLabel !== undefined
+                ) {
+                  const external =
+                    externalInference.inference_config[
+                      SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
+                    ];
+
+                  if (external) {
+                    external.multi_label = multiLabel;
+                    external.labels = labels;
+                  }
+                } else if (
+                  taskType === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING &&
+                  question !== undefined
+                ) {
+                  const external =
+                    externalInference.inference_config[SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING];
+
+                  if (external) {
+                    external.question = question;
+                  }
+                }
               }
             }
 
