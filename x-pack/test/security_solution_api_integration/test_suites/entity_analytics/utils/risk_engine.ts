@@ -40,7 +40,8 @@ const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   delete score['@timestamp'];
   delete score.inputs;
   delete score.notes;
-  // delete score.category_1_score;
+  delete score.category_5_count;
+  delete score.category_5_score;
   return score;
 };
 

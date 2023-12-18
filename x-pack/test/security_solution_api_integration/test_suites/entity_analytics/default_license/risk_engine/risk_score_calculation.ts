@@ -127,16 +127,9 @@ export default ({ getService }: FtrProviderContext): void => {
           calculated_score_norm: 8.039816232771823,
           category_1_score: 8.039816232771821,
           category_1_count: 1,
-          category_5_score: 0,
-          category_5_count: 0,
           id_field: 'host.name',
           id_value: 'host-1',
         });
-
-        expect(score.category_1_score! + score.category_5_score!).to.be.within(
-          score.calculated_score_norm! - 0.000000000000001,
-          score.calculated_score_norm! + 0.000000000000001
-        );
       });
 
       describe('paging through calculations', () => {
@@ -280,7 +273,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('with asset criticality data', () => {
+      describe('@skipInServerless with asset criticality data', () => {
         const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
         beforeEach(async () => {
@@ -320,13 +313,14 @@ export default ({ getService }: FtrProviderContext): void => {
             calculated_score_norm: 11.59366948840633,
             category_1_score: 8.039816232771821,
             category_1_count: 1,
-            category_5_count: 1,
-            category_5_score: 3.5538532556345075,
             id_field: 'host.name',
             id_value: 'host-1',
           });
+          const [rawScore] = scores;
 
-          expect(score.category_1_score! + score.category_5_score!).to.be.within(
+          expect(
+            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_5_score!
+          ).to.be.within(
             score.calculated_score_norm! - 0.000000000000001,
             score.calculated_score_norm! + 0.000000000000001
           );

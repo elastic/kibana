@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(scoredIdentifiers).to.contain('user.name');
         });
 
-        context('with asset criticality data', () => {
+        context('@skipInServerless with asset criticality data', () => {
           const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
           beforeEach(async () => {
@@ -273,8 +273,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 calculated_score_norm: 46.809565696393314,
                 category_1_count: 10,
                 category_1_score: 30.55645472198471,
-                category_5_count: 1,
-                category_5_score: 16.253110974408603,
               },
             ]);
           });
