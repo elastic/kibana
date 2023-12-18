@@ -1625,10 +1625,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@90.0.1-backport.0":
-  version "90.0.1-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-90.0.1-backport.0.tgz#c57910220dab4f85c813c4b7b44a80500b5abf82"
-  integrity sha512-mv8ucgZdBAJ7i7sDb6K1wHS9eboVe4rb3Vg0NSIMsat2skCfQAods+aPuXuKo323W57uZGnJnQlO07wF4iA3Tg==
+"@elastic/eui@91.0.0-backport.0":
+  version "91.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-91.0.0-backport.0.tgz#821306a580cc8fcf1a142106e425f3fcd1bebfbf"
+  integrity sha512-2T+8JiPs1Ejh2T8l7cwqv/IIlNV6I9RbXtJ60L9U4lJGtS/R8zIoikrR/2SEs8bXwyXXg4i/trhfbYbylAvZpw==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3271,6 +3271,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/code-owners@link:packages/kbn-code-owners":
+  version "0.0.0"
+  uid ""
+
 "@kbn/coloring@link:packages/kbn-coloring":
   version "0.0.0"
   uid ""
@@ -4623,6 +4627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ftr-common-functional-ui-services@link:packages/kbn-ftr-common-functional-ui-services":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
@@ -5424,6 +5432,10 @@
   uid ""
 
 "@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+  version "0.0.0"
+  uid ""
+
+"@kbn/router-utils@link:packages/kbn-router-utils":
   version "0.0.0"
   uid ""
 
@@ -18734,10 +18746,10 @@ ignore@^4.0.3:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
 
-ignore@^5.0.5, ignore@^5.1.1, ignore@^5.1.4, ignore@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"
-  integrity sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==
+ignore@^5.0.5, ignore@^5.1.1, ignore@^5.1.4, ignore@^5.2.0, ignore@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.0.tgz#67418ae40d34d6999c95ff56016759c718c82f78"
+  integrity sha512-g7dmpshy+gD7mh88OC9NwSGTKoc3kyLAZQRU1mt53Aw/vnvfXnbC+F/7F7QoYVKbV+KNvJx8wArewKy1vXMtlg==
 
 immediate@~3.0.5:
   version "3.0.6"
