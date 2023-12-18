@@ -159,7 +159,7 @@ export function getInspectResponse({
   startTime: number;
 }): InspectResponse[0] {
   const name = `${operationName} (${kibanaRequest.route.path})`;
-  const id = `${name} #${uuidv4().slice(0, 5)}`;
+  const id = `${name} ${uuidv4()}`;
 
   return {
     id,
