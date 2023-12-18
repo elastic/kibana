@@ -28,16 +28,20 @@ function PrefixLengthParamEditor({
   setValidity,
   setTouched,
 }: PrefixLengthParamEditorProps) {
-  const fieldTitle = aggParam.displayName == "prefixLength64" ? "IPv6" : "IPv4";
-  const maxValue = aggParam.displayName == "prefixLength64" ? 128 : 32;
+  const fieldTitle = aggParam.displayName == 'prefixLength64' ? 'IPv6' : 'IPv4';
+  const maxValue = aggParam.displayName == 'prefixLength64' ? 128 : 32;
 
   const label = (
     <>
-      <FormattedMessage id="visDefaultEditor.controls.prefixLengthLabel" defaultMessage="{fieldTitle} Prefix Length" values={{ fieldTitle: fieldTitle }} />
+      <FormattedMessage
+        id="visDefaultEditor.controls.prefixLengthLabel"
+        defaultMessage="{fieldTitle} Prefix Length"
+        values={{ fieldTitle }}
+      />
       {iconTip}
     </>
   );
-  
+
   const isValid = disabled || (Number(value) >= 0 && Number(value) <= maxValue);
 
   useEffect(() => {

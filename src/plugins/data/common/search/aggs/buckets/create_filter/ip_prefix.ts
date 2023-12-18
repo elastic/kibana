@@ -10,8 +10,5 @@ import { buildRangeFilter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
 
 export const createFilterIpPrefix = (aggConfig: IBucketAggConfig) => {
-  return buildRangeFilter(
-    aggConfig.params.field,
-    aggConfig.getIndexPattern()
-  );
+  return buildRangeFilter(aggConfig.params.field, aggConfig.getIndexPattern());
 };

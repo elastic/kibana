@@ -60,9 +60,9 @@ export const getIpPrefixBucketAgg = () =>
         type: 'number',
         shouldShow: (agg) => !agg.getParam('isIpv6'),
         write: (aggConfig, output) => {
-	  if(!aggConfig.params.isIpv6) {
+          if (!aggConfig.params.isIpv6) {
             output.params.prefix_length = aggConfig.params.prefixLength;
-	  }
+          }
         },
       },
       {
@@ -71,9 +71,9 @@ export const getIpPrefixBucketAgg = () =>
         type: 'number',
         shouldShow: (agg) => agg.getParam('isIpv6'),
         write: (aggConfig, output) => {
-	  if(aggConfig.params.isIpv6) {
+          if (aggConfig.params.isIpv6) {
             output.params.prefix_length = aggConfig.params.prefixLength64;
-	  }
+          }
         },
       },
       {
