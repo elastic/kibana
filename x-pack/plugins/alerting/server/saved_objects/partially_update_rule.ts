@@ -13,13 +13,17 @@ import {
 } from '@kbn/core/server';
 import { RawRule } from '../types';
 
-import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from '.';
+import {
+  RuleAttributesExcludedFromAAD,
+  RuleAttributesExcludedFromAADType,
+  RULE_SAVED_OBJECT_TYPE,
+} from '.';
 
-export type PartiallyUpdateableAlertAttributes = Partial<
-  Pick<RawRule, AlertAttributesExcludedFromAADType>
+export type PartiallyUpdateableRuleAttributes = Partial<
+  Pick<RawRule, RuleAttributesExcludedFromAADType>
 >;
 
-export interface PartiallyUpdateAlertSavedObjectOptions {
+interface PartiallyUpdateRuleSavedObjectOptions {
   refresh?: SavedObjectsUpdateOptions['refresh'];
   version?: string;
   ignore404?: boolean;
@@ -29,16 +33,16 @@ export interface PartiallyUpdateAlertSavedObjectOptions {
 // typed this way so we can send a SavedObjectClient or SavedObjectRepository
 type SavedObjectClientForUpdate = Pick<SavedObjectsClient, 'update'>;
 
-// direct, partial update to an alert saved object via scoped SavedObjectsClient
+// direct, partial update to a rule saved object via scoped SavedObjectsClient
 // using namespace set in the client
-export async function partiallyUpdateAlert(
+export async function partiallyUpdateRule(
   savedObjectsClient: SavedObjectClientForUpdate,
   id: string,
-  attributes: PartiallyUpdateableAlertAttributes,
-  options: PartiallyUpdateAlertSavedObjectOptions = {}
+  attributes: PartiallyUpdateableRuleAttributes,
+  options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
-  const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
+  const attributeUpdates = pick(attributes, RuleAttributesExcludedFromAAD);
   const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
     options,
     'namespace',
@@ -47,7 +51,12 @@ export async function partiallyUpdateAlert(
   );
 
   try {
-    await savedObjectsClient.update<RawRule>('alert', id, attributeUpdates, updateOptions);
+    await savedObjectsClient.update<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      attributeUpdates,
+      updateOptions
+    );
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;
