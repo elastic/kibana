@@ -11,7 +11,9 @@ import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
+export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
 export const E5_MODEL_ID = '.multilingual-e5-small';
+export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
 export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
 
 export const MODEL_TITLES_BY_TYPE: Record<string, string | undefined> = {
@@ -64,24 +66,37 @@ export const ELSER_MODEL_PLACEHOLDER: MlModel = {
   ...BASE_MODEL,
   modelId: ELSER_MODEL_ID,
   type: SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION,
-  title: 'Elastic Learned Sparse EncodeR (ELSER)',
+  title: 'ELSER (Elastic Learned Sparse EncodeR)',
   description: i18n.translate('xpack.enterpriseSearch.modelCard.elserPlaceholder.description', {
     defaultMessage:
-      'ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone.',
+      "ELSER is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform.",
   }),
-  license: 'Elastic',
   isPlaceholder: true,
+};
+
+export const ELSER_LINUX_OPTIMIZED_MODEL_PLACEHOLDER = {
+  ...ELSER_MODEL_PLACEHOLDER,
+  modelId: ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  title: 'ELSER (Elastic Learned Sparse EncodeR), optimized for linux-x86_64',
 };
 
 export const E5_MODEL_PLACEHOLDER: MlModel = {
   ...BASE_MODEL,
   modelId: E5_MODEL_ID,
   type: SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING,
-  title: 'E5 Multilingual Embedding',
+  title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
   description: i18n.translate('xpack.enterpriseSearch.modelCard.e5Placeholder.description', {
-    defaultMessage: 'Multilingual dense vector embedding generator.',
+    defaultMessage:
+      'E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries.',
   }),
-  license: 'MIT',
-  modelDetailsPageUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
+  licenseType: 'mit',
+  modelDetailsPageUrl: 'https://ela.st/multilingual-e5-small',
   isPlaceholder: true,
+};
+
+export const E5_LINUX_OPTIMIZED_MODEL_PLACEHOLDER = {
+  ...E5_MODEL_PLACEHOLDER,
+  modelId: E5_LINUX_OPTIMIZED_MODEL_ID,
+  title: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+  modelDetailsPageUrl: 'https://ela.st/multilingual-e5-small-linux-x86-64',
 };

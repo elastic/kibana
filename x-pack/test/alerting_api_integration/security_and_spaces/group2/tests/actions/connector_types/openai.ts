@@ -316,7 +316,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               data: genAiSuccessResponse,
             });
           });
-          describe('OpenAI dashboard', () => {
+          describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
             it('should not create a dashboard when user does not have kibana event log permissions', async () => {

@@ -55,7 +55,6 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-
   const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
     useConversation();
 
@@ -94,40 +93,57 @@ export const useChatSend = ({
       setPromptTextPreview('');
 
       const rawResponse = await sendMessages({
-        http,
         apiConfig: currentConversation.apiConfig,
+        http,
         messages: updatedMessages,
+        onNewReplacements,
+        replacements: currentConversation.replacements ?? {},
       });
+
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
       appendMessage({ conversationId: currentConversation.id, message: responseMessage });
     },
     [
       allSystemPrompts,
-      currentConversation,
-      selectedPromptContexts,
       appendMessage,
-      setSelectedPromptContexts,
-      setPromptTextPreview,
-      sendMessages,
-      http,
       appendReplacements,
+      currentConversation.apiConfig,
+      currentConversation.id,
+      currentConversation.messages.length,
+      currentConversation.replacements,
       editingSystemPromptId,
+      http,
+      selectedPromptContexts,
+      sendMessages,
+      setPromptTextPreview,
+      setSelectedPromptContexts,
     ]
   );
 
   const handleRegenerateResponse = useCallback(async () => {
+    const onNewReplacements = (newReplacements: Record<string, string>) =>
+      appendReplacements({
+        conversationId: currentConversation.id,
+        replacements: newReplacements,
+      });
+
     const updatedMessages = removeLastMessage(currentConversation.id);
+
     const rawResponse = await sendMessages({
-      http,
       apiConfig: currentConversation.apiConfig,
+      http,
       messages: updatedMessages,
+      onNewReplacements,
+      replacements: currentConversation.replacements ?? {},
     });
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);
     appendMessage({ conversationId: currentConversation.id, message: responseMessage });
   }, [
     appendMessage,
+    appendReplacements,
     currentConversation.apiConfig,
     currentConversation.id,
+    currentConversation.replacements,
     http,
     removeLastMessage,
     sendMessages,

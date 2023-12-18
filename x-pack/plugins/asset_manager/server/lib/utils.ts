@@ -35,3 +35,7 @@ export function isStringOrNonEmptyArray(
   }
   return true;
 }
+
+export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
+  return toArray(maybeArray)[0];
+}

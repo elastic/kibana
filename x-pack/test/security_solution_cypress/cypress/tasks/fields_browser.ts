@@ -51,7 +51,7 @@ export const clearFieldsBrowser = () => {
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(FIELD_BROWSER_CLOSE_BTN).click({ force: true });
+  cy.get(FIELD_BROWSER_CLOSE_BTN).click();
   cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
@@ -85,7 +85,7 @@ export const removesMessageField = () => {
 };
 
 export const removeField = (fieldName: string) => {
-  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck({ force: true });
+  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck();
 };
 
 export const resetFields = () => {

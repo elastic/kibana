@@ -6035,15 +6035,15 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               }
             ]
           },
@@ -7207,7 +7207,7 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/increment_counter.test.ts"
               }
             ]
           },

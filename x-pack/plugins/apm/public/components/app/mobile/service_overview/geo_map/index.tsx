@@ -29,13 +29,19 @@ export function GeoMap({
     <>
       <EmbeddedMapSelect selectedMap={selectedMap} onChange={selectMap} />
       <EuiSpacer size="s" />
-      <EmbeddedMap
-        selectedMap={selectedMap}
-        start={start}
-        end={end}
-        kuery={kuery}
-        filters={filters}
-      />
+      <div
+        style={{
+          height: 500,
+        }}
+      >
+        <EmbeddedMap
+          selectedMap={selectedMap}
+          start={start}
+          end={end}
+          kuery={kuery}
+          filters={filters}
+        />
+      </div>
     </>
   );
 }

@@ -12,6 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
+import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -245,6 +247,8 @@ const FormattedFieldValueComponent: React.FC<{
         data-test-subj="endpointHostAgentStatus"
       />
     );
+  } else if (fieldName === SENTINEL_ONE_AGENT_ID_FIELD) {
+    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (
     [
       RULE_REFERENCE_FIELD_NAME,

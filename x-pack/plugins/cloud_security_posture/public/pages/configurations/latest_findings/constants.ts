@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { GroupOption } from '@kbn/securitysolution-grouping';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
 
@@ -15,30 +16,60 @@ export const FINDINGS_UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
   });
 
-export const defaultGroupingOptions = [
+export const GROUPING_OPTIONS = {
+  RESOURCE_NAME: 'resource.name',
+  RULE_NAME: 'rule.name',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};
+
+export const NULL_GROUPING_UNIT = i18n.translate('xpack.csp.findings.grouping.nullGroupUnit', {
+  defaultMessage: 'findings',
+});
+
+export const NULL_GROUPING_MESSAGES = {
+  RESOURCE_NAME: i18n.translate('xpack.csp.findings.grouping.resource.nullGroupTitle', {
+    defaultMessage: 'No resource',
+  }),
+  RULE_NAME: i18n.translate('xpack.csp.findings.grouping.rule.nullGroupTitle', {
+    defaultMessage: 'No rule',
+  }),
+  CLOUD_ACCOUNT_NAME: i18n.translate('xpack.csp.findings.grouping.cloudAccount.nullGroupTitle', {
+    defaultMessage: 'No cloud account',
+  }),
+  ORCHESTRATOR_CLUSTER_NAME: i18n.translate(
+    'xpack.csp.findings.grouping.kubernetes.nullGroupTitle',
+    { defaultMessage: 'No Kubernetes cluster' }
+  ),
+  DEFAULT: i18n.translate('xpack.csp.findings.grouping.default.nullGroupTitle', {
+    defaultMessage: 'No grouping',
+  }),
+};
+
+export const defaultGroupingOptions: GroupOption[] = [
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
       defaultMessage: 'Resource',
     }),
-    key: 'resource.name',
+    key: GROUPING_OPTIONS.RESOURCE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {
       defaultMessage: 'Rule name',
     }),
-    key: 'rule.name',
+    key: GROUPING_OPTIONS.RULE_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
       defaultMessage: 'Cloud account',
     }),
-    key: 'cloud.account.name',
+    key: GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
   },
   {
     label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {
       defaultMessage: 'Kubernetes cluster',
     }),
-    key: 'orchestrator.cluster.name',
+    key: GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME,
   },
 ];
 

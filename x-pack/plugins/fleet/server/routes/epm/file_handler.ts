@@ -82,7 +82,10 @@ export const getFileHandler: FleetRequestHandler<
       pkgToPkgKey({ name: pkgName, version: pkgVersion })
     );
     if (bundledPackage) {
-      const bufferEntries = await unpackBufferEntries(bundledPackage.buffer, 'application/zip');
+      const bufferEntries = await unpackBufferEntries(
+        await bundledPackage.getBuffer(),
+        'application/zip'
+      );
 
       const fileBuffer = bufferEntries.find((entry) => entry.path === assetPath)?.buffer;
 
