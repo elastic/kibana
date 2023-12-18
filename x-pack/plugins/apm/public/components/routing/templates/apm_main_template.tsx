@@ -11,6 +11,7 @@ import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -19,9 +20,11 @@ import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_group
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+// import { useDiagnosticsContext } from '../../app/diagnostics/context/use_diagnostics';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
+const APM_FEEDBACK_LINK = 'https://ela.st/services-feedback';
 
 /*
  * This template contains:
@@ -54,6 +57,7 @@ export function ApmMainTemplate({
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
+  // const { diagnosticsBundle } = useDiagnosticsContext();
 
   const { services } = useKibana<ApmPluginStartDeps>();
   const { http, docLinks, observabilityShared, application } = services;
@@ -66,7 +70,7 @@ export function ApmMainTemplate({
     return callApmApi('GET /internal/apm/has_data');
   }, []);
 
-  // create static data view on inital load
+  // create static data view on initial load
   useFetcher(
     (callApmApi) => {
       const canCreateDataView =
@@ -115,7 +119,22 @@ export function ApmMainTemplate({
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
       <EuiFlexItem grow={false}>
-        {environmentFilter && <ApmEnvironmentFilter />}
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <FeatureFeedbackButton
+              data-test-subj="infraApmFeedbackLink"
+              formUrl={APM_FEEDBACK_LINK}
+              // kibanaVersion={
+              //   diagnosticsBundle ? diagnosticsBundle.kibanaVersion : undefined
+              // }
+              // isCloudEnv={isCloudEnv}
+              // isServerlessEnv={isServerlessEnv}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {environmentFilter && <ApmEnvironmentFilter />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
