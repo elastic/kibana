@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXPAND_ALERT_BTN, OPEN_HOST_FLYOUT_BUTTON } from '../../screens/alerts';
+import { EXPAND_ALERT_BTN } from '../../screens/alerts';
 import { DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE } from '../../screens/expandable_flyout/alert_details_right_panel';
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
@@ -21,13 +21,6 @@ import { openTakeActionButtonAndSelectItem } from './alert_details_right_panel';
  */
 export const expandFirstAlertExpandableFlyout = () => {
   cy.get(EXPAND_ALERT_BTN).first().click();
-};
-
-/**
- * Find the first alert row in the alerts table then click on the host name to open the flyout
- */
-export const expandFirstAlertHostExpandableFlyout = () => {
-  cy.get(OPEN_HOST_FLYOUT_BUTTON).first().click();
 };
 
 /**

@@ -9,19 +9,21 @@ import { getNewRule } from '../../../objects/rule';
 import {
   HOST_DETAILS_FLYOUT_SECTION_HEADER,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
-  toggleAssetCriticalityAccordion,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
-  toggleAssetCriticalityModal,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL,
-} from '../../../screens/expandable_flyout/host_details_right_panel';
+} from '../../../screens/asset_criticality/flyouts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import {
+  expandFirstAlertHostFlyout,
+  toggleAssetCriticalityAccordion,
+  toggleAssetCriticalityModal,
+} from '../../../tasks/asset_criticality/common';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { expandFirstAlertHostExpandableFlyout } from '../../../tasks/expandable_flyout/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -45,10 +47,12 @@ describe(
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertHostExpandableFlyout();
     });
 
     describe('Host flyout', () => {
+      beforeEach(() => {
+        expandFirstAlertHostFlyout();
+      });
       it('should display header section', () => {
         cy.log('header and content');
 

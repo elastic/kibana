@@ -10,7 +10,6 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -276,7 +275,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             {!isInDetailsSidePanel && (
               <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
             )}
-            <AssetCriticalitySelector entity={{ type: 'user', name: userName }} />
             {descriptionLists.map((descriptionList, index) => (
               <OverviewDescriptionList descriptionList={descriptionList} key={index} />
             ))}
@@ -292,7 +290,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-
         {isAuthorized && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}

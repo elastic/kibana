@@ -93,8 +93,6 @@ export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-actio
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
-export const OPEN_HOST_FLYOUT_BUTTON = '[data-test-subj="host-details-button"]';
-
 export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
 

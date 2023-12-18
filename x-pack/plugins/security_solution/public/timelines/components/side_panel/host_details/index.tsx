@@ -82,7 +82,6 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiSpacer size="m" />
           <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
-          <EuiSpacer size="m" />
         </StyledEuiFlyoutBody>
       </>
     ) : (
