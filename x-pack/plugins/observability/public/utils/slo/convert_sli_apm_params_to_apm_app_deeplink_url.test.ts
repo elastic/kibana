@@ -14,6 +14,7 @@ const SLI_APM_PARAMS = {
   service: 'barService',
   transactionName: 'bazName',
   transactionType: 'blarfType',
+  groupBy: '*',
 };
 
 describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
@@ -86,6 +87,18 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
 
     expect(url).toMatchInlineSnapshot(
       `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
+    );
+  });
+
+  it('should return a correct APM deeplink when groupBy and instanceId are provided', () => {
+    const url = convertSliApmParamsToApmAppDeeplinkUrl({
+      ...SLI_APM_PARAMS,
+      groupBy: 'label.project_id',
+      instanceId: 'bf6689b383749812f35c7a408f57d113',
+    });
+
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12++and+label.project_id+%3A+%22bf6689b383749812f35c7a408f57d113%22"`
     );
   });
 });

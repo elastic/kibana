@@ -14,6 +14,8 @@ interface Props {
   service: string;
   transactionName: string;
   transactionType: string;
+  groupBy: string;
+  instanceId?: string;
 }
 
 export function convertSliApmParamsToApmAppDeeplinkUrl({
@@ -23,6 +25,8 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   service,
   transactionName,
   transactionType,
+  groupBy,
+  instanceId,
 }: Props) {
   if (!service) {
     return '';
@@ -49,6 +53,9 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   }
   if (filter && filter.length > 0) {
     kueryParams.push(filter);
+  }
+  if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {
+    kueryParams.push(`${groupBy} : "${instanceId}"`);
   }
 
   if (kueryParams.length > 0) {

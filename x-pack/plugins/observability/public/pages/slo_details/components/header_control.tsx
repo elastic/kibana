@@ -81,6 +81,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
           params: { environment, filter, service, transactionName, transactionType },
         },
         timeWindow: { duration },
+        groupBy,
+        instanceId,
       } = slo;
 
       const url = convertSliApmParamsToApmAppDeeplinkUrl({
@@ -90,6 +92,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
         service,
         transactionName,
         transactionType,
+        groupBy,
+        instanceId,
       });
 
       navigate(basePath.prepend(url));
