@@ -145,8 +145,11 @@ function runEvaluations() {
           };
 
           const sortedEvaluationFunctions = sortBy(evaluationFunctions, 'fileName', 'name');
+          let failedCount = 0;
+          let totalCount = 0;
+          let failedScenarios: { [key: string]: { fileName: string, resultsScore: string, reasoning: string } } = {};
 
-          for (const { name, fn } of sortedEvaluationFunctions) {
+          for (const { name, fileName, fn } of sortedEvaluationFunctions) {
             log.debug(`Executing ${name}`);
             const result = await fn({
               esClient,
@@ -166,12 +169,11 @@ function runEvaluations() {
               ],
               result.conversationId
                 ? [
-                    `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
-                      argv.spaceId ? `s/${argv.spaceId}/` : ''
-                    }app/observabilityAIAssistant/conversations/${result.conversationId}`,
-                    '',
-                    '',
-                  ]
+                  `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${argv.spaceId ? `s/${argv.spaceId}/` : ''
+                  }app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                  '',
+                  '',
+                ]
                 : ['', '', ''],
               ...header,
             ];
@@ -179,12 +181,33 @@ function runEvaluations() {
             result.scores.forEach((score) => {
               output.push([
                 score.criterion,
-                score.score === 0 ? chalk.redBright('failed') : chalk.greenBright('passed'),
+                String(score.score),//score.score === 0 ? chalk.redBright('failed') : chalk.greenBright('passed'),
                 score.reasoning,
               ]);
             });
             log.write(table.table(output, tableConfig));
+
+            let totalResults = result.scores.length;
+            let failedResults = result.scores.filter((score) => score.score < 1).length;
+
+            if (failedResults / totalResults > 0) {
+              let reasoningConcat = result.scores.map(score => score.reasoning).join(' ');
+              failedScenarios[name] = {
+                "fileName": String(fileName.split("/").at(-2)),
+                "resultsScore": `Failed ${failedResults} tests out of ${totalResults}`,
+                "reasoning": `Reasoning: ${reasoningConcat}`
+              }
+            }
+
+            log.write(`Total number of tests failed: ${failedResults} out of ${totalResults}`);
+
+            totalCount = totalCount + totalResults
+            failedCount = failedCount + failedResults
           }
+
+          log.write(`Total number of tests failed: ${failedCount} out of ${totalCount}`);
+          log.write(`Number of scenarios failed: ${Object.keys(failedScenarios).length} out of ${Object.keys(sortedEvaluationFunctions).length}`);
+          log.write(failedScenarios)
         },
         {
           log: {
