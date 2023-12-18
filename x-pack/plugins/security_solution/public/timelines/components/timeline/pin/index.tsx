@@ -54,7 +54,7 @@ export const Pin = React.memo<Props>(
       isTemplate,
       isPinned: pinned,
     });
-    const pinAriaLabel = ariaLabel != null ? ariaLabel : defaultAriaLabel;
+    const pinAriaLabel = ariaLabel != null && !isTemplate ? ariaLabel : defaultAriaLabel;
 
     return (
       <EuiButtonIcon
