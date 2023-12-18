@@ -5,16 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { dynamic } from '../../../common/dynamic';
 
 export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
 
 export function createLogAIAssistant() {
-  return ({
-    observabilityAIAssistant,
-    ...props
-  }: {
-    observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
-  }) => <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />;
+  return ({ ...props }) => <LogAIAssistant {...props} />;
 }
