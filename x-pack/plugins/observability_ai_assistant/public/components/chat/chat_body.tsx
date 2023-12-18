@@ -140,12 +140,12 @@ export function ChatBody({
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    if (conversation.value?.conversation && 'user' in conversation.value.conversation) {
+    if (conversation.value?.conversation && 'user' in conversation.value) {
       sendEvent(chatService.analytics, {
         type: TELEMETRY.observability_ai_assistant_chat_feedback,
         payload: {
           messageWithFeedback: { message, feedback },
-          conversation: conversation.value.conversation,
+          conversation: conversation.value,
         },
       });
     }
