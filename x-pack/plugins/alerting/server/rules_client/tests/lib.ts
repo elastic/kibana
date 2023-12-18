@@ -13,6 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ConstructorOptions } from '../rules_client';
 import { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
 
@@ -69,7 +70,7 @@ export function getBeforeSetup(
     enabled: false,
   });
   taskManager.bulkRemove.mockResolvedValue({
-    statuses: [{ id: 'taskId', type: 'alert', success: true }],
+    statuses: [{ id: 'taskId', type: RULE_SAVED_OBJECT_TYPE, success: true }],
   });
   const actionsClient = actionsClientMock.create();
 
