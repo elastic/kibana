@@ -195,11 +195,11 @@ export function formatAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} {detectorType} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
+      defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
-        detectorType: getApmMlDetectorLabel(detectorType),
+        detectorTypeLabel: getApmMlDetectorLabel(detectorType),
         anomalyScore,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
