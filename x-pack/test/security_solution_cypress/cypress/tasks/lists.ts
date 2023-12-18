@@ -49,11 +49,11 @@ export const waitForValueListsModalToBeLoaded = () => {
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click({ force: true });
+  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click();
 };
 
 export const closeValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LIST_CLOSE_BUTTON).click({ force: true });
+  return cy.get(VALUE_LIST_CLOSE_BUTTON).click();
 };
 
 export const selectValueListsFile = (file: string): Cypress.Chainable<JQuery<HTMLElement>> => {

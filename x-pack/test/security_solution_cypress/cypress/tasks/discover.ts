@@ -50,7 +50,7 @@ export const selectCurrentDiscoverEsqlQuery = (
   discoverEsqlInput = DISCOVER_ESQL_EDITABLE_INPUT
 ) => {
   goToEsqlTab();
-  cy.get(discoverEsqlInput).should('be.visible').click();
+  cy.get(discoverEsqlInput).click();
   cy.get(discoverEsqlInput).should('be.focused');
   cy.get(DISCOVER_ESQL_INPUT_EXPAND).click();
   cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
@@ -88,7 +88,6 @@ export const openAddDiscoverFilterPopover = () => {
   cy.log(DISCOVER_CONTAINER);
   cy.log(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER));
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).should('be.enabled');
-  cy.get(DISCOVER_ADD_FILTER).should('be.visible');
   cy.get(DISCOVER_ADD_FILTER).click();
 };
 

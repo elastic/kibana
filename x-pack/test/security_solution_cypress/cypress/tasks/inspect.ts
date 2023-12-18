@@ -18,7 +18,7 @@ export const closesModal = () => {
 
 export const clickInspectButton = (container: string) => {
   cy.get(container).realHover();
-  cy.get(container).find(INSPECT_BUTTON_ICON).click({ force: true });
+  cy.get(container).find(INSPECT_BUTTON_ICON).click();
 };
 
 const LOADER_ARIA = '[aria-label="Loading"]';
@@ -58,5 +58,5 @@ export const openLensVisualizationsInspectModal = (
 
 export const openTab = (tab: string) => {
   cy.get(tab).invoke('show');
-  cy.get(tab).click({ force: true });
+  cy.get(tab).click();
 };

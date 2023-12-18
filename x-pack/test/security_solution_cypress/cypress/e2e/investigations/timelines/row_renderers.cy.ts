@@ -42,7 +42,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     openTimelineUsingToggle();
     populateTimeline();
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
   });
 
   it('Row renderers should be enabled by default', () => {
@@ -75,7 +75,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // open modal, filter and check
-    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
 
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();

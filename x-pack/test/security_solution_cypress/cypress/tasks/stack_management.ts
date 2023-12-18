@@ -10,5 +10,5 @@ import { SAVED_OBJECTS_SETTINGS } from '../screens/common/stack_management';
 export const goToSavedObjectSettings = () => {
   cy.get(SAVED_OBJECTS_SETTINGS).scrollIntoView();
   cy.get(SAVED_OBJECTS_SETTINGS).should('be.visible').focus();
-  cy.get(SAVED_OBJECTS_SETTINGS).should('be.visible').click();
+  cy.get(SAVED_OBJECTS_SETTINGS).click();
 };

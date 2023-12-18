@@ -159,7 +159,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
     }
   });
-  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click({ force: true });
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
 };
 
 export const refreshAlertPageFilter = () => {
@@ -206,7 +206,7 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
   values.forEach((value) => {
-    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click();
   });
   closePageFilterPopover(filterIndex);
   waitForAlerts();
@@ -237,13 +237,13 @@ export const goToClosedAlerts = () => {
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
-  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(OPENED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const goToOpenedAlerts = () => {
-  // cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  // cy.get(OPENED_ALERTS_FILTER_BTN).click();
   /*
    * below line commented because alertPageFiltersEnabled feature flag
    * is disabled by default
@@ -264,12 +264,12 @@ export const openFirstAlert = () => {
 };
 
 export const openAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const selectCountTable = () => {
-  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+  cy.get(SELECT_AGGREGATION_CHART).click();
 };
 
 export const selectAlertsHistogram = () => {
@@ -293,7 +293,7 @@ export const goToAcknowledgedAlerts = () => {
 };
 
 export const markAlertsAcknowledged = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
@@ -311,17 +311,17 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click();
     cy.get('@checkbox').should('have.attr', 'checked');
   }
 };
 
 export const investigateFirstAlertInTimeline = () => {
-  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+  cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click();
 };
 
 export const openAnalyzerForFirstAlertInTimeline = () => {
-  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
+  cy.get(OPEN_ANALYZER_BTN).first().click();
 };
 
 export const clickAlertsHistogramLegend = () => {
@@ -342,7 +342,7 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(actionSelector).first().click({ force: true });
+  cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -358,7 +358,7 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
-  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click();
 };
 
 export const waitForAlerts = () => {
@@ -442,7 +442,7 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 
 export const selectFirstPageAlerts = () => {
   cy.get(SELECT_ALL_VISIBLE_ALERTS).first().scrollIntoView();
-  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click({ force: true });
+  cy.get(SELECT_ALL_VISIBLE_ALERTS).first().click();
 };
 
 export const selectAllAlerts = () => {

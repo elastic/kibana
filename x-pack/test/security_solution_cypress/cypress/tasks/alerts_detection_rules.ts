@@ -96,11 +96,11 @@ export const duplicateFirstRule = () => {
  */
 export const duplicateRuleFromMenu = () => {
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
@@ -403,7 +403,7 @@ const selectOverwriteConnectorsRulesImport = () => {
 
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
   cy.get(INPUT_FILE).trigger('change');
   selectOverwriteRulesImport();

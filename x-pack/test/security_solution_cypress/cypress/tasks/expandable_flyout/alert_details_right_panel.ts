@@ -91,7 +91,7 @@ export const openTakeActionButton = () => {
 export const selectTakeActionItem = (option: string) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
     .should('be.visible')
-    .within(() => cy.get(option).should('be.visible').click());
+    .within(() => cy.get(option).click());
 };
 
 /**
@@ -104,5 +104,5 @@ export const fillOutFormToCreateNewCase = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
 
   cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
-  cy.get(TOASTER_CLOSE_ICON).should('be.visible').click();
+  cy.get(TOASTER_CLOSE_ICON).click();
 };

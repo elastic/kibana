@@ -79,7 +79,7 @@ export const addExceptionEntryFieldValueOfItemX = (
 };
 
 export const searchExceptionEntryFieldWithPrefix = (fieldPrefix: string, index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).click({ force: true });
+  cy.get(FIELD_INPUT).eq(index).click();
   cy.get(FIELD_INPUT).eq(index).type(fieldPrefix);
 };
 
@@ -90,7 +90,7 @@ export const showFieldConflictsWarningTooltipWithMessage = (message: string, ind
 };
 
 export const showMappingConflictsWarningMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(index).click({ force: true });
+  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(index).click();
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION).eq(index).should('have.text', message);
 };
 
@@ -160,11 +160,11 @@ export const editExceptionFlyoutItemName = (name: string) => {
 
 export const selectBulkCloseAlerts = () => {
   cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  cy.get(CLOSE_ALERTS_CHECKBOX).click();
 };
 
 export const selectCloseSingleAlerts = () => {
-  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click({ force: true });
+  cy.get(CLOSE_SINGLE_ALERT_CHECKBOX).click();
 };
 
 export const addExceptionConditions = (exception: Exception) => {

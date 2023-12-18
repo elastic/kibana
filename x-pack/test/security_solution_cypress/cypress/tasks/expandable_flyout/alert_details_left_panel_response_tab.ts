@@ -12,5 +12,5 @@ import { DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB } from '../../screens/expandable_f
  */
 export const openResponseTab = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB).click();
 };

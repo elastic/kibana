@@ -18,7 +18,7 @@ import {
  */
 export const toggleRulePreviewAboutSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER).click();
 };
 
 /* Definition section */
@@ -40,5 +40,5 @@ export const toggleRulePreviewDefinitionSection = () => {
  */
 export const toggleRulePreviewScheduleSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER).click();
 };
