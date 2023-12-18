@@ -137,8 +137,7 @@ export const GuideCard = ({
   const progress = getProgressLabel(guideState);
 
   const cardCss = css`
-    position: relative;
-    height: 125px;
+    height: 75px;
     width: 380px;
     .euiCard__top {
       margin-block-end: 8px;
@@ -149,7 +148,7 @@ export const GuideCard = ({
     }
     @media (min-width: 768px) and (max-width: 1210px) {
       max-width: 230px;
-      height: 175px;
+      height: 75px;
       justify-content: center;
     }
   `;
@@ -163,9 +162,10 @@ export const GuideCard = ({
       css={cardCss}
       display={isHighlighted ? undefined : 'transparent'}
       hasBorder={!isHighlighted}
-      title={<h3 style={{ fontWeight: 600 }}>{card.title}</h3>}
+      title={<h3 style={{ fontWeight: 500 }}>{card.title}</h3>}
       titleSize="xs"
-      icon={<EuiIcon size="l" type={card.icon} />}
+      icon={<EuiIcon size="xl" type={card.icon} />}
+      layout="horizontal"
       description={
         <>
           {progress && (

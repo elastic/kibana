@@ -42,7 +42,7 @@ export interface GuideCardsProps {
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
   return (
-    <EuiFlexGroup wrap alignItems="center" justifyContent="center">
+    <EuiFlexGroup wrap alignItems="center" justifyContent="center" direction="column">
       {filteredCards?.map((card, index) => (
         <EuiFlexItem key={index}>
           <GuideCard card={card} {...props} />
