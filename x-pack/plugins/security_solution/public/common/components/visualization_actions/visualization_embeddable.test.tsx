@@ -22,7 +22,7 @@ import {
 import { createStore } from '../../store';
 import type { State } from '../../store';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { getRiskScoreDonutAttributes } from './lens_attributes/common/risk_scores/risk_score_donut';
+import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session', () => ({

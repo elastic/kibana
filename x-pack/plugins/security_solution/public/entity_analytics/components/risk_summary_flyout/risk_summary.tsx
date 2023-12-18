@@ -27,10 +27,11 @@ import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
+
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { RiskInputsPanelKey } from '../risk_inputs_flyout_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
+import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
