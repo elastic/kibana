@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['maps']);
-  const inspector = getService('inspector');
   const security = getService('security');
 
   describe('esql', () => {
@@ -25,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    it('should register elasticsearch request in inspector', async () => {
+    it('should display ES|QL statement results on map', async () => {
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('logstash-*');
       expect(tooltipText).to.equal(
         'logstash-*\nFound 5 rows.\nResults narrowed by global time\nResults narrowed by visible map area'
