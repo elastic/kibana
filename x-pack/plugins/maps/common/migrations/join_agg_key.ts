@@ -21,7 +21,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { MapV1 } from '../content_management';
 
 const GROUP_BY_DELIMITER = '_groupby_';
 
@@ -53,7 +53,11 @@ function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldN
   };
 }
 
-export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes }): MapAttributes {
+export function migrateJoinAggKey({
+  attributes,
+}: {
+  attributes: MapV1.MapAttributes;
+}): MapV1.MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

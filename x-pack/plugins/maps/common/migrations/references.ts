@@ -9,7 +9,7 @@
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes, MapV1 } from '../content_management';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
@@ -17,41 +17,8 @@ interface IndexPatternReferenceDescriptor {
   indexPatternRefName?: string;
 }
 
-export function extractReferences({
-  attributes,
-  references = [],
-}: {
-  attributes: MapAttributes;
-  references?: SavedObjectReference[];
-}) {
-  if (!attributes.layerListJSON) {
-    return { attributes, references };
-  }
-
-  const adhocDataViewIds: string[] = [];
-  if (attributes.mapStateJSON) {
-    try {
-      const mapState = JSON.parse(attributes.mapStateJSON);
-      if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
-        (mapState.adHocDataViews as DataViewSpec[]).forEach((spec) => {
-          if (spec.id) {
-            adhocDataViewIds.push(spec.id);
-          }
-        });
-      }
-    } catch (e) {
-      throw new Error('Unable to parse attribute mapStateJSON');
-    }
-  }
-
+function extractReferencesFromLayerList(layerList: LayerDescriptor[], adhocDataViewIds: string[]) {
   const extractedReferences: SavedObjectReference[] = [];
-
-  let layerList: LayerDescriptor[] = [];
-  try {
-    layerList = JSON.parse(attributes.layerListJSON);
-  } catch (e) {
-    throw new Error('Unable to parse attribute layerListJSON');
-  }
 
   layerList.forEach((layer, layerIndex) => {
     // Extract index-pattern references from source descriptor
@@ -98,6 +65,71 @@ export function extractReferences({
       });
     }
   });
+  return extractedReferences;
+}
+
+export function extractReferences({
+  attributes,
+  references = [],
+}: {
+  attributes: MapAttributes;
+  references?: SavedObjectReference[];
+}) {
+  const { mapState, layerList } = attributes;
+
+  // If layerList is not defined, try using the legacy extractReferences function
+  if (!layerList) return extractReferencesV1({ attributes, references });
+
+  const adhocDataViewIds: string[] = [];
+  if (mapState?.adHocDataViews && mapState.adHocDataViews.length > 0) {
+    (mapState.adHocDataViews as DataViewSpec[]).forEach((spec) => {
+      if (spec.id) {
+        adhocDataViewIds.push(spec.id);
+      }
+    });
+  }
+
+  return {
+    attributes,
+    references: references.concat(extractReferencesFromLayerList(layerList, adhocDataViewIds)),
+  };
+}
+
+export function extractReferencesV1({
+  attributes,
+  references = [],
+}: {
+  attributes: MapV1.MapAttributes;
+  references?: SavedObjectReference[];
+}) {
+  if (!attributes.layerListJSON) {
+    return { attributes, references };
+  }
+
+  const adhocDataViewIds: string[] = [];
+  if (attributes.mapStateJSON) {
+    try {
+      const mapState = JSON.parse(attributes.mapStateJSON);
+      if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
+        (mapState.adHocDataViews as DataViewSpec[]).forEach((spec) => {
+          if (spec.id) {
+            adhocDataViewIds.push(spec.id);
+          }
+        });
+      }
+    } catch (e) {
+      throw new Error('Unable to parse attribute mapStateJSON');
+    }
+  }
+
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
+  const extractedReferences = extractReferencesFromLayerList(layerList, adhocDataViewIds);
 
   return {
     attributes: {
@@ -121,6 +153,50 @@ export function injectReferences({
   references,
 }: {
   attributes: MapAttributes;
+  references: SavedObjectReference[];
+}) {
+  const { layerList } = attributes;
+
+  // If layerList is not defined, try using the legacy injectReferences function
+  if (!layerList) return injectReferencesV1({ attributes, references });
+
+  layerList.forEach((layer) => {
+    // Inject index-pattern references into source descriptor
+    if (layer.sourceDescriptor && 'indexPatternRefName' in layer.sourceDescriptor) {
+      const sourceDescriptor = layer.sourceDescriptor as IndexPatternReferenceDescriptor;
+      const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
+      sourceDescriptor.indexPatternId = reference.id;
+      delete sourceDescriptor.indexPatternRefName;
+    }
+
+    if ('joins' in layer) {
+      // Inject index-pattern references into join
+      const vectorLayer = layer as VectorLayerDescriptor;
+      const joins = vectorLayer.joins ? vectorLayer.joins : [];
+      joins.forEach((join) => {
+        if (join.right && 'indexPatternRefName' in join.right) {
+          const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
+          const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
+          sourceDescriptor.indexPatternId = reference.id;
+          delete sourceDescriptor.indexPatternRefName;
+        }
+      });
+    }
+  });
+
+  return {
+    attributes: {
+      ...attributes,
+      layerList,
+    },
+  };
+}
+
+export function injectReferencesV1({
+  attributes,
+  references,
+}: {
+  attributes: MapV1.MapAttributes;
   references: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {

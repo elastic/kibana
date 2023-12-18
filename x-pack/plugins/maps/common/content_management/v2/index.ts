@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { MapAttributes } from '../content_management';
-
-export type MapEmbeddablePersistableState = EmbeddableStateWithType & {
-  attributes: MapAttributes;
-};
+import { MapCrudTypes } from './types';
+export type { MapCrudTypes, MapAttributes } from './types';
+export type MapItem = MapCrudTypes['Item'];
+export { mapAttributesSchema } from './cm_services';

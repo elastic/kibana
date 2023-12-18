@@ -53,7 +53,6 @@ import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -145,9 +144,9 @@ export class SavedMap {
 
     this._reportUsage();
 
-    if (this._attributes?.mapStateJSON) {
+    if (this._attributes?.mapState) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const { mapState } = this._attributes;
         if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
           const dataViewService = getIndexPatternService();
           const promises = mapState.adHocDataViews.map((spec) => {
@@ -162,9 +161,9 @@ export class SavedMap {
 
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
-    } else if (this._attributes?.mapStateJSON) {
+    } else if (this._attributes?.mapState) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const { mapState } = this._attributes;
         if (mapState.settings) {
           this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
         }
@@ -176,9 +175,9 @@ export class SavedMap {
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
       isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
-    } else if (this._attributes?.uiStateJSON) {
+    } else if (this._attributes?.uiState) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        const { uiState } = this._attributes;
         if ('isLayerTOCOpen' in uiState) {
           isLayerTOCOpen = uiState.isLayerTOCOpen;
         }
@@ -191,9 +190,9 @@ export class SavedMap {
     let openTOCDetails: string[] = [];
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
       openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
-    } else if (this._attributes?.uiStateJSON) {
+    } else if (this._attributes?.uiState) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        const { uiState } = this._attributes;
         if ('openTOCDetails' in uiState) {
           openTOCDetails = uiState.openTOCDetails;
         }
@@ -211,9 +210,9 @@ export class SavedMap {
           zoom: this._mapEmbeddableInput.mapCenter.zoom,
         })
       );
-    } else if (this._attributes?.mapStateJSON) {
+    } else if (this._attributes?.mapState) {
       try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        const { mapState } = this._attributes;
         this._store.dispatch(
           setGotoWithCenter({
             lat: mapState.center.lat,
@@ -227,9 +226,9 @@ export class SavedMap {
     }
 
     let layerList: LayerDescriptor[] = [];
-    if (this._attributes.layerListJSON) {
+    if (this._attributes.layerList) {
       try {
-        layerList = JSON.parse(this._attributes.layerListJSON) as LayerDescriptor[];
+        layerList = this._attributes.layerList;
       } catch (e) {
         throw new Error('Malformed saved object: unable to parse layerListJSON');
       }
@@ -258,9 +257,7 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
-    const savedLayerList = this._attributes.layerListJSON
-      ? JSON.parse(this._attributes.layerListJSON)
-      : null;
+    const savedLayerList = this._attributes.layerList ?? null;
     const layerListConfigOnly = getLayerListConfigOnly(this._store.getState());
     return !savedLayerList
       ? !_.isEqual(layerListConfigOnly, this._initialLayerListConfig)
@@ -410,12 +407,12 @@ export class SavedMap {
       return this._mapEmbeddableInput.mapSettings.autoFitToDataBounds;
     }
 
-    if (!this._attributes || !this._attributes.mapStateJSON) {
+    if (!this._attributes || !this._attributes.mapState) {
       return false;
     }
 
     try {
-      const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+      const { mapState } = this._attributes;
       if (mapState?.settings.autoFitToDataBounds !== undefined) {
         return mapState.settings.autoFitToDataBounds;
       }
@@ -551,11 +548,11 @@ export class SavedMap {
     const state: MapStoreState = this._store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
-    this._attributes!.layerListJSON = JSON.stringify(layerListConfigOnly);
+    this._attributes!.layerList = layerListConfigOnly;
 
     const mapSettings = getMapSettings(state);
 
-    this._attributes!.mapStateJSON = JSON.stringify({
+    this._attributes!.mapState = {
       adHocDataViews: await this._getAdHocDataViews(),
       zoom: getMapZoom(state),
       center: getMapCenter(state),
@@ -573,12 +570,12 @@ export class SavedMap {
           return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
         }),
       },
-    } as SerializedMapState);
+    };
 
-    this._attributes!.uiStateJSON = JSON.stringify({
+    this._attributes!.uiState = {
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
-    } as SerializedUiState);
+    };
   }
 
   private async _getAdHocDataViews() {

@@ -455,8 +455,8 @@ export class MapApp extends React.Component<Props, State> {
     let serializedMapState: SerializedMapState | undefined;
     try {
       const attributes = this.props.savedMap.getAttributes();
-      if (attributes.mapStateJSON) {
-        serializedMapState = JSON.parse(attributes.mapStateJSON);
+      if (attributes.mapState) {
+        serializedMapState = attributes.mapState;
       }
     } catch (e) {
       // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults

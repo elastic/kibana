@@ -12,7 +12,7 @@ import {
   LayerDescriptor,
   VectorStyleDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { MapV1 } from '../content_management';
 
 const COLOR_STYLES = [
   VECTOR_STYLES.FILL_COLOR,
@@ -53,8 +53,8 @@ function migrateColorProperty(
 export function migrateOtherCategoryColor({
   attributes,
 }: {
-  attributes: MapAttributes;
-}): MapAttributes {
+  attributes: MapV1.MapAttributes;
+}): MapV1.MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

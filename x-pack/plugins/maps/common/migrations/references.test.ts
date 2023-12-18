@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { extractReferences, injectReferences } from './references';
+import { extractReferencesV1, injectReferencesV1 } from './references';
 import { SOURCE_TYPES } from '../constants';
 
 const layerListJSON = {
@@ -34,7 +34,7 @@ describe('extractReferences', () => {
     const attributes = {
       title: 'my map',
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
       },
@@ -48,7 +48,7 @@ describe('extractReferences', () => {
       title: 'my map',
       mapStateJSON,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         mapStateJSON,
@@ -62,7 +62,7 @@ describe('extractReferences', () => {
       title: 'my map',
       layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esSearchSource.withIndexPatternRef,
@@ -91,7 +91,7 @@ describe('extractReferences', () => {
       layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
       mapStateJSON,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
@@ -106,7 +106,7 @@ describe('extractReferences', () => {
       title: 'my map',
       layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternId,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternRef,
@@ -126,7 +126,7 @@ describe('extractReferences', () => {
       title: 'my map',
       layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.pewPewSource.withIndexPatternRef,
@@ -146,7 +146,7 @@ describe('extractReferences', () => {
       title: 'my map',
       layerListJSON: layerListJSON.join.withIndexPatternId,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.join.withIndexPatternRef,
@@ -174,7 +174,7 @@ describe('extractReferences', () => {
       layerListJSON: layerListJSON.join.withIndexPatternId,
       mapStateJSON,
     };
-    expect(extractReferences({ attributes })).toEqual({
+    expect(extractReferencesV1({ attributes })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.join.withIndexPatternId,
@@ -185,12 +185,12 @@ describe('extractReferences', () => {
   });
 });
 
-describe('injectReferences', () => {
+describe('injectReferencesV1', () => {
   test('Should handle missing layerListJSON attribute', () => {
     const attributes = {
       title: 'my map',
     };
-    expect(injectReferences({ attributes, references: [] })).toEqual({
+    expect(injectReferencesV1({ attributes, references: [] })).toEqual({
       attributes: {
         title: 'my map',
       },
@@ -209,7 +209,7 @@ describe('injectReferences', () => {
         type: 'index-pattern',
       },
     ];
-    expect(injectReferences({ attributes, references })).toEqual({
+    expect(injectReferencesV1({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
@@ -229,7 +229,7 @@ describe('injectReferences', () => {
         type: 'index-pattern',
       },
     ];
-    expect(injectReferences({ attributes, references })).toEqual({
+    expect(injectReferencesV1({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternId,
@@ -249,7 +249,7 @@ describe('injectReferences', () => {
         type: 'index-pattern',
       },
     ];
-    expect(injectReferences({ attributes, references })).toEqual({
+    expect(injectReferencesV1({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
@@ -269,7 +269,7 @@ describe('injectReferences', () => {
         type: 'index-pattern',
       },
     ];
-    expect(injectReferences({ attributes, references })).toEqual({
+    expect(injectReferencesV1({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
         layerListJSON: layerListJSON.join.withIndexPatternId,
