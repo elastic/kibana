@@ -32,7 +32,7 @@ export const useCreateConnector = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' }));
+      navigateToUrl(`/app/${generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' })}`);
     }
   }, [connector, isSuccess, navigateToUrl]);
 

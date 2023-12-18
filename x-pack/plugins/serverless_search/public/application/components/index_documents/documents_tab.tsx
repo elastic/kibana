@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ServerlessSearchPluginStartDependencies } from '../../../types';
 import { IndexDocuments } from './documents';
 
-export const createIndexOverviewContent = (
+export const createIndexDocumentsContent = (
   core: CoreStart,
   services: ServerlessSearchPluginStartDependencies
 ): IndexDetailsTab => {
