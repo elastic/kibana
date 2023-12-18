@@ -56,6 +56,7 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
 const mockContext = {
   elasticAssistant: {
     actions: jest.fn(),
+    getRegisteredTools: jest.fn(() => []),
     logger: loggingSystemMock.createLogger(),
   },
   core: {
