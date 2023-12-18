@@ -22,7 +22,7 @@ export function defineHasApiKeysRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/_has_active',
+      path: '/internal/security/api_key/_has_active',
       validate: false,
       options: {
         access: 'internal',
