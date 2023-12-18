@@ -9,11 +9,10 @@ import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
   findCspBenchmarkRuleRequestSchema,
-} from '../../../../common/types/latest';
-
+} from '../../../../common/types/rules/v3';
 import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
 import { CspRouter } from '../../../types';
-import { findRuleHandler as findRuleHandlerV1 } from './v1';
+import { findBenchmarkRuleHandler as findRuleHandlerV1 } from './v1';
 
 export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
   router.versioned
