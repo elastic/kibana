@@ -197,7 +197,7 @@ describe('<SimplePrivilegeForm>', () => {
 
     const featurePrivilegeToggles = wrapper.find(EuiButtonGroup);
     expect(featurePrivilegeToggles).toHaveLength(1);
-    expect(featurePrivilegeToggles.find('input')).toHaveLength(3);
+    expect(featurePrivilegeToggles.find('button')).toHaveLength(3);
 
     (featurePrivilegeToggles.props() as EuiButtonGroupProps).onChange('feature1_all', null);
 
