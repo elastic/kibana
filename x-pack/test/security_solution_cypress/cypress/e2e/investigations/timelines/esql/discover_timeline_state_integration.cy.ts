@@ -8,7 +8,10 @@
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
-import { goToSavedObjectSettings } from '../../../../tasks/stack_management';
+import {
+  clickSavedObjectTagsFilter,
+  goToSavedObjectSettings,
+} from '../../../../tasks/stack_management';
 import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
@@ -33,7 +36,6 @@ import { login } from '../../../../tasks/login';
 import {
   addDescriptionToTimeline,
   addNameToTimelineAndSave,
-  confirmLeaveUnsavedTimeline,
   createNewTimeline,
   createTimelineOptionsPopoverBottomBar,
   goToEsqlTab,
@@ -45,7 +47,6 @@ import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
 import {
   GET_SAVED_OBJECTS_TAGS_OPTION,
   SAVED_OBJECTS_ROW_TITLES,
-  SAVED_OBJECTS_TAGS_FILTER,
 } from '../../../../screens/common/stack_management';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -58,6 +59,34 @@ const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
+
+const handleIntercepts = () => {
+  cy.intercept('PATCH', '/api/timeline', (req) => {
+    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
+      req.alias = TIMELINE_PATCH_REQ;
+    }
+  });
+  cy.intercept('PATCH', '/api/timeline', (req) => {
+    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
+      req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
+    }
+  });
+
+  cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
+    if (req.body.hasOwnProperty('contentTypeId') && req.body.contentTypeId === 'search') {
+      req.alias = SAVED_SEARCH_UPDATE_REQ;
+    }
+  });
+  cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
+    if (
+      req.body.hasOwnProperty('data') &&
+      req.body.data.hasOwnProperty('description') &&
+      req.body.data.description.length > 0
+    ) {
+      req.alias = SAVED_SEARCH_UPDATE_WITH_DESCRIPTION;
+    }
+  });
+};
 
 describe(
   'Discover Timeline State Integration',
@@ -74,39 +103,11 @@ describe(
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
-    const handleIntercepts = () => {
-      cy.intercept('PATCH', '/api/timeline', (req) => {
-        if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
-          req.alias = TIMELINE_PATCH_REQ;
-        }
-      });
-      cy.intercept('PATCH', '/api/timeline', (req) => {
-        if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
-          req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
-        }
-      });
-
-      cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
-        if (req.body.hasOwnProperty('contentTypeId') && req.body.contentTypeId === 'search') {
-          req.alias = SAVED_SEARCH_UPDATE_REQ;
-        }
-      });
-      cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
-        if (
-          req.body.hasOwnProperty('data') &&
-          req.body.data.hasOwnProperty('description') &&
-          req.body.data.description.length > 0
-        ) {
-          req.alias = SAVED_SEARCH_UPDATE_WITH_DESCRIPTION;
-        }
-      });
-    };
-
-    describe('save/restore', () => {
+    describe('ESQL tab state', () => {
       beforeEach(() => {
         handleIntercepts();
       });
-      it('should be able create an empty timeline with default discover state', () => {
+      it('should be able create an empty timeline with default esql tab state', () => {
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();
@@ -115,7 +116,7 @@ describe(
           `Last 15 minutes`
         );
       });
-      it('should save/restore discover dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
+      it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
@@ -146,7 +147,7 @@ describe(
             );
           });
       });
-      it('should save/restore discover dataview/timerange/filter/query/columns when timeline is opened via url', () => {
+      it('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
@@ -172,7 +173,7 @@ describe(
             );
           });
       });
-      it('should save/restore discover ES|QL when saving timeline', () => {
+      it('should save/restore esql tab ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
         addNameToTimelineAndSave(timelineName);
@@ -191,11 +192,12 @@ describe(
           });
       });
     });
-    describe('saved search', () => {
+
+    describe('Discover saved search state for ESQL tab', () => {
       beforeEach(() => {
         handleIntercepts();
       });
-      it('should save discover saved search with `Security Solution` tag', () => {
+      it('should save esql tab saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
@@ -203,11 +205,10 @@ describe(
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
         openKibanaNavigation();
         navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
-        confirmLeaveUnsavedTimeline();
         cy.get(LOADING_INDICATOR).should('not.exist');
         goToSavedObjectSettings();
         cy.get(LOADING_INDICATOR).should('not.exist');
-        cy.get(SAVED_OBJECTS_TAGS_FILTER).trigger('click');
+        clickSavedObjectTagsFilter();
         cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
