@@ -10,6 +10,7 @@ import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
+import type { GroupByField } from '../components/slo_list_group_by';
 import type { SLOView } from '../components/toggle_slo_view';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
@@ -24,6 +25,7 @@ export interface SearchState {
   };
   view: SLOView;
   compact: boolean;
+  groupBy: GroupByField;
 }
 
 export const DEFAULT_STATE = {
@@ -33,6 +35,7 @@ export const DEFAULT_STATE = {
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
   compact: true,
+  groupBy: 'ungrouped' as const,
 };
 
 export function useUrlSearchState(): {
