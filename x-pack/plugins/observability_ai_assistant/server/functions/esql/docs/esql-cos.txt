@@ -1,0 +1,7 @@
+COS
+
+
+Cosine trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL cos=COS(a)
+Supported types:
