@@ -373,6 +373,13 @@ const apmPerAgentSchema: Pick<
           'Total number of services utilizing the opentelemetry/swift agent within the last day',
       },
     },
+    'opentelemetry/android': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/android agent within the last day',
+      },
+    },
     'opentelemetry/webjs': {
       type: 'long',
       _meta: {

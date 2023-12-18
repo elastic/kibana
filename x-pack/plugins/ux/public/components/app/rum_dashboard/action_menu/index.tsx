@@ -34,8 +34,10 @@ const ANALYZE_MESSAGE = i18n.translate(
 
 export function UXActionMenu({
   appMountParameters,
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
+  isDev: boolean;
 }) {
   const { http, application } = useKibanaServices();
   const { urlParams } = useLegacyUrlParams();
@@ -85,7 +87,7 @@ export function UXActionMenu({
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
-        <UxInspectorHeaderLink />
+        <UxInspectorHeaderLink isDev={isDev} />
         <ObservabilityAIAssistantActionMenuItem />
       </EuiHeaderLinks>
     </HeaderMenuPortal>

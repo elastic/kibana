@@ -6,135 +6,150 @@
  */
 import React from 'react';
 
+import type { Step, StepId } from './types';
 import {
   SectionId,
-  GetSetUpCardId,
-  IntroductionSteps,
+  QuickStartSectionCardsId,
+  OverviewSteps,
   type Section,
-  ConfigureSteps,
-  ExploreSteps,
+  AddIntegrationsSteps,
+  ViewDashboardSteps,
+  AddAndValidateYourDataCardsId,
+  GetStartedWithAlertsCardsId,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  ViewAlertsSteps,
 } from './types';
 import * as i18n from './translations';
-import explore from './images/explore.svg';
-import { ProductLine } from '../../common/product';
-import { FleetOverviewLink } from './step_links/fleet_overview_link';
-import { InstallAgentButton } from './step_links/install_agent_button';
+
 import { AddIntegrationButton } from './step_links/add_integration_button';
 import { AlertsButton } from './step_links/alerts_link';
-import connectToDataSources from './images/connect_to_existing_sources.png';
-import endalbePrebuiltRules from './images/enable_prebuilt_rules.png';
-import deployElasticAgent from './images/deploy_elastic_agent_to_protect_your_endpoint.png';
-import learnAboutElasticAgent from './images/learn_about_elastic_agent.png';
-import viewAlerts from './images/view_alerts.png';
-import analyzeDataUsingDashboards from './images/analyze_data_using_dashboards.png';
 import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
 import { DashboardButton } from './step_links/dashboard_button';
+import overviewVideo from './images/overview_video.svg';
+import { Video } from './card_step/content/video';
+import { OverviewVideoDescription } from './card_step/content/overview_video_description';
+import { ManageProjectsButton } from './step_links/manage_projects_button';
+import { EnableRuleImage } from './card_step/content/enable_rule_image';
+import {
+  autoCheckAddIntegrationsStepCompleted,
+  autoCheckPrebuildRuleStepCompleted,
+} from './card_step/helpers';
+import { ViewDashboardImage } from './card_step/content/view_dashboard_image';
+import { AddIntegrationsImage } from './card_step/content/add_integration_image';
+import { CreateProjectImage } from './card_step/content/create_project_step_image';
+import { ViewAlertsImage } from './card_step/content/view_alerts_image';
 
-export const introductionSteps = [
+export const createProjectSteps = [
   {
-    id: IntroductionSteps.getToKnowElasticSecurity,
-    title: i18n.INTRODUCTION_STEP1,
-    description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
-    splitPanel: (
-      <iframe
-        allowFullScreen
-        className="vidyard_iframe"
-        frameBorder="0"
-        height="100%"
-        width="100%"
-        referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
-        scrolling="no"
-        src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-        title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
-      />
-    ),
-    timeInMinutes: 3,
+    id: CreateProjectSteps.createFirstProject,
+    title: i18n.CREATE_PROJECT_TITLE,
+    icon: { type: 'addDataApp', size: 'xl' as const },
+    description: [i18n.CREATE_PROJECT_DESCRIPTION, <ManageProjectsButton />],
+    splitPanel: <CreateProjectImage />,
+  },
+];
+export const overviewVideoSteps = [
+  {
+    icon: { type: overviewVideo, size: 'xl' as const },
+    title: i18n.WATCH_VIDEO_TITLE,
+    id: OverviewSteps.getToKnowElasticSecurity,
+    description: [<OverviewVideoDescription />],
+    splitPanel: <Video />,
   },
 ];
 
-const configureSteps = [
+export const addIntegrationsSteps: Array<Step<AddIntegrationsSteps.connectToDataSources>> = [
   {
-    id: ConfigureSteps.learnAbout,
-    title: i18n.CONFIGURE_STEP1,
-    description: [
-      i18n.CONFIGURE_STEP1_DESCRIPTION1,
-      i18n.CONFIGURE_STEP1_DESCRIPTION2,
-      <FleetOverviewLink />,
-    ],
-    splitPanel: (
-      <img src={learnAboutElasticAgent} alt={i18n.CONFIGURE_STEP1} height="100%" width="100%" />
-    ),
-  },
-  {
-    id: ConfigureSteps.deployElasticAgent,
-    title: i18n.CONFIGURE_STEP2,
-    description: [i18n.CONFIGURE_STEP2_DESCRIPTION1, <InstallAgentButton />],
-    splitPanel: (
-      <img src={deployElasticAgent} alt={i18n.CONFIGURE_STEP2} height="100%" width="100%" />
-    ),
-  },
-  {
-    id: ConfigureSteps.connectToDataSources,
-    title: i18n.CONFIGURE_STEP3,
-    description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <AddIntegrationButton />],
-    productLineRequired: [ProductLine.security],
-    splitPanel: (
-      <img src={connectToDataSources} alt={i18n.CONFIGURE_STEP3} height="100%" width="100%" />
-    ),
-  },
-  {
-    id: ConfigureSteps.enablePrebuiltRules,
-    title: i18n.CONFIGURE_STEP4,
-    description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <AddElasticRulesButton />],
-    splitPanel: (
-      <img src={endalbePrebuiltRules} alt={i18n.CONFIGURE_STEP4} height="100%" width="100%" />
-    ),
+    icon: { type: 'fleetApp', size: 'xl' as const },
+    id: AddIntegrationsSteps.connectToDataSources,
+    title: i18n.ADD_INTEGRATIONS_TITLE,
+    description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButton />],
+    splitPanel: <AddIntegrationsImage />,
+    autoCheckIfStepCompleted: autoCheckAddIntegrationsStepCompleted,
   },
 ];
 
-const exploreSteps = [
+export const viewDashboardSteps = [
   {
-    id: ExploreSteps.viewAlerts,
-    title: i18n.EXPLORE_STEP1,
-    description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsButton />],
-    splitPanel: <img src={viewAlerts} alt={i18n.EXPLORE_STEP1} height="100%" width="100%" />,
+    id: ViewDashboardSteps.analyzeData,
+    icon: { type: 'dashboardApp', size: 'xl' as const },
+    title: i18n.VIEW_DASHBOARDS,
+    description: [i18n.VIEW_DASHBOARDS_DESCRIPTION, <DashboardButton />],
+    splitPanel: <ViewDashboardImage />,
   },
+];
+
+export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enablePrebuiltRules>> = [
   {
-    id: ExploreSteps.analyzeData,
-    title: i18n.EXPLORE_STEP2,
-    description: [i18n.EXPLORE_STEP2_DESCRIPTION1, <DashboardButton />],
-    splitPanel: (
-      <img src={analyzeDataUsingDashboards} alt={i18n.EXPLORE_STEP2} height="100%" width="100%" />
-    ),
+    title: i18n.ENABLE_RULES,
+    icon: { type: 'advancedSettingsApp', size: 'xl' as const },
+    id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+    description: [i18n.ENABLE_RULES_DESCRIPTION, <AddElasticRulesButton />],
+    splitPanel: <EnableRuleImage />,
+    autoCheckIfStepCompleted: autoCheckPrebuildRuleStepCompleted,
+  },
+];
+
+export const viewAlertSteps = [
+  {
+    icon: { type: 'watchesApp', size: 'xl' as const },
+    title: i18n.VIEW_ALERTS_TITLE,
+    id: ViewAlertsSteps.viewAlerts,
+    description: [i18n.VIEW_ALERTS_DESCRIPTION, <AlertsButton />],
+    splitPanel: <ViewAlertsImage />,
   },
 ];
 
 export const sections: Section[] = [
   {
-    id: SectionId.getSetUp,
-    title: i18n.GET_SET_UP_TITLE,
+    id: SectionId.quickStart,
+    title: i18n.SECTION_1_TITLE,
     cards: [
       {
-        title: i18n.INTRODUCTION_TITLE,
-        icon: { type: 'securityApp', size: 'xl' },
-        id: GetSetUpCardId.introduction,
-        steps: introductionSteps,
+        id: QuickStartSectionCardsId.createFirstProject,
+        steps: createProjectSteps,
+        hideSteps: true,
       },
       {
-        icon: { type: 'agentApp', size: 'xl' },
-        title: i18n.CONFIGURE_TITLE,
-        id: GetSetUpCardId.configure,
-        steps: configureSteps,
+        id: QuickStartSectionCardsId.watchTheOverviewVideo,
+        steps: overviewVideoSteps,
+      },
+    ],
+  },
+  {
+    id: SectionId.addAndValidateYourData,
+    title: i18n.SECTION_2_TITLE,
+    cards: [
+      {
+        id: AddAndValidateYourDataCardsId.addIntegrations,
+        steps: addIntegrationsSteps,
       },
       {
-        icon: { type: explore, size: 'xl' },
-        title: i18n.EXPLORE_TITLE,
-        id: GetSetUpCardId.explore,
-        steps: exploreSteps,
+        id: AddAndValidateYourDataCardsId.viewDashboards,
+        steps: viewDashboardSteps,
+      },
+    ],
+  },
+  {
+    id: SectionId.getStartedWithAlerts,
+    title: i18n.SECTION_3_TITLE,
+    cards: [
+      {
+        id: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        steps: enablePrebuildRuleSteps,
+      },
+      {
+        id: GetStartedWithAlertsCardsId.viewAlerts,
+        steps: viewAlertSteps,
       },
     ],
   },
 ];
 
 export const getSections = () => sections;
+
+export const getCardById = (stepId: StepId) => {
+  const cards = sections.flatMap((s) => s.cards);
+  return cards.find((c) => c.steps?.find((step) => stepId === step.id));
+};

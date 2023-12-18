@@ -27,7 +27,7 @@ const noPanelStyle = css`
   }
 
   .euiLink {
-    padding: 0 8px;
+    padding: 0;
   }
 
   .euiLink:focus {
@@ -37,26 +37,32 @@ const noPanelStyle = css`
   .euiLink:hover {
     text-decoration: underline;
   }
-`;
 
-const avatarStyle = css`
-  cursor: 'pointer';
+  .euiAvatar {
+    cursor: pointer;
+
+    :hover {
+      border: solid 2px #d3dae6;
+    }
+  }
 `;
 
 export function ChatConsolidatedItems({
   consolidatedItem,
+  onActionClick,
+  onEditSubmit,
   onFeedback,
   onRegenerate,
-  onEditSubmit,
+  onSendTelemetry,
   onStopGenerating,
-  onActionClick,
 }: {
   consolidatedItem: ChatTimelineItem[];
+  onActionClick: ChatTimelineProps['onActionClick'];
+  onEditSubmit: ChatTimelineProps['onEdit'];
   onFeedback: ChatTimelineProps['onFeedback'];
   onRegenerate: ChatTimelineProps['onRegenerate'];
-  onEditSubmit: ChatTimelineProps['onEdit'];
+  onSendTelemetry: ChatTimelineProps['onSendTelemetry'];
   onStopGenerating: ChatTimelineProps['onStopGenerating'];
-  onActionClick: ChatTimelineProps['onActionClick'];
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -71,7 +77,6 @@ export function ChatConsolidatedItems({
         timelineAvatar={
           <EuiAvatar
             color="subdued"
-            css={avatarStyle}
             name="inspect"
             iconType="layers"
             onClick={handleToggleExpand}
@@ -119,15 +124,16 @@ export function ChatConsolidatedItems({
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
               {...item}
+              onActionClick={onActionClick}
+              onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);
               }}
               onRegenerateClick={() => {
                 onRegenerate(item.message);
               }}
-              onEditSubmit={(message) => onEditSubmit(item.message, message)}
+              onSendTelemetry={onSendTelemetry}
               onStopGeneratingClick={onStopGenerating}
-              onActionClick={onActionClick}
             />
           ))
         : null}

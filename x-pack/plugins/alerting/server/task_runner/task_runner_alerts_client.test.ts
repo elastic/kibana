@@ -774,19 +774,24 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAndLogAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: true,
+      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
+        notifyOnActionGroupChange: false,
         flappingSettings: {
           enabled: true,
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
       });
-      expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();
+
+      expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+
+      expect(alertsClientNotToUse.processAlerts).not.toHaveBeenCalled();
+      expect(alertsClientNotToUse.logAlerts).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
       expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();

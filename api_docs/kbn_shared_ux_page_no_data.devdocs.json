@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-no-data",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPage",
+        "id": "def-public.NoDataPage",
         "type": "Function",
         "tags": [],
         "label": "NoDataPage",
@@ -37,7 +21,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPage.$1",
+            "id": "def-public.NoDataPage.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  solution,\n  logo,\n  action,\n  docsLink,\n  pageTitle,\n  pageDescription,\n  className,\n}",
@@ -56,7 +40,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPageKibanaProvider",
+        "id": "def-public.NoDataPageKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataPageKibanaProvider",
@@ -74,7 +58,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageKibanaProvider.$1",
+            "id": "def-public.NoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...dependencies\n}",
@@ -95,7 +79,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPageProvider",
+        "id": "def-public.NoDataPageProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataPageProvider",
@@ -113,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProvider.$1",
+            "id": "def-public.NoDataPageProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, ...services }",
@@ -136,7 +120,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPageProps",
+        "id": "def-public.NoDataPageProps",
         "type": "Interface",
         "tags": [],
         "label": "NoDataPageProps",
@@ -154,7 +138,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProps.solution",
+            "id": "def-public.NoDataPageProps.solution",
             "type": "string",
             "tags": [],
             "label": "solution",
@@ -167,7 +151,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProps.docsLink",
+            "id": "def-public.NoDataPageProps.docsLink",
             "type": "string",
             "tags": [],
             "label": "docsLink",
@@ -183,7 +167,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProps.logo",
+            "id": "def-public.NoDataPageProps.logo",
             "type": "string",
             "tags": [],
             "label": "logo",
@@ -199,7 +183,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProps.pageTitle",
+            "id": "def-public.NoDataPageProps.pageTitle",
             "type": "string",
             "tags": [],
             "label": "pageTitle",
@@ -215,7 +199,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data",
-            "id": "def-common.NoDataPageProps.pageDescription",
+            "id": "def-public.NoDataPageProps.pageDescription",
             "type": "string",
             "tags": [],
             "label": "pageDescription",
@@ -237,7 +221,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPageKibanaDependencies",
+        "id": "def-public.NoDataPageKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "NoDataPageKibanaDependencies",
@@ -256,7 +240,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data",
-        "id": "def-common.NoDataPageServices",
+        "id": "def-public.NoDataPageServices",
         "type": "Type",
         "tags": [],
         "label": "NoDataPageServices",
@@ -274,6 +258,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

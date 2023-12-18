@@ -16,6 +16,8 @@ import { componentTemplateHelpers } from '../apis/management/index_management/li
 import { settingsApi } from '../apis/management/index_management/lib/settings.api';
 import { clusterNodesApi } from '../apis/management/index_management/lib/cluster_nodes.api';
 import { datastreamsHelpers } from '../apis/management/index_management/lib/datastreams.helpers';
+import { enrichPoliciesApi } from '../apis/management/index_management/lib/enrich_policies.api';
+import { enrichPoliciesHelpers } from '../apis/management/index_management/lib/enrich_policies.helpers';
 
 export function IndexManagementProvider({ getService }: FtrProviderContext) {
   return {
@@ -42,6 +44,10 @@ export function IndexManagementProvider({ getService }: FtrProviderContext) {
     },
     settings: {
       api: settingsApi(getService),
+    },
+    enrichPolicies: {
+      api: enrichPoliciesApi(getService),
+      helpers: enrichPoliciesHelpers(getService),
     },
   };
 }

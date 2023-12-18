@@ -44,6 +44,7 @@ export interface FilterGroupProps {
   /** @internal used for recursive rendering **/
   renderedLevel?: number;
   reverseBackground?: boolean;
+  filtersCount?: number;
 }
 
 /** @internal **/
@@ -75,6 +76,7 @@ export const FilterGroup = ({
   path,
   reverseBackground = false,
   renderedLevel = 0,
+  filtersCount,
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, hideOr },
@@ -128,6 +130,7 @@ export const FilterGroup = ({
               color={color}
               index={index}
               renderedLevel={renderedLevel}
+              filtersCount={filtersCount}
             />
           </EuiFlexItem>
 
