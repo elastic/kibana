@@ -81,7 +81,7 @@ export const assistantKnowledgeBaseToggledEvent: TelemetryEvent = {
     didEnable: {
       type: 'boolean',
       _meta: {
-        description: 'Title of the quick prompt',
+        description: 'Is knowledge base enabled',
         optional: false,
       },
     },
