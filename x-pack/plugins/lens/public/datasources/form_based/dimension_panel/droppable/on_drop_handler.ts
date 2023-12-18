@@ -26,7 +26,7 @@ import {
   hasOperationSupportForMultipleFields,
   getOperationHelperForMultipleFields,
   replaceColumn,
-} from '../../operations';
+} from '../../../../../common/datasources/form_based/operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
 import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';

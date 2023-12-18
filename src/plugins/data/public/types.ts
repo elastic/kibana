@@ -28,7 +28,7 @@ import {
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
-import { NowProviderPublicContract } from './now_provider';
+import { NowProviderPublicContract } from '../common/now_provider';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;

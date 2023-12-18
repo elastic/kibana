@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
-import { GenericOperationDefinition } from '../operations';
+import { GenericOperationDefinition } from '../../../../common/datasources/form_based/operations';
 import {
   averageOperation,
   countOperation,
@@ -18,12 +18,12 @@ import {
   termsOperation,
   staticValueOperation,
   minOperation,
-} from '../operations/definitions';
+} from '../../../../common/datasources/form_based/operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
 import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
-import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { ReferenceBasedIndexPatternColumn } from '../../../../common/datasources/form_based/operations/definitions/column_types';
 import { FieldSelect } from './field_select';
 import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 

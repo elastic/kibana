@@ -14,7 +14,7 @@ import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
+import { NowProviderInternalContract } from '../../../common/now_provider';
 import {
   calculateBounds,
   getAbsoluteTimeRange,

@@ -9,8 +9,11 @@ import { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
 import { FormBasedPrivateState } from '../../types';
 import { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';
-import { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
-import { generateId } from '../../../../id_generator';
+import {
+  FormulaIndexPatternColumn,
+  MedianIndexPatternColumn,
+} from '../../../../../common/datasources/form_based/operations';
+import { generateId } from '../../../../../common/id_generator';
 import {
   mockDataViews,
   mockedLayers,

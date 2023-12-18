@@ -14,7 +14,7 @@ import { TimeRange } from '@kbn/es-query';
 import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { RefreshInterval } from '../../../common';
-import { createNowProviderMock } from '../../now_provider/mocks';
+import { createNowProviderMock } from '../../../common/now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();

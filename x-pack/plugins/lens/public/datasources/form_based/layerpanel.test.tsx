@@ -14,7 +14,7 @@ import { EuiSelectable } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
-import { TermsIndexPatternColumn } from './operations';
+import { TermsIndexPatternColumn } from '../../../common/datasources/form_based/operations';
 import { act } from 'react-dom/test-utils';
 import { TriggerButton } from '../../shared_components/dataview_picker/trigger';
 

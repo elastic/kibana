@@ -20,7 +20,7 @@ export type {
 } from './query_point_event_annotation/types';
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
 export { queryPointEventAnnotation } from './query_point_event_annotation';
-export { eventAnnotationGroup } from './event_annotation_group';
+export { eventAnnotationGroup, mapSavedObjectToGroupConfig } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';

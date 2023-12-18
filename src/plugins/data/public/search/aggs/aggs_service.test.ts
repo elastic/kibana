@@ -20,7 +20,7 @@ import {
   AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
-import { createNowProviderMock } from '../../now_provider/mocks';
+import { createNowProviderMock } from '../../../common/now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();
 

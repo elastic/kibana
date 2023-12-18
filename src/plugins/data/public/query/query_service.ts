@@ -26,7 +26,7 @@ import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
 import { getEsQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
-import { NowProviderInternalContract } from '../now_provider';
+import { NowProviderInternalContract } from '../../common/now_provider';
 import {
   extract,
   getAllMigrations,

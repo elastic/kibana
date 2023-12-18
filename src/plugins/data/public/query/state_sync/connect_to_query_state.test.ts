@@ -18,7 +18,7 @@ import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from '../query_state';
-import { createNowProviderMock } from '../../now_provider/mocks';
+import { createNowProviderMock } from '../../../common/now_provider/mocks';
 
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>
   connectToQueryState(query, state, {

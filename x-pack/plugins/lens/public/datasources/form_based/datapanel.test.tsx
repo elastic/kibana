@@ -28,7 +28,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { TermsIndexPatternColumn } from './operations';
+import { TermsIndexPatternColumn } from '../../../common/datasources/form_based/operations';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';

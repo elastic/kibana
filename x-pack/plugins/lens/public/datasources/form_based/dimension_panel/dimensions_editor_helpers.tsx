@@ -22,10 +22,10 @@ import {
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
-} from '../operations';
-import { isColumnOfType } from '../operations/definitions/helpers';
+} from '../../../../common/datasources/form_based/operations';
+import { isColumnOfType } from '../../../../common/datasources/form_based/operations/definitions/helpers';
 import { FormBasedLayer } from '../types';
-import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
+import { MAX_TERMS_OTHER_ENABLED } from '../../../../common/datasources/form_based/operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';

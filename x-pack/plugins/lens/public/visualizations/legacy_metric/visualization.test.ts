@@ -9,7 +9,7 @@ import { getLegacyMetricVisualization } from './visualization';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/common';

@@ -29,7 +29,7 @@ import {
   isNumericMetric,
   isReferenceLayer,
 } from './visualization_helpers';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {

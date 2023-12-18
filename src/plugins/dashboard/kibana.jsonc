@@ -25,7 +25,7 @@
       "urlForwarding",
       "presentationUtil",
       "visualizations",
-      "unifiedSearch"
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "home",
@@ -35,7 +35,8 @@
       "usageCollection",
       "taskManager",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "lens"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
   }

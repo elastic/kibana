@@ -44,8 +44,8 @@ import {
   SumIndexPatternColumn,
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
-} from './operations';
-import { createMockedFullReference } from './operations/mocks';
+} from '../../../common/datasources/form_based/operations';
+import { createMockedFullReference } from '../../../common/datasources/form_based/operations/mocks';
 import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';

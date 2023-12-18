@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormBasedLayer } from '../types';
-import { hasField } from '../pure_utils';
-import { GenericIndexPatternColumn } from '../operations';
+import { hasField } from '../../../../common/datasources/form_based/pure_utils';
+import { GenericIndexPatternColumn } from '../../../../common/datasources/form_based/operations';
 import { IndexPatternField } from '../../../types';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {

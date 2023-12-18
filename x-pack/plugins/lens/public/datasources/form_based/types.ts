@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import type {
+  IncompleteColumn,
+  GenericIndexPatternColumn,
+} from '../../../common/datasources/form_based/operations';
 import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
 
 export type {
@@ -37,9 +40,9 @@ export type {
   OverallSumIndexPatternColumn,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
-} from './operations';
+} from '../../../common/datasources/form_based/operations';
 
-export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
+export type { FormulaPublicApi } from '../../../common/datasources/form_based/operations/definitions/formula/formula_public_api';
 
 export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;

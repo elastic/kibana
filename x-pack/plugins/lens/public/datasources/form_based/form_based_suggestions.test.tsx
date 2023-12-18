@@ -13,7 +13,7 @@ import type {
   CountColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { DatasourceSuggestion } from '../../types';
-import { generateId } from '../../id_generator';
+import { generateId } from '../../../common/id_generator';
 import type { FormBasedPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
@@ -25,12 +25,15 @@ import {
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import {
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../../../common/datasources/form_based/operations';
 import {
   MathIndexPatternColumn,
   RangeIndexPatternColumn,
   StaticValueIndexPatternColumn,
-} from './operations/definitions';
+} from '../../../common/datasources/form_based/operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');

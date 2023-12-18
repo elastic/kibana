@@ -19,7 +19,7 @@ import {
 } from '../../../common/search/aggs';
 import { calculateBounds, TimeRange } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
-import type { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../../common/now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change

@@ -35,7 +35,7 @@ import {
   isLensFilterEvent,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import type { IndexPatternServiceAPI } from './data_views_service/service';
+import type { IndexPatternServiceAPI } from '../common/data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -65,14 +65,6 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
   }
 
   return configuredTimeZone;
-}
-export function getActiveDatasourceIdFromDoc(doc?: Document) {
-  if (!doc) {
-    return null;
-  }
-
-  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  return firstDatasourceFromDoc || null;
 }
 
 export function getActiveVisualizationIdFromDoc(doc?: Document) {
@@ -336,11 +328,6 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
     op1.layerId === op2.layerId
   );
 };
-
-export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
-  dataViewRefs.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
 
 export const getSearchWarningMessages = (
   adapter: RequestAdapter,

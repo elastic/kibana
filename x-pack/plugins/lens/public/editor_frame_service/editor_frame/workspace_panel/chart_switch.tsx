@@ -42,7 +42,7 @@ import {
   selectVisualization,
   selectDatasourceStates,
 } from '../../../state_management';
-import { generateId } from '../../../id_generator/id_generator';
+import { generateId } from '../../../../common/id_generator/id_generator';
 
 interface VisualizationSelection {
   visualizationId: string;

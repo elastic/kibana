@@ -8,15 +8,15 @@
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { insertOrReplaceColumn } from '../operations/layer_helpers';
+import { insertOrReplaceColumn } from '../../../../common/datasources/form_based/operations/layer_helpers';
 import { FieldSelect } from './field_select';
 import type {
   FieldInputProps,
   OperationType,
   GenericIndexPatternColumn,
-} from '../operations/definitions';
-import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
-import { shouldShowTimeSeriesOption } from '../pure_utils';
+} from '../../../../common/datasources/form_based/operations/definitions';
+import type { FieldBasedIndexPatternColumn } from '../../../../common/datasources/form_based/operations/definitions/column_types';
+import { shouldShowTimeSeriesOption } from '../../../../common/datasources/form_based/pure_utils';
 
 export function FieldInput({
   layer,

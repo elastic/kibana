@@ -55,7 +55,7 @@ import {
   isMessageRemovable,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
-import { buildExpression } from '../expression_helpers';
+import { buildExpression } from '../../../../common/expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';

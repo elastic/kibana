@@ -12,7 +12,7 @@ import { RandomSamplingIcon } from '@kbn/random-sampling';
 import type { DatasourceLayerPanelProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
-import { getSamplingValue } from './utils';
+import { getSamplingValue } from '../../../common/datasources/form_based/utils';
 import { getIgnoreGlobalFilterIcon } from '../../shared_components/ignore_global_filter';
 
 export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {

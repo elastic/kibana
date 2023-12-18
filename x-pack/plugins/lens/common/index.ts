@@ -6,3 +6,4 @@
  */
 export { DOCUMENT_FIELD_NAME } from './constants';
 export type { PersistableFilter, LegacyMetricState } from './types';
+export { docToExpression } from './doc_to_expression';

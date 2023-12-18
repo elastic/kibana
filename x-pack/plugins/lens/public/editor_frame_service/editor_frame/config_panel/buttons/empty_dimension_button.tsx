@@ -19,7 +19,7 @@ import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualiz
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';
-import { generateId } from '../../../../id_generator';
+import { generateId } from '../../../../../common/id_generator';
 
 import {
   Datasource,
