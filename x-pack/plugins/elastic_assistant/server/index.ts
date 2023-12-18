@@ -13,6 +13,10 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
-  ElasticAssistantPluginSetup as EcsDataQualityDashboardPluginSetup,
-  ElasticAssistantPluginStart as EcsDataQualityDashboardPluginStart,
+  ElasticAssistantPluginSetup,
+  ElasticAssistantPluginStart,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantPluginStartDependencies,
+  AssistantTool,
+  AssistantToolParams,
 } from './types';

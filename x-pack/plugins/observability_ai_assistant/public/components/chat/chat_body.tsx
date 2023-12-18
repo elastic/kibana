@@ -14,6 +14,8 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -32,16 +34,17 @@ import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { MESSAGE_FEEDBACK } from '../../analytics/schema';
 import { ChatActionClickType } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { TELEMETRY, sendEvent } from '../../analytics';
 
 const fullHeightClassName = css`
   height: 100%;
 `;
 
-const timelineClassName = css`
+const timelineClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  ${scrollBarStyles}
 `;
 
 const promptEditorClassname = css`
@@ -104,6 +107,8 @@ export function ChatBody({
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -140,8 +145,15 @@ export function ChatBody({
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    const feedbackEvent = { ...message, feedback };
-    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+    if (conversation.value?.conversation && 'user' in conversation.value) {
+      sendEvent(chatService.analytics, {
+        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        payload: {
+          messageWithFeedback: { message, feedback },
+          conversation: conversation.value,
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -196,6 +208,9 @@ export function ChatBody({
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
             />
             <EuiSpacer size="s" />
           </EuiPanel>
@@ -207,7 +222,7 @@ export function ChatBody({
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName}>
+        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)}>
           <div ref={timelineContainerRef} className={fullHeightClassName}>
             <EuiPanel
               grow
@@ -236,6 +251,9 @@ export function ChatBody({
                     const indexOf = messages.indexOf(message);
                     next(messages.slice(0, indexOf));
                   }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    sendEvent(chatService.analytics, eventWithPayload)
+                  }
                   onStopGenerating={() => {
                     stop();
                   }}
@@ -283,8 +301,11 @@ export function ChatBody({
             className={promptEditorContainerClassName}
           >
             <ChatPromptEditor
-              loading={isLoading}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              loading={isLoading}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
