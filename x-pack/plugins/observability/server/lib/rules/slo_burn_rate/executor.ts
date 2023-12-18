@@ -94,11 +94,10 @@ export const getRuleExecutor = ({
     const { dateEnd } = getTimeRange('1m');
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
-    const alertLimit = alertFactory.alertLimit.getValue();
-    let hasReachedLimit = false;
-    let scheduledActionsCount = 0;
-
     if (results.length > 0) {
+      const alertLimit = alertFactory.alertLimit.getValue();
+      let hasReachedLimit = false;
+      let scheduledActionsCount = 0;
       for (const result of results) {
         const {
           instanceId,
@@ -116,12 +115,12 @@ export const getRuleExecutor = ({
           spaceId,
           `/app/observability/slos/${slo.id}${urlQuery}`
         );
-        if (scheduledActionsCount >= alertLimit) {
-          // need to set this so that warning is displayed in the UI and in the logs
-          hasReachedLimit = true;
-          break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-        }
         if (shouldAlert) {
+          if (scheduledActionsCount >= alertLimit) {
+            // need to set this so that warning is displayed in the UI and in the logs
+            hasReachedLimit = true;
+            break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+          }
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -172,8 +171,8 @@ export const getRuleExecutor = ({
           scheduledActionsCount++;
         }
       }
+      alertFactory.alertLimit.setLimitReached(hasReachedLimit);
     }
-    alertFactory.alertLimit.setLimitReached(hasReachedLimit);
 
     const { getRecoveredAlerts } = alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
