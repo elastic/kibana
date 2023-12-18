@@ -34,6 +34,7 @@ export function SlosPage() {
   const { hasAtLeast } = useLicense();
 
   const { isLoading, isError, data: sloList } = useFetchSloList();
+  console.log(sloList, '!!sloList');
   const { total } = sloList ?? { total: 0 };
 
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();

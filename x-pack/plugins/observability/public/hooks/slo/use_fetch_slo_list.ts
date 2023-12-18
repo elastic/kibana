@@ -22,6 +22,7 @@ interface SLOListParams {
   sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
   perPage?: number;
+  groupBy?: string;
 }
 
 export interface UseFetchSloListResponse {
@@ -40,6 +41,7 @@ export function useFetchSloList({
   sortDirection = 'desc',
   shouldRefetch,
   perPage = DEFAULT_SLO_PAGE_SIZE,
+  groupBy = 'ungrouped',
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -51,7 +53,7 @@ export function useFetchSloList({
   );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection }),
+    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection, groupBy }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
@@ -64,7 +66,48 @@ export function useFetchSloList({
         signal,
       });
 
-      return response;
+      console.log(response, '!!useFetchSloList response');
+      console.log(groupBy, '!!groupBy useFetchSloList');
+      if (groupBy !== 'ungrouped') {
+        // can I get the tags from saved object, so that I avoid looping through all slos to retrieve the tags
+        const tags = [];
+        const groupedResponse = {
+          group_by_sli_indicator: {
+            'sli.kql.custom': [],
+            'sli.metric.custom': [],
+            'sli.apm.transactionErrorRate': [],
+            'sli.apm.transactionDuration': [],
+          },
+          group_by_status: {
+            healthy: [],
+            violated: [],
+            degraded: [],
+            nodata: [],
+          },
+          group_by_tags: {},
+        };
+        response.results.forEach((slo) => {
+          // Group by indicator
+          groupedResponse.group_by_sli_indicator[slo.indicator.type].push(slo.id);
+
+          // Group by status
+          groupedResponse.group_by_status[slo.summary.status.toLowerCase()].push(slo.id);
+
+          // Group by tags
+          slo.tags.forEach((tag) => {
+            if (!(tag in groupedResponse.group_by_tags)) {
+              groupedResponse.group_by_tags[tag] = [slo.id];
+            } else {
+              groupedResponse.group_by_tags[tag].push(slo.id);
+            }
+          });
+        });
+
+        console.log(groupedResponse, '!!groupedResponse');
+        return groupedResponse;
+      } else {
+        return response;
+      }
     },
     cacheTime: 0,
     refetchOnWindowFocus: false,
@@ -84,11 +127,12 @@ export function useFetchSloList({
         return;
       }
 
-      if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
-        setStateRefetchInterval(SLO_SHORT_REFETCH_INTERVAL);
-      } else {
-        setStateRefetchInterval(SLO_LONG_REFETCH_INTERVAL);
-      }
+      // TODO temporarily comment
+      // if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
+      //   setStateRefetchInterval(SLO_SHORT_REFETCH_INTERVAL);
+      // } else {
+      //   setStateRefetchInterval(SLO_LONG_REFETCH_INTERVAL);
+      // }
     },
     onError: (error: Error) => {
       toasts.addError(error, {
