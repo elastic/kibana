@@ -41,20 +41,18 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverUnload', 'timeline');
   });
 
-  it(`should have ${defaultPageSize} events in the page by default`, () => {
+  it(`should paginate records correctly`, () => {
+    // should have ${defaultPageSize} events in the page by default
     cy.get(TIMELINE_EVENT).should('have.length', defaultPageSize);
-  });
 
-  it('should be able to go to next / previous page', () => {
+    // should be able to go to next / previous page
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
-  });
 
-  it(`should select ${defaultPageSize} items per page by default`, () => {
+    // should select ${defaultPageSize} items per page by default
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
-  });
 
-  it('should be able to change items count per page with the dropdown', () => {
+    // should be able to change items count per page with the dropdown
     const itemsPerPage = 100;
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_BTN).first().click();
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION(itemsPerPage)).click();
