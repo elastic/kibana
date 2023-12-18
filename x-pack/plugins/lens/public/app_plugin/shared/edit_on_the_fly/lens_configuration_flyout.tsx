@@ -72,11 +72,13 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
-  const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
     (state) => state.lens
   );
+  // use the latest activeId, but fallback to attributes
+  const activeVisualization =
+    visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
