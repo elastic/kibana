@@ -79,32 +79,32 @@ describe('getDataStreams', () => {
       {
         name: 'logs-elastic_agent-default',
         size: '1gb',
-        size_bytes: 1170805528,
-        last_activity: 1698916071000,
+        sizeBytes: 1170805528,
+        lastActivity: 1698916071000,
       },
       {
         name: 'logs-elastic_agent.filebeat-default',
         size: '1.3mb',
-        size_bytes: 1459100,
-        last_activity: 1698902209996,
+        sizeBytes: 1459100,
+        lastActivity: 1698902209996,
       },
       {
         name: 'logs-elastic_agent.fleet_server-default',
         size: '2.9mb',
-        size_bytes: 3052148,
-        last_activity: 1698914110010,
+        sizeBytes: 3052148,
+        lastActivity: 1698914110010,
       },
       {
         name: 'logs-elastic_agent.metricbeat-default',
         size: '1.6mb',
-        size_bytes: 1704807,
-        last_activity: 1698672046707,
+        sizeBytes: 1704807,
+        lastActivity: 1698672046707,
       },
       {
         name: 'logs-test.test-default',
         size: '6.2mb',
-        size_bytes: 6570447,
-        last_activity: 1698913802000,
+        sizeBytes: 6570447,
+        lastActivity: 1698913802000,
       },
     ]);
   });
