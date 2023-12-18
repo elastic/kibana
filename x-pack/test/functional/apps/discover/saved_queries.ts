@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryName = 'shared-saved-query';
   const destinationSpaceId = 'nondefaultspace';
 
-  // Failing: See https://github.com/elastic/kibana/issues/173094
-  describe.skip('Discover Saved Queries', () => {
+  describe('Discover Saved Queries', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -76,11 +75,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('updates a saved query', async () => {
+        const name = 'ok-response';
+
         // Navigate to Discover & create a saved query
         await PageObjects.common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
+        await savedQueryManagementComponent.saveNewQuery(name, '', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail(name);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
         // Navigate to Discover & create a saved query
@@ -90,10 +91,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Expect to see a success toast
         const successToast = await toasts.getToastElement(1);
         const successText = await successToast.getVisibleText();
-        expect(successText).to.equal(`Your query "${savedQueryName}" was saved`);
+        expect(successText).to.equal(`Your query "${name}" was saved`);
 
         await PageObjects.common.navigateToApp('discover');
-        await savedQueryManagementComponent.deleteSavedQuery(savedQueryName);
+        await savedQueryManagementComponent.deleteSavedQuery(name);
       });
     });
   });
