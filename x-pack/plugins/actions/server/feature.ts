@@ -13,6 +13,9 @@ import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 
+export const CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-advanced-connectors';
+export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic-connectors';
+
 /**
  * The order of appearance in the feature privilege page
  * under the management section.
@@ -33,7 +36,10 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [],
+      api: [
+        CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
+        CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
+      ],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -50,7 +56,7 @@ export const ACTIONS_FEATURE = {
     },
     read: {
       app: [],
-      api: [],
+      api: [CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],

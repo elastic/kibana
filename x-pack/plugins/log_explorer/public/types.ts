@@ -6,18 +6,22 @@
  */
 import type { ComponentType } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { LogExplorerLocators } from '../common/locators';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LogExplorerLocators } from '../common/locators';
 import type { LogExplorerProps } from './components/log_explorer';
+import type { CreateLogExplorerController } from './controller';
 
 export interface LogExplorerPluginSetup {
   locators: LogExplorerLocators;
 }
 export interface LogExplorerPluginStart {
   LogExplorer: ComponentType<LogExplorerProps>;
+  createLogExplorerController: CreateLogExplorerController;
 }
 
 export interface LogExplorerSetupDeps {
@@ -30,4 +34,6 @@ export interface LogExplorerStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   fieldFormats: FieldFormatsStart;
+  navigation: NavigationPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

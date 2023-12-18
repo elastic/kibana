@@ -1,0 +1,64 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "buildNum": 9007199254740991
+      },
+      "references": [],
+      "type": "config",
+      "updated_at": "2020-06-17T15:03:14.532Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "saved-object-mv:e35debe0-6c54-11ee-88d4-47e62f05d6ef",
+    "index": ".kibana",
+    "source": {
+      "saved-object-mv": {
+        "encryptedAttribute": "x4ZzV15mzNhVVTtFSk9Q/XsDqUJVi8B3i82OusVGFTOsm8VntzCq5j/QUTRdjulZUQq6SW1olrZwl2lrpvJuAJ9ItRMJHNwPVVo0ia9FgvnIjNZ4KUpj/Vrp3jtMNVhFEcKN7+zzxY9BDm2EYXGSiSVEDmSYTFM=",
+        "nonEncryptedAttribute": "elastic"
+      },
+      "typeMigrationVersion": "8.8.0",
+      "modelVersion": 0,
+      "references": [],
+      "namespaces": [
+        "default"
+      ],
+      "type": "saved-object-mv",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "saved-object-mv:fd176460-6c56-11ee-b81b-d9ea3824cff5",
+    "index": ".kibana",
+    "source": {
+      "saved-object-mv": {
+        "encryptedAttribute": "FyAHi/Go7w/6/Ip2OZEnQOm7GbYIvFEIZa3xWXq4kfhskCQWQRXXeEI5gu7xWPjSADL4pxbkHiWIfLrJXH7i5fsrL/05zi74AQ8hYeMAQPno+tcDa22Azb/YDiaFo/6hGIoLb5r00pp2mSdsItIAVSiFg1c56gM=",
+        "nonEncryptedAttribute": "elastic"
+      },
+      "typeMigrationVersion": "8.8.0",
+      "modelVersion": 0,
+      "references": [],
+      "namespaces": [
+        "custom-space"
+      ],
+      "type": "saved-object-mv",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
