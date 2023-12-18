@@ -163,12 +163,12 @@ export default function ({ getService }: FtrProviderContext) {
           expect(status).toBe(200);
         });
 
-        it('has_api_keys', async () => {
+        it('_has_active', async () => {
           let body: unknown;
           let status: number;
 
           ({ body, status } = await supertest
-            .get('/internal/security/has_api_keys')
+            .get('/internal/security/_has_active')
             .set(svlCommonApi.getCommonRequestHeader()));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(status).toBe(400);
 
           ({ body, status } = await supertest
-            .get('/internal/security/has_api_keys')
+            .get('/internal/security/_has_active')
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
           expect(status).toBe(200);
