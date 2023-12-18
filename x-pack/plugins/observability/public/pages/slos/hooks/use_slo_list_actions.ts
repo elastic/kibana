@@ -20,7 +20,7 @@ export function useSloListActions({
   setIsActionsPopoverOpen: (val: boolean) => void;
   setIsAddRuleFlyoutOpen: (val: boolean) => void;
   setDeleteConfirmationModalOpen: (val: boolean) => void;
-  setDashboardAttachmentReady: (val: boolean) => void;
+  setDashboardAttachmentReady?: (val: boolean) => void;
 }) {
   const { embeddable } = useKibana().services;
   const { mutate: deleteSlo } = useDeleteSlo();
