@@ -5,44 +5,48 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef, useState } from 'react';
+import { css, keyframes } from '@emotion/css';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Conversation, Message, MessageRole } from '../../../common/types';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { IncorrectLicensePanel } from './incorrect_license_panel';
-import { InitialSetupPanel } from './initial_setup_panel';
-import { ChatActionClickType } from './types';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { Feedback } from '../feedback_buttons';
-import { MESSAGE_FEEDBACK } from '../../analytics/schema';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { WelcomeMessage } from './welcome_message';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { ChatActionClickType } from './types';
+import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { TELEMETRY, sendEvent } from '../../analytics';
+
+const fullHeightClassName = css`
+  height: 100%;
+`;
 
 const timelineClassName = css`
   overflow-y: auto;
 `;
 
-const loadingSpinnerContainerClassName = css`
-  align-self: center;
+const promptEditorClassname = css`
+  overflow: hidden;
+  transition: height ${euiThemeVars.euiAnimSpeedFast} ${euiThemeVars.euiAnimSlightResistance};
 `;
 
 const incorrectLicenseContainer = css`
@@ -52,6 +56,29 @@ const incorrectLicenseContainer = css`
 
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
+`;
+
+const promptEditorContainerClassName = css`
+  padding-top: 12px;
+  padding-bottom: 8px;
+`;
+
+const fadeInAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const animClassName = css`
+  height: 100%;
+  opacity: 0;
+  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal}
+    ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
 export function ChatBody({
@@ -113,8 +140,15 @@ export function ChatBody({
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    const feedbackEvent = { ...message, feedback };
-    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+    if (conversation.value?.conversation && 'user' in conversation.value) {
+      sendEvent(chatService.analytics, {
+        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        payload: {
+          messageWithFeedback: { message, feedback },
+          conversation: conversation.value,
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -169,92 +203,104 @@ export function ChatBody({
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
             />
             <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
     );
-  } else if (
-    connectors.loading ||
-    knowledgeBase.status.loading ||
-    (!conversation.value && conversation.loading)
-  ) {
-    footer = (
-      <EuiFlexItem className={loadingSpinnerContainerClassName}>
-        <EuiLoadingSpinner />
-      </EuiFlexItem>
-    );
-  } else if (connectors.connectors?.length === 0 && !initialConversationId) {
-    footer = (
-      <InitialSetupPanel
-        connectors={connectors}
-        connectorsManagementHref={connectorsManagementHref}
-        knowledgeBase={knowledgeBase}
-        startedFrom={startedFrom}
-      />
-    );
+  } else if (!conversation.value && conversation.loading) {
+    footer = null;
   } else {
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <div ref={timelineContainerRef}>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-              <ChatTimeline
-                startedFrom={startedFrom}
-                messages={messages}
-                knowledgeBase={knowledgeBase}
-                chatService={chatService}
-                currentUser={currentUser}
-                chatState={state}
-                hasConnector={!!connectors.connectors?.length}
-                onEdit={(editedMessage, newMessage) => {
-                  const indexOf = messages.indexOf(editedMessage);
-                  next(messages.slice(0, indexOf).concat(newMessage));
-                }}
-                onFeedback={handleFeedback}
-                onRegenerate={(message) => {
-                  const indexOf = messages.indexOf(message);
-                  next(messages.slice(0, indexOf));
-                }}
-                onStopGenerating={() => {
-                  stop();
-                }}
-                onActionClick={(payload) => {
-                  setStickToBottom(true);
-                  switch (payload.type) {
-                    case ChatActionClickType.executeEsqlQuery:
-                      next(
-                        messages.concat({
-                          '@timestamp': new Date().toISOString(),
-                          message: {
-                            role: MessageRole.Assistant,
-                            content: '',
-                            function_call: {
-                              name: 'execute_query',
-                              arguments: JSON.stringify({
-                                query: payload.query,
-                              }),
-                              trigger: MessageRole.User,
-                            },
-                          },
-                        })
-                      );
-                      break;
+          <div ref={timelineContainerRef} className={fullHeightClassName}>
+            <EuiPanel
+              grow
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              className={animClassName}
+            >
+              {connectors.connectors?.length === 0 || messages.length === 1 ? (
+                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+              ) : (
+                <ChatTimeline
+                  startedFrom={startedFrom}
+                  messages={messages}
+                  knowledgeBase={knowledgeBase}
+                  chatService={chatService}
+                  currentUser={currentUser}
+                  chatState={state}
+                  hasConnector={!!connectors.connectors?.length}
+                  onEdit={(editedMessage, newMessage) => {
+                    const indexOf = messages.indexOf(editedMessage);
+                    next(messages.slice(0, indexOf).concat(newMessage));
+                  }}
+                  onFeedback={handleFeedback}
+                  onRegenerate={(message) => {
+                    const indexOf = messages.indexOf(message);
+                    next(messages.slice(0, indexOf));
+                  }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    sendEvent(chatService.analytics, eventWithPayload)
                   }
-                }}
-              />
+                  onStopGenerating={() => {
+                    stop();
+                  }}
+                  onActionClick={(payload) => {
+                    setStickToBottom(true);
+                    switch (payload.type) {
+                      case ChatActionClickType.executeEsqlQuery:
+                        next(
+                          messages.concat({
+                            '@timestamp': new Date().toISOString(),
+                            message: {
+                              role: MessageRole.Assistant,
+                              content: '',
+                              function_call: {
+                                name: 'execute_query',
+                                arguments: JSON.stringify({
+                                  query: payload.query,
+                                }),
+                                trigger: MessageRole.User,
+                              },
+                            },
+                          })
+                        );
+                        break;
+                    }
+                  }}
+                />
+              )}
             </EuiPanel>
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+
+        <EuiFlexItem
+          grow={false}
+          className={promptEditorClassname}
+          style={{
+            height: !connectors.loading && connectors.connectors?.length !== 0 ? 110 : 0,
+          }}
+        >
           <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            className={promptEditorContainerClassName}
+          >
             <ChatPromptEditor
-              loading={isLoading}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              loading={isLoading}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
