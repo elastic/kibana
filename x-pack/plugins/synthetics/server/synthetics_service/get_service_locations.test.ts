@@ -41,52 +41,145 @@ describe('getServiceLocations', function () {
     },
   });
 
-  it('should return all locations', async () => {
-    const locations = await getServiceLocations({
-      isDev: true,
-      config: {
-        service: {
-          manifestUrl: 'http://local.dev',
+  describe('when out of production', () => {
+    it('should return all locations regardless of the `showExperimentalLocations` key', async () => {
+      const locations = await getServiceLocations({
+        isDev: true,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: false,
+          },
+          enabled: true,
         },
-        enabled: true,
-      },
-      // @ts-ignore
-      logger: {
-        error: jest.fn(),
-      },
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            isInvalid: false,
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
+          },
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_east',
+            isInvalid: false,
+            label: 'US East',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.EXPERIMENTAL,
+          },
+        ],
+      });
+    });
+  });
+
+  describe('when in production', () => {
+    it('should return only GA locations and throttling when `showExperimentalLocations` is set to false', async () => {
+      const locations = await getServiceLocations({
+        isDev: false,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: false,
+          },
+          enabled: true,
+        },
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            isInvalid: false,
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
+          },
+        ],
+      });
     });
 
-    expect(locations).toEqual({
-      throttling: {
-        [BandwidthLimitKey.DOWNLOAD]: 100,
-        [BandwidthLimitKey.UPLOAD]: 50,
-      },
-      locations: [
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
+    it('should return all locations and throttling when `showExperimentalLocations` flag is set to true', async () => {
+      const locations = await getServiceLocations({
+        isDev: false,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: true,
           },
-          id: 'us_central',
-          isInvalid: false,
-          label: 'US Central',
-          url: 'https://local.dev',
-          isServiceManaged: true,
-          status: LocationStatus.GA,
+          enabled: true,
         },
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            isInvalid: false,
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
           },
-          id: 'us_east',
-          isInvalid: false,
-          label: 'US East',
-          url: 'https://local.dev',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-        },
-      ],
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_east',
+            isInvalid: false,
+            label: 'US East',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.EXPERIMENTAL,
+          },
+        ],
+      });
     });
   });
 });
