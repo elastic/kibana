@@ -144,6 +144,8 @@ export function ChatBody({
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
+  const [promptEditorMode, setPromptEditorMode] = useState<'text' | 'function'>('text');
+
   const handleFeedback = (message: Message, feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
       sendEvent(chatService.analytics, {
@@ -173,6 +175,18 @@ export function ChatBody({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineContainerRef.current]);
+
+  const getPromptEditorHeight = () => {
+    if (connectors.loading || connectors.connectors?.length === 0) {
+      return 0;
+    }
+
+    if (promptEditorMode === 'function') {
+      return 200;
+    }
+
+    return 71;
+  };
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -205,6 +219,9 @@ export function ChatBody({
             <ChatPromptEditor
               loading={isLoading}
               disabled
+              onSwitchMode={(mode) => {
+                setPromptEditorMode(mode);
+              }}
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
@@ -289,15 +306,14 @@ export function ChatBody({
         <EuiFlexItem
           grow={false}
           className={promptEditorClassname}
-          style={{
-            height: !connectors.loading && connectors.connectors?.length !== 0 ? 110 : 0,
-          }}
+          style={{ height: getPromptEditorHeight() }}
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel
             hasBorder={false}
             hasShadow={false}
             paddingSize="m"
+            color="subdued"
             className={promptEditorContainerClassName}
           >
             <ChatPromptEditor
@@ -306,6 +322,9 @@ export function ChatBody({
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
+              onSwitchMode={(mode) => {
+                setPromptEditorMode(mode);
+              }}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
