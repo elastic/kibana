@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ForwardRefExoticComponent } from 'react';
+import React from 'react';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-
 import { StreamingChatResponseEvent } from '../common/conversation_complete';
-import type { InsightProps } from './components/insight/insight';
 import { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -77,14 +75,14 @@ function createStartContract(): ObservabilityAIAssistantPluginStart {
   return {
     service: mockService,
 
-    ObservabilityAIAssistantActionMenuItem: () => (
+    ObservabilityAIAssistantActionMenuItem: (() => (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>Im a button</div>
-    ),
+    )) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantActionMenuItem'],
     ObservabilityAIAssistantContextualInsight: (
       // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
       <div>I give insight</div>
-    ) as unknown as ForwardRefExoticComponent<InsightProps>,
+    ) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantContextualInsight'],
     useGenAIConnectors: () => ({
       loading: false,
       selectConnector: () => {},

@@ -28,6 +28,8 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -93,14 +95,9 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ObservabilityAIAssistantPluginStart {
-  service: ObservabilityAIAssistantService;
-  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps>;
-  ObservabilityAIAssistantActionMenuItem: () => JSX.Element;
-  useGenAIConnectors: () => UseGenAIConnectorsResult;
-}
+export interface ConfigSchema {}
 
-export interface ObservabilityAIAssistantPluginSetup {}
+export type { PendingMessage };
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
@@ -122,6 +119,14 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export interface ConfigSchema {}
+export interface ObservabilityAIAssistantPluginSetup {}
 
-export type { PendingMessage };
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps>;
+  ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
+    Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
+      RefAttributes<{}>
+  >;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
+}
