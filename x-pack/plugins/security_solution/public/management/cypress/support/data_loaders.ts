@@ -11,12 +11,6 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
-import {
-  agentPolicyRouteService,
-  API_VERSIONS,
-  packagePolicyRouteService,
-} from '@kbn/fleet-plugin/common';
 import {
   getHostVmClient,
   createVm,
@@ -396,7 +390,7 @@ ${s1Info.status}
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostCIOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostCIResponse> => {
-      const { kbnClient, log } = await stackServicesPromise;
+      const { kbnClient, log, esClient } = await stackServicesPromise;
 
       let retryAttempt = 0;
       const attemptCreateEndpointHost =
@@ -416,28 +410,8 @@ ${s1Info.status}
                   log,
                   kbnClient,
                 });
-            if (options.endpointPolicyId) {
-              log.info('========! Getting package policy info', JSON.stringify(options, null, 2));
-              const a = await kbnClient.request<GetOnePackagePolicyResponse>({
-                method: 'GET',
-                path: packagePolicyRouteService.getInfoPath(options.endpointPolicyId),
-                headers: {
-                  'elastic-api-version': API_VERSIONS.public.v1,
-                },
-              });
-              log.info('========! Package policy info', JSON.stringify(a.data.item, null, 2));
-            }
 
-            const b = await kbnClient.request({
-              path: agentPolicyRouteService.getInfoPath(options.agentPolicyId),
-              headers: {
-                'elastic-api-version': API_VERSIONS.public.v1,
-              },
-              method: 'GET',
-            });
-
-            log.info('===========! Agent policy info', JSON.stringify(b.data.item, null, 2));
-            await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
+            await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000, esClient);
             return newHost;
           } catch (err) {
             log.info(`Caught error when setting up the agent: ${err}`);
@@ -450,28 +424,6 @@ ${s1Info.status}
               log.info(`Deleted endpoint host ${err.agentId} and retrying`);
               return attemptCreateEndpointHost();
             } else {
-              log.info('ENDPOINT CREATION FAILED');
-              if (options.endpointPolicyId) {
-                log.info('========! Getting package policy info', JSON.stringify(options, null, 2));
-                const a = await kbnClient.request<GetOnePackagePolicyResponse>({
-                  method: 'GET',
-                  path: packagePolicyRouteService.getInfoPath(options.endpointPolicyId),
-                  headers: {
-                    'elastic-api-version': API_VERSIONS.public.v1,
-                  },
-                });
-                log.info('========! Package policy info', JSON.stringify(a.data.item, null, 2));
-              }
-
-              const b = await kbnClient.request({
-                path: agentPolicyRouteService.getInfoPath(options.agentPolicyId),
-                headers: {
-                  'elastic-api-version': API_VERSIONS.public.v1,
-                },
-                method: 'GET',
-              });
-
-              log.info('===========! Agent policy info', JSON.stringify(b.data.item, null, 2));
               log.info(
                 `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
               );

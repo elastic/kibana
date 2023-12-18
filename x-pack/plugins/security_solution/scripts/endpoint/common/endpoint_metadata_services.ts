@@ -153,7 +153,8 @@ const fetchLastStreamedEndpointUpdate = async (
 export const waitForEndpointToStreamData = async (
   kbnClient: KbnClient,
   endpointAgentId: string,
-  timeoutMs: number = 60000
+  timeoutMs: number = 60000,
+  esClient?: Client
 ): Promise<HostInfo> => {
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -166,10 +167,23 @@ export const waitForEndpointToStreamData = async (
     found = await fetchEndpointMetadata(kbnClient, endpointAgentId)
       .then((data) => {
         console.log('===+', data);
+
         return data;
       })
-      .catch((error) => {
+      .catch(async (error) => {
         console.log('===-', error);
+        if (esClient) {
+          console.log(
+            JSON.stringify(
+              await esClient.transport.request({
+                method: 'GET',
+                path: `_transform/_stats`,
+              }),
+              null,
+              2
+            )
+          );
+        }
         // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
         // been streamed yet.
         if (error?.response?.status === 404) {
