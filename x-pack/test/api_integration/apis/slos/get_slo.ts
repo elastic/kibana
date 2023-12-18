@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
-    const transform = getService('transform');
+    // const transform = getService('transform');
     const retry = getService('retry');
     const slo = getService('slo');
     const sloEsClient = new SloEsClient(esClient);

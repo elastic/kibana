@@ -10,12 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Synthetics API Tests', () => {
-    before(async () => {
-      await esDeleteAllIndices('heartbeat*');
-      await esDeleteAllIndices('synthetics*');
-    });
-
+  describe('SLO API Tests', () => {
     loadTestFile(require.resolve('./create_slo'));
     loadTestFile(require.resolve('./delete_slo'));
     loadTestFile(require.resolve('./get_slo'));
