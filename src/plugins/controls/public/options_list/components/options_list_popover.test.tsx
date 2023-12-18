@@ -153,8 +153,8 @@ describe('Options list popover', () => {
     const popover = await mountComponent();
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');
     const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
-    expect(includeButton.prop('checked')).toBe(true);
-    expect(excludeButton.prop('checked')).toBeFalsy();
+    expect(includeButton.prop('aria-pressed')).toBe(true);
+    expect(excludeButton.prop('aria-pressed')).toBe(false);
   });
 
   test('if exclude = true, select appropriate button in button group', async () => {
@@ -163,8 +163,8 @@ describe('Options list popover', () => {
     });
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');
     const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
-    expect(includeButton.prop('checked')).toBeFalsy();
-    expect(excludeButton.prop('checked')).toBe(true);
+    expect(includeButton.prop('aria-pressed')).toBe(false);
+    expect(excludeButton.prop('aria-pressed')).toBe(true);
   });
 
   test('clicking another option unselects "Exists"', async () => {
@@ -176,8 +176,8 @@ describe('Options list popover', () => {
 
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
-      if (child.text() === 'woof') expect(child.prop('checked')).toBe('on');
-      else expect(child.prop('checked')).toBeFalsy();
+      if (child.text() === 'woof') expect(child.prop('aria-pressed')).toBe(true);
+      else expect(child.prop('aria-pressed')).toBeFalsy();
     });
   });
 
@@ -189,15 +189,15 @@ describe('Options list popover', () => {
     const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
     let availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
-      if (selections.includes(child.text())) expect(child.prop('checked')).toBe('on');
-      else expect(child.prop('checked')).toBeFalsy();
+      if (selections.includes(child.text())) expect(child.prop('aria-pressed')).toBe(true);
+      else expect(child.prop('aria-pressed')).toBeFalsy();
     });
 
     existsOption.simulate('click');
     availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     availableOptionsDiv.children().forEach((child, i) => {
-      if (child.text() === 'Exists (*)') expect(child.prop('checked')).toBe('on');
-      else expect(child.prop('checked')).toBeFalsy();
+      if (child.text() === 'Exists (*)') expect(child.prop('aria-pressed')).toBe(true);
+      else expect(child.prop('aria-pressed')).toBeFalsy();
     });
   });
 
