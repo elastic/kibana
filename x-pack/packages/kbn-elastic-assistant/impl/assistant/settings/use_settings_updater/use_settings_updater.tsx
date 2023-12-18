@@ -34,6 +34,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const {
     allQuickPrompts,
     allSystemPrompts,
+    assistantTelemetry,
     conversations,
     defaultAllow,
     defaultAllowReplacement,
@@ -65,6 +66,14 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
+  //
+  // const [didUpdateKnowledgeBaseSettings, setDidUpdateKnowledgeBaseSettings] =
+  //   useState<boolean>(false);
+  //
+  // const setUpdatedKnowledgeBaseSettings = useCallback((knowledgeBase) => {
+  //   _setUpdatedKnowledgeBaseSettings(knowledgeBase);
+  //   setDidUpdateKnowledgeBaseSettings((last) => !last);
+  // }, []);
 
   /**
    * Reset all pending settings
@@ -92,10 +101,24 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
     setConversations(updatedConversationSettings);
+    const didUpdateKnowledgeBase =
+      knowledgeBase.assistantLangChain !== updatedKnowledgeBaseSettings.assistantLangChain;
+    const didUpdateRAGAlerts = knowledgeBase.alerts !== updatedKnowledgeBaseSettings.alerts;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+      assistantTelemetry?.reportAssistantSettingToggled({
+        ...(didUpdateKnowledgeBase
+          ? { didEnableKnowledgeBase: updatedKnowledgeBaseSettings.assistantLangChain }
+          : {}),
+        ...(didUpdateRAGAlerts ? { didEnableRAGAlerts: updatedKnowledgeBaseSettings.alerts } : {}),
+      });
+    }
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
+    assistantTelemetry,
+    knowledgeBase.alerts,
+    knowledgeBase.assistantLangChain,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,

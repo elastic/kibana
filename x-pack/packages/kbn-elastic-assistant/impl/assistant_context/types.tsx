@@ -73,7 +73,10 @@ export interface AssistantTelemetry {
     assistantLangChain: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantKnowledgeBaseToggled: (params: { didEnable: boolean }) => void;
+  reportAssistantSettingToggled: (params: {
+    didEnableKnowledgeBase?: boolean;
+    didEnableRAGAlerts?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {

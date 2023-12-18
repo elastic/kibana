@@ -44,7 +44,7 @@ export enum TelemetryEventTypes {
   AssistantInvoked = 'Assistant Invoked',
   AssistantMessageSent = 'Assistant Message Sent',
   AssistantQuickPrompt = 'Assistant Quick Prompt',
-  AssistantKnowledgeBaseToggled = 'Assistant Knowledge Base Toggled',
+  AssistantSettingToggled = 'Assistant Setting Toggled',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',

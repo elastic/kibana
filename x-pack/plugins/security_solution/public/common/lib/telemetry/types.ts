@@ -34,7 +34,7 @@ import type {
   ReportAssistantInvokedParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantMessageSentParams,
-  ReportAssistantKnowledgeBaseToggledParams,
+  ReportAssistantSettingToggledParams,
 } from './events/ai_assistant/types';
 
 export * from './events/ai_assistant/types';
@@ -93,7 +93,7 @@ export interface TelemetryClientStart {
   reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
   reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
-  reportAssistantKnowledgeBaseToggled(params: ReportAssistantKnowledgeBaseToggledParams): void;
+  reportAssistantSettingToggled(params: ReportAssistantSettingToggledParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;

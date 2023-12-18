@@ -23,7 +23,7 @@ import type {
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
-  ReportAssistantKnowledgeBaseToggledParams,
+  ReportAssistantSettingToggledParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -75,12 +75,8 @@ export class TelemetryClient implements TelemetryClientStart {
     });
   };
 
-  public reportAssistantKnowledgeBaseToggled = ({
-    didEnable,
-  }: ReportAssistantKnowledgeBaseToggledParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AssistantKnowledgeBaseToggled, {
-      didEnable,
-    });
+  public reportAssistantSettingToggled = (params: ReportAssistantSettingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {

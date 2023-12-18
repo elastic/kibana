@@ -76,13 +76,20 @@ export const assistantQuickPrompt: TelemetryEvent = {
 };
 
 export const assistantKnowledgeBaseToggledEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantKnowledgeBaseToggled,
+  eventType: TelemetryEventTypes.AssistantSettingToggled,
   schema: {
-    didEnable: {
+    didEnableKnowledgeBase: {
       type: 'boolean',
       _meta: {
         description: 'Is knowledge base enabled',
-        optional: false,
+        optional: true,
+      },
+    },
+    didEnableRAGAlerts: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is RAG on Alerts enabled',
+        optional: true,
       },
     },
   },

@@ -24,14 +24,15 @@ export interface ReportAssistantQuickPromptParams {
   promptTitle: string;
 }
 
-export interface ReportAssistantKnowledgeBaseToggledParams {
-  didEnable: boolean;
+export interface ReportAssistantSettingToggledParams {
+  didEnableKnowledgeBase?: boolean;
+  didEnableRAGAlerts?: boolean;
 }
 
 export type ReportAssistantTelemetryEventParams =
   | ReportAssistantInvokedParams
   | ReportAssistantMessageSentParams
-  | ReportAssistantKnowledgeBaseToggledParams
+  | ReportAssistantSettingToggledParams
   | ReportAssistantQuickPromptParams;
 
 export type AssistantTelemetryEvent =
@@ -40,8 +41,8 @@ export type AssistantTelemetryEvent =
       schema: RootSchema<ReportAssistantInvokedParams>;
     }
   | {
-      eventType: TelemetryEventTypes.AssistantKnowledgeBaseToggled;
-      schema: RootSchema<ReportAssistantKnowledgeBaseToggledParams>;
+      eventType: TelemetryEventTypes.AssistantSettingToggled;
+      schema: RootSchema<ReportAssistantSettingToggledParams>;
     }
   | {
       eventType: TelemetryEventTypes.AssistantMessageSent;
