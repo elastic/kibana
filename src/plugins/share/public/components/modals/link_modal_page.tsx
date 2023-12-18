@@ -65,11 +65,14 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
-
+  const [url, setUrl] = useState<string>('');
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
+  const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
+  const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+
 
   interface UrlParams {
     [extensionName: string]: {
@@ -233,33 +236,34 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     }
   };
 
-  const setUrl = () => {
-    let url: string | undefined;
-
+  const setUrlHelper = () => {
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      url = getSavedObjectUrl();
-    } else if (shortUrl) {
-      url = shortUrlCache;
+      setUrl(getSavedObjectUrl()!);
+    } else if (isShortUrl !== undefined && shortUrlCache !== undefined) {
+      setUrl(shortUrlCache);
     } else {
-      url = getSnapshotUrl();
+      setUrl(getSnapshotUrl());
     }
 
-    if (url) {
-      url = addUrlAnonymousAccessParameters(url);
+    if (url !== '') {
+      setUrl(addUrlAnonymousAccessParameters(url));
     }
 
-    if (isEmbedded) {
-      url = makeIframeTag(url);
+    if (isEmbedded && url !== undefined) {
+      setUrl(makeIframeTag(url)!);
     }
 
-    setUrl();
+    setUrl(url);
   };
 
-  const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
-    const isChecked = evt.target.checked;
 
-    if (!isChecked || shortUrlCache !== undefined) {
-      setShortUrl(true);
+  const handleShortUrlChange = (evt: {
+    target: { checked: React.SetStateAction<boolean> };
+  }) => {
+    setCheckShortUrlSwitch(evt.target.checked);
+    if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
+      setIsShortUrl(true);
+      setUrlHelper();
       return;
     }
 
@@ -284,8 +288,8 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
-        checked={setShortUrl as unknown as boolean}
         onChange={handleShortUrlChange}
+        checked={checkShortUrlSwitch}
         data-test-subj="useShortUrl"
       />
     );

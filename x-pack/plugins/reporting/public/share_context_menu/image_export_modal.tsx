@@ -9,13 +9,17 @@ import {
   EuiButton,
   EuiCopy,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
@@ -287,17 +291,13 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     return (
       <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton
-            color={isUnsaved ? 'warning' : 'primary'}
-            onClick={copy}
-            size="s"
-            data-test-subj="shareReportingCopyURL"
-          >
+          <EuiLink onClick={copy} data-test-subj="shareReportingCopyURL">
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
-              defaultMessage="Copy POST URL"
-            />
-          </EuiButton>
+              defaultMessage="Export URL  "
+            /> 
+            <EuiIcon type="copy"/>
+          </EuiLink>
         )}
       </EuiCopy>
     );
@@ -344,7 +344,10 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     );
   return (
     <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-      <EuiSpacer size="xs" />
+      <EuiTitle>
+        <EuiText>Share as PNG or PDF</EuiText>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiText size="s">{renderDescription(objectType)}</EuiText>
       </EuiFormRow>
@@ -370,11 +373,10 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
           />
         )}
-        <EuiFlexGroup>
-          {renderOptions()}
-          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-        </EuiFlexGroup>
+        <EuiFlexItem>{renderOptions()}</EuiFlexItem>
       </EuiFlexGroup>
+      <EuiFlexGroup>{renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}</EuiFlexGroup>
+
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" justifyContent="flexEnd">
         <EuiButton fill onSubmit={onClose}>

@@ -9,6 +9,7 @@
 import {
   EuiButton,
   EuiCheckboxGroup,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -21,6 +22,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
@@ -68,14 +70,16 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
-  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({ ['filterBar']: true });
+  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({
+    ['filterBar']: true,
+  });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
-  const [url, setUrl] = useState<string>('')
+  const [url, setUrl] = useState<string>('');
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
-
+  const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
   interface UrlParams {
     [extensionName: string]: {
       [queryParam: string]: boolean;
@@ -249,10 +253,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     setUrl(url);
   };
 
-  const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
-    const isChecked = evt.target.checked;
-
-    if (!isChecked || shortUrlCache !== undefined) {
+  const handleShortUrlChange = (evt: {
+    target: { checked: React.SetStateAction<boolean> };
+  }) => {
+    setCheckShortUrlSwitch(evt.target.checked);
+    if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
       setIsShortUrl(true);
       setUrlHelper();
       return;
@@ -279,8 +284,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
-        checked={setIsShortUrl as unknown as boolean}
         onChange={handleShortUrlChange}
+        checked={checkShortUrlSwitch}
         data-test-subj="useShortUrl"
       />
     );
@@ -313,7 +318,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       return {
         ...prev,
         [id]: prev[id] ? !prev[id] : true,
-      }
+      };
     });
   };
 
@@ -321,6 +326,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'savedObject', label: 'Saved object' },
     { id: 'snapshot', label: 'Snapshot' },
   ];
+
+  const placeholderEmbedCode = '';
 
   return (
     <EuiModal onClose={onClose}>
@@ -352,6 +359,10 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
             <EuiSpacer size="m" />
           </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiCopy textToCopy={placeholderEmbedCode} anchorClassName="eui-displayBlock">
+            {(copy) => <EuiTextArea placeholder={placeholderEmbedCode} fullWidth />}
+          </EuiCopy>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiButton fill onClick={onClose}>
