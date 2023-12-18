@@ -104,6 +104,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           TEST_CONNECTOR_NAME
         );
       });
+      it('confirm connector table is disappeared after delete ', async () => {
+        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorTableIsDisappearedAfterDelete();
+      });
     });
   });
 }

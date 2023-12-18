@@ -72,6 +72,16 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.existOrFail('confirmModalConfirmButton');
         await testSubjects.existOrFail('confirmModalCancelButton');
       },
+      async confirmConnectorTableIsDisappearedAfterDelete() {
+        await retry.waitForWithTimeout('delete modal to disappear', 5000, () =>
+          testSubjects
+            .missingOrFail('confirmModalConfirmButton')
+            .then(() => true)
+            .catch(() => false)
+        );
+        browser.refresh();
+        this.expectConnectorTableToHaveNoItems();
+      },
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');
         await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
@@ -107,7 +117,6 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(true);
         await retry.try(async () => await testSubjects.click('confirmModalConfirmButton'));
-        this.expectConnectorTableToHaveNoItems(3000);
       },
       async deleteConnectorIncorrectName(incorrectName: string) {
         const fieldText = await testSubjects.find('serverlessSearchDeleteConnectorModalFieldText');
