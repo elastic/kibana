@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   type EuiDataGridColumn,
   EuiDescriptionList,
-  EuiInMemoryTable,
   EuiPanel,
-  EuiTabbedContent,
-  EuiTabbedContentProps,
   EuiTabbedContentTab,
   EuiTitle,
-  useEuiOverflowScroll,
 } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { ScrollableFlyoutTabbedContent, FieldsTable } from '@kbn/alerts-ui-shared';
 import { RegisterFormatter } from '../cells/render_cell_value';
 import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
@@ -33,88 +29,7 @@ const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBas
   );
 };
 
-export const search = {
-  box: {
-    incremental: true,
-    placeholder: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.filter.placeholder',
-      {
-        defaultMessage: 'Filter by Field, Value, or Description...',
-      }
-    ),
-    schema: true,
-  },
-};
-
-const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
-  <EuiTabbedContent
-    css={css`
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-
-      & [role='tabpanel'] {
-        display: flex;
-        flex: 1 0 0;
-        ${useEuiOverflowScroll('y', true)}
-      }
-    `}
-    {...props}
-  />
-);
-
-type TabId = 'overview';
-
-const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
-
-const useFieldBrowserPagination = () => {
-  const [pagination, setPagination] = useState<{ pageIndex: number }>({
-    pageIndex: 0,
-  });
-
-  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
-    setPagination({ pageIndex: index });
-  }, []);
-  const paginationTableProp = useMemo(
-    () => ({
-      ...pagination,
-      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
-    }),
-    [pagination]
-  );
-
-  return {
-    onTableChange,
-    paginationTableProp,
-  };
-};
-
-const FieldsTable = memo(({ alert }: Pick<AlertsTableFlyoutBaseProps, 'alert'>) => {
-  const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
-  return (
-    <EuiInMemoryTable
-      items={Object.entries(alert).map(([key, value]) => ({ key, value: value?.[0] }))}
-      itemId="key"
-      columns={[
-        {
-          field: 'key',
-          name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.field', {
-            defaultMessage: 'Field',
-          }),
-        },
-        {
-          field: 'value',
-          name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.value', {
-            defaultMessage: 'Value',
-          }),
-        },
-      ]}
-      onTableChange={onTableChange}
-      pagination={paginationTableProp}
-      search={search}
-    />
-  );
-});
+type TabId = 'overview' | 'table';
 
 export const getDefaultAlertFlyout =
   (columns: EuiDataGridColumn[], formatter: RegisterFormatter) => () => {
