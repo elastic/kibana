@@ -35,6 +35,10 @@ import { visit } from '../../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
+// https://github.com/cypress-io/cypress/issues/22113
+// issue is inside monaco editor, used in ES|QL query input
+// calling it after visiting page in each tests, seems fixes the issue
+// the only other alternative is patching ResizeObserver, which is something I would like to avoid
 const workaroundForResizeObserver = () =>
   cy.on('uncaught:exception', (err) => {
     if (err.message.includes('ResizeObserver loop limit exceeded')) {
