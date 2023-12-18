@@ -20,7 +20,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { Conversation } from '../../../..';
+import { merge } from 'lodash';
+import { Conversation, useFetchConversationsByUser } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
@@ -63,20 +64,34 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
-    const { allSystemPrompts, conversations } = useAssistantContext();
+    const { allSystemPrompts, baseConversations } = useAssistantContext();
 
-    const { deleteConversation, setConversation } = useConversation();
+    const { deleteConversation, createConversation } = useConversation();
+
+    const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+
+    const conversations = merge(
+      baseConversations,
+      (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+        (transformed, conversation) => {
+          transformed[conversation.id] = conversation;
+          return transformed;
+        },
+        {}
+      )
+    );
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
-        label: conversation.id,
+        id: conversation.id ?? '',
+        label: conversation.title,
       }));
     }, [conversations]);
 
     const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
-      return conversationOptions.filter((c) => c.label === selectedConversationId) ?? [];
+      return conversationOptions.filter((c) => c.id === selectedConversationId) ?? [];
     });
 
     // Callback for when user types to create a new system prompt
@@ -99,6 +114,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (!optionExists) {
           const newConversation: Conversation = {
             id: searchValue,
+            title: searchValue,
             messages: [],
             apiConfig: {
               connectorId: defaultConnectorId,
@@ -106,7 +122,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
               defaultSystemPromptId: defaultSystemPrompt?.id,
             },
           };
-          setConversation({ conversation: newConversation });
+          createConversation(newConversation);
         }
         onConversationSelected(searchValue);
       },
@@ -114,7 +130,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         allSystemPrompts,
         defaultConnectorId,
         defaultProvider,
-        setConversation,
+        createConversation,
         onConversationSelected,
       ]
     );
@@ -187,7 +203,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     useEvent('keydown', onKeyDown);
 
     useEffect(() => {
-      setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationId));
+      setSelectedOptions(conversationOptions.filter((c) => c.id === selectedConversationId));
     }, [conversationOptions, selectedConversationId]);
 
     const renderOption: (
@@ -195,7 +211,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value } = option;
+      const { label, value, id } = option;
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -230,7 +246,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onDelete(label);
+                    onDelete(id ?? '');
                   }}
                   data-test-subj="delete-option"
                   css={css`

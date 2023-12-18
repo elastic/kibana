@@ -11,7 +11,9 @@
       "actions",
       "data",
       "ml",
-      "taskManager"
+      "taskManager",
+      "spaces",
+      "security"
     ]
   }
 }

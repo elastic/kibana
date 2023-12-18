@@ -13,14 +13,15 @@ import styled from 'styled-components';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { merge } from 'lodash/fp';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, Message } from '../../..';
+import { Conversation, Message, useFetchConversationsByUser } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
 import { useConversation } from '../../assistant/use_conversation';
-import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
+import { conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -47,10 +48,24 @@ export const useConnectorSetup = ({
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
-  const { appendMessage, setApiConfig, setConversation } = useConversation();
+  const { appendMessage, setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, conversations, http } = useAssistantContext();
+  const { actionTypeRegistry, http, baseConversations } = useAssistantContext();
+
+  const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+
+  const conversations = merge(
+    baseConversations,
+    (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+      (transformed, conversationData) => {
+        transformed[conversation.id] = conversationData;
+        return transformed;
+      },
+      {}
+    )
+  );
+
   const {
     data: connectors,
     isSuccess: areConnectorsFetched,
@@ -108,8 +123,8 @@ export const useConnectorSetup = ({
     setShowAddConnectorButton(true);
     bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
-    setConversation({ conversation: clearPresentationData(conversation) });
-  }, [conversation, onSetupComplete, setConversation]);
+    // setConversation({ conversation: clearPresentationData(conversation) });
+  }, [onSetupComplete]);
 
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
@@ -185,6 +200,8 @@ export const useConnectorSetup = ({
       Object.values(conversations).forEach((c) => {
         setApiConfig({
           conversationId: c.id,
+          title: c.title,
+          isDefault: c.isDefault,
           apiConfig: {
             ...c.apiConfig,
             connectorId: connector.id,
@@ -194,6 +211,7 @@ export const useConnectorSetup = ({
           },
         });
       });
+      console.log('setApiConfig ggg');
 
       refetchConnectors?.();
       setIsConnectorModalVisible(false);

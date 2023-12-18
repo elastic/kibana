@@ -40,6 +40,7 @@ describe('getComments', () => {
       currentConversation: {
         apiConfig: {},
         id: '1',
+        title: '1',
         messages: [
           {
             role: user,

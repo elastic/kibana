@@ -24,18 +24,17 @@ import { keyBy } from 'lodash/fp';
 import { css } from '@emotion/react';
 import { Conversation, Prompt } from '../../../../..';
 import * as i18n from './translations';
-import { UseAssistantContext } from '../../../../assistant_context';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
 import { TEST_IDS } from '../../../constants';
 
 interface Props {
-  conversationSettings: UseAssistantContext['conversations'];
+  conversationSettings: Record<string, Conversation>;
   onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
   selectedSystemPrompt: Prompt | undefined;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
   setUpdatedConversationSettings: React.Dispatch<
-    React.SetStateAction<UseAssistantContext['conversations']>
+    React.SetStateAction<Record<string, Conversation>>
   >;
   systemPromptSettings: Prompt[];
 }

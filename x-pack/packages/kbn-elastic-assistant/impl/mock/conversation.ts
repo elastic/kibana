@@ -10,6 +10,7 @@ import { Conversation } from '../..';
 
 export const alertConvo: Conversation = {
   id: 'Alert summary',
+  title: 'Alert summary',
   isDefault: true,
   messages: [
     {
@@ -32,6 +33,7 @@ export const alertConvo: Conversation = {
 
 export const emptyWelcomeConvo: Conversation = {
   id: 'Welcome',
+  title: 'Welcome',
   isDefault: true,
   theme: {
     title: 'Elastic AI Assistant',
@@ -72,6 +74,7 @@ export const welcomeConvo: Conversation = {
 
 export const customConvo: Conversation = {
   id: 'Custom option',
+  title: 'Custom option',
   isDefault: false,
   messages: [],
   apiConfig: {

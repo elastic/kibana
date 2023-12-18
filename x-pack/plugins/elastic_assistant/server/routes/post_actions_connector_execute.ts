@@ -19,7 +19,7 @@ import { buildRouteValidation } from '../schemas/common';
 import {
   PostActionsConnectorExecuteBody,
   PostActionsConnectorExecutePathParams,
-} from '../schemas/post_actions_connector_execute';
+} from '../schemas/actions_connector/post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';

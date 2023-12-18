@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/post_actions_connector_execute';
+import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/actions_connector/post_actions_connector_execute';
 
 export type RequestBody = PostActionsConnectorExecuteBodyInputs;
 

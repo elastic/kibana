@@ -9,8 +9,8 @@ import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import { DataStreamAdapter } from './create_data_stream';
-import { IIndexPatternString } from '../types';
+import { DataStreamAdapter } from './create_datastream';
+import { IIndexPatternString } from '../../types';
 
 export interface ConcreteIndexInfo {
   index: string;

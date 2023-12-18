@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
@@ -13,7 +13,7 @@ import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from './helpers';
-import { useConversationStore } from './use_conversation_store';
+import { useBaseConversations } from './use_conversation_store';
 import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
@@ -42,11 +42,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
   const assistantStreamingEnabled = useIsExperimentalFeatureEnabled('assistantStreamingEnabled');
 
-  const { conversations, setConversations } = useConversationStore();
-  const getInitialConversation = useCallback(() => {
-    return conversations;
-  }, [conversations]);
-
+  const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
@@ -66,26 +62,25 @@ export const AssistantProvider: React.FC = ({ children }) => {
       alertsIndexPattern={alertsIndexPattern}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      assistantTelemetry={assistantTelemetry}
-      defaultAllow={defaultAllow}
-      defaultAllowReplacement={defaultAllowReplacement}
+      assistantTelemetry={assistantTelemetry} // to server
+      defaultAllow={defaultAllow} // to server and plugin start
+      defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-      baseAllow={DEFAULT_ALLOW}
-      baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT}
+      baseAllow={DEFAULT_ALLOW} // to server and plugin start
+      baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
-      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
-      getInitialConversations={getInitialConversation}
+      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
+      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
+      baseConversations={baseConversations}
       getComments={getComments}
       http={http}
       assistantStreamingEnabled={assistantStreamingEnabled}
       modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
       ragOnAlerts={ragOnAlerts}
-      setConversations={setConversations}
-      setDefaultAllow={setDefaultAllow}
-      setDefaultAllowReplacement={setDefaultAllowReplacement}
+      setDefaultAllow={setDefaultAllow} // remove
+      setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

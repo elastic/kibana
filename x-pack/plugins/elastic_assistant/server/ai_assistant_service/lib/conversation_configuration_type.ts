@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { IIndexPatternString } from '../../types';
 
@@ -27,78 +26,6 @@ const dynamic = {
   dynamic: true,
 };
 
-const commonFields: ClusterComponentTemplate['component_template']['template'] = {
-  mappings: {
-    dynamic_templates: [
-      {
-        numeric_labels: {
-          path_match: 'numeric_labels.*',
-          mapping: {
-            scaling_factor: 1000000,
-            type: 'scaled_float',
-          },
-        },
-      },
-    ],
-    dynamic: false,
-    properties: {
-      '@timestamp': date,
-      labels: dynamic,
-      numeric_labels: dynamic,
-      user: {
-        properties: {
-          id: keyword,
-          name: keyword,
-        },
-      },
-      conversation: {
-        properties: {
-          id: keyword,
-          title: text,
-          last_updated: date,
-        },
-      },
-      api_config: {
-        properties: {
-          connectorId: keyword,
-          connectorTypeTitle: text,
-          model: keyword,
-          provider: keyword,
-        },
-      },
-      anonymized_fields: {
-        type: 'object',
-        properties: {
-          field_name: keyword,
-          value: {
-            type: 'object',
-            enabled: false,
-          },
-          uuid: keyword,
-        },
-      },
-      namespace: keyword,
-      messages: {
-        type: 'object',
-        properties: {
-          '@timestamp': date,
-          message: {
-            type: 'object',
-            properties: {
-              content: text,
-              event: text,
-              role: keyword,
-            },
-          },
-        },
-      },
-      public: {
-        type: 'boolean',
-      },
-    },
-  },
-};
-
 export const conversationsFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -115,18 +42,28 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'conversation.id': {
+  id: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
-  'conversation.title': {
-    type: 'object',
+  title: {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  is_default: {
+    type: 'boolean',
     array: false,
     required: false,
   },
-  'conversation.last_updated': {
-    type: 'object',
+  updated_at: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  created_at: {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -135,7 +72,7 @@ export const conversationsFieldMap: FieldMap = {
     array: true,
     required: false,
   },
-  'messages.id': {
+  'messages.@timestamp': {
     type: 'keyword',
     array: false,
     required: true,
@@ -145,19 +82,84 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  'messages.event': {
-    type: 'keyword',
+  'messages.is_error': {
+    type: 'boolean',
     array: false,
-    required: true,
+    required: false,
   },
   'messages.content': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'messages.anonymized_fields': {
+  'messages.reader': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'messages.replacements': {
     type: 'object',
-    array: true,
+    array: false,
+    required: false,
+  },
+  'messages.presentation': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'messages.presentation.delay': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'messages.presentation.stream': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'messages.trace_data': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'messages.trace_data.transaction_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'messages.trace_data.trace_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  api_config: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'api_config.connector_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'api_config.connector_type_title': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'api_config.default_system_prompt_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'api_config.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'api_config.model': {
+    type: 'keyword',
+    array: false,
     required: false,
   },
 } as const;
@@ -173,10 +175,10 @@ export const getIndexTemplateAndPattern = (
   const pattern = `${context}`;
   const patternWithNamespace = `${pattern}-${concreteNamespace}`;
   return {
-    template: `${patternWithNamespace}-index-template`,
-    pattern: `.internal.${patternWithNamespace}-*`,
+    template: `.${patternWithNamespace}-index-template`,
+    pattern: `.${patternWithNamespace}*`,
     basePattern: `.${pattern}-*`,
-    name: `.internal.${patternWithNamespace}-000001`,
+    name: `.${patternWithNamespace}-000001`,
     alias: `.${patternWithNamespace}`,
   };
 };

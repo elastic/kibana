@@ -41,6 +41,7 @@ const getInitialConversations = (): Record<string, Conversation> => ({
   },
   [MOCK_CONVERSATION_TITLE]: {
     id: MOCK_CONVERSATION_TITLE,
+    title: MOCK_CONVERSATION_TITLE,
     messages: [],
     apiConfig: {},
   },

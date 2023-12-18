@@ -50,6 +50,7 @@ export interface ConversationTheme {
  *
  */
 export interface Conversation {
+  '@timestamp'?: string;
   apiConfig: {
     connectorId?: string;
     connectorTypeTitle?: string;
@@ -57,7 +58,12 @@ export interface Conversation {
     provider?: OpenAiProviderType;
     model?: string;
   };
+  user?: {
+    id?: string;
+    name?: string;
+  };
   id: string;
+  title: string;
   messages: Message[];
   replacements?: Record<string, string>;
   theme?: ConversationTheme;

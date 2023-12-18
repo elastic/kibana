@@ -107,6 +107,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         if (selectedConversation != null) {
           setApiConfig({
             conversationId: selectedConversation.id,
+            title: selectedConversation.title,
+            isDefault: selectedConversation.isDefault,
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,

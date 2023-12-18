@@ -19,12 +19,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import { Conversation } from '../../../..';
-import { UseAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
-  conversations: UseAssistantContext['conversations'];
+  conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationSelectionChange: (conversation?: Conversation | string) => void;
   selectedConversationId?: string;
@@ -66,14 +65,15 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     >(() => {
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
-        label: conversation.id,
+        label: conversation.title,
+        id: conversation.id ?? '',
         'data-test-subj': conversation.id,
       }));
     });
 
     const selectedOptions = useMemo<ConversationSelectorSettingsOption[]>(() => {
       return selectedConversationId
-        ? conversationOptions.filter((c) => c.label === selectedConversationId) ?? []
+        ? conversationOptions.filter((c) => c.id === selectedConversationId) ?? []
         : [];
     }, [conversationOptions, selectedConversationId]);
 
@@ -83,7 +83,8 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           conversationSelectorSettingsOption.length === 0
             ? undefined
             : Object.values(conversations).find(
-                (conversation) => conversation.id === conversationSelectorSettingsOption[0]?.label
+                (conversation) =>
+                  conversation.title === conversationSelectorSettingsOption[0]?.label
               ) ?? conversationSelectorSettingsOption[0]?.label;
         onConversationSelectionChange(newConversation);
       },
@@ -131,24 +132,24 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
-      (label: string) => {
-        setConversationOptions(conversationOptions.filter((o) => o.label !== label));
-        if (selectedOptions?.[0]?.label === label) {
+      (id: string) => {
+        setConversationOptions(conversationOptions.filter((o) => o.id !== id));
+        if (selectedOptions?.[0]?.id === id) {
           handleSelectionChange([]);
         }
-        onConversationDeleted(label);
+        onConversationDeleted(id);
       },
       [conversationOptions, handleSelectionChange, onConversationDeleted, selectedOptions]
     );
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      const previousOption = conversationOptions.filter((c) => c.label === prevId);
+      const previousOption = conversationOptions.filter((c) => c.id === prevId);
       handleSelectionChange(previousOption);
     }, [conversationIds, conversationOptions, handleSelectionChange, selectedConversationId]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      const nextOption = conversationOptions.filter((c) => c.label === nextId);
+      const nextOption = conversationOptions.filter((c) => c.id === nextId);
       handleSelectionChange(nextOption);
     }, [conversationIds, conversationOptions, handleSelectionChange, selectedConversationId]);
 
@@ -157,7 +158,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value } = option;
+      const { label, value, id } = option;
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -192,7 +193,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
                   data-test-subj="delete-conversation"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onDelete(label);
+                    onDelete(id ?? '');
                   }}
                   css={css`
                     visibility: hidden;

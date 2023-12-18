@@ -158,7 +158,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const { conversations } = useConversationStore();
+    const conversations = useConversationStore();
 
     const hasTimelineConversationStarted = useMemo(
       () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,

@@ -83,7 +83,7 @@ export const useChatSend = ({
         selectedSystemPrompt: systemPrompt,
       });
 
-      const updatedMessages = appendMessage({
+      const updatedMessages = await appendMessage({
         conversationId: currentConversation.id,
         message,
       });
@@ -95,7 +95,7 @@ export const useChatSend = ({
       const rawResponse = await sendMessages({
         apiConfig: currentConversation.apiConfig,
         http,
-        messages: updatedMessages,
+        messages: updatedMessages ?? [],
         onNewReplacements,
         replacements: currentConversation.replacements ?? {},
       });
@@ -127,12 +127,12 @@ export const useChatSend = ({
         replacements: newReplacements,
       });
 
-    const updatedMessages = removeLastMessage(currentConversation.id);
+    const updatedMessages = await removeLastMessage(currentConversation.id);
 
     const rawResponse = await sendMessages({
       apiConfig: currentConversation.apiConfig,
       http,
-      messages: updatedMessages,
+      messages: updatedMessages ?? [],
       onNewReplacements,
       replacements: currentConversation.replacements ?? {},
     });

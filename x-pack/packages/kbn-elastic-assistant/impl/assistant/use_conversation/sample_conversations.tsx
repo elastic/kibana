@@ -15,6 +15,7 @@ import {
 
 export const WELCOME_CONVERSATION: Conversation = {
   id: WELCOME_CONVERSATION_TITLE,
+  title: WELCOME_CONVERSATION_TITLE,
   theme: {
     title: ELASTIC_AI_ASSISTANT_TITLE,
     titleIcon: 'logoSecurity',

@@ -15,9 +15,9 @@ import {
   getKnowledgeBaseStatus,
   postEvaluation,
   postKnowledgeBase,
-} from './api';
-import type { Conversation, Message } from '../assistant_context/types';
-import { API_ERROR } from './translations';
+} from '.';
+import type { Conversation, Message } from '../../assistant_context/types';
+import { API_ERROR } from '../translations';
 
 jest.mock('@kbn/core-http-browser');
 

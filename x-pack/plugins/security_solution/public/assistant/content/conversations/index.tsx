@@ -19,24 +19,28 @@ import { TIMELINE_CONVERSATION_TITLE } from './translations';
 export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
   [ALERT_SUMMARY_CONVERSATION_ID]: {
     id: ALERT_SUMMARY_CONVERSATION_ID,
+    title: ALERT_SUMMARY_CONVERSATION_ID,
     isDefault: true,
     messages: [],
     apiConfig: {},
   },
   [DATA_QUALITY_DASHBOARD_CONVERSATION_ID]: {
     id: DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+    title: DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
     isDefault: true,
     messages: [],
     apiConfig: {},
   },
   [DETECTION_RULES_CONVERSATION_ID]: {
     id: DETECTION_RULES_CONVERSATION_ID,
+    title: DETECTION_RULES_CONVERSATION_ID,
     isDefault: true,
     messages: [],
     apiConfig: {},
   },
   [EVENT_SUMMARY_CONVERSATION_ID]: {
     id: EVENT_SUMMARY_CONVERSATION_ID,
+    title: EVENT_SUMMARY_CONVERSATION_ID,
     isDefault: true,
     messages: [],
     apiConfig: {},
@@ -44,12 +48,14 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
   [TIMELINE_CONVERSATION_TITLE]: {
     excludeFromLastConversationStorage: true,
     id: TIMELINE_CONVERSATION_TITLE,
+    title: TIMELINE_CONVERSATION_TITLE,
     isDefault: true,
     messages: [],
     apiConfig: {},
   },
   [WELCOME_CONVERSATION_TITLE]: {
     id: WELCOME_CONVERSATION_TITLE,
+    title: WELCOME_CONVERSATION_TITLE,
     isDefault: true,
     theme: {
       title: ELASTIC_AI_ASSISTANT_TITLE,

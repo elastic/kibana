@@ -31,6 +31,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { merge } from 'lodash';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -49,6 +50,8 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import { useFetchConversationsByUser } from './api/use_fetch_conversations_by_user';
+import { Conversation } from '../assistant_context/types';
 
 export interface Props {
   conversationId?: string;
@@ -75,7 +78,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    conversations,
     defaultAllow,
     defaultAllowReplacement,
     docLinks,
@@ -86,6 +88,7 @@ const AssistantComponent: React.FC<Props> = ({
     localStorageLastConversationId,
     title,
     allSystemPrompts,
+    baseConversations,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -96,8 +99,20 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { amendMessage, createConversation } = useConversation();
+  const { amendMessage, getDefaultConversation } = useConversation();
 
+  const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+
+  const conversations = merge(
+    baseConversations,
+    (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+      (transformed, conversation) => {
+        transformed[conversation.id] = conversation;
+        return transformed;
+      },
+      {}
+    )
+  );
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
@@ -130,15 +145,15 @@ const AssistantComponent: React.FC<Props> = ({
   const currentConversation = useMemo(
     () =>
       conversations[selectedConversationId] ??
-      createConversation({ conversationId: selectedConversationId }),
-    [conversations, createConversation, selectedConversationId]
+      getDefaultConversation({ conversationId: selectedConversationId }),
+    [conversations, getDefaultConversation, selectedConversationId]
   );
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
     // if any conversation has a connector id, we're not in welcome set up
     return Object.keys(conversations).some(
-      (conversation) => conversations[conversation].apiConfig.connectorId != null
+      (conversation) => conversations[conversation].apiConfig?.connectorId != null
     )
       ? false
       : (connectors?.length ?? 0) === 0;

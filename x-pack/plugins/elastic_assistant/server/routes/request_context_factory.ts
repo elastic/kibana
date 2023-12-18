@@ -56,6 +56,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
+    const getCurrentUser = () => startPlugins.security?.authc.getCurrentUser(request);
+
     return {
       core: coreContext,
 
@@ -67,6 +69,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getSpaceId,
 
+      getCurrentUser,
+
       getAIAssistantSOClient: memoize(() => {
         const username =
           startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
@@ -77,12 +81,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantDataClient: memoize(async () =>
-        this.assistantService.createAIAssistantDatastreamClient({
+      getAIAssistantDataClient: memoize(async () => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAIAssistantDatastreamClient({
           namespace: getSpaceId(),
           logger: this.logger,
-        })
-      ),
+          currentUser,
+        });
+      }),
     };
   }
 }

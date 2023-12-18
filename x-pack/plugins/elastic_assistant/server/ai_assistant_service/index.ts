@@ -14,17 +14,17 @@ import {
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+// import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { AssistantResourceNames } from '../types';
 import {
   conversationsFieldMap,
   getIndexTemplateAndPattern,
-  mappingComponentName,
   totalFieldsLimit,
 } from './lib/conversation_configuration_type';
 import { createConcreteWriteIndex } from './lib/create_concrete_write_index';
 import { DataStreamAdapter } from './lib/create_datastream';
-import { AIAssistantDataClient } from '../ai_assistant_data_client';
+import { AIAssistantDataClient } from '../conversations_data_client';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -32,7 +32,7 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';
+// import { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';
 import { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
 
 export const ECS_CONTEXT = `ecs`;
@@ -40,7 +40,7 @@ function getResourceName(resource: string) {
   return `.kibana-elastic-ai-assistant-${resource}`;
 }
 
-export const getComponentTemplateName = (name: string) => `.alerts-${name}-mappings`;
+// export const getComponentTemplateName = (name: string) => `.alerts-${name}-mappings`;
 
 interface AIAssistantServiceOpts {
   logger: Logger;
@@ -53,6 +53,7 @@ interface AIAssistantServiceOpts {
 export interface CreateAIAssistantClientParams {
   logger: Logger;
   namespace: string;
+  currentUser: AuthenticatedUser | null;
 }
 
 export class AIAssistantService {
@@ -155,7 +156,8 @@ export class AIAssistantService {
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       namespace: opts.namespace,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: this.resourceNames.indexPatterns.conversations,
+      indexPatternsResorceName: 'kibana-elastic-ai-assistant-conversations',
+      currentUser: opts.currentUser,
     });
   }
 
@@ -194,9 +196,8 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
-      // TODO: add DLM policy
       await Promise.all([
-        createOrUpdateComponentTemplate({
+        /* createOrUpdateComponentTemplate({
           logger: this.options.logger,
           esClient,
           template: getComponentTemplateFromFieldMap({
@@ -206,12 +207,13 @@ export class AIAssistantService {
             includeSettings: true,
           }),
           totalFieldsLimit,
-        }),
+        }), */
         createOrUpdateComponentTemplate({
           logger: this.options.logger,
           esClient,
           template: {
             name: this.resourceNames.componentTemplate.conversations,
+            // TODO: add DLM policy
             _meta: {
               managed: true,
             },
@@ -245,13 +247,31 @@ export class AIAssistantService {
           version: this.options.kibanaVersion,
         },
         managed: true,
-        namespace,
+        namespace: namespace ?? 'default',
       };
 
       const indexPatterns = getIndexTemplateAndPattern(
-        this.resourceNames.indexPatterns.conversations,
+        'kibana-elastic-ai-assistant-conversations',
         namespace ?? 'default'
       );
+
+      /*
+      export const getIndexTemplateAndPattern = (
+  context: string,
+  namespace?: string
+): IIndexPatternString => {
+  const concreteNamespace = namespace ? namespace : DEFAULT_NAMESPACE_STRING;
+  const pattern = `${context}`;
+  const patternWithNamespace = `${pattern}-${concreteNamespace}`;
+  return {
+    template: `${patternWithNamespace}-index-template`,
+    pattern: `.internal.${patternWithNamespace}-*`,
+    basePattern: `.${pattern}-*`,
+    name: `.internal.${patternWithNamespace}-000001`,
+    alias: `.${patternWithNamespace}`,
+  };
+};
+*/
 
       await createOrUpdateIndexTemplate({
         logger: this.options.logger,
@@ -260,11 +280,13 @@ export class AIAssistantService {
           name: indexPatterns.template,
           body: {
             data_stream: { hidden: true },
-            index_patterns: [indexPatterns.alias],
-            composed_of: [mappingComponentName],
+            index_patterns: indexPatterns.pattern,
+            composed_of: [this.resourceNames.componentTemplate.conversations],
             template: {
               lifecycle: {},
               settings: {
+                hidden: true,
+                'index.mapping.ignore_malformed': true,
                 'index.mapping.total_fields.limit': totalFieldsLimit,
               },
               mappings: {

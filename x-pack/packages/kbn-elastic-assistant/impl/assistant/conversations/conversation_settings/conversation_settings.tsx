@@ -19,7 +19,6 @@ import * as i18nModel from '../../../connectorland/models/model_selector/transla
 import { ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
-import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -27,14 +26,14 @@ import { getGenAiConfig } from '../../../connectorland/helpers';
 
 export interface ConversationSettingsProps {
   allSystemPrompts: Prompt[];
-  conversationSettings: UseAssistantContext['conversations'];
+  conversationSettings: Record<string, Conversation>;
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation: Conversation | undefined;
   setUpdatedConversationSettings: React.Dispatch<
-    React.SetStateAction<UseAssistantContext['conversations']>
+    React.SetStateAction<Record<string, Conversation>>
   >;
   isDisabled?: boolean;
 }
@@ -72,6 +71,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         const newSelectedConversation: Conversation | undefined = isNew
           ? {
               id: c ?? '',
+              title: c ?? '',
               messages: [],
               apiConfig: {
                 connectorId: defaultConnectorId,

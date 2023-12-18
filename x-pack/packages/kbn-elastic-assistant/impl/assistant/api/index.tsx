@@ -6,17 +6,17 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-
-import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import type { Conversation, Message } from '../assistant_context/types';
-import { API_ERROR } from './translations';
-import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
+import { HttpSetup } from '@kbn/core/public';
+import { IHttpFetchError } from '@kbn/core-http-browser';
+import type { Conversation, Message } from '../../assistant_context/types';
+import { API_ERROR } from '../translations';
+import { MODEL_GPT_3_5_TURBO } from '../../connectorland/models/model_selector/model_selector';
 import {
   getFormattedMessageContent,
   getOptionalRequestParams,
   hasParsableResponse,
-} from './helpers';
-import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
+} from '../helpers';
+import { PerformEvaluationParams } from '../settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
   alerts: boolean;

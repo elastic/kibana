@@ -13,6 +13,7 @@ import type {
   CoreRequestHandlerContext,
   CoreSetup,
   CustomRequestHandlerContext,
+  IRouter,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
@@ -20,9 +21,9 @@ import type {
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AIAssistantSOClient } from './saved_object/ai_assistant_so_client';
-import { AIAssistantDataClient } from './ai_assistant_data_client';
+import { AIAssistantDataClient } from './conversations_data_client';
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -52,16 +53,18 @@ export interface ElasticAssistantApiRequestHandlerContext {
   logger: Logger;
   getServerBasePath: () => string;
   getSpaceId: () => string;
+  getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantSOClient: () => AIAssistantSOClient;
 }
-
 /**
  * @internal
  */
 export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<{
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
 }>;
+
+export type ElasticAssistantPluginRouter = IRouter<ElasticAssistantRequestHandlerContext>;
 
 export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
   ElasticAssistantPluginStartDependencies,
@@ -113,7 +116,7 @@ export interface IIndexPatternString {
 }
 
 export interface PublicAIAssistantDataClient {
-  
+  getConversationsLimitValue: () => number;
 }
 
 export interface IAIAssistantDataClient {

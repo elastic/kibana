@@ -39,6 +39,7 @@ import {
 } from './ai_assistant_service/lib/create_datastream';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
+import { registerConversationsRoutes } from './routes/register_routes';
 
 export class ElasticAssistantPlugin
   implements
@@ -111,6 +112,7 @@ export class ElasticAssistantPlugin
     // Evaluate
     postEvaluateRoute(router, getElserId);
     // Conversations
+    registerConversationsRoutes(router, this.logger);
 
     return {
       actions: plugins.actions,
