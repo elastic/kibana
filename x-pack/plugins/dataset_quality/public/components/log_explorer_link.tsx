@@ -20,20 +20,17 @@ export const LogExplorerLink = React.memo(
     const {
       services: { share },
     } = useKibanaContextForPlugin();
-    const [dataset, namespace] = dataStreamStat.title.split('-');
-    const integration = dataStreamStat.integration?.name;
-
     const params: SingleDatasetLocatorParams = {
-      dataset,
+      dataset: dataStreamStat.name,
       timeRange: {
         from: 'now-1d',
         to: 'now',
       },
-      integration,
+      integration: dataStreamStat.integration?.name,
       filterControls: {
         namespace: {
           mode: 'include',
-          values: [namespace],
+          values: [dataStreamStat.namespace],
         },
       },
     };
