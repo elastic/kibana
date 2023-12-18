@@ -28,7 +28,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { getTimezone } from '../../../lib/get_timezone';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -121,7 +121,7 @@ export const TimeSeries = ({
   }
 
   const uiSettings = getUISettings();
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured

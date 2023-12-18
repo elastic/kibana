@@ -97,11 +97,7 @@ function shiftAndNormalizeStops(
       if (params.range === 'percent') {
         result = min + ((max - min) * value) / 100;
       }
-      // a division by zero safeguard
-      if (!Number.isFinite(result)) {
-        return 1;
-      }
-      return Number(result.toFixed(2));
+      return result;
     }
   );
 }
@@ -514,11 +510,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       let overwriteArrayIdx;
 
       if (endValue === Number.POSITIVE_INFINITY) {
-        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+        overwriteArrayIdx = `≥ ${valueFormatter(startValue)}`;
       } else {
-        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-          endValue
-        )}`;
+        overwriteArrayIdx = `${valueFormatter(start)} - ${valueFormatter(endValue)}`;
       }
 
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
