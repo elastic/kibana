@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { AIAssistantSOClient } from '../saved_object/ai_assistant_so_client';
 import { AIAssistantService } from '../ai_assistant_service';
+import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
   create(
@@ -70,6 +71,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       getSpaceId,
 
       getCurrentUser,
+
+      getRegisteredTools: (pluginName: string) => {
+        return appContextService.getRegisteredTools(pluginName);
+      },
 
       getAIAssistantSOClient: memoize(() => {
         const username =

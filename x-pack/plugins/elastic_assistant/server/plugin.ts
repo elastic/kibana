@@ -12,10 +12,12 @@ import {
   Logger,
   KibanaRequest,
   SavedObjectsClientContract,
+  CoreSetup,
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
 import {
+  AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -40,6 +42,13 @@ import {
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerConversationsRoutes } from './routes/register_routes';
+import { appContextService, GetRegisteredTools } from './services/app_context';
+
+interface CreateRouteHandlerContextParams {
+  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
+  logger: Logger;
+  getRegisteredTools: GetRegisteredTools;
+}
 
 export class ElasticAssistantPlugin
   implements
@@ -116,16 +125,45 @@ export class ElasticAssistantPlugin
 
     return {
       actions: plugins.actions,
+      getRegisteredTools: (pluginName: string) => {
+        return appContextService.getRegisteredTools(pluginName);
+      },
     };
   }
 
   public start(core: CoreStart, plugins: ElasticAssistantPluginStartDependencies) {
     this.logger.debug('elasticAssistant: Started');
+    appContextService.start({ logger: this.logger });
 
     return {
+      /**
+       * Actions plugin start contract
+       */
       actions: plugins.actions,
+
+      /**
+       * Get the registered tools for a given plugin name.
+       * @param pluginName
+       */
+      getRegisteredTools: (pluginName: string) => {
+        return appContextService.getRegisteredTools(pluginName);
+      },
+
+      /**
+       * Register tools to be used by the Elastic Assistant for a given plugin. Use the plugin name that
+       * corresponds to your application as defined in the `x-kbn-context` header of requests made from your
+       * application.
+       *
+       * @param pluginName
+       * @param tools
+       */
+      registerTools: (pluginName: string, tools: AssistantTool[]) => {
+        return appContextService.registerTools(pluginName, tools);
+      },
     };
   }
 
-  public stop() {}
+  public stop() {
+    appContextService.stop();
+  }
 }
