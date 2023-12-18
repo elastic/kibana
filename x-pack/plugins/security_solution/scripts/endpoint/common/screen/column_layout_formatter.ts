@@ -85,8 +85,8 @@ export class ColumnLayoutFormatter extends DataFormatter {
 }
 
 // this is a copy of the `ansiRegex` module, which is no longer allowed to be `import`ed at the module
-// because it is not defined as an ESM module (only dynamic import is supported). Due to its usage
-// which does not allow `async` calls to be `await`ed, it is not being copied here for use locally.
+// because it is not defined as an ESM module (only dynamic import is supported). Due to its usage,
+// which does not allow `async` calls to be `await`ed, it is now being copied here for use locally.
 function ansiRegex({ onlyFirst = false } = {}) {
   const pattern = [
     '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
