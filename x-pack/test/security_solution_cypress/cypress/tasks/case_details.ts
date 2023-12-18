@@ -14,9 +14,9 @@ import {
 } from '../screens/case_details';
 
 export const deleteCase = () => {
-  cy.get(CASE_ACTIONS).first().click({ force: true });
-  cy.get(CASE_DELETE).click({ force: true });
-  cy.get(DELETE_CASE_CONFIRM_BUTTON).click({ force: true });
+  cy.get(CASE_ACTIONS).first().click();
+  cy.get(CASE_DELETE).click();
+  cy.get(DELETE_CASE_CONFIRM_BUTTON).click();
 };
 
 export const openCaseTimeline = () => {
