@@ -62,7 +62,7 @@ export function ESQLEditor(props: Props) {
             verifyGeometryColumn(esqlMeta.columns);
             if (esqlMeta.columns.length >= 6) {
               setWarning(
-                i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+                i18n.translate('xpack.maps.esqlSource.tooManyColumnsWarning', {
                   defaultMessage: `ES|QL statement returns {count} columns. For faster maps, use 'DROP' or 'KEEP' to narrow columns.`,
                   values: {
                     count: esqlMeta.columns.length,
