@@ -5,10 +5,10 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import { FlyoutContentActions } from '@kbn/discover-plugin/public';
+import type { LogExplorerFlyoutContentProps } from '../components/flyout_detail/types';
 
 interface UseFlyoutActionsDeps {
-  value: FlyoutContentActions;
+  value: LogExplorerFlyoutContentProps['actions'];
 }
 
 const useDiscoverActions = ({ value }: UseFlyoutActionsDeps) => value;
