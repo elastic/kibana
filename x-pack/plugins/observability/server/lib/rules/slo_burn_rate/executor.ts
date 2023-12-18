@@ -94,11 +94,11 @@ export const getRuleExecutor = ({
     const { dateEnd } = getTimeRange('1m');
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
-    if (results.length > 0) {
-      const alertLimit = alertFactory.alertLimit.getValue();
-      let hasReachedLimit = false;
-      let scheduledActionsCount = 0;
+    const alertLimit = alertFactory.alertLimit.getValue();
+    let hasReachedLimit = false;
+    let scheduledActionsCount = 0;
 
+    if (results.length > 0) {
       for (const result of results) {
         const {
           instanceId,
@@ -116,12 +116,12 @@ export const getRuleExecutor = ({
           spaceId,
           `/app/observability/slos/${slo.id}${urlQuery}`
         );
+        if (scheduledActionsCount >= alertLimit) {
+          // need to set this so that warning is displayed in the UI and in the logs
+          hasReachedLimit = true;
+          break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+        }
         if (shouldAlert) {
-          if (scheduledActionsCount >= alertLimit) {
-            // need to set this so that warning is displayed in the UI and in the logs
-            hasReachedLimit = true;
-            break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-          }
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -172,40 +172,40 @@ export const getRuleExecutor = ({
           scheduledActionsCount++;
         }
       }
+    }
+    alertFactory.alertLimit.setLimitReached(hasReachedLimit);
 
-      const { getRecoveredAlerts } = alertFactory.done();
-      const recoveredAlerts = getRecoveredAlerts();
-      for (const recoveredAlert of recoveredAlerts) {
-        const alertId = recoveredAlert.getId();
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = recoveredAlert.getUuid();
-        const alertDetailsUrl = await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        );
+    const { getRecoveredAlerts } = alertFactory.done();
+    const recoveredAlerts = getRecoveredAlerts();
+    for (const recoveredAlert of recoveredAlerts) {
+      const alertId = recoveredAlert.getId();
+      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+      const alertUuid = recoveredAlert.getUuid();
+      const alertDetailsUrl = await getAlertUrl(
+        alertUuid,
+        spaceId,
+        indexedStartedAt,
+        alertsLocator,
+        basePath.publicBaseUrl
+      );
 
-        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          `/app/observability/slos/${slo.id}${urlQuery}`
-        );
+      const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+      const viewInAppUrl = addSpaceIdToPath(
+        basePath.publicBaseUrl,
+        spaceId,
+        `/app/observability/slos/${slo.id}${urlQuery}`
+      );
 
-        const context = {
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          alertDetailsUrl,
-          sloId: slo.id,
-          sloName: slo.name,
-          sloInstanceId: alertId,
-        };
+      const context = {
+        timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        alertDetailsUrl,
+        sloId: slo.id,
+        sloName: slo.name,
+        sloInstanceId: alertId,
+      };
 
-        recoveredAlert.setContext(context);
-      }
-      alertFactory.alertLimit.setLimitReached(hasReachedLimit);
+      recoveredAlert.setContext(context);
     }
 
     return { state: {} };
