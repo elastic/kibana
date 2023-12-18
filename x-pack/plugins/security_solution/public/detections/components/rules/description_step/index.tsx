@@ -238,9 +238,9 @@ export const getDescriptionItem = (
       return [];
     }
   } else if (field === 'suppressionMissingFields') {
-    // only query rule can have suppression missing fields
     const ruleType: Type = get('ruleType', data);
-    if (!isQueryRule(ruleType)) {
+    const ruleCanHaveSuppressionMissingFields =  isQueryRule(ruleType);
+    if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
     if (get('groupByFields', data).length > 0) {
