@@ -60,21 +60,21 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
               "line": Object {
                 "opacity": 1,
-                "strokeWidth": 1,
+                "strokeWidth": 2,
                 "visible": true,
               },
               "point": Object {
-                "fill": "white",
+                "fill": "#FFF",
                 "opacity": 1,
-                "radius": 2,
+                "radius": 3,
                 "stroke": "__use__series__color__",
-                "strokeWidth": 1,
+                "strokeWidth": 2,
                 "visible": false,
               },
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaeaea",
+                "stroke": "#eaedf3",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -89,11 +89,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#333",
-                "fontFamily": "sans-serif",
+                "fill": "#343741",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
-                  "inner": 8,
+                  "inner": 10,
                   "outer": 0,
                 },
                 "visible": true,
@@ -105,9 +105,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#D3DAE6",
+                  "stroke": "#eaedf3",
                   "strokeWidth": 1,
-                  "visible": false,
+                  "visible": true,
                 },
                 "lumaSteps": Array [
                   224,
@@ -129,13 +129,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    0,
-                    0,
+                    4,
+                    4,
                   ],
                   "opacity": 1,
-                  "stroke": "#D3DAE6",
+                  "stroke": "#eaedf3",
                   "strokeWidth": 1,
-                  "visible": false,
+                  "visible": true,
                 },
               },
               "tickLabel": Object {
@@ -143,8 +143,8 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#777",
-                "fontFamily": "sans-serif",
+                "fill": "#646a77",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
                 "offset": Object {
@@ -152,27 +152,36 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "x": 0,
                   "y": 0,
                 },
-                "padding": 0,
+                "padding": Object {
+                  "inner": 10,
+                  "outer": 8,
+                },
                 "rotation": 0,
                 "visible": true,
               },
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaeaea",
+                "stroke": "#eaedf3",
                 "strokeWidth": 1,
-                "visible": true,
+                "visible": false,
               },
             },
             "background": Object {
-              "color": "transparent",
-              "fallbackColor": "white",
+              "color": "#FFF",
+              "fallbackColor": "#FFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
-                "fill": "#777",
-                "fontFamily": "sans-serif",
-                "fontSize": 8,
+                "alignment": Object {
+                  "horizontal": "center",
+                  "vertical": "middle",
+                },
+                "fill": Object {
+                  "textBorder": 0,
+                },
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
+                "fontSize": 10,
                 "fontStyle": "normal",
                 "offsetX": 0,
                 "offsetY": 0,
@@ -196,10 +205,10 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
             },
             "chartMargins": Object {
-              "bottom": 10,
-              "left": 10,
-              "right": 10,
-              "top": 10,
+              "bottom": 0,
+              "left": 0,
+              "right": 0,
+              "top": 0,
             },
             "chartPaddings": Object {
               "bottom": 0,
@@ -208,50 +217,54 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "top": 0,
             },
             "colors": Object {
-              "defaultVizColor": "red",
+              "defaultVizColor": "#6092C0",
               "vizColors": Array [
                 "#54B399",
                 "#6092C0",
-                "#D36086",
                 "#9170B8",
                 "#CA8EAE",
-                "#D6BF57",
-                "#B9A888",
-                "#DA8B45",
-                "#AA6556",
+                "#D36086",
                 "#E7664C",
+                "#AA6556",
+                "#DA8B45",
+                "#B9A888",
+                "#D6BF57",
               ],
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F5F5F5",
+                "fill": "#F1F4FA",
                 "visible": true,
               },
               "crossLine": Object {
                 "dash": Array [
-                  5,
-                  5,
+                  4,
+                  4,
                 ],
-                "stroke": "#98A2B3",
+                "stroke": "#69707D",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "line": Object {
-                "stroke": "#98A2B3",
+                "dash": Array [
+                  4,
+                  4,
+                ],
+                "stroke": "#69707D",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
               "navigation": Object {
-                "buttonBackgroundColor": "rgb(204, 228, 245)",
-                "buttonDisabledBackgroundColor": "rgba(211, 218, 230, 0.15)",
-                "buttonDisabledTextColor": "rgb(162, 171, 186)",
-                "buttonTextColor": "rgb(0, 97, 166)",
-                "textColor": "rgb(52, 55, 65)",
+                "buttonBackgroundColor": "#CCE4F5",
+                "buttonDisabledBackgroundColor": "#D3DAE626",
+                "buttonDisabledTextColor": "#A2ABBA",
+                "buttonTextColor": "#0061A6",
+                "textColor": "#343741",
               },
-              "scrollbarThumb": "rgb(52, 55, 65)",
-              "scrollbarTrack": "rgb(211, 218, 230)",
+              "scrollbarThumb": "#343741",
+              "scrollbarTrack": "#D3DAE6",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -260,13 +273,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "baselineBarThickness": 32,
               "capturePad": 16,
               "majorCenterLabel": Object {
-                "fill": "black",
-                "fontFamily": "sans-serif",
+                "fill": "#343741",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
               },
               "majorLabel": Object {
-                "fill": "black",
-                "fontFamily": "sans-serif",
+                "fill": "#343741",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
               },
               "marginRatio": 0.05,
@@ -278,28 +291,28 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "maxTickFontSize": 24,
               "minFontSize": 8,
               "minorCenterLabel": Object {
-                "fill": "black",
-                "fontFamily": "sans-serif",
+                "fill": "#646a77",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
               },
               "minorLabel": Object {
-                "fill": "black",
-                "fontFamily": "sans-serif",
+                "fill": "#646a77",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
               },
               "progressLine": Object {
-                "stroke": "black",
+                "stroke": "#343741",
               },
               "targetLine": Object {
-                "stroke": "black",
+                "stroke": "#343741",
               },
               "tickLabel": Object {
-                "fill": "black",
-                "fontFamily": "sans-serif",
+                "fill": "#646a77",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
               },
               "tickLine": Object {
-                "stroke": "darkgrey",
+                "stroke": "#98A2B3",
               },
             },
             "heatmap": Object {
@@ -416,22 +429,22 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
               "line": Object {
                 "opacity": 1,
-                "strokeWidth": 1,
+                "strokeWidth": 2,
                 "visible": true,
               },
               "point": Object {
-                "fill": "white",
+                "fill": "#FFF",
                 "opacity": 1,
-                "radius": 2,
+                "radius": 3,
                 "stroke": "__use__series__color__",
-                "strokeWidth": 1,
+                "strokeWidth": 2,
                 "visible": true,
               },
             },
             "metric": Object {
-              "background": "#FFFFFF",
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -440,7 +453,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
             },
             "partition": Object {
-              "circlePadding": 2,
+              "circlePadding": 4,
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
@@ -453,23 +466,23 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
-                  "fontWeight": 400,
+                  "fontWeight": 700,
                 },
               },
-              "fontFamily": "Sans-Serif",
+              "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
               "horizontalTextAngleThreshold": 0.5235987755982988,
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
                 "fontFamily": "Sans-Serif",
-                "fontSize": 12,
+                "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
                 "gap": 10,
                 "horizontalStemLength": 10,
                 "lineWidth": 1,
-                "maxCount": 36,
+                "maxCount": 5,
                 "maxTextLength": 100,
                 "maximumSection": 10,
                 "minimumStemLength": 0,
@@ -477,20 +490,20 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "__use__adaptive__color__",
+                "textColor": "#343741",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
                 },
               },
-              "maxFontSize": 64,
+              "maxFontSize": 16,
               "maximizeFontSize": false,
               "minFontSize": 8,
-              "outerSizeRatio": 0.6180469715698392,
+              "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "white",
-              "sectorLineWidth": 1,
+              "sectorLineStroke": "#FFF",
+              "sectorLineWidth": 1.5,
             },
             "scales": Object {
               "barsPadding": 0.25,
@@ -510,7 +523,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 500,
+              "maxWidth": 260,
             },
           }
         }
@@ -534,203 +547,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "outerSizeRatio": 0.9,
               },
             },
-            Object {
-              "areaSeriesStyle": Object {
-                "area": Object {
-                  "opacity": 0.3,
-                },
-                "line": Object {
-                  "strokeWidth": 2,
-                },
-                "point": Object {
-                  "fill": "#FFF",
-                  "radius": 3,
-                  "strokeWidth": 2,
-                  "visible": false,
-                },
-              },
-              "axes": Object {
-                "axisLine": Object {
-                  "stroke": "#eaedf3",
-                },
-                "axisTitle": Object {
-                  "fill": "#343741",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                  "fontSize": 12,
-                  "padding": Object {
-                    "inner": 10,
-                    "outer": 0,
-                  },
-                },
-                "gridLine": Object {
-                  "horizontal": Object {
-                    "dash": Array [
-                      0,
-                      0,
-                    ],
-                    "opacity": 1,
-                    "stroke": "#eaedf3",
-                    "strokeWidth": 1,
-                    "visible": true,
-                  },
-                  "vertical": Object {
-                    "dash": Array [
-                      4,
-                      4,
-                    ],
-                    "opacity": 1,
-                    "stroke": "#eaedf3",
-                    "strokeWidth": 1,
-                    "visible": true,
-                  },
-                },
-                "tickLabel": Object {
-                  "fill": "#646a77",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                  "fontSize": 10,
-                  "padding": Object {
-                    "inner": 10,
-                    "outer": 8,
-                  },
-                },
-                "tickLine": Object {
-                  "stroke": "#eaedf3",
-                  "strokeWidth": 1,
-                  "visible": false,
-                },
-              },
-              "background": Object {
-                "color": "#FFF",
-              },
-              "barSeriesStyle": Object {
-                "displayValue": Object {
-                  "alignment": Object {
-                    "horizontal": "center",
-                    "vertical": "middle",
-                  },
-                  "fill": Object {
-                    "textBorder": 0,
-                  },
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                  "fontSize": 10,
-                },
-              },
-              "chartMargins": Object {
-                "bottom": 0,
-                "left": 0,
-                "right": 0,
-                "top": 0,
-              },
-              "colors": Object {
-                "defaultVizColor": "#6092C0",
-                "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
-                ],
-              },
-              "crosshair": Object {
-                "band": Object {
-                  "fill": "#F1F4FA",
-                },
-                "crossLine": Object {
-                  "dash": Array [
-                    4,
-                    4,
-                  ],
-                  "stroke": "#69707D",
-                  "strokeWidth": 1,
-                },
-                "line": Object {
-                  "dash": Array [
-                    4,
-                    4,
-                  ],
-                  "stroke": "#69707D",
-                  "strokeWidth": 1,
-                },
-              },
-              "goal": Object {
-                "majorCenterLabel": Object {
-                  "fill": "#343741",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                },
-                "majorLabel": Object {
-                  "fill": "#343741",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                },
-                "minorCenterLabel": Object {
-                  "fill": "#646a77",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                },
-                "minorLabel": Object {
-                  "fill": "#646a77",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                },
-                "progressLine": Object {
-                  "stroke": "#343741",
-                },
-                "targetLine": Object {
-                  "stroke": "#343741",
-                },
-                "tickLabel": Object {
-                  "fill": "#646a77",
-                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                },
-                "tickLine": Object {
-                  "stroke": "#98A2B3",
-                },
-              },
-              "lineSeriesStyle": Object {
-                "line": Object {
-                  "strokeWidth": 2,
-                },
-                "point": Object {
-                  "fill": "#FFF",
-                  "radius": 3,
-                  "strokeWidth": 2,
-                },
-              },
-              "partition": Object {
-                "circlePadding": 4,
-                "fillLabel": Object {
-                  "valueFont": Object {
-                    "fontWeight": 700,
-                  },
-                },
-                "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-                "linkLabel": Object {
-                  "fontSize": 11,
-                  "maxCount": 5,
-                  "textColor": "#343741",
-                },
-                "maxFontSize": 16,
-                "minFontSize": 8,
-                "outerSizeRatio": 1,
-                "sectorLineStroke": "#FFF",
-                "sectorLineWidth": 1.5,
-              },
-              "scales": Object {
-                "barsPadding": 0.25,
-                "histogramPadding": 0.05,
-              },
-            },
+            Object {},
           ]
         }
       />

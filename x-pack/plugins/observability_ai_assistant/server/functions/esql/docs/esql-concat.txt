@@ -1,0 +1,6 @@
+CONCAT
+
+Concatenates two or more strings.
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL fullname = CONCAT(first_name, " ", last_name)
