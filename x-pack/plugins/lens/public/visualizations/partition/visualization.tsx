@@ -560,14 +560,16 @@ export const getPieVisualization = ({
 
   getUserMessages(state, { frame }) {
     const hasTooManyBucketDimensions = state.layers
-      .map((layer) => {
+      ?.map((layer) => {
+        const primaryGroups = layer?.primaryGroups ?? [];
+        const secondaryGroups = layer?.secondaryGroups ?? [];
         const totalBucketDimensions =
-          Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
+          Array.from(new Set([...primaryGroups, ...(secondaryGroups ?? [])])).filter(
             (columnId) => !isCollapsed(columnId, layer)
           ).length +
           // multiple metrics counts as a dimension
-          (layer.metrics.length > 1 ? 1 : 0);
-        return totalBucketDimensions > PartitionChartsMeta[state.shape].maxBuckets;
+          (layer?.metrics?.length > 1 ? 1 : 0);
+        return totalBucketDimensions > PartitionChartsMeta[state.shape]?.maxBuckets;
       })
       .some(Boolean);
 
@@ -597,7 +599,7 @@ export const getPieVisualization = ({
       : [];
 
     const warningMessages: UserMessage[] = [];
-    if (state?.layers.length > 0 && frame.activeData) {
+    if (state?.layers?.length > 0 && frame.activeData) {
       for (const layer of state.layers) {
         const { layerId, metrics } = layer;
         const rows = frame.activeData[layerId]?.rows;
@@ -605,7 +607,7 @@ export const getPieVisualization = ({
           ({ meta }) => meta?.type === 'number'
         );
 
-        if (!rows || !metrics.length) {
+        if (!rows || !metrics?.length) {
           break;
         }
 
