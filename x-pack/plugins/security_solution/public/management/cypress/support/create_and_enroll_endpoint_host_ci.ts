@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -59,7 +58,7 @@ export const createAndEnrollEndpointHostCI = async ({
   disk,
   memory,
   hostname,
-  version = kibanaPackageJson.version,
+  version = '8.12.0',
   useClosestVersionMatch = true,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
