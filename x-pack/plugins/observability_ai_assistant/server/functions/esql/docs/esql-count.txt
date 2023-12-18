@@ -1,0 +1,10 @@
+COUNT
+
+Counts field values.
+FROM employees
+| STATS COUNT(height)
+Can take any field type as input and the result is always a long not matter
+the input type.To count the number of rows, use COUNT(*):
+FROM employees
+| STATS count = COUNT(*) BY languages
+| SORT languages DESC
