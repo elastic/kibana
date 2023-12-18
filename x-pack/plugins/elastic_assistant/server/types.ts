@@ -16,6 +16,13 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { Tool } from 'langchain/dist/tools/base';
+import { RetrievalQAChain } from 'langchain/chains';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { RequestBody } from './lib/langchain/types';
+import type { GetRegisteredTools } from './services/app_context';
+
+export const PLUGIN_ID = 'elasticAssistant' as const;
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -25,6 +32,17 @@ export interface ElasticAssistantPluginSetup {
 /** The plugin start interface */
 export interface ElasticAssistantPluginStart {
   actions: ActionsPluginStart;
+  /**
+   * Register tools to be used by the elastic assistant
+   * @param pluginName Name of the plugin the tool should be registered to
+   * @param tools AssistantTools to be registered with for the given plugin
+   */
+  registerTools: (pluginName: string, tools: AssistantTool[]) => void;
+  /**
+   * Get the registered tools
+   * @param pluginName Name of the plugin to get the tools for
+   */
+  getRegisteredTools: GetRegisteredTools;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -37,6 +55,7 @@ export interface ElasticAssistantPluginStartDependencies {
 
 export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
+  getRegisteredTools: GetRegisteredTools;
   logger: Logger;
 }
 
@@ -51,3 +70,30 @@ export type GetElser = (
   request: KibanaRequest,
   savedObjectsClient: SavedObjectsClientContract
 ) => Promise<string> | never;
+
+/**
+ * Interfaces for registering tools to be used by the elastic assistant
+ */
+
+export interface AssistantTool {
+  id: string;
+  name: string;
+  description: string;
+  sourceRegister: string;
+  isSupported: (params: AssistantToolParams) => boolean;
+  getTool: (params: AssistantToolParams) => Tool | null;
+}
+
+export interface AssistantToolParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  assistantLangChain: boolean;
+  chain: RetrievalQAChain;
+  esClient: ElasticsearchClient;
+  modelExists: boolean;
+  onNewReplacements?: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
+  request: KibanaRequest<unknown, unknown, RequestBody>;
+  size?: number;
+}

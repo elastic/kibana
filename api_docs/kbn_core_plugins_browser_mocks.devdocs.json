@@ -93,7 +93,13 @@
             "description": [],
             "signature": [
               "(config?: unknown, { buildFlavor }?: { buildFlavor?: ",
-              "BuildFlavor",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.BuildFlavor",
+                "text": "BuildFlavor"
+              },
               " | undefined; }) => ",
               {
                 "pluginId": "@kbn/core-plugins-browser",
@@ -132,7 +138,13 @@
                 "description": [],
                 "signature": [
                   "{ buildFlavor?: ",
-                  "BuildFlavor",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.BuildFlavor",
+                    "text": "BuildFlavor"
+                  },
                   " | undefined; }"
                 ],
                 "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
