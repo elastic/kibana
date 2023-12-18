@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSkeletonRectangle,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,22 +64,19 @@ const degradedDocsColumnTooltip = (
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="poor" />
-              {` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
-            </EuiText>
+            <QualityIndicator
+              quality="poor"
+              description={` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="degraded" />
-              {` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
-            </EuiText>
+            <QualityIndicator
+              quality="degraded"
+              description={` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="good" />
-              {' 0%'}
-            </EuiText>
+            <QualityIndicator quality="good" description={' 0%'} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -160,10 +156,7 @@ export const getDatasetQualitTableColumns = ({
           contentAriaLabel="Example description"
         >
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{`${dataStreamStat.degradedDocs ?? 0}%`}</EuiFlexItem>
+            <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
