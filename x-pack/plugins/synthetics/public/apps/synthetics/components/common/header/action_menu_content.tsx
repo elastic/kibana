@@ -32,8 +32,12 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.
 export function ActionMenuContent(): React.ReactElement {
   const { basePath } = useSyntheticsSettingsContext();
 
-  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
-    useSyntheticsStartPlugins();
+  const {
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantActionMenuItem,
+    } = {},
+  } = useSyntheticsStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -106,7 +110,9 @@ export function ActionMenuContent(): React.ReactElement {
         </EuiHeaderLink>
       </EuiToolTip>
       <InspectorHeaderLink />
-      {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
+      {observabilityAIAssistantService?.isEnabled() && ObservabilityAIAssistantActionMenuItem ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

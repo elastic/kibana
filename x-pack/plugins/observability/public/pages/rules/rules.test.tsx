@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from './rules';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -20,9 +19,6 @@ import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-
-const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
-  observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -52,8 +48,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem,
-  ContextualInsight,
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,

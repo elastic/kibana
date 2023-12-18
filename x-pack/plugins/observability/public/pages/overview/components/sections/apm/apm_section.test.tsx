@@ -28,7 +28,7 @@ jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
 }));
 
-const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
+const { ObservabilityAIAssistantActionMenuItem, ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
 describe('APMSection', () => {
@@ -66,7 +66,7 @@ describe('APMSection', () => {
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
       ObservabilityAIAssistantActionMenuItem,
-      ContextualInsight,
+      ObservabilityAIAssistantContextualInsight,
     }));
   });
 

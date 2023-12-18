@@ -7,7 +7,6 @@
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  useObservabilityAIAssistant,
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/public';
@@ -26,9 +25,11 @@ export function ErrorSampleContextualInsight({
   transaction?: Transaction;
 }) {
   const {
-    observabilityAIAssistant: { ContextualInsight },
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantContextualInsight,
+    },
   } = useApmPluginContext();
-  const aiAssistant = useObservabilityAIAssistant();
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
@@ -75,10 +76,10 @@ ${exceptionStacktrace}`
     ];
   }, [error, transaction, logStacktrace, exceptionStacktrace]);
 
-  return aiAssistant.isEnabled() && messages ? (
+  return observabilityAIAssistantService.isEnabled() && messages ? (
     <>
       <EuiFlexItem>
-        <ContextualInsight
+        <ObservabilityAIAssistantContextualInsight
           messages={messages}
           title={i18n.translate(
             'xpack.apm.errorGroupContextualInsight.explainErrorTitle',

@@ -19,7 +19,6 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
@@ -86,9 +85,6 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
-  const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
-    plugins.observabilityAIAssistant;
-
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
@@ -104,34 +100,30 @@ export const renderApp = ({
                 isServerless,
               }}
             >
-              <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
-                <PluginContext.Provider
-                  value={{
-                    config,
-                    appMountParameters,
-                    observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate,
-                    ObservabilityAIAssistantActionMenuItem,
-                    ContextualInsight,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                            <HideableReactQueryDevTools />
-                          </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </ObservabilityAIAssistantProvider>
+              <PluginContext.Provider
+                value={{
+                  config,
+                  appMountParameters,
+                  observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate,
+                }}
+              >
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <i18nCore.Context>
+                      <RedirectAppLinks
+                        coreStart={core}
+                        data-test-subj="observabilityMainContainer"
+                      >
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                          <HideableReactQueryDevTools />
+                        </QueryClientProvider>
+                      </RedirectAppLinks>
+                    </i18nCore.Context>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
             </KibanaContextProvider>
           </CloudProvider>
         </KibanaThemeProvider>

@@ -27,7 +27,10 @@ export function ApmHeaderActionMenu() {
     core,
     plugins,
     config,
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantActionMenuItem,
+    },
   } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
@@ -101,7 +104,9 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
-      <ObservabilityAIAssistantActionMenuItem />
+      {observabilityAIAssistantService?.isEnabled() ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

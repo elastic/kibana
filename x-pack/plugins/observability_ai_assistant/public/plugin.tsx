@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy } from 'react';
+import React, { ComponentType, lazy, Ref } from 'react';
 import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
@@ -30,6 +30,7 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 import { registerTelemetryEventTypes } from './analytics';
+import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -119,34 +120,50 @@ export class ObservabilityAIAssistantPlugin
       });
     });
 
+    const withProviders = <P extends {}, R = {}>(
+      Component: ComponentType<P>,
+      services: Omit<CoreStart, 'plugins'> & {
+        plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
+      }
+    ) =>
+      React.forwardRef((props: P, ref: Ref<R>) => (
+        <KibanaContextProvider services={services}>
+          <ObservabilityAIAssistantProvider value={service}>
+            <Component {...props} ref={ref} />
+          </ObservabilityAIAssistantProvider>
+        </KibanaContextProvider>
+      ));
+
+    const services = {
+      ...coreStart,
+      plugins: {
+        start: pluginsStart,
+      },
+    };
+
     const ObservabilityAIAssistantActionMenuItem = withSuspense(
-      lazy(() =>
-        import('./components/action_menu_item/action_menu_item').then((m) => ({
-          default: m.ObservabilityAIAssistantActionMenuItem,
-        }))
+      withProviders(
+        lazy(() =>
+          import('./components/action_menu_item/action_menu_item').then((m) => ({
+            default: m.ObservabilityAIAssistantActionMenuItem,
+          }))
+        ),
+        services
       )
     );
 
-    const ContextualInsight = withSuspense(
-      lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight })))
+    const ObservabilityAIAssistantContextualInsight = withSuspense(
+      withProviders(
+        lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight }))),
+        services
+      )
     );
 
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
-      ContextualInsight,
-      ObservabilityAIAssistantActionMenuItem: () => (
-        <KibanaContextProvider
-          services={{
-            ...coreStart,
-            plugins: {
-              start: pluginsStart,
-            },
-          }}
-        >
-          <ObservabilityAIAssistantActionMenuItem />
-        </KibanaContextProvider>
-      ),
+      ObservabilityAIAssistantContextualInsight,
+      ObservabilityAIAssistantActionMenuItem,
     };
   }
 }
