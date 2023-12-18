@@ -1,3 +1,3 @@
 # @kbn/ftr-common-functional-ui-services
 
-Common services for ui actions.
+Common test services for ui actions.
