@@ -10,7 +10,6 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -284,7 +283,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
             {!isInDetailsSidePanel && (
               <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
             )}
-            <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
             {descriptionLists.map((descriptionList, index) => (
               <OverviewDescriptionList descriptionList={descriptionList} key={index} />
             ))}

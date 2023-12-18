@@ -6,6 +6,7 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -66,7 +67,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           <EuiFlexGroup
             direction="row"
             alignItems="center"
-            justifyContent="spaceEvenly"
+            justifyContent="spaceBetween"
             wrap={false}
           >
             <EuiFlexItem>
@@ -88,7 +89,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
                 )}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem css={{ flexGrow: 'unset' }}>
               <EuiButtonEmpty
                 data-test-subj="asset-criticality-change-btn"
                 iconType="arrowStart"
