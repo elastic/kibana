@@ -213,6 +213,8 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    this.notifyUsage(actionRequest.command);
+
     const doc: LogsEndpointAction = {
       '@timestamp': new Date().toISOString(),
       agent: {

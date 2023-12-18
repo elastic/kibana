@@ -109,6 +109,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
+    // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
       throw new ResponseActionsClientError(
         `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
@@ -118,10 +119,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    // TODO:PT support multiple agents
     await this.validateRequest(options);
-
-    this.notifyUsage('isolate');
 
     const agentUUID = options.endpoint_ids[0];
 
@@ -146,5 +144,34 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    await this.validateRequest(options);
+
+    const agentUUID = options.endpoint_ids[0];
+
+    await this.sendAction(SUB_ACTION.RELEASE_HOST, {
+      uuid: agentUUID,
+    });
+
+    // FIXME:PT need to grab data from the response above and store it with the Request or Response documents on our side
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
+      ...options,
+      command: 'unisolate',
+    });
+
+    // TODO: un-comment code below once we have proper authz given to `kibana_system` account (security issue #8190)
+    // await this.writeActionResponseToEndpointIndex({
+    //   actionId: actionRequestDoc.EndpointActions.action_id,
+    //   agentId: actionRequestDoc.agent.id,
+    //   data: {
+    //     command: actionRequestDoc.EndpointActions.data.command,
+    //   },
+    // });
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    //
   }
 }
