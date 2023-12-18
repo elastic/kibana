@@ -30,7 +30,6 @@ export function defineHasApiKeysRoutes({
     },
     createLicensedRouteHandler(async (context, _request, response) => {
       try {
-        // copied logic from get.ts
         const esClient = (await context.core).elasticsearch.client;
         const authenticationService = getAuthenticationService();
 
