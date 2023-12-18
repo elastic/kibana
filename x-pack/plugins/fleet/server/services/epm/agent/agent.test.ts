@@ -399,9 +399,9 @@ describe('encode', () => {
 
     const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
-      hosts: ['sqlserver://db_elastic_agent%40%3F%23%3A:dbelasticagent%5B%21%23%402023@localhost']
-    })
-  })
+      hosts: ['sqlserver://db_elastic_agent%40%3F%23%3A:dbelasticagent%5B%21%23%402023@localhost'],
+    });
+  });
 
   it('should correctly encode parts of the URI of the form domain\\username', () => {
     const streamTemplate = `
@@ -410,15 +410,15 @@ describe('encode', () => {
 
     const vars = {
       username: { value: 'domain\\username', type: 'text' },
-      password: { value: "dbelasticagent[!#@2023", type: 'password' },
+      password: { value: 'dbelasticagent[!#@2023', type: 'password' },
       hosts: { value: 'localhost', type: 'text' },
     };
 
     const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
-      hosts: ['sqlserver://domain%5Cusername:dbelasticagent%5B%21%23%402023@localhost']
-    })
-  })
+      hosts: ['sqlserver://domain%5Cusername:dbelasticagent%5B%21%23%402023@localhost'],
+    });
+  });
 
   it('should handle special characters which are not encoded by default', () => {
     const streamTemplate = `
@@ -433,7 +433,9 @@ describe('encode', () => {
 
     const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
-      hosts: ['sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost']
-    })
-  })
-})
+      hosts: [
+        'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
+      ],
+    });
+  });
+});
