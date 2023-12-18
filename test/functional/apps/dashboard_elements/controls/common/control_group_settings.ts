@@ -91,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let beforeRange: number;
 
       const getRange = async () => {
+        await dashboardControls.rangeSliderWaitForLoading(rangeSliderId);
         const lower = await dashboardControls.rangeSliderGetLowerBoundAttribute(
           rangeSliderId,
           'placeholder'
@@ -120,29 +121,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('do not apply global filters', async () => {
-        it('filter pills', async () => {
+        it('- filter pills', async () => {
           await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
           let afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
           expect(afterCount).to.be.lessThan(beforeCount);
+          await dashboardControls.optionsListEnsurePopoverIsClosed(firstOptionsListId);
 
           await dashboardControls.updateFilterSyncSetting(false);
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
           afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
-
           expect(afterCount).to.be.equal(beforeCount);
+
+          await dashboardControls.optionsListEnsurePopoverIsClosed(firstOptionsListId);
           await filterBar.removeAllFilters();
         });
 
-        it('query', async () => {
+        it('- query', async () => {
           await queryBar.setQuery('weightLbs < 40');
           await queryBar.submitQuery();
           let afterRange = await getRange();
           expect(afterRange).to.be.equal(beforeRange);
+          await dashboardControls.rangeSliderEnsurePopoverIsClosed(rangeSliderId);
 
           await dashboardControls.updateFilterSyncSetting(true);
           afterRange = await getRange();
           expect(afterRange).to.be.lessThan(beforeRange);
+          await dashboardControls.rangeSliderEnsurePopoverIsClosed(rangeSliderId);
           await queryBar.clearQuery();
           await queryBar.submitQuery();
         });
@@ -153,11 +158,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(firstOptionsListId);
         let afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
         expect(afterCount).to.be.equal(0);
+        await dashboardControls.optionsListEnsurePopoverIsClosed(firstOptionsListId);
 
         await dashboardControls.updateTimeRangeSyncSetting(false);
         await dashboardControls.optionsListOpenPopover(firstOptionsListId);
         afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
         expect(afterCount).to.be.equal(beforeCount);
+        await dashboardControls.optionsListEnsurePopoverIsClosed(firstOptionsListId);
         await timePicker.setDefaultDataRange();
         await dashboardControls.updateTimeRangeSyncSetting(true);
       });

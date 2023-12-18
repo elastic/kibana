@@ -199,7 +199,7 @@ export const ControlGroupEditor = ({
           </EuiFormRow>
 
           {controlCount > 0 && (
-            <div>
+            <>
               <EuiHorizontalRule margin="m" />
               <EuiFormRow>
                 <EuiButtonEmpty
@@ -214,7 +214,7 @@ export const ControlGroupEditor = ({
                   {ControlGroupStrings.management.getDeleteAllButtonTitle()}
                 </EuiButtonEmpty>
               </EuiFormRow>
-            </div>
+            </>
           )}
         </EuiForm>
       </EuiFlyoutBody>

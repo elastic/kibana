@@ -364,10 +364,11 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-popover`);
+      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`optionsList-control-popover`);
+      });
     });
   }
 
