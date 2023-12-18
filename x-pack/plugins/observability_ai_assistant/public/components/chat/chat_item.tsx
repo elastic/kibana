@@ -21,17 +21,19 @@ import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_pr
 import { ChatItemControls } from './chat_item_controls';
 import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
-import type { Feedback } from '../feedback_buttons';
-import { Message } from '../../../common';
 import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
-import { ChatActionClickHandler } from './types';
+import type { Message } from '../../../common';
+import type { Feedback } from '../feedback_buttons';
+import type { ChatActionClickHandler } from './types';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
 export interface ChatItemProps extends ChatTimelineItem {
+  onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGeneratingClick: () => void;
-  onActionClick: ChatActionClickHandler;
 }
 
 const normalMessageClassName = css`
@@ -66,21 +68,22 @@ const noPanelMessageClassName = css`
 
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
-  display: { collapsed },
-  message: {
-    message: { function_call: functionCall, role },
-  },
   content,
   currentUser,
+  display: { collapsed },
   element,
   error,
   loading,
+  message: {
+    message: { function_call: functionCall, role },
+  },
   title,
+  onActionClick,
   onEditSubmit,
   onFeedbackClick,
   onRegenerateClick,
+  onSendTelemetry,
   onStopGeneratingClick,
-  onActionClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -130,6 +133,7 @@ export function ChatItem({
         loading={loading}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
+        onSendTelemetry={onSendTelemetry}
       />
     ) : null;
 
