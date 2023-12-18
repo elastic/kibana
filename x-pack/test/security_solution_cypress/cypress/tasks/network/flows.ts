@@ -49,7 +49,7 @@ export const clickOnShowTopN = () => {
 
 export const clickOnCopyValue = () => {
   cy.get(COPY).first().focus();
-  cy.focused().click({ force: true }); // eslint-disable-line cypress/unsafe-to-chain-command
+  cy.focused().click(); // eslint-disable-line cypress/unsafe-to-chain-command
 };
 
 export function withHoverActionsReady() {

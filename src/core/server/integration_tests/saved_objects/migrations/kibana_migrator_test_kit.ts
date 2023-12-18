@@ -12,7 +12,7 @@ import { SemVer } from 'semver';
 
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env } from '@kbn/config';
+import { ConfigService, Env, BuildFlavor } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
@@ -278,6 +278,7 @@ interface GetMigratorParams {
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
 }
 
@@ -290,6 +291,7 @@ const getMigrator = async ({
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
+  buildFlavor = 'traditional',
   nodeRoles,
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
@@ -301,8 +303,8 @@ const getMigrator = async ({
   const soConfig = new SavedObjectConfig(savedObjectsConf, savedObjectsMigrationConf);
 
   const docLinks: DocLinksServiceStart = {
-    ...getDocLinksMeta({ kibanaBranch }),
-    links: getDocLinks({ kibanaBranch }),
+    ...getDocLinksMeta({ kibanaBranch, buildFlavor }),
+    links: getDocLinks({ kibanaBranch, buildFlavor }),
   };
 
   const esCapabilities = await getCapabilitiesFromClient(client);
