@@ -22,6 +22,7 @@ import {
   EuiModalHeaderTitle,
   EuiSuperSelect,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import React, { useState } from 'react';
@@ -51,6 +52,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
 
   return (
     <>
+      <EuiHorizontalRule />
       <EuiAccordion
         id="asset-criticality-selector"
         buttonContent={
@@ -113,6 +115,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           </EuiFlexGroup>
         )}
       </EuiAccordion>
+      <EuiHorizontalRule />
       {modal.visible ? (
         <AssetCriticalityModal entity={entity} criticality={criticality} modal={modal} />
       ) : null}
