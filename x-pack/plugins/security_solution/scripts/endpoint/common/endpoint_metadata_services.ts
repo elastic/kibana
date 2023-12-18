@@ -163,15 +163,21 @@ export const waitForEndpointToStreamData = async (
   let found: HostInfo | undefined;
 
   while (!found && !hasTimedOut()) {
-    found = await fetchEndpointMetadata(kbnClient, endpointAgentId).catch((error) => {
-      // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
-      // been streamed yet.
-      if (error?.response?.status === 404) {
-        return undefined;
-      }
+    found = await fetchEndpointMetadata(kbnClient, endpointAgentId)
+      .then((data) => {
+        console.log('===+', data);
+        return data;
+      })
+      .catch((error) => {
+        console.log('===-', error);
+        // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
+        // been streamed yet.
+        if (error?.response?.status === 404) {
+          return undefined;
+        }
 
-      throw error;
-    });
+        throw error;
+      });
 
     if (!found) {
       // sleep and check again
