@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-export interface Integration {
-  name: string;
-  title?: string;
-  version?: string;
-  icons?: IntegrationIcon[];
-}
+require('@kbn/babel-register').install();
 
-export interface IntegrationIcon {
-  path: string;
-  src: string;
-  title?: string;
-  size?: string;
-  type?: string;
-}
+require('./load_esql_docs');
