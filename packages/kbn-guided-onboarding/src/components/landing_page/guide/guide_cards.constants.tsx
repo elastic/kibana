@@ -73,9 +73,9 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
-    icon: 'magnifyWithPlus',
+    icon: 'searchProfilerApp',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-      defaultMessage: 'Build an AI-powered search experience',
+      defaultMessage: 'Build a semantic search experience',
     }),
     navigateTo: {
       appId: 'enterpriseSearchAISearch',
@@ -85,7 +85,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
-    icon: 'wrench',
+    icon: 'consoleApp',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
@@ -123,7 +123,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    icon: 'apmTrace',
+    icon: 'watchesApp',
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
@@ -142,7 +142,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    icon: 'visBarVertical',
+    icon: 'sqlApp',
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title', {
       defaultMessage: 'Monitor my host metrics',
     }),
@@ -155,7 +155,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    icon: 'cluster',
+    icon: 'dataVisualizer',
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
       {
@@ -168,7 +168,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    icon: 'videoPlayer',
+    icon: 'packetbeatApp',
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
       {
@@ -249,5 +249,18 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,
+  },
+  {
+    solution: 'search',
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.search.skip"
+        defaultMessage="Something else..."
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
+    order: 13,
   },
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
