@@ -226,7 +226,12 @@ export function ObservabilityLogExplorerPageObject({
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
         'observabilityLogExplorer',
         '/',
-        queryStringParams
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
       );
     },
 
@@ -246,7 +251,12 @@ export function ObservabilityLogExplorerPageObject({
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
         'observabilityLogExplorer',
         '/',
-        queryStringParams
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
       );
     },
 

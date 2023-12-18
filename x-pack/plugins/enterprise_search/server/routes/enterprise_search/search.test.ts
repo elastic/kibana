@@ -19,12 +19,15 @@ jest.mock('@kbn/search-index-documents/lib', () => ({
 
 describe('Elasticsearch Search', () => {
   let mockRouter: MockRouter;
-  const mockClient = {};
-
+  const mockClient = {
+    asCurrentUser: jest.fn(),
+  };
   beforeEach(() => {
     const context = {
-      core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-    } as jest.Mocked<RequestHandlerContext>;
+      core: Promise.resolve({
+        elasticsearch: { client: mockClient },
+      }),
+    } as unknown as jest.Mocked<RequestHandlerContext>;
 
     mockRouter = new MockRouter({
       context,
@@ -90,7 +93,7 @@ describe('Elasticsearch Search', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as jest.Mocked<RequestHandlerContext>;
+      } as unknown as jest.Mocked<RequestHandlerContext>;
 
       mockRouterNoQuery = new MockRouter({
         context,
@@ -137,7 +140,7 @@ describe('Elasticsearch Search', () => {
       });
 
       expect(fetchSearchResults).toHaveBeenCalledWith(
-        mockClient,
+        mockClient.asCurrentUser,
         'search-index-name',
         'banana',
         0,
