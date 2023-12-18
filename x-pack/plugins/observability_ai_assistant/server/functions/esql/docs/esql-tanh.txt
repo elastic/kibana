@@ -1,0 +1,7 @@
+TANH
+
+
+Tangent hyperbolic function.
+ROW a=1.8
+| EVAL tanh=TANH(a)
+Supported types:
