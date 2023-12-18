@@ -77,7 +77,6 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'), range);
 
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
   const numberFormat =
@@ -196,7 +195,6 @@ export function DataPreviewChart({
                 showLegend={false}
                 theme={[
                   {
-                    ...theme,
                     lineSeriesStyle: {
                       point: { visible: false },
                     },
@@ -231,7 +229,7 @@ export function DataPreviewChart({
                 timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
                 style={{
-                  tickLine: { size: 0.0001, padding: 4, visible: true },
+                  tickLine: { size: 0, padding: 4, visible: true },
                   tickLabel: {
                     alignment: {
                       horizontal: Position.Left,
