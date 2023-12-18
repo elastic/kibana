@@ -233,17 +233,17 @@ export const ModelSelect: React.FC = () => {
     }));
 
   const onChange = (options: ModelSelectOptionProps[]) => {
-    const selectedModelInList = options.find((option) => option.checked === 'on');
+    const selectedModelOption = options.find((option) => option.checked === 'on');
 
     setInferencePipelineConfiguration({
       ...configuration,
       inferenceConfig: undefined,
-      modelID: selectedModelInList?.modelId ?? '',
-      isModelPlaceholderSelected: selectedModelInList?.isPlaceholder ?? false,
+      modelID: selectedModelOption?.modelId ?? '',
+      isModelPlaceholderSelected: selectedModelOption?.isPlaceholder ?? false,
       fieldMappings: undefined,
       pipelineName: isPipelineNameUserSupplied
         ? pipelineName
-        : indexName + '-' + normalizeModelName(selectedModelInList?.modelId ?? ''),
+        : indexName + '-' + normalizeModelName(selectedModelOption?.modelId ?? ''),
     });
   };
 
