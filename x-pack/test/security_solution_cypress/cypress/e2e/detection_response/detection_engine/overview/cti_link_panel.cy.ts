@@ -18,7 +18,7 @@ import { OVERVIEW_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165709
-describe.skip('CTI Link Panel', { tags: ['@aaa', '@serverless', '@skipInServerless'] }, () => {
+describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -36,7 +36,7 @@ describe.skip('CTI Link Panel', { tags: ['@aaa', '@serverless', '@skipInServerle
   // TODO: https://github.com/elastic/kibana/issues/161539
   describe(
     'enabled threat intel module',
-    { tags: ['@aaa', '@serverless', '@brokenInServerless'] },
+    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
     () => {
       before(() => {
         // illegal_argument_exception: unknown setting [index.lifecycle.name]

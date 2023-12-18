@@ -27,7 +27,7 @@ import { visit } from '../../../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
-describe('Shared exception lists - read only', { tags: ['@aaa', '@skipInServerless'] }, () => {
+describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 

@@ -66,7 +66,7 @@ import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe.skip('Exceptions flyout', { tags: ['@aaa', '@serverless', '@skipInServerless'] }, () => {
+describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large

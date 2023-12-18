@@ -59,7 +59,7 @@ import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
-describe('New Terms rules', { tags: ['@aaa', '@serverless'] }, () => {
+describe('New Terms rules', { tags: ['@ess', '@serverless'] }, () => {
   describe('Detection rules, New Terms', () => {
     const rule = getNewTermsRule();
     const expectedUrls = rule.references?.join('');

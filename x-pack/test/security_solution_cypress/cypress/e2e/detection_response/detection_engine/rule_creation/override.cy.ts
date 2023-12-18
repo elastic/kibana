@@ -66,7 +66,7 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_d
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
-describe('Rules override', { tags: ['@aaa', '@serverless'] }, () => {
+describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');

@@ -71,7 +71,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Threshold rules',
   {
-    tags: ['@aaa', '@serverless'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

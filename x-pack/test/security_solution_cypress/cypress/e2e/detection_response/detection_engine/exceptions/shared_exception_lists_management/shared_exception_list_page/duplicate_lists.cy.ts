@@ -45,7 +45,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Duplicate List', { tags: ['@aaa', '@serverless'] }, () => {
+describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

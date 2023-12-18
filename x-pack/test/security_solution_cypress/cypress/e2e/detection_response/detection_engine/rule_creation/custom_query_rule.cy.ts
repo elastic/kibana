@@ -19,7 +19,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Create custom query rule', { tags: ['@aaa', '@serverless'] }, () => {
+describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
 
   beforeEach(() => {

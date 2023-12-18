@@ -40,7 +40,7 @@ const rule = getNewThresholdRule();
 describe(
   'Detection threshold rules, edit',
   {
-    tags: ['@aaa', '@serverless'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

@@ -12,7 +12,7 @@ import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
 
-describe('value list permissions', { tags: ['@aaa', '@skipInServerless'] }, () => {
+describe('value list permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
   describe('user with restricted access role', () => {
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);

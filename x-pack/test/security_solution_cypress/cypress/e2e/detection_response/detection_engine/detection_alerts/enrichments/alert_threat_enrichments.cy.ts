@@ -31,7 +31,7 @@ import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../../../../tasks
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Threat Match Enrichment',
-  { tags: ['@aaa', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     before(() => {
       // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]

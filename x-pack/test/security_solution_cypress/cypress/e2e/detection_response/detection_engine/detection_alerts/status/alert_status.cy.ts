@@ -38,7 +38,7 @@ import { visit } from '../../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169091
-describe.skip('Changing alert status', { tags: ['@aaa', '@serverless'] }, () => {
+describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -47,7 +47,7 @@ describe.skip('Changing alert status', { tags: ['@aaa', '@serverless'] }, () => 
     cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
-  context('Opening alerts', { tags: ['@aaa', '@serverless'] }, () => {
+  context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -124,7 +124,7 @@ describe.skip('Changing alert status', { tags: ['@aaa', '@serverless'] }, () => 
     });
   });
 
-  context('Marking alerts as acknowledged', { tags: ['@aaa', '@serverless'] }, () => {
+  context('Marking alerts as acknowledged', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -175,7 +175,7 @@ describe.skip('Changing alert status', { tags: ['@aaa', '@serverless'] }, () => 
     });
   });
 
-  context('Closing alerts', { tags: ['@aaa', '@serverless'] }, () => {
+  context('Closing alerts', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -240,7 +240,7 @@ describe.skip('Changing alert status', { tags: ['@aaa', '@serverless'] }, () => 
   // This test is unable to be run in serverless as `reader` is not available and viewer is currently reserved
   // https://github.com/elastic/kibana/pull/169723#issuecomment-1793191007
   // https://github.com/elastic/kibana/issues/170583
-  context('User is readonly', { tags: ['@aaa', '@brokenInServerless'] }, () => {
+  context('User is readonly', { tags: ['@ess', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);

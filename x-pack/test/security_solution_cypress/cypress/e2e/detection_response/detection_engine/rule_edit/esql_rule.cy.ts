@@ -35,7 +35,7 @@ const rule = getEsqlRule();
 
 const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
 
-describe('Detection ES|QL rules, edit', { tags: ['@aaa'] }, () => {
+describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
