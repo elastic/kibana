@@ -22,6 +22,8 @@ import {
   EuiAccordion,
   EuiText,
   EuiNotificationBadge,
+  euiScrollBarStyles,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
