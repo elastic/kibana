@@ -30,7 +30,11 @@ describe('RuleFormConsumerSelectionModal', () => {
     );
 
     expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
-    expect(screen.getByText('Select a scope')).toBeInTheDocument();
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveAttribute(
+      'placeholder',
+      'Select a scope'
+    );
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
@@ -116,8 +120,7 @@ describe('RuleFormConsumerSelectionModal', () => {
       />
     );
 
-    expect(screen.getByText('Logs')).toBeInTheDocument();
-    expect(() => screen.getByText('Select a scope')).toThrow();
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('Logs');
   });
 
   it('should not display the initial selected consumer if it is not a selectable option', () => {
@@ -129,7 +132,6 @@ describe('RuleFormConsumerSelectionModal', () => {
         errors={{}}
       />
     );
-    expect(() => screen.getByText('Logs')).toThrow();
-    expect(screen.getByText('Select a scope')).toBeInTheDocument();
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 });
