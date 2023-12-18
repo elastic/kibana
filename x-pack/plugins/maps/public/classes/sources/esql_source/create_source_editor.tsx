@@ -11,6 +11,7 @@ import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
+import { ESQL_GEO_POINT_TYPE } from './esql_utils';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESQLSourceDescriptor> | null) => void;
@@ -55,7 +56,7 @@ export function CreateSourceEditor(props: Props) {
               columns: [
                 {
                   name: geoField,
-                  type: 'geo_point',
+                  type: ESQL_GEO_POINT_TYPE,
                 }
               ],
               dateField: initialDateField,

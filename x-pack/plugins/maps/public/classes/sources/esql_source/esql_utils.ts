@@ -11,12 +11,14 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
+export const ESQL_GEO_POINT_TYPE = 'geo_point';
+
 const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
   defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
 });
 
 function isGeometryColumn(column: ESQLColumn) {
-  return column.type === 'geo_point';
+  return column.type === ESQL_GEO_POINT_TYPE;
 }
 
 export function verifyGeometryColumn(columns: ESQLColumn[]) {
