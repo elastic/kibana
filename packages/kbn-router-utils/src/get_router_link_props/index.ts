@@ -16,6 +16,18 @@ const isModifiedEvent = (event: React.MouseEvent<HTMLAnchorElement>) =>
 
 const isLeftClickEvent = (event: React.MouseEvent<HTMLAnchorElement>) => event.button === 0;
 
+/**
+ *
+ * getRouterLinkProps is an util that enable HTML elements, such buttons, to
+ * behave as links.
+ * @example
+ * const linkProps = getRouterLinkProps({ href: 'https://my-link', onClick: () => {console.log('click event')} });
+ * <EuiButton {...linkProps}>My custom link</EuiButton>
+ * @param href target url
+ * @param onClick onClick callback
+ * @returns An object that contains an href and a guardedClick handler that will
+ * manage behaviours such as leftClickEvent and event with modifiers (Ctrl, Shift, etc)
+ */
 export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps) => {
   const guardedClickHandler = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (event.defaultPrevented) {
