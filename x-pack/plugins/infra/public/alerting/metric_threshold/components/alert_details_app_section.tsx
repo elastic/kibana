@@ -69,7 +69,6 @@ export function AlertDetailsAppSection({
     [createDerivedIndexPattern]
   );
   const chartProps = {
-    theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
