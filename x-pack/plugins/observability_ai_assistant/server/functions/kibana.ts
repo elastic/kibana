@@ -6,7 +6,6 @@
  */
 
 import axios from 'axios';
-import https from 'https';
 import { format } from 'url';
 import type { FunctionRegistrationParameters } from '.';
 
