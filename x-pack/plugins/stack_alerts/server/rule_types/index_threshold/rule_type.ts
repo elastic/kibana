@@ -17,6 +17,7 @@ import {
   ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -230,7 +231,7 @@ export function getRuleType(
     } = options;
     const { alertsClient, scopedClusterClient } = services;
     if (!alertsClient) {
-      throw new Error(`Expected alertsClient to be defined but it was not!`);
+      throw new AlertsClientError();
     }
 
     const alertLimit = alertsClient.getAlertLimitValue();

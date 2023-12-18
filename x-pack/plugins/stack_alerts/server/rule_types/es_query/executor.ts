@@ -15,6 +15,7 @@ import {
   ALERT_URL,
 } from '@kbn/rule-data-utils';
 
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -49,7 +50,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   } = options;
   const { alertsClient, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   if (!alertsClient) {
-    throw new Error(`Expected alertsClient to be defined but it was not!`);
+    throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';

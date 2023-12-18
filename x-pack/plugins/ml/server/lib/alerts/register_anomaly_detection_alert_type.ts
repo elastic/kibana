@@ -15,7 +15,11 @@ import type {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import {
+  AlertsClientError,
+  IRuleTypeAlerts,
+  RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -249,7 +253,9 @@ export function registerAnomalyDetectionAlertType({
       );
 
       const { alertsClient } = services;
-      if (!alertsClient) return { state: {} };
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
       const executionResult = await execute(params, spaceId);
 
