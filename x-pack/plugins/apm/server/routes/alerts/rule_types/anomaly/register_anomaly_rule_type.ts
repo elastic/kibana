@@ -254,7 +254,9 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
-                detectorIndex: latest.detector_index as number,
+                detectorType: getApmMlDetectorType(
+                  latest.detector_index as number
+                ),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
               };
@@ -269,7 +271,7 @@ export function registerAnomalyRuleType({
             environment,
             transactionType,
             score,
-            detectorIndex,
+            detectorType,
             timestamp,
             bucketSpan,
           } = anomaly;
@@ -292,7 +294,7 @@ export function registerAnomalyRuleType({
             severityLevel,
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
-            detectorType: getApmMlDetectorType(detectorIndex),
+            detectorType,
           });
 
           const alertId = [
