@@ -533,7 +533,7 @@ describe('useOutputOptions', () => {
     `);
   });
 
-  it('should only enable remote es output for monitoring output', async () => {
+  it('should enable remote es output for data and monitoring output', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
@@ -545,7 +545,8 @@ describe('useOutputOptions', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     await waitForNextUpdate();
-    expect(result.current.dataOutputOptions.length).toEqual(1);
+    expect(result.current.dataOutputOptions.length).toEqual(2);
+    expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
     expect(result.current.monitoringOutputOptions.length).toEqual(2);
     expect(result.current.monitoringOutputOptions[1].value).toEqual('remote1');
   });
