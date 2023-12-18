@@ -61,5 +61,6 @@ export async function getAgentsPerOutput(
       }
       outputTypes[monitoringOutputType].count_as_monitoring += item.agents ?? 0;
     });
+
   return Object.values(outputTypes);
 }
