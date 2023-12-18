@@ -85,7 +85,6 @@ export const getNotUpgradeableMessage = (
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
     const timeToWaitMins = getRecentUpgradeInfoForAgent(agent).timeToWaitMins;
     const elapsedMinsSinceUpgrade = getRecentUpgradeInfoForAgent(agent).elapsedMinsSinceUpgrade;
-    // const upgradeStarted = moment().subtract(AGENT_UPGRADE_COOLDOWN_IN_MIN - timeToWaitMins).minutes();
     return `agent was upgraded ${elapsedMinsSinceUpgrade} minutes ago, please wait ${timeToWaitMins} minutes before attempting the upgrade again.`;
   }
   const agentVersionNumber = semverCoerce(agentVersion);
