@@ -105,7 +105,6 @@ export const reportingScreenshotShareProvider = ({
             theme={theme}
             jobProviderOptions={jobProviderOpts}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            urlService={urlService}
           />,
           { theme, i18n: i18nStart }
         ),

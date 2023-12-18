@@ -132,7 +132,7 @@ export class ReportingPublicPlugin
     if (core) {
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings), share),
+        components: share ? getSharedComponents(core, this.getApiClient(core.http, core.uiSettings), share!) : {},
       };
     }
 

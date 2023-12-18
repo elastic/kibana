@@ -10,7 +10,7 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { SharePluginSetup } from '../shared_imports';
-import { reportingScreenshotShareProvider } from '../share_context_menu';
+import { JobParamsProviderOptions, reportingScreenshotShareProvider } from '../share_context_menu';
 import { ReportingModalContent } from '../share_context_menu/reporting_panel_content_lazy';
 /**
  * Properties for displaying a share menu with Reporting features.
@@ -40,7 +40,7 @@ export interface ApplicationProps {
 export const getSharedComponents = async (
   core: CoreSetup,
   apiClient: ReportingAPIClient,
-  share: SharePluginSetup | undefined
+  share: SharePluginSetup
 ) => {
   const [plugins, startDeps] = await core.getStartServices();
   const { jobProviderOptions } = reportingScreenshotShareProvider({
@@ -51,6 +51,9 @@ export const getSharedComponents = async (
     usesUiCapabilities: true,
     application: plugins.application,
     theme: core.theme,
+    overlays: plugins.overlays,
+    i18nStart: plugins.i18n,
+    urlService: share?.url,
   });
 
   return (
@@ -60,7 +63,7 @@ export const getSharedComponents = async (
       toasts={core.notifications.toasts}
       uiSettings={core.uiSettings}
       theme={core.theme}
-      jobProviderOptions={jobProviderOptions}
+      jobProviderOptions={jobProviderOptions as unknown as JobParamsProviderOptions}
       onClose={() => {}}
     />
   );
