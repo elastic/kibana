@@ -29,6 +29,7 @@ import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
+import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -146,6 +147,21 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Last checkin message',
               }),
               description: agent.last_checkin_message ? agent.last_checkin_message : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.upgradeDetailsLabel', {
+                defaultMessage: 'Upgrade details',
+              }),
+              description: (
+                <AgentUpgradeStatus
+                  isAgentUpgradable={
+                    !!(latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion))
+                  }
+                  agentUpgradeStartedAt={agent.upgrade_started_at}
+                  agentUpgradedAt={agent.upgraded_at}
+                  agentUpgradeDetails={agent.upgrade_details}
+                />
+              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
