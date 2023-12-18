@@ -90,6 +90,38 @@ export const fleetAgentsSchema: RootSchema<any> = {
       },
     },
   },
+  upgrade_details: {
+    _meta: {
+      description: 'Agent upgrade details telemetry',
+      optional: true,
+    },
+    properties: {
+      target_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Target version of the agent upgrade',
+        },
+      },
+      state: {
+        type: 'keyword',
+        _meta: {
+          description: 'State of the agent upgrade',
+        },
+      },
+      error_msg: {
+        type: 'keyword',
+        _meta: {
+          description: 'Error message of the agent upgrade if failed',
+        },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: {
+          description: 'How many agents have this upgrade details',
+        },
+      },
+    },
+  },
 };
 
 export const fleetUsagesSchema: RootSchema<any> = {
