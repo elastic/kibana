@@ -10,7 +10,7 @@
  *
  * */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import type { TimelineType } from '../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../common/types';
@@ -39,8 +39,10 @@ const TimelineTourComp = (props: TimelineTourProps) => {
     services: { storage },
   } = useKibana();
 
-  const updatedTourSteps = timelineTourSteps.filter(
-    (step) => !step.timelineType || step.timelineType === timelineType
+  const updatedTourSteps = useMemo(
+    () =>
+      timelineTourSteps.filter((step) => !step.timelineType || step.timelineType === timelineType),
+    [timelineType]
   );
 
   const [tourState, setTourState] = useState<TourState>(() => {
