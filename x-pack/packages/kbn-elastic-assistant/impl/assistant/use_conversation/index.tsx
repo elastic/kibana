@@ -78,7 +78,7 @@ export const useConversation = (): UseConversation => {
   const {
     allSystemPrompts,
     assistantTelemetry,
-    knowledgeBase: { assistantLangChain },
+    knowledgeBase: { assistantLangChain: isEnabledKnowledgeBase, alerts: isEnabledRAGAlerts },
     setConversations,
   } = useAssistantContext();
 
@@ -148,7 +148,8 @@ export const useConversation = (): UseConversation => {
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId,
         role: message.role,
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
       });
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
@@ -170,7 +171,7 @@ export const useConversation = (): UseConversation => {
       });
       return messages;
     },
-    [assistantTelemetry, setConversations]
+    [isEnabledKnowledgeBase, isEnabledRAGAlerts, assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(

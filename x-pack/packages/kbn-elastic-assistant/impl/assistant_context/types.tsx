@@ -70,7 +70,8 @@ export interface AssistantTelemetry {
   reportAssistantMessageSent: (params: {
     conversationId: string;
     role: string;
-    assistantLangChain: boolean;
+    isEnabledKnowledgeBase: boolean;
+    isEnabledRAGAlerts: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {

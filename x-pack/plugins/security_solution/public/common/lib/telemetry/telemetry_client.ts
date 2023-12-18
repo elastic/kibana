@@ -55,12 +55,14 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportAssistantMessageSent = ({
     conversationId,
-    assistantLangChain,
+    isEnabledKnowledgeBase,
+    isEnabledRAGAlerts,
     role,
   }: ReportAssistantMessageSentParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
       conversationId,
-      assistantLangChain,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       role,
     });
   };

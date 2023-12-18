@@ -16,7 +16,8 @@ export interface ReportAssistantInvokedParams {
 export interface ReportAssistantMessageSentParams {
   conversationId: string;
   role: string;
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
+  isEnabledRAGAlerts: boolean;
 }
 
 export interface ReportAssistantQuickPromptParams {
