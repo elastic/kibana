@@ -155,7 +155,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -182,7 +182,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -209,7 +209,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -283,7 +283,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -310,7 +310,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -337,7 +337,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -466,7 +466,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
                 values={
                   Object {
@@ -498,7 +498,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics. APM is only supported for elasticsearch types."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
