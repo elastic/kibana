@@ -867,6 +867,7 @@ describe('es_query executor', () => {
         payload: {
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '291',
           'kibana.alert.reason':
             'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',

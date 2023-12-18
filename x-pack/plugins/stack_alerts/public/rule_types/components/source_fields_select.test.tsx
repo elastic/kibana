@@ -93,7 +93,7 @@ describe('SourceFields', () => {
   });
 
   it('should auto select valid sourceFields if sourceFields param is not defined', async () => {
-    let sourceFields: SourceField[] = [];
+    let sourceFields: SourceField[] | undefined;
     const onChange = (fields: SourceField[]) => {
       sourceFields = fields;
     };
@@ -139,7 +139,7 @@ describe('SourceFields', () => {
   });
 
   it('should remove duplicate and non-aggregatable esFields and handle keyword esFields', async () => {
-    let sourceFields: SourceField[] = [];
+    let sourceFields: SourceField[] | undefined;
     const onChange = (fields: SourceField[]) => {
       sourceFields = fields;
     };
