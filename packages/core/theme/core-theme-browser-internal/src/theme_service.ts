@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject, BehaviorSubject } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 
@@ -18,17 +17,16 @@ export interface ThemeServiceSetupDeps {
 
 /** @internal */
 export class ThemeService {
-  private theme$?: BehaviorSubject<CoreTheme>;
   private contract?: ThemeServiceSetup;
   private stop$ = new Subject<void>();
 
   public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
-    const theme = injectedMetadata.getTheme();
-    this.theme$ = new BehaviorSubject<CoreTheme>({ darkMode: theme.darkMode });
+    const themeMeta = injectedMetadata.getTheme();
+    const theme: CoreTheme = { darkMode: themeMeta.darkMode };
 
     this.contract = {
-      theme$: this.theme$.pipe(takeUntil(this.stop$), shareReplay(1)),
-      getTheme: () => this.theme$!.value,
+      theme$: of(theme),
+      getTheme: () => theme,
     };
 
     return this.contract;
