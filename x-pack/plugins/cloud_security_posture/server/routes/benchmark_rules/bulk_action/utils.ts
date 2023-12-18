@@ -6,7 +6,10 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
@@ -21,33 +24,28 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
+import {
+  convertRuleTagsToKQL,
+  generateBenchmarkRuleTags,
+} from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 
-const CSP_RULE_TAG = 'Cloud Security';
-const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
-const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
+const disableDetectionRules = async (
+  detectionRulesClient: RulesClient,
+  detectionRules: FindResult<RuleParams>[]
+) => {
+  const idsToDisable = detectionRules
+    .map((detectionRule) => {
+      return detectionRule.data.map((data) => data.id);
+    })
+    .flat();
 
-const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
-
-// TODO: move it to common
-export function convertRuleTagsToKQL(tags: string[]): string {
-  const TAGS_FIELD = 'alert.attributes.tags';
-  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(' AND ')})`;
-}
+  return await detectionRulesClient.bulkDisableRules({ ids: idsToDisable });
+};
 
 export const getDetectionRules = async (
   detectionRulesClient: RulesClient,
   rulesTags: string[][]
 ): Promise<Array<FindResult<RuleParams>>> => {
-  const foo = await detectionRulesClient.find({
-    excludeFromPublicApi: false,
-    options: {
-      filter: convertRuleTagsToKQL(rulesTags[0]),
-      searchFields: ['tags'],
-      page: 1,
-      per_page: 1,
-    },
-  });
-
   const detectionRules = Promise.all(
     rulesTags.map(async (ruleTags) => {
       return detectionRulesClient.find({
@@ -65,46 +63,16 @@ export const getDetectionRules = async (
   return detectionRules;
 };
 
-export const getFindingsDetectionRuleSearchTags = (cspBenchmarkRule: CspBenchmarkRule) => {
-  // ex: cis_gcp to ['CIS', 'GCP']
-  const benchmarkIdTags = cspBenchmarkRule.metadata.benchmark.id
-    .split('_')
-    .map((tag) => tag.toUpperCase());
-  // ex: 'CIS GCP 1.1'
-  const benchmarkRuleNumberTag = `${cspBenchmarkRule.metadata.benchmark.id
-    .replace('_', ' ')
-    .toUpperCase()} ${cspBenchmarkRule.metadata.benchmark.rule_number}`;
-
-  return benchmarkIdTags.concat([benchmarkRuleNumberTag]);
-};
-
-const generateBenchmarkRuleTags = (rule: CspBenchmarkRule) => {
-  return [STATIC_RULE_TAGS]
-    .concat(getFindingsDetectionRuleSearchTags(rule))
-    .concat(
-      rule.metadata.benchmark.posture_type
-        ? [
-            rule.metadata.benchmark.posture_type.toUpperCase(),
-            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${rule.metadata.benchmark.posture_type.toUpperCase()}`,
-          ]
-        : []
-    )
-    .concat(
-      rule.metadata.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
-    )
-    .flat();
-};
-
-export const getBenchmarkRulesTags = async (
+export const getBenchmarkRules = async (
   soClient: SavedObjectsClientContract,
   ruleIds: string[]
-): Promise<CspBenchmarkRule[]> => {
+): Promise<(CspBenchmarkRule | undefined)[]> => {
   const bulkGetObject = ruleIds.map((ruleId) => ({
     id: ruleId,
     type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   }));
   const cspBenchmarkRulesSo = await soClient.bulkGet<CspBenchmarkRule>(bulkGetObject);
-  // TODO: handle empty response
+
   const benchmarkRules = cspBenchmarkRulesSo.saved_objects.map(
     (cspBenchmarkRule) => cspBenchmarkRule.attributes
   );
@@ -116,27 +84,24 @@ export const muteDetectionRules = async (
   detectionRulesClient: RulesClient,
   rulesIds: string[]
 ) => {
-  const benchmarkRules = await getBenchmarkRulesTags(soClient, rulesIds);
-
+  const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
+  if (benchmarkRules.includes(undefined))
+    throw new Error('At least one of the provided benchmark rule id not exists');
   const benchmarkRulesTags = benchmarkRules.map((benchmarkRule) =>
-    generateBenchmarkRuleTags(benchmarkRule)
+    generateBenchmarkRuleTags(benchmarkRule!.metadata)
   );
-  // TODO: handle empty state
+
   const detectionRules = await getDetectionRules(detectionRulesClient, benchmarkRulesTags);
 
-  const idsToDisable = detectionRules
-    .map((detectionRule) => {
-      return detectionRule.data.map((data) => data.id);
-    })
-    .flat();
-  // TODO: handle empty ids
-  await detectionRulesClient.bulkDisableRules({ ids: idsToDisable });
+  const disabledDetectionRules = await disableDetectionRules(detectionRulesClient, detectionRules);
+
+  return disabledDetectionRules;
 };
 
 export const updateRulesStates = async (
   encryptedSoClient: SavedObjectsClientContract,
   newRulesStates: CspBenchmarkRulesStates
-) => {
+): Promise<SavedObjectsUpdateResponse<CspSettings>> => {
   return await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,

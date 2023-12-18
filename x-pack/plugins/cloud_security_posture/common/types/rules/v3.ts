@@ -8,6 +8,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
+import { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import { BulkDisableRulesResult } from '@kbn/alerting-plugin/server/application/rule/methods/bulk_disable';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
@@ -167,3 +169,8 @@ export const cspSettingsSchema = schema.object({
 
 export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 export type CspSettings = TypeOf<typeof cspSettingsSchema>;
+
+export interface BulkActionBenchmarkRulesResponse {
+  newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
+  disabledRules: BulkDisableRulesResult<Record<string, any>>;
+}
