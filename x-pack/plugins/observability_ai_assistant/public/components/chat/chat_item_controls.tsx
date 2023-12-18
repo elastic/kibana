@@ -46,14 +46,14 @@ export function ChatItemControls({
     controls = <StopGeneratingButton onClick={onStopGeneratingClick} />;
   } else if (displayFeedback || displayRegenerate) {
     controls = (
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         {displayFeedback ? (
           <EuiFlexItem grow={true}>
             <FeedbackButtons onClickFeedback={onFeedbackClick} />
           </EuiFlexItem>
         ) : null}
         {displayRegenerate ? (
-          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+          <EuiFlexItem grow={false}>
             <RegenerateResponseButton onClick={onRegenerateClick} />
           </EuiFlexItem>
         ) : null}

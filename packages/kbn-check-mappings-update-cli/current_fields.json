@@ -968,5 +968,8 @@
     "kuery",
     "serviceEnvironmentFilterEnabled",
     "serviceNameFilterEnabled"
+  ],
+  "cloud-security-posture-settings": [
+    "rules"
   ]
 }
