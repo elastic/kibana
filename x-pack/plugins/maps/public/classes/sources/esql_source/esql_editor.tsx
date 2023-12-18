@@ -23,7 +23,7 @@ export function ESQLEditor(props: Props) {
   const isMounted = useMountedState();
 
   const [error, setError] = useState<Error | undefined>();
-  const [warning, setWarning] = useState<string | udefined>();
+  const [warning, setWarning] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: props.esql });
 
