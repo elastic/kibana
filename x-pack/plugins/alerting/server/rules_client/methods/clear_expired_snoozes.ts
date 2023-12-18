@@ -6,7 +6,7 @@
  */
 
 import { RuleTypeParams, SanitizedRule } from '../../../common';
-import { partiallyUpdateAlert } from '../../saved_objects';
+import { partiallyUpdateRule } from '../../saved_objects';
 import { isSnoozeExpired } from '../../lib';
 import { RulesClientContext } from '../types';
 import { updateMeta } from '../lib';
@@ -39,7 +39,7 @@ export async function clearExpiredSnoozes(
 
   const updateOptions = { version, refresh: false };
 
-  await partiallyUpdateAlert(
+  await partiallyUpdateRule(
     context.unsecuredSavedObjectsClient,
     rule.id,
     updateAttributes,

@@ -43,7 +43,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateAlert } from '../saved_objects';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -221,7 +221,7 @@ export class TaskRunner<
       // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateAlert(
+      await partiallyUpdateRule(
         client,
         ruleId,
         { ...attributes, running: false },
@@ -473,7 +473,7 @@ export class TaskRunner<
           };
 
           const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
-            includedHiddenTypes: ['alert', 'action'],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
           });
 
           const dataViews = await this.context.dataViews.dataViewsServiceFactory(

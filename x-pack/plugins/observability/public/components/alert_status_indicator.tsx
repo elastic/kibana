@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
-import { LIGHT_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 
 interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
@@ -19,7 +19,7 @@ interface AlertStatusIndicatorProps {
 export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (
-      <EuiHealth color={LIGHT_THEME.colors.vizColors[2]} textSize={textSize}>
+      <EuiHealth color={LEGACY_LIGHT_THEME.colors.vizColors[2]} textSize={textSize}>
         {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
           defaultMessage: 'Active',
         })}
@@ -28,7 +28,7 @@ export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStat
   }
 
   return (
-    <EuiHealth color={LIGHT_THEME.colors.vizColors[1]} textSize={textSize}>
+    <EuiHealth color={LEGACY_LIGHT_THEME.colors.vizColors[1]} textSize={textSize}>
       <EuiText color="subdued" size="relative">
         {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
           defaultMessage: 'Recovered',
