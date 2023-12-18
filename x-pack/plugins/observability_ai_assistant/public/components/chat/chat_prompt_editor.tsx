@@ -8,13 +8,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
   EuiPanel,
-  EuiSpacer,
   EuiTextArea,
   keys,
 } from '@elastic/eui';
@@ -26,24 +24,30 @@ import { TelemetryEventTypeWithPayload, TELEMETRY } from '../../analytics';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
+  hidden: boolean;
   loading: boolean;
   initialPrompt?: string;
   initialSelectedFunctionName?: string;
   initialFunctionPayload?: string;
   trigger?: MessageRole;
-  onSubmit: (message: Message) => void;
+  onChangeHeight: (height: number) => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
+  onSubmit: (message: Message) => void;
 }
 
 export function ChatPromptEditor({
   disabled,
+  hidden,
   loading,
   initialPrompt,
   initialSelectedFunctionName,
   initialFunctionPayload,
-  onSubmit,
+  onChangeHeight,
   onSendTelemetry,
+  onSubmit,
 }: ChatPromptEditorProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const isFocusTrapEnabled = Boolean(initialPrompt);
 
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -65,6 +69,8 @@ export function ChatPromptEditor({
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
+
+    handleResizeTextArea();
   };
 
   const handleChangeFunctionPayload = (params: string) => {
@@ -72,24 +78,30 @@ export function ChatPromptEditor({
     recalculateFunctionEditorLineCount();
   };
 
-  const handleClearSelection = () => {
-    setSelectedFunctionName(undefined);
-    setFunctionPayload('');
-    setPrompt('');
-  };
-
-  const handleSelectFunction = (functionName: string) => {
+  const handleSelectFunction = (functionName: string | undefined) => {
     setPrompt('');
     setFunctionPayload('');
     setSelectedFunctionName(functionName);
+    console.log('functionName', functionName);
+
+    if (functionName) {
+      onChangeHeight(200);
+      return;
+    }
+
+    if (containerRef.current) {
+      onChangeHeight(containerRef.current.clientHeight);
+    }
   };
 
-  const handleResizeTextArea = () => {
+  const handleResizeTextArea = useCallback(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.minHeight = 'auto';
       textAreaRef.current.style.minHeight = textAreaRef.current?.scrollHeight + 'px';
     }
-  };
+
+    onChangeHeight(textAreaRef.current?.scrollHeight || 0);
+  }, [onChangeHeight]);
 
   const handleResetTextArea = () => {
     if (textAreaRef.current) {
@@ -100,7 +112,7 @@ export function ChatPromptEditor({
   const recalculateFunctionEditorLineCount = useCallback(() => {
     const newLineCount = model?.getLineCount() || 0;
     if (newLineCount !== functionEditorLineCount) {
-      setFunctionEditorLineCount(newLineCount);
+      setFunctionEditorLineCount(newLineCount + 1);
     }
   }, [functionEditorLineCount, model]);
 
@@ -180,123 +192,94 @@ export function ChatPromptEditor({
 
     if (textarea) {
       textarea.focus();
-      textarea.addEventListener('input', handleResizeTextArea, false);
     }
-
-    return () => {
-      textarea?.removeEventListener('input', handleResizeTextArea, false);
-    };
-  });
+  }, [handleResizeTextArea]);
 
   useEffect(() => {
     handleResizeTextArea();
-  }, []);
+  }, [handleResizeTextArea]);
 
   return (
     <EuiFocusTrap disabled={!isFocusTrapEnabled}>
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow>
-                  <FunctionListPopover
-                    selectedFunctionName={selectedFunctionName}
-                    onSelectFunction={handleSelectFunction}
-                    disabled={loading || disabled}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {selectedFunctionName ? (
-                    <EuiButtonEmpty
-                      data-test-subj="observabilityAiAssistantChatPromptEditorEmptySelectionButton"
-                      iconType="cross"
-                      iconSide="right"
-                      size="xs"
-                      disabled={loading || disabled}
-                      onClick={handleClearSelection}
-                    >
-                      {i18n.translate('xpack.observabilityAiAssistant.prompt.emptySelection', {
-                        defaultMessage: 'Empty selection',
-                      })}
-                    </EuiButtonEmpty>
-                  ) : null}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {selectedFunctionName ? (
-                <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
-                  <CodeEditor
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.chatPromptEditor.codeEditor.payloadEditorLabel',
-                      { defaultMessage: 'payloadEditor' }
-                    )}
-                    data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
-                    fullWidth
-                    height={functionEditorLineCount > 8 ? '200px' : '120px'}
-                    languageId="json"
-                    isCopyable
-                    languageConfiguration={{
-                      autoClosingPairs: [
-                        {
-                          open: '{',
-                          close: '}',
-                        },
-                      ],
-                    }}
-                    editorDidMount={(editor) => {
-                      editor.focus();
-                    }}
-                    options={{
-                      accessibilitySupport: 'off',
-                      acceptSuggestionOnEnter: 'on',
-                      automaticLayout: true,
-                      autoClosingQuotes: 'always',
-                      autoIndent: 'full',
-                      contextmenu: true,
-                      fontSize: 12,
-                      formatOnPaste: true,
-                      formatOnType: true,
-                      inlineHints: { enabled: true },
-                      lineNumbers: 'on',
-                      minimap: { enabled: false },
-                      model,
-                      overviewRulerBorder: false,
-                      quickSuggestions: true,
-                      scrollbar: { alwaysConsumeMouseWheel: false },
-                      scrollBeyondLastLine: false,
-                      suggestOnTriggerCharacters: true,
-                      tabSize: 2,
-                      wordWrap: 'on',
-                      wrappingIndent: 'indent',
-                    }}
-                    transparentBackground
-                    value={functionPayload || ''}
-                    onChange={handleChangeFunctionPayload}
-                  />
-                </EuiPanel>
-              ) : (
-                <EuiTextArea
-                  data-test-subj="observabilityAiAssistantChatPromptEditorTextArea"
-                  css={{ maxHeight: 200 }}
-                  disabled={disabled}
-                  fullWidth
-                  inputRef={textAreaRef}
-                  placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
-                    defaultMessage: 'Send a message to the Assistant',
-                  })}
-                  resize="vertical"
-                  rows={1}
-                  value={prompt}
-                  onChange={handleChange}
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
         <EuiFlexItem grow={false}>
-          <EuiSpacer size="xl" />
+          <FunctionListPopover
+            selectedFunctionName={selectedFunctionName}
+            onSelectFunction={handleSelectFunction}
+            disabled={loading || disabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {selectedFunctionName ? (
+            <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
+              <CodeEditor
+                aria-label={i18n.translate(
+                  'xpack.observabilityAiAssistant.chatPromptEditor.codeEditor.payloadEditorLabel',
+                  { defaultMessage: 'payloadEditor' }
+                )}
+                data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
+                fullWidth
+                height={'180px'}
+                languageId="json"
+                isCopyable
+                languageConfiguration={{
+                  autoClosingPairs: [
+                    {
+                      open: '{',
+                      close: '}',
+                    },
+                  ],
+                }}
+                editorDidMount={(editor) => {
+                  editor.focus();
+                }}
+                options={{
+                  accessibilitySupport: 'off',
+                  acceptSuggestionOnEnter: 'on',
+                  automaticLayout: true,
+                  autoClosingQuotes: 'always',
+                  autoIndent: 'full',
+                  contextmenu: true,
+                  fontSize: 12,
+                  formatOnPaste: true,
+                  formatOnType: true,
+                  inlineHints: { enabled: true },
+                  lineNumbers: 'on',
+                  minimap: { enabled: false },
+                  model,
+                  overviewRulerBorder: false,
+                  quickSuggestions: true,
+                  scrollbar: { alwaysConsumeMouseWheel: false },
+                  scrollBeyondLastLine: false,
+                  suggestOnTriggerCharacters: true,
+                  tabSize: 2,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                }}
+                transparentBackground
+                value={functionPayload || ''}
+                onChange={handleChangeFunctionPayload}
+              />
+            </EuiPanel>
+          ) : (
+            <EuiTextArea
+              data-test-subj="observabilityAiAssistantChatPromptEditorTextArea"
+              css={{ maxHeight: 200 }}
+              disabled={disabled}
+              fullWidth
+              inputRef={textAreaRef}
+              placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
+                defaultMessage: 'Send a message to the Assistant',
+              })}
+              resize="vertical"
+              rows={1}
+              value={prompt}
+              onChange={handleChange}
+            />
+          )}
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
             aria-label={i18n.translate(

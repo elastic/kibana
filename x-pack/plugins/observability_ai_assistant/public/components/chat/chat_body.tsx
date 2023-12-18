@@ -144,6 +144,8 @@ export function ChatBody({
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
+  const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
+
   const handleFeedback = (message: Message, feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
       sendEvent(chatService.analytics, {
@@ -203,8 +205,10 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
+              hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               disabled
+              onChangeHeight={setPromptEditorHeight}
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
@@ -289,23 +293,27 @@ export function ChatBody({
         <EuiFlexItem
           grow={false}
           className={promptEditorClassname}
-          style={{
-            height: !connectors.loading && connectors.connectors?.length !== 0 ? 110 : 0,
-          }}
+          style={{ height: promptEditorHeight }}
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel
             hasBorder={false}
             hasShadow={false}
             paddingSize="m"
+            color="subdued"
             className={promptEditorContainerClassName}
           >
             <ChatPromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
+              onChangeHeight={(height) => {
+                console.log('height', height);
+                setPromptEditorHeight(height + 30);
+              }}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
