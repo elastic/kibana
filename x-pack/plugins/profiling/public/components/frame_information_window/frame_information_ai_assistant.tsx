@@ -92,7 +92,7 @@ export function FrameInformationAIAssistant({ frame }: Props) {
 
   return (
     <>
-      {observabilityAIAssistantService.isEnabled() && promptMessages ? (
+      {ObservabilityAIAssistantContextualInsight && promptMessages ? (
         <ObservabilityAIAssistantContextualInsight
           messages={promptMessages}
           title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {

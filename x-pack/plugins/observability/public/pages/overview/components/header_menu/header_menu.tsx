@@ -17,10 +17,7 @@ export function HeaderMenu(): React.ReactElement | null {
   const {
     http,
     theme,
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantActionMenuItem,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibana().services;
 
   const {
@@ -37,9 +34,7 @@ export function HeaderMenu(): React.ReactElement | null {
         >
           {addDataLinkText}
         </EuiHeaderLink>
-        {observabilityAIAssistantService?.isEnabled() ? (
-          <ObservabilityAIAssistantActionMenuItem />
-        ) : null}
+        {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

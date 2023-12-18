@@ -31,10 +31,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const {
     application: { getUrlForApp },
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantActionMenuItem,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibanaContextForPlugin().services;
 
   const enableDeveloperRoutes = isDevMode();
@@ -89,7 +86,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
             >
               {ADD_DATA_LABEL}
             </EuiHeaderLink>
-            {observabilityAIAssistantService.isEnabled() ? (
+            {ObservabilityAIAssistantActionMenuItem ? (
               <ObservabilityAIAssistantActionMenuItem />
             ) : null}
           </EuiHeaderLinks>

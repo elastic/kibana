@@ -123,10 +123,10 @@ export interface ObservabilityAIAssistantPluginSetup {}
 
 export interface ObservabilityAIAssistantPluginStart {
   service: ObservabilityAIAssistantService;
-  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps>;
+  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
   ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
     Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
       RefAttributes<{}>
-  >;
+  > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
 }

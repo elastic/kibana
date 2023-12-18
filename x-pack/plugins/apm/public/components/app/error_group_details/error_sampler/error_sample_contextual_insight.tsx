@@ -25,10 +25,7 @@ export function ErrorSampleContextualInsight({
   transaction?: Transaction;
 }) {
   const {
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantContextualInsight,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = useApmPluginContext();
 
   const [logStacktrace, setLogStacktrace] = useState('');
@@ -76,7 +73,7 @@ ${exceptionStacktrace}`
     ];
   }, [error, transaction, logStacktrace, exceptionStacktrace]);
 
-  return observabilityAIAssistantService.isEnabled() && messages ? (
+  return ObservabilityAIAssistantContextualInsight && messages ? (
     <>
       <EuiFlexItem>
         <ObservabilityAIAssistantContextualInsight

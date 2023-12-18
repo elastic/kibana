@@ -41,10 +41,7 @@ export function UXActionMenu({
   const {
     http,
     application,
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantActionMenuItem,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibanaServices();
 
   const { urlParams } = useLegacyUrlParams();
@@ -95,7 +92,7 @@ export function UXActionMenu({
           })}
         </EuiHeaderLink>
         <UxInspectorHeaderLink isDev={isDev} />
-        {observabilityAIAssistantService.isEnabled() ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
           <ObservabilityAIAssistantActionMenuItem />
         ) : null}
       </EuiHeaderLinks>

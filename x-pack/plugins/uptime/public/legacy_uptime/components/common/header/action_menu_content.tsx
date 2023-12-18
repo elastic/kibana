@@ -41,12 +41,8 @@ export function ActionMenuContent(): React.ReactElement {
   const kibana = useKibana();
 
   const { basePath } = useUptimeSettingsContext();
-  const {
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantActionMenuItem,
-    } = {},
-  } = useUptimeStartPlugins();
+  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
+    useUptimeStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -125,9 +121,7 @@ export function ActionMenuContent(): React.ReactElement {
         {ADD_DATA_LABEL}
       </EuiHeaderLink>
       <InspectorHeaderLink />
-      {observabilityAIAssistantService?.isEnabled() && ObservabilityAIAssistantActionMenuItem ? (
-        <ObservabilityAIAssistantActionMenuItem />
-      ) : null}
+      {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
     </EuiHeaderLinks>
   );
 }

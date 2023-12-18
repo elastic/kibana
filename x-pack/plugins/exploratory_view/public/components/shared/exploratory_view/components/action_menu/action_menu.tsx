@@ -23,10 +23,7 @@ export function ExpViewActionMenuContent({
   const {
     lens,
     isDev,
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantActionMenuItem,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
   } = useKibana().services;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
@@ -97,7 +94,7 @@ export function ExpViewActionMenuContent({
             })}
           </EuiButton>
         </EuiFlexItem>
-        {observabilityAIAssistantService?.isEnabled() ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
           <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
           </EuiFlexItem>

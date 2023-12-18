@@ -35,10 +35,7 @@ interface Props {
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
   const {
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantContextualInsight,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = useKibanaContextForPlugin().services;
 
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
@@ -100,7 +97,7 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
   }, [command]);
   return (
     <>
-      {observabilityAIAssistantService.isEnabled() && explainProcessMessages ? (
+      {ObservabilityAIAssistantContextualInsight && explainProcessMessages ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexItem grow={false}>

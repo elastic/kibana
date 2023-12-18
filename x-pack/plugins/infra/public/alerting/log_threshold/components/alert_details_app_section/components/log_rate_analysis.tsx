@@ -52,10 +52,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const {
     dataViews,
     logsShared,
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantContextualInsight,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
@@ -290,7 +287,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {observabilityAIAssistantService.isEnabled() && messages ? (
+        {ObservabilityAIAssistantContextualInsight && messages ? (
           <EuiFlexItem grow={false}>
             <ObservabilityAIAssistantContextualInsight
               title={logRateAnalysisTitle}

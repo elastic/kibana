@@ -26,10 +26,7 @@ export interface LogAIAssistantProps {
 
 export const LogAIAssistant = ({
   doc,
-  observabilityAIAssistant: {
-    service: observabilityAIAssistantService,
-    ObservabilityAIAssistantContextualInsight,
-  },
+  observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
 }: LogAIAssistantProps) => {
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
@@ -73,7 +70,7 @@ export const LogAIAssistant = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {observabilityAIAssistantService.isEnabled() && explainLogMessageMessages ? (
+      {ObservabilityAIAssistantContextualInsight && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
           <ObservabilityAIAssistantContextualInsight
             title={explainLogMessageTitle}
@@ -82,7 +79,7 @@ export const LogAIAssistant = ({
           />
         </EuiFlexItem>
       ) : null}
-      {observabilityAIAssistantService.isEnabled() && similarLogMessageMessages ? (
+      {ObservabilityAIAssistantContextualInsight && similarLogMessageMessages ? (
         <EuiFlexItem grow={false}>
           <ObservabilityAIAssistantContextualInsight
             title={similarLogMessagesTitle}

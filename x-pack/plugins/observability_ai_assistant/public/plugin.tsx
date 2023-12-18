@@ -141,29 +141,33 @@ export class ObservabilityAIAssistantPlugin
       },
     };
 
-    const ObservabilityAIAssistantActionMenuItem = withSuspense(
-      withProviders(
-        lazy(() =>
-          import('./components/action_menu_item/action_menu_item').then((m) => ({
-            default: m.ObservabilityAIAssistantActionMenuItem,
-          }))
-        ),
-        services
-      )
-    );
-
-    const ObservabilityAIAssistantContextualInsight = withSuspense(
-      withProviders(
-        lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight }))),
-        services
-      )
-    );
+    const isEnabled = service.isEnabled();
 
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
-      ObservabilityAIAssistantContextualInsight,
-      ObservabilityAIAssistantActionMenuItem,
+      ObservabilityAIAssistantContextualInsight: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/insight/insight').then((m) => ({ default: m.Insight }))
+              ),
+              services
+            )
+          )
+        : null,
+      ObservabilityAIAssistantActionMenuItem: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/action_menu_item/action_menu_item').then((m) => ({
+                  default: m.ObservabilityAIAssistantActionMenuItem,
+                }))
+              ),
+              services
+            )
+          )
+        : null,
     };
   }
 }
