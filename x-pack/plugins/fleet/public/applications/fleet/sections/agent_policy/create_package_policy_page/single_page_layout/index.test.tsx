@@ -18,8 +18,10 @@ import {
   sendCreatePackagePolicy,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
+  sendGetOneAgentPolicy,
   useIntraAppState,
   useStartServices,
+  useGetAgentPolicies,
   useGetPackageInfoByKeyQuery,
 } from '../../../../hooks';
 
@@ -95,6 +97,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 import { CreatePackagePolicySinglePage } from '.';
+import { AGENTLESS_POLICY_ID } from './hooks/setup_technology';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -290,6 +293,7 @@ describe('when on the package policy create page', () => {
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
         policy_id: 'agent-policy-1',
+        force: false,
       });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
@@ -441,6 +445,7 @@ describe('when on the package policy create page', () => {
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
           ...newPackagePolicy,
           policy_id: 'agent-policy-2',
+          force: false,
         });
 
         await waitFor(() => {
@@ -503,6 +508,7 @@ describe('when on the package policy create page', () => {
           expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
             ...newPackagePolicy,
             policy_id: 'agent-policy-1',
+            force: false,
           });
 
           await waitFor(() => {
@@ -573,7 +579,49 @@ describe('when on the package policy create page', () => {
                 ],
               },
             ],
+            force: false,
           });
+        });
+      });
+    });
+
+    describe('with agentless policy available', () => {
+      beforeEach(async () => {
+        (sendGetOneAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: { item: { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' } },
+        });
+        (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+          data: {
+            items: [{ id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' }],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        });
+
+        await act(async () => {
+          render();
+        });
+      });
+
+      test('should force create package policy', async () => {
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+          ...newPackagePolicy,
+          force: true,
+          policy_id: AGENTLESS_POLICY_ID,
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
         });
       });
     });

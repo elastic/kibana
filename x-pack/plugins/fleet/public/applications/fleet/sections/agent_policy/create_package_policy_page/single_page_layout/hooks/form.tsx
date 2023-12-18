@@ -46,6 +46,7 @@ import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+import { AGENTLESS_POLICY_ID } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -298,12 +299,15 @@ export function useOnSubmit({
         }
       }
 
+      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
+      const forceInstall = force || agentPolicyIdToSave === AGENTLESS_POLICY_ID;
+
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: createdPolicy?.id ?? packagePolicy.policy_id,
-        force,
+        policy_id: agentPolicyIdToSave,
+        force: forceInstall,
       });
 
       const hasAzureArmTemplate = data?.item
@@ -373,9 +377,11 @@ export function useOnSubmit({
       } else {
         if (isVerificationError(error)) {
           setFormState('VALID'); // don't show the add agent modal
-          const forceInstall = await confirmForceInstall(packagePolicy.package!);
+          const forceInstallUnverifiedIntegration = await confirmForceInstall(
+            packagePolicy.package!
+          );
 
-          if (forceInstall) {
+          if (forceInstallUnverifiedIntegration) {
             // skip creating the agent policy because it will have already been successfully created
             onSubmit({ overrideCreatedAgentPolicy: createdPolicy, force: true });
           }
