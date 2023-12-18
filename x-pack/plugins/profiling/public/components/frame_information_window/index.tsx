@@ -130,7 +130,15 @@ export function FrameInformationWindow({
           <EuiFlexGroup direction="column" gutterSize="s">
             {informationRows.map((item, index) => (
               <EuiFlexItem key={index}>
-                <EuiStat title={item.value} description={item.label} titleSize="xs" />
+                <EuiStat
+                  title={
+                    <span data-test-subj={`informationRows_${item['data-test-subj']}`}>
+                      {item.value}
+                    </span>
+                  }
+                  description={item.label}
+                  titleSize="xs"
+                />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
