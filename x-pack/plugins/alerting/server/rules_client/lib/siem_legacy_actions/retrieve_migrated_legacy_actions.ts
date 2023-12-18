@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RulesClientContext } from '../..';
 import { RawRuleAction } from '../../../types';
 import { find } from '../../methods/find';
@@ -52,7 +53,7 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
         options: {
           filter: 'alert.attributes.alertTypeId:(siem.notifications)',
           hasReference: {
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
           },
         },
@@ -60,7 +61,7 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
       unsecuredSavedObjectsClient.find<LegacyIRuleActionsAttributes>({
         type: legacyRuleActionsSavedObjectType,
         hasReference: {
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         },
       }),
