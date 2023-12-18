@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSelectable, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableOption, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
 import { MlModel } from '../../../../../../../common/types/ml';
 import { IndexNameLogic } from '../../index_name_logic';
@@ -17,8 +17,12 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelectLogic } from './model_select_logic';
-import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
+import { ModelSelectOption } from './model_select_option';
 import { normalizeModelName } from './utils';
+
+type EuiSelectableOptionWithMlModelData = EuiSelectableOption & {
+  data: MlModel;
+};
 
 export const ModelSelect: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
@@ -31,28 +35,34 @@ export const ModelSelect: React.FC = () => {
 
   const { modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
 
-  const getModelSelectOptionProps = (models: MlModel[]): ModelSelectOptionProps[] =>
+  const getModelSelectOptionProps = (models: MlModel[]): EuiSelectableOptionWithMlModelData[] =>
     (models ?? []).map((model) => ({
-      ...model,
       label: model.modelId,
       checked: model.modelId === modelID ? 'on' : undefined,
+      data: { ...model },
     }));
 
-  const onChange = (options: ModelSelectOptionProps[]) => {
+  const onChange = (options: EuiSelectableOptionWithMlModelData[]) => {
     const selectedOption = options.find((option) => option.checked === 'on');
     setInferencePipelineConfiguration({
       ...configuration,
       inferenceConfig: undefined,
-      modelID: selectedOption?.modelId ?? '',
-      isModelPlaceholderSelected: selectedOption?.isPlaceholder ?? false,
+      modelID: selectedOption?.data.modelId ?? '',
+      isModelPlaceholderSelected: selectedOption?.data.isPlaceholder ?? false,
       fieldMappings: undefined,
       pipelineName: isPipelineNameUserSupplied
         ? pipelineName
-        : indexName + '-' + normalizeModelName(selectedOption?.modelId ?? ''),
+        : indexName + '-' + normalizeModelName(selectedOption?.data.modelId ?? ''),
     });
   };
 
-  const renderOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
+  const renderOption = (option: EuiSelectableOptionWithMlModelData) => {
+    const flattenedOption: EuiSelectableOption<MlModel> = {
+      ...option,
+      ...option.data,
+    };
+    return <ModelSelectOption {...flattenedOption} />;
+  };
 
   return (
     <EuiSelectable

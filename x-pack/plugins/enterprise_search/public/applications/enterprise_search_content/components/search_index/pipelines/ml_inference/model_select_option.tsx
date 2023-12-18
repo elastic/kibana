@@ -21,6 +21,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiRadio,
+  EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -74,11 +75,6 @@ export const getContextMenuPanel = (
       ],
     },
   ];
-};
-
-export type ModelSelectOptionProps = MlModel & {
-  label: string;
-  checked?: 'on';
 };
 
 export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
@@ -172,7 +168,7 @@ export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, modelDe
   );
 };
 
-export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
+export const ModelSelectOption: React.FC<EuiSelectableOption<MlModel>> = ({
   modelId,
   title,
   description,

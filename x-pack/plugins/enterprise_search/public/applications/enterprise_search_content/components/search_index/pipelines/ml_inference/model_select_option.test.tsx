@@ -11,9 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSelectableOption, EuiText } from '@elastic/eui';
 
-import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 
 import {
@@ -21,11 +21,10 @@ import {
   getContextMenuPanel,
   LicenseBadge,
   ModelSelectOption,
-  ModelSelectOptionProps,
   StartModelButton,
 } from './model_select_option';
 
-const DEFAULT_PROPS: ModelSelectOptionProps = {
+const DEFAULT_PROPS: EuiSelectableOption<MlModel> = {
   modelId: 'model_1',
   type: 'ner',
   label: 'Model 1',
