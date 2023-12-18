@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
+import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
@@ -135,6 +135,7 @@ export const cspBenchmarkRules = schema.arrayOf(
     benchmark_id: schema.string(),
     benchmark_version: schema.string(),
     rule_number: schema.string(),
+    rule_id: schema.string(),
   })
 );
 
@@ -153,6 +154,10 @@ const rulesStates = schema.recordOf(
   schema.string(),
   schema.object({
     muted: schema.boolean(),
+    benchmarkId: schema.string(),
+    benchmarkVersion: schema.string(),
+    ruleNumber: schema.string(),
+    ruleId: schema.string(),
   })
 );
 
@@ -162,3 +167,8 @@ export const cspSettingsSchema = schema.object({
 
 export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 export type CspSettings = TypeOf<typeof cspSettingsSchema>;
+
+export interface BulkActionBenchmarkRulesResponse {
+  newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
+  disabledRules: number;
+}
