@@ -38,12 +38,12 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
       loadDetectionsPage(ROLES.reader);
     });
 
-    it('should not allow user with read only privileges to attach alerts to existing cases', () => {
+    test('should not allow user with read only privileges to attach alerts to existing cases', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
       cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
 
-    it('should not allow user with read only privileges to attach alerts to a new case', () => {
+    test('should not allow user with read only privileges to attach alerts to a new case', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
       cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
@@ -55,7 +55,7 @@ describe('Alerts timeline', { tags: ['@ess'] }, () => {
       cy.get(LOADING_INDICATOR).should('not.exist');
     });
 
-    it('should allow a user with crud privileges to attach alerts to cases', () => {
+    test('should allow a user with crud privileges to attach alerts to cases', () => {
       expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });
