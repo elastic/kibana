@@ -13,15 +13,11 @@ import { shallow } from 'enzyme';
 
 import { EuiText } from '@elastic/eui';
 
-
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 
 import { LicenseBadge } from './license_badge';
-import {
-  ModelSelectOption,
-  ModelSelectOptionProps,
-} from './model_select_option';
+import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 
 const DEFAULT_PROPS: ModelSelectOptionProps = {
   modelId: 'model_1',

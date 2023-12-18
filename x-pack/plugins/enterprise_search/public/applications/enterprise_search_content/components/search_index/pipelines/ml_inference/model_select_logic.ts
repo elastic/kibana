@@ -112,9 +112,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       IndexViewLogic,
       ['ingestionMethod as ingestionMethodFromIndexViewLogic'],
       MLInferenceLogic,
-      [
-        'addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic',
-      ],
+      ['addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic'],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
     ],
