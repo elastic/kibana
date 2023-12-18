@@ -27,7 +27,10 @@ export async function interceptRequest(
         await new Promise((innerResolve) =>
           connection.execute(
             ...onIntercept({
-              fail: () => ['Fetch.failRequest', { requestId: parsed.params.requestId }],
+              fail: () => [
+                'Fetch.failRequest',
+                { requestId: parsed.params.requestId, errorReason: 'Failed' },
+              ],
             }),
             innerResolve
           )

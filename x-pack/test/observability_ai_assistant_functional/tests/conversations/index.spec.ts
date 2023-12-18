@@ -104,7 +104,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             // so we don't have to wait until it's fully downloaded
             await interceptRequest(
               driver.driver,
-              '*kb/setup*',
+              '*kb\\/setup*',
               (responseFactory) => {
                 return responseFactory.fail();
               },
