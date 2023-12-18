@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutHeader,
@@ -32,7 +32,7 @@ export interface FlyoutNavigationProps {
   /**
    * If flyoutIsExpandable is true, pass a callback to open left panel
    */
-  expandDetails?: () => void;
+  expandDetails?: (e: SyntheticEvent) => void;
   /**
    * Optional actions to be placed on the right hand side of navigation
    */
@@ -79,7 +79,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
       () => (
         <EuiButtonEmpty
           iconSide="left"
-          onClick={expandDetails ? () => expandDetails() : undefined}
+          onClick={expandDetails}
           iconType="arrowStart"
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}

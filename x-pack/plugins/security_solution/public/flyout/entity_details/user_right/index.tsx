@@ -78,7 +78,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   });
 
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const openPanel = useCallback(
+  const openPanelTab = useCallback(
     (tab?: UserDetailsLeftPanelTab) => {
       openLeftPanel({
         id: UserDetailsPanelKey,
@@ -96,6 +96,8 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
     },
     [email, openLeftPanel, userName, userRiskData?.user.risk.inputs]
   );
+
+  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
@@ -124,7 +126,10 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         };
         return (
           <>
-            <FlyoutNavigation flyoutIsExpandable={hasUserDetailsData} expandDetails={openPanel} />
+            <FlyoutNavigation
+              flyoutIsExpandable={hasUserDetailsData}
+              expandDetails={openPanelFirstTab}
+            />
             <UserPanelHeader
               userName={userName}
               observedUser={observedUserWithAnomalies}
@@ -137,7 +142,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={openPanel}
+              openDetailsPanel={openPanelTab}
             />
           </>
         );
