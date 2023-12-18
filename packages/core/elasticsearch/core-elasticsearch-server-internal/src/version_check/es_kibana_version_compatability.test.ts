@@ -22,6 +22,12 @@ describe('plugins/elasticsearch', () => {
       it('when majors are equal, but ES minor is less than Kibana minor', () => {
         expect(esVersionCompatibleWithKibana('1.0.0', '1.1.0')).toBe(false);
       });
+
+      it('ES is not SemVer-compliant', () => {
+        expect(
+          esVersionCompatibleWithKibana('615c621a8416c444941dc97b142a0122d5c878d0', '1.1.0')
+        ).toBe(false);
+      });
     });
 
     describe('returns true', () => {

@@ -340,11 +340,21 @@ export function ChangeDataView({
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
         <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
+            css={css`
+              border-top-right-radius: unset;
+              border-top-left-radius: unset;
+            `}
             color="success"
             size="s"
             fullWidth
             onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
             data-test-subj="select-text-based-language-panel"
+            contentProps={{
+              css: {
+                justifyContent: 'flex-start',
+                paddingLeft: '26px',
+              },
+            }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
               defaultMessage: 'Try ES|QL',

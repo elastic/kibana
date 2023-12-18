@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { keyBy } from 'lodash';
+import { get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
@@ -234,15 +234,14 @@ export async function extractAndWriteSecrets(opts: {
     return { packagePolicy, secretReferences: [] };
   }
 
+  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+
   const secrets = await createSecrets({
     esClient,
-    values: secretPaths.map((secretPath) => secretPath.value.value),
+    values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-  secretPaths.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy);
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -253,8 +252,9 @@ export async function extractAndWriteSecrets(opts: {
 export async function extractAndWriteOutputSecrets(opts: {
   output: NewOutput;
   esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
 }): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
-  const { output, esClient } = opts;
+  const { output, esClient, secretHashes = {} } = opts;
 
   const secretPaths = getOutputSecretPaths(output.type, output).filter(
     (path) => typeof path.value === 'string'
@@ -271,7 +271,12 @@ export async function extractAndWriteOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
   secretPaths.forEach((secretPath, i) => {
-    set(outputWithSecretRefs, secretPath.path, { id: secrets[i].id });
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+    set(outputWithSecretRefs, secretPath.path, {
+      id: secrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
   });
 
   return {
@@ -397,15 +402,18 @@ export async function extractAndUpdateSecrets(opts: {
 
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
+  const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
+
   const createdSecrets = await createSecrets({
     esClient,
-    values: toCreate.map((secretPath) => secretPath.value.value),
+    values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
-  toCreate.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
-  });
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    createdSecrets,
+    packagePolicyUpdate
+  );
 
   const secretReferences = [
     ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
@@ -418,7 +426,7 @@ export async function extractAndUpdateSecrets(opts: {
     // check if the previous secret is actually a secret refrerence
     // it may be that secrets were not enabled at the time of creation
     // in which case they are just stored as plain text
-    if (secretPath.value.value.isSecretRef) {
+    if (secretPath.value.value?.isSecretRef) {
       secretsToDelete.push({ id: secretPath.value.value.id });
     }
   });
@@ -433,12 +441,13 @@ export async function extractAndUpdateOutputSecrets(opts: {
   oldOutput: Output;
   outputUpdate: Partial<Output>;
   esClient: ElasticsearchClient;
+  secretHashes?: Record<string, any>;
 }): Promise<{
   outputUpdate: Partial<Output>;
   secretReferences: PolicySecretReference[];
   secretsToDelete: PolicySecretReference[];
 }> {
-  const { oldOutput, outputUpdate, esClient } = opts;
+  const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
   const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
   const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
@@ -459,7 +468,13 @@ export async function extractAndUpdateOutputSecrets(opts: {
 
   const outputWithSecretRefs = JSON.parse(JSON.stringify(outputUpdate));
   toCreate.forEach((secretPath, i) => {
-    set(outputWithSecretRefs, secretPath.path, { id: createdSecrets[i].id });
+    const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
+    const maybeHash = get(secretHashes, pathWithoutPrefix);
+
+    set(outputWithSecretRefs, secretPath.path, {
+      id: createdSecrets[i].id,
+      ...(typeof maybeHash === 'string' && { hash: maybeHash }),
+    });
   });
 
   const secretReferences = [
@@ -501,14 +516,14 @@ export function diffSecretPaths(
   const toCreate: SecretPath[] = [];
   const toDelete: SecretPath[] = [];
   const noChange: SecretPath[] = [];
-  const newPathsByPath = keyBy(newPaths, 'path');
+  const newPathsByPath = keyBy(newPaths, (x) => x.path.join('.'));
 
   for (const oldPath of oldPaths) {
-    if (!newPathsByPath[oldPath.path]) {
+    if (!newPathsByPath[oldPath.path.join('.')]) {
       toDelete.push(oldPath);
     }
 
-    const newPath = newPathsByPath[oldPath.path];
+    const newPath = newPathsByPath[oldPath.path.join('.')];
     if (newPath && newPath.value.value) {
       const newValue = newPath.value?.value;
       if (!newValue?.isSecretRef) {
@@ -517,7 +532,7 @@ export function diffSecretPaths(
       } else {
         noChange.push(newPath);
       }
-      delete newPathsByPath[oldPath.path];
+      delete newPathsByPath[oldPath.path.join('.')];
     }
   }
 
@@ -543,10 +558,12 @@ export function diffOutputSecretPaths(
     const newPath = newPathsByPath[oldPath.path];
     if (newPath && newPath.value) {
       const newValue = newPath.value;
-      if (typeof newValue === 'string') toCreate.push(newPath);
-      toDelete.push(oldPath);
-    } else {
-      noChange.push(newPath);
+      if (typeof newValue === 'string') {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
     }
     delete newPathsByPath[oldPath.path];
   }
@@ -637,7 +654,7 @@ function _getPackageLevelSecretPaths(
     if (packageSecretVarsByName[name]) {
       vars.push({
         value: configEntry,
-        path: `vars.${name}`,
+        path: ['vars', name],
       });
     }
     return vars;
@@ -669,7 +686,7 @@ function _getInputSecretPaths(
       inputVars.forEach(([name, configEntry]) => {
         if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
           currentInputVarPaths.push({
-            path: `inputs[${inputIndex}].vars.${name}`,
+            path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
           });
         }
@@ -684,7 +701,14 @@ function _getInputSecretPaths(
           Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
             if (streamVarDefs[name]) {
               currentInputVarPaths.push({
-                path: `inputs[${inputIndex}].streams[${streamIndex}].vars.${name}`,
+                path: [
+                  'inputs',
+                  inputIndex.toString(),
+                  'streams',
+                  streamIndex.toString(),
+                  'vars',
+                  name,
+                ],
                 value: configEntry,
               });
             }
@@ -740,4 +764,35 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
     },
     {}
   );
+}
+
+/**
+ * Given an array of secret paths, existing secrets, and a package policy, generates a
+ * new package policy object that includes resolved secret reference values at each
+ * provided path.
+ */
+function getPolicyWithSecretReferences(
+  secretPaths: SecretPath[],
+  secrets: Secret[],
+  packagePolicy: NewPackagePolicy
+) {
+  const result = JSON.parse(JSON.stringify(packagePolicy));
+
+  secretPaths.forEach((secretPath, secretPathIndex) => {
+    secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
+      if (!acc[val]) {
+        acc[val] = {};
+      }
+
+      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
+
+      if (isLast) {
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+      }
+
+      return acc[val];
+    }, result);
+  });
+
+  return result;
 }

@@ -716,7 +716,7 @@
         "label": "FieldPicker",
         "description": [],
         "signature": [
-          "({\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}: ",
+          "(props: ",
           "FieldPickerProps",
           "<T>) => JSX.Element"
         ],
@@ -729,7 +729,7 @@
             "id": "def-public.FieldPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "FieldPickerProps",

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
-import React, { useState, useMemo, useCallback } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
+import { find, orderBy } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { useKibanaContextForPlugin } from '../utils';
+import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
 
 const DEFAULT_SORT_FIELD = 'title';
 const DEFAULT_SORT_DIRECTION = 'desc';
@@ -33,12 +33,22 @@ export const useDatasetQualityTable = () => {
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
+  const defaultTimeRange = getDefaultTimeRange();
+
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
+  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
+    async () =>
+      client.getDataStreamsDegradedStats({
+        start: defaultTimeRange.from,
+        end: defaultTimeRange.to,
+      }),
+    []
+  );
 
   const columns = useMemo(
-    () => getDatasetQualitTableColumns({ fieldFormats, setSelectedDatasetName }),
-    [fieldFormats]
+    () => getDatasetQualitTableColumns({ fieldFormats, setSelectedDatasetName, oadingDegradedStats }),
+    [fieldFormats, loadingDegradedStats]
   );
 
   const pagination = {
@@ -67,10 +77,19 @@ export const useDatasetQualityTable = () => {
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
-    const sortedItems = orderBy(data, overridenSortingField, sortDirection);
+    const mergedData = data.map((dataStream) => {
+      const degradedDocs = find(degradedStats, { dataset: dataStream.name });
+
+      return {
+        ...dataStream,
+        degradedDocs: degradedDocs?.percentage,
+      };
+    });
+
+    const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
     return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, sortField, sortDirection, pageIndex, pageSize]);
+  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);

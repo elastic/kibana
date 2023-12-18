@@ -8,12 +8,22 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import {
-  RISKY_HOSTS_DOC_LINK,
-  RISKY_USERS_DOC_LINK,
-  RISKY_ENTITY_SCORE_DOC_LINK,
-} from '../../../../../common/constants';
 import { LEARN_MORE } from '../../../../overview/components/entity_analytics/risk_score/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+
+const useLearnMoreLinkForEntity = (riskScoreEntity?: RiskScoreEntity) => {
+  const { docLinks } = useKibana().services;
+  const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
+  return useMemo(() => {
+    if (!riskScoreEntity) {
+      return entityAnalyticsLinks.entityRiskScoring;
+    }
+    if (riskScoreEntity === RiskScoreEntity.user) {
+      return entityAnalyticsLinks.userRiskScore;
+    }
+    return entityAnalyticsLinks.hostRiskScore;
+  }, [riskScoreEntity, entityAnalyticsLinks]);
+};
 
 const RiskScoreDocLinkComponent = ({
   riskScoreEntity,
@@ -22,18 +32,10 @@ const RiskScoreDocLinkComponent = ({
   riskScoreEntity?: RiskScoreEntity;
   title?: string | React.ReactNode;
 }) => {
-  const docLink = useMemo(() => {
-    if (!riskScoreEntity) {
-      return RISKY_ENTITY_SCORE_DOC_LINK;
-    }
-    if (riskScoreEntity === RiskScoreEntity.user) {
-      return RISKY_USERS_DOC_LINK;
-    }
-    return RISKY_HOSTS_DOC_LINK;
-  }, [riskScoreEntity]);
+  const learnMoreLink = useLearnMoreLinkForEntity(riskScoreEntity);
 
   return (
-    <EuiLink target="_blank" rel="noopener nofollow noreferrer" href={docLink}>
+    <EuiLink target="_blank" rel="noopener nofollow noreferrer" href={learnMoreLink}>
       {title ? title : LEARN_MORE(riskScoreEntity)}
     </EuiLink>
   );
