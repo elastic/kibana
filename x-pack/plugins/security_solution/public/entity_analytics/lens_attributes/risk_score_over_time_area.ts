@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { GetLensAttributes } from '../../../types';
+import type { GetLensAttributes } from '../../common/components/visualization_actions/types';
 
 const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
 

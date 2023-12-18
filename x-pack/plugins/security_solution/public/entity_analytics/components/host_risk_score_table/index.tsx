@@ -9,29 +9,29 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
-import { PaginatedTable } from '../../../components/paginated_table';
-
-import { getUserRiskScoreColumns } from './columns';
-
-import * as i18nUsers from '../../pages/translations';
-import * as i18n from './translations';
-import { usersModel, usersSelectors, usersActions } from '../../store';
-import type { UserRiskScoreItem } from '../../../../../common/search_strategy/security_solution/users/common';
-import type { SeverityCount } from '../../../../entity_analytics/components/severity/types';
-import { SeverityBadges } from '../../../../entity_analytics/components/severity/severity_badges';
-import { SeverityBar } from '../../../../entity_analytics/components/severity/severity_bar';
-import { SeverityFilterGroup } from '../../../../entity_analytics/components/severity/severity_filter_group';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { State } from '../../../../common/store';
+import type { Columns, Criteria, ItemsPerRow } from '../../../explore/components/paginated_table';
+import { PaginatedTable } from '../../../explore/components/paginated_table';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { hostsActions, hostsModel, hostsSelectors } from '../../../explore/hosts/store';
+import { getHostRiskScoreColumns } from './columns';
 import type {
-  RiskScoreFields,
+  HostRiskScore,
+  RiskScoreItem,
   RiskScoreSortField,
   RiskSeverity,
-  UserRiskScore,
-} from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskInformationButtonEmpty } from '../../../../entity_analytics/components/risk_information';
+  RiskScoreFields,
+} from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { State } from '../../../common/store';
+import * as i18n from '../../../explore/hosts/components/hosts_table/translations';
+import * as i18nHosts from './translations';
+
+import { SeverityBadges } from '../severity/severity_badges';
+import { SeverityBar } from '../severity/severity_bar';
+import { SeverityFilterGroup } from '../severity/severity_filter_group';
+
+import type { SeverityCount } from '../severity/types';
+import { RiskInformationButtonEmpty } from '../risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -44,10 +44,10 @@ export const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const tableType = usersModel.UsersTableType.risk;
+const tableType = hostsModel.HostsTableType.risk;
 
-interface UserRiskScoreTableProps {
-  data: UserRiskScore[];
+interface HostRiskScoreTableProps {
+  data: HostRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -55,17 +55,17 @@ interface UserRiskScoreTableProps {
   setQuerySkip: (skip: boolean) => void;
   severityCount: SeverityCount;
   totalCount: number;
-  type: usersModel.UsersType;
+  type: hostsModel.HostsType;
 }
 
-export type UserRiskScoreColumns = [
-  Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
-  Columns<UserRiskScoreItem[RiskScoreFields.timestamp]>,
-  Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
-  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
+export type HostRiskScoreColumns = [
+  Columns<RiskScoreItem[RiskScoreFields.hostName]>,
+  Columns<RiskScoreItem[RiskScoreFields.timestamp]>,
+  Columns<RiskScoreItem[RiskScoreFields.hostRiskScore]>,
+  Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
 ];
 
-const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
+const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   data,
   id,
   isInspect,
@@ -77,34 +77,31 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-
-  const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
+  const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getUserRiskScoreSelector(state)
+    getHostRiskScoreSelector(state, hostsModel.HostsType.page)
   );
   const updateLimitPagination = useCallback(
-    (newLimit) => {
+    (newLimit) =>
       dispatch(
-        usersActions.updateTableLimit({
-          usersType: type,
+        hostsActions.updateTableLimit({
+          hostsType: type,
           limit: newLimit,
           tableType,
         })
-      );
-    },
+      ),
     [type, dispatch]
   );
 
   const updateActivePage = useCallback(
-    (newPage) => {
+    (newPage) =>
       dispatch(
-        usersActions.updateTableActivePage({
+        hostsActions.updateTableActivePage({
           activePage: newPage,
-          usersType: type,
+          hostsType: type,
           tableType,
         })
-      );
-    },
+      ),
     [type, dispatch]
   );
 
@@ -114,28 +111,29 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
         const newSort = criteria.sort;
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
-            usersActions.updateTableSorting({
+            hostsActions.updateHostRiskScoreSort({
               sort: newSort as RiskScoreSortField,
-              tableType,
+              hostsType: type,
             })
           );
         }
       }
     },
-    [dispatch, sort]
+    [dispatch, sort, type]
   );
   const dispatchSeverityUpdate = useCallback(
     (s: RiskSeverity) => {
       dispatch(
-        usersActions.updateUserRiskScoreSeverityFilter({
+        hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: [s],
+          hostsType: type,
         })
       );
     },
-    [dispatch]
+    [dispatch, type]
   );
   const columns = useMemo(
-    () => getUserRiskScoreColumns({ dispatchSeverityUpdate }),
+    () => getHostRiskScoreColumns({ dispatchSeverityUpdate }),
     [dispatchSeverityUpdate]
   );
 
@@ -150,23 +148,24 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     </EuiFlexGroup>
   );
 
-  const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    getUserRiskScoreFilterQuerySelector(state)
+    getHostRiskScoreFilterQuerySelector(state, type)
   );
 
   const onSelect = useCallback(
     (newSelection: RiskSeverity[]) => {
       dispatch(
-        usersActions.updateUserRiskScoreSeverityFilter({
+        hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: newSelection,
+          hostsType: type,
         })
       );
     },
-    [dispatch]
+    [dispatch, type]
   );
 
   return (
@@ -178,20 +177,20 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
       headerFilters={
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.user} />
+            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.host} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SeverityFilterGroup
               selectedSeverities={severitySelectionRedux}
               severityCount={severityCount}
               onSelect={onSelect}
-              riskEntity={RiskScoreEntity.user}
+              riskEntity={RiskScoreEntity.host}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       headerSupplement={risk}
-      headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
+      headerTitle={i18nHosts.HOST_RISK_TITLE}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}
@@ -213,8 +212,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 };
 
-UserRiskScoreTableComponent.displayName = 'UserRiskScoreTableComponent';
+HostRiskScoreTableComponent.displayName = 'HostRiskScoreTableComponent';
 
-export const UserRiskScoreTable = React.memo(UserRiskScoreTableComponent);
+export const HostRiskScoreTable = React.memo(HostRiskScoreTableComponent);
 
-UserRiskScoreTable.displayName = 'UserRiskScoreTable';
+HostRiskScoreTable.displayName = 'HostRiskScoreTable';

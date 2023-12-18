@@ -6,13 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { wrapper } from '../../../mocks';
-
-import { useLensAttributes } from '../../../use_lens_attributes';
+import { wrapper } from '../../common/components/visualization_actions/mocks';
+import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 
 import { getRiskScoreDonutAttributes } from './risk_score_donut';
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
@@ -20,7 +19,7 @@ jest.mock('../../../../../containers/sourcerer', () => ({
   }),
 }));
 
-jest.mock('../../../../../utils/route/use_route_spy', () => ({
+jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
       detailName: 'undefined',

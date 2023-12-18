@@ -14,7 +14,7 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { HostRiskScoreTable } from '../../components/host_risk_score_table';
+import { HostRiskScoreTable } from '../../../../entity_analytics/components/host_risk_score_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../../common/store';

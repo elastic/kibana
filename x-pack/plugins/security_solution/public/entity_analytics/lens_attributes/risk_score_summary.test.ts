@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../../../../../common/entity_analytics/risk_engine';
+import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 import { renderHook } from '@testing-library/react-hooks';
-import { wrapper } from '../../../mocks';
-import { useLensAttributes } from '../../../use_lens_attributes';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
-import { RiskSeverity } from '../../../../../../../common/search_strategy';
+import { RiskSeverity } from '../../../common/search_strategy';
 import type { MetricVisualizationState } from '@kbn/lens-plugin/public';
+import { wrapper } from '../../common/components/visualization_actions/mocks';
+import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',

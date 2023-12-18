@@ -18,12 +18,12 @@ import { LandingPageComponent } from '../../common/components/landing_page';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
-import { useRiskEngineStatus } from '../../entity_analytics/api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from '../../entity_analytics/components/risk_score_update_panel';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../components/risk_score_update_panel';
 import { useHasSecurityCapability } from '../../helper_hooks';
-import { EntityAnalyticsHeader } from '../../entity_analytics/components/entity_analytics_header';
-import { EntityAnalyticsAnomalies } from '../../entity_analytics/components/entity_analytics_anomalies';
-import { EntityAnalyticsRiskScores } from '../../entity_analytics/components/entity_analytics_risk_score';
+import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
+import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
+import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();

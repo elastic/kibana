@@ -29,7 +29,7 @@ import type { SortUsersField } from '../../../../../common/search_strategy/secur
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
+import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';

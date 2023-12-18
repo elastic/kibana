@@ -9,10 +9,10 @@ import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 import React from 'react';
 import { UserRiskScoreTable } from '.';
-import type { UserRiskScore } from '../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../common/search_strategy';
-import { TestProviders } from '../../../../common/mock';
-import { UsersType } from '../../store/model';
+import type { UserRiskScore } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
+import { UsersType } from '../../../explore/users/store/model';
 
 describe('UserRiskScoreTable', () => {
   const username = 'test_user_name';

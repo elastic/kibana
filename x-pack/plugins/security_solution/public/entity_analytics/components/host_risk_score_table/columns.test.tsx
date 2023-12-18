@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { getHostRiskScoreColumns } from './columns';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import type { HostRiskScoreColumns } from '.';
 
 describe('getHostRiskScoreColumns', () => {

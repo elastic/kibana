@@ -9,53 +9,50 @@ import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import {
   SecurityCellActions,
-  SecurityCellActionsTrigger,
   CellActionsMode,
-} from '../../../../common/components/cell_actions';
-import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import type { UserRiskScoreColumns } from '.';
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { HostDetailsLink } from '../../../common/components/links';
+import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
-import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
-import { UserDetailsLink } from '../../../../common/components/links';
-import { UsersTableType } from '../../store/model';
-import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
-import { CELL_ACTIONS_TELEMETRY } from '../../../../entity_analytics/components/risk_score/constants';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
+import { RiskScoreFields, RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskScoreLevel } from '../severity/common';
+import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 
-export const getUserRiskScoreColumns = ({
+export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
-}): UserRiskScoreColumns => [
+}): HostRiskScoreColumns => [
   {
-    field: 'user.name',
-    name: i18n.USER_NAME,
+    field: 'host.name',
+    name: i18n.HOST_NAME,
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
     width: '35%',
-    render: (userName) => {
-      if (userName != null && userName.length > 0) {
-        const id = escapeDataProviderId(`user-risk-score-table-userName-${userName}`);
+    render: (hostName) => {
+      if (hostName != null && hostName.length > 0) {
         return (
           <SecurityCellActions
-            key={id}
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
             data={{
-              value: userName,
-              field: 'user.name',
+              value: hostName,
+              field: 'host.name',
             }}
             metadata={{
               telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
-            <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
+            <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
           </SecurityCellActions>
         );
       }
@@ -76,8 +73,8 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: RiskScoreFields.userRiskScore,
-    name: i18n.USER_RISK_SCORE,
+    field: RiskScoreFields.hostRiskScore,
+    name: i18n.HOST_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
     sortable: true,
@@ -93,8 +90,8 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: RiskScoreFields.userRisk,
-    name: ENTITY_RISK_LEVEL(RiskScoreEntity.user),
+    field: RiskScoreFields.hostRisk,
+    name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
@@ -104,7 +101,7 @@ export const getUserRiskScoreColumns = ({
           <RiskScoreLevel
             toolTipContent={
               <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
-                <EuiText size="xs">{i18n.VIEW_USERS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
+                <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
               </EuiLink>
             }
             severity={risk}

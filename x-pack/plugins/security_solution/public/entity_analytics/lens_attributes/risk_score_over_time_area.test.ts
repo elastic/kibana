@@ -7,13 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { XYState } from '@kbn/lens-plugin/public';
-import { wrapper } from '../../../mocks';
-
-import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area';
+import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
+import { wrapper } from '../../common/components/visualization_actions/mocks';
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
@@ -21,7 +20,7 @@ jest.mock('../../../../../containers/sourcerer', () => ({
   }),
 }));
 
-jest.mock('../../../../../utils/route/use_route_spy', () => ({
+jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
       detailName: 'mockHost',

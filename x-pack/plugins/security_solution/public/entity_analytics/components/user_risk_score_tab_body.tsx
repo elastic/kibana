@@ -8,21 +8,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
-import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { UserRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
-import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
-import type { UsersComponentsQueryProps } from './types';
-import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { State } from '../../../../common/store';
-import { UserRiskScoreTable } from '../../components/user_risk_score_table';
-import { usersSelectors } from '../../store';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
+import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
+import { useRiskScore } from '../api/hooks/use_risk_score';
+import { UserRiskScoreQueryId } from '../common/utils';
+import { EnableRiskScore } from './enable_risk_score';
+import type { UsersComponentsQueryProps } from '../../explore/users/pages/navigation/types';
+import { manageQuery } from '../../common/components/page/manage_query';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import type { State } from '../../common/store';
+import { UserRiskScoreTable } from './user_risk_score_table';
+import { usersSelectors } from '../../explore/users/store';
+import { useQueryToggle } from '../../common/containers/query_toggle';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_strategy';
+import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from './risk_score_update_panel';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 

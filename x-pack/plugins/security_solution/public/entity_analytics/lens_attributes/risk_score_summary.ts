@@ -6,14 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SEVERITY_UI_SORT_ORDER,
-  RISK_SEVERITY_COLOUR,
-  RISK_SCORE_RANGES,
-} from '../../../../../../entity_analytics/common/utils';
-import type { RiskSeverity } from '../../../../../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../../../../../common/search_strategy';
-import type { LensAttributes } from '../../../types';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
+import type { RiskSeverity } from '../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;

@@ -8,8 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { UserRiskScoreColumns } from '.';
 import { getUserRiskScoreColumns } from './columns';
-import { TestProviders } from '../../../../common/mock';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { TestProviders } from '../../../common/mock';
+import { RiskScoreFields } from '../../../../common/search_strategy';
 
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {
