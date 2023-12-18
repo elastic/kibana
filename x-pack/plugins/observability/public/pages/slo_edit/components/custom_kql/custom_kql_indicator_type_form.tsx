@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -20,10 +21,16 @@ import { IndexSelection } from '../custom_common/index_selection';
 export function CustomKqlIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
+  const timestampField = watch('indicator.params.timestampField');
+  const groupByField = watch('groupBy');
+
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
   const groupByFields = indexFields.filter((field) => field.aggregatable);
+
+  const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
+    useFetchGroupByCardinality(index, timestampField, groupByField);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -157,6 +164,19 @@ export function CustomKqlIndicatorTypeForm() {
         isLoading={!!index && isIndexFieldsLoading}
         isDisabled={!index}
       />
+
+      {!isGroupByCardinalityLoading && !!groupByCardinality && (
+        <EuiCallOut
+          size="s"
+          iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
+          color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
+          title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
+            defaultMessage:
+              "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
+            values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+          })}
+        />
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>
