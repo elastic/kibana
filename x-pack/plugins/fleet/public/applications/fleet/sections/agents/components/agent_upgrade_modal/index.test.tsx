@@ -216,7 +216,7 @@ describe('AgentUpgradeAgentModal', () => {
       expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
       expect(
         utils.queryByText(
-          /Reason: agent cannot be upgraded through Fleet. It may be running in a container./
+          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
         )
       ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');

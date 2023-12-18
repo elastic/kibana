@@ -245,19 +245,19 @@ describe('Fleet - isAgentUpgradeable', () => {
 describe('Fleet - getNotUpgradeableMessage', () => {
   it('if agent reports not upgradeable with agent version < latest agent version', () => {
     expect(getNotUpgradeableMessage(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(
-      'agent cannot be upgraded through Fleet. It may be running in a container.'
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 
   it('if agent reports not upgradeable with agent version > latest agent version', () => {
     expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(
-      'agent cannot be upgraded through Fleet. It may be running in a container.'
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 
   it('returns false if agent reports not upgradeable with agent version === latest agent version', () => {
     expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(
-      'agent cannot be upgraded through Fleet. It may be running in a container.'
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 

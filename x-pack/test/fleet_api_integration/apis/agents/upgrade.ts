@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'Agent agent1 is not upgradeable: agent is already running on the selected version..'
+          'Agent agent1 is not upgradeable: agent is already running on the selected version.'
         );
       });
 
@@ -307,7 +307,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.equal(
-          'Agent agent1 is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container.'
+          'Agent agent1 is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
         );
       });
 
