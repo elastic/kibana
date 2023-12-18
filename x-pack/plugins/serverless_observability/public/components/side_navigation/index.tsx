@@ -35,18 +35,19 @@ const navigationTree: NavigationTreeDefinition = {
           link: 'observability-log-explorer',
           // prevent this entry from ever becoming active, effectively falling through to the obs-log-explorer child
           getIsActive: () => false,
+          // avoid duplicate "Discover" breadcrumbs
+          breadcrumbStatus: 'hidden',
           renderAs: 'item',
           children: [
             {
               link: 'discover',
               sideNavStatus: 'hidden',
-              // avoid duplicate "Discover" breadcrumbs
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              // show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-              link: 'observability-log-explorer',
-              sideNavStatus: 'hidden',
+              children: [
+                {
+                  link: 'observability-log-explorer',
+                  sideNavStatus: 'hidden',
+                },
+              ],
             },
           ],
         },
