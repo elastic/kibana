@@ -29,7 +29,7 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 
   if (geometryColumns.length > 1) {
     throw new Error(i18n.translate('xpack.maps.source.esql.multipleGeometryColumnErrorMsg', {
-      defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' commands to narrow columns.`,
+      defaultMessage: `Elasticsearch ES|QL query has {count} geometry columns when only 1 is allowed. Use 'DROP' or 'KEEP' to narrow columns.`,
       values: {
         count: geometryColumns.length
       }

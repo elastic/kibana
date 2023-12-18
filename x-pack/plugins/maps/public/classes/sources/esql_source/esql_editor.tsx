@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -22,6 +23,7 @@ export function ESQLEditor(props: Props) {
   const isMounted = useMountedState();
 
   const [error, setError] = useState<Error | undefined>();
+  const [warning, setWarning] = useState<string | udefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: props.esql });
 
@@ -35,7 +37,12 @@ export function ESQLEditor(props: Props) {
             return;
           }
           
-          setError(undefined);
+          if (warning) {
+            setWarning(undefined);
+          }
+          if (error) {
+            setError(undefined);
+          }
           setIsLoading(true);
 
           try {
@@ -45,6 +52,14 @@ export function ESQLEditor(props: Props) {
               return;
             }
             verifyGeometryColumn(esqlMeta.columns);
+            if (esqlMeta.columns.length >= 6) {
+              setWarning(i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+                defaultMessage: `ES|QL statement returns {count} columns. For faster maps, use 'DROP' or 'KEEP' to narrow columns.`,
+                values: {
+                  count: esqlMeta.columns.length
+                }
+              }))
+            }
             props.onESQLChange({
               columns: esqlMeta.columns,
               dateFields: esqlMeta.dateFields,
@@ -65,6 +80,7 @@ export function ESQLEditor(props: Props) {
           setIsLoading(false);
         }}
         errors={error ? [error] : undefined}
+        warning={warning}
         expandCodeEditor={(status: boolean) => {
           // never called because hideMinimizeButton hides UI
         }}
