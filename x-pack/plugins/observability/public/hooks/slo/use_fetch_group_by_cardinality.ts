@@ -52,7 +52,7 @@ export function useFetchGroupByCardinality(
           })
         );
 
-        // @ts-ignore
+        // @ts-expect-error Property 'value' does not exist on type 'AggregationsAggregate'
         const cardinality = result.rawResponse?.aggregations?.groupByCardinality?.value ?? 0;
         return { cardinality, isHighCardinality: cardinality > HIGH_CARDINALITY_THRESHOLD };
       } catch (error) {
