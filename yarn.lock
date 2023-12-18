@@ -5431,6 +5431,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/router-utils@link:packages/kbn-router-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/routing-example-plugin@link:examples/routing_example":
   version "0.0.0"
   uid ""
