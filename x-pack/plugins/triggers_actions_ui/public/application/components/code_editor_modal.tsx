@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { monaco } from '@kbn/monaco';
 import React, { useState, useCallback, useEffect } from 'react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import {
@@ -23,6 +24,55 @@ interface CodeEditorModalProps {
   onChange: (code: string) => void;
   onClose: () => void;
 }
+
+const suggestionProvider = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  context: monaco.languages.CompletionContext
+) => {
+  const wordUntil = model.getWordUntilPosition(position);
+  const wordRange = new monaco.Range(
+    position.lineNumber,
+    wordUntil.startColumn,
+    position.lineNumber,
+    wordUntil.endColumn
+  );
+
+  return {
+    suggestions: [
+      {
+        label: 'report',
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: 'report',
+        range: wordRange,
+      },
+      {
+        label: 'setAlertData',
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: 'setAlertData',
+        range: wordRange,
+      },
+      {
+        label: 'getAlertLimitValue',
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: 'getAlertLimitValue',
+        range: wordRange,
+      },
+      {
+        label: 'setAlertLimitReached',
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: 'setAlertLimitReached',
+        range: wordRange,
+      },
+      {
+        label: 'getRecoveredAlerts',
+        kind: monaco.languages.CompletionItemKind.Function,
+        insertText: 'getRecoveredAlerts',
+        range: wordRange,
+      },
+    ],
+  };
+};
 
 export const CodeEditorModal = (props: CodeEditorModalProps) => {
   const { code, title, onChange, onClose, isOpen } = props;
@@ -67,11 +117,15 @@ export const CodeEditorModal = (props: CodeEditorModalProps) => {
             wordWrap: 'on',
             wrappingIndent: 'indent',
             automaticLayout: true,
+            quickSuggestions: true,
           }}
           value={codeInternal}
           width="100%"
           height="600px"
           onChange={onChangeInternal}
+          suggestionProvider={{
+            provideCompletionItems: suggestionProvider,
+          }}
           allowFullScreen
         />
       </EuiModalBody>
