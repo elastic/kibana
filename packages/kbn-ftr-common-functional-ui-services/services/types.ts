@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { RetryOnStaleProvider } from './retry_on_stale';
-import { FindProvider } from './find';
-import { TestSubjects } from './test_subjects';
-import { RemoteProvider } from './remote';
-
-export const services = {
-  retryOnStale: RetryOnStaleProvider,
-  find: FindProvider,
-  testSubjects: TestSubjects,
-  __webdriver__: RemoteProvider,
-};
+export interface TimeoutOpt {
+  timeout?: number;
+}

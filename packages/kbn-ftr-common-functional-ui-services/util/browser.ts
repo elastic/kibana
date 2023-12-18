@@ -15,16 +15,17 @@ import Url from 'url';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
+import { FtrService, type FtrProviderContext } from '../services/ftr_provider_context';
+import { WebElementWrapper } from '../services/web_element_wrapper';
+import { Browsers } from '../services/remote/browsers';
 import {
-  commonFunctionalUIServices,
-  Browsers,
   NETWORK_PROFILES,
-} from '@kbn/ftr-common-functional-ui-services';
-import type { NetworkOptions, NetworkProfile } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
+  type NetworkOptions,
+  type NetworkProfile,
+} from '../services/remote/network_profiles';
 
 export type Browser = BrowserService;
-const { WebElementWrapper } = commonFunctionalUIServices;
+
 class BrowserService extends FtrService {
   /**
    * Keyboard events

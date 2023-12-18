@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
+export { WebElementWrapper } from './services/web_element_wrapper';
+export { Browsers } from './services/remote/browsers';
+export type { NetworkProfile, NetworkOptions } from './services/remote/network_profiles';
+export { NETWORK_PROFILES } from './services/remote/network_profiles';
 export { services as commonFunctionalUIServices } from './services/all';
 export type { FtrProviderContext } from './services/ftr_provider_context';
