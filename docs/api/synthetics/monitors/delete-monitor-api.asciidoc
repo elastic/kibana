@@ -1,7 +1,7 @@
 [[delete-monitors-api]]
 == Delete Monitors API
 ++++
-<titleabbrev>Delete Monitors</titleabbrev>
+<titleabbrev>Delete monitors</titleabbrev>
 ++++
 
 Deletes one or more monitors from the Synthetics app.

@@ -1,16 +1,16 @@
 [[update-monitor-api]]
 == Update Monitor API
 ++++
-<titleabbrev>Update Monitor</titleabbrev>
+<titleabbrev>Update monitor</titleabbrev>
 ++++
 
 Updates a new monitor with the specified attributes. The required and default fields may vary based on the monitor type.
 
 === {api-request-title}
 
-`PUT <kibana host>:<port>/api/synthetics/monitors/<monitor_id>`
+`PUT <kibana host>:<port>/api/synthetics/monitors/<config_id>`
 
-`PUT <kibana host>:<port>/s/<space_id>/api/synthetics/monitors/<monitor_id>`
+`PUT <kibana host>:<port>/s/<space_id>/api/synthetics/monitors/<config_id>`
 
 === {api-prereq-title}
 
@@ -21,7 +21,7 @@ You must have `all` privileges for the *Synthetics* feature in the *{observabili
 [[update-monitor-api-path-params]]
 === {api-path-parms-title}
 
-`monitor_id`::
+`config_id`::
 (Required, string) The ID of the monitor that you want to update.
 
 `space_id`::

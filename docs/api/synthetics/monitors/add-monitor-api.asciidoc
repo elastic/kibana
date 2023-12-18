@@ -1,7 +1,7 @@
 [[add-monitor-api]]
 == Add Monitor API
 ++++
-<titleabbrev>Add Monitor</titleabbrev>
+<titleabbrev>Add monitor</titleabbrev>
 ++++
 
 Creates a new monitor with the specified attributes. A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser. The required and default fields may vary based on the monitor type.
