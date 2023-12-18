@@ -116,6 +116,7 @@ describe('Embeddable', () => {
         reportType={mockReportType}
         title={mockTitle}
         withActions={mockActions}
+        attributes={[]}
       />
     );
     expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
@@ -131,6 +132,7 @@ describe('Embeddable', () => {
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
     expect(
@@ -147,6 +149,7 @@ describe('Embeddable', () => {
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
 
@@ -181,6 +184,7 @@ describe('Embeddable', () => {
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
 

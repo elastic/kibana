@@ -30,7 +30,7 @@ import { useEmbeddableAttributes } from './use_embeddable_attributes';
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
-  attributes?: AllSeries;
+  attributes: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
   customHeight?: string;
