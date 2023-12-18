@@ -51,11 +51,11 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../ur
 
 describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
-    login();
     deleteTimelines();
   });
 
   it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
+    login();
     createTimelineTemplate(getTimeline());
     visit(TIMELINE_TEMPLATES_URL);
     selectCustomTemplates();
@@ -67,6 +67,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should be able to create timeline with crud privileges', () => {
+    login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
     createNewTimeline();
@@ -91,6 +92,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should create a timeline by clicking untitled timeline from bottom bar', () => {
+    login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
     addNameAndDescriptionToTimeline(getTimeline());
@@ -114,6 +116,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should show the different timeline states', () => {
+    login();
     visitWithTimeRange(TIMELINES_URL);
     createTimeline();
 
@@ -142,6 +145,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should save timelines as new', () => {
+    login();
     visitWithTimeRange(TIMELINES_URL);
     cy.get(ROWS).should('have.length', '0');
 
