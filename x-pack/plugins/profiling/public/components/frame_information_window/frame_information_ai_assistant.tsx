@@ -17,10 +17,7 @@ interface Props {
 
 export function FrameInformationAIAssistant({ frame }: Props) {
   const {
-    observabilityAIAssistant: {
-      service: observabilityAIAssistantService,
-      ObservabilityAIAssistantContextualInsight,
-    },
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = useProfilingDependencies().start;
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
