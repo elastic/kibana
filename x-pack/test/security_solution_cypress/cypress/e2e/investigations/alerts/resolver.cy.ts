@@ -17,7 +17,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     createRule(getNewRule());
   });

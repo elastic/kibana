@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingFunctionsData } from '../../hooks/use_profiling_functions_data';
@@ -17,10 +19,16 @@ import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
 
 export function Functions() {
+  const { services } = useKibanaContextForPlugin();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { activeTabId } = useTabSwitcherContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { dateRange, getDateRangeInTimestamp } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
+
+  const profilingLinkLocator = services.observabilityShared.locators.profiling.topNFunctionsLocator;
+  const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppTopFunctionsLink', {
+    defaultMessage: 'Go to Universal Profiling Functions',
+  });
 
   const params = useMemo(
     () => ({
@@ -44,7 +52,13 @@ export function Functions() {
 
   return (
     <>
-      <ProfilingLinks profilingPath="functions" hostname={asset.name} />
+      <ProfilingLinks
+        hostname={asset.name}
+        from={dateRange.from}
+        to={dateRange.to}
+        profilingLinkLocator={profilingLinkLocator}
+        profilingLinkLabel={profilingLinkLabel}
+      />
       <EuiSpacer />
       <EmbeddableFunctions
         data={response ?? undefined}

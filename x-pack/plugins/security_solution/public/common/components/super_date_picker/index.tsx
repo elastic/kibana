@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import type {
   EuiSuperDatePickerProps,
   EuiSuperDatePickerRecentRange,
+  EuiSuperUpdateButtonProps,
   OnRefreshChangeProps,
   OnRefreshProps,
   OnTimeChangeProps,
@@ -41,6 +42,10 @@ import {
   toStrSelector,
 } from './selectors';
 import type { Inputs } from '../../store/inputs/model';
+
+const refreshButtonProps: EuiSuperUpdateButtonProps = {
+  fill: false,
+};
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -219,6 +224,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         isDisabled={disabled}
         width={width}
         compressed={compressed}
+        updateButtonProps={refreshButtonProps}
       />
     );
   },

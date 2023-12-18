@@ -11,15 +11,18 @@ import { TIMELINE_TOUR_CONFIG_ANCHORS } from './step_config';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { TimelineTabs } from '../../../../../common/types';
 
 jest.mock(
   '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted'
 );
 
+const switchTabMock = jest.fn();
+
 const TestComponent = () => {
   return (
     <TestProviders>
-      <TimelineTour />
+      <TimelineTour activeTab={TimelineTabs.query} switchToTab={switchTabMock} />
       {Object.values(TIMELINE_TOUR_CONFIG_ANCHORS).map((anchor) => {
         return <div id={anchor} key={anchor} />;
       })}
@@ -54,6 +57,12 @@ describe('Timeline Tour', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('timeline-tour-step-3')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-4')).toBeVisible();
     });
 
     fireEvent.click(screen.getByText('Next'));
