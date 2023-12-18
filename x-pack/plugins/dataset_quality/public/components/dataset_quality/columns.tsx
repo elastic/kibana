@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
@@ -32,6 +33,10 @@ import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicat
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
+});
+
+const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
+  defaultMessage: 'Namespace',
 });
 
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
@@ -129,6 +134,14 @@ export const getDatasetQualitTableColumns = ({
           </EuiFlexGroup>
         );
       },
+    },
+    {
+      name: namespaceColumnName,
+      field: 'namespace',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
+      ),
     },
     {
       name: sizeColumnName,
