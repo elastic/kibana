@@ -8,7 +8,7 @@
 
 import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
+import type { ThemeServiceSetup, CoreTheme } from '@kbn/core-theme-browser';
 import type { ThemeService } from '@kbn/core-theme-browser-internal';
 
 const mockTheme: CoreTheme = {
@@ -23,18 +23,12 @@ const createTheme$Mock = () => {
   return of(createThemeMock());
 };
 
-const createThemeSetupMock = () => {
-  const setupMock: jest.Mocked<ThemeServiceSetup> = {
+const createThemeContractMock = () => {
+  const themeMock: jest.Mocked<ThemeServiceSetup> = {
     theme$: createTheme$Mock(),
+    getTheme: jest.fn().mockReturnValue(createThemeMock()),
   };
-  return setupMock;
-};
-
-const createThemeStartMock = () => {
-  const startMock: jest.Mocked<ThemeServiceStart> = {
-    theme$: createTheme$Mock(),
-  };
-  return startMock;
+  return themeMock;
 };
 
 type ThemeServiceContract = PublicMethodsOf<ThemeService>;
@@ -46,16 +40,16 @@ const createServiceMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue(createThemeSetupMock());
-  mocked.start.mockReturnValue(createThemeStartMock());
+  mocked.setup.mockReturnValue(createThemeContractMock());
+  mocked.start.mockReturnValue(createThemeContractMock());
 
   return mocked;
 };
 
 export const themeServiceMock = {
   create: createServiceMock,
-  createSetupContract: createThemeSetupMock,
-  createStartContract: createThemeStartMock,
+  createSetupContract: createThemeContractMock,
+  createStartContract: createThemeContractMock,
   createTheme: createThemeMock,
   createTheme$: createTheme$Mock,
 };
