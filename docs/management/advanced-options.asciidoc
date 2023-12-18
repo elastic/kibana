@@ -184,8 +184,10 @@ this setting stores part of the URL in your browser session to keep the URL
 short.
 
 [[theme-darkmode]]`theme:darkMode`::
-Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
-to apply the setting.
+The UI theme that the {kib} UI should use. 
+Set to `true` or `false` to enable or disable the dark theme.
+Set to `system` to have the {kib} UI theme follow the system theme.
+You must refresh the page to apply the setting.
 
 [[theme-version]]`theme:version`::
 Kibana only ships with the v8 theme now, so this setting can no longer be edited.
