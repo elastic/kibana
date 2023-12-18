@@ -38,6 +38,7 @@ export interface CreateAndEnrollEndpointHostCIOptions
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
   useClosestVersionMatch?: boolean;
+  endpointPolicyId?: string;
 }
 
 export interface CreateAndEnrollEndpointHostCIResponse {

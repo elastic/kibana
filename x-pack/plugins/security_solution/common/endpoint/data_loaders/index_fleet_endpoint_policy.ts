@@ -163,7 +163,10 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
+        .catch((err) => {
+          log.info('====-Error deleting integration policies', err);
+          return wrapErrorAndRejectPromise(err);
+        })) as AxiosResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 
