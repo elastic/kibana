@@ -209,6 +209,7 @@ export function SloItemActions({
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            icon="dashboardApp"
             key="attachToDashboard"
             onClick={handleAttachToDashboard}
             data-test-subj="sloActinsAttachToDashboard"
