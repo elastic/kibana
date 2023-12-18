@@ -80,18 +80,29 @@ export const FieldStatsInfoButton = ({
           </EuiToolTip>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: themeVars.euiTheme.euiSizeXS }}>
+      <EuiFlexItem
+        grow={false}
+        css={{
+          paddingRight: themeVars.euiTheme.euiSizeXS,
+          paddingBottom: themeVars.euiTheme.euiSizeXS,
+        }}
+      >
         <FieldIcon
           color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
           type={getKbnFieldIconType(field.type)}
           fill="none"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiText color={isEmpty ? 'subdued' : undefined} size="s">
-          {label}
-        </EuiText>
-      </EuiFlexItem>
+      <EuiText
+        color={isEmpty ? 'subdued' : undefined}
+        size="s"
+        aria-label={label}
+        title={label}
+        className="euiComboBoxOption__content"
+        css={{ paddingBottom: themeVars.euiTheme.euiSizeXS }}
+      >
+        {label}
+      </EuiText>
     </EuiFlexGroup>
   );
 };

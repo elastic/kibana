@@ -5,6 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import {
+  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+  urlSchemaV1,
+} from '@kbn/observability-log-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
@@ -101,8 +105,14 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-const FROM = '2023-08-03T10:24:14.035Z';
-const TO = '2023-08-03T10:24:14.091Z';
+const defaultPageState: urlSchemaV1.UrlSchema = {
+  v: 1,
+  time: {
+    from: '2023-08-03T10:24:14.035Z',
+    to: '2023-08-03T10:24:14.091Z',
+    mode: 'absolute',
+  },
+};
 
 export function ObservabilityLogExplorerPageObject({
   getPageObjects,
@@ -116,15 +126,6 @@ export function ObservabilityLogExplorerPageObject({
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
-
-  type NavigateToAppOptions = Omit<
-    Parameters<typeof PageObjects['common']['navigateToApp']>[1],
-    'search'
-  > & {
-    search?: Record<string, string>;
-    from?: string;
-    to?: string;
-  };
 
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
@@ -208,19 +209,55 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
-    async navigateTo(options: NavigateToAppOptions = {}) {
-      const { search = {}, from = FROM, to = TO, ...extraOptions } = options;
-      const composedSearch = querystring.stringify({
-        ...search,
-        _g: rison.encode({
-          time: { from, to },
+    async navigateTo({
+      pageState,
+    }: {
+      pageState?: urlSchemaV1.UrlSchema;
+    } = {}) {
+      const queryStringParams = querystring.stringify({
+        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode(
+          urlSchemaV1.urlSchemaRT.encode({
+            ...defaultPageState,
+            ...pageState,
+          })
+        ),
+      });
+
+      return await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'observabilityLogExplorer',
+        '/',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
+    },
+
+    async navigateToWithUncheckedState({
+      pageState: uncheckedPageState,
+    }: {
+      pageState?: {};
+    } = {}) {
+      const queryStringParams = querystring.stringify({
+        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode({
+          ...uncheckedPageState,
         }),
       });
 
-      return await PageObjects.common.navigateToApp('observabilityLogExplorer', {
-        search: composedSearch,
-        ...extraOptions,
-      });
+      log.info('queryStringParams');
+
+      return await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'observabilityLogExplorer',
+        '/',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
     },
 
     getDatasetSelector() {
@@ -357,9 +394,7 @@ export function ObservabilityLogExplorerPageObject({
 
     async assertRestoreFailureToastExist() {
       const successToast = await toasts.getToastElement(1);
-      expect(await successToast.getVisibleText()).to.contain(
-        "We couldn't restore your datasets selection"
-      );
+      expect(await successToast.getVisibleText()).to.contain('Error restoring state from URL');
     },
 
     assertLoadingSkeletonExists() {

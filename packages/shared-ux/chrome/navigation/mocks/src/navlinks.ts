@@ -29,6 +29,8 @@ const allNavLinks: AppDeepLinkId[] = [
   'fleet',
   'integrations',
   'management',
+  'management:aiAssistantManagementSelection',
+  'management:aiAssistantManagementObservability',
   'management:api_keys',
   'management:cases',
   'management:cross_cluster_replication',

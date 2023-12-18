@@ -12,6 +12,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { getAlertsTableDefaultAlertActionsLazy } from '@kbn/triggers-actions-ui-plugin/public/common/get_alerts_table_default_row_actions';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
@@ -26,6 +28,9 @@ const triggersActionsUiStartMock = {
       getAlertsStateTable: jest.fn(() => (
         <div data-test-subj="alerts-state-table">mocked component</div>
       )),
+      getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+        return getAlertsTableDefaultAlertActionsLazy(props);
+      },
       getAddRuleFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">mocked component</div>),
       getEditRuleFlyout: jest.fn(() => (
         <div data-test-subj="edit-rule-flyout">mocked component</div>

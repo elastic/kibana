@@ -15,8 +15,8 @@ export const LCP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.lcp',
   defaultMessage: 'Largest contentful paint',
 });
 
-export const FID_LABEL = i18n.translate('xpack.observability.ux.coreVitals.fip', {
-  defaultMessage: 'First input delay',
+export const INP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.inp', {
+  defaultMessage: 'Interaction to Next Paint',
 });
 
 export const CLS_LABEL = i18n.translate('xpack.observability.ux.coreVitals.cls', {
@@ -71,9 +71,9 @@ export const LCP_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.
     'Largest contentful paint measures loading performance. To provide a good user experience, LCP should occur within 2.5 seconds of when the page first starts loading.',
 });
 
-export const FID_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.fid.help', {
+export const INP_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.inp.help', {
   defaultMessage:
-    'First input delay measures interactivity. To provide a good user experience, pages should have a FID of less than 100 milliseconds.',
+    'INP assesses responsiveness using data from the Event Timing API. When an interaction causes a page to become unresponsive, that is a poor user experience. INP observes the latency of all interactions a user has made with the page, and reports a single value which all (or nearly all) interactions were below. A low INP means the page was consistently able to respond quickly to all—or the vast majority—of user interactions.',
 });
 
 export const CLS_HELP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.cls.help', {

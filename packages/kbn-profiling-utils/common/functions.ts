@@ -205,8 +205,8 @@ export function createTopNFunctions({
 
   const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
   const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
-  const totalAnnualCO2Kgs = sumBy(framesAndCountsAndIds, 'totalAnnualCO2kgs');
-  const totalAnnualCostUSD = sumBy(framesAndCountsAndIds, 'totalAnnualCostUSD');
+  const totalAnnualCO2Kgs = sumBy(framesAndCountsAndIds, 'selfAnnualCO2kgs');
+  const totalAnnualCostUSD = sumBy(framesAndCountsAndIds, 'selfAnnualCostUSD');
 
   return {
     TotalCount: totalCount,
