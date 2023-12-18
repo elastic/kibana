@@ -205,9 +205,9 @@ export const getDescriptionItem = (
   } else if (field === 'responseActions') {
     return [];
   } else if (field === 'groupByFields') {
-    // only query rule can have suppression group by fields
     const ruleType: Type = get('ruleType', data);
-    if (!isQueryRule(ruleType)) {
+    const ruleCanHaveGroupByFields = isQueryRule(ruleType);
+    if (!ruleCanHaveGroupByFields) {
       return [];
     }
     const values: string[] = get(field, data);
@@ -221,7 +221,7 @@ export const getDescriptionItem = (
       return [];
     }
 
-    // threshold rule can have suppression duration without grouping fields, but should be explicitly enabled by user
+    // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
     // query rule have suppression duration only if group by fields selected
     const showDuration = isThresholdRule(ruleType)
       ? get('enableThresholdSuppression', data) === true
@@ -239,7 +239,7 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields =  isQueryRule(ruleType);
+    const ruleCanHaveSuppressionMissingFields = isQueryRule(ruleType);
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
