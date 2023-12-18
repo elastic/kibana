@@ -6,6 +6,6 @@
  */
 
 import { FeatureUsageService } from './service';
-export type { FeatureKeys } from './service';
+export type { FeatureKeys } from './feature_keys';
 
 export const featureUsageService = new FeatureUsageService();
