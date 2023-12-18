@@ -72,7 +72,7 @@ export const createAndEnrollEndpointHostCI = async ({
   agentDownload = isAgentDownloadFromDiskAvailable(agentFileName);
 
   // If it has not been already downloaded, it should be downloaded.
-  if (!agentDownload) {
+  if (true) {
     log.warning(
       `There is no agent installer for ${agentFileName} present on disk, trying to download it now.`
     );
