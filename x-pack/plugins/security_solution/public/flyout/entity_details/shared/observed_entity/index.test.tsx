@@ -7,42 +7,44 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { ObservedEntity } from '.';
 import { TestProviders } from '../../../../common/mock';
-import { mockObservedUser } from './__mocks__';
-import { ObservedUser } from './observed_user';
+import { mockObservedHostData } from '../../../../timelines/components/side_panel/new_host_detail/__mocks__';
 
-describe('ObservedUser', () => {
+describe('ObservedHost', () => {
   const mockProps = {
-    observedUser: mockObservedUser,
+    observedData: mockObservedHostData,
     contextID: '',
     scopeId: '',
     isDraggable: false,
+    queryId: 'TEST_QUERY_ID',
+    observedFields: [],
   };
 
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ObservedUser {...mockProps} />
+        <ObservedEntity {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('observedUser-data')).toBeInTheDocument();
+    expect(getByTestId('observedEntity-data')).toBeInTheDocument();
   });
 
   it('renders the formatted date', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ObservedUser {...mockProps} />
+        <ObservedEntity {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('observedUser-data')).toHaveTextContent('Updated Feb 23, 2023');
+    expect(getByTestId('observedEntity-data')).toHaveTextContent('Updated Feb 23, 2023');
   });
 
   it('renders anomaly score', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ObservedUser {...mockProps} />
+        <ObservedEntity {...mockProps} />
       </TestProviders>
     );
 

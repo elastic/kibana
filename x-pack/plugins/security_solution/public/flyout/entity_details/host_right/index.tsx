@@ -1,0 +1,130 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import type { HostItem } from '../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { HostPanelContent } from './content';
+import { HostPanelHeader } from './header';
+import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
+import type { ObservedEntityData } from '../shared/observed_entity/types';
+import { useObservedHost } from './hooks/use_observed_host';
+import { HostDetailsPanelKey } from '../host_details_left';
+
+export interface HostPanelProps extends Record<string, unknown> {
+  contextID: string;
+  scopeId: string;
+  hostName: string;
+  isDraggable?: boolean;
+}
+
+export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'host-panel';
+  params: HostPanelProps;
+}
+
+export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
+export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
+export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
+
+export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPanelProps) => {
+  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
+  const hostNameFilterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
+  const riskScoreState = useRiskScore({
+    riskEntity: RiskScoreEntity.host,
+    filterQuery: hostNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+  });
+
+  const { data: hostRisk, inspect: inspectRiskScore, refetch, loading } = riskScoreState;
+  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: inspectRiskScore,
+    loading,
+    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    refetch,
+    setQuery,
+  });
+
+  const openPanel = useCallback(() => {
+    openLeftPanel({
+      id: HostDetailsPanelKey,
+      params: {
+        riskInputs: {
+          alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
+        },
+      },
+    });
+  }, [openLeftPanel, hostRiskData?.host.risk.inputs]);
+
+  const useObserved = useObservedHost(hostName);
+
+  if (riskScoreState.loading || useObserved.isLoading) {
+    return <FlyoutLoading />;
+  }
+
+  return (
+    <AnomalyTableProvider
+      criteriaFields={hostToCriteria(useObserved.details)}
+      startDate={from}
+      endDate={to}
+      skip={isInitializing}
+    >
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => {
+        const observedHostWithAnomalies: ObservedEntityData<HostItem> = {
+          ...useObserved,
+          anomalies: {
+            isLoading: isLoadingAnomaliesData,
+            anomalies: anomaliesData,
+            jobNameById,
+          },
+        };
+
+        return (
+          <>
+            <FlyoutNavigation
+              flyoutIsExpandable={!!hostRiskData?.host.risk}
+              expandDetails={openPanel}
+            />
+            <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
+            <HostPanelContent
+              observedHost={observedHostWithAnomalies}
+              riskScoreState={riskScoreState}
+              contextID={contextID}
+              scopeId={scopeId}
+              isDraggable={!!isDraggable}
+            />
+          </>
+        );
+      }}
+    </AnomalyTableProvider>
+  );
+};
+
+HostPanel.displayName = 'HostPanel';

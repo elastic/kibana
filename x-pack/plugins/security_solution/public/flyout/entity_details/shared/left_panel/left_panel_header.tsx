@@ -6,21 +6,33 @@
  */
 
 import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
-import type { VFC } from 'react';
+import type { ReactElement, VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import type { LeftPanelTabsType, UserDetailsLeftPanelTab } from './tabs';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutHeader } from '../../../shared/components/flyout_header';
+
+export type LeftPanelTabsType = Array<{
+  id: EntityDetailsLeftPanelTab;
+  'data-test-subj': string;
+  name: ReactElement;
+  content: React.ReactElement;
+}>;
+
+export enum EntityDetailsLeftPanelTab {
+  RISK_INPUTS = 'risk_inputs',
+  OKTA = 'okta_document',
+  ENTRA = 'entra_document',
+}
 
 export interface PanelHeaderProps {
   /**
    * Id of the tab selected in the parent component to display its content
    */
-  selectedTabId: UserDetailsLeftPanelTab;
+  selectedTabId: EntityDetailsLeftPanelTab;
   /**
    * Callback to set the selected tab id in the parent component
    */
-  setSelectedTabId: (selected: UserDetailsLeftPanelTab) => void;
+  setSelectedTabId: (selected: EntityDetailsLeftPanelTab) => void;
   /**
    * List of tabs to display in the header
    */
@@ -31,9 +43,9 @@ export interface PanelHeaderProps {
  * Header at the top of the left section.
  * Displays the investigation and insights tabs (visualize is hidden for 8.9).
  */
-export const PanelHeader: VFC<PanelHeaderProps> = memo(
+export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const onSelectedTabChanged = (id: UserDetailsLeftPanelTab) => setSelectedTabId(id);
+    const onSelectedTabChanged = (id: EntityDetailsLeftPanelTab) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => onSelectedTabChanged(tab.id)}
@@ -61,4 +73,4 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
   }
 );
 
-PanelHeader.displayName = 'PanelHeader';
+LeftPanelHeader.displayName = 'LeftPanelHeader';

@@ -105,10 +105,16 @@ export const allowedExperimentalValues = Object.freeze({
   assistantRagOnAlerts: false,
 
   /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
   newUserDetailsFlyout: false,
+
+  /*
+   * Enables the new host details flyout displayed on the Alerts table.
+   *
+   **/
+  newHostDetailsFlyout: false,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings

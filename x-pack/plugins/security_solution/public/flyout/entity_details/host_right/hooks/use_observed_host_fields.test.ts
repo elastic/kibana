@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { mockObservedHostData } from '../../../../timelines/components/side_panel/new_host_detail/__mocks__';
 import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../../common/mock';
-import { mockObservedUser } from '../__mocks__';
-import { useObservedUserItems } from './use_observed_user_items';
+import { useObservedHostFields } from './use_observed_host_fields';
+import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 
 describe('useManagedUserItems', () => {
   it('returns managed user items for Entra user', () => {
-    const { result } = renderHook(() => useObservedUserItems(mockObservedUser), {
+    const { result } = renderHook(() => useObservedHostFields(mockObservedHostData), {
       wrapper: TestProviders,
     });
 
@@ -26,11 +26,6 @@ describe('useManagedUserItems', () => {
         field: 'user.domain',
         label: 'Domain',
         values: ['test domain', 'another test domain'],
-      },
-      {
-        field: 'anomalies',
-        label: 'Max anomaly score by job',
-        values: mockObservedUser.anomalies,
       },
       {
         field: '@timestamp',

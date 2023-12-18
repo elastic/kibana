@@ -9,19 +9,19 @@ import { useEuiBackgroundColor } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { LeftPanelTabsType, UserDetailsLeftPanelTab } from './tabs';
-import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutBody } from '../../../shared/components/flyout_body';
+import type { EntityDetailsLeftPanelTab, LeftPanelTabsType } from './left_panel_header';
 
 export interface PanelContentProps {
-  selectedTabId: UserDetailsLeftPanelTab;
+  selectedTabId: EntityDetailsLeftPanelTab;
   tabs: LeftPanelTabsType;
 }
 
 /**
- * User details expandable flyout left section.
+ * Content for a entity left panel.
  * Appears after the user clicks on the expand details button in the right section.
  */
-export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) => {
+export const LeftPanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) => {
   const selectedTabContent = useMemo(() => {
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
@@ -37,4 +37,4 @@ export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) =>
   );
 };
 
-PanelContent.displayName = 'PanelContent';
+LeftPanelContent.displayName = 'LeftPanelContent';

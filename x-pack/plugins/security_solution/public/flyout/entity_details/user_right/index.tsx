@@ -11,7 +11,6 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
-import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -24,7 +23,8 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
-import type { UserDetailsLeftPanelTab } from '../user_details_left/tabs';
+import { useObservedUser } from './hooks/use_observed_user';
+import type { EntityDetailsLeftPanelTab } from '../shared/left_panel/left_panel_header';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -79,7 +79,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
 
   const { openLeftPanel } = useExpandableFlyoutContext();
   const openPanelTab = useCallback(
-    (tab?: UserDetailsLeftPanelTab) => {
+    (tab?: EntityDetailsLeftPanelTab) => {
       openLeftPanel({
         id: UserDetailsPanelKey,
         params: {

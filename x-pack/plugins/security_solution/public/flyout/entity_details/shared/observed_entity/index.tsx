@@ -5,39 +5,35 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiTitle, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from './translations';
-import type { ObservedUserData } from './types';
-import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
+import { EntityTable } from '../entity_table';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { getObservedUserTableColumns } from './columns';
-import { ONE_WEEK_IN_HOURS } from './constants';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { OBSERVED_USER_QUERY_ID } from '../../../../explore/users/containers/users/observed_details';
-import { useObservedUserItems } from './hooks/use_observed_user_items';
+import * as i18n from './translations';
+import type { EntityTableRows } from '../entity_table/types';
+import { ONE_WEEK_IN_HOURS } from '../constants';
+import type { ObservedEntityData } from './types';
 
-export const ObservedUser = ({
-  observedUser,
+export const ObservedEntity = <T,>({
+  observedData,
   contextID,
   scopeId,
   isDraggable,
+  observedFields,
+  queryId,
 }: {
-  observedUser: ObservedUserData;
+  observedData: ObservedEntityData<T>;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
+  observedFields: EntityTableRows<ObservedEntityData<T>>;
+  queryId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const observedItems = useObservedUserItems(observedUser);
-
-  const observedUserTableColumns = useMemo(
-    () => getObservedUserTableColumns(contextID, scopeId, isDraggable),
-    [contextID, scopeId, isDraggable]
-  );
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   return (
@@ -45,11 +41,11 @@ export const ObservedUser = ({
       <InspectButtonContainer>
         <EuiAccordion
           initialIsOpen={true}
-          isLoading={observedUser.isLoading}
-          id="observedUser-data"
-          data-test-subj="observedUser-data"
+          isLoading={observedData.isLoading}
+          id="observedEntity-accordion"
+          data-test-subj="observedEntity-accordion"
           buttonProps={{
-            'data-test-subj': 'observedUser-accordion-button',
+            'data-test-subj': 'observedEntity-accordion-button',
             css: css`
               color: ${euiTheme.colors.primary};
             `,
@@ -66,24 +62,21 @@ export const ObservedUser = ({
                   margin-right: ${euiTheme.size.s};
                 `}
               >
-                <InspectButton
-                  queryId={OBSERVED_USER_QUERY_ID}
-                  title={i18n.OBSERVED_USER_INSPECT_TITLE}
-                />
+                <InspectButton queryId={queryId} title={i18n.OBSERVED_DATA_TITLE} />
               </span>
-              {observedUser.lastSeen.date && (
+              {observedData.lastSeen.date && (
                 <span
                   css={css`
                     font-size: ${xsFontSize};
                   `}
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.timeline.userDetails.observedUserUpdatedTime"
+                    id="xpack.securitySolution.flyout.entityDetails.observedEntityUpdatedTime"
                     defaultMessage="Updated {time}"
                     values={{
                       time: (
                         <FormattedRelativePreferenceDate
-                          value={observedUser.lastSeen.date}
+                          value={observedData.lastSeen.date}
                           dateFormat="MMM D, YYYY"
                           relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
                         />
@@ -101,17 +94,12 @@ export const ObservedUser = ({
           `}
         >
           <EuiSpacer size="m" />
-
-          <BasicTable
-            loading={
-              observedUser.isLoading ||
-              observedUser.firstSeen.isLoading ||
-              observedUser.lastSeen.isLoading ||
-              observedUser.anomalies.isLoading
-            }
-            data-test-subj="observedUser-table"
-            columns={observedUserTableColumns}
-            items={observedItems}
+          <EntityTable
+            contextID={contextID}
+            scopeId={scopeId}
+            isDraggable={isDraggable}
+            data={observedData}
+            entityFields={observedFields}
           />
         </EuiAccordion>
       </InspectButtonContainer>

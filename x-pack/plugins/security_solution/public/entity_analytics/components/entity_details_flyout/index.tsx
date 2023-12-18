@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
-import { UserDetailsLeftPanelTab } from '../../../flyout/entity_details/user_details_left/tabs';
 import { RiskInputsTab } from './tabs/risk_inputs';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 
 export const getRiskInputTab = (alertIds: string[]) => ({
-  id: UserDetailsLeftPanelTab.RISK_INPUTS,
+  id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
     <FormattedMessage
