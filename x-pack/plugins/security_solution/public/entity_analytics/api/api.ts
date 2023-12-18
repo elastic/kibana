@@ -33,10 +33,13 @@ import { useKibana } from '../../common/lib/kibana/kibana_react';
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
-  /** 
+  /**
    * Fetches preview risks scores
    */
   const fetchRiskScorePreview = ({
+    signal,
+    params,
+  }: {
     signal?: AbortSignal;
     params: RiskScorePreviewRequestSchema;
   }) =>
@@ -102,6 +105,35 @@ export const useEntityAnalyticsRoutes = () => {
       method: 'GET',
     });
 
+  /**
+   * Create asset criticality
+   */
+  const createAssetCriticality = async (
+    params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
+  ): Promise<AssetCriticalityRecord> =>
+    http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+      version: '1',
+      method: 'POST',
+      body: JSON.stringify({
+        id_value: params.idValue,
+        id_field: params.idField,
+        criticality_level: params.criticalityLevel,
+      }),
+    });
+
+  /**
+   * Get asset criticality
+   */
+  const fetchAssetCriticality = async (
+    params: Pick<AssetCriticality, 'idField' | 'idValue'>
+  ): Promise<AssetCriticalityRecord> => {
+    return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
+      version: '1',
+      method: 'GET',
+      query: { id_value: params.idValue, id_field: params.idField },
+    });
+  };
+
   return {
     fetchRiskScorePreview,
     fetchRiskEngineStatus,
@@ -110,36 +142,9 @@ export const useEntityAnalyticsRoutes = () => {
     disableRiskEngine,
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
+    createAssetCriticality,
+    fetchAssetCriticality,
   };
 };
 
-type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;
-/**
- * Create asset criticality
- */
-export const createAssetCriticality = async (
-  params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
-): Promise<AssetCriticalityRecord> => {
-  return KibanaServices.get().http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
-    version: '1',
-    method: 'POST',
-    body: JSON.stringify({
-      id_value: params.idValue,
-      id_field: params.idField,
-      criticality_level: params.criticalityLevel,
-    }),
-  });
-};
-
-/**
- * Get asset criticality
- */
-export const fetchAssetCriticality = async (
-  params: Pick<AssetCriticality, 'idField' | 'idValue'>
-): Promise<AssetCriticalityRecord> => {
-  return KibanaServices.get().http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
-    version: '1',
-    method: 'GET',
-    query: { id_value: params.idValue, id_field: params.idField },
-  });
-};
+export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;

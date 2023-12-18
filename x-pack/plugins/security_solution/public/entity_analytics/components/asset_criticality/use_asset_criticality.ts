@@ -12,16 +12,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToggle } from 'react-use';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
-import {
-  createAssetCriticality,
-  fetchAssetCriticality,
-  fetchAssetCriticalityPrivileges,
-} from '../../api/api';
+import type { AssetCriticality } from '../../api/api';
+import { useEntityAnalyticsRoutes } from '../../api/api';
 import { buildCriticalityQueryKeys } from './common';
 
 export const useAssetCriticalityData = (entity: Entity, modal: ModalState): State => {
   const QC = useQueryClient();
   const QUERY_KEYS = buildCriticalityQueryKeys(entity.name);
+
+  const { fetchAssetCriticality, createAssetCriticality, fetchAssetCriticalityPrivileges } =
+    useEntityAnalyticsRoutes();
 
   const privileges = useQuery({
     queryKey: QUERY_KEYS.privileges,
@@ -62,7 +62,7 @@ export interface State {
   privileges: UseQueryResult<EntityAnalyticsPrivileges>;
   mutation: UseMutationResult<AssetCriticalityRecord, unknown, Params, unknown>;
 }
-type Params = Parameters<typeof createAssetCriticality>[0];
+type Params = Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>;
 
 export interface ModalState {
   basicSelectId: string;
