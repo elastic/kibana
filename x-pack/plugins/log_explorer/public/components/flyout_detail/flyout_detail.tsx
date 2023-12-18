@@ -6,23 +6,19 @@
  */
 
 import React from 'react';
-import { LogExplorerFlyoutContentProps, LogDocument } from './types';
+import { LogExplorerFlyoutContentProps } from './types';
 import { useDocDetail } from './use_doc_detail';
 import { FlyoutHeader } from './flyout_header';
 import { FlyoutHighlights } from './flyout_highlights';
 import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
 
-export function FlyoutDetail({
-  dataView,
-  doc,
-  actions,
-}: Pick<LogExplorerFlyoutContentProps, 'dataView' | 'doc' | 'actions'>) {
-  const parsedDoc = useDocDetail(doc as LogDocument, { dataView });
+export function FlyoutDetail({ dataView, doc, actions }: LogExplorerFlyoutContentProps) {
+  const parsedDoc = useDocDetail(doc, { dataView });
 
   return (
     <DiscoverActionsProvider value={actions}>
       <FlyoutHeader doc={parsedDoc} />
-      <FlyoutHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} actions={actions} />
+      <FlyoutHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} />
     </DiscoverActionsProvider>
   );
 }
