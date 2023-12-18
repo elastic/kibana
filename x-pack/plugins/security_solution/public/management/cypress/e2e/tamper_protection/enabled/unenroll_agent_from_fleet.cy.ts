@@ -20,7 +20,9 @@ import { login } from '../../../tasks/login';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/173460
+// FLAKY: https://github.com/elastic/kibana/issues/170706
+describe.skip(
   'Unenroll agent from fleet when agent tamper protection is enabled',
   { tags: ['@ess'] },
   () => {
