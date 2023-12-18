@@ -41,19 +41,21 @@ export type LogExplorerDiscoverServices = Pick<
 };
 
 export interface OptionsListControlOption {
+  type: 'options';
+  selectedOptions: string[];
+}
+
+export interface OptionsListControlExists {
+  type: 'exists';
+}
+
+export interface OptionsListControl {
   mode: 'include' | 'exclude';
-  selection:
-    | {
-        type: 'options';
-        selectedOptions: string[];
-      }
-    | {
-        type: 'exists';
-      };
+  selection: OptionsListControlOption | OptionsListControlExists;
 }
 
 export interface ControlOptions {
-  [availableControlsPanels.NAMESPACE]?: OptionsListControlOption;
+  [availableControlsPanels.NAMESPACE]?: OptionsListControl;
 }
 
 // we might want to wrap this into an object that has a "state value" laster
