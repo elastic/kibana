@@ -732,15 +732,11 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/components/chat/chat_body.tsx"
+                "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/components/insight/insight.tsx"
               },
               {
                 "plugin": "apm",
