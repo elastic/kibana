@@ -12,7 +12,7 @@ import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/consta
 
 import type { StartPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { getUserRiskEnginePrivileges } from '../get_user_risk_engine_privileges';
+import { getUserRiskEnginePrivileges } from '../risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

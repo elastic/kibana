@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LIGHT_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import {
   ALERT_CONTEXT,
@@ -129,7 +129,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 threshold={rule.params.count.value}
@@ -196,7 +196,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 threshold={rule.params.count.value}
