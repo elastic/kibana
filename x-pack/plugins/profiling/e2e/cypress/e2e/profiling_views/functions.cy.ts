@@ -174,7 +174,6 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('/');
   });
 
-  // skipping this for now until the values are passed to the ES plugin
   describe('Test changing CO2 settings', () => {
     after(() => {
       cy.updateAdvancedSettings({
@@ -183,7 +182,6 @@ describe('Functions page', () => {
         [profilingPervCPUWattX86]: 7,
       });
     });
-
     it('changes CO2 settings and validate values in the table', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
