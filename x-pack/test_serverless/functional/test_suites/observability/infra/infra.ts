@@ -104,7 +104,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
-              expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+              expect(documentTitle).to.contain(
+                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+              );
             });
 
             await returnTo(INVENTORY_PATH);
