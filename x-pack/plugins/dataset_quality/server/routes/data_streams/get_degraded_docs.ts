@@ -14,7 +14,7 @@ import {
   DATA_STREAM_TYPE,
   _IGNORED,
 } from '../../../common/es_fields';
-import { DataStreamTypes } from '../../types/data_stream';
+import { DataStreamTypes } from '../../types/default_api_types';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
 export async function getDegradedDocsPaginated(options: {
