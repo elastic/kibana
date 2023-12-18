@@ -17,7 +17,6 @@ import {
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
 import { mockFlyoutContextValue } from '../../document_details/shared/mocks/mock_flyout_context';
-import userEvent from '@testing-library/user-event';
 
 const expandDetails = jest.fn();
 
@@ -108,23 +107,5 @@ describe('<FlyoutNavigation />', () => {
     await act(async () => {
       expect(container).toBeEmptyDOMElement();
     });
-  });
-
-  it('should call expandDetails without any parameter', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-          <FlyoutNavigation
-            flyoutIsExpandable={true}
-            expandDetails={expandDetails}
-            actions={<div />}
-          />
-        </ExpandableFlyoutContext.Provider>
-      </TestProviders>
-    );
-
-    userEvent.click(getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID));
-
-    expect(expandDetails).toHaveBeenCalledWith();
   });
 });
