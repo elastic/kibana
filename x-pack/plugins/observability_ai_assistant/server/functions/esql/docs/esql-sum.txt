@@ -1,0 +1,5 @@
+SUM
+
+The sum of a numeric field.
+FROM employees
+| STATS SUM(languages)
