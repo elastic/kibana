@@ -45,7 +45,10 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = () => {
   const {
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantActionMenuItem,
+    },
   } = useKibanaContextForPlugin().services;
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -98,7 +101,9 @@ export const InfrastructurePage = () => {
                         >
                           {ADD_DATA_LABEL}
                         </EuiHeaderLink>
-                        <ObservabilityAIAssistantActionMenuItem />
+                        {observabilityAIAssistantService.isEnabled() ? (
+                          <ObservabilityAIAssistantActionMenuItem />
+                        ) : null}
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}

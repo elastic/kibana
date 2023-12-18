@@ -13,7 +13,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { HasDataContextProvider } from '../../context/has_data_context/has_data_context';
 import {
@@ -39,9 +38,6 @@ function unregisterAll() {
 }
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
-
-const { ObservabilityAIAssistantActionMenuItem, ContextualInsight } =
-  observabilityAIAssistantPluginMock.createStartContract();
 
 const withCore = makeDecorator({
   name: 'withCore',
@@ -103,8 +99,6 @@ const withCore = makeDecorator({
               config,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
-              ObservabilityAIAssistantActionMenuItem,
-              ContextualInsight,
             }}
           >
             <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>

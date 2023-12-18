@@ -14,20 +14,12 @@ import type {
   ConfigSchema,
   ObservabilityAIAssistantService,
 } from './types';
-export { mockService as mockObservabilityAIAssistantService } from './utils/storybook_decorator';
-
-export { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
 export type {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantService,
 };
-
-export {
-  useObservabilityAIAssistant,
-  useObservabilityAIAssistantOptional,
-} from './hooks/use_observability_ai_assistant';
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';

@@ -7,15 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  type Message,
-  ObservabilityAIAssistantPluginStart,
-  MessageRole,
-  ObservabilityAIAssistantProvider,
-  useObservabilityAIAssistant,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
@@ -23,16 +18,15 @@ export interface LogAIAssistantDocument {
 
 export interface LogAIAssistantProps {
   doc: LogAIAssistantDocument | undefined;
-  ContextualInsight: ObservabilityAIAssistantPluginStart['ContextualInsight'];
 }
 
-export interface LogAIAssistantDeps extends LogAIAssistantProps {
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart['service'];
-  ContextualInsight: ObservabilityAIAssistantPluginStart['ContextualInsight'];
-}
-
-export const LogAIAssistant = withProviders(({ doc, ContextualInsight }: LogAIAssistantProps) => {
-  const aiAssistant = useObservabilityAIAssistant();
+export const LogAIAssistant = ({ doc }: LogAIAssistantProps) => {
+  const {
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantContextualInsight,
+    },
+  } = useKibanaContextForPlugin().services;
 
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
@@ -76,18 +70,18 @@ export const LogAIAssistant = withProviders(({ doc, ContextualInsight }: LogAIAs
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {aiAssistant.isEnabled() && explainLogMessageMessages ? (
+      {observabilityAIAssistantService.isEnabled() && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight
+          <ObservabilityAIAssistantContextualInsight
             title={explainLogMessageTitle}
             messages={explainLogMessageMessages}
             dataTestSubj="obsAiAssistantInsightButtonExplainLogMessage"
           />
         </EuiFlexItem>
       ) : null}
-      {aiAssistant.isEnabled() && similarLogMessageMessages ? (
+      {observabilityAIAssistantService.isEnabled() && similarLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight
+          <ObservabilityAIAssistantContextualInsight
             title={similarLogMessagesTitle}
             messages={similarLogMessageMessages}
             dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
@@ -96,20 +90,7 @@ export const LogAIAssistant = withProviders(({ doc, ContextualInsight }: LogAIAs
       ) : null}
     </EuiFlexGroup>
   );
-});
+};
 
 // eslint-disable-next-line import/no-default-export
 export default LogAIAssistant;
-
-function withProviders(Component: React.FunctionComponent<LogAIAssistantProps>) {
-  return function ComponentWithProviders({
-    observabilityAIAssistant: observabilityAIAssistantService,
-    ...props
-  }: LogAIAssistantDeps) {
-    return (
-      <ObservabilityAIAssistantProvider value={observabilityAIAssistantService}>
-        <Component {...props} />
-      </ObservabilityAIAssistantProvider>
-    );
-  };
-}

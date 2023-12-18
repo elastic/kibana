@@ -26,7 +26,10 @@ export function ProfilingHeaderActionMenu() {
   const history = useHistory();
 
   const {
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+    observabilityAIAssistant: {
+      service: observabilityAIAssistantService,
+      ObservabilityAIAssistantActionMenuItem,
+    },
   } = useProfilingDependencies().start;
 
   return (
@@ -85,7 +88,9 @@ export function ProfilingHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
-      <ObservabilityAIAssistantActionMenuItem />
+      {observabilityAIAssistantService?.isEnabled() ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

@@ -17,7 +17,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
@@ -53,9 +52,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const { ContextualInsight, ObservabilityAIAssistantActionMenuItem } =
-  observabilityAIAssistantPluginMock.createStartContract();
-
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
@@ -77,8 +73,6 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             config: merge(defaultConfig, config),
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
-            ObservabilityAIAssistantActionMenuItem,
-            ContextualInsight,
           }}
         >
           <QueryClientProvider client={queryClient}>
