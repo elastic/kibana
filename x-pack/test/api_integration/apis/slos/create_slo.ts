@@ -9,7 +9,7 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Create SLOs', function () {
@@ -17,20 +17,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     const supertestAPI = getService('supertest');
     const kibanaServer = getService('kibanaServer');
-    const esClient = getService('es');
-    const logger = getService('log');
     const slo = getService('slo');
 
-    let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
       await slo.deleteAllSLOs();
-      _createSLOInput = getFixtureJson('create_slo');
     });
 
     beforeEach(() => {
-      createSLOInput = _createSLOInput;
+      createSLOInput = sloData;
     });
 
     afterEach(async () => {
@@ -38,13 +34,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('creates a new slo and transforms', async () => {
-      const request = createSLOInput;
-
       const apiResponse = await supertestAPI
         .post('/api/observability/slos')
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
-        .send(request)
+        .send(createSLOInput)
         .expect(200);
 
       expect(apiResponse.body).property('id');

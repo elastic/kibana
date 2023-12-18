@@ -9,24 +9,21 @@ import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
 import { loadTestData } from './helper/load_test_data';
 import { SloEsClient } from './helper/es';
+import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Get SLOs', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
-    const kibanaServer = getService('kibanaServer');
     const esClient = getService('es');
     const logger = getService('log');
-    // const transform = getService('transform');
     const retry = getService('retry');
     const slo = getService('slo');
     const sloEsClient = new SloEsClient(esClient);
 
-    let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     const createSLO = async (requestOverrides?: Record<string, any>) => {
@@ -40,11 +37,10 @@ export default function ({ getService }: FtrProviderContext) {
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
       await loadTestData(getService);
-      _createSLOInput = getFixtureJson('create_slo');
     });
 
     beforeEach(async () => {
-      createSLOInput = _createSLOInput;
+      createSLOInput = sloData;
     });
 
     afterEach(async () => {
@@ -180,11 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      const response = await esClient.search({
-        index: 'kbn-data-forge-fake_hosts*',
-        query: { term: { 'system.network.name': 'eth1' } },
-      });
-
       await retry.tryForTime(300 * 1000, async () => {
         const getResponse = await supertestAPI
           .get(`/api/observability/slos/${id}`)
@@ -305,7 +296,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('gets slos by query', async () => {
       const id = await createSLO();
-      const secondId = await createSLO({ name: 'test name int' });
 
       await retry.tryForTime(300 * 1000, async () => {
         const response = await supertestAPI

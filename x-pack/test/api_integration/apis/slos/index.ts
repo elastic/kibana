@@ -7,9 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
-
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('SLO API Tests', () => {
     loadTestFile(require.resolve('./create_slo'));
     loadTestFile(require.resolve('./delete_slo'));

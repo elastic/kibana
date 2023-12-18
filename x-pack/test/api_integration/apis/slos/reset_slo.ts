@@ -6,13 +6,10 @@
  */
 import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
-import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
 import { loadTestData } from './helper/load_test_data';
-
 import { SloEsClient } from './helper/es';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -24,20 +21,12 @@ export default function ({ getService }: FtrProviderContext) {
     const esClient = getService('es');
     const logger = getService('log');
     const slo = getService('slo');
-    const sloEsClient = new SloEsClient();
-
-    let _createSLOInput: CreateSLOInput;
-    let createSLOInput: CreateSLOInput;
+    const sloEsClient = new SloEsClient(esClient);
 
     before(async () => {
       await sloEsClient.deleteTestSourceData();
       await slo.deleteAllSLOs();
-      _createSLOInput = getFixtureJson('create_slo');
       await loadTestData(getService);
-    });
-
-    beforeEach(() => {
-      createSLOInput = _createSLOInput;
     });
 
     afterEach(async () => {

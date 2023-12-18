@@ -10,7 +10,7 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import { sloData } from './fixtures/create_slo';
 import { loadTestData } from './helper/load_test_data';
 import { SloEsClient } from './helper/es';
 
@@ -26,18 +26,16 @@ export default function ({ getService }: FtrProviderContext) {
     const retry = getService('retry');
     const sloEsClient = new SloEsClient(esClient);
 
-    let _createSLOInput: CreateSLOInput;
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
-      _createSLOInput = getFixtureJson('create_slo');
       await slo.deleteAllSLOs();
-      await sloEsClient.deleteTestSourceData(getService);
+      await sloEsClient.deleteTestSourceData();
       loadTestData(getService);
     });
 
     beforeEach(() => {
-      createSLOInput = _createSLOInput;
+      createSLOInput = sloData;
     });
 
     afterEach(async () => {
@@ -46,13 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await cleanup({ esClient, logger });
-      await sloEsClient.deleteTestSourceData(getService);
+      await sloEsClient.deleteTestSourceData();
     });
 
     it('deletes new slo saved object and transforms', async () => {
-      const request = createSLOInput;
-
-      const id = await slo.create(request);
+      const id = await slo.create(createSLOInput);
 
       const savedObject = await kibanaServer.savedObjects.find({
         type: SO_SLO_TYPE,
