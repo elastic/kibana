@@ -194,6 +194,9 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         await testSubjects.existOrFail('aiopsRandomSamplerOptionOnAutomatic', { timeout: 1000 });
 
         await testSubjects.click(option);
+
+        await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+        await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
       });
     },
   };
