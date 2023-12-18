@@ -750,10 +750,6 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
-
-    const logger = appContextService.getLogger();
-    logger.debug(`Updating output ${id}`);
-
     let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
