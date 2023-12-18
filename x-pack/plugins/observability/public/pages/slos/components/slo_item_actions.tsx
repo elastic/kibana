@@ -17,16 +17,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { RulesParams } from '../../../locators/rules';
 import { rulesLocatorID } from '../../../../common';
-import {
-  transformCreateSLOFormToCreateSLOInput,
-  transformSloResponseToCreateSloForm,
-} from '../../slo_edit/helpers/process_slo_form_values';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -73,7 +69,6 @@ export function SloItemActions({
     },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
-  const { mutate: cloneSlo } = useCloneSlo();
 
   const sloDetailsUrl = basePath.prepend(
     paths.observability.sloDetails(
@@ -94,18 +89,15 @@ export function SloItemActions({
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
 
+  const navigateToClone = useCloneSlo();
+
+  const handleClone = () => {
+    navigateToClone(slo);
+  };
+
   const handleNavigateToRules = async () => {
     const locator = locators.get<RulesParams>(rulesLocatorID);
     locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
-  };
-
-  const handleClone = () => {
-    const newSlo = transformCreateSLOFormToCreateSLOInput(
-      transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
-    );
-
-    cloneSlo({ slo: newSlo, originalSloId: slo.id });
-    setIsActionsPopoverOpen(false);
   };
 
   const handleDelete = () => {
