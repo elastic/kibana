@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSortedCspBenchmarkRulesTemplates } from './utilities';
+import { getSortedCspBenchmarkRulesTemplates } from './utils';
 import { CspBenchmarkRule } from '../../../../common/types/latest';
 
 describe('getSortedCspBenchmarkRules', () => {

@@ -14,9 +14,9 @@ import type {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
 } from '../../../../common/types/latest';
-import { getSortedCspBenchmarkRulesTemplates } from './utilities';
+import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
-export const findRuleHandler = async (
+export const findBenchmarkRuleHandler = async (
   soClient: SavedObjectsClientContract,
   options: FindCspBenchmarkRuleRequest
 ): Promise<FindCspBenchmarkRuleResponse> => {

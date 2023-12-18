@@ -73,7 +73,7 @@ export const RulesTableHeader = ({
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem
             css={css`
-              max-width: 140px;
+              max-width: 200px;
             `}
           >
             <EuiComboBox
@@ -95,7 +95,7 @@ export const RulesTableHeader = ({
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
-              max-width: 160px;
+              max-width: 140px;
             `}
           >
             <EuiComboBox

@@ -46,7 +46,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
                 <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                   <FormattedMessage
                     id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
-                    defaultMessage="Benchmark Rules"
+                    defaultMessage="Benchmarks"
                   />
                 </EuiButtonEmpty>
               </Link>

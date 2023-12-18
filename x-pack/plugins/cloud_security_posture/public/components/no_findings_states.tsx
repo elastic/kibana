@@ -31,7 +31,6 @@ import {
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails, PostureTypes } from '../../common/types_old';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
@@ -184,7 +183,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
         <h2>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-            defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
+            defaultMessage="Identify & remediate configuration risks in your Cloud infrastructure"
           />
         </h2>
       }
@@ -194,17 +193,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
         <p>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-            defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
-            values={{
-              learnMore: (
-                <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
-                  <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
-                    defaultMessage="Learn more about Cloud Security Posture"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Maintain the confidentiality, integrity, and availability of your data in the cloud by continuously identifying and remediating potential configuration risks, like publicly accessible s3 buckets, using Elastic Security posture management for Cloud & Kubernetes"
           />
         </p>
       }
@@ -219,7 +208,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
             >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                defaultMessage="Add CSPM Integration"
+                defaultMessage="Add CSPM"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -232,7 +221,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
             >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                defaultMessage="Add KSPM Integration"
+                defaultMessage="Add KSPM"
               />
             </EuiButton>
           </EuiFlexItem>
