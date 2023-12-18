@@ -24,6 +24,7 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getMinimumCompatibleVersion } from '../saved_objects';
 
 export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<Params> {
@@ -116,7 +117,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   const namespace = context.spaceIdToNamespace(spaceId);
 
   const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     ruleId,
     { namespace }
   );

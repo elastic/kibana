@@ -83,6 +83,7 @@ import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helper
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { getLatestRuleVersion } from '../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2103,7 +2104,10 @@ describe('Task Runner', () => {
 
   test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
     rulesClient.getAlertFromRaw.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+        RULE_SAVED_OBJECT_TYPE,
+        '1'
+      );
     });
 
     const taskRunner = new TaskRunner({

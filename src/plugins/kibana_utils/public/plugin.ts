@@ -10,26 +10,40 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { History } from 'history';
 import { setVersion } from './set_version';
 
-export interface KibanaUtilsSetup {
+export interface KibanaUtilsPublicSetup {
   setVersion: (history: Pick<History, 'location' | 'replace'>) => void;
 }
 
-export type KibanaUtilsStart = undefined;
+export type KibanaUtilsPublicStart = undefined;
 
-export class KibanaUtilsPublicPlugin implements Plugin<KibanaUtilsSetup, KibanaUtilsStart> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPublicStartDependencies {}
+
+export class KibanaUtilsPublicPlugin
+  implements
+    Plugin<
+      KibanaUtilsPublicSetup,
+      KibanaUtilsPublicStart,
+      KibanaUtilsPublicSetupDependencies,
+      KibanaUtilsPublicStartDependencies
+    >
+{
   private readonly version: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.version = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): KibanaUtilsSetup {
+  public setup(_core: CoreSetup): KibanaUtilsPublicSetup {
     return {
       setVersion: this.setVersion,
     };
   }
 
-  public start(core: CoreStart): KibanaUtilsStart {
+  public start(_core: CoreStart): KibanaUtilsPublicStart {
     return undefined;
   }
 
