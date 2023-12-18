@@ -10,19 +10,23 @@ import { DataStreamStatType, IntegrationType } from './types';
 
 export class DataStreamStat {
   name: DataStreamStatType['name'];
+  namespace: string;
   title: string;
   size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['size_bytes'];
-  lastActivity?: DataStreamStatType['last_activity'];
+  sizeBytes?: DataStreamStatType['sizeBytes'];
+  lastActivity?: DataStreamStatType['lastActivity'];
   integration?: IntegrationType;
+  degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.name = dataStreamStat.name;
     this.title = dataStreamStat.title ?? dataStreamStat.name;
+    this.namespace = dataStreamStat.namespace;
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
     this.integration = dataStreamStat.integration;
+    this.degradedDocs = dataStreamStat.degradedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -30,10 +34,11 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       name: dataStreamStat.name,
-      title: `${dataset}-${namespace}`,
+      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      namespace,
       size: dataStreamStat.size,
-      sizeBytes: dataStreamStat.size_bytes,
-      lastActivity: dataStreamStat.last_activity,
+      sizeBytes: dataStreamStat.sizeBytes,
+      lastActivity: dataStreamStat.lastActivity,
       integration: dataStreamStat.integration
         ? Integration.create(dataStreamStat.integration)
         : undefined,

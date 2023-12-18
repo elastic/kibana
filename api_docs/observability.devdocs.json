@@ -2442,37 +2442,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ locators: { profiling: { flamegraphLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "FlamegraphLocatorParams",
-              ">; topNFunctionsLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "TopNFunctionsLocatorParams",
-              ">; stacktracesLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "StacktracesLocatorParams",
-              ">; }; }; navigation: { registerSections: (sections$: ",
+              "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -2639,6 +2609,52 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly registerAction: <Context extends object>(definition: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsSetup.licensing",
             "type": "Object",
             "tags": [],
@@ -2652,6 +2668,27 @@
                 "section": "def-public.LicensingPluginSetup",
                 "text": "LicensingPluginSetup"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "serverless",
+                "scope": "public",
+                "docId": "kibServerlessPluginApi",
+                "section": "def-public.ServerlessPluginSetup",
+                "text": "ServerlessPluginSetup"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -2983,7 +3020,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ navigation: { PageTemplate: (pageTemplateProps: ",
+              "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
               ") => JSX.Element; registerSections: (sections$: ",
               "Observable",
@@ -3318,6 +3355,106 @@
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly getAction: (id: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3359,7 +3496,7 @@
             "label": "format",
             "description": [],
             "signature": [
-              "(options: { fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+              "(options: { fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
               {
                 "pluginId": "@kbn/alerts-as-data-utils",
                 "scope": "common",
@@ -3367,11 +3504,11 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
-              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
+              "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; hasBasePath?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
@@ -3386,7 +3523,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+                  "{ fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
                   {
                     "pluginId": "@kbn/alerts-as-data-utils",
                     "scope": "common",
@@ -3394,7 +3531,7 @@
                     "section": "def-common.MultiField",
                     "text": "MultiField"
                   },
-                  "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+                  "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
@@ -3602,7 +3739,7 @@
             "label": "fields",
             "description": [],
             "signature": [
-              "OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+              "OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
               {
                 "pluginId": "@kbn/alerts-as-data-utils",
                 "scope": "common",
@@ -3610,7 +3747,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & TAdditionalMetaFields"
+              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>> & TAdditionalMetaFields"
             ],
             "path": "x-pack/plugins/observability/public/typings/alerts.ts",
             "deprecated": false,
@@ -3670,6 +3807,20 @@
             "tags": [],
             "label": "active",
             "description": [],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.hasBasePath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasBasePath",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/observability/public/typings/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3813,9 +3964,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "observability",
+                "pluginId": "observabilityShared",
                 "scope": "public",
-                "docId": "kibObservabilityPluginApi",
+                "docId": "kibObservabilitySharedPluginApi",
                 "section": "def-public.UXMetrics",
                 "text": "UXMetrics"
               }
@@ -3880,140 +4031,6 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.UXMetrics",
-        "type": "Interface",
-        "tags": [],
-        "label": "UXMetrics",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.cls",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "cls",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.fid",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fid",
-            "description": [],
-            "signature": [
-              "number | null | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.lcp",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "lcp",
-            "description": [],
-            "signature": [
-              "number | null | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.tbt",
-            "type": "number",
-            "tags": [],
-            "label": "tbt",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.fcp",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fcp",
-            "description": [],
-            "signature": [
-              "number | null | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.coreVitalPages",
-            "type": "number",
-            "tags": [],
-            "label": "coreVitalPages",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.lcpRanks",
-            "type": "Array",
-            "tags": [],
-            "label": "lcpRanks",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.fidRanks",
-            "type": "Array",
-            "tags": [],
-            "label": "fidRanks",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UXMetrics.clsRanks",
-            "type": "Array",
-            "tags": [],
-            "label": "clsRanks",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4410,7 +4427,7 @@
         "label": "ObservabilityRuleTypeFormatter",
         "description": [],
         "signature": [
-          "(options: { fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+          "(options: { fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
           {
             "pluginId": "@kbn/alerts-as-data-utils",
             "scope": "common",
@@ -4418,11 +4435,11 @@
             "section": "def-common.MultiField",
             "text": "MultiField"
           },
-          "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+          "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
-          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; }"
+          "<number>, denominator: number | undefined, fallbackResult?: string) => string; }; }) => { reason: string; link?: string | undefined; hasBasePath?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
         "deprecated": false,
@@ -4437,7 +4454,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
+              "{ fields: OutputOf<SetOptional<{ readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status_updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.revision\": { readonly type: \"long\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.maintenance_window_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; readonly multi_fields: ",
               {
                 "pluginId": "@kbn/alerts-as-data-utils",
                 "scope": "common",
@@ -4445,7 +4462,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "[]; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
@@ -8216,7 +8233,29 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /internal/observability/slos/{id}/_instances\": { endpoint: \"GET /internal/observability/slos/{id}/_instances\"; params?: ",
+          "{ \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/{id}/_instances\": { endpoint: \"GET /internal/observability/slos/{id}/_instances\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -9148,7 +9187,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9182,7 +9221,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9224,7 +9263,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9232,11 +9271,17 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/_definitions\": { endpoint: \"GET /internal/observability/slos/_definitions\"; params?: ",
-          "TypeC",
+          "; \"GET /api/observability/slos/_definitions 2023-10-31\": { endpoint: \"GET /api/observability/slos/_definitions 2023-10-31\"; params?: ",
+          "PartialC",
           "<{ query: ",
-          "TypeC",
+          "PartialC",
           "<{ search: ",
+          "StringC",
+          "; includeOutdatedOnly: ",
+          "Type",
+          "<boolean, boolean, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           {
@@ -9246,7 +9291,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { search: string; }; }; }) => Promise<({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; })[]>; } & ",
+          " & { params?: { query?: { search?: string | undefined; includeOutdatedOnly?: boolean | undefined; page?: string | undefined; perPage?: string | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9926,7 +9971,29 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/observability/slos/{id}/_instances\": { endpoint: \"GET /internal/observability/slos/{id}/_instances\"; params?: ",
+          "{ \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { path: { id: string; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"GET /internal/observability/slos/{id}/_instances\": { endpoint: \"GET /internal/observability/slos/{id}/_instances\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -10858,7 +10925,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; }>; } & ",
+          " | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | undefined; }; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10892,7 +10959,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
+          " & { params: { path: { id: string; }; } & { query?: { instanceId?: string | undefined; } | undefined; }; }) => Promise<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10934,7 +11001,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
+          " & { params?: { query?: { kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10942,11 +11009,17 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "; \"GET /internal/observability/slos/_definitions\": { endpoint: \"GET /internal/observability/slos/_definitions\"; params?: ",
-          "TypeC",
+          "; \"GET /api/observability/slos/_definitions 2023-10-31\": { endpoint: \"GET /api/observability/slos/_definitions 2023-10-31\"; params?: ",
+          "PartialC",
           "<{ query: ",
-          "TypeC",
+          "PartialC",
           "<{ search: ",
+          "StringC",
+          "; includeOutdatedOnly: ",
+          "Type",
+          "<boolean, boolean, unknown>; page: ",
+          "StringC",
+          "; perPage: ",
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           {
@@ -10956,7 +11029,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { search: string; }; }; }) => Promise<({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; } & { instanceId?: string | undefined; })[]>; } & ",
+          " & { params?: { query?: { search?: string | undefined; includeOutdatedOnly?: boolean | undefined; page?: string | undefined; perPage?: string | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string; total: string; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | undefined; }); } & { filter?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; groupBy: string; createdAt: string; updatedAt: string; version: number; } & { instanceId?: string | undefined; })[]; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -13858,10 +13931,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI",
+            "id": "def-server.uiSettings.profilingPervCPUWattX86",
             "type": "Object",
             "tags": [],
-            "label": "[profilingUseLegacyFlamegraphAPI]",
+            "label": "[profilingPervCPUWattX86]",
             "description": [],
             "path": "x-pack/plugins/observability/server/ui_settings.ts",
             "deprecated": false,
@@ -13869,7 +13942,7 @@
             "children": [
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.category",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.category",
                 "type": "Array",
                 "tags": [],
                 "label": "category",
@@ -13883,7 +13956,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.name",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -13894,80 +13967,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingUseLegacyFlamegraphAPI.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.profilingPerCoreWatt",
-            "type": "Object",
-            "tags": [],
-            "label": "[profilingPerCoreWatt]",
-            "description": [],
-            "path": "x-pack/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.value",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.value",
                 "type": "number",
                 "tags": [],
                 "label": "value",
@@ -13978,7 +13978,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.description",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -13989,7 +13989,7 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.schema",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.schema",
                 "type": "Object",
                 "tags": [],
                 "label": "schema",
@@ -14010,7 +14010,102 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPerCoreWatt.requiresPageReload",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingPervCPUWattArm64",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingPervCPUWattArm64]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
@@ -14201,6 +14296,269 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.profilingCo2PerKWH.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingUseLegacyCo2Calculation]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingUseLegacyCo2Calculation.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingAWSCostDiscountRate",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingAWSCostDiscountRate]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.profilingCostPervCPUPerHour",
+            "type": "Object",
+            "tags": [],
+            "label": "[profilingCostPervCPUPerHour]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.value",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<number>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.requiresPageReload",
                 "type": "boolean",
                 "tags": [],
                 "label": "requiresPageReload",
@@ -15609,6 +15967,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.profilingAWSCostDiscountRate",
+        "type": "string",
+        "tags": [],
+        "label": "profilingAWSCostDiscountRate",
+        "description": [],
+        "signature": [
+          "\"observability:profilingAWSCostDiscountRate\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.profilingCo2PerKWH",
         "type": "string",
         "tags": [],
@@ -15616,6 +15989,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingCo2PerKWH\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.profilingCostPervCPUPerHour",
+        "type": "string",
+        "tags": [],
+        "label": "profilingCostPervCPUPerHour",
+        "description": [],
+        "signature": [
+          "\"observability:profilingCostPervCPUPerHour\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -15639,13 +16027,13 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.profilingPerCoreWatt",
+        "id": "def-common.profilingPervCPUWattArm64",
         "type": "string",
         "tags": [],
-        "label": "profilingPerCoreWatt",
+        "label": "profilingPervCPUWattArm64",
         "description": [],
         "signature": [
-          "\"observability:profilingPerCoreWatt\""
+          "\"observability:profilingPervCPUWattArm64\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -15654,13 +16042,28 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.profilingUseLegacyFlamegraphAPI",
+        "id": "def-common.profilingPervCPUWattX86",
         "type": "string",
         "tags": [],
-        "label": "profilingUseLegacyFlamegraphAPI",
+        "label": "profilingPervCPUWattX86",
         "description": [],
         "signature": [
-          "\"observability:profilingUseLegacyFlamegraphAPI\""
+          "\"observability:profilingPerVCPUWattX86\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.profilingUseLegacyCo2Calculation",
+        "type": "string",
+        "tags": [],
+        "label": "profilingUseLegacyCo2Calculation",
+        "description": [],
+        "signature": [
+          "\"observability:profilingUseLegacyCo2Calculation\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -15905,7 +16308,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

@@ -9,6 +9,7 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { SetupRouteOptions } from './types';
 import { pingRoute } from './ping';
 import { sampleAssetsRoutes } from './sample_assets';
+import { assetsRoutes } from './assets';
 import { hostsRoutes } from './assets/hosts';
 import { servicesRoutes } from './assets/services';
 import { containersRoutes } from './assets/containers';
@@ -20,6 +21,7 @@ export function setupRoutes<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   pingRoute<T>({ router, assetClient });
   sampleAssetsRoutes<T>({ router, assetClient });
+  assetsRoutes<T>({ router, assetClient });
   hostsRoutes<T>({ router, assetClient });
   servicesRoutes<T>({ router, assetClient });
   containersRoutes<T>({ router, assetClient });

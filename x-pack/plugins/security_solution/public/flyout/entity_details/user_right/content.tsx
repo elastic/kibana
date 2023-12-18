@@ -8,11 +8,11 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import type {
   ManagedUserData,
   ObservedUserData,
 } from '../../../timelines/components/side_panel/new_user_detail/types';
-import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import { ObservedUser } from '../../../timelines/components/side_panel/new_user_detail/observed_user';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
@@ -52,12 +52,7 @@ export const UserPanelContent = ({
         isDraggable={isDraggable}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser
-        managedUser={managedUser}
-        contextID={contextID}
-        scopeId={scopeId}
-        isDraggable={isDraggable}
-      />
+      <ManagedUser managedUser={managedUser} contextID={contextID} isDraggable={isDraggable} />
     </FlyoutBody>
   );
 };

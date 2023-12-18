@@ -12,7 +12,7 @@ import type {
   TestCase,
   TestCaseWithoutTimeline,
 } from '../objects/case';
-import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
+import { ALL_CASES_STATUS_FILTER, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 
 import {
@@ -46,7 +46,7 @@ export const backToCases = () => {
 };
 
 export const filterStatusOpen = () => {
-  cy.get(ALL_CASES_OPEN_CASES_COUNT).click();
+  cy.get(ALL_CASES_STATUS_FILTER).click();
   cy.get(ALL_CASES_OPEN_FILTER).click();
 };
 

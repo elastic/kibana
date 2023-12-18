@@ -26,7 +26,7 @@ import {
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
 
-import type { MonacoError } from './helpers';
+import type { MonacoMessage } from './helpers';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -98,10 +98,10 @@ export function ErrorsWarningsPopover({
   isSpaceReduced,
 }: {
   isPopoverOpen: boolean;
-  items: MonacoError[];
+  items: MonacoMessage[];
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
-  onErrorClick: (error: MonacoError) => void;
+  onErrorClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
 }) {
   const strings = getConstsByType(type, items.length);
@@ -109,7 +109,14 @@ export function ErrorsWarningsPopover({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="error" color={strings.color} size="s" />
+          <EuiIcon
+            type={type}
+            color={strings.color}
+            size="s"
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -184,10 +191,10 @@ export function ErrorsWarningsPopover({
 interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
-  errors?: MonacoError[];
-  warning?: MonacoError[];
+  errors?: MonacoMessage[];
+  warnings?: MonacoMessage[];
   detectTimestamp: boolean;
-  onErrorClick: (error: MonacoError) => void;
+  onErrorClick: (error: MonacoMessage) => void;
   runQuery: () => void;
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
@@ -199,7 +206,7 @@ export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
-  warning,
+  warnings,
   detectTimestamp,
   onErrorClick,
   runQuery,
@@ -209,8 +216,8 @@ export const EditorFooter = memo(function EditorFooter({
   isSpaceReduced,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+  const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
+  const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -261,22 +268,30 @@ export const EditorFooter = memo(function EditorFooter({
           )}
           {errors && errors.length > 0 && (
             <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
+              isPopoverOpen={isErrorPopoverOpen}
               items={errors}
               type="error"
-              setIsPopoverOpen={setIsPopoverOpen}
+              setIsPopoverOpen={(isOpen) => {
+                if (isOpen) {
+                  setIsWarningPopoverOpen(false);
+                }
+                setIsErrorPopoverOpen(isOpen);
+              }}
               onErrorClick={onErrorClick}
-              isSpaceReduced={isSpaceReduced}
             />
           )}
-          {warning && warning.length > 0 && (
+          {warnings && warnings.length > 0 && (
             <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
-              items={warning}
+              isPopoverOpen={isWarningPopoverOpen}
+              items={warnings}
               type="warning"
-              setIsPopoverOpen={setIsPopoverOpen}
+              setIsPopoverOpen={(isOpen) => {
+                if (isOpen) {
+                  setIsErrorPopoverOpen(false);
+                }
+                setIsWarningPopoverOpen(isOpen);
+              }}
               onErrorClick={onErrorClick}
-              isSpaceReduced={isSpaceReduced}
             />
           )}
         </EuiFlexGroup>

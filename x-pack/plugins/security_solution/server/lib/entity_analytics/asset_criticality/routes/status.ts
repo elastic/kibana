@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { AssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { ASSET_CRITICALITY_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
@@ -32,10 +33,11 @@ export const assetCriticalityStatusRoute = (
         const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
         const result = await assetCriticalityClient.getStatus();
+        const body: AssetCriticalityStatusResponse = {
+          asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
+        };
         return response.ok({
-          body: {
-            asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
-          },
+          body,
         });
       } catch (e) {
         const error = transformError(e);
