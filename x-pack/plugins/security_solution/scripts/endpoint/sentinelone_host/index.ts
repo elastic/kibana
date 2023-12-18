@@ -21,7 +21,11 @@ import {
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
-import { installSentinelOneAgent, S1Client } from './common';
+import {
+  createSentinelOneStackConnectorIfNeeded,
+  installSentinelOneAgent,
+  S1Client,
+} from './common';
 import { createVm, generateVmName, getMultipassVmCountNotice } from '../common/vm_services';
 import { createKbnClient } from '../common/stack_services';
 
@@ -161,6 +165,8 @@ const runCli: RunFn = async ({ log, flags }) => {
       `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
     );
   }
+
+  await createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url });
 
   log.info(`Done!
 

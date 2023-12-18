@@ -8,6 +8,9 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import type { KbnClient } from '@kbn/test';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { dump } from '../endpoint_agent_runner/utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,
@@ -16,6 +19,8 @@ import type {
 } from './types';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import type { HostVm } from '../common/types';
+
+import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 
 interface S1ClientOptions {
   /** The base URL for SentinelOne */
@@ -206,5 +211,42 @@ export const installSentinelOneAgent = async ({
       path: installPath,
       status,
     };
+  });
+};
+
+interface CreateSentinelOneStackConnectorIfNeededOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  s1Url: string;
+  s1ApiToken: string;
+  name?: string;
+}
+
+export const createSentinelOneStackConnectorIfNeeded = async ({
+  kbnClient,
+  log,
+  s1ApiToken,
+  s1Url,
+  name = 'SentinelOne Dev instance',
+}: CreateSentinelOneStackConnectorIfNeededOptions): Promise<void> => {
+  const connector = await fetchConnectorByType(kbnClient, SENTINELONE_CONNECTOR_ID);
+
+  if (connector) {
+    log.debug(`Nothing to do. A connector for SentinelOne is already configured`);
+    log.verbose(dump(connector));
+    return;
+  }
+
+  log.info(`Creating SentinelOne Connector with name: ${name}`);
+
+  await createConnector(kbnClient, {
+    name,
+    config: {
+      url: s1Url,
+    },
+    secrets: {
+      token: s1ApiToken,
+    },
+    connector_type_id: SENTINELONE_CONNECTOR_ID,
   });
 };
