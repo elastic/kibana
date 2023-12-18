@@ -84,6 +84,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
+    "@kbn/elastic-assistant-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
@@ -183,6 +184,7 @@
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/stack-connectors-plugin",
+    "@kbn/elastic-assistant-common"
   ]
 }
