@@ -82,7 +82,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout in create rule page, alert preview
    */
-  expandableFlyoutInCreateRuleEnabled: false,
+  expandableFlyoutInCreateRuleEnabled: true,
   /*
    * Enables new Set of filters on the Alerts page.
    *

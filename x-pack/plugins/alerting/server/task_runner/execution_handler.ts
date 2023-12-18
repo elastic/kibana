@@ -51,6 +51,7 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 enum Reasons {
   MUTED = 'muted',
@@ -554,13 +555,13 @@ export class ExecutionHandler<
       consumer: ruleConsumer,
       source: asSavedObjectExecutionSource({
         id: ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       }),
       executionId,
       relatedSavedObjects: [
         {
           id: ruleId,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           namespace: namespace.namespace,
           typeId: this.ruleType.id,
         },
