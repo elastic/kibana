@@ -149,7 +149,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   buttonAddFieldVariant,
   isSidebarCollapsed,
   allFields,
-                                                                                           allFieldsWithValues,
+  allFieldsWithValues,
   dataView,
   trackUiMetric,
   showFieldList = true,

@@ -63,6 +63,7 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
   'data-test-subj': string;
   docLinks: CoreStart['docLinks'];
   allFields: T[] | null;
+  allFieldsWithValues?: string[];
   getCustomFieldType?: GetCustomFieldType<T>;
   selectedFieldTypes: FieldTypeKnown[];
   onSupportedFieldFilter?: (field: T) => boolean;
@@ -86,6 +87,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   'data-test-subj': dataTestSubject,
   docLinks,
   allFields,
+  allFieldsWithValues,
   getCustomFieldType,
   selectedFieldTypes,
   onSupportedFieldFilter,
@@ -96,7 +98,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   const testSubj = `${dataTestSubject}FieldTypeFilter`;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [typeCounts, setTypeCounts] = useState<Map<string, number>>();
-
   const { euiTheme } = useEuiTheme();
 
   const titleStyle = useMemo(
@@ -132,13 +133,24 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
         return;
       }
+      if (docSampleFilter && allFieldsWithValues && !allFieldsWithValues.includes(field.name)) {
+        return;
+      }
       const type = getFieldIconType(field, getCustomFieldType);
       if (isKnownFieldType(type)) {
         counts.set(type, (counts.get(type) || 0) + 1);
       }
     });
     setTypeCounts(counts);
-  }, [isOpen, allFields, setTypeCounts, getCustomFieldType, onSupportedFieldFilter]);
+  }, [
+    isOpen,
+    allFields,
+    setTypeCounts,
+    getCustomFieldType,
+    onSupportedFieldFilter,
+    docSampleFilter,
+    allFieldsWithValues,
+  ]);
 
   const availableFieldTypes = useMemo(() => {
     // sorting is defined by items in KNOWN_FIELD_TYPE_LIST
@@ -152,6 +164,8 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   const clearAll = useCallback(() => {
     onChange([]);
   }, [onChange]);
+  const numFilters =
+    selectedFieldTypes.length + (allFieldsWithValues ? Number(docSampleFilter) : 0);
 
   return (
     <EuiPopover
@@ -169,9 +183,9 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           })}
           color="primary"
           isSelected={isOpen}
-          numFilters={selectedFieldTypes.length}
-          hasActiveFilters={!!selectedFieldTypes.length}
-          numActiveFilters={selectedFieldTypes.length}
+          numFilters={numFilters}
+          hasActiveFilters={Boolean(numFilters)}
+          numActiveFilters={numFilters}
           data-test-subj={`${testSubj}Toggle`}
           css={filterButtonStyle}
           onClick={() => setIsOpen((value) => !value)}
@@ -259,15 +273,18 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
         <EuiPopoverFooter>
           <EuiPanel color="transparent" paddingSize="m">
             <EuiText size="s">
-              <p>
-                <EuiSwitch
-                  label={i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
-                    defaultMessage: 'Use document sample',
-                  })}
-                  checked={docSampleFilter}
-                  onChange={(e) => onChangeDocSampleFilter(e.target.checked)}
-                />
-              </p>
+              {Boolean(allFieldsWithValues) && (
+                <p>
+                  <EuiSwitch
+                    label={i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
+                      defaultMessage: 'Filter by results',
+                    })}
+                    checked={docSampleFilter}
+                    onChange={(e) => onChangeDocSampleFilter(e.target.checked)}
+                  />
+                </p>
+              )}
+
               <p>
                 {i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
                   defaultMessage: 'Learn more about',

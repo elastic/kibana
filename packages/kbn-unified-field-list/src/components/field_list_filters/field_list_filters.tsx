@@ -20,6 +20,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   docLinks: FieldTypeFilterProps<T>['docLinks'];
   selectedFieldTypes?: FieldTypeFilterProps<T>['selectedFieldTypes'];
   allFields?: FieldTypeFilterProps<T>['allFields'];
+  allFieldsWithValues?: FieldTypeFilterProps<T>['allFieldsWithValues'];
   getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
   onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
   onChangeFieldTypes: FieldTypeFilterProps<T>['onChange'];
@@ -53,6 +54,7 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
   docLinks,
   selectedFieldTypes,
   allFields,
+  allFieldsWithValues,
   getCustomFieldType,
   onSupportedFieldFilter,
   onChangeFieldTypes,
@@ -73,6 +75,7 @@ function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
             docLinks={docLinks}
             selectedFieldTypes={selectedFieldTypes}
             allFields={allFields}
+            allFieldsWithValues={allFieldsWithValues}
             getCustomFieldType={getCustomFieldType}
             onSupportedFieldFilter={onSupportedFieldFilter}
             onChange={onChangeFieldTypes}

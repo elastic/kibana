@@ -11,6 +11,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, GetCustomFieldType } from '../types';
 
@@ -21,7 +22,7 @@ const htmlId = htmlIdGenerator('fieldList');
  */
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
-  allFieldsWithValues: string[];
+  allFieldsWithValues?: string[];
   getCustomFieldType?: GetCustomFieldType<T>;
   onSupportedFieldFilter?: (field: T) => boolean;
   services: {
@@ -54,7 +55,10 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   services,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
-  const [docSampleFilter, setDocSampleFilter] = useState<boolean>(false);
+  const [docSampleFilter, setDocSampleFilter] = useLocalStorage<boolean>(
+    'FieldListFilterByResults',
+    false
+  );
   const [nameFilter, setNameFilter] = useState<string>('');
   const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
@@ -67,13 +71,14 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         docLinks,
         selectedFieldTypes,
         allFields,
+        allFieldsWithValues,
         getCustomFieldType,
         onSupportedFieldFilter,
         onChangeFieldTypes: setSelectedFieldTypes,
         nameFilter,
         onChangeNameFilter: setNameFilter,
         screenReaderDescriptionId,
-        docSampleFilter,
+        docSampleFilter: Boolean(docSampleFilter),
         onChangeDocSampleFilter: setDocSampleFilter,
       },
       onFilterField:
@@ -85,7 +90,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
               if (selectedFieldTypes.length > 0) {
                 return selectedFieldTypes.includes(getFieldIconType(field, getCustomFieldType));
               }
-              if (docSampleFilter) {
+              if (docSampleFilter && allFieldsWithValues) {
                 return allFieldsWithValues.includes(field.name);
               }
               return true;
@@ -93,16 +98,15 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
           : undefined,
     };
   }, [
+    nameFilter,
     docLinks,
     selectedFieldTypes,
     allFields,
+    allFieldsWithValues,
     getCustomFieldType,
     onSupportedFieldFilter,
-    setSelectedFieldTypes,
-    nameFilter,
-    setNameFilter,
     screenReaderDescriptionId,
     docSampleFilter,
-    allFieldsWithValues,
+    setDocSampleFilter,
   ]);
 }

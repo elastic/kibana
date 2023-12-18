@@ -376,6 +376,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   if (!selectedDataView) {
     return null;
   }
+  const allFieldsWithValues = Object.keys(sidebarState.fieldCounts ?? {});
 
   return (
     <UnifiedFieldListSidebarContainer
@@ -386,7 +387,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}
       allFields={sidebarState.allFields}
-      allFieldsWithValues={Object.keys(sidebarState.fieldCounts ?? {})}
+      allFieldsWithValues={allFieldsWithValues.length ? allFieldsWithValues : undefined}
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
       fullWidth
