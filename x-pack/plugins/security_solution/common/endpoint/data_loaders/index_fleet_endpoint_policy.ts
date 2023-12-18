@@ -22,6 +22,7 @@ import {
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
@@ -137,14 +138,19 @@ export interface DeleteIndexedFleetEndpointPoliciesResponse {
  */
 export const deleteIndexedFleetEndpointPolicies = async (
   kbnClient: KbnClient,
-  indexData: IndexedFleetEndpointPolicyResponse
+  indexData: IndexedFleetEndpointPolicyResponse,
+  log: ToolingLog
 ): Promise<DeleteIndexedFleetEndpointPoliciesResponse> => {
   const response: DeleteIndexedFleetEndpointPoliciesResponse = {
     integrationPolicies: undefined,
     agentPolicies: undefined,
   };
-
+  log.info(`=-Deleting ${indexData.integrationPolicies.length} integration policies`);
   if (indexData.integrationPolicies.length) {
+    log.info(
+      '====-',
+      indexData.integrationPolicies.map((policy) => policy.id)
+    );
     response.integrationPolicies = (
       (await kbnClient
         .request({

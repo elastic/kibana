@@ -179,8 +179,8 @@ export const dataLoaders = (
     },
 
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
-      const { kbnClient } = await stackServicesPromise;
-      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
+      const { kbnClient, log } = await stackServicesPromise;
+      return deleteIndexedFleetEndpointPolicies(kbnClient, indexData, log);
     },
 
     indexCase: async (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase['data']> => {
