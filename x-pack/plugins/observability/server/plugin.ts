@@ -59,11 +59,7 @@ import { getObservabilityServerRouteRepository } from './routes/get_global_obser
 import { registerRoutes } from './routes/register_routes';
 import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
-import {
-  DefaultResourceInstaller,
-  DefaultSLOInstaller,
-  KibanaSavedObjectsSLORepository,
-} from './services/slo';
+import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
 
 import { uiSettings } from './ui_settings';
 
@@ -402,11 +398,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
-    this.sloOrphanCleanupTask?.start(
-      plugins.taskManager,
-      new KibanaSavedObjectsSLORepository(internalSoClient),
-      internalEsClient
-    );
+    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
   }
 
   public stop() {}

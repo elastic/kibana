@@ -17,7 +17,7 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 
 export interface SLORepository {
   save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
-  findAllByIds(ids: string[], namespace?: string): Promise<SLO[]>;
+  findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
   search(
@@ -84,7 +84,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async findAllByIds(ids: string[], namespace?: string): Promise<SLO[]> {
+  async findAllByIds(ids: string[]): Promise<SLO[]> {
     if (ids.length === 0) return [];
 
     const response = await this.soClient.find<StoredSLO>({
@@ -92,8 +92,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       page: 1,
       perPage: ids.length,
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
-      namespaces: namespace ? [namespace] : undefined,
     });
+
     return response.saved_objects.map((slo) => toSLO(slo.attributes));
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -13,7 +13,8 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { SLORepository } from '..';
+import { StoredSLO } from '../../../domain/models';
+import { SO_SLO_TYPE } from '../../../saved_objects';
 import { ObservabilityConfig } from '../../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
@@ -46,7 +47,7 @@ export class SloOrphanSummaryCleanupTask {
   private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
-  private repository?: SLORepository;
+  private soClient?: SavedObjectsClientContract;
   private esClient?: ElasticsearchClient;
   private config: ObservabilityConfig;
 
@@ -77,7 +78,7 @@ export class SloOrphanSummaryCleanupTask {
   runTask = async () => {
     const runAt = new Date().toISOString();
 
-    if (this.repository && this.esClient) {
+    if (this.soClient && this.esClient) {
       let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
       do {
@@ -88,10 +89,10 @@ export class SloOrphanSummaryCleanupTask {
         }
 
         searchAfterKey = searchAfter;
-        const sloDefinitions = await this.repository.findAllByIds(
-          sloSummaryIds.map(({ id }) => id),
-          ALL_SPACES_ID
-        );
+
+        const ids = sloSummaryIds.map(({ id }) => id);
+
+        const sloDefinitions = await this.findSloDefinitions(ids);
 
         const sloSummaryIdsToDelete = sloSummaryIds.filter(
           ({ id, revision }) =>
@@ -203,17 +204,30 @@ export class SloOrphanSummaryCleanupTask {
     };
   };
 
+  findSloDefinitions = async (ids: string[]) => {
+    const sloDefinitions = await this.soClient?.find<Pick<StoredSLO, 'id' | 'revision'>>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: ids.length,
+      filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      namespaces: [ALL_SPACES_ID],
+      fields: ['id', 'revision'],
+    });
+
+    return sloDefinitions?.saved_objects.map(({ attributes }) => attributes) ?? [];
+  };
+
   private get taskId() {
     return `${TASK_TYPE}:1.0.0`;
   }
 
   public async start(
     taskManager: TaskManagerStartContract,
-    repository: SLORepository,
+    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
     this.taskManager = taskManager;
-    this.repository = repository;
+    this.soClient = soClient;
     this.esClient = esClient;
 
     if (!taskManager) {
