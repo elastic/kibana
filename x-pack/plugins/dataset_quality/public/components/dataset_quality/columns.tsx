@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
@@ -33,24 +34,28 @@ const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
 });
 
+const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
+  defaultMessage: 'Namespace',
+});
+
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
   defaultMessage: 'Size',
 });
 
-const malformedDocsColumnName = i18n.translate('xpack.datasetQuality.malformedDocsColumnName', {
-  defaultMessage: 'Malformed Docs',
+const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
+  defaultMessage: 'Degraded Docs',
 });
 
-const malformedDocsDescription = (minimimPercentage: number) =>
-  i18n.translate('xpack.datasetQuality.malformedDocsQualityDescription', {
+const degradedDocsDescription = (minimimPercentage: number) =>
+  i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
     defaultMessage: 'greater than {minimimPercentage}%',
     values: { minimimPercentage },
   });
 
-const malformedDocsColumnTooltip = (
+const degradedDocsColumnTooltip = (
   <FormattedMessage
-    id="xpack.datasetQuality.malformedDocsColumnTooltip"
-    defaultMessage="The percentage of malformed documents -documents with the {ignoredProperty} property- in your dataset. {visualQueue}"
+    id="xpack.datasetQuality.degradedDocsColumnTooltip"
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset. {visualQueue}"
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
@@ -62,13 +67,13 @@ const malformedDocsColumnTooltip = (
           <EuiFlexItem>
             <EuiText>
               <QualityIndicator quality="poor" />
-              {` ${malformedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+              {` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <QualityIndicator quality="degraded" />
-              {` ${malformedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+              {` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -89,10 +94,10 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
 
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
-  loadingMalformedStats,
+  loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
-  loadingMalformedStats?: boolean;
+  loadingDegradedStats?: boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -123,34 +128,42 @@ export const getDatasetQualitTableColumns = ({
       },
     },
     {
+      name: namespaceColumnName,
+      field: 'namespace',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
+      ),
+    },
+    {
       name: sizeColumnName,
       field: 'size',
       sortable: true,
     },
     {
       name: (
-        <EuiToolTip content={malformedDocsColumnTooltip}>
+        <EuiToolTip content={degradedDocsColumnTooltip}>
           <span>
-            {`${malformedDocsColumnName} `}
+            {`${degradedDocsColumnName} `}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
-      field: 'malformedDocs',
+      field: 'degradedDocs',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiSkeletonRectangle
           width="50px"
           height="20px"
           borderRadius="m"
-          isLoading={loadingMalformedStats}
+          isLoading={loadingDegradedStats}
           contentAriaLabel="Example description"
         >
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <QualityPercentageIndicator percentage={dataStreamStat.malformedDocs} />
+              <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{`${dataStreamStat.malformedDocs}%`}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{`${dataStreamStat.degradedDocs ?? 0}%`}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),

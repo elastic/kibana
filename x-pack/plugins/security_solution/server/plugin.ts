@@ -46,7 +46,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
+import { APP_ID, APP_UI_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -109,8 +109,12 @@ import {
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
-import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
+import {
+  latestRiskScoreIndexPattern,
+  allRiskScoreIndexPattern,
+} from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
+import { getAssistantTools } from './assistant/tools';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -505,6 +509,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.licensing$ = plugins.licensing.license$;
+
+    // Assistant Tool and Feature Registration
+    plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

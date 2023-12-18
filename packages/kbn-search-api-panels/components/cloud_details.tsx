@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { OverviewPanel } from '..';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 
@@ -49,7 +50,15 @@ export const CloudDetailsPanel = ({
   const panelContent = (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xs">
-        <EuiCodeBlock isCopyable fontSize="m" className="serverlessSearchCloudDetailsCopyPanel">
+        <EuiCodeBlock
+          css={css`
+            overflow-wrap: anywhere;
+          `}
+          isCopyable
+          fontSize="m"
+          className="serverlessSearchCloudDetailsCopyPanel"
+          whiteSpace="pre-wrap"
+        >
           {selectedDetail === CloudDetail.CloudId && cloudId}
           {selectedDetail === CloudDetail.ElasticsearchEndpoint && elasticsearchUrl}
         </EuiCodeBlock>
