@@ -1,0 +1,7 @@
+SINH
+
+
+Sine hyperbolic function.
+ROW a=1.8
+| EVAL sinh=SINH(a)
+Supported types:

@@ -31,6 +31,7 @@ import type {
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
+import type { BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
@@ -171,4 +172,36 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
 
   // nothing to do, return unmutated policy
   return packagePolicy;
+};
+
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'CIS Kubernetes';
+    case 'cis_azure':
+      return 'CIS Azure';
+    case 'cis_aws':
+      return 'CIS AWS';
+    case 'cis_eks':
+      return 'CIS EKS';
+    case 'cis_gcp':
+      return 'CIS GCP';
+  }
+  return null;
+};
+
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'Kubernetes';
+    case 'cis_azure':
+      return 'Microsoft Azure';
+    case 'cis_aws':
+      return 'Amazon Web Services';
+    case 'cis_eks':
+      return 'Amazon Elastic Kubernetes Service';
+    case 'cis_gcp':
+      return 'Google Cloud Provider';
+  }
+  return null;
 };
