@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import https from 'https';
 import { format } from 'url';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -57,7 +58,8 @@ export function registerKibanaFunction({
         username,
         password,
         pathname: pathnameFromRequest,
-      } = request.rewrittenUrl!;
+      } = request.rewrittenUrl || request.url;
+
       const nextUrl = {
         host,
         protocol,
@@ -76,6 +78,9 @@ export function registerKibanaFunction({
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,
+        // httpsAgent: new https.Agent({
+        //   rejectUnauthorized: false,
+        // }),
       }).then((response) => {
         return { content: response.data };
       });
