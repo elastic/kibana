@@ -24,8 +24,8 @@ import { hostsUrl } from '../../../urls/navigation';
 
 // Flaky on serverless
 const defaultPageSize = 25;
-// FLAKY: https://github.com/elastic/kibana/issues/169413
-describe.skip('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'timeline' });
   });
@@ -56,7 +56,7 @@ describe.skip('Pagination', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should be able to change items count per page with the dropdown', () => {
     const itemsPerPage = 100;
-    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_BTN).first().click({ force: true });
+    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_BTN).first().click();
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION(itemsPerPage)).click();
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('not.have.text', '0');
     cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE)
