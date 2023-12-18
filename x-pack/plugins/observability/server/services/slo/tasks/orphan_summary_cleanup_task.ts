@@ -193,8 +193,8 @@ export class SloOrphanSummaryCleanupTask {
 
     const sloSummaryIds = aggBuckets.map(({ key }) => {
       return {
-        id: key.id as string,
-        revision: key.revision as number,
+        id: String(key.id),
+        revision: Number(key.revision),
       };
     });
 
