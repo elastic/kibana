@@ -90,6 +90,7 @@ describe('Observability AI Assistant service', () => {
   const loggerMock: DeeplyMockedKeys<Logger> = {
     log: jest.fn(),
     error: jest.fn(),
+    debug: jest.fn(),
   } as any;
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {

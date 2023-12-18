@@ -5,6 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type {
+  MlDeploymentAllocationState,
+  MlDeploymentState,
+} from '@elastic/elasticsearch/lib/api/types';
 import { useMemo, useState } from 'react';
 import { AbortableAsyncState, useAbortableAsync } from './use_abortable_async';
 import { useKibana } from './use_kibana';
@@ -14,8 +18,9 @@ export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<{
     ready: boolean;
     error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
+    deployment_state?: MlDeploymentState;
+    allocation_state?: MlDeploymentAllocationState;
+    model_name?: string;
   }>;
   isInstalling: boolean;
   installError?: Error;
@@ -50,15 +55,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         })
         .then(() => {
           status.refresh();
-          toasts.addSuccess({
-            title: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyTitle', {
-              defaultMessage: 'Knowledge base is ready',
-            }),
-            text: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyContentReload', {
-              defaultMessage: 'A page reload is needed to be able to use it.',
-            }),
-            toastLifeTimeMs: Number.MAX_VALUE,
-          });
         })
         .catch((error) => {
           if (
