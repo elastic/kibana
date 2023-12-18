@@ -364,26 +364,20 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private async validateTask({ taskInstance }: RunContext) {
-    const { state, taskType, params, id, numSkippedRuns = 0 } = taskInstance;
+    const { state, taskType, params, id } = taskInstance;
 
     if (!this.requeueInvalidTasksConfig.enabled) {
       return { state };
     }
-
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
     const { paramsSchema, indirectParamsSchema, latestTypeVersion } = this.definition;
-    let hasValidationError = false;
 
     // validate task params
     if (paramsSchema) {
       try {
         paramsSchema.validate(params);
       } catch (err) {
-        hasValidationError = true;
         this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-        if (numSkippedRuns < maxAttempts) {
-          return { error: createSkipError(err), state };
-        }
+        return { error: createSkipError(err), state };
       }
     }
 
@@ -394,18 +388,13 @@ export class TaskManagerRunner implements TaskRunner {
 
       // validate runtime version
       if (typeVersion && latestTypeVersion && typeVersion > latestTypeVersion) {
-        hasValidationError = true;
         this.logger.warn(
           `Task (${taskType}/${id}) has a newer version(${typeVersion}) than expected((${latestTypeVersion}))`
         );
-        if (numSkippedRuns < maxAttempts) {
-          return {
-            error: createSkipError(
-              new Error('Task has already been run by a newer Kibana version')
-            ),
-            state,
-          };
-        }
+        return {
+          error: createSkipError(new Error('Task has already been run by a newer Kibana version')),
+          state,
+        };
       }
 
       // validate indirect params e.g. connector or rule.params
@@ -413,19 +402,12 @@ export class TaskManagerRunner implements TaskRunner {
         try {
           indirectParamsSchema.validate(indirectParams);
         } catch (err) {
-          hasValidationError = true;
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`
           );
-          if (numSkippedRuns < maxAttempts) {
-            return { error: createSkipError(err), state };
-          }
+          return { error: createSkipError(err), state };
         }
       }
-    }
-
-    if (numSkippedRuns >= maxAttempts && hasValidationError) {
-      this.logger.warn(`Task Manager has reached the max skip attempts for task ${taskType}/${id}`);
     }
 
     return { state };
