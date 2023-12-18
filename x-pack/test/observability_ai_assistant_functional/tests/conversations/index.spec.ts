@@ -239,6 +239,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConversations();
 
       await ui.auth.logout();
+      await proxy.close();
     });
   });
 }
