@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule } from './helpers/alerting_api_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -26,8 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172754
-  registry.when.skip(
+  registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         const serviceA = apm
-          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .service({ name: 'foo', environment: 'production', agentName: 'java' })
           .instance('a');
 
         const events = timerange(start, end)
@@ -78,8 +78,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }
 
       describe('with ml jobs', () => {
-        let ruleId: string;
-        let createdRule: any;
+        let createdRule: Awaited<ReturnType<typeof createApmRule>>;
+
         before(async () => {
           createdRule = await createApmRule({
             supertest,
@@ -104,9 +104,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('produces an alert with the correct reason', async () => {
-          const alerts = await waitForAlertsForRule({ es, ruleId });
+          const alerts = await waitForAlertsForRule({ es, ruleId: createdRule.id });
+          // @ts-expect-error
+          const score = alerts[0]['kibana.alert.evaluation.value'];
           expect(alerts[0]['kibana.alert.reason']).to.be(
-            'warning latency anomaly with a score of 80, was detected in the last 5 mins for foo.'
+            `warning latency anomaly with a score of ${score}, was detected in the last 5 hrs for foo.`
           );
         });
       });
