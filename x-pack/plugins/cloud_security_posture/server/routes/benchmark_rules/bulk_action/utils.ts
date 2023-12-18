@@ -14,6 +14,10 @@ import type { Logger } from '@kbn/core/server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import {
+  convertRuleTagsToKQL,
+  generateBenchmarkRuleTags,
+} from '../../../../common/utils/detection_rules';
+import {
   CspBenchmarkRule,
   CspBenchmarkRulesStates,
   CspSettings,
@@ -24,14 +28,10 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
-import {
-  convertRuleTagsToKQL,
-  generateBenchmarkRuleTags,
-} from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 
 const disableDetectionRules = async (
   detectionRulesClient: RulesClient,
-  detectionRules: FindResult<RuleParams>[]
+  detectionRules: Array<FindResult<RuleParams>>
 ) => {
   const idsToDisable = detectionRules
     .map((detectionRule) => {
@@ -66,7 +66,7 @@ export const getDetectionRules = async (
 export const getBenchmarkRules = async (
   soClient: SavedObjectsClientContract,
   ruleIds: string[]
-): Promise<(CspBenchmarkRule | undefined)[]> => {
+): Promise<Array<CspBenchmarkRule | undefined>> => {
   const bulkGetObject = ruleIds.map((ruleId) => ({
     id: ruleId,
     type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,

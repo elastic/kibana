@@ -7,9 +7,9 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { BulkDisableRulesResult } from '@kbn/alerting-plugin/server/application/rule/methods/bulk_disable';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
-import { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import { BulkDisableRulesResult } from '@kbn/alerting-plugin/server/application/rule/methods/bulk_disable';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
