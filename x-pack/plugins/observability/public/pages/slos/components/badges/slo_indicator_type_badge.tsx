@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiToolTip, EuiBadgeProps } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
-
+import { SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../../utils/slo/indicator';
@@ -18,7 +17,7 @@ import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
   color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse | SLOResponse;
 }
 
 export function SloIndicatorTypeBadge({ slo, color }: Props) {

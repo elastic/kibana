@@ -65,37 +65,7 @@
               },
               "<object, unknown>, pluginsSetup: ",
               "ObservabilitySharedSetup",
-              ") => { locators: { profiling: { flamegraphLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "FlamegraphLocatorParams",
-              ">; topNFunctionsLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "TopNFunctionsLocatorParams",
-              ">; stacktracesLocator: ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.LocatorPublic",
-                "text": "LocatorPublic"
-              },
-              "<",
-              "StacktracesLocatorParams",
-              ">; }; }; navigation: { registerSections: (sections$: ",
+              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -169,7 +139,7 @@
               },
               ", plugins: ",
               "ObservabilitySharedStart",
-              ") => { navigation: { PageTemplate: (pageTemplateProps: ",
+              ") => { locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
               ") => JSX.Element; registerSections: (sections$: ",
               "Observable",
@@ -1268,17 +1238,19 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useChartTheme",
+        "id": "def-public.useChartThemes",
         "type": "Function",
         "tags": [],
-        "label": "useChartTheme",
+        "label": "useChartThemes",
         "description": [],
         "signature": [
-          "() => ",
+          "() => { baseTheme: ",
+          "Theme",
+          "; theme: ",
           "RecursivePartial",
           "<",
           "Theme",
-          ">[]"
+          ">[]; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_chart_theme.tsx",
         "deprecated": false,
@@ -2944,37 +2916,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ locators: { profiling: { flamegraphLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "FlamegraphLocatorParams",
-          ">; topNFunctionsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "TopNFunctionsLocatorParams",
-          ">; stacktracesLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "StacktracesLocatorParams",
-          ">; }; }; navigation: { registerSections: (sections$: ",
+          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {
@@ -2999,7 +2941,7 @@
         "label": "ObservabilitySharedPluginStart",
         "description": [],
         "signature": [
-          "{ navigation: { PageTemplate: (pageTemplateProps: ",
+          "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
           "WrappedPageTemplateProps",
           ") => JSX.Element; registerSections: (sections$: ",
           "Observable",
@@ -3060,36 +3002,12 @@
         "description": [],
         "signature": [
           "{ flamegraphLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "FlamegraphLocatorParams",
-          ">; topNFunctionsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "TopNFunctionsLocatorParams",
-          ">; stacktracesLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "StacktracesLocatorParams",
-          ">; }"
+          "FlamegraphLocator",
+          "; topNFunctionsLocator: ",
+          "TopNFunctionsLocator",
+          "; stacktracesLocator: ",
+          "StacktracesLocator",
+          "; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,

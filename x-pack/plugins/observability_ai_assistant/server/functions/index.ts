@@ -54,18 +54,22 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         If a function call fails, DO NOT UNDER ANY CIRCUMSTANCES execute it again. Ask the user for guidance and offer them options.
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
+
+        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
         
-        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries yourself. Even if the "recall" function was used before that, follow it up with the "esql" function.`
+        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
+        Even if the "recall" function was used before that, follow it up with the "esql" function. If a query fails, do not attempt to correct it yourself. Again you should call the "esql" function,
+        even if it has been called before.
+
+        If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "esql" function, but be explicit about it potentially being incorrect.
+        `
     );
 
     if (isReady) {
       description += `You can use the "summarize" functions to store new information you have learned in a knowledge database. Once you have established that you did not know the answer to a question, and the user gave you this information, it's important that you create a summarisation of what you have learned and store it in the knowledge database. Don't create a new summarization if you see a similar summarization in the conversation, instead, update the existing one by re-using its ID.
 
         Additionally, you can use the "recall" function to retrieve relevant information from the knowledge database.
-        `;
 
-      description += `Here are principles you MUST adhere to, in order:
-        - DO NOT make any assumptions about where and how users have stored their data. ALWAYS first call get_dataset_info function with empty string to get information about available indices. Once you know about available indices you MUST use this function again to get a list of available fields for specific index. If user provides an index name make sure its a valid index first before using it to retrieve the field list by calling this function with an empty string!
         `;
 
       registerSummarizationFunction(registrationParameters);

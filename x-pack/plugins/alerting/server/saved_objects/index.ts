@@ -23,7 +23,7 @@ import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateAlert } from './partially_update_alert';
+export { partiallyUpdateRule } from './partially_update_rule';
 export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
@@ -31,10 +31,12 @@ import {
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
 
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
+
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
 // decryption failures during migration.
-export const AlertAttributesExcludedFromAAD = [
+export const RuleAttributesExcludedFromAAD = [
   'scheduledTaskId',
   'muteAll',
   'mutedInstanceIds',
@@ -51,47 +53,7 @@ export const AlertAttributesExcludedFromAAD = [
   'running',
 ];
 
-// properties: {
-//     enabled: {
-//     name: {
-//     tags: {
-//     alertTypeId: {
-//     schedule: {
-//     consumer: {
-//     legacyId: {
-//     actions: {
-//     params: {
-//     mapped_params: {
-//     scheduledTaskId: {
-//     createdBy: {
-//     updatedBy: {
-//     createdAt: {
-//     updatedAt: {
-//     // NEED TO CHECK WITH KIBANA SECURITY
-//     // apiKey: {
-//     //   type: 'binary',
-//     // },
-//     // NO NEED TO BE INDEXED
-//     // apiKeyOwner: {
-//     //   type: 'keyword',
-//     // },
-//     throttle: {
-//     notifyWhen: {
-//     muteAll: {
-//     mutedInstanceIds: {
-//     // meta: {
-//     monitoring: {
-//     revision: {
-//     snoozeSchedule: {
-//     nextRun: {
-//     executionStatus: {
-//     lastRun: {
-//     running: {
-//       type: 'boolean',
-//     },
-//   },
-
-export const AlertAttributesIncludedInAAD = [
+export const RuleAttributesIncludedInAAD = [
   // include enabled: boolean;
   'enabled',
   // include name: string;
@@ -144,11 +106,9 @@ export const AlertAttributesIncludedInAAD = [
   // exclude (**no longer a field**) snoozeEndTime
 ];
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
+// useful for Pick<RawAlert, RuleAttributesExcludedFromAAD> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
-
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
-export type AlertAttributesExcludedFromAADType =
+export type RuleAttributesExcludedFromAADType =
   | 'scheduledTaskId'
   | 'muteAll'
   | 'mutedInstanceIds'
@@ -173,7 +133,7 @@ export function setupSavedObjects(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
-    name: 'alert',
+    name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
@@ -239,10 +199,9 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
-    // attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
-    attributesToIncludeInAAD: new Set(AlertAttributesIncludedInAAD),
+    attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
   });
 
   // Encrypted attributes
