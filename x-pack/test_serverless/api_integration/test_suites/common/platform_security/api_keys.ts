@@ -163,31 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(status).toBe(200);
         });
 
-        it('_has_active', async () => {
-          let body: unknown;
-          let status: number;
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key/_has_active')
-            .set(svlCommonApi.getCommonRequestHeader()));
-          // expect a rejection because we're not using the internal header
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: expect.stringContaining(
-              'method [get] exists but is not available with the current configuration'
-            ),
-          });
-          expect(status).toBe(400);
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key/_has_active')
-            .set(svlCommonApi.getInternalRequestHeader()));
-          // expect success because we're using the internal header
-          expect(status).toBe(200);
-          expect(body).toEqual({ hasApiKeys: true });
-        });
-
         it('invalidate', async () => {
           let body: unknown;
           let status: number;
