@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-export interface Integration {
-  name: string;
-  title?: string;
-  version?: string;
-  icons?: IntegrationIcon[];
-}
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export interface IntegrationIcon {
-  path: string;
-  src: string;
-  title?: string;
-  size?: string;
-  type?: string;
-}
+export default ({ loadTestFile }: FtrProviderContext) => {
+  describe('Serverless Common UI - Dev Tools', function () {
+    loadTestFile(require.resolve('./search_profiler'));
+  });
+};
