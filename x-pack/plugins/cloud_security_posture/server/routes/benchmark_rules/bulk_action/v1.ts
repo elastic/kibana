@@ -6,8 +6,15 @@
  */
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { CspBenchmarkRules } from '../../../../common/types/rules/v3';
-import { buildRuleKey, getCspSettingsSafe, setRulesStates, updateRulesStates } from './utils';
+import {
+  buildRuleKey,
+  getCspSettingsSafe,
+  muteDetectionRules,
+  setRulesStates,
+  updateRulesStates,
+} from './utils';
 
 const muteStatesMap = {
   mute: true,
@@ -15,7 +22,9 @@ const muteStatesMap = {
 };
 
 export const bulkActionBenchmarkRulesHandler = async (
+  soClient: SavedObjectsClientContract,
   encryptedSoClient: SavedObjectsClientContract,
+  detectionRulesClient: RulesClient,
   rulesToUpdate: CspBenchmarkRules,
   action: 'mute' | 'unmute',
   logger: Logger
@@ -23,12 +32,16 @@ export const bulkActionBenchmarkRulesHandler = async (
   const cspSettings = await getCspSettingsSafe(encryptedSoClient, logger);
 
   const currentRulesStates = cspSettings.rules;
-  const ruleKeys = rulesToUpdate.map((rule) =>
+  const rulesKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
-  const newRulesStates = setRulesStates(currentRulesStates, ruleKeys, muteStatesMap[action]);
+  const newRulesStates = setRulesStates(currentRulesStates, rulesKeys, muteStatesMap[action]);
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
+
+  const rulesIds = rulesToUpdate.map((rule) => rule.rule_id);
+
+  await muteDetectionRules(soClient, detectionRulesClient, rulesIds);
 
   return newCspSettings;
 };

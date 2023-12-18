@@ -135,6 +135,7 @@ export const cspBenchmarkRules = schema.arrayOf(
     benchmark_id: schema.string(),
     benchmark_version: schema.string(),
     rule_number: schema.string(),
+    rule_id: schema.string(),
   })
 );
 
@@ -153,6 +154,10 @@ const rulesStates = schema.recordOf(
   schema.string(),
   schema.object({
     muted: schema.boolean(),
+    benchmarkId: schema.string(),
+    benchmarkVersion: schema.string(),
+    ruleNumber: schema.string(),
+    ruleId: schema.string(),
   })
 );
 
