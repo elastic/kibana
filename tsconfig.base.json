@@ -168,6 +168,8 @@
       "@kbn/cloud-security-posture-plugin/*": ["x-pack/plugins/cloud_security_posture/*"],
       "@kbn/code-editor": ["packages/shared-ux/code_editor"],
       "@kbn/code-editor/*": ["packages/shared-ux/code_editor/*"],
+      "@kbn/code-owners": ["packages/kbn-code-owners"],
+      "@kbn/code-owners/*": ["packages/kbn-code-owners/*"],
       "@kbn/coloring": ["packages/kbn-coloring"],
       "@kbn/coloring/*": ["packages/kbn-coloring/*"],
       "@kbn/config": ["packages/kbn-config"],
