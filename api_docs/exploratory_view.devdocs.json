@@ -1215,7 +1215,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ navigation: { PageTemplate: (pageTemplateProps: ",
+              "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
               ") => JSX.Element; registerSections: (sections$: ",
               "Observable",
