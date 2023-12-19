@@ -9,17 +9,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import {
-  Direction,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiLoadingSpinner,
-  EuiRadioGroup,
-  EuiSwitch,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
