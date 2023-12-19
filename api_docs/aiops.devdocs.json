@@ -587,8 +587,8 @@
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsStart",
-                "text": "UiActionsStart"
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
               },
               " | undefined"
             ],
