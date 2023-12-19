@@ -232,7 +232,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             } = await import('./register_helper');
             registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
-            if (pluginsSetup.triggersActionsUi) {
+            if (
+              pluginsSetup.triggersActionsUi &&
+              ((fullLicense && mlCapabilities.canUseMlAlerts && mlCapabilities.canGetJobs) ||
+                // Register rules for basic license to show them in the UI as disabled
+                !fullLicense)
+            ) {
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
