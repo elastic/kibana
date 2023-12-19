@@ -58,11 +58,15 @@ describe('ModelSelect', () => {
     const selectable = wrapper.find(EuiSelectable);
     expect(selectable.prop('options')).toEqual([
       {
-        modelId: 'model_1',
+        data: {
+          modelId: 'model_1',
+        },
         label: 'model_1',
       },
       {
-        modelId: 'model_2',
+        data: {
+          modelId: 'model_2',
+        },
         label: 'model_2',
       },
     ]);
@@ -89,7 +93,10 @@ describe('ModelSelect', () => {
     const wrapper = shallow(<ModelSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    selectable.simulate('change', [{ modelId: 'model_1' }, { modelId: 'model_2', checked: 'on' }]);
+    selectable.simulate('change', [
+      { data: { modelId: 'model_1' } },
+      { data: { modelId: 'model_2' }, checked: 'on' },
+    ]);
     expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
         inferenceConfig: undefined,
@@ -105,8 +112,8 @@ describe('ModelSelect', () => {
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
     selectable.simulate('change', [
-      { modelId: 'model_1' },
-      { modelId: 'model_2', isPlaceholder: true, checked: 'on' },
+      { data: { modelId: 'model_1' } },
+      { data: { modelId: 'model_2', isPlaceholder: true }, checked: 'on' },
     ]);
     expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -121,7 +128,10 @@ describe('ModelSelect', () => {
     const wrapper = shallow(<ModelSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    selectable.simulate('change', [{ modelId: 'model_1' }, { modelId: 'model_2', checked: 'on' }]);
+    selectable.simulate('change', [
+      { data: { modelId: 'model_1' } },
+      { data: { modelId: 'model_2' }, checked: 'on' },
+    ]);
     expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
         pipelineName: 'my-index-model_2',
@@ -143,7 +153,10 @@ describe('ModelSelect', () => {
     const wrapper = shallow(<ModelSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    selectable.simulate('change', [{ modelId: 'model_1' }, { modelId: 'model_2', checked: 'on' }]);
+    selectable.simulate('change', [
+      { data: { modelId: 'model_1' } },
+      { data: { modelId: 'model_2' }, checked: 'on' },
+    ]);
     expect(MOCK_ACTIONS.setInferencePipelineConfiguration).toHaveBeenCalledWith(
       expect.objectContaining({
         pipelineName: 'user-pipeline',
