@@ -1348,6 +1348,58 @@
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_imports.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/application.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/application.tsx"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/plugins/osquery/public/application.tsx"
+          },
+          {
             "plugin": "profiling",
             "path": "x-pack/plugins/profiling/public/app.tsx"
           },
@@ -1484,18 +1536,6 @@
             "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
           },
           {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/index.tsx"
-          },
-          {
             "plugin": "globalSearchBar",
             "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
           },
@@ -1602,58 +1642,6 @@
           {
             "plugin": "observabilityOnboarding",
             "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_imports.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_results.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/shared_components/services_wrapper.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/application.tsx"
           },
           {
             "plugin": "devTools",
@@ -3013,6 +3001,14 @@
             "path": "x-pack/plugins/maps/public/render_app.tsx"
           },
           {
+            "plugin": "timelines",
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
+          },
+          {
+            "plugin": "timelines",
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
+          },
+          {
             "plugin": "banners",
             "path": "x-pack/plugins/banners/public/plugin.tsx"
           },
@@ -3095,14 +3091,6 @@
           {
             "plugin": "reporting",
             "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",

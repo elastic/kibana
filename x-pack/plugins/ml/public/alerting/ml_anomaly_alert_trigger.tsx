@@ -30,7 +30,6 @@ import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs'
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { parseInterval } from '../../common/util/parse_interval';
-import { BetaBadge } from './beta_badge';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
@@ -158,12 +157,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
-      <BetaBadge
-        message={i18n.translate('xpack.ml.anomalyDetectionAlert.betaBadgeTooltipContent', {
-          defaultMessage: `Anomaly detection alerts are a beta feature. We'd love to hear your feedback.`,
-        })}
-      />
-
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}

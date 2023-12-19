@@ -56,14 +56,12 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
         `--xpack.uptime.service.manifestUrl=${manifestUrl}`,
-        `--xpack.uptime.service.showExperimentalLocations=true`,
         `--xpack.uptime.service.username=${
           process.env.SYNTHETICS_REMOTE_ENABLED
             ? serviceUsername
             : 'localKibanaIntegrationTestsUser'
         }`,
         `--xpack.uptime.service.password=${servicePassword}`,
-        `--xpack.uptime.service.showExperimentalLocations=${true}`,
         '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
       ],
     },
