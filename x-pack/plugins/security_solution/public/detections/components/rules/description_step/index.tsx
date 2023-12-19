@@ -56,6 +56,7 @@ import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
+import { isThresholdRule, isQueryRule } from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -204,12 +205,29 @@ export const getDescriptionItem = (
   } else if (field === 'responseActions') {
     return [];
   } else if (field === 'groupByFields') {
+    const ruleType: Type = get('ruleType', data);
+    const ruleCanHaveGroupByFields = isQueryRule(ruleType);
+    if (!ruleCanHaveGroupByFields) {
+      return [];
+    }
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values);
   } else if (field === 'groupByRadioSelection') {
     return [];
   } else if (field === 'groupByDuration') {
-    if (get('groupByFields', data).length > 0) {
+    const ruleType: Type = get('ruleType', data);
+    const ruleCanHaveDuration = isQueryRule(ruleType) || isThresholdRule(ruleType);
+    if (!ruleCanHaveDuration) {
+      return [];
+    }
+
+    // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
+    // query rule have suppression duration only if group by fields selected
+    const showDuration = isThresholdRule(ruleType)
+      ? get('enableThresholdSuppression', data) === true
+      : get('groupByFields', data).length > 0;
+
+    if (showDuration) {
       const value: Duration = get(field, data);
       return buildAlertSuppressionWindowDescription(
         label,
@@ -220,6 +238,11 @@ export const getDescriptionItem = (
       return [];
     }
   } else if (field === 'suppressionMissingFields') {
+    const ruleType: Type = get('ruleType', data);
+    const ruleCanHaveSuppressionMissingFields = isQueryRule(ruleType);
+    if (!ruleCanHaveSuppressionMissingFields) {
+      return [];
+    }
     if (get('groupByFields', data).length > 0) {
       const value = get(field, data);
       return buildAlertSuppressionMissingFieldsDescription(label, value);

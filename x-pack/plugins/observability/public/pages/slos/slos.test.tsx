@@ -7,7 +7,7 @@
 
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
@@ -90,6 +90,7 @@ const mockKibana = () => {
           addError: mockAddError,
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: {
         url: {
           locators: {
