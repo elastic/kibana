@@ -9,11 +9,12 @@ import { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import {
   BulkActionBenchmarkRulesResponse,
+  CspBenchmarkRule,
   CspBenchmarkRules,
 } from '../../../../common/types/rules/v3';
 import {
   buildRuleKey,
-  getCspSettingsSafe,
+  getBenchmarkRules,
   muteDetectionRules,
   setRulesStates,
   updateRulesStates,
@@ -32,17 +33,21 @@ export const bulkActionBenchmarkRulesHandler = async (
   action: 'mute' | 'unmute',
   logger: Logger
 ): Promise<BulkActionBenchmarkRulesResponse> => {
-  const cspSettings = await getCspSettingsSafe(encryptedSoClient, logger);
+  const rulesIds = rulesToUpdate.map((rule) => rule.rule_id);
+  const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
 
-  const currentRulesStates = cspSettings.rules;
+  if (benchmarkRules.includes(undefined))
+    throw new Error('One or more of the provided benchmark rule id not exists');
+
   const rulesKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
-  const newRulesStates = setRulesStates(currentRulesStates, rulesKeys, muteStatesMap[action]);
+
+  const benchmarkRulesSafe = benchmarkRules as CspBenchmarkRule[]; // verified all rules are exists.
+
+  const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], benchmarkRulesSafe);
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
-
-  const rulesIds = rulesToUpdate.map((rule) => rule.rule_id);
 
   const disabledRules = await muteDetectionRules(soClient, detectionRulesClient, rulesIds);
 

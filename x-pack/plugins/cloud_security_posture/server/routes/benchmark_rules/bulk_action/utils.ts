@@ -105,35 +105,29 @@ export const updateRulesStates = async (
   return await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
-    { rules: newRulesStates }
+    { rules: newRulesStates },
+    // if there is no saved object yet, insert a new SO
+    { upsert: { rules: newRulesStates } }
   );
 };
 
 export const setRulesStates = (
-  rulesStates: CspBenchmarkRulesStates,
-  ruleKeys: string[],
-  state: boolean
+  ruleIds: string[],
+  state: boolean,
+  benchmarkRules: CspBenchmarkRule[]
 ): CspBenchmarkRulesStates => {
-  ruleKeys.forEach((ruleKey) => {
-    if (rulesStates[ruleKey]) {
-      // Rule exists, set entry
-      rulesStates[ruleKey] = {
-        muted: state,
-        benchmarkId: '',
-        benchmarkVersion: '',
-        ruleNumber: '',
-        ruleId: '',
-      };
-    } else {
-      // Rule does not exist, create an entry
-      rulesStates[ruleKey] = {
-        muted: state,
-        benchmarkId: '',
-        benchmarkVersion: '',
-        ruleNumber: '',
-        ruleId: '',
-      };
-    }
+  const rulesStates: CspBenchmarkRulesStates = {};
+  ruleIds.forEach((ruleId, index) => {
+    const benchmarkRule = benchmarkRules[index];
+    rulesStates[ruleId] = {
+      muted: state,
+      benchmark_id: benchmarkRule.metadata.benchmark.id,
+      benchmark_version: benchmarkRule.metadata.benchmark.version,
+      rule_number: benchmarkRule.metadata.benchmark.rule_number
+        ? benchmarkRule.metadata.benchmark.rule_number
+        : '',
+      rule_id: benchmarkRule.metadata.id,
+    };
   });
   return rulesStates;
 };
