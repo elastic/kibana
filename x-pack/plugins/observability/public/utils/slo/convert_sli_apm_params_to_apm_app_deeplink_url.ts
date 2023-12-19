@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  SLOResponse,
+} from '@kbn/slo-schema';
 
-interface Props {
-  duration?: string;
-  environment: string;
-  filter: string | undefined;
-  service: string;
-  transactionName: string;
-  transactionType: string;
-  groupBy: string;
-  instanceId?: string;
-}
-
-export function convertSliApmParamsToApmAppDeeplinkUrl({
-  duration,
-  environment,
-  filter,
-  service,
-  transactionName,
-  transactionType,
-  groupBy,
-  instanceId,
-}: Props) {
-  if (!service) {
-    return '';
+export function convertSliApmParamsToApmAppDeeplinkUrl(slo: SLOResponse): string | undefined {
+  if (
+    !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
+    !apmTransactionErrorRateIndicatorSchema.is(slo.indicator)
+  ) {
+    return undefined;
   }
+
+  const {
+    indicator: {
+      params: { environment, filter, service, transactionName, transactionType },
+    },
+    timeWindow: { duration },
+    groupBy,
+    instanceId,
+  } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
 
