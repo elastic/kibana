@@ -103,6 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
           const [score] = sanitizeScores(body.scores.host!);
+          const [rawScore] = body.scores.host!;
 
           expect(score).to.eql({
             calculated_level: 'Unknown',
@@ -113,6 +114,11 @@ export default ({ getService }: FtrProviderContext): void => {
             id_field: 'host.name',
             id_value: 'host-1',
           });
+
+          expect(rawScore.category_1_score! + rawScore.category_5_score!).to.be.within(
+            score.calculated_score_norm! - 0.000000000000001,
+            score.calculated_score_norm! + 0.000000000000001
+          );
         });
 
         it('calculates risk from two alerts, each representing a unique host', async () => {

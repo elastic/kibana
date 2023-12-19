@@ -37,12 +37,15 @@ import {
 } from '../../detections_response/utils';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
-  delete score['@timestamp'];
-  delete score.inputs;
-  delete score.notes;
-  delete score.category_5_count;
-  delete score.category_5_score;
-  return score;
+  const {
+    '@timestamp': timestamp,
+    inputs,
+    notes,
+    category_5_count: cat5Count,
+    category_5_score: cat5Score,
+    ...rest
+  } = score;
+  return rest;
 };
 
 export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
