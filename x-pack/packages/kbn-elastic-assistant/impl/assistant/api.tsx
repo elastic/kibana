@@ -102,6 +102,7 @@ export const fetchConnectorExecuteAction = async ({
           subAction: 'invokeStream',
         },
         isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       }
     : {
@@ -110,6 +111,7 @@ export const fetchConnectorExecuteAction = async ({
           subAction: 'invokeAI',
         },
         isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       };
 

@@ -93,13 +93,13 @@ export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
     isEnabledKnowledgeBase: {
       type: 'boolean',
       _meta: {
-        description: 'Is LangChain enabled',
+        description: 'Is Knowledge Base enabled',
       },
     },
     isEnabledRAGAlerts: {
       type: 'boolean',
       _meta: {
-        description: 'Is LangChain enabled',
+        description: 'Is RAG Alerts enabled',
       },
     },
   },

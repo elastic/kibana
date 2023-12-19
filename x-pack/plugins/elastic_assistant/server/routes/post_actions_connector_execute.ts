@@ -62,7 +62,9 @@ export const postActionsConnectorExecuteRoute = (
         }
 
         // TODO: Add `traceId` to actions request when calling via langchain
-        logger.debug('Executing via langchain, isEnabledKnowledgeBase: true');
+        logger.debug(
+          `Executing via langchain, isEnabledKnowledgeBase: ${request.body.isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
+        );
 
         // Fetch any tools registered by the request's originating plugin
         const pluginName = getPluginNameFromRequest({
@@ -117,9 +119,10 @@ export const postActionsConnectorExecuteRoute = (
         logger.error(err);
         const error = transformError(err);
         telemetry.reportEvent(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
-          isEnabledLangChain: !shouldNotUseLangChain,
+          isEnabledLangChain:
+            request.body.isEnabledKnowledgeBase || request.body.isEnabledRAGAlerts,
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-          isEnabledRAGAlerts: requestHasRequiredAnonymizationParams(request),
+          isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           errorMessage: error.message,
         });
 
