@@ -8,17 +8,17 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import {
-  BulkActionBenchmarkRulesResponse,
-  CspBenchmarkRule,
-  CspBenchmarkRules,
-} from '../../../../common/types/rules/v3';
-import {
   buildRuleKey,
   getBenchmarkRules,
   muteDetectionRules,
   setRulesStates,
   updateRulesStates,
 } from './utils';
+import type {
+  BulkActionBenchmarkRulesResponse,
+  CspBenchmarkRule,
+  CspBenchmarkRules,
+} from '../../../../common/types/rules/v3';
 
 const muteStatesMap = {
   mute: true,

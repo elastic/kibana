@@ -13,15 +13,15 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
-import {
-  convertRuleTagsToKQL,
-  generateBenchmarkRuleTags,
-} from '../../../../common/utils/detection_rules';
-import {
+import type {
   CspBenchmarkRule,
   CspBenchmarkRulesStates,
   CspSettings,
 } from '../../../../common/types/rules/v3';
+import {
+  convertRuleTagsToKQL,
+  generateBenchmarkRuleTags,
+} from '../../../../common/utils/detection_rules';
 
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
