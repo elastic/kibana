@@ -171,24 +171,20 @@ export class TaskScheduling {
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
-    const now = Date.now();
-    const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
       map: (task, i) => {
-        const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
-        const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
-
-        // Run the first task now. Run all other tasks a random number of ms in the future,
-        // with a maximum of 5 minutes or the task interval, whichever is smaller.
-        const runAtTimestamp =
-          i === 0 ? now : now + Math.floor(Math.random() * (maximumRunAt - now));
-        const runAt = new Date(runAtTimestamp);
         if (runSoon) {
-          return { ...task, enabled: true, scheduledAt: runAt, runAt };
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          const taskToRun =
+            i === 0
+              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
+              : randomlyOffsetRunTimestamp(task);
+          return { ...taskToRun, enabled: true };
         }
         return { ...task, enabled: true };
       },
@@ -448,5 +444,19 @@ const cancellablePromise = () => {
       .pipe(take(1))
       .toPromise()
       .then(() => {}),
+  };
+};
+
+const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+  const now = Date.now();
+  const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
+  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
+
+  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now)));
+  return {
+    ...task,
+    runAt,
+    scheduledAt: runAt,
   };
 };
