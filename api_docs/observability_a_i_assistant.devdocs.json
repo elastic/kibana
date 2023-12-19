@@ -1671,8 +1671,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
@@ -4031,8 +4031,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               }
             ],
             "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx",
