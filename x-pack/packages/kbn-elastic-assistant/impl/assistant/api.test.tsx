@@ -133,6 +133,28 @@ describe('API tests', () => {
       );
     });
 
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when assistantLangChain is false and alerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        assistantLangChain: false,
+        alerts: true,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
     it('returns API_ERROR when the response status is error and langchain is on', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
 

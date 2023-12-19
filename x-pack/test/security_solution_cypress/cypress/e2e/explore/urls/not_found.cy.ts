@@ -31,6 +31,7 @@ describe('Display not found page', { tags: ['@ess', '@serverless'] }, () => {
     visitWithTimeRange(TIMELINES_URL);
   });
 
+  // Tracked by https://github.com/elastic/kibana/issues/143705
   // TODO: We need to determine what we want the behavior to be here
   it.skip('navigates to the alerts page with incorrect link', () => {
     visitWithTimeRange(`${ALERTS_URL}/randomUrl`);
