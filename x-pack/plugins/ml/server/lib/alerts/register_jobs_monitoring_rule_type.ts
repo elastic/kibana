@@ -19,6 +19,7 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -104,7 +105,9 @@ export function registerJobsMonitoringRuleType({
     RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
-    AnomalyDetectionJobRealtimeIssue
+    AnomalyDetectionJobRealtimeIssue,
+    'recovered',
+    Alert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
@@ -165,19 +168,24 @@ export function registerJobsMonitoringRuleType({
             .join(', ')}`
         );
 
-        unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = services.alertFactory.create(alertInstanceName);
-          alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
+        unhealthyTests.forEach(({ name: alertName, context }) => {
+          services.alertsClient.report({
+            id: alertName,
+            actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
+            context,
+          });
         });
       }
 
       // Set context for recovered alerts
-      const { getRecoveredAlerts } = services.alertFactory.done();
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const recoveredAlertId = recoveredAlert.getId();
+      for (const recoveredAlert of services.alertsClient.getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          recoveredAlert.setContext(testResult.context);
+          services.alertsClient.setAlertData({
+            id: recoveredAlertId,
+            context: testResult.context,
+          });
         }
       }
 
