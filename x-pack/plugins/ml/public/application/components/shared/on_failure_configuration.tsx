@@ -25,12 +25,12 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SaveChangesButton } from './save_changes_button';
-import type { MlInferenceState } from '../types';
-import { getDefaultOnFailureConfiguration } from '../state';
-import { CANCEL_EDIT_MESSAGE, EDIT_MESSAGE } from '../constants';
-import { useMlKibana } from '../../../contexts/kibana';
-import { isValidJson } from '../../../../../common/util/validation_utils';
+import { SaveChangesButton } from '../ml_inference/components/save_changes_button';
+import type { MlInferenceState } from '../ml_inference/types';
+import { getDefaultOnFailureConfiguration } from '../ml_inference/state';
+import { CANCEL_EDIT_MESSAGE, EDIT_MESSAGE } from '../ml_inference/constants';
+import { useMlKibana } from '../../contexts/kibana';
+import { isValidJson } from '../../../../common/util/validation_utils';
 
 interface Props {
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
