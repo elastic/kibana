@@ -76,9 +76,10 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Output type used by agent',
         },
       },
-      presets_counts: {
+      preset_counts: {
         _meta: {
           description: 'Count of agents per preset',
+          optional: true,
         },
         properties: {
           balanced: {
@@ -117,6 +118,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'keyword',
         _meta: {
           description: 'Output preset used by agent, if applicable',
+          optional: true,
         },
       },
       count_as_data: {
@@ -129,6 +131,38 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agents enrolled that use this output type as monitoring output',
+        },
+      },
+    },
+  },
+  upgrade_details: {
+    _meta: {
+      description: 'Agent upgrade details telemetry',
+      optional: true,
+    },
+    properties: {
+      target_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Target version of the agent upgrade',
+        },
+      },
+      state: {
+        type: 'keyword',
+        _meta: {
+          description: 'State of the agent upgrade',
+        },
+      },
+      error_msg: {
+        type: 'keyword',
+        _meta: {
+          description: 'Error message of the agent upgrade if failed',
+        },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: {
+          description: 'How many agents have this upgrade details',
         },
       },
     },

@@ -7,26 +7,26 @@
     "enums": [],
     "misc": [],
     "objects": [],
-    "setup": {
+    "start": {
       "parentPluginId": "noDataPage",
-      "id": "def-public.NoDataPagePluginStart",
+      "id": "def-public.NoDataPagePublicStart",
       "type": "Type",
       "tags": [],
-      "label": "NoDataPagePluginStart",
+      "label": "NoDataPagePublicStart",
       "description": [],
       "signature": [
         {
           "pluginId": "noDataPage",
           "scope": "public",
           "docId": "kibNoDataPagePluginApi",
-          "section": "def-public.NoDataPagePluginSetup",
-          "text": "NoDataPagePluginSetup"
+          "section": "def-public.NoDataPagePublicSetup",
+          "text": "NoDataPagePublicSetup"
         }
       ],
       "path": "src/plugins/no_data_page/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
