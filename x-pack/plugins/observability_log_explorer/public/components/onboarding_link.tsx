@@ -10,10 +10,10 @@ import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
 import { onboardingLinkTitle } from '../../common/translations';
-import { getRouterLinkProps } from '../utils/get_router_link_props';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedOnboardingLink = React.memo(() => {
