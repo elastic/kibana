@@ -12,6 +12,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -20,7 +21,6 @@ import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_group
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-// import { useDiagnosticsContext } from '../../app/diagnostics/context/use_diagnostics';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -57,7 +57,6 @@ export function ApmMainTemplate({
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
-  // const { diagnosticsBundle } = useDiagnosticsContext();
 
   const { services } = useKibana<ApmPluginStartDeps>();
   const {
@@ -123,6 +122,7 @@ export function ApmMainTemplate({
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
   ];
 
+  const sanitizedPath = getPathForFeedback(window.location.pathname);
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
@@ -135,6 +135,7 @@ export function ApmMainTemplate({
               kibanaVersion={kibanaVersion}
               isCloudEnv={isCloudEnv}
               isServerlessEnv={isServerlessEnv}
+              sanitizedPath={sanitizedPath}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

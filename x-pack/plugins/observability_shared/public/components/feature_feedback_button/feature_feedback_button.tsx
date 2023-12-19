@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
+const SANITIZED_PATH_PARAM = 'entry.1876422621';
 
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
   if (isServerlessEnv) {
@@ -22,13 +23,21 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
-const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string, deploymentType?: string) => {
+const getSurveyFeedbackURL = (
+  formUrl: string,
+  kibanaVersion?: string,
+  deploymentType?: string,
+  sanitizedPath?: string
+) => {
   const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
   }
   if (deploymentType) {
     url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
+  }
+  if (sanitizedPath) {
+    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
   }
 
   return url.href;
@@ -43,6 +52,7 @@ interface FeatureFeedbackButtonProps {
   kibanaVersion?: string;
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
+  sanitizedPath?: string;
 }
 
 export const FeatureFeedbackButton = ({
@@ -53,6 +63,7 @@ export const FeatureFeedbackButton = ({
   kibanaVersion,
   isCloudEnv,
   isServerlessEnv,
+  sanitizedPath,
   surveyButtonText = (
     <FormattedMessage
       id="xpack.infra.homePage.tellUsWhatYouThinkLink"
@@ -67,7 +78,7 @@ export const FeatureFeedbackButton = ({
 
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType)}
+      href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}
       iconType={defaultButton ? undefined : 'editorComment'}
