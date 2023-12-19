@@ -209,10 +209,6 @@ components:
       required:
         - title
       properties:
-        id:
-          oneOf:
-            - $ref: '#/components/schemas/UUID'
-            - $ref: '#/components/schemas/NonEmptyString'
         title:
           type: string
           description: The conversation title.

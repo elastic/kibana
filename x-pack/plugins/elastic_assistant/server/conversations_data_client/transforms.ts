@@ -13,43 +13,47 @@ export const transformESToConversations = (
   response: estypes.SearchResponse<SearchEsConversationSchema>
 ): ConversationResponse[] => {
   return response.hits.hits.map((hit) => {
-    const conversationSchema = hit.fields;
+    const conversationSchema = hit._source;
     const conversation: ConversationResponse = {
-      timestamp: conversationSchema?.['@timestamp']?.[0],
-      createdAt: conversationSchema?.created_at?.[0],
+      timestamp: conversationSchema?.['@timestamp'],
+      createdAt: conversationSchema?.created_at,
       user: {
-        id: conversationSchema?.['user.id']?.[0],
-        name: conversationSchema?.['user.name']?.[0],
+        id: conversationSchema?.user?.id,
+        name: conversationSchema?.user?.name,
       },
-      title: conversationSchema?.title?.[0],
+      title: conversationSchema?.title,
       apiConfig: {
-        connectorId: conversationSchema?.['api_config.connector_id']?.[0],
-        connectorTypeTitle: conversationSchema?.['api_config.connector_type_title']?.[0],
-        defaultSystemPromptId: conversationSchema?.['api_config.default_system_prompt_id']?.[0],
-        model: conversationSchema?.['api_config.model']?.[0],
-        provider: conversationSchema?.['api_config.provider']?.[0],
+        connectorId: conversationSchema?.api_config?.connector_id,
+        connectorTypeTitle: conversationSchema?.api_config?.connector_type_title,
+        defaultSystemPromptId: conversationSchema?.api_config?.default_system_prompt_id,
+        model: conversationSchema?.api_config?.model,
+        provider: conversationSchema?.api_config?.provider,
       },
       excludeFromLastConversationStorage:
-        conversationSchema?.exclude_from_last_conversation_storage?.[0],
-      isDefault: conversationSchema?.is_default?.[0],
+        conversationSchema?.exclude_from_last_conversation_storage,
+      isDefault: conversationSchema?.is_default,
       messages:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conversationSchema?.messages?.map((message: Record<string, any>) => ({
           timestamp: message['@timestamp'],
           content: message.content,
-          isError: message.is_error,
-          presentation: message.presentation,
-          reader: message.reader,
-          replacements: message.replacements as Replacement[],
+          ...(message.is_error ? { isError: message.is_error } : {}),
+          ...(message.presentation ? { presentation: message.presentation } : {}),
+          ...(message.reader ? { reader: message.reader } : {}),
+          ...(message.replacements ? { replacements: message.replacements as Replacement[] } : {}),
           role: message.role,
-          traceData: {
-            traceId: message?.['trace_data.trace_id'],
-            transactionId: message?.['trace_data.transaction_id'],
-          },
+          ...(message.trace_data
+            ? {
+                traceData: {
+                  traceId: message.trace_data?.trace_id,
+                  transactionId: message.trace_data?.transaction_id,
+                },
+              }
+            : {}),
         })) ?? [],
-      updatedAt: conversationSchema?.updated_at?.[0],
-      replacements: conversationSchema?.replacements?.[0] as Replacement[],
-      namespace: conversationSchema?.namespace?.[0],
+      updatedAt: conversationSchema?.updated_at,
+      replacements: conversationSchema?.replacements as Replacement[],
+      namespace: conversationSchema?.namespace,
       id: hit._id,
     };
 

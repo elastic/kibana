@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
@@ -48,23 +48,38 @@ export const useConnectorSetup = ({
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
+  const [conversations, setConversations] = useState<Record<string, Conversation>>({});
   const { appendMessage, setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
   const { actionTypeRegistry, http, baseConversations } = useAssistantContext();
 
-  const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+  const { data: conversationsData, isLoading, refresh } = useFetchConversationsByUser();
 
-  const conversations = merge(
-    baseConversations,
-    (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
-      (transformed, conversationData) => {
-        transformed[conversation.id] = conversationData;
+  useEffect(() => {
+    if (!isLoading) {
+      const userConversations = (conversationsData?.data ?? []).reduce<
+        Record<string, Conversation>
+      >((transformed, conversationData) => {
+        transformed[conversationData.id] = conversationData;
         return transformed;
-      },
-      {}
-    )
-  );
+      }, {});
+      setConversations(
+        merge(
+          userConversations,
+          Object.keys(baseConversations)
+            .filter(
+              (baseId) =>
+                (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
+            )
+            .reduce<Record<string, Conversation>>((transformed, conversationData) => {
+              transformed[conversationData] = baseConversations[conversationData];
+              return transformed;
+            }, {})
+        )
+      );
+    }
+  }, [baseConversations, conversationsData?.data, isLoading]);
 
   const {
     data: connectors,
@@ -211,7 +226,6 @@ export const useConnectorSetup = ({
           },
         });
       });
-      console.log('setApiConfig ggg');
 
       refetchConnectors?.();
       setIsConnectorModalVisible(false);

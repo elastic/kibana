@@ -27,6 +27,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
+  refresh: () => Promise<void>;
 }
 
 export interface UseChatSend {
@@ -53,6 +54,7 @@ export const useChatSend = ({
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
+  refresh,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
   const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
@@ -101,7 +103,8 @@ export const useChatSend = ({
       });
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+      await appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+      await refresh();
     },
     [
       allSystemPrompts,
@@ -113,6 +116,7 @@ export const useChatSend = ({
       currentConversation.replacements,
       editingSystemPromptId,
       http,
+      refresh,
       selectedPromptContexts,
       sendMessages,
       setPromptTextPreview,
@@ -137,7 +141,8 @@ export const useChatSend = ({
       replacements: currentConversation.replacements ?? {},
     });
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-    appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+    await appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+    await refresh();
   }, [
     appendMessage,
     appendReplacements,
@@ -145,6 +150,7 @@ export const useChatSend = ({
     currentConversation.id,
     currentConversation.replacements,
     http,
+    refresh,
     removeLastMessage,
     sendMessages,
   ]);
@@ -157,7 +163,7 @@ export const useChatSend = ({
     [handleSendMessage, setUserPrompt]
   );
 
-  const handleOnChatCleared = useCallback(() => {
+  const handleOnChatCleared = useCallback(async () => {
     const defaultSystemPromptId = getDefaultSystemPrompt({
       allSystemPrompts,
       conversation: currentConversation,
@@ -166,12 +172,14 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    clearConversation(currentConversation.id);
+    await clearConversation(currentConversation.id);
     setEditingSystemPromptId(defaultSystemPromptId);
+    await refresh();
   }, [
     allSystemPrompts,
     clearConversation,
     currentConversation,
+    refresh,
     setEditingSystemPromptId,
     setPromptTextPreview,
     setSelectedPromptContexts,

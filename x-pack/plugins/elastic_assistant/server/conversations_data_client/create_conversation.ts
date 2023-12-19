@@ -71,7 +71,7 @@ export const createConversation = async (
 
   const response = await esClient.create({
     body,
-    id: conversation.isDefault && conversation.id ? conversation.id : uuidv4(),
+    id: uuidv4(),
     index: conversationIndex,
     refresh: 'wait_for',
   });
@@ -87,7 +87,6 @@ export const transformToCreateScheme = (
   namespace: string,
   user: { id?: UUID; name?: string },
   {
-    id,
     title,
     apiConfig,
     excludeFromLastConversationStorage,
@@ -131,6 +130,7 @@ export const transformToCreateScheme = (
 
 function transform(conversationSchema: CreateMessageSchema): ConversationResponse {
   const response: ConversationResponse = {
+    id: conversationSchema.id,
     timestamp: conversationSchema['@timestamp'],
     createdAt: conversationSchema.created_at,
     user: conversationSchema.user,

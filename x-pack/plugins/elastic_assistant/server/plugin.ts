@@ -12,7 +12,6 @@ import {
   Logger,
   KibanaRequest,
   SavedObjectsClientContract,
-  CoreSetup,
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
@@ -42,13 +41,7 @@ import {
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerConversationsRoutes } from './routes/register_routes';
-import { appContextService, GetRegisteredTools } from './services/app_context';
-
-interface CreateRouteHandlerContextParams {
-  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
-  logger: Logger;
-  getRegisteredTools: GetRegisteredTools;
-}
+import { appContextService } from './services/app_context';
 
 export class ElasticAssistantPlugin
   implements

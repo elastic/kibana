@@ -82,10 +82,22 @@ interface UseConversation {
   removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
+  getConversation: (conversationId: string) => Promise<Conversation | undefined>;
 }
 
 export const useConversation = (): UseConversation => {
   const { allSystemPrompts, assistantTelemetry, http } = useAssistantContext();
+
+  const getConversation = useCallback(
+    async (conversationId: string) => {
+      const currentConversation = await getConversationById({ http, id: conversationId });
+      if (isHttpFetchError(currentConversation)) {
+        return;
+      }
+      return currentConversation;
+    },
+    [http]
+  );
 
   /**
    * Removes the last message of conversation[] for a given conversationId
@@ -146,9 +158,9 @@ export const useConversation = (): UseConversation => {
       if (isHttpFetchError(prevConversation)) {
         return;
       }
+
       if (prevConversation != null) {
         messages = [...prevConversation.messages, message];
-
         await updateConversationApi({
           http,
           conversationId,
@@ -296,5 +308,6 @@ export const useConversation = (): UseConversation => {
     removeLastMessage,
     setApiConfig,
     createConversation,
+    getConversation,
   };
 };

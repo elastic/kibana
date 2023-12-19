@@ -73,23 +73,23 @@ export const updateConversation = async (
         ...params,
         // when assigning undefined in painless, it will remove property and wil set it to null
         // for patch we don't want to remove unspecified value in payload
-        assignEmpty: !isPatch,
+        assignEmpty: !(isPatch ?? true),
       },
       source: `
           if (params.assignEmpty == true || params.containsKey('api_config')) {
-            if (params.assignEmpty == true || params.containsKey('api_config.connector_id')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
               ctx._source.api_config.connector_id = params.api_config.connector_id;
             }
-            if (params.assignEmpty == true || params.containsKey('api_config.connector_type_title')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
               ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
             }
-            if (params.assignEmpty == true || params.containsKey('api_config.default_system_prompt_id')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
               ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
             }
-            if (params.assignEmpty == true || params.containsKey('api_config.model')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('model')) {
               ctx._source.api_config.model = params.api_config.model;
             }
-            if (params.assignEmpty == true || params.containsKey('api_config.provider')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('provider')) {
               ctx._source.api_config.provider = params.api_config.provider;
             }
           }
@@ -102,9 +102,8 @@ export const updateConversation = async (
           if (params.assignEmpty == true || params.containsKey('title')) {
             ctx._source.title = params.title;
           }
-          ctx._source.updated_at = params.updated_at;
           if (params.assignEmpty == true || params.containsKey('messages')) {
-            ctx._source.messages = [];
+            def messages = [];
             for (message in params.messages) {
               def newMessage = [:];
               newMessage['@timestamp'] = message['@timestamp'];
@@ -113,12 +112,12 @@ export const updateConversation = async (
               newMessage.presentation = message.presentation;
               newMessage.reader = message.reader;
               newMessage.replacements = message.replacements;
-              newMessage.role = message.role;
-              newMessage.trace_data.trace_id = message.trace_data.trace_id;
-              newMessage.trace_data.transaction_id = message.trace_data.transaction_id;
-              ctx._source.messages.add(enrichment);
+              newMessage.role = message.role; 
+              messages.add(newMessage);
             }
+            ctx._source.messages = messages;
           }
+          ctx._source.updated_at = params.updated_at;
         `,
     },
   });

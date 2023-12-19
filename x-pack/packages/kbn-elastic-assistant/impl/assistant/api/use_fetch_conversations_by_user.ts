@@ -34,11 +34,20 @@ export const useFetchConversationsByUser = () => {
     perPage: 100,
   };
 
-  return useQuery([ELASTIC_AI_ASSISTANT_CONVERSATIONS_KEY, query], () =>
+  const querySt = useQuery([ELASTIC_AI_ASSISTANT_CONVERSATIONS_KEY, query], () =>
     http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
       method: 'GET',
       version: AI_ASSISTANT_API_CURRENT_VERSION,
       query,
     })
   );
+
+  const refresh = () =>
+    http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
+      method: 'GET',
+      version: AI_ASSISTANT_API_CURRENT_VERSION,
+      query,
+    });
+
+  return { ...querySt, refresh };
 };

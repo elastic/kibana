@@ -49,20 +49,9 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
-
-          if (request.body.id != null) {
-            const conversation = await dataClient?.getConversation(request.body.id);
-            if (conversation != null) {
-              return siemResponse.error({
-                statusCode: 409,
-                body: `conversation with id: "${request.body.id}" already exists`,
-              });
-            }
-          }
-
           const createdConversation = await dataClient?.createConversation(request.body);
           return response.ok({
-            body: ConversationResponse.parse(createdConversation), // transformValidate(createdConversation),
+            body: ConversationResponse.parse(createdConversation),
           });
         } catch (err) {
           const error = transformError(err as Error);

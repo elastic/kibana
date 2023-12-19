@@ -80,7 +80,7 @@ const createElasticAssistantRequestContextMock = (
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),
-    core: jest.fn(),
+    core: clients.core,
   };
 };
 

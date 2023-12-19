@@ -48,13 +48,12 @@ export const findConversations = async ({
       track_total_hits: true,
       sort,
     },
-    _source: false,
+    _source: true,
     from: (page - 1) * perPage,
     ignore_unavailable: true,
     index: conversationIndex,
     seq_no_primary_term: true,
     size: perPage,
-    fields: fields ?? ['*'],
   });
   return {
     data: transformESToConversations(response),

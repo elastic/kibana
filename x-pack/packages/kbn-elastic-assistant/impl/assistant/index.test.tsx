@@ -36,6 +36,7 @@ const MOCK_CONVERSATION_TITLE = 'electric sheep';
 const getInitialConversations = (): Record<string, Conversation> => ({
   [WELCOME_CONVERSATION_TITLE]: {
     id: WELCOME_CONVERSATION_TITLE,
+    title: WELCOME_CONVERSATION_TITLE,
     messages: [],
     apiConfig: {},
   },

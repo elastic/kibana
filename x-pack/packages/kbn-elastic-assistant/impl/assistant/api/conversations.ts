@@ -10,12 +10,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 import { Conversation, Message } from '../../assistant_context/types';
 
-export interface GetConversationsParams {
-  http: HttpSetup;
-  user?: string;
-  signal?: AbortSignal | undefined;
-}
-
 export interface GetConversationByIdParams {
   http: HttpSetup;
   id: string;
@@ -23,44 +17,14 @@ export interface GetConversationByIdParams {
 }
 
 /**
- * API call for getting current user conversations.
+ * API call for getting conversation by id.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} options.id - Conversation id.
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<Conversation[] | IHttpFetchError>}
- */
-export const getUserConversations = async ({
-  http,
-  user,
-  signal,
-}: GetConversationsParams): Promise<Conversation[] | IHttpFetchError> => {
-  try {
-    const path = `/api/elastic_assistant/conversations`;
-    const response = await http.fetch(path, {
-      method: 'GET',
-      query: {
-        user,
-      },
-      version: '2023-10-31',
-      signal,
-    });
-
-    return response as Conversation[];
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
-};
-
-/**
- * API call for getting current user conversations.
- *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {Promise<Conversation[] | IHttpFetchError>}
+ * @returns {Promise<Conversation | IHttpFetchError>}
  */
 export const getConversationById = async ({
   http,
@@ -92,14 +56,14 @@ export interface PostConversationResponse {
 }
 
 /**
- * API call for setting up the Knowledge Base. Provide a resource to set up a specific resource.
+ * API call for setting up the Conversation.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.resource] - Resource to be added to the KB, otherwise sets up the base KB
+ * @param {Conversation} [options.conversation] - Conversation to be added
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<PostKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<PostConversationResponse | IHttpFetchError>}
  */
 export const createConversationApi = async ({
   http,
@@ -131,14 +95,14 @@ export interface DeleteConversationResponse {
 }
 
 /**
- * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
+ * API call for deleting the Conversation. Provide a id to delete that specific resource.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.id] - Resource to be deleted from the KB, otherwise delete the entire KB
+ * @param {string} [options.id] - Conversation id to be deleted
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<DeleteKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<DeleteConversationResponse | IHttpFetchError>}
  */
 export const deleteConversationApi = async ({
   http,
@@ -162,6 +126,7 @@ export const deleteConversationApi = async ({
 export interface PutConversationMessageParams {
   http: HttpSetup;
   conversationId: string;
+  title?: string;
   messages?: Message[];
   apiConfig?: {
     connectorId?: string;
@@ -174,23 +139,16 @@ export interface PutConversationMessageParams {
   signal?: AbortSignal | undefined;
 }
 
-export interface PostEvaluationResponse {
-  evaluationId: string;
-  success: boolean;
-}
-
 /**
  * API call for evaluating models.
  *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.evalParams] - Params necessary for evaluation
- * @param {AbortSignal} [options.signal] - AbortSignal
+ * @param {PutConversationMessageParams} options - The options object.
  *
- * @returns {Promise<PostEvaluationResponse | IHttpFetchError>}
+ * @returns {Promise<Conversation | IHttpFetchError>}
  */
 export const updateConversationApi = async ({
   http,
+  title,
   conversationId,
   messages,
   apiConfig,
@@ -203,6 +161,7 @@ export const updateConversationApi = async ({
       method: 'PUT',
       body: JSON.stringify({
         id: conversationId,
+        title,
         messages,
         replacements,
         apiConfig,

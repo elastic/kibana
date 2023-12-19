@@ -94,25 +94,62 @@ const AssistantComponent: React.FC<Props> = ({
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
+  const [conversations, setConversations] = useState<Record<string, Conversation>>({});
   const selectedPromptContextsCount = useMemo(
     () => Object.keys(selectedPromptContexts).length,
     [selectedPromptContexts]
   );
 
-  const { amendMessage, getDefaultConversation } = useConversation();
+  const { amendMessage, getDefaultConversation, getConversation } = useConversation();
+  const { data: conversationsData, isLoading, refresh } = useFetchConversationsByUser();
 
-  const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+  useEffect(() => {
+    if (!isLoading) {
+      const userConversations = (conversationsData?.data ?? []).reduce<
+        Record<string, Conversation>
+      >((transformed, conversation) => {
+        transformed[conversation.id] = conversation;
+        return transformed;
+      }, {});
+      setConversations(
+        merge(
+          userConversations,
+          Object.keys(baseConversations)
+            .filter(
+              (baseId) =>
+                (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
+            )
+            .reduce<Record<string, Conversation>>((transformed, conversation) => {
+              transformed[conversation] = baseConversations[conversation];
+              return transformed;
+            }, {})
+        )
+      );
+    }
+  }, [baseConversations, conversationsData?.data, isLoading]);
 
-  const conversations = merge(
-    baseConversations,
-    (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+  const refetchResults = useCallback(async () => {
+    const data = await refresh();
+    const userConversations = (data.data ?? []).reduce<Record<string, Conversation>>(
       (transformed, conversation) => {
         transformed[conversation.id] = conversation;
         return transformed;
       },
       {}
-    )
-  );
+    );
+    setConversations(
+      merge(
+        userConversations,
+        Object.keys(baseConversations)
+          .filter((baseId) => (data.data ?? []).find((c) => c.title === baseId) === undefined)
+          .reduce<Record<string, Conversation>>((transformed, conversation) => {
+            transformed[conversation] = baseConversations[conversation];
+            return transformed;
+          }, {})
+      )
+    );
+  }, [baseConversations, refresh]);
+
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
@@ -141,6 +178,21 @@ const AssistantComponent: React.FC<Props> = ({
       setConversationId(selectedConversationId);
     }
   }, [selectedConversationId, setConversationId]);
+
+  /* const [currentConversation, setCurrentConversation] = useState<Conversation>(
+    conversations[selectedConversationId] ??
+      getDefaultConversation({ conversationId: selectedConversationId })
+  );
+
+  const refetchConversation = useCallback(
+    async (cId: string) => {
+      const updatedConversation = await getConversation(cId);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
+    },
+    [getConversation]
+  ); */
 
   const currentConversation = useMemo(
     () =>
@@ -255,11 +307,12 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    (cId: string) => {
+    async (cId: string) => {
       setSelectedConversationId(cId);
       setEditingSystemPromptId(
         getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
       );
+      // await refetchConversation(cId);
     },
     [allSystemPrompts, conversations]
   );
@@ -376,6 +429,7 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
+    refresh: refetchResults,
   });
 
   const chatbotComments = useMemo(
