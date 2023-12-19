@@ -19,7 +19,7 @@ export type { CodeEditorProps } from './code_editor';
 export * from './languages/constants';
 
 const LazyCodeEditorBase = React.lazy(() =>
-  import(/* webpackChunkName: "code-editor-chunk" */ './code_editor').then((m) => ({
+  import(/* webpackChunkName: "code-editor-entry" */ './code_editor').then((m) => ({
     default: m.CodeEditor,
   }))
 );
