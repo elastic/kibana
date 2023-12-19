@@ -285,12 +285,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `${expectedInitialAvailableFields}, url, utc_time, xss`
         );
 
-        // Expand Empty section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('empty')).join(', ')
-        ).to.be('');
-
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
         expect(
