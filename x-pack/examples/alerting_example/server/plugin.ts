@@ -12,9 +12,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
-import { alertType as peopleInSpaceAlert } from './alert_types/astros';
-import { alertType as patternAlert } from './alert_types/pattern';
+import { ruleType as alwaysFiringRule } from './rule_types/always_firing';
+import { ruleType as peopleInSpaceRule } from './rule_types/astros';
+import { ruleType as patternRule } from './rule_types/pattern';
 // can't import static code from another plugin to support examples functional test
 const INDEX_THRESHOLD_ID = '.index-threshold';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
@@ -27,9 +27,9 @@ export interface AlertingExampleDeps {
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
   public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
-    alerting.registerType(alwaysFiringAlert);
-    alerting.registerType(peopleInSpaceAlert);
-    alerting.registerType(patternAlert);
+    alerting.registerType(alwaysFiringRule);
+    alerting.registerType(peopleInSpaceRule);
+    alerting.registerType(patternRule);
 
     features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,
@@ -41,15 +41,15 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      alerting: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+      alerting: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
       privileges: {
         all: {
           alerting: {
             rule: {
-              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+              all: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
             },
             alert: {
-              all: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+              all: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
             },
           },
           savedObject: {
@@ -64,10 +64,10 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         read: {
           alerting: {
             rule: {
-              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+              read: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
             },
             alert: {
-              read: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
+              read: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
             },
           },
           savedObject: {

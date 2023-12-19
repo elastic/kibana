@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -23,7 +24,6 @@ import {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -61,7 +61,6 @@ import {
   AlertsFilterTimeframe,
   RuleAlertData,
 } from '../common';
-import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -202,6 +201,12 @@ interface ComponentTemplateSpec {
 export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
+
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<Alert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**

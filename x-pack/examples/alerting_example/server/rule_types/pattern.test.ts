@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { alertType } from './pattern';
+import { ruleType } from './pattern';
 
 const logger = loggingSystemMock.create().get();
 
@@ -24,7 +24,7 @@ describe('pattern rule type', () => {
       state,
     };
     try {
-      await alertType.executor(options as any);
+      await ruleType.executor(options as any);
     } catch (err) {
       expect(err.message).toMatchInlineSnapshot(
         `"errors in patterns: pattern for instA contains invalid string: \\"nope\\", pattern for instB contains invalid string: \\"hallo!\\""`
@@ -50,7 +50,7 @@ describe('pattern rule type', () => {
 
     let result: any;
     for (let i = 0; i < 6; i++) {
-      result = await alertType.executor(options as any);
+      result = await ruleType.executor(options as any);
       options.state = result.state;
     }
 
@@ -189,13 +189,9 @@ function getServices() {
 
   return {
     scheduledActions,
-    alertFactory: {
-      create(instance: string) {
-        return {
-          scheduleActions(actionGroup: string, context: any) {
-            scheduledActions.push([instance, actionGroup, context]);
-          },
-        };
+    alertsClient: {
+      report(reported: { id: string; actionGroup: string; context: any }) {
+        scheduledActions.push([reported.id, reported.actionGroup, reported.context]);
       },
     },
   };

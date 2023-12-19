@@ -10,7 +10,9 @@ import {
   RuleType as BaseRuleType,
   RuleTypeState,
   RuleExecutorOptions as BaseRuleExecutorOptions,
+  DEFAULT_AAD_CONFIG,
 } from '@kbn/alerting-plugin/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 
 type Params = TypeOf<typeof Params>;
 const Params = schema.object(
@@ -41,10 +43,10 @@ interface State extends RuleTypeState {
   runs?: number;
 }
 
-type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default'>;
+type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default', Alert>;
 
-type RuleType = BaseRuleType<Params, never, State, {}, {}, 'default'>;
-export const alertType: RuleType = getPatternRuleType();
+type RuleType = BaseRuleType<Params, never, State, {}, {}, 'default', 'recovered', Alert>;
+export const ruleType: RuleType = getPatternRuleType();
 
 function getPatternRuleType(): RuleType {
   return {
@@ -57,6 +59,7 @@ function getPatternRuleType(): RuleType {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
+    alerts: DEFAULT_AAD_CONFIG,
     validate: {
       params: Params,
     },
@@ -96,7 +99,7 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
     switch (action) {
       case 'a':
         const context = { patternIndex, action, pattern, runs };
-        services.alertFactory.create(instance).scheduleActions('default', context);
+        services.alertsClient.report({ id: instance, actionGroup: 'default', context });
         break;
       case '-':
         break;

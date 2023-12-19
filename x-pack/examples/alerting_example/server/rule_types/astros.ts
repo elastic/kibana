@@ -6,8 +6,14 @@
  */
 
 import axios from 'axios';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import {
+  DEFAULT_AAD_CONFIG,
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -16,6 +22,18 @@ interface PeopleInSpace {
     name: string;
   }>;
   number: number;
+}
+
+interface Params extends RuleTypeParams {
+  outerSpaceCapacity: number;
+  craft: string;
+  op: string;
+}
+interface State extends RuleTypeState {
+  peopleInSpace: number;
+}
+interface AlertState {
+  craft: string;
 }
 
 function getOperator(op: string) {
@@ -40,14 +58,15 @@ function getCraftFilter(craft: string) {
     craft === Craft.OuterSpace ? true : craft === person.craft;
 }
 
-export const alertType: RuleType<
-  { outerSpaceCapacity: number; craft: string; op: string },
+export const ruleType: RuleType<
+  Params,
   never,
-  { peopleInSpace: number },
-  { craft: string },
+  State,
+  AlertState,
   never,
   'default',
-  'hasLandedBackOnEarth'
+  'hasLandedBackOnEarth',
+  Alert
 > = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
@@ -71,7 +90,7 @@ export const alertType: RuleType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services.alertFactory.create(name).replaceState({ craft }).scheduleActions('default');
+        services.alertsClient.report({ id: name, actionGroup: 'default', state: { craft } });
       });
     }
 
@@ -86,6 +105,7 @@ export const alertType: RuleType<
   getViewInAppRelativeUrl({ rule }) {
     return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
   },
+  alerts: DEFAULT_AAD_CONFIG,
   validate: {
     params: schema.object({
       outerSpaceCapacity: schema.number(),

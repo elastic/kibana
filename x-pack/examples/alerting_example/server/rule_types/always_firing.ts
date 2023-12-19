@@ -7,8 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import { DEFAULT_AAD_CONFIG, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -17,6 +18,12 @@ import {
 } from '../../common/constants';
 
 type ActionGroups = 'small' | 'medium' | 'large';
+interface State extends RuleTypeState {
+  count?: number;
+}
+interface AlertState {
+  triggerdOnCycle: number;
+}
 const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
 
 function getTShirtSizeByIdAndThreshold(
@@ -38,13 +45,15 @@ function getTShirtSizeByIdAndThreshold(
   return DEFAULT_ACTION_GROUP;
 }
 
-export const alertType: RuleType<
+export const ruleType: RuleType<
   AlwaysFiringParams,
   never,
-  { count?: number },
-  { triggerdOnCycle: number },
+  State,
+  AlertState,
   never,
-  AlwaysFiringActionGroupIds
+  AlwaysFiringActionGroupIds,
+  never,
+  Alert
 > = {
   id: 'example.always-firing',
   name: 'Always firing',
@@ -66,10 +75,11 @@ export const alertType: RuleType<
     range(instances)
       .map(() => uuidv4())
       .forEach((id: string) => {
-        services.alertFactory
-          .create(id)
-          .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
+        services.alertsClient.report({
+          id,
+          actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
+          state: { triggerdOnCycle: count },
+        });
       });
 
     return {
@@ -92,4 +102,5 @@ export const alertType: RuleType<
       ),
     }),
   },
+  alerts: DEFAULT_AAD_CONFIG,
 };
