@@ -61,6 +61,7 @@ export const useLatestFindingsDataView = (dataView: string) => {
       throw new Error(`Data view not found [Name: {${dataView}}]`);
     }
 
+    // or FINDINGS_INDEX_PATTERN
     if (dataView === LATEST_FINDINGS_INDEX_PATTERN) {
       Object.entries(cloudSecurityFieldLabels).forEach(([field, label]) => {
         if (
