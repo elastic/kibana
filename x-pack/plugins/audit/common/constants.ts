@@ -15,6 +15,13 @@ export enum AuditLogOperation {
   GET = 'get',
 }
 
+export enum AuditDiffOperation {
+  ADD = 'add',
+  DELETE = 'delete',
+  UPDATE = 'update',
+  MOVE = 'move',
+}
+
 export enum AuditSubject {
   RULE = 'rule',
 }

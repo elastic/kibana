@@ -9,8 +9,8 @@ export {
   AUDIT_SAVED_OBJECT_TYPE,
   AUDIT_FIND_PATH,
   AuditLogOperation,
+  AuditDiffOperation,
   AuditSubject,
 } from './constants';
 
 export type { AuditLog } from './types';
-export { AuditDiffOperation } from './types';
