@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('produces an alert with the correct reason', async () => {
           const alerts = await waitForAlertsForRule({ es, ruleId: createdRule.id });
-          // @ts-expect-error
+
           const score = alerts[0]['kibana.alert.evaluation.value'];
           expect(alerts[0]['kibana.alert.reason']).to.be(
             `warning latency anomaly with a score of ${score}, was detected in the last 5 hrs for foo.`
