@@ -312,7 +312,10 @@ export class ObservabilityAIAssistantService {
     };
     await Promise.all(
       this.registrations.map((fn) =>
-        fn({ signal, registerContext, registerFunction, resources, client })
+        fn({ signal, registerContext, registerFunction, resources, client }).catch((error) => {
+          this.logger.error(`Error registering functions`);
+          this.logger.error(error);
+        })
       )
     );
 

@@ -14,6 +14,7 @@ import {
   PartialTheme,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -123,6 +124,8 @@ export function FlameGraph({
                 <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}
+                    // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                    baseTheme={LEGACY_LIGHT_THEME}
                     onElementClick={(elements) => {
                       const selectedElement = elements[0] as Maybe<FlameLayerValue>;
                       if (Number.isNaN(selectedElement?.vmIndex)) {

@@ -7,6 +7,7 @@
     "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
+    "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
     "server/**/*"
@@ -48,7 +49,13 @@
     "@kbn/licensing-plugin",
     "@kbn/share-plugin",
     "@kbn/utility-types-jest",
-    "@kbn/analytics-client"
+    "@kbn/analytics-client",
+    "@kbn/tooling-log",
+    "@kbn/babel-register",
+    "@kbn/dev-cli-runner",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-http-browser",
+    "@kbn/security-plugin-types-common"
   ],
   "exclude": ["target/**/*"]
 }

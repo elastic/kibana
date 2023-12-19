@@ -7,10 +7,12 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSPM_FINDINGS_STATS_INTERVAL,
+} from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types_old';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
-import { CSPM_FINDINGS_STATS_INTERVAL } from '../../tasks/findings_stats_task';
 
 interface FindingsDetails {
   total_findings: number;

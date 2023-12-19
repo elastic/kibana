@@ -565,14 +565,17 @@ const ensureAuthorizedToExecute = async ({
         params
       );
 
-      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
-    }
-
-    // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
-    // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-    if (actionTypeId === '.sentinelone') {
       await authorization.ensureAuthorized({
-        operation: 'create',
+        operation: 'execute',
+        additionalPrivileges,
+        actionTypeId,
+      });
+    } else if (actionTypeId === '.sentinelone') {
+      // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
+      // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
+      await authorization.ensureAuthorized({
+        operation: 'execute',
+        actionTypeId,
       });
     }
   } catch (error) {
