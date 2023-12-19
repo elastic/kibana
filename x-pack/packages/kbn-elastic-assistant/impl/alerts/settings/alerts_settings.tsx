@@ -109,6 +109,18 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
             <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS}</span>
           </EuiText>
         </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.YOUR_ANONYMIZATION_SETTINGS}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.SELECT_FEWER_ALERTS}</span>
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

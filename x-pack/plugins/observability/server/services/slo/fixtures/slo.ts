@@ -15,6 +15,7 @@ import {
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { SLO_MODEL_VERSION } from '../../../../common/slo/constants';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -139,7 +140,7 @@ export const createHistogramIndicator = (
   },
 });
 
-const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
+const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt' | 'version'> = {
   name: 'irrelevant',
   description: 'irrelevant',
   timeWindow: sevenDaysRolling(),
@@ -190,6 +191,7 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
     revision: 1,
     createdAt: now,
     updatedAt: now,
+    version: SLO_MODEL_VERSION,
     ...params,
   });
 };

@@ -8,19 +8,32 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getScreenshotContext, getScreenshotMode } from '../common';
-import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
+import type {
+  ScreenshotModePublicSetup,
+  ScreenshotModePublicSetupDependencies,
+  ScreenshotModePublicStart,
+  ScreenshotModePublicStartDependencies,
+} from './types';
 
-export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
+export class ScreenshotModePlugin
+  implements
+    Plugin<
+      ScreenshotModePublicSetup,
+      ScreenshotModePublicStart,
+      ScreenshotModePublicSetupDependencies,
+      ScreenshotModePublicStartDependencies
+    >
+{
   private publicContract = Object.freeze({
     getScreenshotContext,
     isScreenshotMode: () => getScreenshotMode() === true,
   });
 
-  public setup(core: CoreSetup): ScreenshotModePluginSetup {
+  public setup(_core: CoreSetup): ScreenshotModePublicSetup {
     return this.publicContract;
   }
 
-  public start(core: CoreStart): ScreenshotModePluginStart {
+  public start(_core: CoreStart): ScreenshotModePublicStart {
     return this.publicContract;
   }
 
