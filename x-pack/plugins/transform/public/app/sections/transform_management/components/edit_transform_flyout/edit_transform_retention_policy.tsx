@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -38,32 +38,22 @@ export const EditTransformRetentionPolicy: FC = () => {
       ...(isLatestTransform(requestConfig) ? { latest: requestConfig.latest } : {}),
     };
   }, [requestConfig]);
-  const [destIndexAvailableTimeFields, setDestIndexAvailableTimeFields] = useState<string[]>([]);
 
   const { error: transformsPreviewError, data: transformPreview } =
     useGetTransformsPreview(previewRequest);
 
-  useEffect(
-    function getDateFields() {
-      let unmounted = false;
-      if (transformPreview !== undefined) {
-        if (transformPreview.generated_dest_index) {
-          const properties = transformPreview.generated_dest_index.mappings.properties;
-          const timeFields: string[] = Object.keys(properties).filter(
-            (col) => properties[col].type === 'date'
-          );
+  const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+    if (transformPreview?.generated_dest_index) {
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
 
-          if (!unmounted) {
-            setDestIndexAvailableTimeFields(timeFields);
-          }
-        }
-        return () => {
-          unmounted = true;
-        };
-      }
-    },
-    [transformPreview]
-  );
+      return timeFields;
+    }
+    return [];
+  }, [transformPreview]);
+
   useEffect(() => {
     if (transformsPreviewError !== null) {
       toastNotifications.addDanger({
