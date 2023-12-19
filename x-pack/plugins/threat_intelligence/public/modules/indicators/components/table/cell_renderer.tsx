@@ -26,10 +26,10 @@ export const cellRendererFactory = (from: number) => {
     }
 
     const {
-      services: { uiSettings },
+      services: { theme },
     } = useKibana();
 
-    const darkMode = uiSettings.get('theme:darkMode');
+    const darkMode = theme.getTheme().darkMode;
 
     const { indicators, expanded } = indicatorsTableContext;
 
