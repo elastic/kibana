@@ -65,7 +65,8 @@
     "@kbn/no-data-page-plugin",
     "@kbn/search-response-warnings",
     "@kbn/logging",
-    "@kbn/content-management-table-list-view-common"
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/chart-expressions-common"
   ],
   "exclude": [
     "target/**/*",
