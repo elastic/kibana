@@ -158,6 +158,10 @@ export function ChatBody({
     }
   };
 
+  const handleChangeHeight = (height: number) => {
+    setPromptEditorHeight(height + 30);
+  };
+
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
     if (!parent) {
@@ -310,10 +314,7 @@ export function ChatBody({
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
-              onChangeHeight={(height) => {
-                console.log('height', height);
-                setPromptEditorHeight(height + 30);
-              }}
+              onChangeHeight={handleChangeHeight}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));

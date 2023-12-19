@@ -82,7 +82,6 @@ export function ChatPromptEditor({
     setPrompt('');
     setFunctionPayload('');
     setSelectedFunctionName(functionName);
-    console.log('functionName', functionName);
 
     if (functionName) {
       onChangeHeight(200);
