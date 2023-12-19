@@ -10,6 +10,9 @@ import { CharName } from 'cli-table3';
 
 type Borders = Record<string, Partial<Record<CharName, string>>>;
 
+/**
+ * A utility collection of table border settings for use with `cli-table3`.
+ */
 export const borders: Borders = {
   table: {
     'bottom-left': '╚',

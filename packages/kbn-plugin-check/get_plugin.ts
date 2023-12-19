@@ -9,6 +9,9 @@
 import { findPlugins } from '@kbn/docs-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
+/**
+ * Utility method for finding and logging information about a plugin.
+ */
 export const getPlugin = (pluginName: string, log: ToolingLog) => {
   const plugin = findPlugins([pluginName])[0];
   log.debug('Found plugin:', pluginName);

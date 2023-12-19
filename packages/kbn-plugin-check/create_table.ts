@@ -52,13 +52,19 @@ export const createTable = (
     return table;
   }
 
-  const getTypeLabel = (layer: PluginLayer, lifecycle: PluginLifecycle) =>
+  /**
+   * Build and format the header cell for the plugin lifecycle column.
+   */
+  const getLifecycleColumnHeader = (layer: PluginLayer, lifecycle: PluginLifecycle) =>
     Object.entries(statuses).some(
       ([_name, statusObj]) => statusObj[layer][lifecycle].source === 'none'
     )
       ? colors.red(lifecycle.toUpperCase())
       : lifecycle.toUpperCase();
 
+  /**
+   * Build and format the header cell for the plugin layer column.
+   */
   const getLayerColumnHeader = (layer: PluginLayer) => {
     if (!pluginInfo.classes[layer]) {
       return [
@@ -71,11 +77,15 @@ export const createTable = (
     }
 
     return PLUGIN_LIFECYCLES.map((lifecycle) => ({
-      content: getTypeLabel(layer, lifecycle),
+      content: getLifecycleColumnHeader(layer, lifecycle),
       chars: borders.subheader,
     }));
   };
 
+  /**
+   * True if the `PluginState` is one of the states that should be excluded from a
+   * mismatch check.
+   */
   const isExcludedState = (state: PluginState) =>
     state === 'no class' || state === 'unknown' || state === 'missing';
 

@@ -11,7 +11,12 @@ import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 import { PluginOrPackage } from '@kbn/docs-utils/src/types';
 
+/**
+ * Return the `client` and `server` plugin classes for a plugin.
+ */
 export const getPluginClasses = (project: Project, plugin: PluginOrPackage, log: ToolingLog) => {
+  // The `client` and `server` plugins have a consistent name and directory structure, but the
+  // `client` plugin _may_ be a `.tsx` file, so we need to check for both.
   let client = project.getSourceFile(`${plugin.directory}/public/plugin.ts`);
 
   if (!client) {
@@ -20,6 +25,7 @@ export const getPluginClasses = (project: Project, plugin: PluginOrPackage, log:
 
   const server = project.getSourceFile(`${plugin.directory}/server/plugin.ts`);
 
+  // Log the warning if one or both plugin implementations are missing.
   if (!client || !server) {
     if (!client) {
       log.warning(`${plugin.id}/client: no plugin.`);
@@ -30,7 +36,8 @@ export const getPluginClasses = (project: Project, plugin: PluginOrPackage, log:
     }
   }
 
-  // We restrict files to a single class, so this should be fine.
+  // We restrict files to a single class, so assigning the first element from the
+  // resulting array should be fine.
   return {
     project,
     client: client ? client.getClasses()[0] : null,

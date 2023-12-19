@@ -14,14 +14,17 @@ import { createTable } from './create_table';
 import { getDependencySummary } from './get_dependency_summary';
 import { getPluginInfo } from './get_plugin_info';
 
+/**
+ * Prepare and output information about a plugin's dependencies.
+ */
 export const displayDependencyCheck = (
   project: Project,
   plugin: PluginOrPackage,
   log: ToolingLog
 ) => {
   log.info('Running plugin check on plugin:', plugin.id);
-
   log.indent(4);
+
   const pluginInfo = getPluginInfo(project, plugin, log);
 
   if (!pluginInfo) {
@@ -38,6 +41,5 @@ export const displayDependencyCheck = (
   const table = createTable(pluginInfo, summary, log);
 
   log.indent(-4);
-
   log.info(table.toString());
 };

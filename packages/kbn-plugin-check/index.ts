@@ -13,6 +13,9 @@ import { findTeamPlugins } from '@kbn/docs-utils';
 import { getPlugin } from './get_plugin';
 import { displayDependencyCheck } from './display_dependency_check';
 
+/**
+ * A CLI for checking the consistency of a plugin's declared and implicit dependencies.
+ */
 export const runPluginCheckCli = () => {
   run(
     async ({ log, flags }) => {
@@ -57,6 +60,10 @@ export const runPluginCheckCli = () => {
       },
       flags: {
         string: ['plugin', 'team'],
+        help: `
+          --plugin   The plugin to check.
+          --team     Check all plugins owned by a given team.
+        `,
       },
     }
   );

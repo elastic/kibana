@@ -14,6 +14,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginClasses } from './get_plugin_classes';
 import { PluginInfo, PluginLifecycle, PluginLayer, Lifecycle, Dependencies } from './types';
 
+/**
+ * Derive and return information about a plugin and its dependencies.
+ */
 export const getPluginInfo = (
   project: Project,
   plugin: PluginOrPackage,
@@ -30,10 +33,12 @@ export const getPluginInfo = (
   const clientDependencies = getPluginDependencies(client, 'client', log);
   const serverDependencies = getPluginDependencies(server, 'server', log);
 
+  // Combine all plugin implementation dependencies, removing duplicates.
   const allPluginDependencies = [
     ...new Set([...clientDependencies.all, ...serverDependencies.all]),
   ];
 
+  // Combine all manifest dependencies, removing duplicates.
   const allManifestDependencies = [
     ...new Set([
       ...requiredManifestPlugins,
@@ -71,6 +76,7 @@ const getPluginDependencies = (
   pluginType: 'client' | 'server',
   log: ToolingLog
 ): Lifecycle => {
+  // If the plugin class doesn't exist, return an empty object with `null` implementations.
   if (!pluginClass) {
     return {
       all: [],
@@ -79,6 +85,8 @@ const getPluginDependencies = (
     };
   }
 
+  // This is all very brute-force, but it's easier to see and understand what's going on, rather
+  // than relying on loops and placeholders.  YMMV.
   const {
     source: setupSource,
     typeName: setupType,
@@ -116,29 +124,12 @@ const getPluginDependencies = (
       required: requiredStartDependencies,
       optional: optionalStartDependencies,
     },
-    // type: {
-    //   setup: {
-    //     source: setupSource,
-    //     name: setupType,
-    //   },
-    //   start: {
-    //     source: startSource,
-    //     name: startType,
-    //   },
-    // },
-    // required: {
-    //   all: [...new Set([...requiredSetupDependencies, ...requiredStartDependencies])],
-    //   setup: requiredSetupDependencies,
-    //   start: requiredStartDependencies,
-    // },
-    // optional: {
-    //   all: [...new Set([...optionalSetupDependencies, ...optionalStartDependencies])],
-    //   setup: optionalSetupDependencies,
-    //   start: optionalStartDependencies,
-    // },
   };
 };
 
+/**
+ * Given a lifecycle type, derive the dependencies for that lifecycle.
+ */
 const getDependenciesFromLifecycleType = (
   pluginClass: ClassDeclaration,
   lifecycle: PluginLifecycle,
@@ -156,34 +147,44 @@ const getDependenciesFromLifecycleType = (
     // This is safe, as we don't allow more than one class per file.
     const typeArguments = classImplements[0].getTypeArguments();
 
-    const node = typeArguments[lifecycle === 'setup' ? 2 : 3];
+    // The `Plugin` generic has 4 type arguments, the 3rd of which is an interface of `setup`
+    // dependencies, and the fourth being an interface of `start` dependencies.
+    const type = typeArguments[lifecycle === 'setup' ? 2 : 3];
 
-    if (node) {
-      const dependencies = getDependenciesFromNode(node, log);
+    // If the type is defined, we can derive the dependencies directly from it.
+    if (type) {
+      const dependencies = getDependenciesFromNode(type, log);
 
       if (dependencies) {
         return dependencies;
       }
     } else {
+      // ...and we can warn if the type is not defined.
       log.warning(
         `${layer}/${className}/${lifecycle} dependencies not defined on core interface generic.`
       );
     }
   }
 
+  // If the type is not defined or otherwise unavailable, it's possible to derive the lifecycle
+  // dependencies directly from the instance method.
   log.debug(
     `${layer}/${className}/${lifecycle} falling back to instance method to derive dependencies.`
   );
 
   const methods = pluginClass.getInstanceMethods();
+
+  // Find the method on the class that matches the lifecycle name.
   const method = methods.find((m) => m.getName() === (lifecycle === 'setup' ? 'setup' : 'start'));
 
+  // As of now, a plugin cannot omit a lifecycle method, so throw an error.
   if (!method) {
     throw new Error(
       `${layer}/${className}/${lifecycle} method does not exist; this should not be possible.`
     );
   }
 
+  // Given a method, derive the dependencies.
   const dependencies = getDependenciesFromMethod(method, log);
 
   if (dependencies) {
@@ -194,6 +195,7 @@ const getDependenciesFromLifecycleType = (
     `${layer}/${className}/${lifecycle} dependencies also not defined on lifecycle method.`
   );
 
+  // At this point, there's no way to derive the dependencies, so return an empty object.
   return {
     all: [],
     source: 'none',
@@ -203,6 +205,7 @@ const getDependenciesFromLifecycleType = (
   };
 };
 
+/** Derive dependencies from a `TypeNode`-- the lifecycle method itself. */
 const getDependenciesFromNode = (
   node: TypeNode | undefined,
   _log: ToolingLog
@@ -213,6 +216,7 @@ const getDependenciesFromNode = (
 
   const typeName = node.getText();
 
+  // Get all of the dependencies and whether or not they're required.
   const dependencies = node
     .getType()
     .getSymbol()
@@ -221,6 +225,7 @@ const getDependenciesFromNode = (
       return { name: member.getName(), isOptional: member.isOptional() };
     });
 
+  // Split the dependencies into required and optional.
   const optional =
     dependencies
       ?.filter((dependency) => dependency.isOptional)
@@ -233,6 +238,8 @@ const getDependenciesFromNode = (
 
   return {
     all: [...new Set([...required, ...optional])],
+    // Set the `source` to `implements`, as the dependencies were derived from the method
+    // implementation, rather than an explicit type.
     source: 'implements',
     typeName,
     required,
