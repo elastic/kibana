@@ -8,7 +8,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { LANGCHAIN_EXECUTION_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
+import { ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import {
@@ -43,6 +43,8 @@ export const postActionsConnectorExecuteRoute = (
       const assistantContext = await context.elasticAssistant;
       const logger: Logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
+      const shouldNotUseLangChain =
+        !request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request);
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -51,7 +53,7 @@ export const postActionsConnectorExecuteRoute = (
         const actions = (await context.elasticAssistant).actions;
 
         // if not langchain, call execute action directly and return the response:
-        if (!request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request)) {
+        if (shouldNotUseLangChain) {
           logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
@@ -114,7 +116,10 @@ export const postActionsConnectorExecuteRoute = (
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
-        telemetry.reportEvent(LANGCHAIN_EXECUTION_ERROR_EVENT.eventType, {
+        telemetry.reportEvent(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+          isEnabledLangChain: !shouldNotUseLangChain,
+          isEnabledKnowledgeBase: request.body.assistantLangChain,
+          isEnabledRAGAlerts: requestHasRequiredAnonymizationParams(request),
           errorMessage: error.message,
         });
 

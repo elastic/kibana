@@ -70,15 +70,36 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
-export const LANGCHAIN_EXECUTION_ERROR_EVENT: EventTypeOpts<{
+export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
+  isEnabledKnowledgeBase: boolean;
+  isEnabledLangChain: boolean;
+  isEnabledRAGAlerts: boolean;
 }> = {
-  eventType: 'langchain_execution_error',
+  eventType: 'actions_connector_execution_error',
   schema: {
     errorMessage: {
       type: 'keyword',
       _meta: {
         description: 'Error message from Elasticsearch',
+      },
+    },
+    isEnabledLangChain: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is LangChain enabled',
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is LangChain enabled',
+      },
+    },
+    isEnabledRAGAlerts: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is LangChain enabled',
       },
     },
   },
@@ -87,5 +108,5 @@ export const LANGCHAIN_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
-  LANGCHAIN_EXECUTION_ERROR_EVENT,
+  ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT,
 ];

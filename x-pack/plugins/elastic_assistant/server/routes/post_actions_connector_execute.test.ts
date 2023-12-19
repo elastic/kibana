@@ -15,16 +15,23 @@ import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
 jest.mock('../lib/executor', () => ({
-  executeAction: jest.fn().mockImplementation((x) => ({
-    connector_id: 'mock-connector-id',
-    data: mockActionResponse,
-    status: 'ok',
-  })),
+  executeAction: jest.fn().mockImplementation(async ({ connectorId }) => {
+    if (connectorId === 'mock-connector-id') {
+      return {
+        connector_id: 'mock-connector-id',
+        data: mockActionResponse,
+        status: 'ok',
+      };
+    } else {
+      throw new Error('simulated error');
+    }
+  }),
 }));
 
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
@@ -53,11 +60,13 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
   ),
 }));
 
+const reportEvent = jest.fn();
 const mockContext = {
   elasticAssistant: {
     actions: jest.fn(),
     getRegisteredTools: jest.fn(() => []),
     logger: loggingSystemMock.createLogger(),
+    telemetry: { ...coreMock.createSetup().analytics, reportEvent },
   },
   core: {
     elasticsearch: {
@@ -172,6 +181,106 @@ describe('postActionsConnectorExecuteRoute', () => {
         expect(result).toEqual({
           body: 'simulated error',
           statusCode: 500,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb on, alerts off', async () => {
+    const requestWithBadConnectorId = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
+
+        expect(result).toEqual({
+          body: 'simulated error',
+          statusCode: 500,
+        });
+
+        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+          errorMessage: 'simulated error',
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: true,
+          isEnabledRAGAlerts: false,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb on, alerts on', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        allow: ['@timestamp'],
+        allowReplacement: ['host.name'],
+        replacements: {},
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(mockContext, badRequest, mockResponse);
+
+        expect(result).toEqual({
+          body: 'simulated error',
+          statusCode: 500,
+        });
+
+        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+          errorMessage: 'simulated error',
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: true,
+          isEnabledRAGAlerts: true,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb off, alerts off', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        assistantLangChain: false,
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(mockContext, badRequest, mockResponse);
+
+        expect(result).toEqual({
+          body: 'simulated error',
+          statusCode: 500,
+        });
+
+        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+          errorMessage: 'simulated error',
+          isEnabledLangChain: false,
+          isEnabledKnowledgeBase: false,
+          isEnabledRAGAlerts: false,
         });
       }),
     };
