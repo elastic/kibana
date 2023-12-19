@@ -12,7 +12,6 @@ import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
@@ -100,12 +99,7 @@ const MonitoringApp: React.FC<{
   theme$: Observable<CoreTheme>;
 }> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
   const history = createPreserveQueryHistory();
-
-  const darkModeObservable: Observable<boolean> = useMemo(
-    () => core.uiSettings!.get$('theme:darkMode'),
-    [core.uiSettings]
-  );
-  const darkMode = useObservable(darkModeObservable, core.uiSettings!.get('theme:darkMode'));
+  const darkMode = useMemo(() => core.theme.getTheme().darkMode, [core.theme]);
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
