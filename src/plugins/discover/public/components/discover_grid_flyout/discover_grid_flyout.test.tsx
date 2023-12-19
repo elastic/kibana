@@ -315,11 +315,14 @@ describe('Discover flyout', function () {
       it('should provide an actions prop collection to optionally update the grid content', async () => {
         mockFlyoutCustomization.Content = ({ actions }) => (
           <>
-            <button data-test-subj="addColumn" onClick={() => actions.addColumn('message')} />
-            <button data-test-subj="removeColumn" onClick={() => actions.removeColumn('message')} />
+            <button data-test-subj="addColumn" onClick={() => actions.onAddColumn?.('message')} />
+            <button
+              data-test-subj="removeColumn"
+              onClick={() => actions.onRemoveColumn?.('message')}
+            />
             <button
               data-test-subj="addFilter"
-              onClick={() => actions.addFilter?.('_exists_', 'message', '+')}
+              onClick={() => actions.filter?.('_exists_', 'message', '+')}
             />
           </>
         );

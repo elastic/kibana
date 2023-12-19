@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useState, useEffect } from 'react';
 
+import { css } from '@emotion/react';
 import { useValues, useActions } from 'kea';
 
 import {
@@ -27,15 +28,13 @@ import {
   EuiHorizontalRule,
   EuiButton,
   EuiHeaderLinks,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
-import { Status } from '../../../../common/types/api';
-
-import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
 import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { CreateApiKeyFlyout } from '../api_key/create_api_key_flyout';
 import { KibanaLogic } from '../kibana';
@@ -48,9 +47,7 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const { user } = useValues(KibanaLogic);
-  const { makeRequest: saveApiKey } = useActions(CreateApiKeyAPILogic);
-  const { data: apiKey, error, status } = useValues(CreateApiKeyAPILogic);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => makeRequest({}), []);
 
@@ -75,16 +72,7 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         {Boolean(children) && <EuiFlexItem>{children}</EuiFlexItem>}
         <EuiFlexItem>
-          {isFlyoutOpen && (
-            <CreateApiKeyFlyout
-              createdApiKey={apiKey}
-              error={error?.body?.message}
-              isLoading={status === Status.LOADING}
-              onClose={() => setIsFlyoutOpen(false)}
-              setApiKey={saveApiKey}
-              username={user?.full_name || user?.username || ''}
-            />
-          )}
+          {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
           <EuiPopover
             button={button}
             isOpen={isPopoverOpen}
@@ -93,6 +81,9 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
             anchorPosition="downLeft"
           >
             <EuiContextMenuPanel
+              css={css`
+                max-width: calc(${euiTheme.size.xxxxl} * 4);
+              `}
               items={[
                 <EuiContextMenuItem key="endpoint">
                   <EuiText size="s">
@@ -107,7 +98,13 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
 
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                     <EuiFlexItem>
-                      <EuiCode>{elasticsearchEndpoint}</EuiCode>
+                      <EuiCode
+                        css={css`
+                          overflow-wrap: anywhere;
+                        `}
+                      >
+                        {elasticsearchEndpoint}
+                      </EuiCode>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
@@ -139,7 +136,13 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
 
                         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                           <EuiFlexItem>
-                            <EuiCode>{cloudId}</EuiCode>
+                            <EuiCode
+                              css={css`
+                                overflow-wrap: anywhere;
+                              `}
+                            >
+                              {cloudId}
+                            </EuiCode>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
