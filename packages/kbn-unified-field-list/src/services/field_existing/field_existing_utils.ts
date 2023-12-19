@@ -59,8 +59,8 @@ export async function fetchFieldExistence({
   // in the given data view. Those fields we consider as new fields,
   // that were ingested after the data view was loaded
   const newFields = existingFieldList
-    .filter((field) => dataView.getFieldByName(field.name) === undefined)
-    .map((field) => dataView.getFieldByName(field.name) ?? new DataViewField(field));
+    .filter((field) => !dataView.getFieldByName(field.name))
+    .map((field) => new DataViewField(field));
   // refresh the data view in case there are new fields
   if (newFields.length) {
     await dataViewsService.refreshFields(dataView, false);
