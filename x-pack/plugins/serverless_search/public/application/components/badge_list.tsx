@@ -8,12 +8,12 @@
 import React from 'react';
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
-export interface BadeListProps {
+export interface BadgeListProps {
   badges: React.ReactNode[];
   maxBadgesToDisplay?: number;
 }
 
-export const BadgeList = ({ badges, maxBadgesToDisplay }: BadeListProps) => {
+export const BadgeList = ({ badges, maxBadgesToDisplay }: BadgeListProps) => {
   const maxBadges = maxBadgesToDisplay ?? 3;
   if (badges.length === 0) {
     return <></>;
