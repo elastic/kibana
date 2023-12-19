@@ -9,7 +9,8 @@
     "browser": true,
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils", 
+      "savedObjectsManagement"
     ]
   }
 }

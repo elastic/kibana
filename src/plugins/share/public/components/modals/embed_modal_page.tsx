@@ -9,7 +9,7 @@
 import {
   EuiButton,
   EuiCheckboxGroup,
-  EuiCopy,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -22,19 +22,32 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
-  EuiTextArea,
   EuiTitle,
+  Query,
 } from '@elastic/eui';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { Capabilities } from '@kbn/core-capabilities-common';
+import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import React, { FC, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
+import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types/latest';
+import {
+  parseQuery,
+  getTagFindReferences,
+} from '@kbn/saved-objects-management-plugin/public';
+import {
+  fetchExportByTypeAndSearch,
+  extractExportDetails,
+} from '@kbn/saved-objects-management-plugin/public/lib';
+
+// @ts-expect-error
+import { saveAs } from '@elastic/filesaver';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService, UrlParamExtension } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
-
 interface EmbedModalPageProps {
   isEmbedded?: boolean;
   allowShortUrl: boolean;
@@ -52,6 +65,11 @@ interface EmbedModalPageProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
+  // onExportAll props
+  notifications: NotificationsStart;
+  http: HttpStart;
+  taggingApi: SavedObjectsTaggingApi;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) => {
@@ -64,6 +82,10 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     shareableUrlLocatorParams,
     urlService,
     onClose,
+    notifications,
+    http,
+    taggingApi,
+    allowedTypes,
   } = props;
   const isMounted = useMountedState();
   const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean>(false);
@@ -80,11 +102,20 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
+  const [exportAllSelectedOptions, setExportAllSelectedOptions] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [isIncludeReferencesDeepChecked, setIsIncludeReferencesDeepCheck] = useState<boolean>(true);
+  const [activeQuery, setActiveQuery] = useState<Query>(Query.parse(''));
   interface UrlParams {
     [extensionName: string]: {
       [queryParam: string]: boolean;
     };
   }
+
+  // useEffect(() => {
+  //   setActiveQuery(Query.parse(''))
+  // },[])
 
   const makeUrlEmbeddable = (url: string): string => {
     const embedParam = '?embed=true';
@@ -253,9 +284,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     setUrl(url);
   };
 
-  const handleShortUrlChange = (evt: {
-    target: { checked: React.SetStateAction<boolean> };
-  }) => {
+  const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
     setCheckShortUrlSwitch(evt.target.checked);
     if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
       setIsShortUrl(true);
@@ -265,6 +294,43 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
     createShortUrl();
+  };
+
+  const onExportAll = async () => {
+    const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
+      if (selected) {
+        accum.push(id);
+      }
+      return accum;
+    }, [] as string[]);
+
+    const references = getTagFindReferences({ selectedTags, taggingApi });
+
+    let blob;
+    try {
+      blob = await fetchExportByTypeAndSearch({
+        http,
+        search: queryText ? `${queryText}*` : undefined,
+        types: exportTypes,
+        references,
+        includeReferencesDeep: isIncludeReferencesDeepChecked,
+      });
+    } catch (e) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
+        }),
+      });
+      throw e;
+    }
+
+    saveAs(blob, 'export.ndjson');
+
+    // this.showExportCompleteMessage(exportDetails);
   };
 
   const renderShortUrlSwitch = () => {
@@ -327,7 +393,10 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'snapshot', label: 'Snapshot' },
   ];
 
-  const placeholderEmbedCode = '';
+  const placeholderEmbedCode = `Click copy icon to generate ${
+    selectedRadio === 'savedObject' ? 'saved object' : 'snapshot'
+  }`;
+
 
   return (
     <EuiModal onClose={onClose}>
@@ -351,7 +420,9 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiFlexItem grow={1}>
               <EuiRadioGroup
                 options={radioOptions}
-                onChange={(id) => setSelectedRadio(id)}
+                onChange={(id) => {
+                  setSelectedRadio(id);
+                }}
                 name="embed radio group"
                 idSelected={selectedRadio}
               />
@@ -360,9 +431,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiSpacer size="m" />
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiCopy textToCopy={placeholderEmbedCode} anchorClassName="eui-displayBlock">
-            {(copy) => <EuiTextArea placeholder={placeholderEmbedCode} fullWidth />}
-          </EuiCopy>
+          <EuiCodeBlock isCopyable>{placeholderEmbedCode}</EuiCodeBlock>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiButton fill onClick={onClose}>
