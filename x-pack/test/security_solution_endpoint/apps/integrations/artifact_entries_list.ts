@@ -62,8 +62,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // https://github.com/elastic/kibana/issues/171489
   // https://github.com/elastic/kibana/issues/171491
   // https://github.com/elastic/kibana/issues/171492
-  describe('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@serverless', '@skipInServerless']);
+  //
+  // FLAKY: https://github.com/elastic/kibana/issues/173681
+  // FLAKY: https://github.com/elastic/kibana/issues/173682
+  describe.skip('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
