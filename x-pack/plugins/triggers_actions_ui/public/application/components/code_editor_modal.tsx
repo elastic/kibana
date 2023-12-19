@@ -41,35 +41,65 @@ const suggestionProvider = (
   return {
     suggestions: [
       {
-        label: 'report',
-        kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'report',
+        label: 'alertsClient',
+        kind: monaco.languages.CompletionItemKind.Variable,
+        insertText: 'alertsClient',
         range: wordRange,
       },
       {
-        label: 'setAlertData',
+        label: 'alertsClient.create',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'setAlertData',
+        insertText: 'alertsClient.create({\n});',
         range: wordRange,
       },
       {
-        label: 'getAlertLimitValue',
-        kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'getAlertLimitValue',
+        label: 'esClient',
+        kind: monaco.languages.CompletionItemKind.Variable,
+        insertText: 'esClient',
         range: wordRange,
       },
       {
-        label: 'setAlertLimitReached',
-        kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'setAlertLimitReached',
+        label: 'esClient.search',
+        kind: monaco.languages.CompletionItemKind.Variable,
+        insertText: 'esClient.search({\n});',
         range: wordRange,
       },
       {
-        label: 'getRecoveredAlerts',
+        label: 'getTimeRange',
         kind: monaco.languages.CompletionItemKind.Function,
-        insertText: 'getRecoveredAlerts',
+        insertText: 'getTimeRange',
         range: wordRange,
       },
+      // {
+      //   label: 'report',
+      //   kind: monaco.languages.CompletionItemKind.Function,
+      //   insertText: 'report',
+      //   range: wordRange,
+      // },
+      // {
+      //   label: 'setAlertData',
+      //   kind: monaco.languages.CompletionItemKind.Function,
+      //   insertText: 'setAlertData',
+      //   range: wordRange,
+      // },
+      // {
+      //   label: 'getAlertLimitValue',
+      //   kind: monaco.languages.CompletionItemKind.Function,
+      //   insertText: 'getAlertLimitValue',
+      //   range: wordRange,
+      // },
+      // {
+      //   label: 'setAlertLimitReached',
+      //   kind: monaco.languages.CompletionItemKind.Function,
+      //   insertText: 'setAlertLimitReached',
+      //   range: wordRange,
+      // },
+      // {
+      //   label: 'getRecoveredAlerts',
+      //   kind: monaco.languages.CompletionItemKind.Function,
+      //   insertText: 'getRecoveredAlerts',
+      //   range: wordRange,
+      // },
     ],
   };
 };
