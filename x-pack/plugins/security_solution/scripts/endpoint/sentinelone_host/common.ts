@@ -207,6 +207,13 @@ export const installSentinelOneAgent = async ({
 
     const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
 
+    try {
+      // Generate an alert in SentinelOne
+      await hostVm.exec('nslookup amazon.com');
+    } catch (e) {
+      log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
+    }
+
     log.info('done');
 
     return {
