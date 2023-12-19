@@ -41,7 +41,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
-  isCompatibleField?: (fields: DataViewField) => boolean;
+  isCompatibleField?: (field: DataViewField) => boolean;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
