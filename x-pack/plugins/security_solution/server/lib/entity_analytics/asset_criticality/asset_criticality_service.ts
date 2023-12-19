@@ -33,9 +33,7 @@ const groupIdentifierValuesByField = (
   identifiers: CriticalityIdentifier[]
 ): IdentifierValuesByField =>
   identifiers.reduce((acc, id) => {
-    if (!acc[id.id_field]) {
-      acc[id.id_field] = [];
-    }
+    acc[id.id_field] ??= [];
     if (!acc[id.id_field].includes(id.id_value)) {
       acc[id.id_field].push(id.id_value);
     }
