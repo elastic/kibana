@@ -33,20 +33,7 @@ import {
 } from '../../../common/options_list/suggestions_sorting';
 import { pluginServices } from '../../services';
 import { OptionsListStrings } from './options_list_strings';
-
-const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
-      <EuiIconTip content={tooltip} position="right" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 
 const selectionOptions = [
   {
@@ -65,7 +52,7 @@ const allSearchOptions = [
   {
     id: 'prefix',
     label: (
-      <TooltipText
+      <ControlSettingTooltipLabel
         label={OptionsListStrings.editor.searchTypes.prefix.getLabel()}
         tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
       />
@@ -75,7 +62,7 @@ const allSearchOptions = [
   {
     id: 'wildcard',
     label: (
-      <TooltipText
+      <ControlSettingTooltipLabel
         label={OptionsListStrings.editor.searchTypes.wildcard.getLabel()}
         tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
       />
@@ -85,7 +72,7 @@ const allSearchOptions = [
   {
     id: 'exact',
     label: (
-      <TooltipText
+      <ControlSettingTooltipLabel
         label={OptionsListStrings.editor.searchTypes.exact.getLabel()}
         tooltip={OptionsListStrings.editor.searchTypes.exact.getTooltip()}
       />
@@ -207,7 +194,7 @@ export const OptionsListEditorOptions = ({
       <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
         <EuiSwitch
           label={
-            <TooltipText
+            <ControlSettingTooltipLabel
               label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
               tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
             />

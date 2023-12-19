@@ -31,13 +31,13 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { ControlGroupInput } from '..';
 import { ParentIgnoreSettings } from '../..';
 import { getDefaultControlGroupInput } from '../../../common';
+import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 import { ControlStyle } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
@@ -125,6 +125,7 @@ export const ControlGroupEditor = ({
           >
             <div>
               <EuiSwitch
+                compressed
                 data-test-subj="control-group-filter-sync"
                 label={ControlGroupStrings.management.filteringSettings.getUseGlobalFiltersTitle()}
                 onChange={(e) =>
@@ -140,6 +141,7 @@ export const ControlGroupEditor = ({
               />
               <EuiSpacer size="s" />
               <EuiSwitch
+                compressed
                 data-test-subj="control-group-query-sync-time-range"
                 label={ControlGroupStrings.management.filteringSettings.getUseGlobalTimeRangeTitle()}
                 onChange={(e) => updateIgnoreSetting({ ignoreTimerange: !e.target.checked })}
@@ -153,40 +155,26 @@ export const ControlGroupEditor = ({
           >
             <div>
               <EuiSwitch
+                compressed
                 data-test-subj="control-group-validate-selections"
                 label={
-                  <div>
-                    <EuiTitle size="xxs">
-                      <h3>
-                        {ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
-                      </h3>
-                    </EuiTitle>
-                    <EuiText size="s">
-                      <p>
-                        {ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsSubTitle()}
-                      </p>
-                    </EuiText>
-                  </div>
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsSubTitle()}
+                  />
                 }
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
                 onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
               />
               <EuiSpacer size="s" />
               <EuiSwitch
+                compressed
                 data-test-subj="control-group-chaining"
                 label={
-                  <div>
-                    <EuiTitle size="xxs">
-                      <h3>
-                        {ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
-                      </h3>
-                    </EuiTitle>
-                    <EuiText size="s">
-                      <p>
-                        {ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchySubTitle()}
-                      </p>
-                    </EuiText>
-                  </div>
+                  <ControlSettingTooltipLabel
+                    label={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchySubTitle()}
+                  />
                 }
                 checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
