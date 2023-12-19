@@ -85,7 +85,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/170357
+  // FLAKY: https://github.com/elastic/kibana/issues/173670
+  describe.skip('endpoint list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;

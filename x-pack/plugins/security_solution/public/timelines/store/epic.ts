@@ -29,15 +29,15 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import type { inputsModel } from '../../../common/store/inputs';
-import { addError } from '../../../common/store/app/actions';
+import type { TimelineErrorResponse, TimelineResponse } from '../../../common/api/timeline';
+import type { ColumnHeaderOptions } from '../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
+import type { inputsModel } from '../../common/store/inputs';
+import { addError } from '../../common/store/app/actions';
 
-import { copyTimeline, persistTimeline } from '../../containers/api';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-import * as i18n from '../../pages/translations';
+import { copyTimeline, persistTimeline } from '../containers/api';
+import { ALL_TIMELINE_QUERY_ID } from '../containers/all';
+import * as i18n from '../pages/translations';
 
 import {
   updateTimeline,
@@ -57,7 +57,7 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { TimelineEpicDependencies } from './types';
-import type { TimelineInput } from '../../../../common/search_strategy';
+import type { TimelineInput } from '../../../common/search_strategy';
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
