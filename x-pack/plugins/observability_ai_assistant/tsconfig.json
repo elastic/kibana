@@ -52,7 +52,9 @@
     "@kbn/analytics-client",
     "@kbn/tooling-log",
     "@kbn/babel-register",
-    "@kbn/dev-cli-runner"
+    "@kbn/dev-cli-runner",
+    "@kbn/core-analytics-browser",
+    "@kbn/security-plugin-types-common"
   ],
   "exclude": ["target/**/*"]
 }

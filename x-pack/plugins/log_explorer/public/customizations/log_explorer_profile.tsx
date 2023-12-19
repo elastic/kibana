@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { waitFor } from 'xstate/lib/waitFor';
 import type { LogExplorerController } from '../controller';
 import { LogExplorerControllerProvider } from '../controller/provider';
@@ -110,21 +111,27 @@ export const createLogExplorerProfileCustomizations =
           viewSurroundingDocument: { disabled: true },
         },
       },
-      Content: (props) => {
-        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+      docViewsRegistry: (registry) => {
+        registry.add({
+          id: 'doc_view_log_overview',
+          title: i18n.translate('xpack.logExplorer.flyoutDetail.docViews.overview', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => {
+            const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
-        const internalState = useObservable(
-          stateContainer.internalState.state$,
-          stateContainer.internalState.get()
-        );
+            return (
+              <KibanaContextProviderForPlugin>
+                <LogExplorerControllerProvider controller={controller}>
+                  <LazyCustomFlyoutContent {...props} />
+                </LogExplorerControllerProvider>
+              </KibanaContextProviderForPlugin>
+            );
+          },
+        });
 
-        return (
-          <KibanaContextProviderForPlugin>
-            <LogExplorerControllerProvider controller={controller}>
-              <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
-            </LogExplorerControllerProvider>
-          </KibanaContextProviderForPlugin>
-        );
+        return registry;
       },
     });
 

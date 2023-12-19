@@ -23,6 +23,7 @@ import {
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -58,6 +59,14 @@ export const postActionsConnectorExecuteRoute = (
         // TODO: Add `traceId` to actions request when calling via langchain
         logger.debug('Executing via langchain, assistantLangChain: true');
 
+        // Fetch any tools registered by the request's originating plugin
+        const pluginName = getPluginNameFromRequest({
+          request,
+          defaultPluginName: DEFAULT_PLUGIN_NAME,
+          logger,
+        });
+        const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
+
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -79,6 +88,7 @@ export const postActionsConnectorExecuteRoute = (
           allowReplacement: request.body.allowReplacement,
           actions,
           assistantLangChain: request.body.assistantLangChain,
+          assistantTools,
           connectorId,
           elserId,
           esClient,
