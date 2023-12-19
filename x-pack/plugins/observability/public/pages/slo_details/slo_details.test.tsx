@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { Capabilities } from '@kbn/core/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams, useLocation } from 'react-router-dom';
@@ -84,6 +85,7 @@ const mockKibana = () => {
           addError: jest.fn(),
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: {
         url: {
           locators: {
