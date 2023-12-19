@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
-  DARK_THEME,
   isMetricElementEvent,
+  LEGACY_DARK_THEME,
   Metric,
   MetricTrendShape,
   Settings,
@@ -19,6 +19,7 @@ import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
@@ -52,7 +53,7 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
   return colors[status ?? 'NO_DATA'];
 };
 
-const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
+const getSubTitle = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
 };
 
@@ -88,14 +89,14 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           }
         }}
         paddingSize="none"
-        style={{
-          height: '182px',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
+        css={css`
+          height: 182px;
+          overflow: hidden;
+          position: relative;
+        `}
         title={slo.summary.status}
       >
-        <SloCardChart slo={slo} historicalSliData={historicalSliData} cardsPerRow={cardsPerRow} />
+        <SloCardChart slo={slo} historicalSliData={historicalSliData} />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -135,11 +136,9 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
 
 export function SloCardChart({
   slo,
-  cardsPerRow,
   historicalSliData,
 }: {
   slo: SLOWithSummaryResponse;
-  cardsPerRow: number;
   historicalSliData?: Array<{ key?: number; value?: number }>;
 }) {
   const {
@@ -147,13 +146,14 @@ export function SloCardChart({
   } = useKibana().services;
 
   const cardColor = useSloCardColor(slo.summary.status);
-  const subTitle = getSubTitle(slo, cardsPerRow);
+  const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
 
   return (
     <Chart>
       <Settings
-        baseTheme={DARK_THEME}
+        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+        baseTheme={LEGACY_DARK_THEME}
         onElementClick={([d]) => {
           if (isMetricElementEvent(d)) {
             navigateToUrl(sloDetailsUrl);
