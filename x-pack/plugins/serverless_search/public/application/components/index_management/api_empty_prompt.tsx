@@ -30,6 +30,8 @@ import {
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
+import { BACK_LABEL } from '../../../../common/i18n_string';
+
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { javaDefinition } from '../languages/java';
@@ -119,10 +121,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
         iconSide="left"
         iconType="arrowLeft"
       >
-        <FormattedMessage
-          id="xpack.serverlessSearch.indexManagement.indexDetails.overview.emptyPrompt.api.backBtn"
-          defaultMessage="Back"
-        />
+        {BACK_LABEL}
       </EuiButtonEmpty>
       <EuiEmptyPrompt
         icon={<EuiIcon type="addDataApp" size="xl" />}
