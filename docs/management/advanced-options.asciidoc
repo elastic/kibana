@@ -452,7 +452,7 @@ preview:[] When enabled, allows users to create Service Groups from the APM Serv
 preview:[] Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
 
 [[observability-infrastructure-profiling-integration]]`observability:enableInfrastructureProfilingIntegration`::
-preview:[] Enables the Profiling view in Host details withing Infrastructure.
+preview:[] Enables the Profiling view in Host details within Infrastructure.
 
 [float]
 [[kibana-reporting-settings]]
