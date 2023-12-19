@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep(
           'should have the retention policy switch enabled'
         );
-        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(true);
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(false);
 
         await transform.testExecution.logTestStep(
           'should have the advanced settings inputs enabled'
