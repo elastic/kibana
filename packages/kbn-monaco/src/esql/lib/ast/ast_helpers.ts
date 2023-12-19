@@ -179,7 +179,7 @@ function getUnquotedText(ctx: ParserRuleContext) {
 const TICKS_REGEX = /(`)/g;
 
 function isQuoted(text: string | undefined) {
-  return text && TICKS_REGEX.test(text);
+  return text && /^(`)/.test(text);
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
