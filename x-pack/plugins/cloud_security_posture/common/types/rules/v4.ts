@@ -14,6 +14,8 @@ export type {
   cspBenchmarkRuleSchema,
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
+  CspSettings,
+  CspBenchmarkRulesStates,
 } from './v3';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
