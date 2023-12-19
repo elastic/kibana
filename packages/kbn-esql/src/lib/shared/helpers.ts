@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { monaco } from '../../../../monaco_imports';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -29,7 +28,7 @@ import {
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
-} from '../types';
+} from '../ast/types';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
@@ -75,7 +74,10 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 }
 
 // From Monaco position to linear offset
-export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
+export function monacoPositionToOffset(
+  expression: string,
+  position: { lineNumber: number; column: number }
+): number {
   const lines = expression.split(/\n/);
   return lines
     .slice(0, position.lineNumber)
@@ -89,19 +91,23 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
+export function buildFunctionsLookupMap(fns: FunctionDefinition[]) {
+  return fns.reduce((memo, def) => {
+    memo.set(def.name, def);
+    if (def.alias) {
+      for (const alias of def.alias) {
+        memo.set(alias, def);
+      }
+    }
+    return memo;
+  }, new Map<string, FunctionDefinition>());
+}
+
 function buildFunctionLookup() {
   if (!fnLookups) {
-    fnLookups = builtinFunctions
-      .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
-      .reduce((memo, def) => {
-        memo.set(def.name, def);
-        if (def.alias) {
-          for (const alias of def.alias) {
-            memo.set(alias, def);
-          }
-        }
-        return memo;
-      }, new Map<string, FunctionDefinition>());
+    fnLookups = buildFunctionsLookupMap(
+      builtinFunctions.concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
+    );
   }
   return fnLookups;
 }
@@ -128,6 +134,10 @@ export function isSupportedFunction(
 
 export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
+}
+
+export function isBuiltinFunction(node: ESQLFunction) {
+  return Boolean(getFunctionDefinition(node.name)?.type === 'builtin');
 }
 
 function buildCommandLookup() {

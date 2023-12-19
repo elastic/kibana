@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
+import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../ast/types';
 
 export interface FunctionDefinition {
-  builtin?: boolean;
+  type: 'builtin' | 'aggs' | 'math';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];

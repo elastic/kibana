@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ESQL_TOKEN_POSTFIX } from '@kbn/esql';
 import { monaco } from '../../../monaco_imports';
-import { ESQL_TOKEN_POSTFIX } from '../constants';
 
 /** @internal **/
 export class ESQLToken implements monaco.languages.IToken {

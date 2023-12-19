@@ -7,20 +7,20 @@
  */
 
 import { CharStreams } from 'antlr4ts';
-import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
+import { getParser, ROOT_STATEMENT } from '../antlr_facade';
 // import { mathCommandDefinition } from '../../autocomplete/autocomplete_definitions';
 // import { getDurationItemsWithQuantifier } from '../../autocomplete/helpers';
-import { AstListener } from '../ast_factory';
+import { AstListener } from '../ast/ast_factory';
 import { validateAst } from './validation';
-import { ESQLAst } from '../types';
-import { ESQLErrorListener } from '../../monaco/esql_error_listener';
+import { ESQLAst } from '../ast/types';
+import { ESQLErrorListener } from '../esql_error_listener';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition } from '../definitions/types';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
-import { EditorError } from '../../../../types';
+import { EditorError } from '../types';
 
 function getCallbackMocks() {
   return {

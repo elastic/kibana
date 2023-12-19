@@ -9,14 +9,18 @@
 import { monaco } from '../../../../monaco_imports';
 import { CharStreams } from 'antlr4ts';
 import { suggest } from './autocomplete';
-import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
-import { ESQLErrorListener } from '../../monaco/esql_error_listener';
-import { AstListener } from '../ast_factory';
-import { evalFunctionsDefinitions } from '../definitions/functions';
-import { builtinFunctions } from '../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { commandDefinitions } from '../definitions/commands';
+import {
+  statsAggregationFunctionDefinitions,
+  evalFunctionsDefinitions,
+  builtinFunctions,
+  timeLiterals,
+  chronoLiterals,
+  commandDefinitions,
+  AstListener,
+  ESQLErrorListener,
+  getParser,
+  ROOT_STATEMENT,
+} from '@kbn/esql';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -103,8 +107,8 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ builtin: isBuiltinFn, name, signatures, ...defRest }) =>
-      isBuiltinFn ? `${name} $0` : `${name}($0)`
+    .map(({ type, name, signatures, ...defRest }) =>
+      type === 'builtin' ? `${name} $0` : `${name}($0)`
     );
 }
 

@@ -16,7 +16,7 @@ function createMathDefinition(
   warning?: FunctionDefinition['warning']
 ) {
   return {
-    builtin: true,
+    type: 'builtin' as const,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -53,7 +53,7 @@ function createComparisonDefinition(
   warning?: FunctionDefinition['warning']
 ) {
   return {
-    builtin: true,
+    type: 'builtin' as const,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -199,7 +199,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
     { name: 'not_rlike', description: '' },
   ].map(({ name, description }) => ({
-    builtin: true,
+    type: 'builtin' as const,
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
@@ -224,7 +224,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
     { name: 'not_in', description: '' },
   ].map(({ name, description }) => ({
-    builtin: true,
+    type: 'builtin' as const,
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
@@ -274,7 +274,7 @@ export const builtinFunctions: FunctionDefinition[] = [
       }),
     },
   ].map(({ name, description }) => ({
-    builtin: true,
+    type: 'builtin' as const,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -289,7 +289,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   })),
   {
-    builtin: true,
+    type: 'builtin' as const,
     name: 'not',
     description: i18n.translate('monaco.esql.definition.notDoc', {
       defaultMessage: 'Not',
@@ -303,7 +303,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   },
   {
-    builtin: true,
+    type: 'builtin' as const,
     name: '=',
     description: i18n.translate('monaco.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
@@ -321,6 +321,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   },
   {
     name: 'functions',
+    type: 'builtin' as const,
     description: i18n.translate('monaco.esql.definition.functionsDoc', {
       defaultMessage: 'Show ES|QL avaialble functions with signatures',
     }),
@@ -334,6 +335,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   },
   {
     name: 'info',
+    type: 'builtin' as const,
     description: i18n.translate('monaco.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),

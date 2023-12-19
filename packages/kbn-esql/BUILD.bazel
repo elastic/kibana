@@ -1,0 +1,36 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "src/**/*",
+    "index.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__fixtures__/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+
+SHARED_DEPS = [
+  "//packages/kbn-i18n",
+  "@npm//antlr4ts",
+]
+
+js_library(
+  name = "kbn-esql",
+  package_name = "@kbn/esql",
+  srcs = ["package.json"] + SRCS,
+  deps = SHARED_DEPS,
+  visibility = ["//visibility:public"],
+)

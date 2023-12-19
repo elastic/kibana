@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLLocation, ESQLMessage } from '../types';
+import type { ESQLLocation, ESQLMessage } from '../ast/types';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({

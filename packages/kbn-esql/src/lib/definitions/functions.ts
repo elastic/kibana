@@ -12,6 +12,7 @@ import { FunctionDefinition } from './types';
 export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.roundDoc', {
       defaultMessage:
         'Returns a number rounded to the decimal, specified by he closest integer value. The default is to round to an integer.',
@@ -26,6 +27,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'abs',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.absDoc', {
       defaultMessage: 'Returns the absolute value.',
     }),
@@ -38,7 +40,22 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'ceil',
+    type: 'math' as const,
+    description: i18n.translate('monaco.esql.definitions.ceilDoc', {
+      defaultMessage: 'Round a number up to the nearest integer.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'number',
+        examples: [`from index | eval ceil_value = ceil(field)`],
+      },
+    ],
+  },
+  {
     name: 'log10',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.log10Doc', {
       defaultMessage: 'Returns the log base 10.',
     }),
@@ -52,6 +69,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'pow',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.powDoc', {
       defaultMessage:
         'Returns the the value of a base (first argument) raised to a power (second argument).',
@@ -69,6 +87,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'concat',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.concatDoc', {
       defaultMessage: 'Concatenates two or more strings.',
     }),
@@ -84,6 +103,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'replace',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.replaceDoc', {
       defaultMessage:
         'The function substitutes in the string (1st argument) any match of the regular expression (2nd argument) with the replacement string (3rd argument). If any of the arguments are NULL, the result is NULL.',
@@ -102,6 +122,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'substring',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.substringDoc', {
       defaultMessage:
         'Returns a substring of a string, specified by a start position and an optional length.',
@@ -120,6 +141,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'trim',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.trimDoc', {
       defaultMessage: 'Removes leading and trailing whitespaces from strings.',
     }),
@@ -133,6 +155,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'starts_with',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.startsWithDoc', {
       defaultMessage:
         'Returns a boolean that indicates whether a keyword string starts with another string.',
@@ -150,6 +173,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'ends_with',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.endsWithDoc', {
       defaultMessage:
         'Returns a boolean that indicates whether a keyword string ends with another string:',
@@ -166,7 +190,25 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'least',
+    type: 'math' as const,
+    description: i18n.translate('monaco.esql.definitions.leastDoc', {
+      defaultMessage: 'Returns the minimum value from many columns.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'first', type: 'number' },
+          { name: 'rest', type: 'number' },
+        ],
+        returnType: 'number',
+        examples: ['from index | eval l = least(a, b)'],
+      },
+    ],
+  },
+  {
     name: 'split',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.splitDoc', {
       defaultMessage: 'Splits a single valued string into multiple strings.',
     }),
@@ -183,6 +225,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_string',
+    type: 'math' as const,
     alias: ['to_str'],
     description: i18n.translate('monaco.esql.definitions.toStringDoc', {
       defaultMessage: 'Converts to string.',
@@ -197,6 +240,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_boolean',
+    type: 'math' as const,
     alias: ['to_bool'],
     description: i18n.translate('monaco.esql.definitions.toBooleanDoc', {
       defaultMessage: 'Converts to boolean.',
@@ -211,6 +255,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_datetime',
+    type: 'math' as const,
     alias: ['to_dt'],
     description: i18n.translate('monaco.esql.definitions.toDateTimeDoc', {
       defaultMessage: 'Converts to date.',
@@ -225,6 +270,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_degrees',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.toDegreesDoc', {
       defaultMessage: 'Coverts to degrees',
     }),
@@ -238,6 +284,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_double',
+    type: 'math' as const,
     alias: ['to_dbl'],
     description: i18n.translate('monaco.esql.definitions.toDoubleDoc', {
       defaultMessage: 'Converts to double.',
@@ -252,6 +299,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_integer',
+    type: 'math' as const,
     alias: ['to_int'],
     description: i18n.translate('monaco.esql.definitions.toIntegerDoc', {
       defaultMessage: 'Converts to integer.',
@@ -266,6 +314,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_long',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.toLongDoc', {
       defaultMessage: 'Converts to long.',
     }),
@@ -279,6 +328,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_radians',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.toRadiansDoc', {
       defaultMessage: 'Converts to radians',
     }),
@@ -292,6 +342,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_unsigned_long',
+    type: 'math' as const,
     alias: ['to_ul', 'to_ulong'],
     description: i18n.translate('monaco.esql.definitions.toUnsignedLongDoc', {
       defaultMessage: 'Converts to unsigned long.',
@@ -306,6 +357,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_ip',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.toIpDoc', {
       defaultMessage: 'Converts to ip.',
     }),
@@ -319,6 +371,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_version',
+    type: 'math' as const,
     alias: ['to_ver'],
     description: i18n.translate('monaco.esql.definitions.toVersionDoc', {
       defaultMessage: 'Converts to version.',
@@ -338,6 +391,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'date_extract',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.dateExtractDoc', {
       defaultMessage: `Extracts parts of a date, like year, month, day, hour. The supported field types are those provided by java.time.temporal.ChronoField`,
     }),
@@ -359,6 +413,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'date_format',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.dateFormatDoc', {
       defaultMessage: `Returns a string representation of a date in the provided format. If no format is specified, the "yyyy-MM-dd'T'HH:mm:ss.SSSZ" format is used.`,
     }),
@@ -375,6 +430,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'date_trunc',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.dateTruncDoc', {
       defaultMessage: `Rounds down a date to the closest interval. Intervals can be expressed using the timespan literal syntax.`,
     }),
@@ -391,6 +447,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'date_parse',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.dateParseDoc', {
       defaultMessage: `Parse dates from strings.`,
     }),
@@ -409,6 +466,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'auto_bucket',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.autoBucketDoc', {
       defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
     }),
@@ -439,6 +497,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'is_finite',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
       defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
     }),
@@ -452,6 +511,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'is_infinite',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
       defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
     }),
@@ -465,6 +525,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'is_nan',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.isNanDoc', {
       defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
     }),
@@ -478,6 +539,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'case',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.caseDoc', {
       defaultMessage:
         'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
@@ -498,6 +560,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'length',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.lengthDoc', {
       defaultMessage: 'Returns the character length of a string.',
     }),
@@ -511,6 +574,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'acos',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.acosDoc', {
       defaultMessage: 'Inverse cosine trigonometric function',
     }),
@@ -524,6 +588,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'asin',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.asinDoc', {
       defaultMessage: 'Inverse sine trigonometric function',
     }),
@@ -537,6 +602,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'atan',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.atanDoc', {
       defaultMessage: 'Inverse tangent trigonometric function',
     }),
@@ -550,6 +616,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'atan2',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.atan2Doc', {
       defaultMessage:
         'The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane',
@@ -567,6 +634,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'coalesce',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.coalesceDoc', {
       defaultMessage: 'Returns the first non-null value.',
     }),
@@ -581,6 +649,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'cos',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.cosDoc', {
       defaultMessage: 'Cosine trigonometric function',
     }),
@@ -594,6 +663,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'cosh',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.coshDoc', {
       defaultMessage: 'Cosine hyperbolic function',
     }),
@@ -607,6 +677,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'floor',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.floorDoc', {
       defaultMessage: 'Round a number down to the nearest integer.',
     }),
@@ -620,6 +691,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'greatest',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.greatestDoc', {
       defaultMessage: 'Returns the maximum value from many columns.',
     }),
@@ -634,6 +706,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'left',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.leftDoc', {
       defaultMessage:
         'Return the substring that extracts length chars from the string starting from the left.',
@@ -650,6 +723,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    type: 'math' as const,
     name: 'ltrim',
     description: i18n.translate('monaco.esql.definitions.ltrimDoc', {
       defaultMessage: 'Removes leading whitespaces from strings.',
@@ -664,6 +738,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'now',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.nowDoc', {
       defaultMessage: 'Returns current date and time.',
     }),
@@ -677,6 +752,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'right',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.rightDoc', {
       defaultMessage:
         'Return the substring that extracts length chars from the string starting from the right.',
@@ -694,6 +770,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'rtrim',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.rtrimDoc', {
       defaultMessage: 'Removes trailing whitespaces from strings.',
     }),
@@ -707,6 +784,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sin',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.sinDoc', {
       defaultMessage: 'Sine trigonometric function.',
     }),
@@ -720,6 +798,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sinh',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.sinhDoc', {
       defaultMessage: 'Sine hyperbolic function.',
     }),
@@ -733,6 +812,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'sqrt',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.sqrtDoc', {
       defaultMessage: 'Returns the square root of a number. ',
     }),
@@ -746,6 +826,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'tan',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.tanDoc', {
       defaultMessage: 'Tangent trigonometric function.',
     }),
@@ -759,6 +840,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'tanh',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.tanhDoc', {
       defaultMessage: 'Tangent hyperbolic function.',
     }),
@@ -772,6 +854,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'cidr_match',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.cidrMatchDoc', {
       defaultMessage:
         'The function takes a first parameter of type IP, followed by one or more parameters evaluated to a CIDR specificatione.',
@@ -793,6 +876,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_avg',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvAvgDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the average of all of the values.',
@@ -807,6 +891,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_concat',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvConcatDoc', {
       defaultMessage:
         'Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter',
@@ -824,6 +909,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_count',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvCountDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing a count of the number of values',
@@ -838,6 +924,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_dedupe',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvDedupeDoc', {
       defaultMessage: 'Removes duplicates from a multivalued field',
     }),
@@ -851,6 +938,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_max',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvMaxDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the maximum value.',
@@ -865,6 +953,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_min',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvMinDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the minimum value.',
@@ -879,6 +968,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_median',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvMedianDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the median value.',
@@ -893,6 +983,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_sum',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.mvSumDoc', {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the sum of all of the values.',
@@ -907,6 +998,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'pi',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.piDoc', {
       defaultMessage: 'The ratio of a circle’s circumference to its diameter.',
     }),
@@ -920,6 +1012,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'e',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.eDoc', {
       defaultMessage: 'Euler’s number.',
     }),
@@ -933,6 +1026,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'tau',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.tauDoc', {
       defaultMessage: 'The ratio of a circle’s circumference to its radius.',
     }),

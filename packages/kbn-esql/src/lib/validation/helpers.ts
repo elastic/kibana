@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAst } from '../types';
+import type { ESQLAst } from '../ast/types';
 import type { ESQLPolicy } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {

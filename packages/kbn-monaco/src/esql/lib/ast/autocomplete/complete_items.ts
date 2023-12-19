@@ -7,11 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  builtinFunctions,
+  commandDefinitions,
+  evalFunctionsDefinitions,
+  statsAggregationFunctionDefinitions,
+} from '@kbn/esql';
 import type { AutocompleteCommandDefinition } from './types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { builtinFunctions } from '../definitions/builtin';
-import { evalFunctionsDefinitions } from '../definitions/functions';
-import { getAllCommands } from '../shared/helpers';
 import {
   getAutocompleteFunctionDefinition,
   getAutocompleteBuiltinDefinition,
@@ -55,9 +57,8 @@ export const getBuiltinCompatibleFunctionDefinition = (
     .map(getAutocompleteBuiltinDefinition);
 };
 
-export const commandAutocompleteDefinitions: AutocompleteCommandDefinition[] = getAllCommands().map(
-  getAutocompleteCommandDefinition
-);
+export const commandAutocompleteDefinitions: AutocompleteCommandDefinition[] =
+  commandDefinitions.map(getAutocompleteCommandDefinition);
 
 export const pipeCompleteItem: AutocompleteCommandDefinition = {
   label: '|',

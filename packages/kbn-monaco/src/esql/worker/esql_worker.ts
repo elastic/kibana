@@ -7,11 +7,9 @@
  */
 
 import { CharStreams } from 'antlr4ts';
+import { AstListener, ESQLErrorListener, getParser, ROOT_STATEMENT } from '@kbn/esql';
 import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
-import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
-import { AstListener } from '../lib/ast/ast_factory';
-import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;

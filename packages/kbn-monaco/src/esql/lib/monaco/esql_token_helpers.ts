@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { ESQL_TOKEN_POSTFIX } from '@kbn/esql';
 import { monaco } from '../../../monaco_imports';
-import { nonNullable } from '../ast/ast_helpers';
-import { ESQL_TOKEN_POSTFIX } from '../constants';
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export function enrichTokensWithFunctionsMetadata(
   tokens: monaco.languages.IToken[]

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../types';
+import type { ESQLColumn, ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../ast/types';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
 import {

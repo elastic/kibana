@@ -7,9 +7,6 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type { monaco } from '../../../../monaco_imports';
-import type { AutocompleteCommandDefinition } from './types';
-import { nonNullable } from '../ast_helpers';
 import {
   columnExists,
   getColumnHit,
@@ -27,18 +24,29 @@ import {
   isSourceItem,
   isTimeIntervalItem,
   monacoPositionToOffset,
-} from '../shared/helpers';
-import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
-import type {
-  AstProviderFn,
-  ESQLAst,
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLSingleAstItem,
-} from '../types';
-import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+  collectVariables,
+  excludeVariablesFromCurrentCommand,
+  EDITOR_MARKER,
+  getAstContext,
+  removeMarkerArgFromArgsList,
+  getFieldsByTypeHelper,
+  getPolicyHelper,
+  getSourcesHelper,
+  type ESQLCallbacks,
+  type ESQLPolicy,
+  type ESQLRealField,
+  type ESQLVariable,
+  type ReferenceMaps,
+  type AstProviderFn,
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLCommandOption,
+  type ESQLFunction,
+  type ESQLSingleAstItem,
+} from '@kbn/esql';
+import type { monaco } from '../../../../monaco_imports';
+import type { AutocompleteCommandDefinition } from './types';
 import {
   commaCompleteItem,
   commandAutocompleteDefinitions,
@@ -61,14 +69,6 @@ import {
   buildOptionDefinition,
   TRIGGER_SUGGESTION_COMMAND,
 } from './factories';
-import { EDITOR_MARKER } from '../shared/constants';
-import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
-import {
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
 
 type GetSourceFn = () => Promise<AutocompleteCommandDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -78,6 +78,10 @@ type GetFieldsByTypeFn = (
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<AutocompleteCommandDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 function hasSameArgBothSides(assignFn: ESQLFunction) {
   if (assignFn.name === '=' && isColumnItem(assignFn.args[0]) && assignFn.args[1]) {
@@ -747,7 +751,7 @@ async function getBuiltinFunctionNextArgument(
           // technically another boolean value should be suggested, but it is a better experience
           // to actually suggest a wider set of fields/functions
           [
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
               ? 'any'
               : finalType,
           ],
@@ -939,7 +943,7 @@ async function getFunctionArgsSuggestions(
           ? {
               ...suggestion,
               insertText:
-                hasMoreMandatoryArgs && !fnDefinition.builtin
+                hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
                   ? `${suggestion.insertText},`
                   : suggestion.insertText,
             }
@@ -949,7 +953,8 @@ async function getFunctionArgsSuggestions(
 
     return suggestions.map(({ insertText, ...rest }) => ({
       ...rest,
-      insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
+      insertText:
+        hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${insertText},` : insertText,
     }));
   }
   return mathCommandDefinition;

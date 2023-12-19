@@ -13,14 +13,9 @@ import type {
   ESQLFunction,
   ESQLCommand,
   ESQLCommandOption,
-} from '../types';
+} from '../ast/types';
 import { EDITOR_MARKER } from './constants';
-import {
-  isOptionItem,
-  isColumnItem,
-  getLastCharFromTrimmed,
-  getFunctionDefinition,
-} from './helpers';
+import { isOptionItem, isColumnItem, getLastCharFromTrimmed, isBuiltinFunction } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
   for (const node of nodes) {
@@ -113,9 +108,6 @@ function findAstPosition(ast: ESQLAst, offset: number) {
 
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
-}
-function isBuiltinFunction(node: ESQLFunction) {
-  return Boolean(getFunctionDefinition(node.name)?.builtin);
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {

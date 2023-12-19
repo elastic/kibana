@@ -7,8 +7,8 @@
  */
 
 import type { ANTLRErrorListener, Recognizer, RecognitionException } from 'antlr4ts';
-import type { EditorError } from '../../../types';
-import { createError } from '../ast/ast_errors';
+import type { EditorError } from './types';
+import { createError } from './ast/ast_errors';
 
 export class ESQLErrorListener implements ANTLRErrorListener<any> {
   private errors: EditorError[] = [];

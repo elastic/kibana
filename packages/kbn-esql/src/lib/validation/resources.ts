@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { nonNullable } from '../ast_helpers';
+import { nonNullable } from '../ast/ast_helpers';
 import { createMapFromList, isSourceItem } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
@@ -14,7 +14,7 @@ import {
   getSourcesHelper,
 } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import type { ESQLCommand } from '../types';
+import type { ESQLCommand } from '../ast/types';
 import { buildQueryForFieldsFromSource, buildQueryForFieldsInPolicies } from './helpers';
 import type { ESQLRealField, ESQLPolicy } from './types';
 

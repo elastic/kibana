@@ -25,6 +25,7 @@
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/ui-theme",
+    "@kbn/esql",
   ],
   "exclude": [
     "target/**/*",

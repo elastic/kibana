@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ESQL_LANG_ID, type ESQLCallbacks } from '@kbn/esql';
 import { monaco } from '../monaco_imports';
-
-import { ESQL_LANG_ID } from './lib/constants';
 
 import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import type { ESQLCallbacks } from './lib/ast/shared/types';
 import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();

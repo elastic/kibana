@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isColumnItem } from '../shared/helpers';
-import { ESQLColumn, ESQLCommand, ESQLMessage } from '../types';
+import { ESQLColumn, ESQLCommand, ESQLMessage } from '../ast/types';
 import {
   appendSeparatorOption,
   asOption,

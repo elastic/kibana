@@ -7,6 +7,7 @@
  */
 
 import { CharStreams, type Token } from 'antlr4ts';
+import { getLexer, ESQL_TOKEN_POSTFIX } from '@kbn/esql';
 import { monaco } from '../../../monaco_imports';
 import { ANTLREErrorListener } from '../../../common/error_listener';
 
@@ -14,8 +15,6 @@ import { ESQLToken } from './esql_token';
 import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
-import { getLexer } from '../antlr_facade';
-import { ESQL_TOKEN_POSTFIX } from '../constants';
 import { enrichTokensWithFunctionsMetadata } from './esql_token_helpers';
 
 const EOF = -1;

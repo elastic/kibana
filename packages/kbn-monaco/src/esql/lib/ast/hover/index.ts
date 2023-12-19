@@ -7,13 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  monacoPositionToOffset,
+  getAstContext,
+  getPolicyHelper,
+  getFunctionDefinition,
+  getFunctionSignatures,
+  isSourceItem,
+  type AstProviderFn,
+  type ESQLCallbacks,
+} from '@kbn/esql';
 import type { monaco } from '../../../../monaco_imports';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { getAstContext } from '../shared/context';
-import { monacoPositionToOffset, getFunctionDefinition, isSourceItem } from '../shared/helpers';
-import { getPolicyHelper } from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
-import type { AstProviderFn } from '../types';
 
 export async function getHoverItem(
   model: monaco.editor.ITextModel,

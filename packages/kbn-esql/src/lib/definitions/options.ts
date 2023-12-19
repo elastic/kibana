@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isLiteralItem } from '../shared/helpers';
-import { ESQLCommandOption, ESQLMessage } from '../types';
+import { ESQLCommandOption, ESQLMessage } from '../ast/types';
 import { CommandOptionsDefinition } from './types';
 
 export const byOption: CommandOptionsDefinition = {

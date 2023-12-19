@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EditorError } from '../../../../types';
-import { ESQLMessage, ESQLLocation } from '../types';
+import { EditorError } from '../types';
+import { ESQLMessage, ESQLLocation } from '../ast/types';
 
 export interface ESQLVariable {
   name: string;

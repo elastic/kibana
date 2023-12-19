@@ -7,17 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AutocompleteCommandDefinition } from './types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionsDefinitions } from '../definitions/functions';
-import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
-  FunctionDefinition,
+  chronoLiterals,
   CommandDefinition,
   CommandOptionsDefinition,
-} from '../definitions/types';
-import { getCommandDefinition } from '../shared/helpers';
+  evalFunctionsDefinitions,
+  FunctionDefinition,
+  getCommandDefinition,
+  getCommandSignature,
+  getFunctionSignatures,
+  statsAggregationFunctionDefinitions,
+  timeLiterals,
+} from '@kbn/esql';
+import { AutocompleteCommandDefinition } from './types';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);

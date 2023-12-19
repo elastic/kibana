@@ -45,7 +45,7 @@ import type {
   ESQLMessage,
   ESQLSingleAstItem,
   ESQLSource,
-} from '../types';
+} from '../ast/types';
 import { getMessageFromId, createMessage } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';

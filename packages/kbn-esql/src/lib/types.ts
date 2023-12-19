@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { ESQL_LANG_ID, ESQL_THEME_ID, type ESQLCallbacks } from '@kbn/esql';
-export { ESQLLang } from './language';
-export { buildESQlTheme } from './lib/monaco/esql_theme';
+export interface EditorError {
+  severity: 1 | 2 | 4 | 8; // monaco.MarkerSeverity values
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  message: string;
+}
