@@ -1148,6 +1148,14 @@ describe('validation logic', () => {
       'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
       'Unknown column [percentile]',
     ]);
+    testErrorsAndWarnings('from a | stats count(`numberField`)', []);
+
+    for (const subCommand of ['keep', 'drop', 'eval']) {
+      testErrorsAndWarnings(
+        `from a | stats count(\`numberField\`) | ${subCommand} \`count(\`\`numberField\`\`)\` `,
+        []
+      );
+    }
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField) by stringField, percentile(numberField) by ipField',
