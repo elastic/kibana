@@ -787,7 +787,7 @@ function getPolicyWithSecretReferences(
       const isLast = secretPathComponentIndex === secretPath.path.length - 1;
 
       if (isLast) {
-        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex]?.id);
       }
 
       return acc[val];
