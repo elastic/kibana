@@ -82,7 +82,7 @@ export const esqlServiceLogCount = createEsqlQueryEvaluation({
 });
 
 //Using synthtrace degraded_logs.ts
-export const fiveLatestLogs = createEsqlQueryEvaluation({
+export const esqlFiveLatestLogs = createEsqlQueryEvaluation({
   question:
     'From `.ds-logs-synth*`, I want to see the 5 latest messages, I want to display only the date that they were indexed in and their log.level and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
   expected: `FROM .ds-logs-synth*
@@ -90,7 +90,18 @@ export const fiveLatestLogs = createEsqlQueryEvaluation({
 | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
 | KEEP formatted_date, log.level, message
 | LIMIT 5`,
-  execute: false,
+});
+
+//Using synthtrace degraded_logs.ts
+export const esqlLogsErrorQuery = createEsqlQueryEvaluation({
+  question: 'I have logs in `.ds-logs-synth*` . Errors are found when log.level contais the value ERROR. generate a query to obtain the error rate as a percetage of the total logs per day for the last day',
+  expected: `FROM .ds-logs-synth*
+| WHERE @timestamp >= NOW() - 1 day
+| EVAL is_error = CASE(log.level == "ERROR", 1, 0)
+| EVAL bucket = DATE_TRUNC(1 day, @timestamp)
+| STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY bucket
+| EVAL error_rate = total_errors / total_logs * 100
+| SORT bucket DESC`,
 });
 
 //Using synthtrace logs_and_metrics.ts
@@ -115,6 +126,26 @@ export const esqlMetricBucket = createEsqlQueryEvaluation({
 | LIMIT 10`,
 });
 
+//Using synthtrace distributed_trace_long.ts
+export const esqlApmTraceDurationQuery = createEsqlQueryEvaluation({
+  question:
+    'My APM data is in `.ds-traces-apm-default-*`. Generate a query to find the average for `transaction.duration.us` per service over the last hour',
+  expected: `FROM .ds-traces-apm-default-*
+  | WHERE @timestamp > NOW() - 1 hour
+  | STATS AVG(transaction.duration.us) BY service.name`,
+});
+
+//Using synthtrace distributed_trace_long.ts
+export const esqlApmServiceInventoryQuery = createEsqlQueryEvaluation({
+  question:
+    'My data is in `.ds-traces-apm-default-*`. I want a query for the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests by service in the last 24 hours.',
+  expected: `FROM .ds-traces-apm-default-*
+| WHERE @timestamp >= NOW() - 24 hours
+| EVAL is_success = CASE(event.outcome == "success", 1, 0)
+| EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
+| STATS avg_duration = AVG(transaction.duration.us), total_success = SUM(is_success), total_failure = SUM(is_failure), total_requests = COUNT(*) BY service.name
+| EVAL success_rate = total_success / (total_success + total_failure)`,
+});
 
 // export const esqlMetricsApmQuery = createEsqlQueryEvaluation({
 //   question:
@@ -134,16 +165,6 @@ export const esqlMetricBucket = createEsqlQueryEvaluation({
 //   | LIMIT 10`,
 // });
 
-// export const logsAvgCpuQuery = createEsqlQueryEvaluation({
-//   question:
-//     'My logs data (ECS) is in `logs-*`. Show me a query that gets the average CPU per host, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
-//   expected: `FROM logs-*
-//   | WHERE @timestamp >= NOW() - 15 minutes
-//   | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
-//   | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY bucket, host.name
-//   | LIMIT 10`,
-// });
-
 // export const apmExitSpanQuery = createEsqlQueryEvaluation({
 //   question: `I've got APM data in \`metrics-apm\`. Filter on \`metricset.name:service_destination\` and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
 //   expected: `FROM metrics-apm
@@ -156,42 +177,12 @@ export const esqlMetricBucket = createEsqlQueryEvaluation({
 //     BY span.destination.service.resource`,
 // });
 
-// export const apmServiceInventoryQuery = createEsqlQueryEvaluation({
-//   question:
-//     'I want to show a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
-//   expected: `FROM traces-apm*
-//   | WHERE @timestamp >= NOW() - 24 hours
-//   | EVAL successful = CASE(event.outcome == "success", 1, 0),
-//     failed = CASE(event.outcome == "failure", 1, 0)
-//   | STATS success_rate = AVG(successful), 
-//     avg_duration = AVG(transaction.duration), 
-//     total_requests = COUNT(transaction.id) BY service.name`,
-// });
 
 // export const metricbeatCpuQuery = createEsqlQueryEvaluation({
 //   question: `from \`metricbeat*\`, using ES|QL, I want to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
 //   expected: `FROM metricbeat*
 //   | EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
 //   | STATS AVG(cpu_pct_normalized) BY host.name`,
-// });
-
-// export const apmTraceDurationQuery = createEsqlQueryEvaluation({
-//   question:
-//     'My APM data is in `traces-apm*`. What’s the average for `transaction.duration.us` per service over the last hour?',
-//   expected: `FROM traces-apm*
-//   | WHERE @timestamp > NOW() - 1 hour
-//   | STATS AVG(transaction.duration.us) BY service.name`,
-// });
-
-// export const fiveEarliestEmployeesQuery = createEsqlQueryEvaluation({
-//   question:
-//     'From employees, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the date as e.g. "September 2019".',
-//   expected: `FROM employees
-//   | EVAL hire_date_formatted = DATE_FORMAT(hire_date, ""MMMM yyyy"")
-//   | SORT hire_date
-//   | KEEP emp_no, hire_date_formatted
-//   | LIMIT 5`,
-//   execute: false,
 // });
 
 // export const employeesWithPaginationQuery = createEsqlQueryEvaluation({
@@ -207,17 +198,6 @@ export const esqlMetricBucket = createEsqlQueryEvaluation({
 //   | DISSECT message "%{} duration: %{query_duration} ms"
 //   | EVAL query_duration_num = TO_DOUBLE(query_duration)
 //   | STATS avg_duration = AVG(query_duration_num)`,
-// });
-
-
-// export const highCardinalityLogsErrorQuery = createEsqlQueryEvaluation({
-//   question: `i have logs in high-cardinality-data-fake_stack.admin-console-* . errors are found when log.level contais the value ERROR. generate a query to obtain the error rate as a percetage of the total logs per day for the last 7 days`,
-//   expected: `FROM high-cardinality-data-fake_stack.admin-console-*
-//   | WHERE @timestamp >= NOW() - 7 days
-//   | EVAL error = CASE(log.level == "ERROR", 1, 0), total = 1
-//   | EVAL bucket = DATE_TRUNC(1 day, @timestamp)
-//   | STATS total_errors = SUM(error), total_logs = SUM(total) BY bucket
-//   | EVAL error_rate = (total_errors / total_logs) * 100`,
 // });
 
 // export const nycTaxisDropoffTimeQuery = createEsqlQueryEvaluation({
