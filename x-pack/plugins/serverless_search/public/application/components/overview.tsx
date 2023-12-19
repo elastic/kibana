@@ -426,6 +426,7 @@ const OverviewFooter = () => {
               </EuiFlexGroup>
             }
             href={docLinks.gettingStartedSearch}
+            target="_blank"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
