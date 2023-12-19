@@ -61,7 +61,8 @@ const useSelectedTab = (
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
     if (!path) return defaultTab;
-    return tabs.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
+
+    return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
   }, [path, tabs]);
 
   const setSelectedTabId = (tabId: UserDetailsLeftPanelTab) => {

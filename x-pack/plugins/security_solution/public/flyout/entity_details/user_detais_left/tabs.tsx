@@ -11,7 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type { ManagedUserHits } from '../../../../common/search_strategy/security_solution/users/managed_details';
+import type {
+  ManagedUserHits,
+  ManagedUserHit,
+} from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID, RISK_INPUTS_TAB_TEST_ID } from './test_ids';
 import { RiskInputsTab } from './tabs/risk_inputs';
 import { AssetDocumentTab } from './tabs/asset_document';
@@ -37,62 +40,70 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
     if (alertIds.length > 0) {
-      tabs.push({
-        id: UserDetailsLeftPanelTab.RISK_INPUTS,
-        'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
-            defaultMessage="Risk Inputs"
-          />
-        ),
-        content: <RiskInputsTab alertIds={alertIds} />,
-      });
+      tabs.push(getRiskInputTab(alertIds));
     }
 
     if (oktaManagedUser) {
-      tabs.push({
-        id: UserDetailsLeftPanelTab.OKTA,
-        'data-test-subj': OKTA_TAB_TEST_ID,
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.userDetails.okta.tabLabel"
-            defaultMessage="Okta Data"
-          />
-        ),
-        content: (
-          <RightPanelProvider
-            id={oktaManagedUser._id}
-            indexName={oktaManagedUser._index}
-            scopeId={UserAssetTableType.assetOkta}
-          >
-            <AssetDocumentTab />
-          </RightPanelProvider>
-        ),
-      });
+      tabs.push(getOktaTab(oktaManagedUser));
     }
 
     if (entraManagedUser) {
-      tabs.push({
-        id: UserDetailsLeftPanelTab.ENTRA,
-        'data-test-subj': ENTRA_TAB_TEST_ID,
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.userDetails.entra.tabLabel"
-            defaultMessage="Entra Data"
-          />
-        ),
-        content: (
-          <RightPanelProvider
-            id={entraManagedUser._id}
-            indexName={entraManagedUser._index}
-            scopeId={UserAssetTableType.assetEntra}
-          >
-            <AssetDocumentTab />
-          </RightPanelProvider>
-        ),
-      });
+      tabs.push(getEntraTab(entraManagedUser));
     }
 
     return tabs;
   }, [alertIds, managedUser]);
+
+const getRiskInputTab = (alertIds: string[]) => ({
+  id: UserDetailsLeftPanelTab.RISK_INPUTS,
+  'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
+      defaultMessage="Risk Inputs"
+    />
+  ),
+  content: <RiskInputsTab alertIds={alertIds} />,
+});
+
+const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
+  id: UserDetailsLeftPanelTab.OKTA,
+  'data-test-subj': OKTA_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.userDetails.okta.tabLabel"
+      defaultMessage="Okta Data"
+    />
+  ),
+  content: (
+    <RightPanelProvider
+      id={oktaManagedUser._id}
+      indexName={oktaManagedUser._index}
+      scopeId={UserAssetTableType.assetOkta}
+    >
+      <AssetDocumentTab />
+    </RightPanelProvider>
+  ),
+});
+
+const getEntraTab = (entraManagedUser: ManagedUserHit) => {
+  return {
+    id: UserDetailsLeftPanelTab.ENTRA,
+    'data-test-subj': ENTRA_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.userDetails.entra.tabLabel"
+        defaultMessage="Entra Data"
+      />
+    ),
+    content: (
+      <RightPanelProvider
+        id={entraManagedUser._id}
+        indexName={entraManagedUser._index}
+        scopeId={UserAssetTableType.assetEntra}
+      >
+        <AssetDocumentTab />
+      </RightPanelProvider>
+    ),
+  };
+};
