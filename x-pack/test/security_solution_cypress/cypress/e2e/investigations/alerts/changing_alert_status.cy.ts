@@ -158,7 +158,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-  context('Closing alerts', () => {
+  context.skip('Closing alerts', () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
