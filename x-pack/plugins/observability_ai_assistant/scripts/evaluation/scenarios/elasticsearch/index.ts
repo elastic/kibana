@@ -49,15 +49,7 @@ export const index_management_count: EvaluationFunction = async ({ chatClient })
 
 export const index_management_index_docs: EvaluationFunction = async ({ chatClient }) => {
   let conversation = await chatClient.complete(
-    'Delete the testing_ai_assistant index if it exists'
-  );
-
-  conversation = await chatClient.complete(
-    conversation.conversationId!,
-    conversation.messages.concat({
-      content: 'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"',
-      role: MessageRole.User
-    })
+    'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
   );
 
   conversation = await chatClient.complete(
@@ -68,11 +60,19 @@ export const index_management_index_docs: EvaluationFunction = async ({ chatClie
     })
   );
 
+  conversation = await chatClient.complete(
+    conversation.conversationId!,
+    conversation.messages.concat({
+      content: 'Delete the testing_ai_assistant index',
+      role: MessageRole.User
+    })
+  );
+
   const evaluation = await chatClient.evaluate(conversation, [
-    'Checks if the testing_ai_assistant index exists, and if it does deletes it',
     'Calls the Elasticsearch function to create the index testing_ai_assistant and add the documents to it',
     'Successfully created index and adds two documents to it',
     'Calls get_dataset_info and retrieves the field types of the index',
+    'Deletes the testing_ai_assistant index'
   ]);
 
   return evaluation;
@@ -86,16 +86,16 @@ export const index_stats: EvaluationFunction = async ({ chatClient }) => {
   conversation = await chatClient.complete(
     conversation.conversationId!,
     conversation.messages.concat({
-      content: 'What are the the store stats of the index?',
+      content: 'What are the the refresh stats of the index?',
       role: MessageRole.User
     })
   );
 
   const evaluation = await chatClient.evaluate(conversation, [
-    'Calls the Elasticsearch function with method: .kibana-observability-ai-assistant-kb-*/_stats',
-    'Returns the index stats',
     'Calls the Elasticsearch function with method: .kibana-observability-ai-assistant-kb-*/_stats/store',
     'Returns the index store stats',
+    'Calls the Elasticsearch function with method: .kibana-observability-ai-assistant-kb-*/_stats/refresh',
+    'Returns the index refresh stats',
   ]);
 
   return evaluation;
