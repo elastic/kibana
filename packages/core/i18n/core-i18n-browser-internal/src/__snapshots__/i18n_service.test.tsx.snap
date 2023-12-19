@@ -7,6 +7,7 @@ exports[`#start() returns \`Context\` component 1`] = `
       Object {
         "mapping": Object {
           "euiAbsoluteTab.dateFormatError": [Function],
+          "euiAbsoluteTab.dateFormatHint": "Press the Enter key to parse as a date.",
           "euiAccordionChildrenLoading.message": "Loading",
           "euiAutoRefresh.autoRefreshLabel": "Auto refresh",
           "euiAutoRefresh.buttonLabelOff": "Auto refresh is off",

@@ -26,7 +26,7 @@ export const SAVED = i18n.translate('xpack.securitySolution.timeline.properties.
 export const UNSAVED_CHANGES = i18n.translate(
   'xpack.securitySolution.timeline.properties.hasChangesLabel',
   {
-    defaultMessage: 'Has unsaved changes',
+    defaultMessage: 'Unsaved changes',
   }
 );
 
