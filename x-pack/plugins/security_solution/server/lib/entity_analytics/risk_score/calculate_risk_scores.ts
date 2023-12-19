@@ -225,11 +225,13 @@ const processScores = async ({
   assetCriticalityService,
   buckets,
   identifierField,
+  logger,
   now,
 }: {
   assetCriticalityService: AssetCriticalityService;
   buckets: RiskScoreBucket[];
   identifierField: string;
+  logger: Logger;
   now: string;
 }): Promise<RiskScore[]> => {
   if (buckets.length === 0) {
@@ -247,7 +249,14 @@ const processScores = async ({
     id_value: bucket.key[identifierField],
   }));
 
-  const criticalities = await assetCriticalityService.getCriticalitiesByIdentifiers(identifiers);
+  let criticalities: AssetCriticalityRecord[] = [];
+  try {
+    criticalities = await assetCriticalityService.getCriticalitiesByIdentifiers(identifiers);
+  } catch (e) {
+    logger.warn(
+      `Error retrieving criticality: ${e}. Scoring will proceed without criticality information.`
+    );
+  }
 
   return buckets.map((bucket) => {
     const criticality = criticalities.find(
@@ -343,12 +352,14 @@ export const calculateRiskScores = async ({
       assetCriticalityService,
       buckets: hostBuckets,
       identifierField: 'host.name',
+      logger,
       now,
     });
     const userScores = await processScores({
       assetCriticalityService,
       buckets: userBuckets,
       identifierField: 'user.name',
+      logger,
       now,
     });
 
