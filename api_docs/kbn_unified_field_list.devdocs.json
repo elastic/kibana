@@ -648,8 +648,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           ", field: ",
           {
@@ -701,8 +701,8 @@
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsStart",
-                "text": "UiActionsStart"
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
               }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
@@ -979,8 +979,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           ", field: ",
           {
@@ -1016,8 +1016,8 @@
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsStart",
-                "text": "UiActionsStart"
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
               }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
@@ -1115,8 +1115,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           ", contextualFields: string[], originatingApp: string, dataView: ",
           {
@@ -1152,8 +1152,8 @@
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsStart",
-                "text": "UiActionsStart"
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
               }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_visualize_button/visualize_trigger_utils.ts",
@@ -1270,8 +1270,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           " | undefined; } & { dataViewFieldEditor?: ",
           {
@@ -5419,8 +5419,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           " | undefined; } & { dataViewFieldEditor?: ",
           {

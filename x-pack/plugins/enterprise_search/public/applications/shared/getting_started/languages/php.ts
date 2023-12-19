@@ -10,10 +10,12 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToPHP } from './helpers';
 
 export const phpDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `$params = [
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `$params = [
   'index' => '${indexName}',
   'body'  => [
     'q' => 'snow'
@@ -35,7 +37,11 @@ print_r($response->asArray());`,
   },
   iconType: 'php.svg',
   id: Languages.PHP,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToPHP(extraIngestDocumentValues) : '';
     return `$params = [${ingestPipeline ? `\n  'pipeline' => '${ingestPipeline}',` : ''}
   'body' => [
