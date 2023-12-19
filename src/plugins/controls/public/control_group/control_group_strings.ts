@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   manageControl: {
@@ -35,10 +36,6 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
           defaultMessage: 'Data view',
         }),
-      noControlTypeMessage: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.noControlTypeMessage', {
-          defaultMessage: 'No field selected yet',
-        }),
       getFieldTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
           defaultMessage: 'Field',
@@ -47,6 +44,46 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.controlTypesTitle', {
           defaultMessage: 'Control type',
         }),
+      getControlTypeErrorMessage: ({
+        fieldSelected,
+        controlType,
+      }: {
+        fieldSelected?: boolean;
+        controlType?: string;
+      }) => {
+        if (!fieldSelected) {
+          return i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
+            {
+              defaultMessage: 'Select a field first.',
+            }
+          );
+        }
+
+        switch (controlType) {
+          /**
+           * Note that options list controls are currently compatible with every field type; so, there is no
+           * need to have a special error message for these.
+           */
+          case RANGE_SLIDER_CONTROL: {
+            return i18n.translate(
+              'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.rangeSlider',
+              {
+                defaultMessage: 'Range sliders are only compatible with number fields.',
+              }
+            );
+          }
+          default: {
+            /** This shouldn't ever happen - but, adding just in case as a fallback. */
+            return i18n.translate(
+              'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.default',
+              {
+                defaultMessage: 'Select a compatible control type.',
+              }
+            );
+          }
+        }
+      },
     },
     displaySettings: {
       getFormGroupTitle: () =>
@@ -231,6 +268,7 @@ export const ControlGroupStrings = {
             'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
         }),
     },
+    /** TODO: These translations aren't used but they will be once https://github.com/elastic/kibana/issues/162985 is resolved */
     querySync: {
       getQuerySettingsTitle: () =>
         i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
