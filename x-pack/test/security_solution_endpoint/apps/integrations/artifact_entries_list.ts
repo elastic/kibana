@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
       .set('kbn-xsrf', 'true');
   };
-  
+
   // Several flaky tests from this file in serverless, hence @skipInServerless
   // - https://github.com/elastic/kibana/issues?q=is%3Aissue+is%3Aopen+X-pack+endpoint+integrations++artifact+entries+list
   // https://github.com/elastic/kibana/issues/171475
@@ -64,6 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // https://github.com/elastic/kibana/issues/171492
   //
   // FLAKY: https://github.com/elastic/kibana/issues/173681
+  // FLAKY: https://github.com/elastic/kibana/issues/173682
   describe.skip('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
 
