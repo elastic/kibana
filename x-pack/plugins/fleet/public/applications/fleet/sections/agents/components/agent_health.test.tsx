@@ -53,7 +53,7 @@ describe('AgentHealth', () => {
     const { utils } = renderAgentHealth(
       {
         active: true,
-        status: 'updating',
+        status: 'online',
         upgrade_started_at: '2022-11-21T12:27:24Z',
         upgrade_details: {
           state: 'UPG_FAILED',
@@ -63,6 +63,40 @@ describe('AgentHealth', () => {
     );
 
     utils.getByText('Agent upgrade is stuck in failed state.');
+
+    utils.getByTestId('restartUpgradeBtn');
+  });
+
+  it('should not render agent health with callout when agent has upgrade state failed but offline', () => {
+    const { utils } = renderAgentHealth(
+      {
+        active: true,
+        status: 'offline',
+        upgrade_started_at: '2022-11-21T12:27:24Z',
+        upgrade_details: {
+          state: 'UPG_FAILED',
+        },
+      } as any,
+      true
+    );
+
+    expect(utils.queryByTestId('restartUpgradeBtn')).not.toBeInTheDocument();
+  });
+
+  it('should not render agent health with callout when agent has upgrade state failed but inactive', () => {
+    const { utils } = renderAgentHealth(
+      {
+        active: false,
+        status: 'unenrolled',
+        upgrade_started_at: '2022-11-21T12:27:24Z',
+        upgrade_details: {
+          state: 'UPG_FAILED',
+        },
+      } as any,
+      true
+    );
+
+    expect(utils.queryByTestId('restartUpgradeBtn')).not.toBeInTheDocument();
   });
 
   it('should not render agent health with callout when agent not stuck updating', () => {
