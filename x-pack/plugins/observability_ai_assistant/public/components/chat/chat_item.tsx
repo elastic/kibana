@@ -41,6 +41,11 @@ const normalMessageClassName = css`
     padding: 0;
   }
 
+  .euiCommentEvent__header > .euiPanel {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
   > :last-child {
     overflow-x: hidden;
@@ -74,9 +79,7 @@ export function ChatItem({
   element,
   error,
   loading,
-  message: {
-    message: { function_call: functionCall, role },
-  },
+  message,
   title,
   onActionClick,
   onEditSubmit,
@@ -115,9 +118,9 @@ export function ChatItem({
     setEditing(!editing);
   };
 
-  const handleInlineEditSubmit = (message: Message) => {
+  const handleInlineEditSubmit = (newMessage: Message) => {
     handleToggleEdit();
-    return onEditSubmit(message);
+    return onEditSubmit(newMessage);
   };
 
   const handleCopyToClipboard = () => {
@@ -127,10 +130,9 @@ export function ChatItem({
   let contentElement: React.ReactNode =
     content || loading || error ? (
       <ChatItemContentInlinePromptEditor
-        content={content}
         editing={editing}
-        functionCall={functionCall}
         loading={loading}
+        message={message}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
         onSendTelemetry={onSendTelemetry}
@@ -153,8 +155,10 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
-      username={getRoleTranslation(role)}
+      timelineAvatar={
+        <ChatItemAvatar loading={loading} currentUser={currentUser} role={message.message.role} />
+      }
+      username={getRoleTranslation(message.message.role)}
       event={title}
       actions={
         <ChatItemActions
