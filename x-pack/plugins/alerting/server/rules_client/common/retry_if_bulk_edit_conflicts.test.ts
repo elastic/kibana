@@ -10,6 +10,7 @@ import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BulkEditSkipReason } from '../../../common/bulk_edit';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const mockFilter: KueryNode = {
   type: 'function',
@@ -21,12 +22,12 @@ const mockLogger = loggingSystemMock.create().get();
 const mockSuccessfulResult = {
   apiKeysToInvalidate: [],
   rules: [
-    { id: '1', type: 'alert', attributes: {} },
-    { id: '2', type: 'alert', attributes: { name: 'Test rule 2' } },
+    { id: '1', type: RULE_SAVED_OBJECT_TYPE, attributes: {} },
+    { id: '2', type: RULE_SAVED_OBJECT_TYPE, attributes: { name: 'Test rule 2' } },
   ],
   resultSavedObjects: [
-    { id: '1', type: 'alert', attributes: {}, references: [] },
-    { id: '2', type: 'alert', attributes: { name: 'Test rule 2' }, references: [] },
+    { id: '1', type: RULE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+    { id: '2', type: RULE_SAVED_OBJECT_TYPE, attributes: { name: 'Test rule 2' }, references: [] },
   ],
   errors: [],
   skipped: [
@@ -50,10 +51,10 @@ function getOperationConflictsTimes(times: number) {
       return {
         ...mockSuccessfulResult,
         resultSavedObjects: [
-          { id: '1', type: 'alert', attributes: {}, references: [] },
+          { id: '1', type: RULE_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
           {
             id: '2',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {},
             references: [],
             error: {
@@ -94,7 +95,7 @@ describe('retryIfBulkEditConflicts', () => {
           attributes: {},
           id: '1',
           references: [],
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
         },
         {
           attributes: {
@@ -102,7 +103,7 @@ describe('retryIfBulkEditConflicts', () => {
           },
           id: '2',
           references: [],
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
         },
       ],
     });

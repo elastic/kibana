@@ -731,6 +731,10 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
               },
