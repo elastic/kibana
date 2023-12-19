@@ -62,7 +62,7 @@ export class OptionsListEmbeddableFactory
     return (
       !field.spec.scripted &&
       field.aggregatable &&
-      ['string', 'boolean', 'ip', 'date'].includes(field.type)
+      ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
     );
   };
 
