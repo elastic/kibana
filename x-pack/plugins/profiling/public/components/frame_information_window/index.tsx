@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
@@ -15,6 +16,7 @@ import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 export interface Frame {
   fileID: string;
@@ -26,6 +28,10 @@ export interface Frame {
   sourceLine: number;
   countInclusive: number;
   countExclusive: number;
+  selfAnnualCO2Kgs: number;
+  totalAnnualCO2Kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCostUSD: number;
 }
 
 export interface Props {
@@ -43,6 +49,12 @@ export function FrameInformationWindow({
   showSymbolsStatus = true,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
 
   if (!frame) {
     return (
@@ -72,6 +84,10 @@ export function FrameInformationWindow({
     sourceLine,
     countInclusive,
     countExclusive,
+    selfAnnualCO2Kgs,
+    totalAnnualCO2Kgs,
+    selfAnnualCostUSD,
+    totalAnnualCostUSD,
   } = frame;
 
   const informationRows = getInformationRows({
@@ -90,6 +106,11 @@ export function FrameInformationWindow({
     totalSamples,
     totalSeconds,
     calculateImpactEstimates,
+    shouldUseLegacyCo2Calculation,
+    selfAnnualCO2Kgs,
+    totalAnnualCO2Kgs,
+    selfAnnualCostUSD,
+    totalAnnualCostUSD,
   });
 
   return (

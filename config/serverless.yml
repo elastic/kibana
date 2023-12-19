@@ -96,9 +96,6 @@ console.autocompleteDefinitions.endpointsAvailability: serverless
 # Do not check the ES version when running on Serverless
 elasticsearch.ignoreVersionMismatch: true
 
-# Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
-elasticsearch.requestHeadersWhitelist: ['authorization', 'es-client-authentication']
-
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
 

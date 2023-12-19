@@ -30,7 +30,7 @@ describe('ConversationSelectorSettings', () => {
   });
   it('Selects an existing conversation', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    expect(getByTestId('comboBoxInput')).toHaveTextContent(welcomeConvo.id);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.id);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     fireEvent.click(getByTestId(alertConvo.id));
     expect(onConversationSelectionChange).toHaveBeenCalledWith(alertConvo);

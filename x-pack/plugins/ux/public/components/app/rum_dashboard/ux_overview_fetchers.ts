@@ -19,6 +19,10 @@ import {
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
+  inpQuery,
+  transformINPResponse,
+} from '../../../services/data/inp_query';
+import {
   coreWebVitalsQuery,
   transformCoreWebVitalsResponse,
   DEFAULT_RANKS,
@@ -45,36 +49,52 @@ async function getCoreWebVitalsResponse({
     }
   );
 
-  return await esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
-    params: {
-      index: dataViewResponse.apmDataViewIndexPattern,
-      ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
-        serviceName: serviceName ? [serviceName] : undefined,
-      }),
-    },
-  });
+  return await Promise.all([
+    esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
+      params: {
+        index: dataViewResponse.apmDataViewIndexPattern,
+        ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
+          serviceName: serviceName ? [serviceName] : undefined,
+        }),
+      },
+    }),
+    esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
+      params: {
+        index: dataViewResponse.apmDataViewIndexPattern,
+        ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
+          serviceName: serviceName ? [serviceName] : undefined,
+        }),
+      },
+    }),
+  ]);
 }
 
 const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
   coreVitalPages: 0,
   cls: 0,
-  fid: 0,
   lcp: 0,
   tbt: 0,
   fcp: 0,
   lcpRanks: DEFAULT_RANKS,
-  fidRanks: DEFAULT_RANKS,
+  inpRanks: DEFAULT_RANKS,
   clsRanks: DEFAULT_RANKS,
 };
 
 export const fetchUxOverviewDate = async (
   params: WithDataPlugin<FetchDataParams>
 ): Promise<UxFetchDataResponse> => {
-  const coreWebVitalsResponse = await getCoreWebVitalsResponse(params);
+  const [coreWebVitalsResponse, inpResponse] = await getCoreWebVitalsResponse(
+    params
+  );
+  const data =
+    transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
+    CORE_WEB_VITALS_DEFAULTS;
+  const inpData = transformINPResponse(inpResponse);
   return {
-    coreWebVitals:
-      transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
-      CORE_WEB_VITALS_DEFAULTS,
+    coreWebVitals: {
+      ...data,
+      ...(inpData ? { inp: inpData?.inp, inpRanks: inpData?.inpRanks } : {}),
+    },
     appLink: `/app/ux?rangeFrom=${params.relativeTime.start}&rangeTo=${params.relativeTime.end}`,
   };
 };

@@ -6,14 +6,14 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 
 interface Props {
-  indexFields: Field[];
+  indexFields: FieldSpec[];
   name: 'groupBy' | 'indicator.params.timestampField';
   label: React.ReactNode | string;
   placeholder: string;
@@ -46,7 +46,7 @@ export function IndexFieldSelector({
           defaultValue={defaultValue}
           name={name}
           control={control}
-          rules={{ required: isRequired }}
+          rules={{ required: isRequired && !isDisabled }}
           render={({ field, fieldState }) => (
             <EuiComboBox<string>
               {...field}

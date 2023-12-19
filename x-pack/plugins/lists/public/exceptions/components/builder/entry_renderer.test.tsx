@@ -264,11 +264,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual('is');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      '1234'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
+    ).toEqual('1234');
   });
 
   test('it renders field values correctly when operator is "isNotOperator"', () => {
@@ -299,13 +303,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      '1234'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
+    ).toEqual('1234');
   });
 
   test('it renders field values correctly when operator is "isOneOfOperator"', () => {
@@ -336,11 +342,13 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is one of'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is one of');
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').first().text()).toEqual(
       '1234'
     );
   });
@@ -373,10 +381,12 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not one of'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not one of');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
       '1234'
     );
@@ -411,12 +421,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is in list'
-    );
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(1).text()
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is in list');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input').props()
+        .value
     ).toEqual('some name');
   });
 
@@ -449,12 +462,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not in list'
-    );
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(1).text()
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not in list');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input').props()
+        .value
     ).toEqual('some name');
   });
 
@@ -486,11 +502,16 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'exists'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('exists');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox existsComboxBox"] input').props()
+        .placeholder
+    ).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -524,11 +545,16 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'does not exist'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('does not exist');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox existsComboxBox"] input').props()
+        .placeholder
+    ).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -562,13 +588,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'matches'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
-      '1234*'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('@tags');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('matches');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').props().value
+    ).toEqual('1234*');
     // doesnt show warning label for non endpoint exception items
     expect(
       wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
@@ -637,13 +665,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'does not match'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
-      '1234*'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('@tags');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('does not match');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').props().value
+    ).toEqual('1234*');
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {

@@ -7,6 +7,7 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
+import { HttpError } from '../../../../../../../common/types/api';
 import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
@@ -121,6 +122,22 @@ describe('ModelSelectLogic', () => {
         StartModelApiLogic.actions.makeRequest({ modelId: 'model_1' });
 
         expect(ModelSelectLogic.values.areActionButtonsDisabled).toBe(true);
+      });
+    });
+
+    describe('modelStateChangeError', () => {
+      it('gets error from API error response', () => {
+        const error = {
+          body: {
+            error: 'some-error',
+            message: 'some-error-message',
+            statusCode: 500,
+          },
+        } as HttpError;
+
+        StartModelApiLogic.actions.apiError(error);
+
+        expect(ModelSelectLogic.values.modelStateChangeError).toEqual('some-error-message');
       });
     });
 

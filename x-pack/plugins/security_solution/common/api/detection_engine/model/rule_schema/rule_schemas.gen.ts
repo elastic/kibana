@@ -69,7 +69,10 @@ import {
 } from './specific_attributes/eql_attributes.gen';
 import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import { AlertSuppression } from './specific_attributes/query_attributes.gen';
-import { Threshold } from './specific_attributes/threshold_attributes.gen';
+import {
+  Threshold,
+  ThresholdAlertSuppression,
+} from './specific_attributes/threshold_attributes.gen';
 import {
   ThreatQuery,
   ThreatMapping,
@@ -353,6 +356,7 @@ export const ThresholdRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
+  alert_suppression: ThresholdAlertSuppression.optional(),
 });
 
 export type ThresholdRuleDefaultableFields = z.infer<typeof ThresholdRuleDefaultableFields>;
