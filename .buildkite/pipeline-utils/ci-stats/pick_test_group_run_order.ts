@@ -252,7 +252,6 @@ export async function pickTestGroupRunOrder() {
     console.log('Not found target.');
   }
 
-
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
