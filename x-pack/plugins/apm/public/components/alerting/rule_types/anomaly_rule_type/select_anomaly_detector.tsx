@@ -8,11 +8,11 @@
 import React, { useCallback } from 'react';
 import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import { ANOMALY_DETECTOR_SELECTOR_OPTIONS } from '../../../../../common/rules/apm_rule_types';
-import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 interface Props {
-  values: ApmMlDetectorType[];
-  onChange: (values?: ApmMlDetectorType[]) => void;
+  values: AnomalyDetectorType[];
+  onChange: (values?: AnomalyDetectorType[]) => void;
 }
 
 export function SelectAnomalyDetector({ values, onChange }: Props) {
@@ -28,7 +28,7 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
     (selectedOptions: EuiSelectableOption[]) => {
       const selectedTypes = selectedOptions
         .filter(({ checked }) => checked === 'on')
-        .map(({ key }) => key as ApmMlDetectorType);
+        .map(({ key }) => key as AnomalyDetectorType);
       if (selectedTypes.length === 0) {
         // we don't change last selection if all the options has been unchecked, at least one detector needs to be selected
         onChange(values);

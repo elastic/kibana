@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               windowSize: 5,
               windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
-              anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+              anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });

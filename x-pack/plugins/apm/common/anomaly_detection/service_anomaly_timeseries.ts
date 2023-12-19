@@ -6,11 +6,11 @@
  */
 
 import { Coordinate } from '../../typings/timeseries';
-import { ApmMlDetectorType } from './apm_ml_detectors';
+import { AnomalyDetectorType } from './apm_ml_detectors';
 
 export interface ServiceAnomalyTimeseries {
   jobId: string;
-  type: ApmMlDetectorType;
+  type: AnomalyDetectorType;
   environment: string;
   serviceName: string;
   version: number;

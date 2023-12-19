@@ -7,7 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
-import { ApmMlDetectorType } from './apm_ml_detectors';
+import { AnomalyDetectorType } from './apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
 import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
@@ -19,7 +19,7 @@ function createMockAnomalyTimeseries({
   environment = PROD,
   version = 3,
 }: {
-  type: ApmMlDetectorType;
+  type: AnomalyDetectorType;
   environment?: Environment;
   version?: number;
 }): ServiceAnomalyTimeseries {
@@ -39,23 +39,23 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
   describe('with a wide set of series', () => {
     const allAnomalyTimeseries = [
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txLatency,
+        type: AnomalyDetectorType.txLatency,
         environment: PROD,
       }),
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txLatency,
+        type: AnomalyDetectorType.txLatency,
         environment: DEV,
       }),
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txThroughput,
+        type: AnomalyDetectorType.txThroughput,
         environment: PROD,
       }),
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txFailureRate,
+        type: AnomalyDetectorType.txFailureRate,
         environment: PROD,
       }),
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txFailureRate,
+        type: AnomalyDetectorType.txFailureRate,
         environment: PROD,
         version: 2,
       }),
@@ -68,7 +68,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
-              detectorType: ApmMlDetectorType.txLatency,
+              detectorType: AnomalyDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: false,
             })?.environment
@@ -85,7 +85,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
-              detectorType: ApmMlDetectorType.txLatency,
+              detectorType: AnomalyDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: false,
             })
@@ -94,7 +94,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
               allAnomalyTimeseries,
-              detectorType: ApmMlDetectorType.txLatency,
+              detectorType: AnomalyDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: true,
             })
@@ -108,7 +108,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
         it('returns the series for production', () => {
           const series = getPreferredServiceAnomalyTimeseries({
             allAnomalyTimeseries,
-            detectorType: ApmMlDetectorType.txFailureRate,
+            detectorType: AnomalyDetectorType.txFailureRate,
             preferredEnvironment,
             fallbackToTransactions: false,
           });
@@ -124,12 +124,12 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
   describe('with multiple versions', () => {
     const allAnomalyTimeseries = [
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txLatency,
+        type: AnomalyDetectorType.txLatency,
         environment: PROD,
         version: 3,
       }),
       createMockAnomalyTimeseries({
-        type: ApmMlDetectorType.txLatency,
+        type: AnomalyDetectorType.txLatency,
         environment: PROD,
         version: 2,
       }),
@@ -140,7 +140,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
     it('selects the most recent version when transaction metrics are being used', () => {
       const series = getPreferredServiceAnomalyTimeseries({
         allAnomalyTimeseries,
-        detectorType: ApmMlDetectorType.txLatency,
+        detectorType: AnomalyDetectorType.txLatency,
         preferredEnvironment,
         fallbackToTransactions: false,
       });
@@ -151,7 +151,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
     it('selects the legacy version when transaction metrics are being used', () => {
       const series = getPreferredServiceAnomalyTimeseries({
         allAnomalyTimeseries,
-        detectorType: ApmMlDetectorType.txLatency,
+        detectorType: AnomalyDetectorType.txLatency,
         preferredEnvironment,
         fallbackToTransactions: true,
       });

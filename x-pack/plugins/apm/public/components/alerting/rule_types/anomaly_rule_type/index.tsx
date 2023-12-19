@@ -33,7 +33,7 @@ import {
   ANOMALY_DETECTOR_SELECTOR_OPTIONS,
   getApmMlDetectorLabel,
 } from '../../../../../common/rules/apm_rule_types';
-import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 interface AlertParams {
   anomalySeverityType?:
@@ -41,7 +41,7 @@ interface AlertParams {
     | ML_ANOMALY_SEVERITY.MAJOR
     | ML_ANOMALY_SEVERITY.MINOR
     | ML_ANOMALY_SEVERITY.WARNING;
-  anomalyDetectorTypes?: ApmMlDetectorType[];
+  anomalyDetectorTypes?: AnomalyDetectorType[];
   environment?: string;
   serviceName?: string;
   transactionType?: string;

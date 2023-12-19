@@ -55,8 +55,8 @@ import {
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 import {
-  getApmMlDetectorIndex,
-  getApmMlDetectorType,
+  getAnomalyDetectorIndex,
+  getAnomalyDetectorType,
 } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
@@ -191,7 +191,7 @@ export function registerAnomalyRuleType({
                   ...termsQuery(
                     'detector_index',
                     ...(ruleParams.anomalyDetectorTypes?.map((type) =>
-                      getApmMlDetectorIndex(type)
+                      getAnomalyDetectorIndex(type)
                     ) ?? [])
                   ),
                 ] as QueryDslQueryContainer[],
@@ -254,7 +254,7 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
-                detectorType: getApmMlDetectorType(
+                detectorType: getAnomalyDetectorType(
                   latest.detector_index as number
                 ),
                 timestamp: Date.parse(latest.timestamp as string),

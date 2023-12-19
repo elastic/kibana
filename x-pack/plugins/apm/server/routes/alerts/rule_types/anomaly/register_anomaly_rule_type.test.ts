@@ -11,8 +11,8 @@ import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies
 import { createRuleTypeMocks } from '../../test_utils';
 import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
 import {
-  ApmMlDetectorType,
-  getApmMlDetectorIndex,
+  AnomalyDetectorType,
+  getAnomalyDetectorIndex,
 } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 describe('Transaction duration anomaly alert', () => {
@@ -30,7 +30,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
-        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
       };
 
       await executor({ params });
@@ -61,7 +61,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
-        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
       };
 
       await executor({ params });
@@ -102,8 +102,8 @@ describe('Transaction duration anomaly alert', () => {
                           metrics: {
                             record_score: 0,
                             job_id: '1',
-                            detector_index: getApmMlDetectorIndex(
-                              ApmMlDetectorType.txLatency
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
                             ),
                           },
                         },
@@ -125,7 +125,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
-        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -172,8 +172,8 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '1',
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
-                            detector_index: getApmMlDetectorIndex(
-                              ApmMlDetectorType.txLatency
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
                             ),
                           },
                         },
@@ -189,8 +189,8 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '2',
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
-                            detector_index: getApmMlDetectorIndex(
-                              ApmMlDetectorType.txLatency
+                            detector_index: getAnomalyDetectorIndex(
+                              AnomalyDetectorType.txLatency
                             ),
                           },
                         },
@@ -212,7 +212,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const params = {
         anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
-        anomalyDetectorTypes: [ApmMlDetectorType.txLatency],
+        anomalyDetectorTypes: [AnomalyDetectorType.txLatency],
         windowSize: 5,
         windowUnit: 'm',
       };

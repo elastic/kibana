@@ -26,7 +26,7 @@ import { MLHeader } from '../transaction_charts/ml_header';
 import * as urlHelpers from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
-import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
@@ -77,7 +77,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txLatency
+    AnomalyDetectorType.txLatency
   );
   const anomalyTimeseriesColor = previousPeriod?.color as string;
 
