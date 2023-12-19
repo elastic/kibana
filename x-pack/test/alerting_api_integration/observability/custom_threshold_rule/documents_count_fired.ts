@@ -24,8 +24,8 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
 import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: 'count' }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },
-          query: { query: 'host.name:*', language: 'kuery' },
+          query: { query: 'host.name:* and container.id:*', language: 'kuery' },
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
