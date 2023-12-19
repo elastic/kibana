@@ -6,30 +6,11 @@
  */
 
 import { mapValues } from 'lodash';
+import {
+  ObservabilityAIAssistantFtrConfigName,
+  observabilityAIAssistantFtrConfigs,
+} from '../../observability_ai_assistant_api_integration/configs';
 import { createTestConfig, CreateTestConfig } from '../common/config';
-
-export const observabilityAIAssistantDebugLogger = {
-  name: 'plugins.observabilityAIAssistant',
-  level: 'debug',
-  appenders: ['console'],
-};
-
-export const observabilityAIAssistantFtrConfigs = {
-  basic: {
-    license: 'basic' as const,
-    kibanaConfig: {
-      'logging.loggers': [observabilityAIAssistantDebugLogger],
-    },
-  },
-  enterprise: {
-    license: 'trial' as const,
-    kibanaConfig: {
-      'logging.loggers': [observabilityAIAssistantDebugLogger],
-    },
-  },
-};
-
-export type ObservabilityAIAssistantFtrConfigName = keyof typeof observabilityAIAssistantFtrConfigs;
 
 export const configs: Record<ObservabilityAIAssistantFtrConfigName, CreateTestConfig> = mapValues(
   observabilityAIAssistantFtrConfigs,
