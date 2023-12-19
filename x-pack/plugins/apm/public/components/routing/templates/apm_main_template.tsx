@@ -60,7 +60,15 @@ export function ApmMainTemplate({
   // const { diagnosticsBundle } = useDiagnosticsContext();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observabilityShared, application } = services;
+  const {
+    http,
+    docLinks,
+    observabilityShared,
+    application,
+    kibanaVersion,
+    isCloudEnv,
+    isServerlessEnv,
+  } = services;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
 
@@ -124,11 +132,9 @@ export function ApmMainTemplate({
             <FeatureFeedbackButton
               data-test-subj="infraApmFeedbackLink"
               formUrl={APM_FEEDBACK_LINK}
-              // kibanaVersion={
-              //   diagnosticsBundle ? diagnosticsBundle.kibanaVersion : undefined
-              // }
-              // isCloudEnv={isCloudEnv}
-              // isServerlessEnv={isServerlessEnv}
+              kibanaVersion={kibanaVersion}
+              isCloudEnv={isCloudEnv}
+              isServerlessEnv={isServerlessEnv}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
