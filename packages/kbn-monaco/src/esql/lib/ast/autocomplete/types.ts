@@ -9,12 +9,6 @@
 import { monaco } from '../../../../..';
 
 /** @internal **/
-export interface UserDefinedVariables {
-  userDefined: string[];
-  policies: string[];
-}
-
-/** @internal **/
 export type AutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
   | 'label'
