@@ -21,7 +21,7 @@ export class DataStreamStat {
   degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
-    this.rawName = dataStreamStat.name;
+    this.rawName = dataStreamStat.rawName;
     this.type = dataStreamStat.type;
     this.name = dataStreamStat.name;
     this.title = dataStreamStat.title ?? dataStreamStat.name;

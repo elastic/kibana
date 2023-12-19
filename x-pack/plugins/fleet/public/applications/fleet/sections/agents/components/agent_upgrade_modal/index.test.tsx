@@ -29,6 +29,7 @@ jest.mock('../../../../hooks', () => {
     }),
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
+    useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
   };
 });
 
@@ -199,6 +200,30 @@ describe('AgentUpgradeAgentModal', () => {
         isUpdating: true,
       });
 
+      const el = utils.getByTestId('confirmModalConfirmButton');
+      expect(el).toBeDisabled();
+    });
+  });
+
+  it('should disable submit button and display a warning for a single agent that is not upgradeable', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: [
+        {
+          status: 'offline',
+          upgrade_started_at: '2022-11-21T12:27:24Z',
+          id: 'agent1',
+          local_metadata: { elastic: { agent: { version: '8.9.0' } } },
+        },
+      ] as any,
+      agentCount: 2,
+    });
+    await waitFor(() => {
+      expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
+      expect(
+        utils.queryByText(
+          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
+        )
+      ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');
       expect(el).toBeDisabled();
     });

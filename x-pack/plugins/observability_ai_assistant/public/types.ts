@@ -28,6 +28,8 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -38,6 +40,7 @@ import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import type { InsightProps } from './components/insight/insight';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -92,12 +95,10 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ObservabilityAIAssistantPluginStart {
-  service: ObservabilityAIAssistantService;
-  useGenAIConnectors: () => UseGenAIConnectorsResult;
-}
+export interface ConfigSchema {}
 
-export interface ObservabilityAIAssistantPluginSetup {}
+export type { PendingMessage };
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -106,6 +107,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
+
 export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
@@ -117,6 +119,14 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export interface ConfigSchema {}
+export interface ObservabilityAIAssistantPluginSetup {}
 
-export type { PendingMessage };
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
+  ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
+    Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
+      RefAttributes<{}>
+  > | null;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
+}
