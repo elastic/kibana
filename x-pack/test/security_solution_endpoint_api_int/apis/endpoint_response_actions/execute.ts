@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint `execute` response action', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/171666
+  describe.skip('Endpoint `execute` response action', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
