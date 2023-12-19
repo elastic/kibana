@@ -8,9 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { DEFAULT_SLO_PAGE_SIZE } from '../../../common/slo/constants';
+import { useCreateDataView } from '../use_create_data_view';
+import {
+  DEFAULT_SLO_PAGE_SIZE,
+  SLO_SUMMARY_DESTINATION_INDEX_NAME,
+} from '../../../common/slo/constants';
 import { SLO_LONG_REFETCH_INTERVAL, SLO_SHORT_REFETCH_INTERVAL } from '../../constants';
 
 import { useKibana } from '../../utils/kibana_react';
@@ -42,7 +46,7 @@ export function useFetchSloList({
   sortDirection = 'desc',
   shouldRefetch,
   perPage = DEFAULT_SLO_PAGE_SIZE,
-  filters = [],
+  filters: filterDSL = [],
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -53,12 +57,24 @@ export function useFetchSloList({
     SLO_SHORT_REFETCH_INTERVAL
   );
 
-  const filterQuery = buildQueryFromFilters(filters, indexPattern, {
-    ignoreFilterIfFieldNotInIndex: config.ignoreFilterIfFieldNotInIndex,
-    nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+  const { dataView } = useCreateDataView({
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   });
+
+  const filters = useMemo(() => {
+    try {
+      return JSON.stringify(
+        buildQueryFromFilters(filterDSL, dataView, {
+          ignoreFilterIfFieldNotInIndex: true,
+        })
+      );
+    } catch (e) {
+      return '';
+    }
+  }, [filterDSL, dataView]);
+
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection }),
+    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection, filters }),
     queryFn: async ({ signal }) => {
       return await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
@@ -67,6 +83,7 @@ export function useFetchSloList({
           ...(sortDirection && { sortDirection }),
           ...(page && { page }),
           ...(perPage && { perPage }),
+          ...(filters && { filters }),
         },
         signal,
       });
