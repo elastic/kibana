@@ -54,6 +54,7 @@
     "@kbn/babel-register",
     "@kbn/dev-cli-runner",
     "@kbn/core-analytics-browser",
+    "@kbn/core-http-browser",
     "@kbn/security-plugin-types-common"
   ],
   "exclude": ["target/**/*"]
