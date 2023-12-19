@@ -50,8 +50,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
       .set('kbn-xsrf', 'true');
   };
-
+  
   // Flaky: https://github.com/elastic/kibana/issues/173682
+  // FLAKY: https://github.com/elastic/kibana/issues/173681
+  // FLAKY: https://github.com/elastic/kibana/issues/173682
   describe.skip('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
 
