@@ -13,11 +13,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { map } from 'lodash';
-import {
-  ELSER_MODEL_ID,
-  INDEX_QUEUED_DOCUMENTS_TASK_ID,
-  INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
-} from '..';
+import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
@@ -28,6 +24,7 @@ interface Dependencies {
   resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
+  getModelId: () => Promise<string>;
 }
 
 export interface RecalledEntry {
@@ -80,13 +77,15 @@ export class KnowledgeBaseService {
   }
 
   setup = async () => {
+    const elserModelId = await this.dependencies.getModelId();
+
     const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
 
     const installModel = async () => {
       this.dependencies.logger.info('Installing ELSER model');
       await this.dependencies.esClient.ml.putTrainedModel(
         {
-          model_id: ELSER_MODEL_ID,
+          model_id: elserModelId,
           input: {
             field_names: ['text_field'],
           },
@@ -100,7 +99,7 @@ export class KnowledgeBaseService {
 
     const getIsModelInstalled = async () => {
       const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
-        model_id: ELSER_MODEL_ID,
+        model_id: elserModelId,
         include: 'definition_status',
       });
 
@@ -131,7 +130,7 @@ export class KnowledgeBaseService {
 
     try {
       await this.dependencies.esClient.ml.startTrainedModelDeployment({
-        model_id: ELSER_MODEL_ID,
+        model_id: elserModelId,
         wait_for: 'fully_allocated',
       });
     } catch (error) {
@@ -144,7 +143,7 @@ export class KnowledgeBaseService {
 
     await pRetry(async () => {
       const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: ELSER_MODEL_ID,
+        model_id: elserModelId,
       });
 
       if (
@@ -268,9 +267,11 @@ export class KnowledgeBaseService {
   }
 
   status = async () => {
+    const elserModelId = await this.dependencies.getModelId();
+
     try {
       const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: ELSER_MODEL_ID,
+        model_id: elserModelId,
       });
       const elserModelStats = modelStats.trained_model_stats[0];
       const deploymentState = elserModelStats.deployment_stats?.state;
@@ -280,13 +281,13 @@ export class KnowledgeBaseService {
         ready: deploymentState === 'started' && allocationState === 'fully_allocated',
         deployment_state: deploymentState,
         allocation_state: allocationState,
-        model_name: ELSER_MODEL_ID,
+        model_name: elserModelId,
       };
     } catch (error) {
       return {
         error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
-        model_name: ELSER_MODEL_ID,
+        model_name: elserModelId,
       };
     }
   };
@@ -304,6 +305,8 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
+    const elserModelId = await this.dependencies.getModelId();
+
     try {
       const query = {
         bool: {
@@ -311,7 +314,7 @@ export class KnowledgeBaseService {
             text_expansion: {
               'ml.tokens': {
                 model_text: text,
-                model_id: ELSER_MODEL_ID,
+                model_id: elserModelId,
               },
             } as unknown as QueryDslTextExpansionQuery,
           })),

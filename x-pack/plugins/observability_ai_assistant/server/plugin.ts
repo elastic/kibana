@@ -12,7 +12,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { mapValues } from 'lodash';
+import { mapValues, once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -105,10 +105,31 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
+    const getModelId = once(async () => {
+      // Using once to make sure the same model ID is used during service init and Knowledge base setup
+
+      try {
+        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
+        const [_, pluginsStart] = await core.getStartServices();
+
+        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
+        await pluginsStart.licensing.refresh();
+
+        const elserModelDefinition = await plugins.ml
+          .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
+          .getELSER();
+
+        return elserModelDefinition.model_id;
+      } catch (error) {
+        throw new Error(`Failed to resolve ELSER model definition: ${error}`);
+      }
+    });
+
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
+      getModelId,
     }));
 
     service.register(registerFunctions);
