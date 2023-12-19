@@ -219,13 +219,38 @@ export const AgentUpgradeStatus: React.FC<{
   agentUpgradeStartedAt?: string | null;
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ isAgentUpgradable, agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
+  notUpgradeableMessage?: string | null;
+}> = ({
+  isAgentUpgradable,
+  agentUpgradeStartedAt,
+  agentUpgradedAt,
+  agentUpgradeDetails,
+  notUpgradeableMessage,
+}) => {
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
   const minVersion = '8.12';
+
+  if (!isAgentUpgradable && notUpgradeableMessage) {
+    return (
+      <EuiIconTip
+        type="iInCircle"
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"
+            defaultMessage="Agent not upgradeable: {reason}"
+            values={{
+              reason: notUpgradeableMessage,
+            }}
+          />
+        }
+        color="subdued"
+      />
+    );
+  }
 
   if (isAgentUpgradable) {
     return (

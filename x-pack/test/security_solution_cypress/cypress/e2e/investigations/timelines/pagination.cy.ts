@@ -25,19 +25,16 @@ import { hostsUrl } from '../../../urls/navigation';
 // Flaky on serverless
 const defaultPageSize = 25;
 
-describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'timeline' });
-  });
-
+describe('Timeline Pagination', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    cy.task('esArchiverLoad', { archiveName: 'timeline' });
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });
 
-  after(() => {
+  afterEach(() => {
     cy.task('esArchiverUnload', 'timeline');
   });
 
