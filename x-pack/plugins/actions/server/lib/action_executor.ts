@@ -541,7 +541,7 @@ function validateAction(
       status: 'error',
       message: err.message,
       retry: !!taskInfo,
-      errorSource: TaskErrorSource.USER,
+      errorSource: TaskErrorSource.FRAMEWORK,
     });
   }
 }
