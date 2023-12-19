@@ -106,8 +106,37 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [createDataView, setCreateDataView] = useState(
       canCreateDataView === false ? false : defaults.createDataView
     );
-    const [destIndexAvailableTimeFields, setDestIndexAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
+
+    const previewRequest = useMemo(() => {
+      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const transformConfigQuery = getTransformConfigQuery(searchQuery);
+      return getPreviewTransformRequestBody(
+        searchItems.dataView,
+        transformConfigQuery,
+        partialPreviewRequest,
+        stepDefineState.runtimeMappings
+      );
+    }, [searchItems.dataView, stepDefineState]);
+
+    const { error: transformsPreviewError, data: transformPreview } =
+      useGetTransformsPreview(previewRequest);
+
+    const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+      if (!transformPreview) return [];
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
+      return timeFields;
+    }, [transformPreview]);
+
+    useEffect(
+      function resetDataViewTimeField() {
+        setDataViewTimeField(destIndexAvailableTimeFields[0]);
+      },
+      [destIndexAvailableTimeFields]
+    );
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -145,31 +174,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [transformsError]);
-
-    const previewRequest = useMemo(() => {
-      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-      const transformConfigQuery = getTransformConfigQuery(searchQuery);
-      return getPreviewTransformRequestBody(
-        searchItems.dataView,
-        transformConfigQuery,
-        partialPreviewRequest,
-        stepDefineState.runtimeMappings
-      );
-    }, [searchItems.dataView, stepDefineState]);
-    const { error: transformsPreviewError, data: transformPreview } =
-      useGetTransformsPreview(previewRequest);
-
-    useEffect(() => {
-      if (transformPreview) {
-        const properties = transformPreview.generated_dest_index.mappings.properties;
-        const timeFields: string[] = Object.keys(properties).filter(
-          (col) => properties[col].type === 'date'
-        );
-
-        setDestIndexAvailableTimeFields(timeFields);
-        setDataViewTimeField(timeFields[0]);
-      }
-    }, [transformPreview]);
 
     useEffect(() => {
       if (transformsPreviewError !== null) {
