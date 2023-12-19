@@ -1082,6 +1082,7 @@
     "seedrandom": "^3.0.5",
     "semver": "^7.5.3",
     "set-value": "^4.1.0",
+    "sharp": "^0.33.1",
     "source-map-support": "^0.5.19",
     "stats-lite": "^2.2.0",
     "strip-ansi": "^6.0.0",
