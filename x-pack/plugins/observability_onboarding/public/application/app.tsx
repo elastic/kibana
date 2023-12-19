@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  useUiSetting$,
+  useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -112,7 +112,10 @@ function App() {
 }
 
 function ObservabilityOnboardingApp() {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const {
+    services: { theme },
+  } = useKibana();
+  const darkMode = theme?.getTheme().darkMode ?? false;
 
   return (
     <ThemeProvider
