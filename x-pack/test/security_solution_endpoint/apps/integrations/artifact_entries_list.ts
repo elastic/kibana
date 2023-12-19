@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
-      await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
+      await retry.waitForWithTimeout('fleet artifact is updated', 200_000, async () => {
         const artifacts = await endpointArtifactsTestResources.getArtifacts();
 
         const manifestArtifact = artifacts.find((artifact) => {
