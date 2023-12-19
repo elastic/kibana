@@ -102,7 +102,7 @@ describe('<Rules />', () => {
   });
 
   it('calls Benchmark API', async () => {
-    const params = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
+    const params: PageUrlParams = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
     const Component = getTestComponent(params);
     const result = createReactQueryResponse({
       status: 'loading',
@@ -116,7 +116,7 @@ describe('<Rules />', () => {
   });
 
   it('Display success state when result request is resolved', async () => {
-    const params = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
+    const params: PageUrlParams = { benchmarkId: 'cis_eks', benchmarkVersion: '1.9.1' };
     const Component = getTestComponent(params);
     const result = createReactQueryResponse({
       status: 'success',

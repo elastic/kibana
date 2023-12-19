@@ -119,8 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(500);
 
       expect(body.message).to.eql(
-        'Please provide BenchmarkId',
-        `expected message to be 'Please provide BenchmarkId' but got ${body.message} instead`
+        'Please provide benchmarkId',
+        `expected message to be 'Please provide benchmarkId' but got ${body.message} instead`
       );
     });
 

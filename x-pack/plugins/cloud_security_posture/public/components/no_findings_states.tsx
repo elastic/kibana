@@ -184,7 +184,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
         <h2>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-            defaultMessage="Identify & remediate configuration risks in your Cloud infrastructure"
+            defaultMessage="Detect security misconfiguration in your cloud infrastructure"
           />
         </h2>
       }
@@ -219,7 +219,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
             >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                defaultMessage="Add CSPM"
+                defaultMessage="Add CSPM Integration"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -232,7 +232,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
             >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                defaultMessage="Add KSPM"
+                defaultMessage="Add KSPM Integration"
               />
             </EuiButton>
           </EuiFlexItem>
