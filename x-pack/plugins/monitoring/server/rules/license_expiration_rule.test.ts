@@ -7,7 +7,6 @@
 
 import { LicenseExpirationRule } from './license_expiration_rule';
 import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
-import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
