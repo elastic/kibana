@@ -13,7 +13,7 @@ import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
 describe('getViewInAppUrl', () => {
   const logExplorerLocator = {
     getRedirectUrl: jest.fn(() => 'mockedGetRedirectUrl'),
-  } as LocatorPublic<DiscoverAppLocatorParams>;
+  } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
   const startedAt = '2023-12-07T16:30:15.403Z';
   const endedAt = '2023-12-07T20:30:15.403Z';
   const returnedTimeRange = {
@@ -136,7 +136,7 @@ describe('getViewInAppUrl', () => {
         {
           name: 'A',
           aggType: Aggregators.AVERAGE,
-          fields: 'mockedAvgField',
+          field: 'mockedAvgField',
         },
       ],
       logExplorerLocator,

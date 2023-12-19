@@ -309,6 +309,7 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = getAlertUuid(recoveredAlertId);
       const timestamp = startedAt.toISOString();
       const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const group = groupByKeysObjectForRecovered[recoveredAlertId];
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -321,13 +322,13 @@ export const createCustomThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        group: groupByKeysObjectForRecovered[recoveredAlertId],
+        group,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
           filter: params.searchConfiguration.query.query,
           logExplorerLocator,
-          metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+          metrics: params.criteria[0]?.metrics,
           startedAt: indexedStartedAt,
         }),
         ...additionalContext,
