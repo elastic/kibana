@@ -100,10 +100,10 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
       assistantTelemetry?.reportAssistantSettingToggled({
         ...(didUpdateKnowledgeBase
-          ? { didEnableKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
+          ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
           : {}),
         ...(didUpdateRAGAlerts
-          ? { didEnableRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
+          ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
           : {}),
       });
     }

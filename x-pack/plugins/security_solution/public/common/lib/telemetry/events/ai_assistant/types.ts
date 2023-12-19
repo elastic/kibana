@@ -26,8 +26,8 @@ export interface ReportAssistantQuickPromptParams {
 }
 
 export interface ReportAssistantSettingToggledParams {
-  didEnableKnowledgeBase?: boolean;
-  didEnableRAGAlerts?: boolean;
+  isEnabledKnowledgeBase?: boolean;
+  isEnabledRAGAlerts?: boolean;
 }
 
 export type ReportAssistantTelemetryEventParams =

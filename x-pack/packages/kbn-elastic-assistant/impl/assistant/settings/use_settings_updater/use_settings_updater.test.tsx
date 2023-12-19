@@ -160,8 +160,8 @@ describe('useSettingsUpdater', () => {
 
       result.current.saveSettings();
       expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
-        didEnableKnowledgeBase: false,
-        didEnableRAGAlerts: false,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: false,
       });
     });
   });
@@ -177,7 +177,7 @@ describe('useSettingsUpdater', () => {
       });
       result.current.saveSettings();
       expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
-        didEnableRAGAlerts: false,
+        isEnabledRAGAlerts: false,
       });
     });
   });
