@@ -29,14 +29,9 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
       const selectedTypes = selectedOptions
         .filter(({ checked }) => checked === 'on')
         .map(({ key }) => key as AnomalyDetectorType);
-      if (selectedTypes.length === 0) {
-        // we don't change last selection if all the options has been unchecked, at least one detector needs to be selected
-        onChange(values);
-      } else {
-        onChange(selectedTypes);
-      }
+      onChange(selectedTypes);
     },
-    [onChange, values]
+    [onChange]
   );
 
   return (

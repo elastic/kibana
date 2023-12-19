@@ -35,7 +35,7 @@ import {
 } from '../../../../../common/rules/apm_rule_types';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
-interface AlertParams {
+export interface AlertParams {
   anomalySeverityType?:
     | ML_ANOMALY_SEVERITY.CRITICAL
     | ML_ANOMALY_SEVERITY.MAJOR
@@ -54,12 +54,12 @@ interface Props {
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
   setRuleProperty: (key: string, value: any) => void;
+  errors: { anomalyDetectorTypes?: string };
 }
 
 export function AnomalyRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
-
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
@@ -110,13 +110,17 @@ export function AnomalyRuleType(props: Props) {
       title={i18n.translate('xpack.apm.anomalyRuleType.anomalyDetector', {
         defaultMessage: 'Detector types',
       })}
+      color={props.errors.anomalyDetectorTypes ? 'danger' : 'success'}
     >
-      <EuiText size="xs" color="subdued">
-        <FormattedMessage
-          id="xpack.apm.anomalyRuleType.anomalyDetector.infoLabel"
-          defaultMessage="At least one detector should be selected"
-        />
-      </EuiText>
+      {props.errors.anomalyDetectorTypes && (
+        <EuiText size="xs" color="danger">
+          <FormattedMessage
+            id="xpack.apm.anomalyRuleType.anomalyDetector.infoLabel"
+            defaultMessage="At least one detector should be selected"
+          />
+        </EuiText>
+      )}
+
       <SelectAnomalyDetector
         values={params.anomalyDetectorTypes}
         onChange={(values) => {
@@ -141,7 +145,6 @@ export function AnomalyRuleType(props: Props) {
       />
     </PopoverExpression>,
   ];
-
   return (
     <ApmRuleParamsContainer
       fields={fields}
