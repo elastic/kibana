@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
+import { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
 
-export type StartServices<TAdditionalServices> = CoreStart & {
-  plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
-} & TAdditionalServices & {};
-
+export type StartServices<AdditionalServices extends object = {}> = CoreStart &
+  ExploratoryViewPublicPluginsStart &
+  AdditionalServices & {
+    isDev: boolean;
+  };
 const useTypedKibana = <AdditionalServices extends object = {}>() =>
   useKibana<StartServices<AdditionalServices>>();
 
