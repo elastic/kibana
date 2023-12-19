@@ -51,7 +51,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe('For each artifact list under management', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/173682
+  describe.skip('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
