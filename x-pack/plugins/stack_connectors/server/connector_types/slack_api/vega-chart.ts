@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import puppeteer from 'puppeteer';
 import { View, parse as parseVegaSpec } from 'vega';
 import { compile as vegaLiteCompile } from 'vega-lite';
 
+const CHART_WIDTH = 1000;
+const CHART_HEIGHT = 750;
 interface ChartDatum {
   d: string; // date
   v: number; // value
@@ -49,6 +52,8 @@ export function generateVegaChartSpec(chartData: ChartData): VegaLiteSpec {
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     description: `Values of ${chartData.field} before alert.`,
+    width: CHART_WIDTH,
+    height: CHART_HEIGHT,
     data: { values: chartData.values },
     mark: 'line',
     encoding: {
@@ -59,12 +64,23 @@ export function generateVegaChartSpec(chartData: ChartData): VegaLiteSpec {
   };
 }
 
-// see: https://observablehq.com/@bmesuere/generating-images-using-vega-lite-and-node
-export async function generateChartPngStream(chartSpec: VegaLiteSpec): Promise<ReadableStream> {
+export async function generateChartSvg(chartSpec: VegaLiteSpec): Promise<string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vegaSpec = vegaLiteCompile(chartSpec as any).spec;
   const view = new View(parseVegaSpec(vegaSpec), { renderer: 'none' });
-  const canvas = await view.toCanvas();
-  // @ts-ignore
-  return canvas.createPNGStream();
+  return await view.toSVG(2.0);
+}
+
+export async function svg2png(svg: string): Promise<string> {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.setViewport({ width: 1000, height: 750 });
+  await page.setContent(svg);
+
+  // console.log(await page.content());
+  const pngData = await page.screenshot();
+  await browser.close();
+
+  return pngData.toString('base64');
 }
