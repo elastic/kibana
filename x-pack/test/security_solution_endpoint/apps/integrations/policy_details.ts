@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/171653
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
