@@ -65,7 +65,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         mappings: deepFreeze({
           properties: {
             publicProperty: { type: 'keyword' },
-            publicPropertyIncludedInAAD: { type: 'keyword' },
+            publicPropertyExcludedFromAAD: { type: 'keyword' },
             publicPropertyStoredEncrypted: { type: 'binary' },
             privateProperty: { type: 'binary' },
           },
@@ -263,11 +263,13 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
   const typePriorTo810 = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
   };
 
   const latestType = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+    attributesToIncludeInAAD: new Set(['nonEncryptedAttribute']),
   };
   deps.encryptedSavedObjects.registerType(latestType);
 

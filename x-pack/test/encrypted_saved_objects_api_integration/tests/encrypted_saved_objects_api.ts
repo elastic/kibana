@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       publicProperty: string;
       publicPropertyStoredEncrypted: string;
       privateProperty: string;
-      publicPropertyIncludedInAAD: string;
+      publicPropertyExcludedFromAAD: string;
     };
 
     let expectedDescriptor: SavedObjectDescriptor;
@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: randomness.string(),
         publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
-        publicPropertyIncludedInAAD: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
       };
 
       const { body } = await supertest
@@ -76,14 +76,14 @@ export default function ({ getService }: FtrProviderContext) {
     it('#create encrypts attributes and strips them from response', async () => {
       expect(savedObject.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject);
       expect(rawAttributes.publicProperty).to.be(savedObjectOriginalAttributes.publicProperty);
-      expect(rawAttributes.publicPropertyIncludedInAAD).to.be(
-        savedObjectOriginalAttributes.publicPropertyIncludedInAAD
+      expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
+        savedObjectOriginalAttributes.publicPropertyExcludedFromAAD
       );
 
       expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           type: encryptedSavedObjectType,
           attributes: {
             publicProperty: randomness.string(),
-            publicPropertyIncludedInAAD: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
             publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
           type: encryptedSavedObjectType,
           attributes: {
             publicProperty: randomness.string(),
-            publicPropertyIncludedInAAD: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
             publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
@@ -134,13 +134,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(attributesFromResponse).to.eql({
           publicProperty: attributesFromRequest.publicProperty,
-          publicPropertyIncludedInAAD: attributesFromRequest.publicPropertyIncludedInAAD,
+          publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
           publicPropertyStoredEncrypted: attributesFromRequest.publicPropertyStoredEncrypted,
         });
 
         expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
-        expect(rawAttributes.publicPropertyIncludedInAAD).to.be(
-          attributesFromRequest.publicPropertyIncludedInAAD
+        expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
+          attributesFromRequest.publicPropertyExcludedFromAAD
         );
         expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
         expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
           type: encryptedSavedObjectType,
           attributes: {
             publicProperty: randomness.string(),
-            publicPropertyIncludedInAAD: randomness.string(),
+            publicPropertyExcludedFromAAD: randomness.string(),
             publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
@@ -193,13 +193,13 @@ export default function ({ getService }: FtrProviderContext) {
         } else {
           expect(attributesFromResponse).to.eql({
             publicProperty: attributesFromRequest.publicProperty,
-            publicPropertyIncludedInAAD: attributesFromRequest.publicPropertyIncludedInAAD,
+            publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
             publicPropertyStoredEncrypted: attributesFromRequest.publicPropertyStoredEncrypted,
           });
 
           expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
-          expect(rawAttributes.publicPropertyIncludedInAAD).to.be(
-            attributesFromRequest.publicPropertyIncludedInAAD
+          expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
+            attributesFromRequest.publicPropertyExcludedFromAAD
           );
           expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
           expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
       expect(response.error).to.be(undefined);
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.attributes).to.eql({
         publicProperty: updatedPublicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(response.error).to.eql({
         message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
@@ -260,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].id).to.be(savedObject.id);
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
       expect(savedObjects[0].error).to.be(undefined);
@@ -286,7 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].id).to.be(savedObject.id);
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: updatedPublicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(savedObjects[0].error).to.eql({
         message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
@@ -308,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].id).to.be(savedObject.id);
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
       expect(savedObjects[0].error).to.be(undefined);
@@ -336,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].id).to.be(savedObject.id);
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: updatedPublicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(savedObjects[0].error).to.eql({
         message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
@@ -348,7 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('#update encrypts attributes and strips them from response', async () => {
       const updatedAttributes = {
         publicProperty: randomness.string(),
-        publicPropertyIncludedInAAD: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
         publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
       };
@@ -361,14 +361,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.attributes).to.eql({
         publicProperty: updatedAttributes.publicProperty,
-        publicPropertyIncludedInAAD: updatedAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: updatedAttributes.publicPropertyStoredEncrypted,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject);
       expect(rawAttributes.publicProperty).to.be(updatedAttributes.publicProperty);
-      expect(rawAttributes.publicPropertyIncludedInAAD).to.be(
-        updatedAttributes.publicPropertyIncludedInAAD
+      expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
+        updatedAttributes.publicPropertyExcludedFromAAD
       );
       expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
       expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
@@ -392,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('#getDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
-      const updatedAttributes = { publicPropertyIncludedInAAD: randomness.string() };
+      const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
@@ -401,7 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(response.attributes).to.eql({
-        publicPropertyIncludedInAAD: updatedAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
       });
 
       const { body: decryptedResponse } = await supertest
@@ -414,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(decryptedResponse.attributes).to.eql({
         ...savedObjectOriginalAttributes,
-        publicPropertyIncludedInAAD: updatedAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
       });
     });
 
@@ -480,12 +480,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(decryptedResponse.saved_objects[0].attributes).to.eql({
         publicProperty: updatedAttributes.publicProperty,
-        publicPropertyIncludedInAAD: savedObjectOriginalAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
     });
 
     it('#createPointInTimeFinderDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
-      const updatedAttributes = { publicPropertyIncludedInAAD: randomness.string() };
+      const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
         .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
@@ -494,7 +494,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(response.attributes).to.eql({
-        publicPropertyIncludedInAAD: updatedAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
       });
 
       const { body: decryptedResponse } = await supertest.get(
@@ -504,7 +504,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(decryptedResponse.saved_objects[0].error).to.be(undefined);
       expect(decryptedResponse.saved_objects[0].attributes).to.eql({
         ...savedObjectOriginalAttributes,
-        publicPropertyIncludedInAAD: updatedAttributes.publicPropertyIncludedInAAD,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
       });
     });
   }
@@ -845,7 +845,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(decryptedResponse.namespaces.sort()).to.eql(namespaces);
           expect(decryptedResponse.attributes).to.eql({
             publicProperty: 'some-public-property-0',
-            publicPropertyIncludedInAAD: 'some-public-property-included-in-aad-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
             publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
           });
         }
@@ -862,7 +862,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(decryptedResponse.attributes).to.eql({
             privateProperty: 'some-private-property-0',
             publicProperty: 'some-public-property-0',
-            publicPropertyIncludedInAAD: 'some-public-property-included-in-aad-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
             publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
           });
         }
@@ -895,7 +895,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(decryptedResponse.attributes).to.eql({
             privateProperty: 'some-private-property-0',
             publicProperty: 'some-public-property-0',
-            publicPropertyIncludedInAAD: 'some-public-property-included-in-aad-0',
+            publicPropertyExcludedFromAAD: 'some-public-property-excluded-from-aad-0',
             publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
           });
         }

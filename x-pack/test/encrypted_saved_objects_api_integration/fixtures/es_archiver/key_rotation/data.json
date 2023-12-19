@@ -46,7 +46,7 @@
     "source": {
       "saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "DNrREm+906YK6Dt3P9NzBmZ+pSYmNYd7dyxw5Q97lIquROGRgqC84EW2/B2eVNfUhYYYcFlvtDrdZQXYmTmKNfZ5z8/hSwhRIXEhGPYiBplm1TiOQNp/P31FLp4l26YKt/ygVjQY/QFVWhDoA5sd+58TtzhxTtzx2FythwYgW6jJNQ==",
         "privateProperty": "BdPvHwNJGgrXHQkSwKPJAtAvBMgfbapmSkthDjFeuoT7kJVfVujxvIZ47ZrUTfXOj1S67yx8R14A0B1VMdk6mITEeQpnIKgRbtqrevqzU522oTKdRZ/D99DL3ZEymmXMKqzafXwNny4pBZY4IMJsP4TRiMr2"
       },
@@ -65,7 +65,7 @@
     "source": {
       "saved-object-with-secret-and-multiple-spaces": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "iA3mnPhS4k1I9SOhguDGb52dq/VsFNlNepxdpAdjXUeHyxV9tXkdX98wDRwSMRgD5esGcdaA8A/QdbAP/pSUnGwMXNAAwmyVrDlC/vAPrZStm/nNVhI6ibl+ItjBEGmV0sueZhU49K8uctrrnctWcSk4u0ZFijQbMvN53Obgeg7p9g==",
         "privateProperty": "oAvCdNvgs4B/BJT5Rc6pNM1uSZ9EeMbjQPK10jAFWQE+hheZHpbXjTqaYxStZC+L/kr5ahRtWyWmOguissMLanx8vhfUWMvpZTxR8VG5rTgnXJ/XNwyRWsBCiIzpRmQHyBQgZJ84jeh/kaRskM1atv+Rm8Sc"
       },
@@ -88,7 +88,7 @@
     "source": {
       "hidden-saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "raJcA4T4lOKuNMFOQC26dp6ToA7iBhUURh7ep4E6ZWGBbot/dpAvjccVBqYcLNCk7Qub2MKY2w7B4dhibJoVaBks8bl5EesKcxFIQ2llU+t8rtKk+x08kB5pOl2IPk4jXkNgkv/zZvwKMM+ot2lE4JG8IKbmuJmrbjmKbGLglIs2mg==",
         "privateProperty": "rYnHH52YWJWPv1jJ++oQAzVK2UUVJr6LSn+IU1LszAzhE3+pC7uAnHnW5KzOqaKtf71Gtc+yxwqu0w8Pnh1/aZqE7GVNVbRYAKDoJS0rpG/0SQXH8Inwl0Q+pTle6UJUvfS3PnwBVBkHGCtIiX4Oo+jXZIku"
       },
@@ -107,7 +107,7 @@
     "source": {
       "saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "ZzRNcMUBDo59TxZxhfvsIx5fNdwHKUXuqBzRJTuGCeiHzTETxX5/uM/L8oUfKRW4BqslRrqnbKMoew6v3dmd+8q5M1OGikX+hDLF06enuZTJi2OD8rcvvBds716hVxoE6aZvWQ4oybO06617wCPwaI2JUV6peA4/4Tz4wnony3TbCA==",
         "privateProperty": "NhxZiOueUmizr9QOxnJqgUIkQvM7NbARU9cGl7J6aoB5BZPQRGASHekFHfyy2PAiQX7bAVOo/C4XYxSgAmgzs6sSK4SqMKljZzRkh1IUss2hPZoEGq3yuyGlJusSPRMTuIgnzbvdSmSqlDoew6or+nRXOD55"
       },
@@ -126,7 +126,7 @@
     "source": {
       "saved-object-with-secret-and-multiple-spaces": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "eRXGrN833HNDpyw4aglw9RVyaVnOZo4BK6sAIWjbH49kITuGlmWBNPTBXyXR59VqgEtxeKJFcoCndkYMlYTc/NRNtoOBfLIIYoyfrPNMLwJb7MShRL/z4ykq/be+lU5mi6Uylnt3XXJSVv6pfQJYdTdZUMULQVUhSzn0DSj3i9k2qg==",
         "privateProperty": "ro8iLGcH4i4/XqadjfuKBET7+fdso8+IXMSWyyq0F+OS1t7oH7MsRuTS2xnraN4eXMF0cfj+jJPSKD7o5oD9539H4GdXXwBg6cEWMy1bTff/g8ixSS9BcuEG0JFX+Id10CoUVq0oY0O7acf1b/yRnpB7C9yi"
       },
@@ -149,7 +149,7 @@
     "source": {
       "hidden-saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
-        "publicPropertyIncludedInAAD": "some-public-property-included-in-aad-0",
+        "publicPropertyExcludedFromAAD": "some-public-property-excluded-from-aad-0",
         "publicPropertyStoredEncrypted": "nkYREB/Uqtc1btk1ieaoFvtU/sZPlHVuCICkDkBrIzkK/K6kaaDAV1AephRH9m3xpyQkhQjdE0PO7OvR0vxjIl4D+huteM0W8Iezzov0MT4r9xfhFodLamsAPAMwRlUmxSnTq6T0LiiNdRIF+LdSc0tb4Qi6mZuY7B8cI5t+uklRcQ==",
         "privateProperty": "vHce4ivOenygNl50dpuXAuBmKGoGMFoDOCvIEQXj02sYrzW8RjbV9xvrZo9PQNMlJOZeedseqJcjRO54J1fJ6MkQ0KmMtkRaMJSWLdvO23OstTmgOyaHQ6z6pg4REdtTG56vEotq6NzBE0w2PPIo/aNW5rl+"
       },
