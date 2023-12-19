@@ -129,7 +129,7 @@ export const RuleAuditTable = (props: {
         field: 'oldValue',
         name: 'Old Value',
         render: (value: string) => {
-          return <pre>{value || '-'}</pre>;
+          return <pre>{value ?? '-'}</pre>;
         },
       });
     }
@@ -140,7 +140,7 @@ export const RuleAuditTable = (props: {
         field: 'newValue',
         name: 'New Value',
         render: (value: string) => {
-          return <pre>{value || '-'}</pre>;
+          return <pre>{value ?? '-'}</pre>;
         },
       });
     }
@@ -200,7 +200,7 @@ export const RuleAuditTable = (props: {
           pageIndex: page.index,
           pageSize: page.size,
           totalItemCount: total,
-          pageSizeOptions: [5, 50, 100],
+          pageSizeOptions: [10, 50, 100],
         }}
         itemIdToExpandedRowMap={{}}
         isExpandable={false}

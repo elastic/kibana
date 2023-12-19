@@ -25,7 +25,7 @@ export const RuleAudit = (props: RuleAuditProps) => {
 
   const [page, setPage] = useState<Pagination>({
     index: 0,
-    size: 5,
+    size: 10,
   });
   const [sort, setSort] = useState<EuiTableSortingType<AuditLog>['sort']>({
     field: '@timestamp',
