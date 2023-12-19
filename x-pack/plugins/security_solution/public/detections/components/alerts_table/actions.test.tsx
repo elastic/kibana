@@ -452,6 +452,7 @@ describe('alert actions', () => {
             templateTimelineVersion: null,
             version: null,
             savedSearchId: null,
+            savedSearch: null,
             isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
           },

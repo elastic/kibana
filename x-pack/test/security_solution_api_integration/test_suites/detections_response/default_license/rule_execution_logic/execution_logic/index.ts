@@ -16,6 +16,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./saved_query'));
     loadTestFile(require.resolve('./threat_match'));
     loadTestFile(require.resolve('./threshold'));
+    loadTestFile(require.resolve('./threshold_alert_suppression'));
     loadTestFile(require.resolve('./non_ecs_fields'));
     loadTestFile(require.resolve('./query'));
   });

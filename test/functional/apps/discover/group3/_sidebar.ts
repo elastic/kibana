@@ -30,8 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 0 empty fields. 3 meta fields.';
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172215
-  describe.skip('discover sidebar', function describeIndexTests() {
+  describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });

@@ -28,11 +28,13 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   SummarizedAlertsChunk,
+  ScopedQueryAlerts,
   ExecutorType,
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
 } from './types';
+export { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';

@@ -19,6 +19,7 @@ import {
   Settings,
   TooltipHeaderFormatter,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
@@ -84,7 +85,12 @@ export const MetricDistributionChart: FC<Props> = ({
     >
       <Chart size={{ width, height }}>
         <Tooltip headerFormatter={headerFormatter} />
-        <Settings theme={theme} locale={i18n.getLocale()} />
+        <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
+          theme={theme}
+          locale={i18n.getLocale()}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

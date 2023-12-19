@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:enableESQL': true,
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172213
-  describe.skip('discover esql view', async function () {
+  describe('discover esql view', async function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');

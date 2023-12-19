@@ -166,3 +166,10 @@ export const SAVE_TOUR_TITLE = i18n.translate(
     defaultMessage: 'Timeline changes now require manual saves',
   }
 );
+
+export const SAVE_AS_NEW = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.saveAsNew',
+  {
+    defaultMessage: 'Save as new timeline',
+  }
+);

@@ -16,8 +16,10 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiCallOut,
+  EuiSwitch,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
@@ -62,6 +64,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
         getTimeline(state, timelineId)
       )
     );
+    const isUnsaved = status === TimelineStatus.draft;
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
     // Resetting the timeline by replacing the active one with a new empty one
@@ -69,6 +72,12 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
       timelineId: TimelineId.active,
       timelineType: TimelineType.default,
     });
+    const [saveAsNewTimeline, setSaveAsNewTimeline] = useState(false);
+
+    const onSaveAsNewChanged = useCallback(
+      (e: EuiSwitchEvent) => setSaveAsNewTimeline(e.target.checked),
+      []
+    );
 
     const handleSubmit = useCallback(
       (titleAndDescription, isValid) => {
@@ -79,12 +88,13 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
               ...titleAndDescription,
             })
           );
-          dispatch(timelineActions.saveTimeline({ id: timelineId }));
+
+          dispatch(timelineActions.saveTimeline({ id: timelineId, saveAsNew: saveAsNewTimeline }));
         }
 
         return Promise.resolve();
       },
-      [dispatch, timelineId]
+      [dispatch, timelineId, saveAsNewTimeline]
     );
 
     const initialState = useMemo(
@@ -232,30 +242,40 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
               <EuiSpacer />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false} component="span">
-                  <EuiButton
-                    size="s"
-                    fill={false}
-                    onClick={handleCancel}
-                    isDisabled={isSaving}
-                    data-test-subj="close-button"
-                  >
-                    {closeModalText}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} component="span">
-                  <EuiButton
-                    autoFocus={initialFocusOn === 'save'}
-                    size="s"
-                    isDisabled={isSaving || isSubmitting}
-                    fill={true}
-                    onClick={onSubmit}
-                    data-test-subj="save-button"
-                  >
-                    {saveButtonTitle}
-                  </EuiButton>
-                </EuiFlexItem>
+              <EuiFlexGroup direction="row" alignItems="center">
+                {!isUnsaved ? (
+                  <EuiSwitch
+                    label={i18n.SAVE_AS_NEW}
+                    checked={saveAsNewTimeline}
+                    onChange={onSaveAsNewChanged}
+                    data-test-subj="save-as-new-switch"
+                  />
+                ) : null}
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false} component="span">
+                    <EuiButton
+                      size="s"
+                      fill={false}
+                      onClick={handleCancel}
+                      isDisabled={isSaving}
+                      data-test-subj="close-button"
+                    >
+                      {closeModalText}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} component="span">
+                    <EuiButton
+                      autoFocus={initialFocusOn === 'save'}
+                      size="s"
+                      isDisabled={isSaving || isSubmitting}
+                      fill={true}
+                      onClick={onSubmit}
+                      data-test-subj="save-button"
+                    >
+                      {saveButtonTitle}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexGroup>
             </EuiFlexItem>
           </Form>

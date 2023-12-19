@@ -136,4 +136,53 @@ describe('grouping container', () => {
 
     expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
   });
+
+  it('Renders groupPanelRenderer when provided', () => {
+    const groupPanelRenderer = jest.fn();
+    render(
+      <I18nProvider>
+        <Grouping {...testProps} groupPanelRenderer={groupPanelRenderer} />
+      </I18nProvider>
+    );
+
+    expect(groupPanelRenderer).toHaveBeenNthCalledWith(
+      1,
+      'host.name',
+      testProps.data.groupByFields.buckets[0],
+      undefined,
+      false
+    );
+
+    expect(groupPanelRenderer).toHaveBeenNthCalledWith(
+      2,
+      'host.name',
+      testProps.data.groupByFields.buckets[1],
+      undefined,
+      false
+    );
+
+    expect(groupPanelRenderer).toHaveBeenNthCalledWith(
+      3,
+      'host.name',
+      testProps.data.groupByFields.buckets[2],
+      'The selected group by field, host.name, is missing a value for this group of events.',
+      false
+    );
+  });
+  it('Renders groupPanelRenderer when provided with isLoading attribute', () => {
+    const groupPanelRenderer = jest.fn();
+    render(
+      <I18nProvider>
+        <Grouping {...testProps} isLoading groupPanelRenderer={groupPanelRenderer} />
+      </I18nProvider>
+    );
+
+    expect(groupPanelRenderer).toHaveBeenNthCalledWith(
+      1,
+      'host.name',
+      testProps.data.groupByFields.buckets[0],
+      undefined,
+      true
+    );
+  });
 });

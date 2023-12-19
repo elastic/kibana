@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,6 +21,7 @@ import {
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { PagerDutyActionParams } from '../types';
+import { OPTIONAL_LABEL } from './translations';
 
 type LinksListProps = Pick<
   ActionParamsProps<PagerDutyActionParams>,
@@ -40,8 +42,13 @@ export const LinksList: React.FC<LinksListProps> = ({
     <EuiFormRow
       id="pagerDutyLinks"
       label={i18n.translate('xpack.stackConnectors.components.pagerDuty.linksFieldLabel', {
-        defaultMessage: 'Links (optional)',
+        defaultMessage: 'Links',
       })}
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {OPTIONAL_LABEL}
+        </EuiText>
+      }
       isInvalid={areLinksInvalid}
       error={errors.links}
       fullWidth

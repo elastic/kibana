@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
       "exploratoryView",
       "features",
       "files",
@@ -28,6 +29,7 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
       "security",
       "share",
@@ -35,6 +37,7 @@
       "visualizations",
       "dashboard",
       "expressions",
+      "logExplorer",
       "licensing"
     ],
     "optionalPlugins": [

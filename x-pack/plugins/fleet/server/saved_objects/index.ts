@@ -278,6 +278,10 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             },
           },
         },
+        preset: {
+          type: 'keyword',
+          index: false,
+        },
       },
     },
     modelVersions: {
@@ -306,6 +310,38 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               service_token: { type: 'keyword', index: false },
+            },
+          },
+        ],
+      },
+      '3': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              secrets: {
+                properties: {
+                  service_token: {
+                    dynamic: false,
+                    properties: {
+                      id: { type: 'keyword' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      '4': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              preset: {
+                type: 'keyword',
+                index: false,
+              },
             },
           },
         ],
@@ -678,6 +714,8 @@ export function registerEncryptedSavedObjects(
       'timeout',
       'broker_timeout',
       'required_acks',
+      'preset',
+      'secrets',
     ]),
   });
   // Encrypted saved objects

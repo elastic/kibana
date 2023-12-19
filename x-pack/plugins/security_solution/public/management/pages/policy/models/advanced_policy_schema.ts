@@ -1163,6 +1163,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.callstacks.timeout_microseconds',
+    first_supported_version: '8.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.timeout_microseconds',
+      {
+        defaultMessage:
+          'Maximum runtime of inline callstack collection/enrichment.  Default: 100000',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.artifacts.global.proxy_url',
     first_supported_version: '8.8',
     documentation: i18n.translate(
@@ -1455,6 +1466,50 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.resident_memory_target_mb',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.resident_memory_target_mb',
+      {
+        defaultMessage:
+          'How much memory (in MB) should Endpoint aim to keep resident in RAM? This setting affects Private Working Set on Windows. It does not affect the amount of virtual memory that Endpoint requests from the OS (Private Bytes aka Commit Charge). If plenty of unused RAM is available, Windows may give Endpoint more RAM than requested to reduce unnecessary paging and improve performance. If the current Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. Default 200. This value cannot be decreased below 50.',
       }
     ),
   },
