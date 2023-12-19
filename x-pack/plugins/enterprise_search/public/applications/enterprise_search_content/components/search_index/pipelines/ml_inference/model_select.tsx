@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
@@ -145,13 +146,13 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
           )}
           {model.licenseType && (
             <EuiFlexItem grow={false}>
-              {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
-              <div>
+              {/* Wrap in a span to prevent the badge from growing to a whole row on mobile */}
+              <span>
                 <LicenseBadge
                   licenseType={model.licenseType}
                   modelDetailsPageUrl={model.modelDetailsPageUrl}
                 />
-              </div>
+              </span>
             </EuiFlexItem>
           )}
           {(model.isPlaceholder ||
@@ -222,8 +223,12 @@ export const ModelSelect: React.FC = () => {
     selectedModel,
   } = useValues(ModelSelectLogic);
   const { setInferencePipelineConfiguration } = useActions(ModelSelectLogic);
+  const { euiTheme } = useEuiTheme();
 
   const { modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
+  const rowHeight = useIsWithinMaxBreakpoint('s') ? euiTheme.base * 8 : euiTheme.base * 6;
+  const maxVisibleOptions = 4;
+  const [listHeight, setListHeight] = useState(maxVisibleOptions * rowHeight);
 
   const getModelSelectOptionProps = (models: MlModel[]): ModelSelectOptionProps[] =>
     (models ?? []).map((model) => ({
@@ -247,6 +252,10 @@ export const ModelSelect: React.FC = () => {
     });
   };
 
+  const onSearchChange = (_: string, matchingOptions: ModelSelectOptionProps[]) => {
+    setListHeight(Math.min(maxVisibleOptions, matchingOptions.length) * rowHeight);
+  };
+
   const renderOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
 
   return (
@@ -258,14 +267,17 @@ export const ModelSelect: React.FC = () => {
           singleSelection="always"
           listProps={{
             bordered: true,
-            rowHeight: useIsWithinMaxBreakpoint('s') ? 128 : 96,
+            rowHeight,
             onFocusBadge: false,
           }}
-          height={384}
+          height={listHeight}
           onChange={onChange}
           renderOption={renderOption}
           isLoading={isLoading}
           searchable
+          searchProps={{
+            onChange: onSearchChange,
+          }}
         >
           {(list, search) => (
             <>

@@ -57,10 +57,10 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 {licenseType && (
                   <EuiFlexItem grow={false}>
-                    {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
-                    <div>
+                    {/* Wrap in a span to prevent the badge from growing to a whole row on mobile */}
+                    <span>
                       <LicenseBadge licenseType={licenseType} />
-                    </div>
+                    </span>
                   </EuiFlexItem>
                 )}
                 {description && (
@@ -76,14 +76,14 @@ export const ModelSelectOption: React.FC<ModelSelectOptionProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-        {/* Wrap in a div to prevent the badge from growing to a whole row on mobile */}
-        <div>
+        {/* Wrap in a span to prevent the badge from growing to a whole row on mobile */}
+        <span>
           <TrainedModelHealth
             modelState={deploymentState}
             modelStateReason={deploymentStateReason}
             isDownloadable={isPlaceholder}
           />
-        </div>
+        </span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
