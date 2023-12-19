@@ -19,14 +19,14 @@ const createThemeMock = (): CoreTheme => {
   return { ...mockTheme };
 };
 
-const createTheme$Mock = () => {
-  return of(createThemeMock());
+const createTheme$Mock = (theme: CoreTheme = createThemeMock()) => {
+  return of(theme);
 };
 
-const createThemeContractMock = () => {
+const createThemeContractMock = (theme: CoreTheme = createThemeMock()) => {
   const themeMock: jest.Mocked<ThemeServiceSetup> = {
-    theme$: createTheme$Mock(),
-    getTheme: jest.fn().mockReturnValue(createThemeMock()),
+    theme$: createTheme$Mock(theme),
+    getTheme: jest.fn().mockReturnValue(theme),
   };
   return themeMock;
 };
