@@ -65,7 +65,8 @@ describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServ
     }
   });
 
-  describe('From Alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169689
+  describe.skip('From Alerts', () => {
     let ruleId: string;
     let ruleName: string;
 
