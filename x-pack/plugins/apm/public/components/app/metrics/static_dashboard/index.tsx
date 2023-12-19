@@ -28,12 +28,12 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { getDashboardPanelMap, MetricsDashboardProps } from './helper';
+import { convertObjectToPanels, MetricsDashboardProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  const dataViewId = useDataViewId();
-
+  // const dataViewId = useDataViewId();
+  const { dataView } = dashboardProps;
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -42,7 +42,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { dataView } = useApmDataView();
+  // const { dataView } = useApmDataView();
 
   const { serviceName } = useApmServiceContext();
 
@@ -55,7 +55,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   }, [kuery, dashboard, rangeFrom, rangeTo]);
 
   useEffect(() => {
-    if (!dashboard || !dataView) return;
+    if (!dashboard) return;
 
     dashboard.updateInput({
       filters: dataView ? getFilters(serviceName, environment, dataView) : [],
@@ -65,7 +65,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   return (
     <DashboardRenderer
       getCreationOptions={() =>
-        getCreationOptions(dashboardProps, notifications, dataViewId)
+        getCreationOptions(dashboardProps, notifications, dataView)
       }
       ref={setDashboard}
     />
@@ -75,20 +75,20 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
   notifications: NotificationsStart,
-  dataViewId: string
+  dataView: DataView
 ): Promise<DashboardCreationOptions> {
   try {
-    const builder = controlGroupInputBuilder;
-    const controlGroupInput = getDefaultControlGroupInput();
+    // const builder = controlGroupInputBuilder;
+    // const controlGroupInput = getDefaultControlGroupInput();
 
-    await builder.addDataControlFromField(controlGroupInput, {
-      dataViewId,
-      title: 'Node name',
-      fieldName: 'service.node.name',
-      width: 'medium',
-      grow: true,
-    });
-    const panels = await getDashboardPanelMap(dashboardProps, dataViewId);
+    // await builder.addDataControlFromField(controlGroupInput, {
+    //   dataView,
+    //   title: 'Node name',
+    //   fieldName: 'service.node.name',
+    //   width: 'medium',
+    //   grow: true,
+    // });
+    const panels = await convertObjectToPanels(dashboardProps, dataView);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
@@ -99,7 +99,6 @@ async function getCreationOptions(
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
-        controlGroupInput,
       }),
     };
   } catch (error) {
