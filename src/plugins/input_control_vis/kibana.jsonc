@@ -10,7 +10,6 @@
     "requiredPlugins": [
       "data",
       "expressions",
-      "visDefaultEditor",
       "visualizations",
       "unifiedSearch"
     ],

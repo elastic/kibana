@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { shapeRendererFactory, progressRendererFactory } from './expression_renderers';
 import { shapeFunction, progressFunction } from '../common/expression_functions';
 
@@ -15,15 +15,11 @@ interface SetupDeps {
   expressions: ExpressionsSetup;
 }
 
-interface StartDeps {
-  expression: ExpressionsStart;
-}
-
 export type ExpressionShapePluginSetup = void;
 export type ExpressionShapePluginStart = void;
 
 export class ExpressionShapePlugin
-  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps>
+  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, {}>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
@@ -32,7 +28,7 @@ export class ExpressionShapePlugin
     expressions.registerRenderer(progressRendererFactory(core));
   }
 
-  public start(core: CoreStart): ExpressionShapePluginStart {}
+  public start(_core: CoreStart): ExpressionShapePluginStart {}
 
   public stop() {}
 }

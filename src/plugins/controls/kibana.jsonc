@@ -8,16 +8,18 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "presentationUtil",
-      "savedObjects",
-      "kibanaReact",
-      "expressions",
-      "embeddable",
-      "dataViews",
       "data",
-      "unifiedSearch",
-      "uiActions"
+      "dataViews",
+      "embeddable",
+      "uiActions",
+      "unifiedSearch"
     ],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaReact",
+      "presentationUtil"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

@@ -13,7 +13,11 @@ import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 
-export class LinksServerPlugin implements Plugin<object, object> {
+interface LinksServerSetupDependencies {
+  contentManagement: ContentManagementServerSetup;
+}
+
+export class LinksServerPlugin implements Plugin<{}, {}, LinksServerSetupDependencies, {}> {
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -42,7 +46,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     return {};
   }
 

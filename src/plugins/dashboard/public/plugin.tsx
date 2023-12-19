@@ -54,7 +54,6 @@ import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-taggin
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
@@ -107,7 +106,6 @@ export interface DashboardStartDependencies {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
-  customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
 }

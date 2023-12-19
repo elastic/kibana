@@ -23,7 +23,7 @@ interface SetupDeps {
   unifiedSearch: UnifiedSearchSetup;
 }
 
-export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
+export class ControlsPlugin implements Plugin<{}, {}, SetupDeps, {}> {
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)

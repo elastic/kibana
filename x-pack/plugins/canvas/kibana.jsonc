@@ -17,12 +17,6 @@
       "data",
       "dataViews",
       "embeddable",
-      "expressionError",
-      "expressionImage",
-      "expressionMetric",
-      "expressionRepeatImage",
-      "expressionRevealImage",
-      "expressionShape",
       "expressions",
       "features",
       "inspector",
@@ -31,14 +25,12 @@
       "uiActions",
       "share",
       "contentManagement",
-      "savedObjectsFinder"
     ],
     "optionalPlugins": [
       "home",
       "reporting",
       "spaces",
-      "usageCollection",
-      "savedObjects",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -46,7 +38,14 @@
       "lens",
       "maps",
       "visualizations",
-      "fieldFormats"
+      "fieldFormats",
+      "expressionError",
+      "expressionImage",
+      "expressionMetric",
+      "expressionRepeatImage",
+      "expressionRevealImage",
+      "expressionShape",
+      "savedObjectsFinder"
     ],
   }
 }

@@ -31,17 +31,17 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
-  usageCollection: UsageCollectionSetup;
-  taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+  taskManager?: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
 }
 
 interface StartDeps {
-  taskManager: TaskManagerStartContract;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
 
@@ -49,18 +49,21 @@ export class DashboardPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+  public setup(
+    core: CoreSetup<StartDeps>,
+    { contentManagement, embeddable, taskManager, usageCollection }: SetupDeps
+  ) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
-          embeddable: plugins.embeddable,
+          embeddable,
         },
       })
     );
 
-    plugins.contentManagement.register({
+    contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
@@ -71,34 +74,34 @@ export class DashboardPlugin
       },
     });
 
-    if (plugins.taskManager) {
-      initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
+    if (taskManager) {
+      initializeDashboardTelemetryTask(this.logger, core, taskManager, embeddable);
     }
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    if (plugins.usageCollection && plugins.taskManager) {
+    if (usageCollection && taskManager) {
       registerDashboardUsageCollector(
-        plugins.usageCollection,
-        core.getStartServices().then(([_, { taskManager }]) => taskManager)
+        usageCollection,
+        // This cast is safe because we know that taskManager is defined on the `start` contract if it
+        // exists on the`setup` contract... but Typescript can't know that.
+        core.getStartServices().then(([_, { taskManager: tm }]) => tm as TaskManagerStartContract)
       );
     }
 
-    plugins.embeddable.registerEmbeddableFactory(
-      dashboardPersistableStateServiceFactory(plugins.embeddable)
-    );
+    embeddable.registerEmbeddableFactory(dashboardPersistableStateServiceFactory(embeddable));
 
     core.uiSettings.register(getUISettings());
 
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDeps) {
+  public start(_core: CoreStart, { taskManager }: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    if (plugins.taskManager) {
-      scheduleDashboardTelemetry(this.logger, plugins.taskManager)
+    if (taskManager) {
+      scheduleDashboardTelemetry(this.logger, taskManager)
         .then(async () => {
-          await plugins.taskManager.runSoon(TASK_ID);
+          await taskManager?.runSoon(TASK_ID);
         })
         .catch((e) => {
           this.logger.debug(`Error scheduling task, received ${e.message}`);

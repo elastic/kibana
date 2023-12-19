@@ -6,14 +6,16 @@
     "id": "dashboardEnhanced",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "dashboardEnhanced"],
+    "configPath": [
+      "xpack",
+      "dashboardEnhanced"
+    ],
     "requiredPlugins": [
       "dashboard",
       "data",
       "embeddable",
       "share",
-      "uiActionsEnhanced",
-      "unifiedSearch"
+      "uiActionsEnhanced"
     ],
     "requiredBundles": [
       "embeddable",

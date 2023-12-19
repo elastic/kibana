@@ -8,19 +8,16 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  UnifiedSearchPublicPluginStart,
-  UnifiedSearchPluginSetup,
-} from '@kbn/unified-search-plugin/public';
+import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import { InputControlPublicConfig } from '../config';
 
-type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
+type InputControlVisCoreSetup = CoreSetup<{}, void>;
 
 export interface InputControlSettings {
   autocompleteTimeout: number;
@@ -43,15 +40,9 @@ export interface InputControlVisPluginSetupDependencies {
 }
 
 /** @internal */
-export interface InputControlVisPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-}
-
-/** @internal */
-export class InputControlVisPlugin implements Plugin<void, void> {
+export class InputControlVisPlugin
+  implements Plugin<void, void, InputControlVisPluginSetupDependencies, {}>
+{
   constructor(public initializerContext: PluginInitializerContext<InputControlPublicConfig>) {}
 
   public setup(
@@ -76,7 +67,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     );
   }
 
-  public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
+  public start(_core: CoreStart) {
     // nothing to do here
   }
 }

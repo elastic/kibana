@@ -8,15 +8,25 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "data",
       "inspector",
       "uiActions",
-      "savedObjectsFinder",
       "savedObjectsManagement",
       "contentManagement"
     ],
-    "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils", "unifiedSearch"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "savedObjectsTaggingOss",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "savedObjects",
+      "kibanaReact",
+      "kibanaUtils",
+      "unifiedSearch",
+      "data",
+      "savedObjectsFinder"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

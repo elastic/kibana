@@ -64,7 +64,7 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
-  usageCollection: UsageCollectionStart;
+  usageCollection?: UsageCollectionStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -105,7 +105,15 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     options: AttributeServiceOptions<A, M>
   ) => AttributeService<A, V, R, M>;
 }
-export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
+export class EmbeddablePublicPlugin
+  implements
+    Plugin<
+      EmbeddableSetup,
+      EmbeddableStart,
+      EmbeddableSetupDependencies,
+      EmbeddableStartDependencies
+    >
+{
   private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
     new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
@@ -116,9 +124,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
+  public setup(_core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     bootstrap(uiActions);
 
     return {

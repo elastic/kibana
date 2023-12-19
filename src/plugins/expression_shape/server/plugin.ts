@@ -7,29 +7,25 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { shapeFunction, progressFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
 }
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
 export type ExpressionShapePluginSetup = void;
 export type ExpressionShapePluginStart = void;
 
 export class ExpressionShapePlugin
-  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps>
+  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, {}>
 {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
+  public setup(_core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
     expressions.registerFunction(progressFunction);
   }
 
-  public start(core: CoreStart): ExpressionShapePluginStart {}
+  public start(_core: CoreStart): ExpressionShapePluginStart {}
 
   public stop() {}
 }

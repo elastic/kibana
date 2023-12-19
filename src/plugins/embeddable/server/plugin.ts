@@ -41,12 +41,12 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
 
-export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
+export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart, {}, {}> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
 
-  public setup(core: CoreSetup) {
+  public setup(_core: CoreSetup) {
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this
         .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
@@ -69,7 +69,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this
         .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
