@@ -6,7 +6,7 @@
  */
 
 import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { Connector } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors/types/connectors';
 
 export interface CreateAPIKeyArgs {
   expiration?: string;
