@@ -60,6 +60,7 @@ export function getConnectorType(): ConnectorTypeModel<
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./sentinelone_connector')),
-    actionParamsFields: lazy(() => import('./sentinelone_params')),
+    // TODO: Enable once we add support for automated response actions
+    // actionParamsFields: lazy(() => import('./sentinelone_params')),
   };
 }
