@@ -64,7 +64,12 @@ export function isStuckInUpdating(agent: Agent): boolean {
     agent.status === 'updating' &&
     !!agent.upgrade_started_at &&
     !agent.upgraded_at &&
-    Date.now() - Date.parse(agent.upgrade_started_at) >
-      AGENT_UPDATING_TIMEOUT_HOURS * 60 * 60 * 1000
+    (isAgentInFailedUpgradeState(agent) ||
+      Date.now() - Date.parse(agent.upgrade_started_at) >
+        AGENT_UPDATING_TIMEOUT_HOURS * 60 * 60 * 1000)
   );
+}
+
+export function isAgentInFailedUpgradeState(agent: Agent): boolean {
+  return agent.upgrade_details?.state === 'UPG_FAILED';
 }

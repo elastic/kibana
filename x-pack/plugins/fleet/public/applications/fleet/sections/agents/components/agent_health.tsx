@@ -23,6 +23,7 @@ import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import {
   getPreviousAgentStatusForOfflineAgents,
+  isAgentInFailedUpgradeState,
   isStuckInUpdating,
 } from '../../../../../../common/services/agent_status';
 
@@ -183,17 +184,27 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
             size="m"
             color="warning"
             title={
-              <FormattedMessage
-                id="xpack.fleet.agentHealth.stuckUpdatingTitle"
-                defaultMessage="Agent may be stuck updating."
-              />
+              isAgentInFailedUpgradeState(agent) ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.failedUpgradeTitle"
+                  defaultMessage="Agent upgrade is stuck in failed state."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.stuckUpdatingTitle"
+                  defaultMessage="Agent may be stuck updating."
+                />
+              )
             }
           >
             <p>
               <FormattedMessage
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
-                defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade. {learnMore}"
+                defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
                 values={{
+                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                    ? 'Agent upgrade failed.'
+                    : 'Agent has been updating for a while, and may be stuck.',
                   learnMore: (
                     <div>
                       <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
