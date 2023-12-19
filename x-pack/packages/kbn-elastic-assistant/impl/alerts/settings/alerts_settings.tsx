@@ -40,7 +40,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
     (event: EuiSwitchEvent) => {
       setUpdatedKnowledgeBaseSettings({
         ...knowledgeBase,
-        alerts: event.target.checked,
+        isEnabledRAGAlerts: event.target.checked,
       });
     },
     [knowledgeBase, setUpdatedKnowledgeBaseSettings]
@@ -58,7 +58,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
         `}
       >
         <EuiSwitch
-          checked={knowledgeBase.alerts}
+          checked={knowledgeBase.isEnabledRAGAlerts}
           compressed
           data-test-subj="alertsSwitch"
           label={i18n.ALERTS_LABEL}
@@ -87,7 +87,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
             aria-label={i18n.ALERTS_RANGE}
             compressed
             data-test-subj="alertsRange"
-            disabled={!knowledgeBase.alerts}
+            disabled={!knowledgeBase.isEnabledRAGAlerts}
             id={inputRangeSliderId}
             max={MAX_LATEST_ALERTS}
             min={MIN_LATEST_ALERTS}

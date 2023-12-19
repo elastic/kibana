@@ -44,7 +44,7 @@ export const postActionsConnectorExecuteRoute = (
       const logger: Logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
       const shouldNotUseLangChain =
-        !request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request);
+        !request.body.isEnabledKnowledgeBase && !requestHasRequiredAnonymizationParams(request);
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -62,7 +62,7 @@ export const postActionsConnectorExecuteRoute = (
         }
 
         // TODO: Add `traceId` to actions request when calling via langchain
-        logger.debug('Executing via langchain, assistantLangChain: true');
+        logger.debug('Executing via langchain, isEnabledKnowledgeBase: true');
 
         // Fetch any tools registered by the request's originating plugin
         const pluginName = getPluginNameFromRequest({
@@ -92,7 +92,7 @@ export const postActionsConnectorExecuteRoute = (
           allow: request.body.allow,
           allowReplacement: request.body.allowReplacement,
           actions,
-          assistantLangChain: request.body.assistantLangChain,
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           assistantTools,
           connectorId,
           elserId,
@@ -118,7 +118,7 @@ export const postActionsConnectorExecuteRoute = (
         const error = transformError(err);
         telemetry.reportEvent(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
           isEnabledLangChain: !shouldNotUseLangChain,
-          isEnabledKnowledgeBase: request.body.assistantLangChain,
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: requestHasRequiredAnonymizationParams(request),
           errorMessage: error.message,
         });

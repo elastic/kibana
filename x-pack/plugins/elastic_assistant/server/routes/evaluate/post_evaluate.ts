@@ -129,7 +129,7 @@ export const postEvaluateRoute = (
             },
             replacements: {},
             size: DEFAULT_SIZE,
-            assistantLangChain: true,
+            isEnabledKnowledgeBase: true,
           },
         };
 
@@ -148,7 +148,7 @@ export const postEvaluateRoute = (
               agentEvaluator: (langChainMessages, exampleId) =>
                 AGENT_EXECUTOR_MAP[agentName]({
                   actions,
-                  assistantLangChain: true,
+                  isEnabledKnowledgeBase: true,
                   assistantTools,
                   connectorId,
                   esClient,

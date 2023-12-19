@@ -69,7 +69,7 @@ describe('callAgentExecutor', () => {
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
     await callAgentExecutor({
       actions: mockActions,
-      assistantLangChain: true,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
@@ -90,7 +90,7 @@ describe('callAgentExecutor', () => {
   it('kicks off the chain with (only) the last message', async () => {
     await callAgentExecutor({
       actions: mockActions,
-      assistantLangChain: true,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
@@ -114,7 +114,7 @@ describe('callAgentExecutor', () => {
 
     await callAgentExecutor({
       actions: mockActions,
-      assistantLangChain: true,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages: onlyOneMessage,
@@ -136,7 +136,7 @@ describe('callAgentExecutor', () => {
   it('returns the expected response body', async () => {
     const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
-      assistantLangChain: true,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,

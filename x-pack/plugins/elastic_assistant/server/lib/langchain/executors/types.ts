@@ -20,7 +20,7 @@ export interface AgentExecutorParams {
   actions: ActionsPluginStart;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   esClient: ElasticsearchClient;

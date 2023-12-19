@@ -237,7 +237,7 @@ describe('getBlockBotConversation', () => {
   describe('getOptionalRequestParams', () => {
     it('should return an empty object when ragOnAlerts is false', () => {
       const params = {
-        alerts: true,
+        isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
@@ -253,7 +253,7 @@ describe('getBlockBotConversation', () => {
 
     it('should return an empty object when alerts is false', () => {
       const params = {
-        alerts: false, // <-- false
+        isEnabledRAGAlerts: false, // <-- false
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
@@ -269,7 +269,7 @@ describe('getBlockBotConversation', () => {
 
     it('should return the optional request params when ragOnAlerts is true and alerts is true', () => {
       const params = {
-        alerts: true,
+        isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
@@ -291,7 +291,7 @@ describe('getBlockBotConversation', () => {
 
     it('should return (only) the optional request params that are defined when some optional params are not provided', () => {
       const params = {
-        alerts: true,
+        isEnabledRAGAlerts: true,
         ragOnAlerts: true,
         allow: ['a', 'b', 'c'], // all the others are undefined
       };
@@ -305,10 +305,10 @@ describe('getBlockBotConversation', () => {
   });
 
   describe('hasParsableResponse', () => {
-    it('returns true when assistantLangChain is true', () => {
+    it('returns true when isEnabledKnowledgeBase is true', () => {
       const result = hasParsableResponse({
-        alerts: false,
-        assistantLangChain: true,
+        isEnabledRAGAlerts: false,
+        isEnabledKnowledgeBase: true,
         ragOnAlerts: false,
       });
 
@@ -317,18 +317,18 @@ describe('getBlockBotConversation', () => {
 
     it('returns true when ragOnAlerts is true and alerts is true', () => {
       const result = hasParsableResponse({
-        alerts: true,
-        assistantLangChain: false,
+        isEnabledRAGAlerts: true,
+        isEnabledKnowledgeBase: false,
         ragOnAlerts: true,
       });
 
       expect(result).toBe(true);
     });
 
-    it('returns false when assistantLangChain, ragOnAlerts, and alerts are all false', () => {
+    it('returns false when isEnabledKnowledgeBase, ragOnAlerts, and alerts are all false', () => {
       const result = hasParsableResponse({
-        alerts: false,
-        assistantLangChain: false,
+        isEnabledRAGAlerts: false,
+        isEnabledKnowledgeBase: false,
         ragOnAlerts: false,
       });
 

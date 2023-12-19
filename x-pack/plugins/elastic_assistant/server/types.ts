@@ -90,7 +90,7 @@ export interface AssistantToolParams {
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;

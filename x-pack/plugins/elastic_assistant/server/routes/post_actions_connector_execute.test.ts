@@ -99,7 +99,7 @@ const mockRequest = {
       },
       subAction: 'invokeAI',
     },
-    assistantLangChain: true,
+    isEnabledKnowledgeBase: true,
   },
 };
 
@@ -115,7 +115,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('returns the expected response when assistantLangChain=false', async () => {
+  it('returns the expected response when isEnabledKnowledgeBase=false', async () => {
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
         const result = await handler(
@@ -124,7 +124,7 @@ describe('postActionsConnectorExecuteRoute', () => {
             ...mockRequest,
             body: {
               ...mockRequest.body,
-              assistantLangChain: false,
+              isEnabledKnowledgeBase: false,
             },
           },
           mockResponse
@@ -146,7 +146,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('returns the expected response when assistantLangChain=true', async () => {
+  it('returns the expected response when isEnabledKnowledgeBase=true', async () => {
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
         const result = await handler(mockContext, mockRequest, mockResponse);
@@ -263,7 +263,7 @@ describe('postActionsConnectorExecuteRoute', () => {
       params: { connectorId: 'bad-connector-id' },
       body: {
         ...mockRequest.body,
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
       },
     };
 

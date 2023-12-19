@@ -78,7 +78,7 @@ export const useConversation = (): UseConversation => {
   const {
     allSystemPrompts,
     assistantTelemetry,
-    knowledgeBase: { assistantLangChain: isEnabledKnowledgeBase, alerts: isEnabledRAGAlerts },
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     setConversations,
   } = useAssistantContext();
 

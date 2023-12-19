@@ -94,14 +94,17 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllSystemPrompts(updatedSystemPromptSettings);
     setConversations(updatedConversationSettings);
     const didUpdateKnowledgeBase =
-      knowledgeBase.assistantLangChain !== updatedKnowledgeBaseSettings.assistantLangChain;
-    const didUpdateRAGAlerts = knowledgeBase.alerts !== updatedKnowledgeBaseSettings.alerts;
+      knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
+    const didUpdateRAGAlerts =
+      knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
     if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
       assistantTelemetry?.reportAssistantSettingToggled({
         ...(didUpdateKnowledgeBase
-          ? { didEnableKnowledgeBase: updatedKnowledgeBaseSettings.assistantLangChain }
+          ? { didEnableKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
           : {}),
-        ...(didUpdateRAGAlerts ? { didEnableRAGAlerts: updatedKnowledgeBaseSettings.alerts } : {}),
+        ...(didUpdateRAGAlerts
+          ? { didEnableRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
+          : {}),
       });
     }
     setKnowledgeBase(updatedKnowledgeBaseSettings);
@@ -109,8 +112,8 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
     assistantTelemetry,
-    knowledgeBase.alerts,
-    knowledgeBase.assistantLangChain,
+    knowledgeBase.isEnabledRAGAlerts,
+    knowledgeBase.isEnabledKnowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,

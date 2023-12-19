@@ -42,8 +42,8 @@ const mockValues = {
   defaultAllow: initialDefaultAllow,
   defaultAllowReplacement: initialDefaultAllowReplacement,
   knowledgeBase: {
-    alerts: true,
-    assistantLangChain: true,
+    isEnabledRAGAlerts: true,
+    isEnabledKnowledgeBase: true,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setAllQuickPrompts: setAllQuickPromptsMock,
@@ -61,8 +61,8 @@ const updatedValues = {
   defaultAllow: ['allow2'],
   defaultAllowReplacement: ['replacement2'],
   knowledgeBase: {
-    alerts: false,
-    assistantLangChain: false,
+    isEnabledRAGAlerts: false,
+    isEnabledKnowledgeBase: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
 };
@@ -173,7 +173,7 @@ describe('useSettingsUpdater', () => {
 
       setUpdatedKnowledgeBaseSettings({
         ...updatedValues.knowledgeBase,
-        assistantLangChain: true,
+        isEnabledKnowledgeBase: true,
       });
       result.current.saveSettings();
       expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
