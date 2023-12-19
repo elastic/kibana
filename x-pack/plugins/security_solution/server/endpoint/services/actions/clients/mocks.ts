@@ -51,12 +51,11 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   esClient.index.mockImplementation((async (payload) => {
     switch (payload.index) {
       case ENDPOINT_ACTIONS_INDEX:
-        return createEsIndexTransportResponseMock({ body: { _index: payload.index } });
       case ENDPOINT_ACTION_RESPONSES_INDEX:
         return createEsIndexTransportResponseMock({ body: { _index: payload.index } });
+      default:
+        throw new Error(`no esClient.index() mock defined for index ${payload.index}`);
     }
-
-    throw new Error(`no esClient.index() mock defined for index ${payload.index}`);
   }) as typeof esClient.index);
 
   esClient.search.mockImplementation(async (payload) => {

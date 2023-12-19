@@ -105,10 +105,6 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
    * Update cases with information about the hosts that received a response action.
    *
    * **NOTE:** Failures during update will not cause this operation to fail - it will only log the errors
-   *
-   * @param caseIds
-   * @param alertIds
-   * @param updates
    * @protected
    */
   protected async updateCases({
