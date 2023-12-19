@@ -1309,13 +1309,13 @@ tr:hover .c4:focus::before {
                                                                 >
                                                                   9987
                                                                   <span
-                                                                    class="emotion-euiLink__externalIcon"
+                                                                    class="emotion-EuiExternalLinkIcon"
                                                                     data-euiicon-type="popout"
                                                                   >
                                                                     External link
                                                                   </span>
                                                                   <span
-                                                                    class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                                                    class="emotion-euiScreenReaderOnly"
                                                                   >
                                                                     (opens in a new tab or window)
                                                                   </span>
@@ -2309,13 +2309,13 @@ tr:hover .c4:focus::before {
                                                                 >
                                                                   80
                                                                   <span
-                                                                    class="emotion-euiLink__externalIcon"
+                                                                    class="emotion-EuiExternalLinkIcon"
                                                                     data-euiicon-type="popout"
                                                                   >
                                                                     External link
                                                                   </span>
                                                                   <span
-                                                                    class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                                                    class="emotion-euiScreenReaderOnly"
                                                                   >
                                                                     (opens in a new tab or window)
                                                                   </span>
@@ -2827,13 +2827,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.fingerprints.ja3.hash-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>
@@ -2935,13 +2935,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.client_certificate.fingerprint.sha1-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>
@@ -3043,13 +3043,13 @@ tr:hover .c4:focus::before {
                                       >
                                         tls.server_certificate.fingerprint.sha1-value
                                         <span
-                                          class="emotion-euiLink__externalIcon"
+                                          class="emotion-EuiExternalLinkIcon"
                                           data-euiicon-type="popout"
                                         >
                                           External link
                                         </span>
                                         <span
-                                          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                          class="emotion-euiScreenReaderOnly"
                                         >
                                           (opens in a new tab or window)
                                         </span>
