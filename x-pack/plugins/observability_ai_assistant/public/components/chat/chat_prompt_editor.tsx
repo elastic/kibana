@@ -94,6 +94,7 @@ export function ChatPromptEditor({
       });
     } catch (_) {
       setInnerMessage(oldMessage);
+      setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
   }, [innerMessage, loading, onSendTelemetry, onSubmit]);
 
