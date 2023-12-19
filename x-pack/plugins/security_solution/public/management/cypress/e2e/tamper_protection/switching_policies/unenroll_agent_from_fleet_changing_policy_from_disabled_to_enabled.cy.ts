@@ -22,7 +22,9 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/173470
+// FLAKY: https://github.com/elastic/kibana/issues/170811
+describe.skip(
   'Unenroll agent from fleet when agent tamper protection is disabled but then is switched to a policy with it enabled',
   { tags: ['@ess'] },
   () => {
