@@ -58,13 +58,13 @@ const formatForResponse = ({
   criticality,
   now,
   identifierField,
-  includeNewFields = false,
+  includeNewFields,
 }: {
   bucket: RiskScoreBucket;
   criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
-  includeNewFields?: boolean;
+  includeNewFields: boolean;
 }): RiskScore => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
@@ -254,7 +254,7 @@ const processScores = async ({
       (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
     );
 
-    return formatForResponse({ bucket, criticality, identifierField, now });
+    return formatForResponse({ bucket, criticality, identifierField, now, includeNewFields: true });
   });
 };
 
