@@ -29,7 +29,10 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import type { DashboardService, DashboardItems } from '../../services/dashboard_service';
-import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import {
+  ToastNotificationService,
+  toastNotificationServiceProvider,
+} from '../../services/toast_notification_service';
 import type { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
@@ -59,6 +62,8 @@ interface CustomUrlsProps extends CustomUrlsWrapperProps {
 }
 
 class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
+  private toastNotificationService: ToastNotificationService | undefined;
+
   constructor(props: CustomUrlsProps) {
     super(props);
 
@@ -80,7 +85,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   componentDidMount() {
     const { toasts } = this.props.kibana.services.notifications;
-    const toastNotificationService = toastNotificationServiceProvider(toasts);
+    this.toastNotificationService = toastNotificationServiceProvider(toasts);
     const { dashboardService } = this.props;
 
     dashboardService
@@ -89,7 +94,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         this.setState({ dashboards });
       })
       .catch((error) => {
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService!.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.loadSavedDashboardsErrorNotificationMessage',
@@ -105,7 +110,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         this.setState({ dataViewListItems });
       })
       .catch((error) => {
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService!.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.loadDataViewsErrorNotificationMessage',
@@ -142,8 +147,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   addNewCustomUrl = () => {
     const { dashboard } = this.props.kibana.services;
-    const { toasts } = this.props.kibana.services.notifications;
-    const toastNotificationService = toastNotificationServiceProvider(toasts);
 
     buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
@@ -152,7 +155,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         this.setState({ editorOpen: false });
       })
       .catch((error) => {
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService!.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
@@ -168,11 +171,9 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   onTestButtonClick = () => {
     const {
       http: { basePath },
-      notifications: { toasts },
       data: { dataViews },
       dashboard,
     } = this.props.kibana.services;
-    const toastNotificationService = toastNotificationServiceProvider(toasts);
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
     dataViews
@@ -197,7 +198,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
                 openCustomUrlWindow(testUrl, customUrl, basePath.get());
               })
               .catch((error) => {
-                toastNotificationService.displayErrorToast(
+                this.toastNotificationService!.displayErrorToast(
                   error,
                   i18n.translate(
                     'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
@@ -212,7 +213,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         );
       })
       .catch((error) => {
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService!.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',

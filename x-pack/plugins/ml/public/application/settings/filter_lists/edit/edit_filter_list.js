@@ -94,6 +94,9 @@ export class EditFilterListUI extends Component {
   }
 
   componentDidMount() {
+    this.toastNotificationService = toastNotificationServiceProvider(
+      this.props.kibana.services.notifications.toasts
+    );
     const filterId = this.props.filterId;
     if (filterId !== undefined) {
       this.loadFilterList(filterId);
@@ -119,9 +122,7 @@ export class EditFilterListUI extends Component {
         this.setLoadedFilterState(filter);
       })
       .catch((error) => {
-        const { toasts } = this.props.kibana.services.notifications;
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.settings.filterLists.editFilterList.loadingDetailsOfFilterErrorMessage',
@@ -290,9 +291,7 @@ export class EditFilterListUI extends Component {
         this.returnToFiltersList();
       })
       .catch((error) => {
-        const { toasts } = this.props.kibana.services.notifications;
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate('xpack.ml.settings.filterLists.editFilterList.savingFilterErrorMessage', {
             defaultMessage: 'An error occurred saving filter {filterId}',

@@ -55,6 +55,9 @@ class NewCalendarUI extends Component {
   }
 
   componentDidMount() {
+    this.toastNotificationService = toastNotificationServiceProvider(
+      this.props.kibana.services.notifications.toasts
+    );
     this.formSetup();
   }
 
@@ -119,10 +122,9 @@ class NewCalendarUI extends Component {
         isGlobalCalendar,
       });
     } catch (error) {
-      console.log(error);
       this.setState({ loading: false });
-      const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
+      this.toastNotificationService.displayErrorToast(
+        error,
         i18n.translate('xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage', {
           defaultMessage: 'An error occurred loading calendar form data. Try refreshing the page.',
         })
@@ -162,9 +164,7 @@ class NewCalendarUI extends Component {
         await this.returnToCalendarsManagementPage();
       } catch (error) {
         this.setState({ saving: false });
-        const { toasts } = this.props.kibana.services.notifications;
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate('xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage', {
             defaultMessage: 'An error occurred creating calendar {calendarId}',
@@ -184,9 +184,7 @@ class NewCalendarUI extends Component {
       await this.returnToCalendarsManagementPage();
     } catch (error) {
       this.setState({ saving: false });
-      const { toasts } = this.props.kibana.services.notifications;
-      const toastNotificationService = toastNotificationServiceProvider(toasts);
-      toastNotificationService.displayErrorToast(
+      this.toastNotificationService.displayErrorToast(
         error,
         i18n.translate('xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage', {
           defaultMessage:

@@ -83,6 +83,9 @@ class RuleEditorFlyoutUI extends Component {
   }
 
   componentDidMount() {
+    this.toastNotificationService = toastNotificationServiceProvider(
+      this.props.kibana.services.notifications.toasts
+    );
     if (typeof this.props.setShowFunction === 'function') {
       this.props.setShowFunction(this.showFlyout);
     }
@@ -153,9 +156,7 @@ class RuleEditorFlyoutUI extends Component {
           });
         })
         .catch((error) => {
-          const { toasts } = this.props.kibana.services.notifications;
-          const toastNotificationService = toastNotificationServiceProvider(toasts);
-          toastNotificationService.displayErrorToast(
+          this.toastNotificationService.displayErrorToast(
             error,
             i18n.translate(
               'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
@@ -374,8 +375,7 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
@@ -427,8 +427,7 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
@@ -467,8 +466,7 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        const toastNotificationService = toastNotificationServiceProvider(toasts);
-        toastNotificationService.displayErrorToast(
+        this.toastNotificationService.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
