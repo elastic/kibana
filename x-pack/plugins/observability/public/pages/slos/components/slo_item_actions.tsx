@@ -30,7 +30,7 @@ interface Props {
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
-  setDashboardAttachmentReady: (value: boolean) => void;
+  setDashboardAttachmentReady?: (value: boolean) => void;
   btnProps?: Partial<EuiButtonIconProps>;
 }
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -114,7 +114,9 @@ export function SloItemActions({
 
   const handleAttachToDashboard = () => {
     setIsActionsPopoverOpen(false);
-    setDashboardAttachmentReady(true);
+    if (setDashboardAttachmentReady) {
+      setDashboardAttachmentReady(true);
+    }
   };
 
   const btn = (

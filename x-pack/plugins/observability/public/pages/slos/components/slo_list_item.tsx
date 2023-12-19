@@ -96,7 +96,6 @@ export function SloListItem({
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
-            setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
