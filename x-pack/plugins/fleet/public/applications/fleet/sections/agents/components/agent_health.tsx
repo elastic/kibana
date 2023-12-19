@@ -153,12 +153,19 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
             <p>{lastCheckinText}</p>
             <p>{lastCheckInMessageText}</p>
             {isStuckInUpdating(agent) ? (
-              <p>
+              isAgentInFailedUpgradeState(agent) ? (
                 <FormattedMessage
-                  id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
-                  defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                  id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
+                  defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
                 />
-              </p>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
+                    defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                  />
+                </p>
+              )
             ) : null}
           </>
         }
