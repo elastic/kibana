@@ -5,52 +5,68 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSkeletonRectangle,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
+import { LogExplorerLink } from '../log_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
 });
 
+const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
+  defaultMessage: 'Namespace',
+});
+
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
   defaultMessage: 'Size',
 });
 
-const malformedDocsColumnName = i18n.translate('xpack.datasetQuality.malformedDocsColumnName', {
-  defaultMessage: 'Malformed Docs',
+const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
+  defaultMessage: 'Degraded Docs',
 });
 
-const malformedDocsDescription = (minimimPercentage: number) =>
-  i18n.translate('xpack.datasetQuality.malformedDocsQualityDescription', {
+const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
+  defaultMessage: 'Last Activity',
+});
+
+const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
+  defaultMessage: 'Actions',
+});
+const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
+  defaultMessage: 'Open',
+});
+
+const degradedDocsDescription = (minimimPercentage: number) =>
+  i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
     defaultMessage: 'greater than {minimimPercentage}%',
     values: { minimimPercentage },
   });
 
-const malformedDocsColumnTooltip = (
+const degradedDocsColumnTooltip = (
   <FormattedMessage
-    id="xpack.datasetQuality.malformedDocsColumnTooltip"
-    defaultMessage="The percentage of malformed documents -documents with the {ignoredProperty} property- in your dataset. {visualQueue}"
+    id="xpack.datasetQuality.degradedDocsColumnTooltip"
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset. {visualQueue}"
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
@@ -60,22 +76,19 @@ const malformedDocsColumnTooltip = (
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="poor" />
-              {` ${malformedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
-            </EuiText>
+            <QualityIndicator
+              quality="poor"
+              description={` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="degraded" />
-              {` ${malformedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
-            </EuiText>
+            <QualityIndicator
+              quality="degraded"
+              description={` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText>
-              <QualityIndicator quality="good" />
-              {' 0%'}
-            </EuiText>
+            <QualityIndicator quality="good" description={' 0%'} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -83,16 +96,12 @@ const malformedDocsColumnTooltip = (
   />
 );
 
-const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
-  defaultMessage: 'Last Activity',
-});
-
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
-  loadingMalformedStats,
+  loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
-  loadingMalformedStats?: boolean;
+  loadingDegradedStats?: boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -123,34 +132,39 @@ export const getDatasetQualitTableColumns = ({
       },
     },
     {
+      name: namespaceColumnName,
+      field: 'namespace',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.namespace}</EuiBadge>
+      ),
+    },
+    {
       name: sizeColumnName,
       field: 'size',
       sortable: true,
     },
     {
       name: (
-        <EuiToolTip content={malformedDocsColumnTooltip}>
+        <EuiToolTip content={degradedDocsColumnTooltip}>
           <span>
-            {`${malformedDocsColumnName} `}
+            {`${degradedDocsColumnName} `}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
-      field: 'malformedDocs',
+      field: 'degradedDocs',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <EuiSkeletonRectangle
           width="50px"
           height="20px"
           borderRadius="m"
-          isLoading={loadingMalformedStats}
+          isLoading={loadingDegradedStats}
           contentAriaLabel="Example description"
         >
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <QualityPercentageIndicator percentage={dataStreamStat.malformedDocs} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{`${dataStreamStat.malformedDocs}%`}</EuiFlexItem>
+            <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
           </EuiFlexGroup>
         </EuiSkeletonRectangle>
       ),
@@ -163,6 +177,13 @@ export const getDatasetQualitTableColumns = ({
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
           .convert(timestamp),
       sortable: true,
+    },
+    {
+      name: actionsColumnName,
+      render: (dataStreamStat: DataStreamStat) => (
+        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+      ),
+      width: '100px',
     },
   ];
 };

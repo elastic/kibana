@@ -179,6 +179,19 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
     }
 
+    if (
+      (await doAnyChangesMatch([
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/test\/defend_workflows_cypress/,
+        /^x-pack\/test\/security_solution_cypress/,
+        /^fleet_packages\.json/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps

@@ -21,22 +21,29 @@ import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_pr
 import { ChatItemControls } from './chat_item_controls';
 import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
-import type { Feedback } from '../feedback_buttons';
-import { Message } from '../../../common';
 import { FailedToLoadResponse } from '../message_panel/failed_to_load_response';
-import { ChatActionClickHandler } from './types';
+import type { Message } from '../../../common';
+import type { Feedback } from '../feedback_buttons';
+import type { ChatActionClickHandler } from './types';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
 export interface ChatItemProps extends ChatTimelineItem {
+  onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGeneratingClick: () => void;
-  onActionClick: ChatActionClickHandler;
 }
 
 const normalMessageClassName = css`
   .euiCommentEvent__body {
     padding: 0;
+  }
+
+  .euiCommentEvent__header > .euiPanel {
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
@@ -66,21 +73,20 @@ const noPanelMessageClassName = css`
 
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
-  display: { collapsed },
-  message: {
-    message: { function_call: functionCall, role },
-  },
   content,
   currentUser,
+  display: { collapsed },
   element,
   error,
   loading,
+  message,
   title,
+  onActionClick,
   onEditSubmit,
   onFeedbackClick,
   onRegenerateClick,
+  onSendTelemetry,
   onStopGeneratingClick,
-  onActionClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -112,9 +118,9 @@ export function ChatItem({
     setEditing(!editing);
   };
 
-  const handleInlineEditSubmit = (message: Message) => {
+  const handleInlineEditSubmit = (newMessage: Message) => {
     handleToggleEdit();
-    return onEditSubmit(message);
+    return onEditSubmit(newMessage);
   };
 
   const handleCopyToClipboard = () => {
@@ -124,12 +130,12 @@ export function ChatItem({
   let contentElement: React.ReactNode =
     content || loading || error ? (
       <ChatItemContentInlinePromptEditor
-        content={content}
         editing={editing}
-        functionCall={functionCall}
         loading={loading}
+        message={message}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
+        onSendTelemetry={onSendTelemetry}
       />
     ) : null;
 
@@ -149,8 +155,10 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
-      username={getRoleTranslation(role)}
+      timelineAvatar={
+        <ChatItemAvatar loading={loading} currentUser={currentUser} role={message.message.role} />
+      }
+      username={getRoleTranslation(message.message.role)}
       event={title}
       actions={
         <ChatItemActions

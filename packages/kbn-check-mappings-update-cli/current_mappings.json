@@ -2349,6 +2349,10 @@
       }
     }
   },
+  "cloud-security-posture-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "slo": {
     "dynamic": false,
     "properties": {
@@ -2379,6 +2383,9 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "long"
       }
     }
   },
