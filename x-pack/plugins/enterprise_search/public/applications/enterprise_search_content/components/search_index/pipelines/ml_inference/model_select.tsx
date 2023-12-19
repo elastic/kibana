@@ -57,10 +57,8 @@ export const ModelSelect: React.FC = () => {
   };
 
   const renderOption = (option: EuiSelectableOptionWithMlModelData) => {
-    const flattenedOption: EuiSelectableOption<MlModel> = {
-      ...option,
-      ...option.data,
-    };
+    const { data, ...optionExclData } = option;
+    const flattenedOption = { ...optionExclData, ...data };
     return <ModelSelectOption {...flattenedOption} />;
   };
 
