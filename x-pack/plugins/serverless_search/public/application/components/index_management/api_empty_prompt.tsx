@@ -71,7 +71,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
     {
       title: i18n.translate(
         'xpack.serverlessSearch.indexManagement.indexDetails.overview.emptyPrompt.api.ingest.title',
-        { defaultMessage: 'Ingest data using your favorite language client via API' }
+        { defaultMessage: 'Ingest data via API using a programming language client' }
       ),
       children: (
         <EuiFlexGroup direction="column">
@@ -141,7 +141,7 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
             <p>
               <FormattedMessage
                 id="xpack.serverlessSearch.indexManagement.indexDetails.overview.emptyPrompt.api.body"
-                defaultMessage="Customize these variables to match your content. To see a full setup guide, visit our {getStartedLink} guide."
+                defaultMessage="Customize these variables to match your content. For a full setup guide, visit our {getStartedLink} guide."
                 values={{
                   getStartedLink: (
                     <EuiLink
