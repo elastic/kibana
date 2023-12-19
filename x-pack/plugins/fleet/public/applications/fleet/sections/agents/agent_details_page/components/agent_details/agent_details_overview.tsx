@@ -174,41 +174,24 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>
-                    {latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion) ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          position="right"
-                          content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
-                            defaultMessage: 'Upgrade available',
-                          })}
-                        >
-                          <EuiIcon type="warning" color="warning" />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <AgentUpgradeStatus
+                        isAgentUpgradable={
+                          !!(
+                            agentPolicy?.is_managed !== true &&
+                            latestAgentVersion &&
+                            isAgentUpgradeable(agent, latestAgentVersion)
+                          )
+                        }
+                        agentUpgradeStartedAt={agent.upgrade_started_at}
+                        agentUpgradedAt={agent.upgraded_at}
+                        agentUpgradeDetails={agent.upgrade_details}
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
                   '-'
                 ),
-            },
-            {
-              title: i18n.translate('xpack.fleet.agentDetails.upgradeDetailsLabel', {
-                defaultMessage: 'Upgrade details',
-              }),
-              description: (
-                <AgentUpgradeStatus
-                  isAgentUpgradable={
-                    !!(
-                      agentPolicy?.is_managed !== true &&
-                      latestAgentVersion &&
-                      isAgentUpgradeable(agent, latestAgentVersion)
-                    )
-                  }
-                  agentUpgradeStartedAt={agent.upgrade_started_at}
-                  agentUpgradedAt={agent.upgraded_at}
-                  agentUpgradeDetails={agent.upgrade_details}
-                />
-              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.hostNameLabel', {
