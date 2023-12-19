@@ -113,6 +113,7 @@ export function SloItemActions({
   };
 
   const handleAttachToDashboard = () => {
+    setIsActionsPopoverOpen(false);
     setDashboardAttachmentReady(true);
   };
 
