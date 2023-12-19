@@ -46,7 +46,7 @@ export class CreateESQLPanelAction implements Action<Context> {
 
   public getIconType() {
     // need to create a new one
-    return 'tableDensityExpanded';
+    return 'esqlVis';
   }
 
   public async isCompatible() {
