@@ -13,6 +13,11 @@ import {
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type {
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetAgentsParams,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { SentinelOneConnectorExecuteOptions } from './types';
 import { dump } from '../../../../utils/dump';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
@@ -20,7 +25,10 @@ import type {
   IsolationRouteRequestBody,
   BaseActionRequestBody,
 } from '../../../../../../common/api/endpoint';
-import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
+import type {
+  ResponseActionsClientOptions,
+  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+} from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
@@ -108,6 +116,43 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
+  private async getAgentDetails(id: string): Promise<SentinelOneGetAgentsResponse['data'][number]> {
+    const { id: connectorId } = await this.getConnector();
+    const executeOptions: SentinelOneConnectorExecuteOptions<SentinelOneGetAgentsParams> = {
+      actionId: connectorId,
+      params: {
+        subAction: SUB_ACTION.GET_AGENTS,
+        subActionParams: {
+          uuid: id,
+        },
+      },
+    };
+
+    let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
+
+    try {
+      const response = await this.connectorActionsClient.execute<SentinelOneGetAgentsResponse>(
+        executeOptions
+      );
+
+      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${dump(response)}`);
+
+      s1ApiResponse = response.data;
+    } catch (err) {
+      throw new ResponseActionsClientError(
+        `Error while attempting to retrieve SentinelOne host with agent id [${id}]`,
+        500,
+        err
+      );
+    }
+
+    if (!s1ApiResponse || !s1ApiResponse.data[0]) {
+      throw new ResponseActionsClientError(`SentinelOne agent id [${id}] not found`, 404);
+    }
+
+    return s1ApiResponse.data[0];
+  }
+
   private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -123,16 +168,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     const agentUUID = options.endpoint_ids[0];
 
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, {
-      uuid: agentUUID,
-    });
+    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: agentUUID });
 
-    // FIXME:PT need to grab data from the response above and store it with the Request or Response documents on our side
-
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
+    const agentDetails = await this.getAgentDetails(agentUUID);
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: 'isolate',
-    });
+      hosts: {
+        [agentUUID]: { name: agentDetails.computerName },
+      },
+    };
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
     // TODO: un-comment code below once we have proper authz given to `kibana_system` account (security issue #8190)
     // await this.writeActionResponseToEndpointIndex({
