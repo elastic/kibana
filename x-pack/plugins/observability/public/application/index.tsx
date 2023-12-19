@@ -87,7 +87,6 @@ export const renderApp = ({
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
-<<<<<<< HEAD
     <PresentationContextProvider>
       <EuiErrorBoundary>
         <ApplicationUsageTrackingProvider>
@@ -103,83 +102,36 @@ export const renderApp = ({
                   isServerless,
                 }}
               >
-                <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
-                  <PluginContext.Provider
-                    value={{
-                      config,
-                      appMountParameters,
-                      observabilityRuleTypeRegistry,
-                      ObservabilityPageTemplate,
-                    }}
-                  >
-                    <Router history={history}>
-                      <EuiThemeProvider darkMode={isDarkMode}>
-                        <i18nCore.Context>
-                          <RedirectAppLinks
-                            coreStart={core}
-                            data-test-subj="observabilityMainContainer"
-                          >
-                            <QueryClientProvider client={queryClient}>
-                              <App />
-                              <HideableReactQueryDevTools />
-                            </QueryClientProvider>
-                          </RedirectAppLinks>
-                        </i18nCore.Context>
-                      </EuiThemeProvider>
-                    </Router>
-                  </PluginContext.Provider>
-                </ObservabilityAIAssistantProvider>
+                <PluginContext.Provider
+                  value={{
+                    config,
+                    appMountParameters,
+                    observabilityRuleTypeRegistry,
+                    ObservabilityPageTemplate,
+                  }}
+                >
+                  <Router history={history}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <i18nCore.Context>
+                        <RedirectAppLinks
+                          coreStart={core}
+                          data-test-subj="observabilityMainContainer"
+                        >
+                          <QueryClientProvider client={queryClient}>
+                            <App />
+                            <HideableReactQueryDevTools />
+                          </QueryClientProvider>
+                        </RedirectAppLinks>
+                      </i18nCore.Context>
+                    </EuiThemeProvider>
+                  </Router>
+                </PluginContext.Provider>
               </KibanaContextProvider>
             </CloudProvider>
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
       </EuiErrorBoundary>
     </PresentationContextProvider>,
-=======
-    <EuiErrorBoundary>
-      <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
-          <CloudProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage: new Storage(localStorage),
-                isDev,
-                kibanaVersion,
-                isServerless,
-              }}
-            >
-              <PluginContext.Provider
-                value={{
-                  config,
-                  appMountParameters,
-                  observabilityRuleTypeRegistry,
-                  ObservabilityPageTemplate,
-                }}
-              >
-                <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <i18nCore.Context>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                          <HideableReactQueryDevTools />
-                        </QueryClientProvider>
-                      </RedirectAppLinks>
-                    </i18nCore.Context>
-                  </EuiThemeProvider>
-                </Router>
-              </PluginContext.Provider>
-            </KibanaContextProvider>
-          </CloudProvider>
-        </KibanaThemeProvider>
-      </ApplicationUsageTrackingProvider>
-    </EuiErrorBoundary>,
->>>>>>> b93d735aa43e694b416d04725fb66e932b7c9ac1
     element
   );
   return () => {
