@@ -84,6 +84,8 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const PADDING_AND_BORDER = 32;
+
 export function ChatBody({
   initialTitle,
   initialMessages,
@@ -158,8 +160,12 @@ export function ChatBody({
     }
   };
 
-  const handleChangeHeight = (height: number) => {
-    setPromptEditorHeight(height + 30);
+  const handleChangeHeight = (editorHeight: number) => {
+    if (editorHeight === 0) {
+      setPromptEditorHeight(0);
+    } else {
+      setPromptEditorHeight(editorHeight + PADDING_AND_BORDER);
+    }
   };
 
   useEffect(() => {

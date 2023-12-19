@@ -29,10 +29,12 @@ interface FunctionListOption {
 }
 
 export function FunctionListPopover({
+  mode,
   selectedFunctionName,
   onSelectFunction,
   disabled,
 }: {
+  mode: 'prompt' | 'function';
   selectedFunctionName?: string;
   onSelectFunction: (func: string | undefined) => void;
   disabled: boolean;
@@ -127,16 +129,16 @@ export function FunctionListPopover({
       button={
         <EuiToolTip
           content={
-            selectedFunctionName
+            mode === 'prompt'
               ? i18n.translate(
+                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.selectAFunctionLabel',
+                  { defaultMessage: 'Select a function' }
+                )
+              : i18n.translate(
                   'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.clearFunction',
                   {
                     defaultMessage: 'Clear function',
                   }
-                )
-              : i18n.translate(
-                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.selectAFunctionLabel',
-                  { defaultMessage: 'Select a function' }
                 )
           }
           display="block"
