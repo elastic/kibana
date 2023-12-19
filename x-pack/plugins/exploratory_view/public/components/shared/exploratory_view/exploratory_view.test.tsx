@@ -12,12 +12,31 @@ import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
 import * as pluginHook from '../../../hooks/use_plugin_context';
 import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
     setHeaderActionMenu: jest.fn(),
   },
 } as any);
+
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
+jest.mock('./hooks/use_kibana', () => {
+  const originalModule = jest.requireActual('./hooks/use_kibana');
+  return {
+    ...originalModule,
+    useKibana: () => {
+      const { services } = originalModule.useKibana();
+      return {
+        services: {
+          ...services,
+          observabilityAIAssistant: mockObservabilityAIAssistant,
+        },
+      };
+    },
+  };
+});
 
 describe('ExploratoryView', () => {
   mockAppDataView();
