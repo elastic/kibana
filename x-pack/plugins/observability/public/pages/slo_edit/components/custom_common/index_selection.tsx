@@ -17,7 +17,7 @@ import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { CreateSLOForm } from '../../types';
 
 export function IndexSelection() {
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService } = useKibana().services;
 
   const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
@@ -82,6 +82,11 @@ export function IndexSelection() {
             }}
             onChangeDataView={(newId: string) => {
               field.onChange(getDataViewPatternById(newId));
+              dataViewsService.get(newId).then((dataView) => {
+                if (dataView.timeFieldName) {
+                  setValue('indicator.params.timestampField', dataView.timeFieldName);
+                }
+              });
             }}
             currentDataViewId={getDataViewIdByIndexPattern(field.value)?.id}
             onDataViewCreated={() => {
@@ -93,6 +98,9 @@ export function IndexSelection() {
                     field.onChange(dataView.getIndexPattern());
                   } else {
                     field.onChange(getDataViewPatternById(dataView.id));
+                  }
+                  if (dataView.timeFieldName) {
+                    setValue('indicator.params.timestampField', dataView.timeFieldName);
                   }
                 },
               });
