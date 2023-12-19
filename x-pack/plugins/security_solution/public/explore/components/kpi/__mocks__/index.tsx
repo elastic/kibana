@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export interface NetworkKpiProps {
-  from: string;
-  to: string;
-}
+import React from 'react';
+
+export const KpiBaseComponent = jest.fn().mockReturnValue(<div />);
