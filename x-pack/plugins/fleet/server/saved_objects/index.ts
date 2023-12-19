@@ -689,6 +689,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+    attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
   });
   encryptedSavedObjects.registerType({
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
