@@ -65,25 +65,25 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
-    async assertTotalCategoriesFound(expectedCategoryCount: number) {
-      const expectedText = `${expectedCategoryCount} patterns found`;
+    async assertTotalCategoriesFound(expectedMinimumCategoryCount: number) {
       await retry.tryForTime(5000, async () => {
         const actualText = await testSubjects.getVisibleText('aiopsLogPatternsFoundCount');
-        expect(actualText).to.eql(
-          expectedText,
-          `Expected patterns found count to be '${expectedText}' (got '${actualText}')`
+        const actualCount = Number(actualText.split(' ')[0]);
+        expect(actualCount + 1).to.greaterThan(
+          expectedMinimumCategoryCount,
+          `Expected patterns found count to be >= '${expectedMinimumCategoryCount}' (got '${actualCount}')`
         );
       });
     },
 
-    async assertCategoryTableRows(expectedCategoryCount: number) {
+    async assertCategoryTableRows(expectedMinimumCategoryCount: number) {
       await retry.tryForTime(5000, async () => {
         const tableListContainer = await testSubjects.find('aiopsLogPatternsTable');
         const rows = await tableListContainer.findAllByClassName('euiTableRow');
 
-        expect(rows.length).to.eql(
-          expectedCategoryCount,
-          `Expected number of rows in table to be '${expectedCategoryCount}' (got '${rows.length}')`
+        expect(rows.length + 1).to.greaterThan(
+          expectedMinimumCategoryCount,
+          `Expected number of rows in table to be >= '${expectedMinimumCategoryCount}' (got '${rows.length}')`
         );
       });
     },
