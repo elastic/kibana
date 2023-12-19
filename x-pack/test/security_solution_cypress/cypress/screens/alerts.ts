@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
@@ -204,9 +205,15 @@ export const ALERT_ASSIGNEES_SELECT_PANEL =
 export const ALERT_ASSIGNEES_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
 
-export const ALERT_USER_AVATAR = (assignee: string) =>
-  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
+export const ALERT_USER_AVATAR = (assignee: string) => {
+  let expectedAssignee = assignee;
 
+  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
+    expectedAssignee = `test ${expectedAssignee}`;
+  }
+
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+};
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
 export const ALERT_ASIGNEES_COLUMN =

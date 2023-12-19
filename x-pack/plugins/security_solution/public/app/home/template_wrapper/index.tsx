@@ -11,7 +11,8 @@ import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/e
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { SecuritySolutionFlyout, SecuritySolutionFlyoutContextProvider } from '../../../flyout';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -19,6 +20,8 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
 import { SecuritySolutionBottomBar } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { SecurityPageName } from '../../types';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -50,6 +53,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const [routeProps] = useRouteSpy();
+    const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
@@ -62,7 +67,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <SecuritySolutionFlyoutContextProvider>
+      <ExpandableFlyoutProvider storage={isPreview ? 'memory' : 'url'}>
         <StyledKibanaPageTemplate
           theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -91,7 +96,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           )}
           <SecuritySolutionFlyout />
         </StyledKibanaPageTemplate>
-      </SecuritySolutionFlyoutContextProvider>
+      </ExpandableFlyoutProvider>
     );
   });
 
