@@ -218,17 +218,22 @@ describe('Discover url generator', () => {
     expect(path).toContain('__test__');
   });
 
-  test('can specify columns, interval, sort and savedQuery', async () => {
+  test('can specify columns, grid, interval, sort and savedQuery', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
       columns: ['_source'],
+      grid: {
+        columns: {
+          _source: { width: 150 },
+        },
+      },
       interval: 'auto',
       sort: [['timestamp, asc']] as string[][] & SerializableRecord,
       savedQuery: '__savedQueryId__',
     });
 
     expect(path).toMatchInlineSnapshot(
-      `"#/?_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
+      `"#/?_a=(columns:!(_source),grid:(columns:(_source:(width:150))),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
     );
   });
 
