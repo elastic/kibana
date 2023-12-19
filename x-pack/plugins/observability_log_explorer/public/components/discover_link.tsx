@@ -9,7 +9,11 @@ import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDatasetSelection } from '@kbn/log-explorer-plugin/common';
-import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
+import {
+  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverFiltersFromState,
+} from '@kbn/log-explorer-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
@@ -18,7 +22,6 @@ import {
   ObservabilityLogExplorerService,
   useObservabilityLogExplorerPageStateContext,
 } from '../state_machines/observability_log_explorer/src';
-import { getRouterLinkProps } from '../utils/get_router_link_props';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {
@@ -54,7 +57,7 @@ export const DiscoverLinkForValidState = React.memo(
       () => ({
         breakdownField: logExplorerState.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsFromDisplayOptions(logExplorerState),
-        filters: logExplorerState.filters,
+        filters: getDiscoverFiltersFromState(logExplorerState.filters, logExplorerState.controls),
         query: logExplorerState.query,
         refreshInterval: logExplorerState.refreshInterval,
         timeRange: logExplorerState.time,
