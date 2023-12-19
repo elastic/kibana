@@ -153,6 +153,8 @@ const enrichModelWithDownloadStatus = async (
   });
 
   if (modelConfigWithDefinitionStatus && modelConfigWithDefinitionStatus.count > 0) {
+    // We're using NotDeployed for downloaded models. Downloaded is also a valid status, but we want to have the same
+    // status badge as for 3rd party models.
     model.deploymentState = modelConfigWithDefinitionStatus.trained_model_configs[0].fully_defined
       ? MlModelDeploymentState.NotDeployed
       : MlModelDeploymentState.Downloading;

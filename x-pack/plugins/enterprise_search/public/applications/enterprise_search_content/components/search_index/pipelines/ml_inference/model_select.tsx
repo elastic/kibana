@@ -160,24 +160,24 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
   const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
 
-  const getSelectedModelAnnouncement = (model: MlModel) =>
-    model.isPlaceholder
+  const getSelectedModelAnnouncement = (selectedModel: MlModel) =>
+    selectedModel.isPlaceholder
       ? i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotDeployedAnnouncement',
           {
             defaultMessage: '{modelId} model selected but not deployed',
             values: {
-              modelId: model.modelId,
+              modelId: selectedModel.modelId,
             },
           }
         )
-      : model.deploymentState === MlModelDeploymentState.NotDeployed
+      : selectedModel.deploymentState === MlModelDeploymentState.NotDeployed
       ? i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotStartedAnnouncement',
           {
             defaultMessage: '{modelId} model selected but not started',
             values: {
-              modelId: model.modelId,
+              modelId: selectedModel.modelId,
             },
           }
         )
@@ -186,7 +186,7 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
           {
             defaultMessage: '{modelId} model selected',
             values: {
-              modelId: model.modelId,
+              modelId: selectedModel.modelId,
             },
           }
         );
