@@ -14696,6 +14696,10 @@
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
               },
