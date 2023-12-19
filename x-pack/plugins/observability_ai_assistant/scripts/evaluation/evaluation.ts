@@ -147,7 +147,7 @@ function runEvaluations() {
           const sortedEvaluationFunctions = sortBy(evaluationFunctions, 'fileName', 'name');
           let failedCount = 0;
           let totalCount = 0;
-          let failedScenarios: { [key: string]: { fileName: string, resultsScore: string, reasoning: string } } = {};
+          let failedScenarios: { [key: string]: { scenarioGroup: string, resultsScore: string, reasoning: string } } = {};
 
           for (const { name, fileName, fn } of sortedEvaluationFunctions) {
             log.debug(`Executing ${name}`);
@@ -193,7 +193,7 @@ function runEvaluations() {
             if (failedResults / totalResults > 0) {
               let reasoningConcat = result.scores.map(score => score.reasoning).join(' ');
               failedScenarios[name] = {
-                "fileName": String(fileName.split("/").at(-2)),
+                "scenarioGroup": String(fileName.split("/").at(-2)),
                 "resultsScore": `Failed ${failedResults} tests out of ${totalResults}`,
                 "reasoning": `Reasoning: ${reasoningConcat}`
               }

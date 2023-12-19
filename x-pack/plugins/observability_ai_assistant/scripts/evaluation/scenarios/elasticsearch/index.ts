@@ -80,7 +80,7 @@ export const index_management_index_docs: EvaluationFunction = async ({ chatClie
 
 export const index_stats: EvaluationFunction = async ({ chatClient }) => {
   let conversation = await chatClient.complete(
-    'What are the the store stats of the index .kibana-observability-ai-assistant-kb-*?'
+    'What are the store stats of the index .kibana-observability-ai-assistant-kb-*?'
   );
 
   conversation = await chatClient.complete(
