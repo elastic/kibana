@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LIGHT_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import {
   ALERT_CONTEXT,
@@ -20,7 +20,6 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
@@ -44,10 +43,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const {
-    logsShared,
-    observabilityAIAssistant: { service: observabilityAIAssistantService },
-  } = useKibanaContextForPlugin().services;
+  const { logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -129,7 +125,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 threshold={rule.params.count.value}
@@ -196,7 +192,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 threshold={rule.params.count.value}
@@ -245,14 +241,12 @@ const AlertDetailsAppSection = ({
   };
 
   return (
-    <ObservabilityAIAssistantProvider value={observabilityAIAssistantService}>
-      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-        {getLogRatioChart()}
-        {getLogCountChart()}
-        {getLogRateAnalysisSection()}
-        {getLogsHistoryChart()}
-      </EuiFlexGroup>
-    </ObservabilityAIAssistantProvider>
+    <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+      {getLogRatioChart()}
+      {getLogCountChart()}
+      {getLogRateAnalysisSection()}
+      {getLogsHistoryChart()}
+    </EuiFlexGroup>
   );
 };
 

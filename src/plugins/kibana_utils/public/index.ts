@@ -112,7 +112,7 @@ export {
 } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 
-export type { KibanaUtilsSetup } from './plugin';
+export type { KibanaUtilsPublicSetup as KibanaUtilsSetup, KibanaUtilsPublicStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new KibanaUtilsPublicPlugin(initializerContext);
