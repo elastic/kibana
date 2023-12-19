@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('shows the details flyout when clicking on a data stream', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Verify url is stateful
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/data_streams/${TEST_DS_NAME}`);
@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('allows to update data retention', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Open the edit retention dialog
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('allows to disable data retention', async () => {
       // Open details flyout
-      await pageObjects.indexManagement.clickDataStreamAt(0);
+      await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Open the edit retention dialog
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
