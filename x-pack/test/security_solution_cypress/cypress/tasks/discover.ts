@@ -64,7 +64,7 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).realClick();
 };
 
-export const convertNBSPToSP = (str: string) => {
+export const convertEditorNonBreakingSpaceToSpace = (str: string) => {
   return str.replaceAll(String.fromCharCode(160), ' ');
 };
 
