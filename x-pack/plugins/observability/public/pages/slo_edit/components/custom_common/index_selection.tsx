@@ -17,7 +17,7 @@ import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { CreateSLOForm } from '../../types';
 
 export function IndexSelection() {
-  const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService } = useKibana().services;
 
   const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
@@ -25,26 +25,30 @@ export function IndexSelection() {
   const { dataViewEditor } = useKibana<ObservabilityPublicPluginsStart>().services;
 
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
-  const [missingAdHocDataView, setMissingAdHocDataView] = useState<string>();
+
+  const currentIndexPattern = watch('indicator.params.index');
 
   useEffect(() => {
-    async function loadMissingDataView() {
-      const dataView = await dataViewsService.create(
-        {
-          title: missingAdHocDataView,
-          allowNoIndex: true,
-        },
-        true
-      );
-      if (dataView) {
-        setAdHocDataViews((prev) => [...prev, dataView]);
-      }
-    }
+    const missingAdHocDataView = adHocDataViews.find(
+      (dataView) => dataView.getIndexPattern() === currentIndexPattern
+    );
 
-    if (missingAdHocDataView) {
+    if (!missingAdHocDataView) {
+      async function loadMissingDataView() {
+        const dataView = await dataViewsService.create(
+          {
+            title: currentIndexPattern,
+            allowNoIndex: true,
+          },
+          true
+        );
+        if (dataView) {
+          setAdHocDataViews((prev) => [...prev, dataView]);
+        }
+      }
       loadMissingDataView();
     }
-  }, [dataViewsService, missingAdHocDataView]);
+  }, [adHocDataViews, currentIndexPattern, dataViewsService]);
 
   const getDataViewPatternById = (id?: string) => {
     return (
@@ -54,13 +58,10 @@ export function IndexSelection() {
   };
 
   const getDataViewIdByIndexPattern = (indexPattern: string) => {
-    const dataViewId =
+    return (
       dataViews.find((dataView) => dataView.title === indexPattern) ||
-      adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern);
-    if (!dataViewId) {
-      setMissingAdHocDataView(indexPattern);
-    }
-    return dataViewId;
+      adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern)
+    );
   };
 
   return (
