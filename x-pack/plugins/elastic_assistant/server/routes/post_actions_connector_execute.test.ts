@@ -100,6 +100,7 @@ const mockRequest = {
       subAction: 'invokeAI',
     },
     isEnabledKnowledgeBase: true,
+    isEnabledRAGAlerts: false,
   },
 };
 
@@ -227,9 +228,7 @@ describe('postActionsConnectorExecuteRoute', () => {
       params: { connectorId: 'bad-connector-id' },
       body: {
         ...mockRequest.body,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
-        replacements: {},
+        isEnabledRAGAlerts: true,
       },
     };
 
