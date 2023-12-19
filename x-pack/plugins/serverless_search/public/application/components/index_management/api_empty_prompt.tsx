@@ -119,7 +119,10 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
         iconSide="left"
         iconType="arrowLeft"
       >
-        Back
+        <FormattedMessage
+          id="xpack.serverlessSearch.indexManagement.indexDetails.overview.emptyPrompt.api.backBtn"
+          defaultMessage="Back"
+        />
       </EuiButtonEmpty>
       <EuiEmptyPrompt
         icon={<EuiIcon type="addDataApp" size="xl" />}

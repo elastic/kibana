@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EmptyConnectorsPrompt } from '../connectors/empty_connectors_prompt';
 
@@ -24,7 +25,10 @@ export const ConnectorIndexEmptyPrompt = ({ onBackClick }: ConnectorIndexEmptyPr
         iconSide="left"
         iconType="arrowLeft"
       >
-        Back
+        <FormattedMessage
+          id="xpack.serverlessSearch.indexManagement.indexDetails.overview.emptyPrompt.connector.backBtn"
+          defaultMessage="Back"
+        />
       </EuiButtonEmpty>
       <EmptyConnectorsPrompt />
     </EuiPanel>
