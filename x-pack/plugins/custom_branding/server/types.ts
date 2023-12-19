@@ -12,7 +12,16 @@ import {
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { IRouter } from '@kbn/core/server';
 
-export interface Dependencies {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomBrandingServerSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomBrandingServerStart {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomBrandingServerSetupDependencies {}
+
+export interface CustomBrandingServerStartDependencies {
   licensing: LicensingPluginStart;
 }
 

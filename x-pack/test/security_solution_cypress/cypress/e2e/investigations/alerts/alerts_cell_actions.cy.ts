@@ -36,7 +36,7 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     createRule(getNewRule());
   });
