@@ -28,17 +28,17 @@
  */
 
 export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooterHeight) {
-  var rootScroller = document.scrollingElement || document.documentElement;
+  const rootScroller = document.scrollingElement || document.documentElement;
   if (!rootScroller) {
     throw new Error('Unable to find document.scrollingElement or document.documentElement');
   }
 
-  var rootRect = rootScroller.getBoundingClientRect();
-  var targetRect = target.getBoundingClientRect();
+  const rootRect = rootScroller.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
 
-  var viewportHeight = window.visualViewport ? visualViewport.height : window.innerHeight;
+  const viewportHeight = window.visualViewport ? visualViewport.height : window.innerHeight;
 
-  var viewportWidth = window.visualViewport ? visualViewport.width : window.innerWidth;
+  const viewportWidth = window.visualViewport ? visualViewport.width : window.innerWidth;
 
   function isInView() {
     return (
@@ -57,15 +57,15 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooter
     target.scrollIntoView();
   }
 
-  var boundingRect = target.getBoundingClientRect();
-  var additionalScrollNecessary = fixedHeaderHeight - boundingRect.top;
+  const boundingRect = target.getBoundingClientRect();
+  const additionalScrollNecessary = fixedHeaderHeight - boundingRect.top;
 
   if (additionalScrollNecessary > 0) {
     rootScroller.scrollTop = rootScroller.scrollTop - additionalScrollNecessary;
   }
 
   if (fixedFooterHeight) {
-    var bottomOfVisibility = viewportHeight - fixedFooterHeight;
+    const bottomOfVisibility = viewportHeight - fixedFooterHeight;
     if (bottomOfVisibility < boundingRect.bottom) {
       rootScroller.scrollTop = rootScroller.scrollTop + fixedFooterHeight;
     }
