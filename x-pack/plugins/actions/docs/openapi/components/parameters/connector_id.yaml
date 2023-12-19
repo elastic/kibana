@@ -4,4 +4,5 @@ description: An identifier for the connector.
 required: true
 schema:
   type: string
-  example: df770e30-8b8b-11ed-a780-3b746c987a81
+  examples:
+    - df770e30-8b8b-11ed-a780-3b746c987a81

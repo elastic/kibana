@@ -26,51 +26,20 @@
         "tags": [],
         "label": "ExitFullScreenButton",
         "description": [
-          "\nA presentational component that renders a button designed to exit \"full screen\" mode."
-        ],
-        "signature": [
-          "({ onClick, className, customLogo }: ",
-          "ExitFullScreenButtonComponentProps",
-          ") => JSX.Element"
-        ],
-        "path": "packages/shared-ux/button/exit_full_screen/impl/src/exit_full_screen_button.component.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
-            "id": "def-common.ExitFullScreenButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ onClick, className, customLogo }",
-            "description": [],
-            "signature": [
-              "ExitFullScreenButtonComponentProps"
-            ],
-            "path": "packages/shared-ux/button/exit_full_screen/impl/src/exit_full_screen_button.component.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
-        "id": "def-common.ExitFullScreenButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ExitFullScreenButton",
-        "description": [
           "\nA service-enabled component that provides Kibana-specific functionality to the `ExitFullScreenButton`\npure component."
         ],
         "signature": [
           "({ onExit, toggleChrome }: ",
-          "ExitFullScreenButtonProps",
+          {
+            "pluginId": "@kbn/shared-ux-button-exit-full-screen",
+            "scope": "common",
+            "docId": "kibKbnSharedUxButtonExitFullScreenPluginApi",
+            "section": "def-common.ExitFullScreenButtonProps",
+            "text": "ExitFullScreenButtonProps"
+          },
           ") => JSX.Element"
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/impl/src/exit_full_screen_button.tsx",
+        "path": "packages/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,9 +51,15 @@
             "label": "{ onExit = () => {}, toggleChrome = true }",
             "description": [],
             "signature": [
-              "ExitFullScreenButtonProps"
+              {
+                "pluginId": "@kbn/shared-ux-button-exit-full-screen",
+                "scope": "common",
+                "docId": "kibKbnSharedUxButtonExitFullScreenPluginApi",
+                "section": "def-common.ExitFullScreenButtonProps",
+                "text": "ExitFullScreenButtonProps"
+              }
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/impl/src/exit_full_screen_button.tsx",
+            "path": "packages/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,7 +82,7 @@
           "KibanaDependencies",
           ">) => JSX.Element"
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/impl/src/services.tsx",
+        "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,46 +98,7 @@
               "KibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/impl/src/services.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
-        "id": "def-common.ExitFullScreenButtonProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "ExitFullScreenButtonProvider",
-        "description": [
-          "\nAbstract external service Provider."
-        ],
-        "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
-          "Services",
-          ">) => JSX.Element"
-        ],
-        "path": "packages/shared-ux/button/exit_full_screen/impl/src/services.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
-            "id": "def-common.ExitFullScreenButtonProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "Services",
-              ">"
-            ],
-            "path": "packages/shared-ux/button/exit_full_screen/impl/src/services.tsx",
+            "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -172,9 +108,78 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
+        "id": "def-common.ExitFullScreenButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExitFullScreenButtonProps",
+        "description": [
+          "\nProps for the service-enabled `ExitFullScreenButton` component."
+        ],
+        "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
+            "id": "def-common.ExitFullScreenButtonProps.onExit",
+            "type": "Function",
+            "tags": [],
+            "label": "onExit",
+            "description": [
+              "Optional handler to call when one exits full-screen mode."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
+            "id": "def-common.ExitFullScreenButtonProps.toggleChrome",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "toggleChrome",
+            "description": [
+              "Should the button toggle the Chrome visibility?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-button-exit-full-screen",
+        "id": "def-common.ExitFullScreenButtonKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "ExitFullScreenButtonKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component as well as any dependencies."
+        ],
+        "signature": [
+          "KibanaDependencies"
+        ],
+        "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

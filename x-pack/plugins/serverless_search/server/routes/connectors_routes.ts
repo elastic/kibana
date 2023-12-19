@@ -12,7 +12,10 @@ import {
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
+  fetchSyncJobsByConnectorId,
+  startConnectorSync,
   updateConnectorConfiguration,
+  updateConnectorIndexName,
   updateConnectorNameAndDescription,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
@@ -172,6 +175,38 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
 
   router.post(
     {
+      path: '/internal/serverless_search/connectors/{connectorId}/index_name',
+      validate: {
+        body: schema.object({
+          index_name: schema.string(),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const result = await updateConnectorIndexName(
+          client.asCurrentUser,
+          request.params.connectorId,
+          request.body.index_name
+        );
+        return response.ok({
+          body: {
+            result,
+          },
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return response.conflict({ body: e });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: '/internal/serverless_search/connectors/{connectorId}/service_type',
       validate: {
         body: schema.object({
@@ -244,9 +279,60 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       );
 
       return response.ok({
-        body: {
-          result,
-        },
+        body: result,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await startConnectorSync(client.asCurrentUser, {
+        connectorId: request.params.connectorId,
+      });
+
+      return response.ok({
+        body: result,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/sync_jobs',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        query: schema.object({
+          from: schema.maybe(schema.number()),
+          size: schema.maybe(schema.number()),
+          type: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await fetchSyncJobsByConnectorId(
+        client.asCurrentUser,
+        request.params.connectorId,
+        request.query.from || 0,
+        request.query.size || 20,
+        (request.query.type as 'content' | 'access_control' | 'all' | undefined) || 'all'
+      );
+
+      return response.ok({
+        body: result,
         headers: { 'content-type': 'application/json' },
       });
     }

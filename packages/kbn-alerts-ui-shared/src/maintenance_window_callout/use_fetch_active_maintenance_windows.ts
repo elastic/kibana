@@ -37,6 +37,6 @@ const FETCH_ERROR = i18n.translate('alertsUIShared.maintenanceWindowCallout.fetc
 const FETCH_ERROR_DESCRIPTION = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.fetchErrorDescription',
   {
-    defaultMessage: 'Rule notifications are stopped while the maintenance window is running.',
+    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
   }
 );

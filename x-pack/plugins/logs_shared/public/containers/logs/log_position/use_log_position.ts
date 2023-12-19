@@ -6,10 +6,10 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
+import { TimeKey } from '@kbn/io-ts-utils';
 import createContainer from 'constate';
 import { useMemo } from 'react';
 import { ActorRefWithDeprecatedState } from 'xstate';
-import { TimeKey } from '../../../../common/time';
 import {
   MatchedStateFromActor,
   OmitDeprecatedState,
@@ -52,7 +52,7 @@ export type LogPositionStateParams = DateRange & {
 
 export interface LogPositionCallbacks {
   jumpToTargetPosition: (pos: TimeKeyOrNull) => void;
-  jumpToTargetPositionTime: (time: number) => void;
+  jumpToTargetPositionTime: (time: string) => void;
   reportVisiblePositions: (visPos: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
@@ -62,7 +62,7 @@ export interface LogPositionCallbacks {
 export interface LogStreamPageCallbacks {
   updateTimeRange: (timeRange: Partial<TimeRange>) => void;
   jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
-  jumpToTargetPositionTime: (time: number) => void;
+  jumpToTargetPositionTime: (time: string) => void;
   reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;

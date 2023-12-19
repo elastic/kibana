@@ -10,6 +10,12 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
+import { useRiskScore } from '../../../../explore/containers/risk_score';
+import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { InsightsSection } from './insights_section';
@@ -41,6 +47,40 @@ jest.mock('react-router-dom', () => {
   alertIds: [],
 });
 
+const from = '2022-04-05T12:00:00.000Z';
+const to = '2022-04-08T12:00:00.;000Z';
+const selectedPatterns = 'alerts';
+
+const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
+jest.mock('../../../../common/containers/use_global_time', () => {
+  return {
+    useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
+  };
+});
+
+const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
+jest.mock('../../../../common/containers/sourcerer', () => {
+  return {
+    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
+  };
+});
+
+const mockUseUserDetails = useObservedUserDetails as jest.Mock;
+jest.mock('../../../../explore/users/containers/users/observed_details');
+
+const mockUseRiskScore = useRiskScore as jest.Mock;
+jest.mock('../../../../explore/containers/risk_score');
+
+const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
+jest.mock('../../../../common/containers/use_first_last_seen');
+
+const mockUseHostDetails = useHostDetails as jest.Mock;
+jest.mock('../../../../explore/hosts/containers/hosts/details');
+
+jest.mock('../hooks/use_fetch_threat_intelligence');
+
+jest.mock('../../shared/hooks/use_prevalence');
+
 const renderInsightsSection = (contextValue: RightPanelContext, expanded: boolean) =>
   render(
     <TestProviders>
@@ -51,6 +91,23 @@ const renderInsightsSection = (contextValue: RightPanelContext, expanded: boolea
   );
 
 describe('<InsightsSection />', () => {
+  beforeEach(() => {
+    mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
+    mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
+    mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
+    mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+      loading: false,
+      threatMatchesCount: 2,
+      threatEnrichmentsCount: 2,
+    });
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+  });
+
   it('should render insights component', () => {
     const contextValue = {
       eventId: 'some_Id',

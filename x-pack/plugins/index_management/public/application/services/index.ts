@@ -20,7 +20,6 @@ export {
   updateIndexSettings,
   loadIndexStats,
   loadIndexMapping,
-  loadIndexData,
   useLoadIndexTemplates,
   simulateIndexTemplate,
   useLoadNodesPlugins,

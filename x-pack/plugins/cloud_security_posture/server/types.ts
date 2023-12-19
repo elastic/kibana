@@ -34,7 +34,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CspStatusCode, IndexDetails } from '../common/types';
+import { CspStatusCode, IndexDetails } from '../common/types_old';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -69,6 +69,7 @@ export interface CspApiRequestHandlerContext {
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  encryptedSavedObjects: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;

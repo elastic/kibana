@@ -63,6 +63,7 @@ export const getRuleExecutor = ({
     params,
     startedAt,
     spaceId,
+    getTimeRange,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -88,9 +89,15 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
+    // We only need the end timestamp to base all of queries on. The length of the time range
+    // doesn't matter for our use case since we allow the user to customize the window sizes,
+    const { dateEnd } = getTimeRange('1m');
+    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
+      const alertLimit = alertFactory.alertLimit.getValue();
+      let hasReachedLimit = false;
+      let scheduledActionsCount = 0;
       for (const result of results) {
         const {
           instanceId,
@@ -109,6 +116,11 @@ export const getRuleExecutor = ({
           `/app/observability/slos/${slo.id}${urlQuery}`
         );
         if (shouldAlert) {
+          if (scheduledActionsCount >= alertLimit) {
+            // need to set this so that warning is displayed in the UI and in the logs
+            hasReachedLimit = true;
+            break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+          }
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -156,41 +168,43 @@ export const getRuleExecutor = ({
 
           alert.scheduleActions(windowDef.actionGroup, context);
           alert.replaceState({ alertState: AlertStates.ALERT });
+          scheduledActionsCount++;
         }
       }
+      alertFactory.alertLimit.setLimitReached(hasReachedLimit);
+    }
 
-      const { getRecoveredAlerts } = alertFactory.done();
-      const recoveredAlerts = getRecoveredAlerts();
-      for (const recoveredAlert of recoveredAlerts) {
-        const alertId = recoveredAlert.getId();
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = recoveredAlert.getUuid();
-        const alertDetailsUrl = await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        );
+    const { getRecoveredAlerts } = alertFactory.done();
+    const recoveredAlerts = getRecoveredAlerts();
+    for (const recoveredAlert of recoveredAlerts) {
+      const alertId = recoveredAlert.getId();
+      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+      const alertUuid = recoveredAlert.getUuid();
+      const alertDetailsUrl = await getAlertUrl(
+        alertUuid,
+        spaceId,
+        indexedStartedAt,
+        alertsLocator,
+        basePath.publicBaseUrl
+      );
 
-        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          `/app/observability/slos/${slo.id}${urlQuery}`
-        );
+      const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+      const viewInAppUrl = addSpaceIdToPath(
+        basePath.publicBaseUrl,
+        spaceId,
+        `/app/observability/slos/${slo.id}${urlQuery}`
+      );
 
-        const context = {
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          alertDetailsUrl,
-          sloId: slo.id,
-          sloName: slo.name,
-          sloInstanceId: alertId,
-        };
+      const context = {
+        timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        alertDetailsUrl,
+        sloId: slo.id,
+        sloName: slo.name,
+        sloInstanceId: alertId,
+      };
 
-        recoveredAlert.setContext(context);
-      }
+      recoveredAlert.setContext(context);
     }
 
     return { state: {} };

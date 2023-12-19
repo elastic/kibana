@@ -35,7 +35,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -128,7 +128,6 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -137,6 +136,7 @@ export interface ApmPluginStartDeps {
   profiling?: ProfilingPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   dashboard: DashboardStart;
+  metricsDataAccess: MetricsDataPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -427,16 +427,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
-    plugins.observabilityAIAssistant.register(
-      async ({ signal, registerContext, registerFunction }) => {
+    plugins.observabilityAIAssistant.service.register(
+      async ({ registerRenderFunction }) => {
         const mod = await import('./assistant_functions');
 
         mod.registerAssistantFunctions({
-          coreStart: core,
-          pluginsStart: plugins,
-          registerContext,
-          registerFunction,
-          signal,
+          registerRenderFunction,
         });
       }
     );

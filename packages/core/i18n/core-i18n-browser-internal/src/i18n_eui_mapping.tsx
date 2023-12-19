@@ -170,13 +170,21 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
+    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelExpand',
+      { defaultMessage: 'Expand navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelCollapse',
+      { defaultMessage: 'Collapse navigation' }
+    ),
     'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Toggle navigation closed' }
+      { defaultMessage: 'Close navigation' }
     ),
     'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Toggle navigation open' }
+      { defaultMessage: 'Open navigation' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -1426,7 +1434,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
       i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-        defaultMessage: 'Expected format: {dateFormat}',
+        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
         values: { dateFormat },
       }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
@@ -1445,6 +1453,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
       defaultMessage: 'Must be a valid range',
+    }),
+    'euiAbsoluteTab.dateFormatHint': i18n.translate('core.euiAbsoluteTab.dateFormatHint', {
+      defaultMessage: 'Press the Enter key to parse as a date.',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',

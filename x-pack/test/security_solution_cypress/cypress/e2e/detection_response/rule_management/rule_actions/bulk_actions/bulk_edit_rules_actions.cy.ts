@@ -20,7 +20,7 @@ import {
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -74,17 +74,14 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       deleteAlertsAndRules();
       deleteConnectors();
-      cy.task('esArchiverResetKibana');
 
       createSlackConnector().then(({ body }) => {
         const actions: RuleActionArray = [
@@ -151,7 +148,7 @@ describe(
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
         login(ROLES.hunter_no_actions);
-        visitRulesManagementTable(ROLES.hunter_no_actions);
+        visitRulesManagementTable();
 
         expectManagementTableRules([
           ruleNameToAssert,

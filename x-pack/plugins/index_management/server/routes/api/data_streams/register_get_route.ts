@@ -28,6 +28,7 @@ const enhanceDataStreams = ({
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
+    // @ts-expect-error @elastic/elasticsearch next_generation_managed_by prop is still not in the ES types
     const enhancedDataStream: EnhancedDataStreamFromEs = {
       ...dataStream,
       privileges: {
@@ -143,6 +144,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
+
           if (config.isSecurityEnabled()) {
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }

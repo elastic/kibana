@@ -34,6 +34,7 @@
     "@kbn/event-annotation-common",
     "@kbn/visualization-ui-components",
     "@kbn/es-query",
+    "@kbn/cell-actions",
   ],
   "exclude": [
     "target/**/*",

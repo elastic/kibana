@@ -131,7 +131,7 @@ export const useConnectorSetup = ({
         (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
       return (
         <StreamingText
-          text={message.content}
+          text={message.content ?? ''}
           delay={enableStreaming ? 50 : 0}
           onStreamingComplete={
             isLastMessage ? onHandleLastMessageStreamingComplete : onHandleMessageStreamingComplete

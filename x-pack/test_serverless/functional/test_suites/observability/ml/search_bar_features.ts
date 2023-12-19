@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation']);
+  const PageObjects = getPageObjects(['header', 'svlCommonPage', 'svlCommonNavigation']);
 
   const allLabels = [
     { label: 'Machine Learning', expected: true },
@@ -49,6 +49,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
     describe('list features', () => {
       it('has the correct features enabled', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.svlCommonNavigation.search.showSearch();
 
         const expectedLabels = allLabels.filter((l) => l.expected).map((l) => l.label);
@@ -64,7 +65,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
+
       it('has the correct features disabled', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.svlCommonNavigation.search.showSearch();
 
         const notExpectedLabels = allLabels.filter((l) => !l.expected).map((l) => l.label);

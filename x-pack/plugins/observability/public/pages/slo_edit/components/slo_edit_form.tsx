@@ -15,11 +15,10 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { sloFeatureId } from '../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -45,7 +44,7 @@ import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo?: GetSLOResponse;
 }
 
 export const maxWidth = 775;
@@ -54,7 +53,6 @@ export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
   const isEditMode = slo !== undefined;
@@ -63,6 +61,8 @@ export function SloEditForm({ slo }: Props) {
   });
 
   const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
+
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
@@ -73,8 +73,8 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesFromUrlState),
-    values: transformSloResponseToCreateSloForm(slo),
+    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    values: sloFormValuesFromUrlState ? sloFormValuesFromUrlState : sloFormValuesFromSloResponse,
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;
@@ -142,10 +142,6 @@ export function SloEditForm({ slo }: Props) {
 
   const handleChangeCheckbox = () => {
     setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
-  };
-
-  const handleCloseRuleFlyout = async () => {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
   };
 
   return (
@@ -254,16 +250,11 @@ export function SloEditForm({ slo }: Props) {
         </EuiFlexGroup>
       </FormProvider>
 
-      {isAddRuleFlyoutOpen && slo ? (
-        <AddRuleFlyout
-          canChangeTrigger={false}
-          consumer={sloFeatureId}
-          initialValues={{ name: `${watch('name')} burn rate rule`, params: { sloId: slo.id } }}
-          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          onClose={handleCloseRuleFlyout}
-          onSave={handleCloseRuleFlyout}
-        />
-      ) : null}
+      <BurnRateRuleFlyout
+        slo={slo as GetSLOResponse}
+        isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
+        canChangeTrigger={false}
+      />
     </>
   );
 }

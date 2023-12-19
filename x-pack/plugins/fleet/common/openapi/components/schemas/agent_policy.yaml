@@ -33,9 +33,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   package_policies:
     description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
     type: array

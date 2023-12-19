@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-
-import type { Props as CodeEditorProps } from '@kbn/code-editor-types';
+import type { CodeEditorProps } from '../code_editor';
 
 type PropArguments = Pick<
   CodeEditorProps,
@@ -19,7 +18,7 @@ type PropArguments = Pick<
   | 'placeholder'
 >;
 
-export type Params = Record<keyof PropArguments, any>;
+export type CodeEditorStorybookParams = Record<keyof PropArguments, any>;
 
 /**
  * Storybook mock for the `CodeEditor` component
@@ -74,7 +73,7 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
   serviceArguments = {};
   dependencies = [];
 
-  getProps(params?: Params): CodeEditorProps {
+  getProps(params?: CodeEditorStorybookParams): CodeEditorProps {
     return {
       languageId: this.getArgumentValue('languageId', params),
       value: this.getArgumentValue('value', params),

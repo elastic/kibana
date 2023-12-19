@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv1, mockUuidv5 } from './saved_objects_utils.test.mock';
+import { mockUuidv4, mockUuidv5 } from './saved_objects_utils.test.mock';
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from './saved_objects_utils';
@@ -78,8 +78,8 @@ describe('SavedObjectsUtils', () => {
 
   describe('#generateId', () => {
     it('returns a valid uuid', () => {
-      expect(generateId()).toBe('uuidv1'); // default return value for mockUuidv1
-      expect(mockUuidv1).toHaveBeenCalled();
+      expect(generateId()).toBe('uuidv4'); // default return value for mockUuidv4
+      expect(mockUuidv4).toHaveBeenCalled();
     });
   });
 

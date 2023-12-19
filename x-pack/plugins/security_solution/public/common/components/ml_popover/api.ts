@@ -33,12 +33,13 @@ export const checkRecognizer = async ({
   signal,
 }: CheckRecognizerProps): Promise<RecognizerModule[]> =>
   KibanaServices.get().http.fetch<RecognizerModule[]>(
-    `/internal/ml/modules/recognize/${indexPatternName}`,
+    `/internal/ml/modules/recognize/${indexPatternName.map((i) => encodeURIComponent(i))}`,
     {
       method: 'GET',
       version: '1',
       asSystemRequest: true,
       signal,
+      query: { filter: 'security' },
     }
   );
 
@@ -51,12 +52,16 @@ export const checkRecognizer = async ({
  * @throws An error if response is not OK
  */
 export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
-  KibanaServices.get().http.fetch<Module[]>(`/internal/ml/modules/get_module/${moduleId}`, {
-    method: 'GET',
-    version: '1',
-    asSystemRequest: true,
-    signal,
-  });
+  KibanaServices.get().http.fetch<Module[]>(
+    `/internal/ml/modules/get_module/${encodeURIComponent(moduleId)}`,
+    {
+      method: 'GET',
+      version: '1',
+      asSystemRequest: true,
+      signal,
+      query: { filter: 'security' },
+    }
+  );
 
 /**
  * Creates ML Jobs + Datafeeds for the given configTemplate + indexPatternName
@@ -77,7 +82,7 @@ export const setupMlJob = async ({
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
   const response = await KibanaServices.get().http.fetch<SetupMlResponse>(
-    `/internal/ml/modules/setup/${configTemplate}`,
+    `/internal/ml/modules/setup/${encodeURIComponent(configTemplate)}`,
     {
       method: 'POST',
       version: '1',

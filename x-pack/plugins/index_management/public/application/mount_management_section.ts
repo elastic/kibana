@@ -54,9 +54,7 @@ export async function mountManagementSection({
   extensionsService,
   isFleetEnabled,
   kibanaVersion,
-  enableIndexActions = true,
-  enableLegacyTemplates = true,
-  enableIndexStats = true,
+  config,
   cloud,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
@@ -65,9 +63,7 @@ export async function mountManagementSection({
   extensionsService: ExtensionsService;
   isFleetEnabled: boolean;
   kibanaVersion: SemVer;
-  enableIndexActions?: boolean;
-  enableLegacyTemplates?: boolean;
-  enableIndexStats?: boolean;
+  config: AppDependencies['config'];
   cloud?: CloudSetup;
 }) {
   const { element, setBreadcrumbs, history, theme$ } = params;
@@ -114,11 +110,7 @@ export async function mountManagementSection({
       uiMetricService,
       extensionsService,
     },
-    config: {
-      enableIndexActions,
-      enableLegacyTemplates,
-      enableIndexStats,
-    },
+    config,
     history,
     setBreadcrumbs,
     uiSettings,

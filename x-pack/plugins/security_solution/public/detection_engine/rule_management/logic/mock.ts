@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { FetchRulesResponse, Rule } from './types';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { FetchRulesResponse } from './types';
 
 // TODO move to __mocks__
-export const savedRuleMock: Rule = {
+export const savedRuleMock: RuleResponse = {
   author: [],
   actions: [],
   created_at: 'mm/dd/yyyyTHH:MM:sssz',
@@ -47,9 +48,11 @@ export const savedRuleMock: Rule = {
   to: 'now',
   type: 'query',
   threat: [],
-  throttle: null,
   updated_at: 'mm/dd/yyyyTHH:MM:sssz',
   updated_by: 'mockUser',
+  version: 1,
+  revision: 1,
+  exceptions_list: [],
 };
 
 export const rulesMock: FetchRulesResponse = {
@@ -93,8 +96,9 @@ export const rulesMock: FetchRulesResponse = {
       to: 'now',
       type: 'query',
       threat: [],
-      throttle: null,
       version: 1,
+      revision: 1,
+      exceptions_list: [],
     },
     {
       actions: [],
@@ -131,8 +135,9 @@ export const rulesMock: FetchRulesResponse = {
       to: 'now',
       type: 'query',
       threat: [],
-      throttle: null,
       version: 1,
+      revision: 1,
+      exceptions_list: [],
     },
   ],
 };

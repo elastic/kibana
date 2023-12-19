@@ -190,7 +190,7 @@ const getLogEntryFromHit =
         if ('timestampColumn' in column) {
           return {
             columnId: column.timestampColumn.id,
-            timestamp: cursor.time,
+            time: cursor.time,
           };
         } else if ('messageColumn' in column) {
           return {

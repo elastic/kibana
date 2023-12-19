@@ -7,7 +7,7 @@
 
 import type { Client, estypes } from '@elastic/elasticsearch';
 import assert from 'assert';
-import { createEsClient } from './stack_services';
+import { createEsClient, isServerlessKibanaFlavor } from './stack_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface DeleteAllEndpointDataResponse {
@@ -30,7 +30,10 @@ export const deleteAllEndpointData = async (
 ): Promise<DeleteAllEndpointDataResponse> => {
   assert(endpointAgentIds.length > 0, 'At least one endpoint agent id must be defined');
 
-  const unrestrictedUser = await createSecuritySuperuser(esClient, 'super_superuser');
+  const isServerless = await isServerlessKibanaFlavor(esClient);
+  const unrestrictedUser = isServerless
+    ? { password: 'changeme', username: 'system_indices_superuser', created: false }
+    : await createSecuritySuperuser(esClient, 'super_superuser');
   const esUrl = getEsUrlFromClient(esClient);
   const esClientUnrestricted = createEsClient({
     url: esUrl,

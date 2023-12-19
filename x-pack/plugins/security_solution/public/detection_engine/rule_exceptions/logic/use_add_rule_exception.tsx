@@ -43,22 +43,27 @@ export const useAddRuleDefaultException = (): ReturnUseAddRuleException => {
       exceptions: CreateRuleExceptionListItemSchema[],
       rules: Rule[]
     ): Promise<ExceptionListItemSchema[]> => {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      // TODO: Update once bulk route is added
-      const result = await Promise.all(
-        rules.map(async (rule) =>
-          addRuleExceptions({
-            items: exceptions,
-            ruleId: rule.id,
-            signal: abortCtrl.signal,
-          })
-        )
-      );
+        // TODO: Update once bulk route is added
+        const result = await Promise.all(
+          rules.map(async (rule) =>
+            addRuleExceptions({
+              items: exceptions,
+              ruleId: rule.id,
+              signal: abortCtrl.signal,
+            })
+          )
+        );
 
-      setIsLoading(false);
+        setIsLoading(false);
 
-      return result.flatMap((r) => r);
+        return result.flatMap((r) => r);
+      } catch (e) {
+        setIsLoading(false);
+        throw e;
+      }
     };
     addRuleExceptionFunc.current = addExceptionItemsToRule;
 

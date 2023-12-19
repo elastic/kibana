@@ -9,11 +9,7 @@ import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  ROW_HEIGHT_OPTION,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
@@ -73,6 +69,15 @@ interface CloudSecurityDataGridProps {
    */
   loadMore: () => void;
   'data-test-subj'?: string;
+  /**
+   * This is the component that will be rendered in the group selector.
+   * This component will receive the current group and a function to change the group.
+   */
+  groupSelectorComponent?: JSX.Element;
+  /**
+   * Height override for the data grid.
+   */
+  height?: number;
 }
 
 export const CloudSecurityDataTable = ({
@@ -86,6 +91,8 @@ export const CloudSecurityDataTable = ({
   loadMore,
   title,
   customCellRenderer,
+  groupSelectorComponent,
+  height,
   ...rest
 }: CloudSecurityDataGridProps) => {
   const {
@@ -213,6 +220,7 @@ export const CloudSecurityDataTable = ({
       columns={currentColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 
@@ -220,11 +228,10 @@ export const CloudSecurityDataTable = ({
     // Change the height of the grid to fit the page
     // If there are filters, leave space for the filter bar
     // Todo: Replace this component with EuiAutoSizer
-    height: `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
+    height: height ?? `calc(100vh - ${filters?.length > 0 ? 443 : 403}px)`,
   };
 
-  const rowHeightState =
-    uiSettings.get(ROW_HEIGHT_OPTION) === -1 ? 0 : uiSettings.get(ROW_HEIGHT_OPTION);
+  const rowHeightState = 0;
 
   const loadingStyle = {
     opacity: isLoading ? 1 : 0,
@@ -250,7 +257,7 @@ export const CloudSecurityDataTable = ({
           onSetColumns={onSetColumns}
           onSort={onSort}
           rows={rows}
-          sampleSize={MAX_FINDINGS_TO_LOAD}
+          sampleSizeState={MAX_FINDINGS_TO_LOAD}
           setExpandedDoc={setExpandedDoc}
           renderDocumentView={renderDocumentView}
           sort={sort}

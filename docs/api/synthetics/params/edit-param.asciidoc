@@ -1,0 +1,70 @@
+[[edit-parameter-by-id-api]]
+== Edit Parameter by ID API
+++++
+<titleabbrev>Edit Parameter</titleabbrev>
+++++
+
+Edits a parameter with the specified ID.
+
+=== {api-request-title}
+
+`PUT <kibana host>:<port>/api/synthetics/params`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/synthetics/params`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[[parameter-edit-path-params]]
+==== Path Parameters
+
+`id`::
+(Required, string) The unique identifier of the parameter to be edited.
+
+[[parameter-edit-request-body]]
+==== Request body
+
+The request body should contain the following attributes:
+
+`key`::
+(Required, string) The key of the parameter.
+
+`value`::
+(Required, string) The updated value associated with the parameter.
+
+`description`::
+(Optional, string) The updated description of the parameter.
+
+`tags`::
+(Optional, array of strings) An array of updated tags to categorize the parameter.
+
+[[parameter-edit-example]]
+==== Example
+
+Here is an example of a PUT request to edit a parameter by its ID:
+
+[source,sh]
+--------------------------------------------------
+PUT /api/synthetics/params/param_id1
+{
+  "key": "updated_param_key",
+  "value": "updated-param-value",
+  "description": "Updated Param to be used in browser monitor",
+  "tags": ["authentication", "security", "updated"]
+}
+--------------------------------------------------
+
+The API returns the updated parameter as follows:
+
+[source,json]
+--------------------------------------------------
+{
+  "id": "param_id1",
+  "key": "updated_param_key",
+  "value": "updated-param-value",
+  "description": "Updated Param to be used in browser monitor",
+  "tags": ["authentication", "security", "updated"]
+}
+--------------------------------------------------

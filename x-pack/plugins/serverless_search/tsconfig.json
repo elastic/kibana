@@ -9,7 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -30,10 +30,16 @@
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-api-panels",
+    "@kbn/search-index-documents",
     "@kbn/serverless-search-settings",
     "@kbn/core-lifecycle-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-connectors",
     "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-types",
   ]
 }

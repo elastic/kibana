@@ -71,9 +71,10 @@ export class AssetDetailsEmbeddable extends Embeddable<AssetDetailsEmbeddableInp
         <EuiThemeProvider>
           <div style={{ width: '100%' }}>
             <LazyAssetDetailsWrapper
-              dateRange={this.input.dateRange}
-              asset={this.input.asset}
+              assetId={this.input.assetId}
+              assetName={this.input.assetName}
               assetType={this.input.assetType}
+              dateRange={this.input.dateRange}
               overrides={this.input.overrides}
               renderMode={this.input.renderMode}
               tabs={this.input.tabs}

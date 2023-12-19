@@ -102,7 +102,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     search: {
       logPosition: encode({
         end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        position: { tiebreaker, time: timestamp },
+        position: { tiebreaker, time: moment(timestamp).toISOString() },
         start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         streamLive: false,
       }),

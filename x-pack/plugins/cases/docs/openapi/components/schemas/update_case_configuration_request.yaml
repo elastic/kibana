@@ -16,9 +16,23 @@ properties:
       - id
       - name
       - type
+  customFields:
+    type: array
+    description: Custom fields case configuration.
+    x-technical-preview: true
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
   version:
     description: >
       The version of the connector.
       To retrieve the version value, use the get configuration API.
     type: string
-    example: WzIwMiwxXQ==
+    examples:
+      - WzIwMiwxXQ==

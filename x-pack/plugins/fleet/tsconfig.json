@@ -101,5 +101,7 @@
     "@kbn/core-http-common",
     "@kbn/dashboard-plugin",
     "@kbn/cloud",
+    "@kbn/config",
+    "@kbn/core-http-server-mocks",
   ]
 }

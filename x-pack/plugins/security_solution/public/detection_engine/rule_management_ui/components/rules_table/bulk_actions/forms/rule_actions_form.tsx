@@ -23,8 +23,8 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
@@ -99,8 +99,8 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
 
     const { actions = [], overwrite: overwriteValue } = data;
     const editAction = overwriteValue
-      ? BulkActionEditType.set_rule_actions
-      : BulkActionEditType.add_rule_actions;
+      ? BulkActionEditTypeEnum.set_rule_actions
+      : BulkActionEditTypeEnum.add_rule_actions;
 
     onConfirm({
       type: editAction,

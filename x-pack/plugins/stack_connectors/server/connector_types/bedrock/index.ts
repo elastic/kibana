@@ -23,7 +23,7 @@ import { renderParameterTemplates } from './render';
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: BEDROCK_CONNECTOR_ID,
   name: BEDROCK_TITLE,
-  Service: BedrockConnector,
+  getService: (params) => new BedrockConnector(params),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,

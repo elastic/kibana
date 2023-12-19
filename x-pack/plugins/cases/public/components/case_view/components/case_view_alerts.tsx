@@ -48,7 +48,6 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     id: `case-details-alerts-${caseData.owner}`,
     featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
-    showExpandToDetails: Boolean(alertFeatureIds?.includes('siem')),
     showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
   };
 

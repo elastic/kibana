@@ -116,6 +116,7 @@ const PackDetailsPageComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">
           <EuiButton
+            data-test-subj="edit-pack-button"
             fill
             {...editQueryLinkProps}
             iconType="pencil"

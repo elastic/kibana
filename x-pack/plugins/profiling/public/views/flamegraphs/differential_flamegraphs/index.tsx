@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -16,6 +16,8 @@ import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
+import { FramesSummary } from '../../../components/frames_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 
 export function DifferentialFlameGraphsView() {
   const {
@@ -117,6 +119,36 @@ export function DifferentialFlameGraphsView() {
             comparisonMode={comparisonMode}
             normalizationMode={normalizationMode}
             normalizationOptions={normalizationOptions}
+          />
+          <EuiSpacer />
+          <FramesSummary
+            isLoading={state.status === AsyncStatus.Loading}
+            baseValue={
+              state.data?.primaryFlamegraph
+                ? {
+                    duration: totalSeconds,
+                    selfCPU: state.data.primaryFlamegraph.SelfCPU,
+                    totalCPU: state.data.primaryFlamegraph.TotalCPU,
+                    totalCount: state.data.primaryFlamegraph.TotalSamples,
+                    scaleFactor: isNormalizedByTime ? baselineTime : baseline,
+                    totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2KgsItems[0],
+                    totalAnnualCostUSD: state.data.primaryFlamegraph.TotalAnnualCostsUSDItems[0],
+                  }
+                : undefined
+            }
+            comparisonValue={
+              state.data?.comparisonFlamegraph
+                ? {
+                    duration: totalComparisonSeconds,
+                    selfCPU: state.data.comparisonFlamegraph.SelfCPU,
+                    totalCPU: state.data.comparisonFlamegraph.TotalCPU,
+                    totalCount: state.data.comparisonFlamegraph.TotalSamples,
+                    scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
+                    totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2KgsItems[0],
+                    totalAnnualCostUSD: state.data.comparisonFlamegraph.TotalAnnualCostsUSDItems[0],
+                  }
+                : undefined
+            }
           />
         </EuiPanel>
       </EuiFlexItem>

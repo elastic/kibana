@@ -122,6 +122,11 @@ describe('server files', () => {
                 "allowedMimeTypes": Array [
                   "image/png",
                 ],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
+                ],
                 "http": Object {
                   "create": Object {
                     "tags": Array [
@@ -160,6 +165,11 @@ describe('server files', () => {
                 "allowedMimeTypes": Array [
                   "image/png",
                 ],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
+                ],
                 "http": Object {
                   "create": Object {
                     "tags": Array [
@@ -197,6 +207,11 @@ describe('server files', () => {
               Object {
                 "allowedMimeTypes": Array [
                   "image/png",
+                ],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
                 ],
                 "http": Object {
                   "create": Object {
@@ -238,6 +253,11 @@ describe('server files', () => {
             Array [
               Object {
                 "allowedMimeTypes": Array [],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
+                ],
                 "http": Object {
                   "create": Object {
                     "tags": Array [
@@ -274,6 +294,11 @@ describe('server files', () => {
             Array [
               Object {
                 "allowedMimeTypes": Array [],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
+                ],
                 "http": Object {
                   "create": Object {
                     "tags": Array [
@@ -310,6 +335,11 @@ describe('server files', () => {
             Array [
               Object {
                 "allowedMimeTypes": Array [],
+                "hashes": Array [
+                  "md5",
+                  "sha1",
+                  "sha256",
+                ],
                 "http": Object {
                   "create": Object {
                     "tags": Array [
@@ -439,6 +469,11 @@ describe('server files', () => {
                 "application/x-tar",
                 "application/pdf",
               ],
+              "hashes": Array [
+                "md5",
+                "sha1",
+                "sha256",
+              ],
               "http": Object {
                 "create": Object {
                   "tags": Array [
@@ -563,6 +598,11 @@ describe('server files', () => {
                 "application/x-tar",
                 "application/pdf",
               ],
+              "hashes": Array [
+                "md5",
+                "sha1",
+                "sha256",
+              ],
               "http": Object {
                 "create": Object {
                   "tags": Array [
@@ -686,6 +726,11 @@ describe('server files', () => {
                 "application/x-7z-compressed",
                 "application/x-tar",
                 "application/pdf",
+              ],
+              "hashes": Array [
+                "md5",
+                "sha1",
+                "sha256",
               ],
               "http": Object {
                 "create": Object {

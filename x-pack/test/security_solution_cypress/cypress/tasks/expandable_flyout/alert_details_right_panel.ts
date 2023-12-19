@@ -13,9 +13,15 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
 } from '../../screens/expandable_flyout/alert_details_right_panel';
+import {
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
+  VIEW_CASE_TOASTER_LINK,
+} from '../../screens/expandable_flyout/common';
+import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
 
 /* Header */
 
@@ -33,14 +39,6 @@ export const expandDocumentDetailsExpandableFlyoutLeftSection = () => {
 export const collapseDocumentDetailsExpandableFlyoutLeftSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).click();
-};
-
-/**
- * Open the Overview tab in the document details expandable flyout right section
- */
-export const openOverviewTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).click();
 };
 
 /**
@@ -94,4 +92,17 @@ export const selectTakeActionItem = (option: string) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
     .should('be.visible')
     .within(() => cy.get(option).should('be.visible').click());
+};
+
+/**
+ * Create new case from the expandable flyout take action button
+ */
+export const fillOutFormToCreateNewCase = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT).type('case');
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT).type('case description');
+
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
+
+  cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
+  cy.get(TOASTER_CLOSE_ICON).should('be.visible').click();
 };

@@ -122,13 +122,22 @@ export async function fetchSeries<T extends ValueAggregationMap>({
   }
 
   return response.aggregations.groupBy.buckets.map((bucket) => {
+    let value =
+      bucket.value?.value === undefined || bucket.value?.value === null
+        ? null
+        : Number(bucket.value.value);
+
+    if (value !== null) {
+      value =
+        Math.abs(value) < 100
+          ? Number(value.toPrecision(3))
+          : Math.round(value);
+    }
+
     return {
       groupBy: bucket.key_as_string || String(bucket.key),
       data: bucket.timeseries.buckets,
-      value:
-        bucket.value?.value === undefined || bucket.value?.value === null
-          ? null
-          : Math.round(bucket.value.value),
+      value,
       change_point: bucket.change_point,
       unit,
     };

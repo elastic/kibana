@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
@@ -101,14 +100,10 @@ describe('<TemplateCreate />', () => {
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
-
-    // disable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
   });
 
   describe('composable index template', () => {
@@ -533,6 +528,8 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
+        dataStream: {},
+        allowAutoCreate: true,
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -545,13 +542,14 @@ describe('<TemplateCreate />', () => {
     });
 
     it('should send the correct payload', async () => {
-      const { actions, find } = testBed;
+      const { component, actions, find } = testBed;
 
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
 
       await act(async () => {
         actions.clickNextButton();
       });
+      component.update();
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
@@ -559,6 +557,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
+            allowAutoCreate: true,
+            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -608,32 +608,59 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  test('preview data stream', async () => {
-    await act(async () => {
-      testBed = await setup(httpSetup);
-    });
-    testBed.component.update();
+  describe('DSL', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
 
-    const { actions } = testBed;
-    // Logistics
-    await actions.completeStepOne({
-      name: TEMPLATE_NAME,
-      indexPatterns: DEFAULT_INDEX_PATTERNS,
-      dataStream: {},
+      await testBed.actions.completeStepOne({
+        name: TEMPLATE_NAME,
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
+        dataStream: {},
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
+      });
     });
 
-    await act(async () => {
-      await actions.previewTemplate();
+    test('should include DSL in summary when set in step 1', async () => {
+      const { find, component } = testBed;
+
+      await act(async () => {
+        testBed.find('formWizardStep-5').simulate('click');
+      });
+      component.update();
+
+      expect(find('lifecycleValue').text()).toContain('1 day');
     });
 
-    expect(httpSetup.post).toHaveBeenLastCalledWith(
-      `${API_BASE_PATH}/index_templates/simulate`,
-      expect.objectContaining({
-        body: JSON.stringify({
-          index_patterns: DEFAULT_INDEX_PATTERNS,
-          data_stream: {},
-        }),
-      })
-    );
+    test('preview data stream', async () => {
+      const { actions } = testBed;
+
+      await act(async () => {
+        await actions.previewTemplate();
+      });
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/simulate`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
+            },
+            index_patterns: DEFAULT_INDEX_PATTERNS,
+            data_stream: {},
+            allow_auto_create: false,
+          }),
+        })
+      );
+    });
   });
 });

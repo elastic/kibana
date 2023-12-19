@@ -10,8 +10,7 @@ import { isString } from 'lodash/fp';
 import type { AppError } from '@kbn/securitysolution-t-grid';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import type { IEsError } from '@kbn/data-plugin/public';
-import { isEsError } from '@kbn/data-plugin/public';
+import { type IEsError, isEsError } from '@kbn/search-errors';
 
 import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
@@ -98,8 +97,10 @@ export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
       ? `(${error.statusCode})`
       : '';
   const stringifiedError = getStringifiedStack(maybeUnWrapped);
-  const adaptedError = new Error(`${error.attributes?.reason ?? error.message} ${statusCode}`);
-  adaptedError.name = error.attributes?.reason ?? error.message;
+  const adaptedError = new Error(
+    `${error.attributes?.error?.reason ?? error.message} ${statusCode}`
+  );
+  adaptedError.name = error.attributes?.error?.reason ?? error.message;
   if (stringifiedError != null) {
     adaptedError.stack = stringifiedError;
   }

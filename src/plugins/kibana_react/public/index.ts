@@ -21,9 +21,6 @@ export {
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 
-export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
-export { ExitFullScreenButton } from './exit_full_screen_button';
-
 export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
 export {
   context,
@@ -46,10 +43,6 @@ export {
 } from './ui_settings';
 
 export { useExecutionContext } from './use_execution_context';
-
-export type { ToolbarButtonProps } from './toolbar_button';
-/** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
-export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
 
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
@@ -78,9 +71,6 @@ export { Markdown, MarkdownSimple } from './markdown';
 
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
-
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
 
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';

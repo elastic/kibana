@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInvestigationTab } from '../../left';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
@@ -24,7 +24,8 @@ import {
  */
 export const InvestigationGuide: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
+    useRightPanelContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
@@ -32,7 +33,7 @@ export const InvestigationGuide: React.FC = () => {
 
   const goToInvestigationsTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInvestigationTab,
       },
@@ -56,7 +57,12 @@ export const InvestigationGuide: React.FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      {loading ? (
+      {isPreview ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage"
+          defaultMessage="Investigation guide is not available in alert preview."
+        />
+      ) : loading ? (
         <EuiSkeletonText
           data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(

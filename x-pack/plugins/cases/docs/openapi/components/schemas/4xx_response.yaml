@@ -3,9 +3,11 @@ title: Unsuccessful cases API response
 properties:
   error:
     type: string
-    example: Unauthorized
+    examples:
+      - Unauthorized
   message:
     type: string 
   statusCode:
     type: integer
-    example: 401
+    examples:
+      - 401

@@ -76,6 +76,9 @@ interface FindingsAggBucket extends AggregationsStringRareTermsBucketKeys {
   cis_sections: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
+/**
+ * @deprecated: This hook is deprecated and will be removed in the next release.
+ */
 export const getFindingsByResourceAggQuery = ({
   query,
   sortDirection,
@@ -168,6 +171,9 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
   },
 });
 
+/**
+ * @deprecated: This hook is deprecated and will be removed in the next release.
+ */
 export const useFindingsByResource = (options: UseFindingsByResourceOptions) => {
   const {
     data,

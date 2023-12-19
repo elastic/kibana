@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Core Context Providers', () => {
     let event: Event<Record<string, unknown>>;
     before(async () => {
-      let i = 2;
+      let i = 1;
       do {
         // Wait until we get a GREEN "status_changed" event. At that point all the context providers should be set up.
         const events = await ebtServerHelper.getEvents(i, {

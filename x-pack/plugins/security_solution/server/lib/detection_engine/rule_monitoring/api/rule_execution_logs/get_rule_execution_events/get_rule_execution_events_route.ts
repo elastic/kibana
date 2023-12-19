@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
@@ -36,8 +36,8 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidation(GetRuleExecutionEventsRequestParams),
-            query: buildRouteValidation(GetRuleExecutionEventsRequestQuery),
+            params: buildRouteValidationWithZod(GetRuleExecutionEventsRequestParams),
+            query: buildRouteValidationWithZod(GetRuleExecutionEventsRequestQuery),
           },
         },
       },

@@ -667,6 +667,7 @@ export class VisualBuilderPageObject extends FtrService {
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setFieldForAggregateBy(field: string): Promise<void> {

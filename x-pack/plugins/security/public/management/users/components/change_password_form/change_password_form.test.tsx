@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ChangePasswordForm } from './change_password_form';
-import type { User } from '../../../../../common/model';
+import type { User } from '../../../../../common';
 import { userAPIClientMock } from '../../index.mock';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {

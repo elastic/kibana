@@ -538,9 +538,10 @@ describe('Lens App', () => {
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
-        await getButton(inst).run(inst.getDOMNode());
-        inst.update();
-        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
+        getButton(inst).run(inst.getDOMNode());
+        // wait a tick since SaveModalContainer initializes asynchronously
+        await new Promise(process.nextTick);
+        const handler = inst.update().find('SavedObjectSaveModalOrigin').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);

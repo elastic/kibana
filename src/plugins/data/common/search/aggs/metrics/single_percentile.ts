@@ -28,7 +28,7 @@ export const getSinglePercentileMetricAgg = () => {
     expressionName: aggSinglePercentileFnName,
     dslName: 'percentiles',
     title: singlePercentileTitle,
-    valueType: 'number',
+    getValueType: () => 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.singlePercentileLabel', {
         defaultMessage: 'Percentile {field}',

@@ -16,13 +16,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const toasts = getService('toasts');
   const retry = getService('retry');
   const find = getService('find');
 
   describe('Configure Case', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
@@ -42,7 +41,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 
@@ -54,7 +53,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('change closure option successfully', async () => {
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
         const toast = await toasts.getToastElement(1);
-        expect(await toast.getVisibleText()).to.be('Saved external connection settings');
+        expect(await toast.getVisibleText()).to.be('Settings successfully updated');
         await toasts.dismissAllToasts();
       });
     });

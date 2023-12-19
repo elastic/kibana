@@ -82,6 +82,7 @@ const casesSchemaObject = schema.maybe(
     update: schema.maybe(casesSchema),
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
+    settings: schema.maybe(casesSchema),
   })
 );
 

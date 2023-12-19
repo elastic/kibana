@@ -36,6 +36,13 @@ jest.mock('langchain/agents', () => ({
   })),
 }));
 
+jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
+  ElasticsearchStore: jest.fn().mockImplementation(() => ({
+    asRetriever: jest.fn(),
+    isModelInstalled: jest.fn().mockResolvedValue(true),
+  })),
+}));
+
 const mockConnectorId = 'mock-connector-id';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,10 +69,12 @@ describe('callAgentExecutor', () => {
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
     });
@@ -81,17 +90,23 @@ describe('callAgentExecutor', () => {
   it('kicks off the chain with (only) the last message', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: '\n\nDo you know my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: '\n\nDo you know my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
@@ -99,26 +114,34 @@ describe('callAgentExecutor', () => {
 
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages: onlyOneMessage,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: 'What is my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: 'What is my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('returns the expected response body', async () => {
     const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
     });

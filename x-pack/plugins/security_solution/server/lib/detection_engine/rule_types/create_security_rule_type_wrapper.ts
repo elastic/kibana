@@ -422,6 +422,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
+                    experimentalFeatures,
                   },
                 });
 
@@ -507,7 +508,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
-                message: `Bulk Indexing of alerts failed: ${truncateList(result.errors).join()}`,
+                message: `An error occurred during rule execution: message: "${truncateList(
+                  result.errors
+                ).join()}"`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,

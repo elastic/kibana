@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -32,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
@@ -41,13 +42,14 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
-  getPosturePolicy,
-  getPostureInputHiddenVars,
-  getVulnMgmtCloudFormationDefaultValue,
-  POSTURE_NAMESPACE,
-  type NewPackagePolicyPostureInput,
-  isPostureInput,
   getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getVulnMgmtCloudFormationDefaultValue,
+  isPostureInput,
+  isBelowMinVersion,
+  type NewPackagePolicyPostureInput,
+  POSTURE_NAMESPACE,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -57,6 +59,8 @@ import {
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { gcpField, getInputVarsFields } from './gcp_credential_form';
+import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
+import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -138,19 +142,23 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   },
 ];
 
-const getAzureAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+const getAzureAccountTypeOptions = (
+  isAzureOrganizationDisabled: boolean
+): CspRadioGroupProps['options'] => [
   {
     id: AZURE_ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
-    disabled: true,
-    tooltip: i18n.translate(
-      'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
-      {
-        defaultMessage: 'Coming Soon',
-      }
-    ),
+    disabled: isAzureOrganizationDisabled,
+    tooltip: isAzureOrganizationDisabled
+      ? i18n.translate(
+          'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+          {
+            defaultMessage: 'Coming Soon',
+          }
+        )
+      : undefined,
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
@@ -355,7 +363,7 @@ const GcpAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization."
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -409,25 +417,33 @@ const getAzureAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
 ): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
+const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
+
 const AzureAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
   disabled,
+  packageInfo,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
+  packageInfo: PackageInfo;
 }) => {
-  const azureAccountTypeOptions = getAzureAccountTypeOptions();
+  const isAzureOrganizationDisabled = isBelowMinVersion(
+    packageInfo.version,
+    AZURE_ORG_MINIMUM_PACKAGE_VERSION
+  );
+  const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
-            value: AZURE_SINGLE_ACCOUNT,
+            value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
           'azure.credentials.type': {
@@ -507,7 +523,16 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage, packageInfo }) => {
+  ({
+    agentPolicy,
+    newPolicy,
+    onChange,
+    validationResults,
+    isEditPage,
+    packageInfo,
+    handleSetupTechnologyChange,
+    agentlessPolicy,
+  }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
@@ -515,6 +540,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
+    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+      input,
+      agentPolicy,
+      agentlessPolicy,
+      handleSetupTechnologyChange,
+      isEditPage,
+    });
+    const shouldRenderAgentlessSelector =
+      (!isEditPage && isAgentlessAvailable) ||
+      (isEditPage && setupTechnology === SetupTechnology.AGENTLESS);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -528,11 +563,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType, packageInfo);
+        const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [newPolicy, updatePolicy, packageInfo]
+      [setupTechnology, packageInfo, newPolicy, updatePolicy]
     );
 
     // search for non null fields of the validation?.vars object
@@ -570,6 +605,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
+
+    useEffect(() => {
+      if (isEditPage) {
+        return;
+      }
+
+      setEnabledPolicyInput(input.type);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setupTechnology]);
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -644,7 +688,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <>
             <EuiCallOut
               title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                defaultMessage: 'Agent Installation Required for Changes',
+                defaultMessage: 'Modifying Integration Details',
               })}
               color="warning"
               iconType="warning"
@@ -652,7 +696,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               <p>
                 <FormattedMessage
                   id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts or change where CSPM is deployed (Organization vs Single Account), please install a new CSPM integration."
+                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
                 />
               </p>
             </EuiCallOut>
@@ -697,6 +741,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
             disabled={isEditPage}
           />
         )}
@@ -708,6 +753,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
 
+        {shouldRenderAgentlessSelector && (
+          <SetupTechnologySelector
+            disabled={isEditPage}
+            setupTechnology={setupTechnology}
+            onSetupTechnologyChange={setSetupTechnology}
+          />
+        )}
+
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm
           input={input}
@@ -717,6 +770,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={onChange}
           setIsValid={setIsValid}
           disabled={isEditPage}
+          setupTechnology={setupTechnology}
         />
         <EuiSpacer />
       </>

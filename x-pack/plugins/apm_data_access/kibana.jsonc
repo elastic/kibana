@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-data-access-plugin",
-  "owner": "@elastic/apm-ui",
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-infra_services-team"],
   "plugin": {
     "id": "apmDataAccess",
     "server": true,

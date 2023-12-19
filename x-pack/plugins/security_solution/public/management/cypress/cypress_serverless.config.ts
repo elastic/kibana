@@ -14,7 +14,7 @@ export default defineCypressConfig(
     env: {
       IS_SERVERLESS: true,
 
-      grepTags: '@serverless --@brokenInServerless',
+      grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     },
   })
 );

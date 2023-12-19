@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // We need to use a dataset for the tests to run
   const data = [
     {
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -40,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
-      '@timestamp': '2023-09-10T14:01:00.000Z',
+      '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -62,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
-      '@timestamp': '2023-09-10T14:02:00.000Z',
+      '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -84,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
-      '@timestamp': '2023-09-10T14:03:00.000Z',
+      '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -205,7 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(await rulePageDescription.getVisibleText()).to.be(data[0].rule.rationale);
 
-        const severity = await testSubjects.find('severity');
+        const severity = await testSubjects.find('severityPropertyValue');
         expect(await severity.getVisibleText()).to.be('Low');
 
         const referenceUrls = await testSubjects.find('urlsDescriptionReferenceLinkItem');

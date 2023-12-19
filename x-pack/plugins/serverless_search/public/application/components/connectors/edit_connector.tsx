@@ -11,12 +11,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +30,8 @@ import { EditName } from './edit_name';
 import { EditServiceType } from './edit_service_type';
 import { EditDescription } from './edit_description';
 import { DeleteConnectorModal } from './delete_connector_modal';
+import { ConnectorConfiguration } from './connector_config/connector_configuration';
+import { useConnector } from '../../hooks/api/use_connector';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
@@ -41,14 +42,9 @@ export const EditConnector: React.FC = () => {
   useEffect(() => setDeleteModalIsOpen(false), [id, setDeleteModalIsOpen]);
   const {
     application: { navigateToUrl },
-    http,
   } = useKibanaServices();
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: [`fetchConnector${id}`],
-    queryFn: () =>
-      http.fetch<{ connector: Connector }>(`/internal/serverless_search/connector/${id}`),
-  });
+  const { data, isLoading } = useConnector(id);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
@@ -76,7 +72,12 @@ export const EditConnector: React.FC = () => {
             </h1>
           }
           actions={
-            <EuiButton color="primary" fill onClick={() => navigateToUrl(`./`)}>
+            <EuiButton
+              data-test-subj="serverlessSearchEditConnectorGoBackButton"
+              color="primary"
+              fill
+              onClick={() => navigateToUrl(`./`)}
+            >
               {i18n.translate('xpack.serverlessSearch.connectors.goBack', {
                 defaultMessage: 'Go back',
               })}
@@ -91,11 +92,11 @@ export const EditConnector: React.FC = () => {
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
-      <EuiPageTemplate.Section grow={false}>
+      <EuiPageTemplate.Section grow={false} color="subdued">
         <EuiText size="s">{CONNECTOR_LABEL}</EuiText>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EditName connectorId={id} name={connector.name} onSuccess={refetch} />
+            <EditName connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {deleteModalIsOpen && (
@@ -111,6 +112,7 @@ export const EditConnector: React.FC = () => {
                 id={'connectorMenu'}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="serverlessSearchEditConnectorButton"
                     aria-label={i18n.translate('xpack.serverlessSearch.connectors.openMenuLabel', {
                       defaultMessage: 'Open menu',
                     })}
@@ -154,18 +156,15 @@ export const EditConnector: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
-          <EuiFlexItem>
-            <EditServiceType
-              connectorId={id}
-              serviceType={connector.service_type ?? ''}
-              onSuccess={() => refetch()}
-            />
+          <EuiFlexItem grow={1}>
+            <EditServiceType connector={connector} />
             <EuiSpacer />
-            <EditDescription
-              connectorId={id}
-              description={connector.description ?? ''}
-              onSuccess={refetch}
-            />
+            <EditDescription connector={connector} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiPanel hasBorder hasShadow={false}>
+              <ConnectorConfiguration connector={connector} />
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

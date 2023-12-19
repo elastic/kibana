@@ -116,6 +116,7 @@ export const ConnectorsTable: React.FC = () => {
       name: nameLabel,
       render: (name: string, connector: Connector) => (
         <EuiLink
+          data-test-subj="serverlessSearchColumnsLink"
           onClick={() => navigateToUrl(generatePath(EDIT_CONNECTOR_PATH, { id: connector.id }))}
         >
           {name || connector.id}
@@ -226,15 +227,21 @@ export const ConnectorsTable: React.FC = () => {
         filter ? `${connector[filter]}`.toLowerCase().includes(query.toLowerCase()) : true
       )
       .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) ?? [];
-
   return (
     <>
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
-          <EuiSearchBar onChange={({ queryText }) => setQuery(queryText ?? '')} query={query} />
+          <EuiSearchBar
+            box={{
+              'data-test-subj': `serverlessSearchConnectorsTableSearchBar`,
+            }}
+            onChange={({ queryText }) => setQuery(queryText ?? '')}
+            query={query}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            data-test-subj="serverlessSearchConnectorsTableSelect"
             onChange={(e) => setFilter(e.currentTarget.value as Filter)}
             options={filterOptions}
           />
@@ -260,6 +267,7 @@ export const ConnectorsTable: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        data-test-subj="serverlessSearchConnectorTable"
         columns={columns}
         loading={isLoading}
         items={items}
@@ -294,6 +302,7 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connec
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
         <EuiButtonIcon
+          data-test-subj="serverlessSearchDeleteConnectorModalActionButton"
           aria-label={DELETE_CONNECTOR_LABEL}
           onClick={() => setModalIsOpen(true)}
           iconType="trash"

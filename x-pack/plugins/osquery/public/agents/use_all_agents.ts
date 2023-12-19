@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
-import type { ListResult, Agent } from '@kbn/fleet-plugin/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
+import type { processAggregations } from '../../common/utils/aggregations';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
@@ -27,7 +28,11 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
   const { data: osqueryPolicies, isFetched } = useOsqueryPolicies();
 
-  return useQuery<Omit<ListResult<{}>, 'items'> & { agents: Agent[] }, unknown, Agent[]>(
+  return useQuery<{
+    agents: Agent[];
+    groups: ReturnType<typeof processAggregations>;
+    total: number;
+  }>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
       let kuery = '';
@@ -37,6 +42,8 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
         if (searchValue) {
           kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
+        } else {
+          kuery += ` and (status:online)`;
         }
       }
 
@@ -49,7 +56,6 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       });
     },
     {
-      select: (data) => data?.agents || [],
       enabled: isFetched && !!osqueryPolicies?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>

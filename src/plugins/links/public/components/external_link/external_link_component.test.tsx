@@ -17,6 +17,8 @@ import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
 
+const onRender = jest.fn();
+
 describe('external link component', () => {
   const defaultLinkInfo = {
     destination: 'https://example.com',
@@ -38,10 +40,15 @@ describe('external link component', () => {
   test('by default opens in new tab', async () => {
     render(
       <LinksContext.Provider value={links}>
-        <ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+        <ExternalLinkComponent
+          link={defaultLinkInfo}
+          layout={LINKS_VERTICAL_LAYOUT}
+          onRender={onRender}
+        />
       </LinksContext.Provider>
     );
 
+    expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
     await userEvent.click(link);
@@ -55,9 +62,10 @@ describe('external link component', () => {
     };
     render(
       <LinksContext.Provider value={links}>
-        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} onRender={onRender} />
       </LinksContext.Provider>
     );
+    expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toHaveTextContent('https://example.com');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
@@ -73,9 +81,10 @@ describe('external link component', () => {
     };
     render(
       <LinksContext.Provider value={links}>
-        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} onRender={onRender} />
       </LinksContext.Provider>
     );
+    expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
     await userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
@@ -89,9 +98,10 @@ describe('external link component', () => {
     };
     render(
       <LinksContext.Provider value={links}>
-        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />
+        <ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} onRender={onRender} />
       </LinksContext.Provider>
     );
+    expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo--error');
     expect(link).toBeDisabled();
     /**

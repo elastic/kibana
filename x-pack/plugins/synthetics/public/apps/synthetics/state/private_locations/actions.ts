@@ -6,11 +6,16 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(
   '[AGENT POLICIES] GET'
+);
+
+export const getPrivateLocationsAction = createAsyncAction<void, SyntheticsPrivateLocations>(
+  '[PRIVATE LOCATIONS] GET'
 );
 
 export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');

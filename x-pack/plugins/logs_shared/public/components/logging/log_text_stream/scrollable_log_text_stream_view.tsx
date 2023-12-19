@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, GetDerivedStateFromProps } from 'react';
 import moment from 'moment';
-
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
@@ -216,7 +215,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 position="start"
                                 isLoading={isLoadingMore}
                                 hasMore={hasMoreBeforeStart}
-                                timestamp={items[0].logEntry.cursor.time}
+                                timestamp={moment(items[0].logEntry.cursor.time).valueOf()}
                                 isStreaming={false}
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
@@ -225,17 +224,17 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 }
                               />
                               {items.map((item, idx) => {
-                                const currentTimestamp = item.logEntry.cursor.time;
+                                const currentTime = item.logEntry.cursor.time;
                                 let showDate = false;
 
                                 if (idx > 0) {
-                                  const prevTimestamp = items[idx - 1].logEntry.cursor.time;
-                                  showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
+                                  const prevTime = items[idx - 1].logEntry.cursor.time;
+                                  showDate = !moment(currentTime).isSame(prevTime, 'day');
                                 }
 
                                 return (
                                   <Fragment key={getStreamItemId(item)}>
-                                    {showDate && <LogDateRow timestamp={currentTimestamp} />}
+                                    {showDate && <LogDateRow time={currentTime} />}
                                     <MeasurableItemView
                                       register={registerChild}
                                       registrationKey={getStreamItemId(item)}
@@ -279,8 +278,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 isStreaming={isStreaming}
                                 timestamp={
                                   isStreaming && lastLoadedTime
-                                    ? lastLoadedTime.valueOf()
-                                    : items[items.length - 1].logEntry.cursor.time
+                                    ? lastLoadedTime.getTime()
+                                    : moment(items[items.length - 1].logEntry.cursor.time).valueOf()
                                 }
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}

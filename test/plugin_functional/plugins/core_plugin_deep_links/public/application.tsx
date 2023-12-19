@@ -50,7 +50,7 @@ const PageA = () => (
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>DL Page A</h1>
+          <h1>DL page A</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
@@ -70,7 +70,7 @@ const PageB = () => (
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>DL Page B</h1>
+          <h1>DL page B</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>

@@ -10,6 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
   EuiCopy,
+  EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
@@ -52,7 +53,7 @@ function getProps(): UnifiedDataTableProps {
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
     rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-    sampleSize: 30,
+    sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
     setExpandedDoc: jest.fn(),
@@ -299,6 +300,122 @@ describe('UnifiedDataTable', () => {
         }
       `);
     });
+
+    it('should apply sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [['message', 'desc']],
+        columns: ['message'],
+      });
+
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
+
+    it('should not apply unknown sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [
+          ['bytes', 'desc'],
+          ['unknown', 'asc'],
+          ['message', 'desc'],
+        ],
+        columns: ['bytes', 'message'],
+      });
+
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "bytes",
+            },
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
+  });
+
+  describe('display settings', () => {
+    it('should include additional display settings if onUpdateSampleSize is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 150,
+        onUpdateSampleSize: jest.fn(),
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              onChangeSampleSize={[MockFunction]}
+              sampleSize={150}
+            />,
+            "allowDensity": false,
+            "allowResetButton": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should not include additional display settings if onUpdateSampleSize is not provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 200,
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "allowDensity": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should hide display settings if no handlers provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        onUpdateRowHeight: undefined,
+        onUpdateSampleSize: undefined,
+      });
+
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": undefined,
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
   });
 
   describe('externalControlColumns', () => {
@@ -439,6 +556,52 @@ describe('UnifiedDataTable', () => {
       const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
       const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
       expect(tourStep).toEqual('test-expand');
+    });
+  });
+
+  describe('renderCustomToolbar', () => {
+    it('should render a custom toolbar', async () => {
+      let toolbarParams: Record<string, unknown> = {};
+      let gridParams: Record<string, unknown> = {};
+      const renderCustomToolbarMock = jest.fn((props) => {
+        toolbarParams = props.toolbarProps;
+        gridParams = props.gridProps;
+        return <div data-test-subj="custom-toolbar">Custom layout</div>;
+      });
+      const component = await getComponent({
+        ...getProps(),
+        renderCustomToolbar: renderCustomToolbarMock,
+      });
+
+      // custom toolbar should be rendered
+      expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+
+      expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          toolbarProps: expect.objectContaining({
+            hasRoomForGridControls: true,
+          }),
+          gridProps: expect.objectContaining({
+            additionalControls: null,
+          }),
+        })
+      );
+
+      // the default eui controls should be available for custom rendering
+      expect(toolbarParams?.columnSortingControl).toBeTruthy();
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBe(null);
+
+      // additional controls become available after selecting a document
+      act(() => {
+        component
+          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .first()
+          .simulate('change');
+      });
+
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBeTruthy();
     });
   });
 

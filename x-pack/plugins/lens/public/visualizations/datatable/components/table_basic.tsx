@@ -261,20 +261,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
-  const isNumericMap: Record<string, boolean> = useMemo(() => {
-    const numericMap: Record<string, boolean> = {};
-    for (const column of firstLocalTable.columns) {
-      // filtered metrics result as "number" type, but have no field
-      numericMap[column.id] =
-        (column.meta.type === 'number' && column.meta.field != null) ||
-        // as fallback check the first available value type
-        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
-        (column.meta.field == null &&
-          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
-            'number');
-    }
-    return numericMap;
-  }, [firstLocalTable]);
+  const isNumericMap: Record<string, boolean> = useMemo(
+    () =>
+      firstLocalTable.columns.reduce<Record<string, boolean>>(
+        (map, column) => ({
+          ...map,
+          [column.id]: column.meta.type === 'number',
+        }),
+        {}
+      ),
+    [firstLocalTable]
+  );
 
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};

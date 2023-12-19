@@ -60,6 +60,7 @@ interface UserRiskScoreTableProps {
 
 export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
@@ -191,7 +192,6 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
       }
       headerSupplement={risk}
       headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
-      headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { assetKindRT } from '../../common/types_api';
+
 export function parseEan(ean: string) {
   const [kind, id, ...rest] = ean.split(':');
 
-  if (!kind || !id || rest.length > 0) {
+  if (!assetKindRT.is(kind) || !kind || !id || rest.length > 0) {
     throw new Error(`${ean} is not a valid EAN`);
   }
 

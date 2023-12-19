@@ -38,7 +38,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchdb.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/couchdb.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/couchdb.svg'),
     artifacts: {
       dashboards: [
         {
@@ -57,7 +57,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/couchdb_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/couchdb_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

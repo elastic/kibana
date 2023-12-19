@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '@kbn/fleet-plugin/server/constants';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -24,6 +25,10 @@ import { CloudSecurityPostureConfig } from '../config';
 interface IndexTemplateSettings {
   index: {
     default_pipeline: string;
+    codec?: string;
+    mapping?: {
+      ignore_malformed: boolean;
+    };
   };
   lifecycle?: { name: string };
 }
@@ -226,6 +231,10 @@ const updateIndexTemplate = async (
     ...template?.settings, // nothing inside
     index: {
       default_pipeline: latestFindingsPipelineIngestConfig.id,
+      codec: 'best_compression',
+      mapping: {
+        ignore_malformed: true,
+      },
     },
     lifecycle: { name: '' },
   };
@@ -242,7 +251,7 @@ const updateIndexTemplate = async (
         aliases: template?.aliases,
       },
       _meta,
-      composed_of: composedOf,
+      composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);

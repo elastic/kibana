@@ -13,10 +13,17 @@ const CODE_SKIP = 'TaskManager/skip';
 
 const code = Symbol('TaskManagerErrorCode');
 const retry = Symbol('TaskManagerErrorRetry');
+const source = Symbol('TaskManagerErrorSource');
+
+export enum TaskErrorSource {
+  FRAMEWORK = 'framework',
+  USER = 'user',
+}
 
 export interface DecoratedError extends Error {
   [code]?: string;
   [retry]?: Date | boolean;
+  [source]?: TaskErrorSource;
 }
 
 export class EphemeralTaskRejectedDueToCapacityError extends Error {
@@ -40,8 +47,9 @@ export function isUnrecoverableError(error: Error | DecoratedError) {
   return isTaskManagerError(error) && error[code] === CODE_UNRECOVERABLE;
 }
 
-export function throwUnrecoverableError(error: Error) {
+export function throwUnrecoverableError(error: Error, errorSource = TaskErrorSource.FRAMEWORK) {
   (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
+  (error as DecoratedError)[source] = errorSource;
   throw error;
 }
 
@@ -52,14 +60,10 @@ export function isRetryableError(error: Error | DecoratedError) {
   return null;
 }
 
-export function createRetryableError(error: Error, shouldRetry: Date | boolean): DecoratedError {
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
   (error as DecoratedError)[code] = CODE_RETRYABLE;
   (error as DecoratedError)[retry] = shouldRetry;
-  return error;
-}
-
-export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
-  throw createRetryableError(error, shouldRetry);
+  throw error;
 }
 
 export function isSkipError(error: Error | DecoratedError) {
@@ -71,6 +75,14 @@ export function isSkipError(error: Error | DecoratedError) {
 
 export function createSkipError(error: Error): DecoratedError {
   (error as DecoratedError)[code] = CODE_SKIP;
+  return error;
+}
+
+export function createTaskRunError(
+  error: Error,
+  errorSource = TaskErrorSource.FRAMEWORK
+): DecoratedError {
+  (error as DecoratedError)[source] = errorSource;
   return error;
 }
 

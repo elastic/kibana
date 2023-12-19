@@ -83,8 +83,4 @@ export class FeatureControlsPluginExample
   start() {
     return {};
   }
-
-  stop() {
-    return {};
-  }
 }

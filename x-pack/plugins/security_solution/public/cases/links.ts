@@ -8,7 +8,7 @@
 import {
   CREATE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
-  UPDATE_CASES_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
 } from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
@@ -22,8 +22,7 @@ const casesLinks = getCasesDeepLinks<LinkItem>({
       capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
     },
     [SecurityPageName.caseConfigure]: {
-      capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
-      licenseType: 'gold',
+      capabilities: [`${CASES_FEATURE_ID}.${CASES_SETTINGS_CAPABILITY}`],
       sideNavDisabled: true,
     },
     [SecurityPageName.caseCreate]: {

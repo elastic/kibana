@@ -2865,6 +2865,12 @@
                 "description": "Total number of services utilizing the opentelemetry/swift agent within the last day"
               }
             },
+            "opentelemetry/android": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/android agent within the last day"
+              }
+            },
             "opentelemetry/webjs": {
               "type": "long",
               "_meta": {
@@ -7026,6 +7032,12 @@
           "_meta": {
             "description": "The Serverless Project ID"
           }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
+          }
         }
       }
     },
@@ -7702,6 +7714,42 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "connectors": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "connectors_serverless": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
             }
           }
         }
@@ -12388,6 +12436,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12439,6 +12493,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12492,6 +12552,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12543,6 +12609,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12596,6 +12668,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12647,6 +12725,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12700,6 +12784,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12751,6 +12841,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }

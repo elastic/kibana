@@ -25,13 +25,13 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { GcpCredentialsType } from '../../../common/types';
+import { GcpCredentialsType } from '../../../common/types_old';
 import {
   CLOUDBEAT_GCP,
   SETUP_ACCESS_CLOUD_SHELL,
   SETUP_ACCESS_MANUAL,
 } from '../../../common/constants';
-import { RadioGroup } from './csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from './csp_boxed_radio_group';
 import {
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
@@ -231,12 +231,7 @@ export const gcpField: GcpInputFields = {
   },
 };
 
-const getSetupFormatOptions = (): Array<{
-  id: SetupFormatGCP;
-  label: string;
-  disabled: boolean;
-  testId: string;
-}> => [
+const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: SETUP_ACCESS_CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
@@ -548,7 +543,6 @@ const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
@@ -562,7 +556,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
             <EuiFieldText
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
@@ -574,7 +567,6 @@ const GcpInputVarFields = ({
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
             <EuiTextArea
-              disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
               id={credentialJSONFields.id}
               fullWidth

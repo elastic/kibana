@@ -12,7 +12,6 @@ import {
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { StackAlert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
@@ -23,13 +22,14 @@ import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { Params, ParamsSchema } from './rule_type_params';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { StackAlertType } from '../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
 
 export function getRuleType(
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlert> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlertType> {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -212,13 +212,21 @@ export function getRuleType(
   };
 
   async function executor(
-    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId, StackAlert>
+    options: RuleExecutorOptions<
+      Params,
+      {},
+      {},
+      ActionContext,
+      typeof ActionGroupId,
+      StackAlertType
+    >
   ) {
     const {
       rule: { id: ruleId, name },
       services,
       params,
       logger,
+      getTimeRange,
     } = options;
     const { alertsClient, scopedClusterClient } = services;
 
@@ -237,7 +245,8 @@ export function getRuleType(
     }
 
     const esClient = scopedClusterClient.asCurrentUser;
-    const date = new Date().toISOString();
+    const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
       index: params.index,
@@ -247,8 +256,8 @@ export function getRuleType(
       groupBy: params.groupBy,
       termField: params.termField,
       termSize: params.termSize,
-      dateStart: date,
-      dateEnd: date,
+      dateStart,
+      dateEnd,
       timeWindowSize: params.timeWindowSize,
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
@@ -269,6 +278,7 @@ export function getRuleType(
           TIME_SERIES_BUCKET_SELECTOR_FIELD
         ),
       },
+      useCalculatedDateRange: false,
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
@@ -309,7 +319,7 @@ export function getRuleType(
       )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         group: alertId,
         value,
         conditions: humanFn,
@@ -338,7 +348,7 @@ export function getRuleType(
       const alertId = recoveredAlert.getId();
       logger.debug(`setting context for recovered alert ${alertId}`);
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         value: unmetGroupValues[alertId] ?? 'unknown',
         group: alertId,
         conditions: `${agg} is NOT ${getHumanReadableComparator(

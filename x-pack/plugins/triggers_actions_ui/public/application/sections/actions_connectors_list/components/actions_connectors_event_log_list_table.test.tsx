@@ -93,25 +93,22 @@ describe('actions_connectors_event_log_list_table', () => {
     expect(wrapper.find('[data-test-subj="connectorEventLogListProgressBar"]')).toEqual({});
     expect(
       wrapper
-        .find('[data-gridcell-column-id="timestamp"] .euiDataGridRowCell__truncate')
+        .find('[data-gridcell-column-id="timestamp"] .euiDataGridRowCell__content')
         .first()
         .text()
     ).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-gridcell-column-id="status"] .euiDataGridRowCell__truncate')
-        .first()
-        .text()
+      wrapper.find('[data-gridcell-column-id="status"] .euiDataGridRowCell__content').first().text()
     ).toEqual('succeeded');
     expect(
       wrapper
-        .find('[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__truncate')
+        .find('[data-gridcell-column-id="connector_name"] .euiDataGridRowCell__content')
         .first()
         .text()
     ).toEqual('test connector');
     expect(
       wrapper
-        .find('[data-gridcell-column-id="message"] .euiDataGridRowCell__truncate')
+        .find('[data-gridcell-column-id="message"] .euiDataGridRowCell__content')
         .first()
         .text()
     ).toEqual('action executed: .server-log:86020b10-9b3b-11ed-8422-2f5a388a317d: test');

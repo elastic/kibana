@@ -127,50 +127,55 @@ export const setupCapabilities = (
     };
   });
 
-  core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
-    if (useDefaultCapabilities) {
-      return {};
-    }
+  core.capabilities.registerSwitcher(
+    async (request, capabilities, useDefaultCapabilities) => {
+      if (useDefaultCapabilities) {
+        return {};
+      }
 
-    const isSecurityPluginEnabled = securitySetup?.license.isEnabled() ?? false;
-    const startServices = await core.getStartServices();
-    const [, { security: securityStart }] = startServices;
+      const isSecurityPluginEnabled = securitySetup?.license.isEnabled() ?? false;
+      const startServices = await core.getStartServices();
+      const [, { security: securityStart }] = startServices;
 
-    // If security is not enabled or not available, transform should have full permission
-    if (!isSecurityPluginEnabled || !securityStart) {
+      // If security is not enabled or not available, transform should have full permission
+      if (!isSecurityPluginEnabled || !securityStart) {
+        return {
+          transform: getInitialTransformCapabilities(true),
+        };
+      }
+
+      const checkPrivileges = securityStart.authz.checkPrivilegesDynamicallyWithRequest(request);
+
+      const { hasAllRequested, privileges } = await checkPrivileges({
+        elasticsearch: {
+          cluster: APP_CLUSTER_PRIVILEGES,
+          index: {},
+        },
+      });
+
+      const clusterPrivileges: Record<string, boolean> = Array.isArray(
+        privileges?.elasticsearch?.cluster
+      )
+        ? privileges.elasticsearch.cluster.reduce<Record<string, boolean>>((acc, p) => {
+            acc[p.privilege] = p.authorized;
+            return acc;
+          }, {})
+        : {};
+
+      const hasOneIndexWithAllPrivileges = false;
+
+      const transformCapabilities = getPrivilegesAndCapabilities(
+        clusterPrivileges,
+        hasOneIndexWithAllPrivileges,
+        hasAllRequested
+      ).capabilities;
+
       return {
-        transform: getInitialTransformCapabilities(true),
+        transform: transformCapabilities as Record<string, boolean | Record<string, boolean>>,
       };
+    },
+    {
+      capabilityPath: 'transform.*',
     }
-
-    const checkPrivileges = securityStart.authz.checkPrivilegesDynamicallyWithRequest(request);
-
-    const { hasAllRequested, privileges } = await checkPrivileges({
-      elasticsearch: {
-        cluster: APP_CLUSTER_PRIVILEGES,
-        index: {},
-      },
-    });
-
-    const clusterPrivileges: Record<string, boolean> = Array.isArray(
-      privileges?.elasticsearch?.cluster
-    )
-      ? privileges.elasticsearch.cluster.reduce<Record<string, boolean>>((acc, p) => {
-          acc[p.privilege] = p.authorized;
-          return acc;
-        }, {})
-      : {};
-
-    const hasOneIndexWithAllPrivileges = false;
-
-    const transformCapabilities = getPrivilegesAndCapabilities(
-      clusterPrivileges,
-      hasOneIndexWithAllPrivileges,
-      hasAllRequested
-    ).capabilities;
-
-    return {
-      transform: transformCapabilities as Record<string, boolean | Record<string, boolean>>,
-    };
-  });
+  );
 };

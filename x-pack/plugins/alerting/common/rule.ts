@@ -15,6 +15,8 @@ import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
+export type { ActionVariable } from '@kbn/alerting-types';
+
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -116,6 +118,7 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  useAlertDataForTemplate?: boolean;
 }
 
 export interface RuleLastRun {
@@ -191,7 +194,10 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 > & { actions: SanitizedRuleAction[] };
 
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
@@ -236,14 +242,6 @@ export interface AlertsHealth {
     status: HealthStatus;
     timestamp: string;
   };
-}
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  deprecated?: boolean;
-  useWithTripleBracesInTemplates?: boolean;
-  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {

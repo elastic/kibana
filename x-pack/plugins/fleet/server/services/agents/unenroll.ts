@@ -73,6 +73,7 @@ export async function unenrollAgents(
     force?: boolean;
     revoke?: boolean;
     batchSize?: number;
+    showInactive?: boolean;
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {

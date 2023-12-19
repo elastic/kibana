@@ -23,7 +23,7 @@ import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Promise<boolean> => {
   try {
     const docsLoader = new DirectoryLoader(
-      resolve(__dirname, '../../../knowledge_base/esql/docs'),
+      resolve(__dirname, '../../../knowledge_base/esql/documentation'),
       {
         '.asciidoc': (path) => new TextLoader(path),
       },
@@ -76,8 +76,7 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     return response.length > 0;
   } catch (e) {
     logger.error(
-      `Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base`,
-      e
+      `Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base\n${e}`
     );
     return false;
   }

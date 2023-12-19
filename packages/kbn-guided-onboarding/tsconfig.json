@@ -14,7 +14,17 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core-application-browser",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/cloud",
+    "@kbn/share-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/analytics",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",

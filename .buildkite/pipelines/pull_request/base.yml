@@ -20,7 +20,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
+    label: 'Check Types and Build API Docs'
     agents:
       queue: n2-4-spot
     key: build_api_docs
@@ -57,13 +57,13 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless.sh
-    label: 'Serverless Security Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
+    label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '*'
@@ -75,7 +75,7 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 4
     retry:
       automatic:
         - exit_status: '*'
@@ -87,19 +87,79 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
+    label: 'Serverless Rule Management - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
     parallelism: 4
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution.sh
-    label: 'Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
+    label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 16
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
+    label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
+    label: 'Serverless AI Assistant - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1        
+
+  - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
+    label: 'Entity Analytics - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '*'
@@ -117,6 +177,66 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
+    label: 'Rule Management - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
+    label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+          
+  - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
+    label: 'Detection Engine - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
+    label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
+    label: 'AI Assistant - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1        
+
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
@@ -129,10 +249,22 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
-    label: 'Defend Workflows Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
+    label: 'Threat Intelligence Cypress Tests'
     agents:
-      queue: n2-4-virt
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
+    label: 'Osquery Cypress Tests'
+    agents:
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -141,62 +273,17 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
-    label: 'Defend Workflows Cypress Tests, burning changed specs'
-    agents:
-      queue: n2-4-virt
-    depends_on: build
-    timeout_in_minutes: 60
-    soft_fail: true
-    parallelism: 1
-    retry:
-      automatic: false
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      queue: n2-4-virt
-    depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
-    label: 'Defend Workflows Cypress Tests on Serverless, burning changed specs'
-    agents:
-      queue: n2-4-virt
-    depends_on: build
-    timeout_in_minutes: 60
-    soft_fail: true
-    parallelism: 1
-    retry:
-      automatic: false
-
-  - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
-    label: 'Threat Intelligence Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 120
-    parallelism: 2
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: 'Security Solution Cypress tests, burning changed specs'
+  - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
+    label: 'Serverless Osquery Cypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 6
     retry:
-      automatic: false
-    soft_fail: true
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   # status_exception: Native role management is not enabled in this Elasticsearch instance
   # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
@@ -236,16 +323,6 @@ steps:
     label: 'Checks'
     agents:
       queue: n2-2-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
-    agents:
-      queue: n2-16-spot
     timeout_in_minutes: 60
     retry:
       automatic:

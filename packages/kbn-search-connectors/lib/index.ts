@@ -17,6 +17,7 @@ export * from './update_filtering_draft';
 export * from './update_native';
 export * from './start_sync';
 export * from './update_connector_configuration';
+export * from './update_connector_index_name';
 export * from './update_connector_name_and_description';
 export * from './update_connector_scheduling';
 export * from './update_connector_service_type';

@@ -6,13 +6,13 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { getUnallowedFieldValues } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { GET_UNALLOWED_FIELD_VALUES, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';
+import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
 export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -37,12 +37,11 @@ export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) =>
             body: responses,
           });
         } catch (err) {
-          const error = transformError(err);
-          logger.error(error.message);
+          logger.error(JSON.stringify(err));
 
           return resp.error({
-            body: error.message,
-            statusCode: error.statusCode,
+            body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
+            statusCode: err.statusCode ?? 500,
           });
         }
       }

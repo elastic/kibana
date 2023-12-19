@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import {
-  get,
-  getOr,
-  has,
-  merge as mergeObject,
-  set,
-  omit,
-  isObject,
-  toString as fpToString,
-} from 'lodash/fp';
+import { get, getOr, has, set, omit, isObject, toString as fpToString } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
-import { from, empty, merge } from 'rxjs';
+import { from, EMPTY, merge } from 'rxjs';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
   isScriptedRangeFilter,
@@ -33,95 +24,40 @@ import {
   map,
   startWith,
   withLatestFrom,
-  debounceTime,
   mergeMap,
   concatMap,
-  delay,
   takeUntil,
 } from 'rxjs/operators';
 
-import type {
-  TimelineErrorResponse,
-  ResponseTimeline,
-  TimelineResult,
-} from '../../../../common/api/timeline';
+import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
-import { persistTimeline } from '../../containers/api';
+import { copyTimeline, persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
 
 import {
-  applyKqlFilterQuery,
-  addProvider,
-  dataProviderEdited,
-  removeColumn,
-  removeProvider,
-  updateColumns,
-  updateEqlOptions,
-  updateDataProviderEnabled,
-  updateDataProviderExcluded,
-  updateDataProviderType,
-  updateKqlMode,
-  updateProviders,
-  updateRange,
-  updateSort,
-  upsertColumn,
-  updateDataView,
   updateTimeline,
-  updateTitleAndDescription,
-  updateAutoSaveMsg,
-  setExcludedRowRendererIds,
-  setFilters,
-  setSavedQueryId,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
-  addTimeline,
   showCallOutUnauthorizedMsg,
+  addTimeline,
   saveTimeline,
-  updateSavedSearchId,
+  setChanged,
 } from './actions';
 import type { TimelineModel } from './model';
-import { epicPersistNote, timelineNoteActionsType } from './epic_note';
-import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
-import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
+import { epicPersistNote, isNoteAction } from './epic_note';
+import { epicPersistPinnedEvent, isPinnedEventAction } from './epic_pinned_event';
+import { epicPersistTimelineFavorite, isFavoriteTimelineAction } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import type { ActionTimeline, TimelineEpicDependencies } from './types';
+import type { TimelineEpicDependencies } from './types';
 import type { TimelineInput } from '../../../../common/search_strategy';
-
-const timelineActionsType = [
-  applyKqlFilterQuery.type,
-  addProvider.type,
-  addTimeline.type,
-  dataProviderEdited.type,
-  removeProvider.type,
-  saveTimeline.type,
-  setExcludedRowRendererIds.type,
-  setFilters.type,
-  setSavedQueryId.type,
-  updateDataProviderEnabled.type,
-  updateDataProviderExcluded.type,
-  updateDataProviderType.type,
-  updateEqlOptions.type,
-  updateKqlMode.type,
-  updateProviders.type,
-  updateTitleAndDescription.type,
-
-  updateDataView.type,
-  removeColumn.type,
-  updateColumns.type,
-  updateSort.type,
-  updateRange.type,
-  upsertColumn.type,
-
-  updateSavedSearchId.type,
-];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
@@ -182,42 +118,32 @@ export const createTimelineEpic =
             myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
             return getOr(false, 'payload.savedTimeline', action);
           } else if (
-            timelineActionsType.includes(action.type) &&
-            !timelineObj.isLoading &&
+            action.type === saveTimeline.type &&
+            !timelineObj.isSaving &&
             isItAtimelineAction(timelineId)
           ) {
             return true;
           }
         }),
-        debounceTime(500),
         mergeMap(([action]) => {
           dispatcherTimelinePersistQueue.next({ action });
-          return empty();
+          return EMPTY;
         })
       ),
       dispatcherTimelinePersistQueue.pipe(
-        delay(500),
         withLatestFrom(timeline$, notes$, timelineTimeRange$),
         concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
-          const action: ActionTimeline = get('action', objAction);
+          const action: Action = get('action', objAction);
           const timelineId = myEpicTimelineId.getTimelineId();
           const version = myEpicTimelineId.getTimelineVersion();
           const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-          if (timelineNoteActionsType.includes(action.type)) {
-            return epicPersistNote(
-              action,
-              timeline,
-              notes,
-              action$,
-              timeline$,
-              notes$,
-              allTimelineQuery$
-            );
-          } else if (timelinePinnedEventActionsType.includes(action.type)) {
+          if (isNoteAction(action)) {
+            return epicPersistNote(action, notes, action$, timeline$, notes$, allTimelineQuery$);
+          } else if (isPinnedEventAction(action)) {
             return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
-          } else if (timelineFavoriteActionsType.includes(action.type)) {
+          } else if (isFavoriteTimelineAction(action)) {
             return epicPersistTimelineFavorite(
               action,
               timeline,
@@ -225,25 +151,61 @@ export const createTimelineEpic =
               timeline$,
               allTimelineQuery$
             );
-          } else if (timelineActionsType.includes(action.type)) {
+          } else if (isSaveTimelineAction(action)) {
+            const saveAction = action as unknown as ReturnType<typeof saveTimeline>;
+            const savedSearch = timeline[action.payload.id].savedSearch;
             return from(
-              persistTimeline({
-                timelineId,
-                version,
-                timeline: {
-                  ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
-                  templateTimelineId,
-                  templateTimelineVersion,
-                },
-              })
+              saveAction.payload.saveAsNew && timelineId
+                ? copyTimeline({
+                    timelineId,
+                    timeline: {
+                      ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                      templateTimelineId,
+                      templateTimelineVersion,
+                    },
+                    savedSearch,
+                  })
+                : persistTimeline({
+                    timelineId,
+                    version,
+                    timeline: {
+                      ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                      templateTimelineId,
+                      templateTimelineVersion,
+                    },
+                    savedSearch,
+                  })
             ).pipe(
               withLatestFrom(timeline$, allTimelineQuery$, kibana$),
-              mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
-                const error = result as TimelineErrorResponse;
-                if (error.status_code != null && error.status_code === 405) {
+              mergeMap(([response, recentTimeline, allTimelineQuery, kibana]) => {
+                if (isTimelineErrorResponse(response)) {
+                  const error = getErrorFromResponse(response);
+                  switch (error?.errorCode) {
+                    // conflict
+                    case 409:
+                      kibana.notifications.toasts.addDanger({
+                        title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
+                        text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
+                      });
+                      break;
+                    default:
+                      kibana.notifications.toasts.addDanger({
+                        title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                        text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                      });
+                  }
+                  return [
+                    endTimelineSaving({
+                      id: action.payload.id,
+                    }),
+                  ];
+                }
+
+                const unwrappedResponse = response.data.persistTimeline;
+                if (unwrappedResponse == null) {
                   kibana.notifications.toasts.addDanger({
                     title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                    text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                    text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
                   });
                   return [
                     endTimelineSaving({
@@ -252,43 +214,40 @@ export const createTimelineEpic =
                   ];
                 }
 
-                const savedTimeline = recentTimeline[action.payload.id];
-                const response: ResponseTimeline = get('data.persistTimeline', result);
-                if (response == null) {
+                if (unwrappedResponse.code === 403) {
                   return [
+                    showCallOutUnauthorizedMsg(),
                     endTimelineSaving({
                       id: action.payload.id,
                     }),
                   ];
                 }
-                const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
                 if (allTimelineQuery.refetch != null) {
                   (allTimelineQuery.refetch as inputsModel.Refetch)();
                 }
 
                 return [
-                  response.code === 409
-                    ? updateAutoSaveMsg({
-                        timelineId: action.payload.id,
-                        newTimelineModel: omitTypenameInTimeline(savedTimeline, response.timeline),
-                      })
-                    : updateTimeline({
-                        id: action.payload.id,
-                        timeline: {
-                          ...savedTimeline,
-                          updated: response.timeline.updated ?? undefined,
-                          savedObjectId: response.timeline.savedObjectId,
-                          version: response.timeline.version,
-                          status: response.timeline.status ?? TimelineStatus.active,
-                          timelineType: response.timeline.timelineType ?? TimelineType.default,
-                          templateTimelineId: response.timeline.templateTimelineId ?? null,
-                          templateTimelineVersion:
-                            response.timeline.templateTimelineVersion ?? null,
-                          isSaving: false,
-                        },
-                      }),
-                  ...callOutMsg,
+                  updateTimeline({
+                    id: action.payload.id,
+                    timeline: {
+                      ...recentTimeline[action.payload.id],
+                      updated: unwrappedResponse.timeline.updated ?? undefined,
+                      savedObjectId: unwrappedResponse.timeline.savedObjectId,
+                      version: unwrappedResponse.timeline.version,
+                      status: unwrappedResponse.timeline.status ?? TimelineStatus.active,
+                      timelineType: unwrappedResponse.timeline.timelineType ?? TimelineType.default,
+                      templateTimelineId: unwrappedResponse.timeline.templateTimelineId ?? null,
+                      templateTimelineVersion:
+                        unwrappedResponse.timeline.templateTimelineVersion ?? null,
+                      savedSearchId: unwrappedResponse.timeline.savedSearchId ?? null,
+                      isSaving: false,
+                    },
+                  }),
+                  setChanged({
+                    id: action.payload.id,
+                    changed: false,
+                  }),
                   endTimelineSaving({
                     id: action.payload.id,
                   }),
@@ -323,11 +282,15 @@ export const createTimelineEpic =
               )
             );
           }
-          return empty();
+          return EMPTY;
         })
       )
     );
   };
+
+function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
+  return action.type === saveTimeline.type;
+}
 
 const timelineInput: TimelineInput = {
   columns: null,
@@ -433,14 +396,6 @@ export const convertTimelineAsInput = (
     return acc;
   }, timelineInput);
 
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-const omitTypenameInTimeline = (
-  oldTimeline: TimelineModel,
-  newTimeline: TimelineResult
-): TimelineModel => JSON.parse(JSON.stringify(mergeObject(oldTimeline, newTimeline)), omitTypename);
-
 const convertToString = (obj: unknown) => {
   try {
     if (isObject(obj)) {
@@ -451,3 +406,17 @@ const convertToString = (obj: unknown) => {
     return '';
   }
 };
+
+type PossibleResponse = TimelineResponse | TimelineErrorResponse;
+
+function isTimelineErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
+  return 'status_code' in response || 'statusCode' in response;
+}
+
+function getErrorFromResponse(response: TimelineErrorResponse) {
+  if ('status_code' in response) {
+    return { errorCode: response.status_code, message: response.message };
+  } else if ('statusCode' in response) {
+    return { errorCode: response.statusCode, message: response.message };
+  }
+}

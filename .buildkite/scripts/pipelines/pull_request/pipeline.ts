@@ -136,6 +136,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
+    if (
+      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
       pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
     }
@@ -152,14 +160,6 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
-        GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
-      !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
-    }
-
-    if (
       (await doAnyChangesMatch([
         /\.docnav\.json$/,
         /\.apidocs\.json$/,
@@ -170,6 +170,26 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:build-next-docs')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
+    }
+
+    if (
+      GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/test\/defend_workflows_cypress/,
+        /^x-pack\/test\/security_solution_cypress/,
+        /^fleet_packages\.json/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

@@ -7,6 +7,7 @@
  */
 
 export { Navigation } from './components';
+export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
 
 export { DefaultNavigation } from './default_navigation';
 
@@ -14,6 +15,8 @@ export { getPresets } from './nav_tree_presets';
 
 export type {
   GroupDefinition,
+  PresetDefinition,
+  ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
   ProjectNavigationDefinition,

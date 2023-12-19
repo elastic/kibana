@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
@@ -72,6 +73,8 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     const licensingContext = await context.licensing;
     const esClient = (await context.core).elasticsearch.client;
 
+    const esCapabilities = await getESCapabilities(resources);
+
     const [mlClient, indices] = await Promise.all([
       getMlClient(resources),
       getApmIndices(),
@@ -87,6 +90,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
       indices,
       environments,
       logger,
+      esCapabilities,
     });
 
     notifyFeatureUsage({
@@ -149,10 +153,18 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
         ),
     ]);
 
+    const esCapabilities = await getESCapabilities(resources);
+
     const { logger } = resources;
 
     return {
-      update: await updateToV3({ mlClient, logger, indices, esClient }),
+      update: await updateToV3({
+        mlClient,
+        logger,
+        indices,
+        esClient,
+        esCapabilities,
+      }),
     };
   },
 });

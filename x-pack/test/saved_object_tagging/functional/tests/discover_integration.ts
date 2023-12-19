@@ -52,8 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150249
-  describe.skip('discover integration', () => {
+  describe('discover integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/discover/data.json'
@@ -143,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
         expect(await tagModal.isOpened()).to.be(false);

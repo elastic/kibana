@@ -47,7 +47,6 @@ import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
 
 import './add_inference_pipeline_flyout.scss';
-import { UpdateMappings } from './update_mappings';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
@@ -132,7 +131,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
-        {step === AddInferencePipelineSteps.Mappings && <UpdateMappings />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiFlyoutBody>
@@ -188,22 +186,6 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
         {
           defaultMessage: 'Fields',
-        }
-      ),
-    },
-    {
-      // Mappings
-      onClick: () => {
-        if (!isPipelineDataValid) return;
-        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Mappings);
-      },
-      status: isPipelineDataValid
-        ? getStepStatus(step, AddInferencePipelineSteps.Mappings)
-        : 'disabled',
-      title: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.updateMappings.title',
-        {
-          defaultMessage: 'Mappings',
         }
       ),
     },
@@ -265,18 +247,13 @@ export const AddInferencePipelineFooter: React.FC<
       isContinueButtonEnabled = isConfigureStepValid;
       break;
     case AddInferencePipelineSteps.Fields:
-      nextStep = AddInferencePipelineSteps.Mappings;
+      nextStep = AddInferencePipelineSteps.Test;
       previousStep = AddInferencePipelineSteps.Configuration;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
-    case AddInferencePipelineSteps.Mappings:
-      nextStep = AddInferencePipelineSteps.Test;
-      previousStep = AddInferencePipelineSteps.Fields;
-      isContinueButtonEnabled = true;
-      break;
     case AddInferencePipelineSteps.Test:
       nextStep = AddInferencePipelineSteps.Review;
-      previousStep = AddInferencePipelineSteps.Mappings;
+      previousStep = AddInferencePipelineSteps.Fields;
       isContinueButtonEnabled = true;
       break;
     case AddInferencePipelineSteps.Review:

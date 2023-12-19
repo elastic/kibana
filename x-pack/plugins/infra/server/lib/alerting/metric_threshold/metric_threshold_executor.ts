@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -14,9 +14,10 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
-import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -44,6 +45,14 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
+export type MetricThresholdAlert = Omit<
+  ObservabilityMetricsAlert,
+  'kibana.alert.evaluation.values'
+> & {
+  // Defining a custom type for this because the schema generation script doesn't allow explicit null values
+  'kibana.alert.evaluation.values'?: Array<number | null>;
+};
+
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
@@ -68,28 +77,27 @@ type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
-type MetricThresholdAlert = Alert<
-  MetricThresholdAlertState,
-  MetricThresholdAlertContext,
-  MetricThresholdAllowedActionGroups
->;
-
-type MetricThresholdAlertFactory = (
+type MetricThresholdAlertReporter = (
   id: string,
   reason: string,
   actionGroup: MetricThresholdActionGroup,
+  context: MetricThresholdAlertContext,
   additionalContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>
-) => MetricThresholdAlert;
+) => void;
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
-  libs.metricsRules.createLifecycleRuleExecutor<
-    MetricThresholdRuleParams,
-    MetricThresholdRuleTypeState,
-    MetricThresholdAlertState,
-    MetricThresholdAlertContext,
-    MetricThresholdAllowedActionGroups
-  >(async function (options) {
+export const createMetricThresholdExecutor =
+  (libs: InfraBackendLibs) =>
+  async (
+    options: RuleExecutorOptions<
+      MetricThresholdRuleParams,
+      MetricThresholdRuleTypeState,
+      MetricThresholdAlertState,
+      MetricThresholdAlertContext,
+      MetricThresholdAllowedActionGroups,
+      MetricThresholdAlert
+    >
+  ) => {
     const startTime = Date.now();
 
     const {
@@ -110,30 +118,43 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       executionId,
     });
 
-    const {
-      alertWithLifecycle,
-      savedObjectsClient,
-      getAlertUuid,
-      getAlertStartedDate,
-      getAlertByAlertUuid,
-    } = services;
+    const { alertsClient, savedObjectsClient } = services;
+    if (!alertsClient) {
+      throw new Error(`Expected alertsClient to be defined but it was not!`);
+    }
 
-    const alertFactory: MetricThresholdAlertFactory = (
+    const alertReporter: MetricThresholdAlertReporter = async (
       id,
       reason,
       actionGroup,
+      contextWithoutAlertDetailsUrl,
       additionalContext,
       evaluationValues
-    ) =>
-      alertWithLifecycle({
+    ) => {
+      const { uuid, start } = alertsClient.report({
         id,
-        fields: {
+        actionGroup,
+      });
+
+      alertsClient.setAlertData({
+        id,
+        payload: {
           [ALERT_REASON]: reason,
-          [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           ...flattenAdditionalContext(additionalContext),
         },
+        context: {
+          ...contextWithoutAlertDetailsUrl,
+          alertDetailsUrl: await getAlertUrl(
+            uuid,
+            spaceId,
+            start ?? startedAt.toISOString(),
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
+        },
       });
+    };
 
     const {
       sourceId,
@@ -154,19 +175,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
-        const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
-        const indexedStartedAt =
-          getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
-
-        alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            libs.alertsLocator,
-            libs.basePath.publicBaseUrl
-          ),
+        const alertContext = {
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -174,7 +183,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           timestamp,
           value: null,
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
-        });
+        };
+
+        await alertReporter(UNGROUPED_FACTORY_KEY, reason, actionGroupId, alertContext);
 
         return {
           state: {
@@ -317,25 +328,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           return acc;
         }, []);
 
-        const alert = alertFactory(
-          `${group}`,
-          reason,
-          actionGroupId,
-          additionalContext,
-          evaluationValues
-        );
-        const alertUuid = getAlertUuid(group);
-        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
-        scheduledActionsCount++;
-
-        alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            libs.alertsLocator,
-            libs.basePath.publicBaseUrl
-          ),
+        const alertContext = {
           alertState: stateToAlertMessage[nextState],
           group,
           groupByKeys: groupByKeysObjectMapping[group],
@@ -365,29 +358,37 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           }),
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
           ...additionalContext,
-        });
+        };
+
+        await alertReporter(
+          `${group}`,
+          reason,
+          actionGroupId,
+          alertContext,
+          additionalContext,
+          evaluationValues
+        );
+        scheduledActionsCount++;
       }
     }
 
-    const { getRecoveredAlerts } = services.alertFactory.done();
-    const recoveredAlerts = getRecoveredAlerts();
-
+    const recoveredAlerts = alertsClient?.getRecoveredAlerts() ?? [];
     const groupByKeysObjectForRecovered = getGroupByObject(
       params.groupBy,
-      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
+      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
     );
 
-    for (const alert of recoveredAlerts) {
-      const recoveredAlertId = alert.getId();
-      const alertUuid = getAlertUuid(recoveredAlertId);
+    for (const recoveredAlert of recoveredAlerts) {
+      const recoveredAlertId = recoveredAlert.alert.getId();
+      const alertUuid = recoveredAlert.alert.getUuid();
       const timestamp = startedAt.toISOString();
-      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const indexedStartedAt = recoveredAlert.alert.getStart() ?? timestamp;
 
-      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
-      alert.setContext({
+      recoveredAlert.alert.setContext({
         alertDetailsUrl: await getAlertUrl(
           alertUuid,
           spaceId,
@@ -427,7 +428,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         filterQuery: params.filterQuery,
       },
     };
-  });
+  };
 
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',

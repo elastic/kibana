@@ -7,14 +7,14 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { first, startsWith } from 'lodash';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
-import { findInventoryFields } from '../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const getNodeInfo = async (

@@ -548,6 +548,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnsearcherrors",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/search-errors'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnstd",
             "type": "string",
             "tags": [],
@@ -563,6 +574,17 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/safer-lodash-set'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnshareduxerrorboundary",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/shared-ux-error-boundary'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

@@ -232,11 +232,19 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
-          <FormattedMessage
-            id="xpack.ml.newJob.page.createJob.dataViewName"
-            defaultMessage="Using data view {dataViewName}"
-            values={{ dataViewName: jobCreator.indexPatternDisplayName }}
-          />
+          {dataSourceContext.selectedDataView.isPersisted() ? (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.dataViewName"
+              defaultMessage="Using data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.tempDataViewName"
+              defaultMessage="Using temporary data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          )}
         </EuiText>
 
         <Wizard

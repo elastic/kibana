@@ -108,6 +108,7 @@ const AssistantTab: React.FC<{
     <AssistantTabContainer>
       <Assistant
         conversationId={TIMELINE_CONVERSATION_TITLE}
+        embeddedLayout
         setConversationId={setConversationId}
         shouldRefocusPrompt={shouldRefocusPrompt}
       />
@@ -181,9 +182,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {isEsqlSettingEnabled && (
+        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
-            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />
@@ -273,6 +274,10 @@ const StyledEuiTab = styled(EuiTab)`
       text-decoration: underline;
     }
   }
+`;
+
+const StyledEuiTabs = styled(EuiTabs)`
+  padding-inline: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
@@ -388,7 +393,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   return (
     <>
       {!timelineFullScreen && (
-        <EuiTabs>
+        <StyledEuiTabs className="eui-scrollBar">
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.query}`}
             onClick={setQueryAsActiveTab}
@@ -415,7 +420,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
                 tooltipContent={
                   <FormattedMessage
                     id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
                   />
                 }
               />
@@ -492,7 +497,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.SECURITY_ASSISTANT}</span>
             </StyledEuiTab>
           )}
-        </EuiTabs>
+        </StyledEuiTabs>
       )}
 
       <ActiveTimelineTab

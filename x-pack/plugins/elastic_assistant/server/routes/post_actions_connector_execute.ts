@@ -7,8 +7,13 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
+import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
-import { getLangChainMessages } from '../lib/langchain/helpers';
+import {
+  getLangChainMessages,
+  requestHasRequiredAnonymizationParams,
+} from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import {
@@ -18,6 +23,7 @@ import {
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -41,6 +47,26 @@ export const postActionsConnectorExecuteRoute = (
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
 
+        // if not langchain, call execute action directly and return the response:
+        if (!request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request)) {
+          logger.debug('Executing via actions framework directly');
+          const result = await executeAction({ actions, request, connectorId });
+          return response.ok({
+            body: result,
+          });
+        }
+
+        // TODO: Add `traceId` to actions request when calling via langchain
+        logger.debug('Executing via langchain, assistantLangChain: true');
+
+        // Fetch any tools registered by the request's originating plugin
+        const pluginName = getPluginNameFromRequest({
+          request,
+          defaultPluginName: DEFAULT_PLUGIN_NAME,
+          logger,
+        });
+        const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
+
         // get a scoped esClient for assistant memory
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -51,19 +77,35 @@ export const postActionsConnectorExecuteRoute = (
 
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+        let latestReplacements = { ...request.body.replacements };
+        const onNewReplacements = (newReplacements: Record<string, string>) => {
+          latestReplacements = { ...latestReplacements, ...newReplacements };
+        };
+
         const langChainResponseBody = await callAgentExecutor({
+          alertsIndexPattern: request.body.alertsIndexPattern,
+          allow: request.body.allow,
+          allowReplacement: request.body.allowReplacement,
           actions,
+          assistantLangChain: request.body.assistantLangChain,
+          assistantTools,
           connectorId,
+          elserId,
           esClient,
+          kbResource: ESQL_RESOURCE,
           langChainMessages,
           logger,
+          onNewReplacements,
           request,
-          elserId,
-          kbResource: ESQL_RESOURCE,
+          replacements: request.body.replacements,
+          size: request.body.size,
         });
 
         return response.ok({
-          body: langChainResponseBody,
+          body: {
+            ...langChainResponseBody,
+            replacements: latestReplacements,
+          },
         });
       } catch (err) {
         logger.error(err);

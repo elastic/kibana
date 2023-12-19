@@ -109,7 +109,7 @@ describe('test useSavedSearch message generators', () => {
     });
     sendLoadingMoreFinishedMsg(documents$, {
       moreRecords,
-      interceptedWarnings: [{ originalWarning: searchResponseIncompleteWarningLocalCluster }],
+      interceptedWarnings: [searchResponseIncompleteWarningLocalCluster],
     });
   });
   test('sendLoadingMoreFinishedMsg after an exception', (done) => {
@@ -119,7 +119,7 @@ describe('test useSavedSearch message generators', () => {
     const documents$ = new BehaviorSubject<DataDocumentsMsg>({
       fetchStatus: FetchStatus.LOADING_MORE,
       result: initialRecords,
-      interceptedWarnings: [{ originalWarning: searchResponseIncompleteWarningLocalCluster }],
+      interceptedWarnings: [searchResponseIncompleteWarningLocalCluster],
     });
     documents$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.LOADING_MORE) {

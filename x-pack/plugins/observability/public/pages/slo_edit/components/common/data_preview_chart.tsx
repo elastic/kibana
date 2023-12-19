@@ -29,11 +29,11 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React from 'react';
-import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { min, max } from 'lodash';
+import { max, min } from 'lodash';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
@@ -46,6 +46,8 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
 }
+
+const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
 
 export function DataPreviewChart({
   formatPattern,
@@ -63,14 +65,18 @@ export function DataPreviewChart({
     watch,
   });
 
+  const [range, _] = useState({
+    start: new Date().getTime() - ONE_HOUR_IN_MILLISECONDS,
+    end: new Date().getTime(),
+  });
+
   const {
     data: previewData,
     isLoading: isPreviewLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'));
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'), range);
 
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
   const numberFormat =
@@ -189,7 +195,6 @@ export function DataPreviewChart({
                 showLegend={false}
                 theme={[
                   {
-                    ...theme,
                     lineSeriesStyle: {
                       point: { visible: false },
                     },
@@ -224,7 +229,7 @@ export function DataPreviewChart({
                 timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
                 style={{
-                  tickLine: { size: 0.0001, padding: 4, visible: true },
+                  tickLine: { size: 0, padding: 4, visible: true },
                   tickLabel: {
                     alignment: {
                       horizontal: Position.Left,

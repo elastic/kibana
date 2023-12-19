@@ -34,6 +34,7 @@ const variables = {
   ul: '_',
   st_lt: '*<',
   vl: '|',
+  link: 'https://te_st.com/',
 };
 
 describe('mustache_renderer', () => {
@@ -111,6 +112,7 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString('{{ul}}', variables, 'slack')).toBe('`_`');
       // html escapes not needed when using backtic escaping
       expect(renderMustacheString('{{st_lt}}', variables, 'slack')).toBe('`*<`');
+      expect(renderMustacheString('{{link}}', variables, 'slack')).toBe('https://te_st.com/');
     });
 
     it('handles escape:json with commonly escaped strings', () => {

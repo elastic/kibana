@@ -24,7 +24,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 import * as eui from '@elastic/eui';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { ResizableLayoutDirection } from '../types';
 
 describe('Panels resizable', () => {

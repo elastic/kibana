@@ -7,6 +7,7 @@ exports[`#start() returns \`Context\` component 1`] = `
       Object {
         "mapping": Object {
           "euiAbsoluteTab.dateFormatError": [Function],
+          "euiAbsoluteTab.dateFormatHint": "Press the Enter key to parse as a date.",
           "euiAccordionChildrenLoading.message": "Loading",
           "euiAutoRefresh.autoRefreshLabel": "Auto refresh",
           "euiAutoRefresh.buttonLabelOff": "Auto refresh is off",
@@ -35,8 +36,10 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiCodeBlockFullScreen.fullscreenExpand": "Expand",
           "euiCollapsedItemActions.allActions": "All actions",
           "euiCollapsibleNavBeta.ariaLabel": "Site menu",
-          "euiCollapsibleNavButton.ariaLabelClose": "Toggle navigation closed",
-          "euiCollapsibleNavButton.ariaLabelOpen": "Toggle navigation open",
+          "euiCollapsibleNavButton.ariaLabelClose": "Close navigation",
+          "euiCollapsibleNavButton.ariaLabelCollapse": "Collapse navigation",
+          "euiCollapsibleNavButton.ariaLabelExpand": "Expand navigation",
+          "euiCollapsibleNavButton.ariaLabelOpen": "Open navigation",
           "euiColorPicker.alphaLabel": "Alpha channel (opacity) value",
           "euiColorPicker.closeLabel": "Press the down key to open a popover containing color options",
           "euiColorPicker.colorErrorMessage": "Invalid color value",

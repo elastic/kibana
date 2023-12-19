@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import * as Rx from 'rxjs';
+import { map, take } from 'rxjs/operators';
+
 import type {
   CoreSetup,
   DocLinksServiceSetup,
@@ -23,12 +26,17 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import {
-  PdfScreenshotResult,
-  PngScreenshotResult,
-  ScreenshotOptions,
-  ScreenshottingStart,
-} from '@kbn/screenshotting-plugin/server';
+  CsvSearchSourceExportType,
+  CsvSearchSourceImmediateExportType,
+  CsvV2ExportType,
+} from '@kbn/reporting-export-types-csv';
+import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
+import { PngExportType } from '@kbn/reporting-export-types-png';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import { ExportType } from '@kbn/reporting-server';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -37,23 +45,14 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import * as Rx from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
+
 import type { ReportingSetup } from '.';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { createConfig, ReportingConfigType } from './config';
-import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
-import { CsvV2ExportType } from './export_types/csv_v2';
-import { PdfV1ExportType } from './export_types/printable_pdf';
-import { PdfExportType } from './export_types/printable_pdf_v2';
-import { PngExportType } from './export_types/png_v2';
-import { checkLicense, ExportTypesRegistry } from './lib';
+import { createConfig } from './config';
+import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
-import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate';
-import { ExportType } from './export_types/common';
+import type { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -81,18 +80,6 @@ export interface ReportingInternalStart {
   screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
-}
-
-/**
- * @internal
- */
-export interface ReportingServerInfo {
-  port: number;
-  name: string;
-  uuid: string;
-  basePath: string;
-  protocol: string;
-  hostname: string;
 }
 
 /**
@@ -134,7 +121,6 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: config.statefulSettings.enabled ? this.getScreenshots.bind(this) : undefined,
       getSpaceId: this.getSpaceId.bind(this),
     });
 
@@ -171,7 +157,7 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
 
     this.exportTypesRegistry.getAll().forEach((et) => {
-      et.start({ ...startDeps, reporting: this.getContract() });
+      et.start({ ...startDeps });
     });
 
     const { taskManager } = startDeps;
@@ -401,25 +387,6 @@ export class ReportingCore {
     }
   }
 
-  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
-  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
-  public getScreenshots(
-    options: PngScreenshotOptions | PdfScreenshotOptions
-  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
-    return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
-        return screenshotting!.getScreenshots({
-          ...options,
-          urls: options.urls.map((url) =>
-            typeof url === 'string'
-              ? url
-              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ),
-        } as ScreenshotOptions);
-      })
-    );
-  }
-
   public trackReport(reportId: string) {
     this.executing.add(reportId);
   }
@@ -447,7 +414,7 @@ export class ReportingCore {
       this.context
     );
     csvImmediateExport.setup(this.getPluginSetupDeps());
-    csvImmediateExport.start({ ...startDeps, reporting: this.getContract() });
+    csvImmediateExport.start({ ...startDeps });
     return csvImmediateExport;
   }
 }

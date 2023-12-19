@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import type {
   EuiSuperDatePickerProps,
   EuiSuperDatePickerRecentRange,
+  EuiSuperUpdateButtonProps,
   OnRefreshChangeProps,
   OnRefreshProps,
   OnTimeChangeProps,
@@ -42,6 +43,10 @@ import {
 } from './selectors';
 import type { Inputs } from '../../store/inputs/model';
 
+const refreshButtonProps: EuiSuperUpdateButtonProps = {
+  fill: false,
+};
+
 const MAX_RECENTLY_USED_RANGES = 9;
 
 interface Range {
@@ -52,6 +57,8 @@ interface Range {
 
 export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
+  /** Indicates that the range has changed which fires additional actions */
+  hasRangeChanged: boolean;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
@@ -116,6 +123,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           kql: kqlQuery,
           start: newStart,
           timelineId,
+          hasRangeChanged: false,
         });
         const currentStart = formatDate(newStart);
         const currentEnd = isQuickSelection
@@ -169,6 +177,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
             kql: kqlQuery,
             start: newStart,
             timelineId,
+            hasRangeChanged: true,
           });
           const newRecentlyUsedRanges = [
             { start: newStart, end: newEnd },
@@ -215,6 +224,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         isDisabled={disabled}
         width={width}
         compressed={compressed}
+        updateButtonProps={refreshButtonProps}
       />
     );
   },
@@ -256,6 +266,7 @@ export const dispatchUpdateReduxTime =
     kql,
     start,
     timelineId,
+    hasRangeChanged,
   }: UpdateReduxTime): ReturnUpdateReduxTime => {
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
@@ -291,7 +302,7 @@ export const dispatchUpdateReduxTime =
         })
       );
     }
-    if (timelineId != null) {
+    if (timelineId != null && hasRangeChanged) {
       dispatch(
         timelineActions.updateRange({
           id: timelineId,

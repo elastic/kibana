@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
+import { DebugState } from '@elastic/charts';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
@@ -67,12 +68,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * a range that has data in our dataset.
      */
     async goToTimeRange(fromTime?: string, toTime?: string) {
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
-      fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
-      toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      // give some time for the update button tooltip to close
-      await PageObjects.common.sleep(500);
+      const from = fromTime || PageObjects.timePicker.defaultStartTime;
+      const to = toTime || PageObjects.timePicker.defaultEndTime;
+      await retry.try(async () => {
+        await PageObjects.timePicker.ensureHiddenNoDataPopover();
+        await PageObjects.timePicker.setAbsoluteRange(from, to);
+        // give some time for the update button tooltip to close
+        await PageObjects.common.sleep(500);
+      });
     },
 
     /**
@@ -909,8 +912,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj^="lnsXY_axisSide_groups_"]`
       );
       for (const axisSideGroup of axisSideGroups) {
-        const input = await axisSideGroup.findByTagName('input');
-        const isSelected = await input.isSelected();
+        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
         if (isSelected) {
           return axisSideGroup?.getVisibleText();
         }
@@ -1091,9 +1094,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState(visType: string) {
+    async getCurrentChartDebugState(visType: string): Promise<DebugState> {
       await this.waitForVisualization(visType);
-      return await elasticChart.getChartDebugData('lnsWorkspace');
+      return (await elasticChart.getChartDebugData('lnsWorkspace'))!;
     },
 
     /**
@@ -1333,8 +1336,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
-    async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
-      return (await findService.descendantExistsByCssSelector(selector, container))
+    async getMetricElementIfExists(
+      selector: string,
+      container: WebElementWrapper,
+      timeout?: number
+    ) {
+      return (await findService.descendantExistsByCssSelector(selector, container, timeout))
         ? await container.findByCssSelector(selector)
         : undefined;
     },
@@ -1354,8 +1361,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        trendlineColor: await (
+          await this.getMetricElementIfExists('.echSingleMetricSparkline__svg > rect', tile, 500)
+        )?.getAttribute('fill'),
         showingTrendline: Boolean(
-          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile, 500)
         ),
       };
     },
@@ -1377,13 +1387,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param title - title for the new lens. If left undefined, the panel will be created by value
      * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     * @param ignoreTimeFilter - whether time range has to be changed
      */
     async createAndAddLensFromDashboard({
       title,
       redirectToOrigin,
+      ignoreTimeFilter,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
+      ignoreTimeFilter?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -1391,7 +1404,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await this.goToTimeRange();
+
+      if (!ignoreTimeFilter) {
+        await this.goToTimeRange();
+      }
+
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
@@ -1422,7 +1439,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
       expect(focusedElementText).to.eql(name);

@@ -79,24 +79,71 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('With custom pipeline', () => {
-      before(() =>
-        es.ingest.putPipeline({
-          id: CUSTOM_PIPELINE,
+      before(async () => {
+        await es.ingest.putPipeline({
+          id: 'global@custom',
           processors: [
             {
-              set: {
+              append: {
                 field: 'test',
-                value: 'itworks',
+                value: ['global'],
               },
             },
           ],
-        })
-      );
+        });
+
+        await es.ingest.putPipeline({
+          id: 'logs@custom',
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs'],
+              },
+            },
+          ],
+        });
+
+        await es.ingest.putPipeline({
+          id: `logs-log@custom`,
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs-log'],
+              },
+            },
+          ],
+        });
+
+        await es.ingest.putPipeline({
+          id: CUSTOM_PIPELINE,
+          processors: [
+            {
+              append: {
+                field: 'test',
+                value: ['logs-log.log'],
+              },
+            },
+          ],
+        });
+      });
 
       after(() =>
-        es.ingest.deletePipeline({
-          id: CUSTOM_PIPELINE,
-        })
+        Promise.all([
+          es.ingest.deletePipeline({
+            id: 'global@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs-log@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: CUSTOM_PIPELINE,
+          }),
+        ])
       );
       it('Should write doc correctly', async () => {
         const res = await es.index({
@@ -111,7 +158,7 @@ export default function (providerContext: FtrProviderContext) {
           id: res._id,
           index: res._index,
         });
-        expect(doc._source?.test).to.eql('itworks');
+        expect(doc._source?.test).be.eql(['global', 'logs', 'logs-log', 'logs-log.log']);
       });
     });
   });

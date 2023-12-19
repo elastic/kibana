@@ -50,7 +50,8 @@
     "@kbn/profiling-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/profiling-utils",
-    "@kbn/advanced-settings-plugin"
+    "@kbn/advanced-settings-plugin",
+    "@kbn/security-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

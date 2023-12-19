@@ -84,7 +84,6 @@ export function StackedBarChart({
             height={128}
             width={MAX_TOOLTIP_WIDTH}
             showAxes={false}
-            onShowMoreClick={null}
             padTitle={false}
           />
         </EuiPanel>
@@ -133,6 +132,7 @@ export function StackedBarChart({
           color={chart.Color}
           xAccessor={'Timestamp'}
           yAccessors={['Count']}
+          stackAccessors={['true']}
           stackMode={asPercentages ? StackMode.Percentage : undefined}
           xScaleType={ScaleType.Time}
           timeZone={timeZone}

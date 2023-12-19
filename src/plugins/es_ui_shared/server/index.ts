@@ -9,7 +9,7 @@
 export { handleEsError, parseEsError } from './errors';
 
 /** dummy plugin*/
-export function plugin() {
+export async function plugin() {
   return new (class EsUiSharedPlugin {
     setup() {}
     start() {}

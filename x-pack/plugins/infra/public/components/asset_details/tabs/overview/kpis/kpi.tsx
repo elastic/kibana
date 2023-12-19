@@ -8,28 +8,26 @@ import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import { ChartModel } from '@kbn/lens-embeddable-utils';
+import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
-import { AVERAGE_SUBTITLE, type KPIChartProps } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-
-import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
+import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
   id,
-  title,
-  layers,
-  toolTip,
   height,
-  dataView,
   assetName,
   dateRange,
-}: KPIChartProps & {
+  dataView,
+  ...chartProps
+}: ChartModel & {
   height: number;
   dataView?: DataView;
   assetName: string;
   dateRange: TimeRange;
 }) => {
-  const { refreshTs } = useDateRangeProviderContext();
+  const { searchSessionId } = useLoadingStateContext();
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -40,21 +38,24 @@ export const Kpi = ({
     ];
   }, [dataView, assetName]);
 
-  const tooltipContent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
+  const tooltipContent = useMemo(
+    () =>
+      id in METRICS_TOOLTIP ? (
+        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
+      ) : undefined,
+    [id]
+  );
 
   return (
     <LensChart
+      {...chartProps}
       id={`infraAssetDetailsKPI${id}`}
       dataView={dataView}
       dateRange={dateRange}
-      layers={layers}
-      lastReloadRequestTime={refreshTs}
       height={height}
       filters={filters}
-      title={title}
-      subtitle={AVERAGE_SUBTITLE}
       toolTip={tooltipContent}
-      visualizationType="lnsMetric"
+      searchSessionId={searchSessionId}
       disableTriggers
       hidePanelTitles
     />

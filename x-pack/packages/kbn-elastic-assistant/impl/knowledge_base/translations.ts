@@ -7,6 +7,49 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
+
+export const ASK_QUESTIONS_ABOUT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
+  {
+    defaultMessage: 'Ask questions about the',
+  }
+);
+
+export const LATEST_AND_RISKIEST_OPEN_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
+  {
+    defaultMessage: 'latest and riskiest open and acknowledged alerts in your environment.',
+  }
+);
+
+export const YOUR_ANONYMIZATION_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.yourAnonymizationSettingsLabel',
+  {
+    defaultMessage: 'Your Anonymization settings will be applied to the alerts.',
+  }
+);
+
+export const SELECT_FEWER_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.selectFewerAlertsLabel',
+  {
+    defaultMessage:
+      "Select fewer alerts if the model's maximum context length is frequently exceeded.",
+  }
+);
+
+export const ALERTS_RANGE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel',
+  {
+    defaultMessage: 'Alerts range',
+  }
+);
+
 export const SETTINGS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.settingsTitle',
   {
@@ -33,6 +76,13 @@ export const KNOWLEDGE_BASE_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseLabel',
   {
     defaultMessage: 'Knowledge Base',
+  }
+);
+
+export const KNOWLEDGE_BASE_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseTooltip',
+  {
+    defaultMessage: 'ELSER must be configured to enable the Knowledge Base',
   }
 );
 

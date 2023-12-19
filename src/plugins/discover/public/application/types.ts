@@ -8,7 +8,7 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -21,9 +21,20 @@ export enum FetchStatus {
 
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
 
+export interface DiscoverCustomizationContext {
+  /*
+   * Display mode in which discover is running
+   */
+  displayMode: DiscoverDisplayMode;
+  /**
+   * Whether or not to show the Log Explorer tabs
+   */
+  showLogExplorerTabs: boolean;
+}
+
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
   textBasedHeaderWarning?: string;
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
+  interceptedWarnings?: SearchResponseWarning[];
 }

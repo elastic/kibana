@@ -3,7 +3,7 @@
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
-  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+  - label: ":rocket: control-plane e2e tests"
     trigger: "ess-k8s-staging-e2e-tests" # https://buildkite.com/elastic/ess-k8s-staging-e2e-tests
     build:
       env:
@@ -11,9 +11,9 @@ steps:
         NAME_PREFIX: ci_test_kibana-promotion_
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
-  - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
+  - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
-    soft_fail: true # Remove this before release or when tests stabilize
+    soft_fail: true # Remove when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
@@ -23,8 +23,9 @@ steps:
 
   - wait: ~
 
-  - label: ":judge::seedling: Trigger Manual Tests Phase"
-    command: "make -C /agent trigger-manual-verification-phase"
-    if: build.branch == "main"
-    agents:
-      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
+  - group: "Kibana Release Manager"
+    steps:
+      - label: ":judge::seedling: Trigger Manual Tests Phase"
+        command: "make -C /agent trigger-manual-verification-phase"
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

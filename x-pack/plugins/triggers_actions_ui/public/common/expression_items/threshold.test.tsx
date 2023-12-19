@@ -115,6 +115,23 @@ describe('threshold expression', () => {
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
   });
 
+  it('renders threshold unit correctly', async () => {
+    const wrapper = mountWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        unit="%"
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="thresholdPopover"]').last().text()).toMatchInlineSnapshot(
+      `"Is above 10%"`
+    );
+  });
+
   it('renders the correct number of threshold inputs', async () => {
     const wrapper = mountWithIntl(
       <ThresholdExpression

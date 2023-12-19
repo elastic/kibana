@@ -182,6 +182,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.suppression.terms.field': schemaStringArray,
   'kibana.alert.suppression.terms.value': schemaStringArray,
   'kibana.alert.system_status': schemaString,
+  'kibana.alert.threshold_result.cardinality': schemaUnknown,
   'kibana.alert.threshold_result.count': schemaStringOrNumber,
   'kibana.alert.threshold_result.from': schemaDate,
   'kibana.alert.threshold_result.terms': rt.array(
@@ -192,8 +193,10 @@ const SecurityAlertOptional = rt.partial({
   ),
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.url': schemaString,
+  'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
+  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,

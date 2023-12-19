@@ -52,8 +52,8 @@ describe('security telemetry - ', () => {
     expect(taskConfig.interval).toEqual('24h');
   });
 
-  test('timelines task is set to 3h', async () => {
+  test('timelines task is set to 1h', async () => {
     const taskConfig = createTelemetryTimelineTaskConfig();
-    expect(taskConfig.interval).toEqual('3h');
+    expect(taskConfig.interval).toEqual('1h');
   });
 });

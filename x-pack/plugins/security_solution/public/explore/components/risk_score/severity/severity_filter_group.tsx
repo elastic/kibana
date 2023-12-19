@@ -16,8 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { SEVERITY_UI_SORT_ORDER } from '../../../../entity_analytics/common/utils';
 import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
-import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 import { RiskScoreLevel } from './common';
 import { ENTITY_RISK_LEVEL } from '../translations';

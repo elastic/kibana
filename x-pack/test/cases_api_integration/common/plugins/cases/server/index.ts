@@ -8,5 +8,5 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { FixturePlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
+export const plugin = async (initializerContext: PluginInitializerContext) =>
   new FixturePlugin(initializerContext);
