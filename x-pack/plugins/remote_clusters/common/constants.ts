@@ -36,7 +36,7 @@ export const getSecurityModel = (type: string) => {
 
   if (type === 'api_key') {
     return i18n.translate('xpack.remoteClusters.securityModelApiKey', {
-      defaultMessage: 'API keys',
+      defaultMessage: 'API key',
     });
   }
 
