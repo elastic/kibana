@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AnalyticsServiceSetup,
   CustomRequestHandlerContext,
   KibanaRequest,
   Logger,
@@ -57,6 +58,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
 }
 
 /**

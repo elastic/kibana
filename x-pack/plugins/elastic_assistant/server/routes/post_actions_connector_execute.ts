@@ -8,6 +8,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { LANGCHAIN_EXECUTION_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import {
@@ -39,7 +40,9 @@ export const postActionsConnectorExecuteRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger: Logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger: Logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -99,6 +102,7 @@ export const postActionsConnectorExecuteRoute = (
           request,
           replacements: request.body.replacements,
           size: request.body.size,
+          telemetry,
         });
 
         return response.ok({
@@ -110,6 +114,9 @@ export const postActionsConnectorExecuteRoute = (
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
+        telemetry.reportEvent(LANGCHAIN_EXECUTION_ERROR_EVENT.eventType, {
+          errorMessage: error.message,
+        });
 
         return resp.error({
           body: error.message,

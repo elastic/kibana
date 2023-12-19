@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -53,9 +53,11 @@ export const postEvaluateRoute = (
         query: buildRouteValidation(PostEvaluatePathQuery),
       },
     },
+    // TODO: Limit route based on experimental feature
     async (context, request, response) => {
-      // TODO: Limit route based on experimental feature
-      const logger: Logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
       try {
         const evaluationId = uuidv4();
         const {
@@ -156,6 +158,7 @@ export const postEvaluateRoute = (
                   logger,
                   request: skeletonRequest,
                   kbResource: ESQL_RESOURCE,
+                  telemetry,
                   traceOptions: {
                     exampleId,
                     projectName,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Callbacks } from 'langchain/callbacks';
@@ -13,6 +13,7 @@ import { Document } from 'langchain/document';
 import { VectorStore } from 'langchain/vectorstores/base';
 import * as uuid from 'uuid';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
 import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
 import { getMsearchQueryBody } from './helpers/get_msearch_query_body';
@@ -25,6 +26,10 @@ import {
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
 import { getRequiredKbDocsTermsQueryDsl } from './helpers/get_required_kb_docs_terms_query_dsl';
+import {
+  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
+} from '../../telemetry/event_based_telemetry';
 
 interface CreatePipelineParams {
   id?: string;
@@ -59,6 +64,7 @@ export class ElasticsearchStore extends VectorStore {
   private readonly esClient: ElasticsearchClient;
   private readonly index: string;
   private readonly logger: Logger;
+  private readonly telemetry: AnalyticsServiceSetup;
   private readonly model: string;
   private readonly kbResource: string;
 
@@ -70,6 +76,7 @@ export class ElasticsearchStore extends VectorStore {
     esClient: ElasticsearchClient,
     index: string,
     logger: Logger,
+    telemetry: AnalyticsServiceSetup,
     model?: string,
     kbResource?: string | undefined
   ) {
@@ -77,6 +84,7 @@ export class ElasticsearchStore extends VectorStore {
     this.esClient = esClient;
     this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
+    this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
     this.kbResource = kbResource ?? ESQL_RESOURCE;
   }
@@ -221,8 +229,13 @@ export class ElasticsearchStore extends VectorStore {
 
         return getFlattenedHits(maybeEsqlMsearchResponse);
       });
-      // add telemetry here, knowledgeBaseAccessed(this.kbResource, results.length, result.response_time);
-      // type, and how many returned, how long it took for ES to deliver results
+
+      this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
+        model: this.model,
+        resourceAccessed: this.kbResource,
+        resultCount: results.length,
+        responseTime: result.took ?? 0,
+      });
 
       this.logger.debug(
         `Similarity search metadata source:\n${JSON.stringify(
@@ -234,6 +247,12 @@ export class ElasticsearchStore extends VectorStore {
 
       return results;
     } catch (e) {
+      const error = transformError(e);
+      this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
+        model: this.model,
+        resourceAccessed: this.kbResource,
+        errorMessage: error.message,
+      });
       this.logger.error(e);
       return [];
     }

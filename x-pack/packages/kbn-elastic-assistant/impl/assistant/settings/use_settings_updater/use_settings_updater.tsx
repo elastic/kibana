@@ -66,14 +66,6 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
-  //
-  // const [didUpdateKnowledgeBaseSettings, setDidUpdateKnowledgeBaseSettings] =
-  //   useState<boolean>(false);
-  //
-  // const setUpdatedKnowledgeBaseSettings = useCallback((knowledgeBase) => {
-  //   _setUpdatedKnowledgeBaseSettings(knowledgeBase);
-  //   setDidUpdateKnowledgeBaseSettings((last) => !last);
-  // }, []);
 
   /**
    * Reset all pending settings
