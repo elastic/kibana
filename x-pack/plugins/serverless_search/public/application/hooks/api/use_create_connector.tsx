@@ -32,9 +32,13 @@ export const useCreateConnector = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigateToUrl(`/app/${generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' })}`);
+      navigateToUrl(
+        http.basePath.prepend(
+          `/app/${generatePath(EDIT_CONNECTOR_PATH, { id: connector?.id || '' })}`
+        )
+      );
     }
-  }, [connector, isSuccess, navigateToUrl]);
+  }, [connector, isSuccess, navigateToUrl, http.basePath]);
 
   const createConnector = () => mutate();
   return { createConnector, isLoading };
