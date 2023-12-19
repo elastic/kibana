@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExecutionContextSearch } from '@kbn/es-query';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -66,7 +65,6 @@ import {
   editVisualizationAction,
   setSaveable,
   useLensSelector,
-  selectExecutionContext,
   selectIsFullscreenDatasource,
   selectVisualization,
   selectDatasourceStates,
@@ -80,6 +78,7 @@ import {
   VisualizationState,
   DatasourceStates,
   DataViewsState,
+  selectExecutionContextSearch,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
@@ -712,7 +711,7 @@ export const VisualizationWrapper = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const context = useLensSelector(selectExecutionContext);
+  const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
   const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
     useReportingState(errors);
@@ -722,18 +721,6 @@ export const VisualizationWrapper = ({
     onRender$();
   }, [setIsRenderComplete, onRender$]);
 
-  const searchContext: ExecutionContextSearch = useMemo(
-    () => ({
-      query: context.query,
-      timeRange: {
-        from: context.dateRange.fromDate,
-        to: context.dateRange.toDate,
-      },
-      filters: context.filters,
-      disableWarningToasts: true,
-    }),
-    [context]
-  );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   if (errors.length) {

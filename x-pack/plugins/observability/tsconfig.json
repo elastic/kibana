@@ -96,7 +96,11 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
     "@kbn/dashboard-plugin",
-    "@kbn/calculate-auto"
+    "@kbn/calculate-auto",
+    "@kbn/presentation-util-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": [
     "target/**/*"
