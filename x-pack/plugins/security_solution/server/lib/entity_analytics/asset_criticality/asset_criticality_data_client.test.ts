@@ -99,11 +99,18 @@ describe('AssetCriticalityDataClient', () => {
 
     it('defaults to the default query size', async () => {
       subject.search({ query: { match_all: {} } });
-      const defaultSize = 10_000;
+      const defaultSize = 1_000;
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ size: defaultSize })
       );
+    });
+
+    it('caps the size to the maximum query size', async () => {
+      subject.search({ query: { match_all: {} }, size: 999999 });
+      const maxSize = 100_000;
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: maxSize }));
     });
 
     it('ignores an index_not_found_exception if the criticality index does not exist', async () => {

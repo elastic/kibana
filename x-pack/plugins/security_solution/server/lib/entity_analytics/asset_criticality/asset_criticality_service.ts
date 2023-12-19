@@ -75,11 +75,13 @@ const getCriticalitiesByIdentifiers = async ({
     throw new Error('At least one identifier must contain a valid field and value');
   }
 
+  const identifierCount = validIdentifiers.length;
   const identifierValuesByField = groupIdentifierValuesByField(validIdentifiers);
   const criticalitiesQuery = buildCriticalitiesQuery(identifierValuesByField);
 
   const criticalitySearchResponse = await assetCriticalityDataClient.search({
     query: criticalitiesQuery,
+    size: identifierCount,
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional

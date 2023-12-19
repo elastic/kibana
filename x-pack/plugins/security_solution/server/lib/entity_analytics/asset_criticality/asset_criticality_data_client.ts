@@ -27,7 +27,8 @@ interface AssetCriticalityUpsert {
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
 
-const MAX_CRITICALITY_RESPONSE_SIZE = 10000; // TODO what's the right value here?
+const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
+const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
 
 const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
 
@@ -52,6 +53,7 @@ export class AssetCriticalityDataClient {
    *
    * A general method for searching asset criticality records.
    * @param query an ESL query to filter criticality results
+   * @param size the maximum number of records to return. Cannot exceed {@link MAX_CRITICALITY_RESPONSE_SIZE}. If unspecified, will default to {@link DEFAULT_CRITICALITY_RESPONSE_SIZE}.
    * @returns criticality records matching the query
    */
   public async search({
@@ -65,7 +67,7 @@ export class AssetCriticalityDataClient {
       index: this.getIndex(),
       ignore_unavailable: true,
       body: { query },
-      size: Math.min(size ?? Infinity, MAX_CRITICALITY_RESPONSE_SIZE),
+      size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
     });
     return response;
   }
