@@ -185,27 +185,24 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
+
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
+      }
     });
     component.update();
 
     if (lifecycle && lifecycle.enabled) {
-      act(() => {
+      await act(async () => {
         form.toggleEuiSwitch('dataRetentionToggle.input');
       });
       component.update();
 
-      act(() => {
-        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
-      });
+      form.setInputValue('valueDataRetentionField', String(lifecycle.value));
     }
 
     await act(async () => {
-      if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
-      }
-
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -378,6 +375,8 @@ export type TestSubjects =
   | 'settingsEditor'
   | 'versionField.input'
   | 'valueDataRetentionField'
+  | 'formWizardStep-5'
+  | 'lifecycleValue'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';

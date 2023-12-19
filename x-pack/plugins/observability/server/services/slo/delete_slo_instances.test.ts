@@ -43,7 +43,7 @@ describe('DeleteSLOInstances', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "should": Array [
@@ -103,7 +103,7 @@ describe('DeleteSLOInstances', () => {
     `);
     expect(mockEsClient.deleteByQuery.mock.calls[1][0]).toMatchInlineSnapshot(`
       Object {
-        "index": ".slo-observability.summary-v2*",
+        "index": ".slo-observability.summary-v3*",
         "query": Object {
           "bool": Object {
             "should": Array [

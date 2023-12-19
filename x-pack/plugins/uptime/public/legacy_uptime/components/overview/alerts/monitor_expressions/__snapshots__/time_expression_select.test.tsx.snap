@@ -8,58 +8,50 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiPopover emotion-euiPopover"
+      class="euiPopover emotion-euiPopover-inline-block"
       id="timerange"
     >
-      <div
-        class="euiPopover__anchor css-16vtueo-render"
+      <span
+        aria-label="Open the popover for time range value field"
+        class="euiExpression emotion-euiExpression-success"
+        data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueExpression"
       >
         <span
-          aria-label="Open the popover for time range value field"
-          class="euiExpression emotion-euiExpression-success"
-          data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueExpression"
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
         >
-          <span
-            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-          >
-            within
-          </span>
-           
-          <span
-            class="euiExpression__value emotion-euiExpression__value"
-          >
-            last 15
-          </span>
+          within
         </span>
-      </div>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          last 15
+        </span>
+      </span>
     </div>
   </div>
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiPopover emotion-euiPopover"
+      class="euiPopover emotion-euiPopover-inline-block"
       id="timerange-unit"
     >
-      <div
-        class="euiPopover__anchor css-16vtueo-render"
+      <span
+        aria-label="Open the popover for time range unit select field"
+        class="euiExpression emotion-euiExpression-success"
+        data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression"
       >
         <span
-          aria-label="Open the popover for time range unit select field"
-          class="euiExpression emotion-euiExpression-success"
-          data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression"
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        />
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
         >
-          <span
-            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-          />
-           
-          <span
-            class="euiExpression__value emotion-euiExpression__value"
-          >
-            minutes
-          </span>
+          minutes
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
