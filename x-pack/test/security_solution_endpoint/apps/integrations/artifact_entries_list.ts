@@ -237,10 +237,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
           // Check new artifact is in the list
           for (const checkResult of testData.create.checkResults) {
-            await retry.waitForWithTimeout('entry is added in list', 10000, async () => {
-              const currentValue = await testSubjects.getVisibleText(checkResult.selector);
-              return currentValue === checkResult.value;
-            });
+            expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
+              checkResult.value
+            );
           }
           await pageObjects.common.closeToast();
 
