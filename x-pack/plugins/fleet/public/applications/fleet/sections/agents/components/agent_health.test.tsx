@@ -40,11 +40,29 @@ describe('AgentHealth', () => {
       true
     );
 
+    utils.getByText('Agent may be stuck updating.');
+
     act(() => {
       fireEvent.click(utils.getByTestId('restartUpgradeBtn'));
     });
 
     utils.findByText('Upgrade Modal');
+  });
+
+  it('should render agent health with callout when agent has upgrade state failed', () => {
+    const { utils } = renderAgentHealth(
+      {
+        active: true,
+        status: 'updating',
+        upgrade_started_at: '2022-11-21T12:27:24Z',
+        upgrade_details: {
+          state: 'UPG_FAILED',
+        },
+      } as any,
+      true
+    );
+
+    utils.getByText('Agent upgrade is stuck in failed state.');
   });
 
   it('should not render agent health with callout when agent not stuck updating', () => {
@@ -58,6 +76,7 @@ describe('AgentHealth', () => {
     );
 
     expect(utils.queryByTestId('restartUpgradeBtn')).not.toBeInTheDocument();
+    expect(utils.queryByText('Agent may be stuck updating.')).not.toBeInTheDocument();
   });
 
   it('should not render agent health with callout when not from details', () => {
