@@ -82,10 +82,13 @@ const mockKibana = () => {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
           get: jest.fn().mockReturnValue([]),
+          getDefault: jest.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        create: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn(),
+        }),
       },
       docLinks: {
         links: {
@@ -110,7 +113,6 @@ const mockKibana = () => {
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {
