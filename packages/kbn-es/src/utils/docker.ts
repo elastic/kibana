@@ -50,8 +50,6 @@ interface ImageOptions {
   tag?: string;
 }
 
-// test commit 2
-
 interface BaseOptions extends ImageOptions {
   port?: number;
   ssl?: boolean;
