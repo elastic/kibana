@@ -17,7 +17,7 @@ import {
 } from '@kbn/observability-plugin/common/slo/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-function assertTransformsResponseBody(body: GetTransformsResponseSchema, expectedTransforms) {
+function assertTransformsResponseBody(body: GetTransformsResponseSchema, expectedTransforms: any) {
   expect(body.count).to.eql(expectedTransforms.count);
   expect(body.transforms).to.have.length(expectedTransforms.count);
 
@@ -53,7 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         lookback: 'now-15m',
         logger,
-        eventsPerCycle: 4,
       });
       await dataViewApi.create({
         name: DATE_VIEW,

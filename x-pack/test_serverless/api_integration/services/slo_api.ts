@@ -70,8 +70,6 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
-    async find() {},
-
     async delete(sloId: string) {
       const response = await supertest
         .delete(`/api/observability/slos/${sloId}`)
