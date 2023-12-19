@@ -141,13 +141,16 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersionSnapshot,
           })
           .expect(400);
+        expect(res.body.message).to.equal(
+          'Agent agent1 is not upgradeable: agent is already running on the selected version.'
+        );
       });
 
       it('should respond 200 if upgrading agent with version the same as snapshot version and force flag is passed', async () => {
@@ -248,26 +251,30 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: '6.0.0',
           })
           .expect(400);
+        expect(res.body.message).to.equal(
+          'Agent agent1 is not upgradeable: agent does not support downgrades.'
+        );
       });
 
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
           revoke: true,
         });
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersion,
           })
           .expect(400);
+        expect(res.body.message).to.equal('cannot upgrade an unenrolling or unenrolled agent');
       });
 
       it('should respond 400 if trying to upgrade an agent that is unenrolled', async () => {
@@ -281,13 +288,14 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: fleetServerVersion,
           })
           .expect(400);
+        expect(res.body.message).to.equal('cannot upgrade an unenrolling or unenrolled agent');
       });
 
       it('should respond 400 if trying to upgrade an agent that is not upgradeable', async () => {
@@ -298,7 +306,9 @@ export default function (providerContext: FtrProviderContext) {
             version: fleetServerVersion,
           })
           .expect(400);
-        expect(res.body.message).to.equal('agent agent1 is not upgradeable');
+        expect(res.body.message).to.equal(
+          'Agent agent1 is not upgradeable: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
+        );
       });
 
       it('enrolled in a hosted agent policy should respond 400 to upgrade and not update the agent SOs', async () => {

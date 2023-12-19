@@ -122,15 +122,13 @@ function ChatContent({
   );
 }
 
-export function Insight({
-  messages,
-  title,
-  dataTestSubj,
-}: {
+export interface InsightProps {
   messages: Message[];
   title: string;
   dataTestSubj?: string;
-}) {
+}
+
+export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [hasOpened, setHasOpened] = useState(false);
 
   const connectors = useGenAIConnectors();
