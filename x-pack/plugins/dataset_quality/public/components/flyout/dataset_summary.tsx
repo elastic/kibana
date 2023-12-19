@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import { EuiBadge } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
@@ -24,6 +16,7 @@ import {
   flyoutDatasetNameSpaceText,
 } from '../../../common/translations';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
+import { FieldsList } from './fields_list';
 
 interface DatasetSummaryProps {
   fieldFormats: FieldFormatsStart;
@@ -36,19 +29,12 @@ export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryP
     .convert(dataStreamStat.lastActivity);
 
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiTitle size="s">
-        <span>{flyoutDatasetDetailsText}</span>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
-              <span>{flyoutDatasetNameSpaceText}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>
+    <FieldsList
+      title={flyoutDatasetDetailsText}
+      fields={[
+        {
+          fieldTitle: flyoutDatasetNameSpaceText,
+          fieldValue: (
             <EuiBadge
               color="hollow"
               css={css`
@@ -57,19 +43,13 @@ export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryP
             >
               {dataStreamStat.namespace}
             </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
-              <span>{flyoutDatasetLastActivityText}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>{formattedLastActivity}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiPanel>
+          ),
+        },
+        {
+          fieldTitle: flyoutDatasetLastActivityText,
+          fieldValue: formattedLastActivity,
+        },
+      ]}
+    />
   );
 }

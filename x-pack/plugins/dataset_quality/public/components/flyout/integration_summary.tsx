@@ -5,42 +5,27 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiPanel,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiHorizontalRule,
-  EuiBadge,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import {
   flyoutIntegrationDetailsText,
-  flyoutIntegrationTypeText,
+  flyoutIntegrationNameText,
   flyoutIntegrationVersionText,
 } from '../../../common/translations';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../common';
+import { FieldsList } from './fields_list';
 
 export function IntegrationSummary({ integration }: { integration: Integration }) {
   const { name, version } = integration;
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiTitle size="s">
-        <span>{flyoutIntegrationDetailsText}</span>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
-              <span>{flyoutIntegrationTypeText}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>
+    <FieldsList
+      title={flyoutIntegrationDetailsText}
+      fields={[
+        {
+          fieldTitle: flyoutIntegrationNameText,
+          fieldValue: (
             <EuiBadge
               color="hollow"
               css={css`
@@ -52,18 +37,13 @@ export function IntegrationSummary({ integration }: { integration: Integration }
                 <EuiText size="s">{name}</EuiText>
               </EuiFlexGroup>
             </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
-              <span>{flyoutIntegrationVersionText}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>{version}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiPanel>
+          ),
+        },
+        {
+          fieldTitle: flyoutIntegrationVersionText,
+          fieldValue: version,
+        },
+      ]}
+    />
   );
 }

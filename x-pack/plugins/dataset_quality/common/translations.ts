@@ -77,9 +77,9 @@ export const flyoutIntegrationVersionText = i18n.translate(
   }
 );
 
-export const flyoutIntegrationTypeText = i18n.translate(
-  'xpack.datasetQuality.flyoutIntegrationTypeText',
+export const flyoutIntegrationNameText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationNameText',
   {
-    defaultMessage: 'Type',
+    defaultMessage: 'Name',
   }
 );
