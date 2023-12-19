@@ -86,5 +86,6 @@
     "@kbn/transform-plugin",
     "@kbn/slo-schema",
     "@kbn/core",
+    "@kbn/alerting-plugin",
   ]
 }

@@ -45,7 +45,11 @@ export function WelcomeMessage({
 
   const {
     application: { navigateToApp, capabilities },
-    triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
+    plugins: {
+      start: {
+        triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
+      },
+    },
   } = useKibana().services;
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
