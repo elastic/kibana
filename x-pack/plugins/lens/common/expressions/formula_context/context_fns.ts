@@ -20,7 +20,10 @@ export type ExpressionFunctionFormulaTimeRange = ExpressionFunctionDefinition<
 
 const getTimeRangeAsNumber = (timeRange: TimeRange | undefined, now: number | undefined) => {
   if (!timeRange) return 0;
-  const absoluteTimeRange = getAbsoluteTimeRange(timeRange, now ? { forceNow: new Date(now) } : {});
+  const absoluteTimeRange = getAbsoluteTimeRange(
+    timeRange,
+    now != null ? { forceNow: new Date(now) } : {}
+  );
   return timeRange ? moment(absoluteTimeRange.to).diff(moment(absoluteTimeRange.from)) : 0;
 };
 
