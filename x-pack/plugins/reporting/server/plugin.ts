@@ -92,6 +92,7 @@ export class ReportingPlugin
         parser: (data: any) => {
           return {
             title: data.body.payload.title,
+            description: 'CSV report created from saved search',
           };
         },
       },

@@ -18,6 +18,7 @@ export type {
   StorageContext,
   StorageContextGetTransformFn,
   MSearchConfig,
+  IndexerFn,
 } from './types';
 
 export type { ContentRegistry, GetStorageContextFn, GetStorageContextFnParams } from './registry';

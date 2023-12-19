@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import type { CoreSetup } from '@kbn/core/server';
 import { TimedItemBuffer } from '@kbn/bfetch-plugin/common';
 import { TranslogService } from './translog_service';
@@ -20,6 +20,8 @@ import type {
 import { retry } from './utils';
 import { SearchIndexClient } from './types';
 import { SearchIndexClientFactory } from './search_index_client_factory';
+import { IndexerFn } from '../core';
+import { IndexParserFn } from '../core/types';
 
 export interface SearchIndexInitializerContext {
   logger: SearchIndexLogger;
@@ -39,6 +41,14 @@ export class SearchIndex {
   protected client?: SearchIndexClient;
   readonly #translogService: TranslogService | undefined;
   readonly #buffer: TimedItemBuffer<BufferData>;
+  private indexSchedule = new Map<
+    string,
+    {
+      indexer: IndexerFn;
+      parser: IndexParserFn;
+      intervalId: NodeJS.Timeout;
+    }
+  >();
 
   constructor(private readonly ctx: SearchIndexInitializerContext) {
     this.#buffer = new TimedItemBuffer<BufferData>({
@@ -200,8 +210,41 @@ export class SearchIndex {
     });
   }
 
+  public async registerIndexer(type: string, indexer: IndexerFn, parser: IndexParserFn) {
+    // const intervalId = setInterval(() => {
+    //   this.runIndexer(type);
+    // }, 5000);
+
+    this.indexSchedule.set(type, {
+      indexer,
+      parser,
+      intervalId: 0,
+    });
+
+    this.runIndexer(type);
+  }
+
   public async stop(): Promise<void> {
+    for (const { intervalId } of this.indexSchedule.values()) {
+      clearInterval(intervalId);
+    }
     await this.#buffer.flushAsync();
+  }
+
+  private runIndexer(type: string) {
+    const { indexer, parser } = this.indexSchedule.get(type) ?? {};
+    if (!indexer) return;
+    if (!parser) return;
+
+    indexer().then((res) => {
+      res.items.forEach((item) => {
+        this.addDocument(`${type}:${item.id}`, {
+          ...parser(item.doc),
+          type,
+          updateTxId: uuidv4(),
+        });
+      });
+    });
   }
 
   private currentSecond() {

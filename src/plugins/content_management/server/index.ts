@@ -20,4 +20,5 @@ export type {
   ContentCrud,
   GetStorageContextFn,
   GetStorageContextFnParams,
+  IndexerFn,
 } from './core';

@@ -68,6 +68,14 @@ export class ContentRegistry {
 
     this.types.set(contentType.id, contentType);
 
+    if (definition.searchIndex?.indexer) {
+      this.searchIndex.registerIndexer(
+        contentType.id,
+        definition.searchIndex.indexer,
+        definition.searchIndex.parser
+      );
+    }
+
     const getStorageCtx: GetStorageContextFn = async ({ requestHandlerContext, req, version }) => {
       const currentUser = await this.ctx.auth.getCurrentUser(req);
       return getStorageContext({

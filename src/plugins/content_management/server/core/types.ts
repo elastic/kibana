@@ -26,6 +26,13 @@ import type {
 } from '../../common';
 import { SearchIndexDoc } from '../search_index/types';
 
+export type IndexerFn = () => Promise<{
+  items: Array<{ id: string; doc: object }>;
+  next?: IndexerFn;
+}>;
+
+export type IndexParserFn = <T = unknown>(item: T) => Pick<SearchIndexDoc, 'title' | 'description'>;
+
 export type StorageContextGetTransformFn = (
   definitions: ContentManagementServiceDefinitionVersioned,
   requestVersion?: Version
@@ -91,7 +98,11 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   storage: S;
   contentIdGenerator?: () => string;
   searchIndex?: {
-    parser: <T = unknown>(item: T) => Pick<SearchIndexDoc, 'title' | 'description'>;
+    parser: IndexParserFn;
+    indexer?: IndexerFn;
+    indexSchedule?: {
+      interval?: number;
+    };
   };
   version: {
     latest: Version;
