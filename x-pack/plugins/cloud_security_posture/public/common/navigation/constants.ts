@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { PosturePolicyTemplate } from '../../../common/types';
+import { PosturePolicyTemplate } from '../../../common/types_old';
 import type {
   CspBenchmarksPage,
   CspIntegrationDocNavigationItem,
@@ -27,7 +27,7 @@ const NAV_ITEMS_NAMES = {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'Benchmark rules',
+    defaultMessage: 'Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',

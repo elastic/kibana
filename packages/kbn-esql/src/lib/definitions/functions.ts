@@ -298,6 +298,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_geopoint',
+    description: i18n.translate('monaco.esql.definitions.toGeopointDoc', {
+      defaultMessage: 'Converts to geo_point.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'geo_point',
+        examples: [`from index | EVAL geopoint = to_geopoint(field)`],
+      },
+    ],
+  },
+  {
     name: 'to_integer',
     type: 'math' as const,
     alias: ['to_int'],

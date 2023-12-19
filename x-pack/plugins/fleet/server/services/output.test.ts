@@ -705,12 +705,12 @@ describe('Output Service', () => {
       );
     });
 
-    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+    it('should not throw when a remote es output is attempted to be created as default data output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
 
-      await expect(
+      expect(
         outputService.create(
           soClient,
           esClientMock,
@@ -722,9 +722,7 @@ describe('Output Service', () => {
           },
           { id: 'output-1' }
         )
-      ).rejects.toThrow(
-        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
-      );
+      ).resolves.not.toThrow();
     });
 
     it('should set preset: balanced by default when creating a new ES output', async () => {
@@ -1644,21 +1642,19 @@ describe('Output Service', () => {
       );
     });
 
-    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+    it('should not throw when a remote es output is attempted to be updated as default data output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
 
-      await expect(
+      expect(
         outputService.update(soClient, esClientMock, 'output-test', {
           is_default: true,
           is_default_monitoring: false,
           name: 'Test',
           type: 'remote_elasticsearch',
         })
-      ).rejects.toThrow(
-        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
-      );
+      ).resolves.not.toThrow();
     });
   });
 
@@ -1839,6 +1835,68 @@ describe('Output Service', () => {
         message: 'connection error',
         timestamp: '2023-11-30T14:25:31Z',
       });
+    });
+  });
+
+  describe('backfillAllOutputPresets', () => {
+    it('should update non-preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('non-preconfigured-output', {
+              is_preconfigured: false,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('non-preconfigured-output', {
+          is_preconfigured: false,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
+    });
+
+    it('should update preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('preconfigured-output', {
+              is_preconfigured: true,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('preconfigured-output', {
+          is_preconfigured: true,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
     });
   });
 });
