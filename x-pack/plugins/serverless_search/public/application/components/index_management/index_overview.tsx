@@ -62,7 +62,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
           <h2>
             <FormattedMessage
               id="xpack.serverlessSearch.indexManagement.indexDetails.overview.loading.title"
-              defaultMessage="Loading Index"
+              defaultMessage="Loading index"
             />
           </h2>
         }
@@ -85,7 +85,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
           <p>
             <FormattedMessage
               id="xpack.serverlessSearch.indexManagement.indexDetails.overview.error.description"
-              defaultMessage="There was an error loading the Index."
+              defaultMessage="There was an error loading the index."
             />
           </p>
         }
