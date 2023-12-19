@@ -19,7 +19,7 @@ describe('startMlModelDownload', () => {
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
     getTrainedModelsStats: jest.fn(),
-    installElasticModel: jest.fn(),
+    putTrainedModel: jest.fn(),
   };
 
   beforeEach(() => {
@@ -89,13 +89,13 @@ describe('startMlModelDownload', () => {
         })
       );
 
-    mockTrainedModelsProvider.installElasticModel.mockImplementation(async () => {});
+    mockTrainedModelsProvider.putTrainedModel.mockImplementation(async () => {});
 
     const response = await startMlModelDownload(
       knownModelName,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Downloading);
-    expect(mockTrainedModelsProvider.installElasticModel).toBeCalledTimes(1);
+    expect(mockTrainedModelsProvider.putTrainedModel).toBeCalledTimes(1);
   });
 });
