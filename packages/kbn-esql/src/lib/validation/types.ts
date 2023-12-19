@@ -98,7 +98,7 @@ export interface ValidationErrors {
   };
   unknownAggregateFunction: {
     message: string;
-    type: { command: string; value: string };
+    type: { type: string; value: string };
   };
   wildcardNotSupportedForCommand: {
     message: string;

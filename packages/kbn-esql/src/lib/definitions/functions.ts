@@ -249,7 +249,21 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'boolean',
-        examples: [`from index" | EVAL bool = to_boolean(field)`],
+        examples: [`from index | EVAL bool = to_boolean(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_cartesianpoint',
+    type: 'math' as const,
+    description: i18n.translate('monaco.esql.definitions.toCartesianPointDoc', {
+      defaultMessage: 'Converts an input value to a `point` value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'cartesian_point',
+        examples: [`from index | EVAL point = to_cartesianpoint(field)`],
       },
     ],
   },
@@ -299,6 +313,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'to_geopoint',
+    type: 'math' as const,
     description: i18n.translate('monaco.esql.definitions.toGeopointDoc', {
       defaultMessage: 'Converts to geo_point.',
     }),

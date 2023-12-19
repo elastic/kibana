@@ -649,8 +649,8 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             getMessageFromId({
               messageId: 'unknownAggregateFunction',
               values: {
-                command: capitalize(command.name),
                 value: (arg as ESQLSingleAstItem).name,
+                type: 'FieldAttribute',
               },
               locations: (arg as ESQLSingleAstItem).location,
             })

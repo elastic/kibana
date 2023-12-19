@@ -606,7 +606,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | mv_expand stringField', [
-      'Mv_expand only supports list type values, found [stringField] of type string',
+      'Mv_expand only supports list type values, found [stringField] of type [string]',
     ]);
 
     testErrorsAndWarnings(`from a | mv_expand listField`, []);
@@ -616,7 +616,7 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', [
-      'Mv_expand only supports list type values, found [a] of type string',
+      'Mv_expand only supports list type values, found [a] of type [string]',
     ]);
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
   });
@@ -681,7 +681,7 @@ describe('validation logic', () => {
     // Do not try to validate the dissect pattern string
     testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
     testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
-      'Dissect only supports string type values, found [numberField] of type number',
+      'Dissect only supports string type values, found [numberField] of type [number]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
@@ -721,7 +721,7 @@ describe('validation logic', () => {
     // Do not try to validate the grok pattern string
     testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
-      'Grok only supports string type values, found [numberField] of type number',
+      'Grok only supports string type values, found [numberField] of type [number]',
     ]);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
@@ -1106,7 +1106,7 @@ describe('validation logic', () => {
   describe('stats', () => {
     testErrorsAndWarnings('from a | stats ', []);
     testErrorsAndWarnings('from a | stats numberField ', [
-      'Stats expects an aggregate function, found [numberField]',
+      'expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
