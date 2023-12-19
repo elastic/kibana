@@ -21,7 +21,7 @@ export const Table = () => {
     columns,
     loading,
     resultsCount,
-    selectedDatasetName,
+    selectedDataset,
     closeFlyout,
   } = useDatasetQualityTable();
 
@@ -64,9 +64,7 @@ export const Table = () => {
           )
         }
       />
-      {selectedDatasetName && (
-        <Flyout datasetName={selectedDatasetName} closeFlyout={closeFlyout} />
-      )}
+      {selectedDataset && <Flyout dataset={selectedDataset} closeFlyout={closeFlyout} />}
     </>
   );
 };

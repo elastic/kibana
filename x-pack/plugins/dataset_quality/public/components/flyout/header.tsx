@@ -25,7 +25,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: DataStreamStat }) {
   const { integration, title } = dataStreamStat;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const logExplorerLink = useLinkToLogExplorer({ dataStreamStat });
+  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
 
   return (
     <EuiFlyoutHeader hasBorder>
@@ -55,7 +55,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: DataStreamStat }) {
             justifyContent="flexEnd"
             alignItems="center"
           >
-            <EuiButton size="s" href={logExplorerLink} iconType="logoObservability">
+            <EuiButton size="s" {...logExplorerLinkProps} iconType="logoObservability">
               {flyoutOpenInLogExplorerText}
             </EuiButton>
           </EuiFlexGroup>

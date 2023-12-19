@@ -12,23 +12,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonRectangle,
   EuiToolTip,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import loggingIcon from '../../icons/logging.svg';
-import { LogExplorerLink } from '../log_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
+import { IntegrationIcon } from '../common';
+import { useLinkToLogExplorer } from '../../hooks';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -98,10 +98,12 @@ const degradedDocsColumnTooltip = (
 
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
+  setSelectedDataset,
   loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
   loadingDegradedStats?: boolean;
+  setSelectedDataset: Dispatch<SetStateAction<DataStreamStat | undefined>>;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -116,7 +118,7 @@ export const getDatasetQualitTableColumns = ({
             <EuiFlexItem grow={false}>
               <IntegrationIcon integration={integration} />
             </EuiFlexItem>
-            <EuiLink onClick={() => setSelectedDatasetName(title)}>{title}</EuiLink>
+            <EuiLink onClick={() => setSelectedDataset(dataStreamStat)}>{title}</EuiLink>
           </EuiFlexGroup>
         );
       },
@@ -178,7 +180,14 @@ export const getDatasetQualitTableColumns = ({
   ];
 };
 
-const LinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
-  const url = useLinkToLogExplorer({ dataStreamStat });
-  return <EuiLink href={url}>{openActionName}</EuiLink>;
+const LogExplorerLink = ({
+  dataStreamStat,
+  title,
+}: {
+  dataStreamStat: DataStreamStat;
+  title: string;
+}) => {
+  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+
+  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
 };

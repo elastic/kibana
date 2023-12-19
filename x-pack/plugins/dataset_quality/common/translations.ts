@@ -49,9 +49,12 @@ export const flyoutDatasetDetailsText = i18n.translate(
   }
 );
 
-export const flyoutDatasetTypeText = i18n.translate('xpack.datasetQuality.flyoutDatasetTypeText', {
-  defaultMessage: 'Type',
-});
+export const flyoutDatasetNameSpaceText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetNameSpaceText',
+  {
+    defaultMessage: 'Namespace',
+  }
+);
 
 export const flyoutDatasetLastActivityText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetLastActivityText',

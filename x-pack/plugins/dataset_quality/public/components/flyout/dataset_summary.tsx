@@ -21,7 +21,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   flyoutDatasetDetailsText,
   flyoutDatasetLastActivityText,
-  flyoutDatasetTypeText,
+  flyoutDatasetNameSpaceText,
 } from '../../../common/translations';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 
@@ -31,7 +31,6 @@ interface DatasetSummaryProps {
 }
 
 export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryProps) {
-  const [type, _dataset, namespace] = dataStreamStat.name.split('-');
   const formattedLastActivity = fieldFormats
     .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
     .convert(dataStreamStat.lastActivity);
@@ -46,16 +45,7 @@ export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryP
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <EuiTitle size="xxs">
-              <span>{flyoutDatasetTypeText}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={4}>{type}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xxs">
-              <span>Namespace</span>
+              <span>{flyoutDatasetNameSpaceText}</span>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={4}>
@@ -65,7 +55,7 @@ export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryP
                 width: fit-content;
               `}
             >
-              {namespace}
+              {dataStreamStat.namespace}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>

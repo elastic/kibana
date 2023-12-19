@@ -10,17 +10,19 @@ import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
   rawName: string;
+  type: string;
   name: DataStreamStatType['name'];
   namespace: string;
   title: string;
   size?: DataStreamStatType['size'];
   sizeBytes?: DataStreamStatType['sizeBytes'];
   lastActivity?: DataStreamStatType['lastActivity'];
-  integration?: IntegrationType;
+  integration?: Integration;
   degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.name;
+    this.type = dataStreamStat.type;
     this.name = dataStreamStat.name;
     this.title = dataStreamStat.title ?? dataStreamStat.name;
     this.namespace = dataStreamStat.namespace;
@@ -32,10 +34,11 @@ export class DataStreamStat {
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
-    const [_type, dataset, namespace] = dataStreamStat.name.split('-');
+    const [type, dataset, namespace] = dataStreamStat.name.split('-');
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
+      type,
       name: dataset,
       title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
       namespace,

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { DatasetSummary } from './dataset_summary';
@@ -23,26 +24,26 @@ import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 
 interface FlyoutProps {
-  datasetName: string;
+  dataset: DataStreamStat;
   closeFlyout: () => void;
 }
 
-export function Flyout({ datasetName, closeFlyout }: FlyoutProps) {
+export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
   const { dataStreamStat, loading, fieldFormats } = useDatasetQualityFlyout({
-    datasetQuery: datasetName,
+    datasetQuery: `${dataset.name}-${dataset.namespace}`,
   });
 
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false} data-component-name={'datasetQualityFlyout'}>
-      {loading ? (
-        <EuiFlyoutBody>
-          <EuiFlexGroup justifyContent="center">
-            <EuiLoadingLogo logo="logoObservability" size="l" />
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
-      ) : (
-        <>
-          <Header dataStreamStat={dataStreamStat} />
+      <>
+        <Header dataStreamStat={dataset} />
+        {loading ? (
+          <EuiFlyoutBody>
+            <EuiFlexGroup justifyContent="center">
+              <EuiLoadingLogo logo="logoObservability" size="l" />
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+        ) : (
           <EuiFlyoutBody>
             <DatasetSummary dataStreamStat={dataStreamStat} fieldFormats={fieldFormats} />
             <EuiSpacer />
@@ -50,17 +51,17 @@ export function Flyout({ datasetName, closeFlyout }: FlyoutProps) {
               <IntegrationSummary integration={dataStreamStat.integration} />
             )}
           </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                  {flyoutCancelText}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </>
-      )}
+        )}
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                {flyoutCancelText}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </>
     </EuiFlyout>
   );
 }
