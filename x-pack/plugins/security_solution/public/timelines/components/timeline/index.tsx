@@ -245,7 +245,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         </div>
       </TimelineContainer>
       {showTimelineTour ? (
-        <TimelineTour activeTab={activeTab} switchToTab={handleSwitchToTab} />
+        <TimelineTour
+          activeTab={activeTab}
+          switchToTab={handleSwitchToTab}
+          timelineType={timelineType}
+        />
       ) : null}
     </TimelineContext.Provider>
   );
