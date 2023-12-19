@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { Alert } from '@kbn/alerting-types';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export const search = {
   box: {
@@ -71,7 +72,7 @@ const useFieldBrowserPagination = () => {
   };
 };
 
-export const FieldsTable = memo(({ alert }: Pick<AlertsTableFlyoutBaseProps, 'alert'>) => {
+export const FieldsTable = memo(({ alert }: { alert: Alert }) => {
   const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
   return (
     <EuiInMemoryTable
@@ -83,17 +84,25 @@ export const FieldsTable = memo(({ alert }: Pick<AlertsTableFlyoutBaseProps, 'al
           name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.field', {
             defaultMessage: 'Field',
           }),
+          width: '30%',
         },
         {
           field: 'value',
           name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.value', {
             defaultMessage: 'Value',
           }),
+          width: '70%',
         },
       ]}
       onTableChange={onTableChange}
       pagination={paginationTableProp}
       search={search}
+      css={css`
+        & .euiTableRow {
+          font-size: ${euiThemeVars.euiFontSizeXS};
+          font-family: ${euiThemeVars.euiCodeFontFamily};
+        }
+      `}
     />
   );
 });

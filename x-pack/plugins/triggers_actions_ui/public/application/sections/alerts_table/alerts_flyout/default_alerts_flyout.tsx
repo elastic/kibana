@@ -70,7 +70,7 @@ export const getDefaultAlertFlyout =
             defaultMessage: 'Table',
           }),
           content: (
-            <EuiPanel>
+            <EuiPanel hasShadow={false}>
               <FieldsTable alert={alert} />
             </EuiPanel>
           ),
