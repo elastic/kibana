@@ -302,8 +302,8 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).should('be.visible').trigger('click');
-  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click({ force: true });
+  cy.get(NEW_TIMELINE_ACTION).click();
+  cy.get(CREATE_NEW_TIMELINE).first().click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {

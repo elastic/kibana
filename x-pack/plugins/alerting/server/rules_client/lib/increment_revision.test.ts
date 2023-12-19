@@ -10,11 +10,12 @@ import { mockedDateString } from '../tests/lib';
 import { incrementRevision } from './increment_revision';
 import { SavedObject } from '@kbn/core/server';
 import { RawRule, RuleTypeParams } from '../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 describe('incrementRevision', () => {
   const currentRule: SavedObject<RawRule> = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: true,
       name: 'rule-name',

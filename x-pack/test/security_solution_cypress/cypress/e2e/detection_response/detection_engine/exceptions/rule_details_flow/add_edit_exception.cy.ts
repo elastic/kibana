@@ -149,7 +149,7 @@ describe(
           .eq(0)
           .find(FIELD_INPUT_PARENT)
           .eq(0)
-          .should('have.text', ITEM_FIELD);
+          .should('have.value', ITEM_FIELD);
         cy.get(VALUES_MATCH_ANY_INPUT).should('have.text', 'foo');
 
         // edit conditions
