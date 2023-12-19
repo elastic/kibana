@@ -58,6 +58,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -222,7 +223,7 @@ describe('Task Runner Cancel', () => {
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
     ).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         executionStatus: {
