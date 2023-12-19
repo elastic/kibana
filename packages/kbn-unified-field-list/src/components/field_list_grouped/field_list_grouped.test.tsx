@@ -22,7 +22,7 @@ import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 
-describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
+describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
   const allFields = dataView.fields;
@@ -123,11 +123,11 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       ExistenceFetchStatus.unknown
     );
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe('');
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(3);
+    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(2);
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([false, false, false]);
+    ).toStrictEqual([false, false]);
     expect(wrapper.find(NoFieldsCallout)).toHaveLength(0);
 
     await act(async () => {
@@ -146,15 +146,15 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '25 available fields. 3 meta fields.'
     );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
+    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([true, true, true]);
+    ).toStrictEqual([true, true]);
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0, 0]);
-    expect(wrapper.find(NoFieldsCallout)).toHaveLength(1);
+    ).toStrictEqual([25, 0]);
+    expect(wrapper.find(NoFieldsCallout)).toHaveLength(0);
   });
 
   it('renders correctly in failed state', async () => {
@@ -175,14 +175,14 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '25 available fields. 3 meta fields.'
     );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
+    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('hasLoaded'))
-    ).toStrictEqual([true, true, true]);
+    ).toStrictEqual([true, true]);
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('showExistenceFetchError'))
-    ).toStrictEqual([true, true, true]);
+    ).toStrictEqual([true, true]);
   });
 
   it('renders correctly in no fields state', async () => {
@@ -201,11 +201,11 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '0 available fields. 0 meta fields.'
     );
-    expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
+    expect(wrapper.find(FieldsAccordion)).toHaveLength(2);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
       wrapper.find(NoFieldsCallout).map((callout) => callout.prop('fieldsExistInIndex'))
-    ).toStrictEqual([false, false, false]);
+    ).toStrictEqual([false, false]);
   });
 
   it('renders correctly for text-based queries (no data view)', async () => {
@@ -246,7 +246,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     );
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0, 0]);
+    ).toStrictEqual([25, 0]);
 
     await act(async () => {
       await wrapper
@@ -259,7 +259,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
 
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0, 3]);
+    ).toStrictEqual([25, 3]);
   });
 
   it('renders correctly when paginated', async () => {
@@ -279,7 +279,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     );
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 0, 0, 0]);
+    ).toStrictEqual([25, 0, 0]);
 
     await act(async () => {
       await wrapper
@@ -292,11 +292,11 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
 
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 50, 0, 0]);
+    ).toStrictEqual([25, 50, 0]);
 
     await act(async () => {
       await wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="fieldListGroupedMetaFields"]')
         .find('button')
         .first()
         .simulate('click');
@@ -305,7 +305,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
 
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([25, 88, 0, 0]);
+    ).toStrictEqual([25, 88, 0]);
   });
 
   it('renders correctly when fields are searched and filtered', async () => {
@@ -472,11 +472,11 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     // only Available is open
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, false, false]);
+    ).toStrictEqual([true, false, false]);
 
     await act(async () => {
       await wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="fieldListGroupedMetaFields"]')
         .find('button')
         .first()
         .simulate('click');
@@ -486,7 +486,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     // now Empty is open too
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, true, false]);
+    ).toStrictEqual([true, false, true]);
 
     const wrapper2 = await mountGroupedList({
       listProps: {
@@ -503,6 +503,6 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     // both Available and Empty are open for the second instance
     expect(
       wrapper2.find(FieldsAccordion).map((accordion) => accordion.prop('initialIsOpen'))
-    ).toStrictEqual([true, false, true, false]);
+    ).toStrictEqual([true, false, true]);
   });
 });
