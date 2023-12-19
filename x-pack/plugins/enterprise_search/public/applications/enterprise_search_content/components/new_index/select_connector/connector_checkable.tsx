@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiThemeComputed,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -43,6 +44,22 @@ export interface ConnectorCheckableProps {
   showNativeBadge: boolean;
 }
 
+const getCss = (
+  euiTheme: EuiThemeComputed,
+  isDisabled: ConnectorCheckableProps['isDisabled'],
+  showNativeBadge: ConnectorCheckableProps['showNativeBadge']
+) => {
+  return css`
+    ${showNativeBadge &&
+    `box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
+      8px 9px 0px 0px ${euiTheme.colors.lightShade};`}
+    ${isDisabled &&
+    `background-color: ${euiTheme.colors.lightestShade};
+    color: ${euiTheme.colors.disabledText};
+    `}
+  `;
+};
+
 export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   isDisabled,
   documentationUrl,
@@ -64,22 +81,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
         onConnectorSelect(showNativeBadge);
       }}
       id={`checkableCard-${serviceType}`}
-      css={css`
-        ${showNativeBadge &&
-        'box-shadow: 8px 9px 0px -1px ' +
-          euiTheme.colors.lightestShade +
-          ',\n' +
-          '8px 9px 0px 0px ' +
-          euiTheme.colors.lightShade +
-          ';'}
-        ${isDisabled &&
-        'background-color: ' +
-          euiTheme.colors.lightestShade +
-          ';\n' +
-          'color: ' +
-          euiTheme.colors.disabledText +
-          ';'}
-      `}
+      css={getCss(euiTheme, isDisabled, showNativeBadge)}
       hasBorder
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
     >
