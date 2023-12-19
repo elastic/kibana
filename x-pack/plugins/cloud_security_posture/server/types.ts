@@ -62,7 +62,6 @@ export interface CspServerPluginStartDeps {
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
-  alerting: AlertingPluginsStart;
 }
 
 export type CspServerPluginStartServices = Promise<
