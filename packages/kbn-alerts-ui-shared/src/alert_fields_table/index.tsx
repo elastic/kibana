@@ -21,12 +21,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 export const search = {
   box: {
     incremental: true,
-    placeholder: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.filter.placeholder',
-      {
-        defaultMessage: 'Filter by Field, Value, or Description...',
-      }
-    ),
+    placeholder: i18n.translate('xpack.alertsUIShared.alertFieldsTable.filter.placeholder', {
+      defaultMessage: 'Filter by Field, Value, or Description...',
+    }),
     schema: true,
   },
 };
@@ -81,14 +78,14 @@ export const FieldsTable = memo(({ alert }: { alert: Alert }) => {
       columns={[
         {
           field: 'key',
-          name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.field', {
+          name: i18n.translate('xpack.alertsUIShared.alertFieldsTable.field', {
             defaultMessage: 'Field',
           }),
           width: '30%',
         },
         {
           field: 'value',
-          name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.value', {
+          name: i18n.translate('xpack.alertsUIShared.alertFieldsTable.value', {
             defaultMessage: 'Value',
           }),
           width: '70%',
