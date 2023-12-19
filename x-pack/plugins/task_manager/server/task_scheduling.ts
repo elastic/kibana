@@ -453,7 +453,8 @@ const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskIn
   const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
   const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
 
-  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now)));
+  // Offset between 1 and maximumRunAt ms
+  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
   return {
     ...task,
     runAt,
