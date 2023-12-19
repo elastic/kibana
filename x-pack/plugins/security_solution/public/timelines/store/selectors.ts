@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import type { State } from '../../../common/store/types';
+import type { State } from '../../common/store/types';
 
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
