@@ -171,50 +171,27 @@ export class TaskScheduling {
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
-    const taskScheduleMapper = (
-      mapFn: (task: ConcreteTaskInstance, runAt: Date) => ConcreteTaskInstance
-    ) => {
-      const TASKS_PER_WINDOW = 100;
-      const WINDOW_SIZE = 1000 * 60;
-
-      const scheduledTasks = new Map();
-      const now = Date.now();
-
-      const getRunAtTimestamp: (maximumRunAt: number, windowSize?: number) => number = (
-        maximumRunAt,
-        windowSize = WINDOW_SIZE
-      ) => {
-        let runAtTimestamp = now;
-        while ((scheduledTasks.get(runAtTimestamp) ?? 0) >= TASKS_PER_WINDOW) {
-          runAtTimestamp += windowSize;
-          if (runAtTimestamp > maximumRunAt) {
-            if (windowSize / 2 < 1) return now;
-            return getRunAtTimestamp(maximumRunAt, Math.floor(windowSize / 2));
-          }
-        }
-        return runAtTimestamp;
-      };
-
-      return (task: ConcreteTaskInstance) => {
-        const maxmimumRunAt = now + parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
-        const runAtTimestamp = getRunAtTimestamp(maxmimumRunAt);
-        scheduledTasks.set(runAtTimestamp, (scheduledTasks.get(runAtTimestamp) ?? 0) + 1);
-        const runAt = new Date(runAtTimestamp);
-        return mapFn(task, runAt);
-      };
-    };
-
+    const now = Date.now();
+    const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: taskScheduleMapper((task, runAt) => {
+      map: (task, i) => {
+        const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+        const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
+
+        // Run the first task now. Run all other tasks a random number of ms in the future,
+        // with a maximum of 5 minutes or the task interval, whichever is smaller.
+        const runAtTimestamp =
+          i === 0 ? now : now + Math.floor(Math.random() * (maximumRunAt - now));
+        const runAt = new Date(runAtTimestamp);
         if (runSoon) {
           return { ...task, enabled: true, scheduledAt: runAt, runAt };
         }
         return { ...task, enabled: true };
-      }),
+      },
       validate: false,
     });
   }
