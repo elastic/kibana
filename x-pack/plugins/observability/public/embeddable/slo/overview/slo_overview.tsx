@@ -112,7 +112,7 @@ export function SloOverview({
 
   return (
     <div ref={containerRef} style={{ width: '100%' }}>
-      <SloCardChart slo={slo} historicalSliData={historicalSliData ?? []} cardsPerRow={4} />
+      <SloCardChart slo={slo} historicalSliData={historicalSliData ?? []} />
       <SloCardBadgesPortal containerRef={containerRef}>
         <SloCardItemBadges
           slo={slo}

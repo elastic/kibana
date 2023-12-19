@@ -22,6 +22,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/discover-utils",
+    "@kbn/ecs",
     "@kbn/elastic-agent-utils",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
@@ -33,13 +34,14 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/navigation-plugin",
+    "@kbn/react-field",
+    "@kbn/router-utils",
     "@kbn/share-plugin",
     "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer",
     "@kbn/unified-field-list",
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",
-    "@kbn/ecs",
-    "@kbn/react-field"
   ],
   "exclude": [
     "target/**/*"
