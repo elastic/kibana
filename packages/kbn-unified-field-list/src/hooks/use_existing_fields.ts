@@ -15,7 +15,7 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
