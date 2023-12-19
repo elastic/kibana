@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../common/slo/constants';
 import { SLO_LONG_REFETCH_INTERVAL, SLO_SHORT_REFETCH_INTERVAL } from '../../constants';
 
@@ -22,6 +23,7 @@ interface SLOListParams {
   sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
   perPage?: number;
+  filters?: Filter[];
 }
 
 export interface UseFetchSloListResponse {
@@ -40,6 +42,7 @@ export function useFetchSloList({
   sortDirection = 'desc',
   shouldRefetch,
   perPage = DEFAULT_SLO_PAGE_SIZE,
+  filters = [],
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -50,10 +53,14 @@ export function useFetchSloList({
     SLO_SHORT_REFETCH_INTERVAL
   );
 
+  const filterQuery = buildQueryFromFilters(filters, indexPattern, {
+    ignoreFilterIfFieldNotInIndex: config.ignoreFilterIfFieldNotInIndex,
+    nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+  });
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection }),
     queryFn: async ({ signal }) => {
-      const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
+      return await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
           ...(kqlQuery && { kqlQuery }),
           ...(sortBy && { sortBy }),
@@ -63,8 +70,6 @@ export function useFetchSloList({
         },
         signal,
       });
-
-      return response;
     },
     cacheTime: 0,
     refetchOnWindowFocus: false,

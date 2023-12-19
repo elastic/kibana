@@ -8,6 +8,7 @@
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
+import { Filter } from '@kbn/es-query';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
 import type { SLOView } from '../components/toggle_slo_view';
@@ -24,6 +25,7 @@ export interface SearchState {
   };
   view: SLOView;
   compact: boolean;
+  filters: Filter[];
 }
 
 export const DEFAULT_STATE = {
@@ -33,6 +35,7 @@ export const DEFAULT_STATE = {
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
   compact: true,
+  filters: [],
 };
 
 export function useUrlSearchState(): {

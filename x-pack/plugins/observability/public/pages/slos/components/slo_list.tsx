@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
@@ -21,6 +22,7 @@ export interface Props {
 export function SloList({ autoRefresh }: Props) {
   const { state, store: storeState } = useUrlSearchState();
   const [page, setPage] = useState(state.page);
+  const [filters, setFilters] = useState<Filter[]>(state.filters);
   const [perPage, setPerPage] = useState(state.perPage);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
@@ -35,6 +37,7 @@ export function SloList({ autoRefresh }: Props) {
     data: sloList,
   } = useFetchSloList({
     perPage,
+    filters,
     page: page + 1,
     kqlQuery: query,
     sortBy: sort,
@@ -58,6 +61,12 @@ export function SloList({ autoRefresh }: Props) {
     setPage(0);
     setQuery(newQuery);
     storeState({ page: 0, kqlQuery: newQuery });
+  };
+
+  const handleChangeFilter = (newFilters: Filter[]) => {
+    setPage(0);
+    setFilters(newFilters);
+    storeState({ page: 0, filters: newFilters });
   };
 
   const handleChangeSort = (newSort: SortField) => {
@@ -84,6 +93,7 @@ export function SloList({ autoRefresh }: Props) {
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
+          onFiltersChange={handleChangeFilter}
           initialState={state}
         />
       </EuiFlexItem>
