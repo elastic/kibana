@@ -23,26 +23,54 @@ describe('MaxCasesWarning', () => {
   const allCasesPageSize = [10, 25, 50, 100];
 
   it.each(allCasesPageSize)(`shows warning when totalCases = ${MAX_DOCS_PER_PAGE}`, (size) => {
-    appMockRender.render(<MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} />);
+    const pagination = {
+      pageSize: size,
+      pageIndex: MAX_DOCS_PER_PAGE / size + 1,
+      totalItemCount: MAX_DOCS_PER_PAGE,
+    };
+    appMockRender.render(
+      <MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} pagination={pagination} />
+    );
 
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });
 
   it.each(allCasesPageSize)(`shows warning when totalCases > ${MAX_DOCS_PER_PAGE}`, (size) => {
-    appMockRender.render(<MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE + 1} />);
+    const pagination = {
+      pageSize: size,
+      pageIndex: MAX_DOCS_PER_PAGE / size + 1,
+      totalItemCount: MAX_DOCS_PER_PAGE + 1,
+    };
+    appMockRender.render(
+      <MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE + 1} pagination={pagination} />
+    );
 
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });
 
   it('should show dismiss button correctly', () => {
-    appMockRender.render(<MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} />);
+    const pagination = {
+      pageSize: 10,
+      pageIndex: MAX_DOCS_PER_PAGE / 10 + 1,
+      totalItemCount: MAX_DOCS_PER_PAGE,
+    };
+    appMockRender.render(
+      <MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} pagination={pagination} />
+    );
 
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
     expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
   });
 
   it('should dismiss warning correctly', () => {
-    appMockRender.render(<MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} />);
+    const pagination = {
+      pageSize: 10,
+      pageIndex: MAX_DOCS_PER_PAGE / 10 + 1,
+      totalItemCount: MAX_DOCS_PER_PAGE,
+    };
+    appMockRender.render(
+      <MaxCasesWarning totalCases={MAX_DOCS_PER_PAGE} pagination={pagination} />
+    );
 
     expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
     expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();

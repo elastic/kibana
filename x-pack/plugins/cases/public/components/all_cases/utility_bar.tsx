@@ -25,7 +25,6 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
-import { MaxCasesWarning } from './max_cases_warning';
 
 interface Props {
   isSelectorView?: boolean;
@@ -177,7 +176,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        <MaxCasesWarning key={totalCases} totalCases={totalCases} />
       </>
     );
   }

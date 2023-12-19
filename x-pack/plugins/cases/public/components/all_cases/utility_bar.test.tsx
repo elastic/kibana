@@ -49,7 +49,6 @@ describe('Utility bar', () => {
     expect(screen.getByText('Selected 1 case')).toBeInTheDocument();
     expect(screen.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
     expect(screen.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
-    expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
   });
 
   it('renders showing cases correctly', async () => {
@@ -194,6 +193,5 @@ describe('Utility bar', () => {
     expect(
       screen.getByText(`Showing ${pageStart} to ${visibleCases} of ${MAX_DOCS_PER_PAGE} cases`)
     ).toBeInTheDocument();
-    expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
   });
 });

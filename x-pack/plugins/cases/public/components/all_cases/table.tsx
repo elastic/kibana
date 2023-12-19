@@ -13,6 +13,7 @@ import classnames from 'classnames';
 import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
+import { MaxCasesWarning } from './max_cases_warning';
 import { LinkButton } from '../links';
 
 import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
@@ -80,6 +81,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     },
     [goToCreateCase, navigateToCreateCase]
   );
+  const totalCases = data.total ?? 0;
 
   return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
     <Div>
@@ -90,7 +92,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <CasesTableUtilityBar
         pagination={pagination}
         isSelectorView={isSelectorView}
-        totalCases={data.total ?? 0}
+        totalCases={totalCases}
         selectedCases={selectedCases}
         deselectCases={deselectCases}
         selectedColumns={selectedColumns}
@@ -134,6 +136,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         sorting={sorting}
         hasActions={false}
       />
+      <MaxCasesWarning totalCases={totalCases} pagination={pagination} />
     </>
   );
 };

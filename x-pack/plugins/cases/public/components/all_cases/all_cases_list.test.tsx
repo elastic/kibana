@@ -656,14 +656,14 @@ describe('AllCasesListGeneric', () => {
         const LOCALSTORAGE_QUERY_PARAMS_KEY = getQueryParamsLocalStorageKey(APP_ID);
         localStorage.setItem(
           LOCALSTORAGE_QUERY_PARAMS_KEY,
-          JSON.stringify({ perPage: item, page: lastPage - 1 })
+          JSON.stringify({ perPage: item, page: lastPage })
         );
 
         useGetCasesMock.mockReturnValue({
           ...defaultGetCases,
           data: {
             ...defaultGetCases.data,
-            page: lastPage - 1,
+            page: lastPage,
             perPage: item,
             total: MAX_DOCS_PER_PAGE + item,
           },
@@ -671,12 +671,13 @@ describe('AllCasesListGeneric', () => {
 
         appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-        expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
+        expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
         expect(screen.queryByTestId(`pagination-button-${lastPage}`)).not.toBeInTheDocument();
 
         userEvent.click(await screen.findByTestId(`pagination-button-${lastPage - 1}`));
 
         await waitFor(() => {
+          expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
           expect(screen.getByTestId('pagination-button-next')).toHaveAttribute('disabled');
         });
       }

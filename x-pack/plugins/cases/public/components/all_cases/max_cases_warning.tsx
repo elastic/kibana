@@ -8,6 +8,7 @@
 import type { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
+import type { Pagination } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,8 +21,8 @@ import {
 import * as i18n from './translations';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 
-export const MaxCasesWarning: FunctionComponent<{ totalCases: number }> = React.memo(
-  ({ totalCases }) => {
+export const MaxCasesWarning: FunctionComponent<{ totalCases: number; pagination: Pagination }> =
+  React.memo(({ totalCases, pagination }) => {
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
 
     const toggleWarning = useCallback(
@@ -29,10 +30,13 @@ export const MaxCasesWarning: FunctionComponent<{ totalCases: number }> = React.
       [isMessageDismissed]
     );
 
-    const hasReachedMaxCases = totalCases >= MAX_DOCS_PER_PAGE;
+    const hasReachedMaxCases =
+      pagination.pageSize &&
+      totalCases >= MAX_DOCS_PER_PAGE &&
+      pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
 
     const renderMaxLimitWarning = (): React.ReactNode => (
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiText
             color="default"
@@ -64,7 +68,7 @@ export const MaxCasesWarning: FunctionComponent<{ totalCases: number }> = React.
           <EuiFlexItem>
             <EuiCallOut
               title={renderMaxLimitWarning()}
-              color="warning"
+              color="primary"
               size="s"
               data-test-subj="all-cases-maximum-limit-warning"
             />
@@ -73,7 +77,6 @@ export const MaxCasesWarning: FunctionComponent<{ totalCases: number }> = React.
         <EuiSpacer size="m" />
       </>
     ) : null;
-  }
-);
+  });
 
 MaxCasesWarning.displayName = 'MaxCasesWarning';
