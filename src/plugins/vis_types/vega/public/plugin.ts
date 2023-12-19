@@ -24,6 +24,7 @@ import {
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
+  setCoreStart,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -99,6 +100,7 @@ export class VegaPlugin implements Plugin<void, void> {
     core: CoreStart,
     { data, mapsEms, dataViews, usageCollection }: VegaPluginStartDependencies
   ) {
+    setCoreStart(core);
     setNotifications(core.notifications);
     setData(data);
     setDataViews(dataViews);
