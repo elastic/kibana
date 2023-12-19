@@ -9,19 +9,19 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
-import type { SessionViewConfig } from '../../../../common/types';
+import type { SessionViewConfig } from '../../../common/types';
 import type {
   DataProvider,
   DataProviderType,
   QueryOperator,
-} from '../../components/timeline/data_providers/data_provider';
+} from '../components/timeline/data_providers/data_provider';
 
 import type { KqlMode, TimelineModel } from './model';
 import type { InitialyzeTimelineSettings, InsertTimeline } from './types';
 import type {
   FieldsEqlOptions,
   TimelineNonEcsData,
-} from '../../../../common/search_strategy/timeline';
+} from '../../../common/search_strategy/timeline';
 import type {
   TimelineTabs,
   TimelinePersistInput,
@@ -29,9 +29,9 @@ import type {
   ToggleDetailPanel,
   ColumnHeaderOptions,
   SortColumnTimeline,
-} from '../../../../common/types/timeline';
-import type { RowRendererId } from '../../../../common/api/timeline';
-import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+} from '../../../common/types/timeline';
+import type { RowRendererId } from '../../../common/api/timeline';
+import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
