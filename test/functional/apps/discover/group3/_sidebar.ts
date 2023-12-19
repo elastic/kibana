@@ -300,10 +300,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
         // Available fields after scrolling down
-        const emptySectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('empty', true)
+        const metaSectionButton = await find.byCssSelector(
+          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
         );
-        await emptySectionButton.scrollIntoViewIfNecessary();
+        await metaSectionButton.scrollIntoViewIfNecessary();
 
         await retry.waitFor('list to update after scrolling', async () => {
           availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
@@ -348,16 +348,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
 
         // Available fields after scrolling down
-        const emptySectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('empty', true)
+        const metaSectionButton = await find.byCssSelector(
+          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
         );
-        await emptySectionButton.scrollIntoViewIfNecessary();
-
-        // Expand Empty section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('empty')).join(', ')
-        ).to.be('');
+        await metaSectionButton.scrollIntoViewIfNecessary();
 
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
