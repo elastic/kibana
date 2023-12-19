@@ -10,10 +10,13 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../doc_links';
 
+import { INDEX_NAME_PLACEHOLDER } from './constants';
+
 import { ingestKeysToJSON } from './helpers';
 
 export const pythonDefinition: LanguageDefinition = {
-  buildSearchQuery: ({ indexName }) => `client.search(index="${indexName}", q="snow")`,
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) =>
+    `client.search(index="${indexName}", q="snow")`,
   configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
@@ -29,7 +32,11 @@ client = Elasticsearch(
   },
   iconType: 'python.svg',
   id: Languages.PYTHON,
-  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+  ingestData: ({
+    indexName = INDEX_NAME_PLACEHOLDER,
+    ingestPipeline,
+    extraIngestDocumentValues,
+  }) => {
     const ingestDocumentKeys = ingestPipeline ? ingestKeysToJSON(extraIngestDocumentValues) : '';
     return `documents = [
   { "index": { "_index": "${indexName}", "_id": "9780553351927"}},
