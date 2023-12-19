@@ -35,7 +35,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { AlertingPluginsStart } from '@kbn/alerting-plugin/server/plugin';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import { CspStatusCode, IndexDetails } from '../common/types_old';
 
