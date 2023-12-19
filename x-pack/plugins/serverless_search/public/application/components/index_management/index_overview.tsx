@@ -7,10 +7,8 @@
 
 import React, { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
-import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   EuiLoadingSpinner,
   EuiEmptyPrompt,
@@ -25,14 +23,10 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { Index } from '@kbn/index-management-plugin/common/types/indices';
-import { IndexContent } from '@kbn/index-management-plugin/public/services';
 
 import { docLinks } from '../../../../common/doc_links';
-import { ServerlessSearchPluginStartDependencies } from '../../../types';
 import { useIndex } from '../../hooks/api/use_index';
 
 import { BadgeList } from '../badge_list';
@@ -270,23 +264,4 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
       )}
     </>
   );
-};
-
-export const createIndexOverviewContent = (
-  core: CoreStart,
-  services: ServerlessSearchPluginStartDependencies
-): IndexContent => {
-  return {
-    renderContent: (index) => {
-      const queryClient = new QueryClient();
-      return (
-        <KibanaContextProvider services={{ ...core, ...services }}>
-          <QueryClientProvider client={queryClient}>
-            <ReactQueryDevtools initialIsOpen={false} />
-            <IndexDetailOverview index={index.index} />
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      );
-    },
-  };
 };

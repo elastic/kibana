@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
-import { createIndexOverviewContent } from './application/components/index_management/index_overview';
+import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
