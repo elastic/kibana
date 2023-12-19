@@ -48,8 +48,12 @@ describe('getDownloadEstimate', () => {
     expect(getDownloadEstimate()).toEqual('');
   });
 
-  it('should return an empty string if the agent has a zero download percent', () => {
-    expect(getDownloadEstimate({ download_percent: 0 })).toEqual('');
+  it('should display 0% if the agent has a zero download percent', () => {
+    expect(getDownloadEstimate({ download_percent: 0 })).toEqual(' (0%)');
+  });
+
+  it('should display 0 Bps if the agent has a zero download rate', () => {
+    expect(getDownloadEstimate({ download_rate: 0 })).toEqual(' (at 0.0 Bps)');
   });
 
   it('should return a formatted string if the agent has a positive download percent', () => {

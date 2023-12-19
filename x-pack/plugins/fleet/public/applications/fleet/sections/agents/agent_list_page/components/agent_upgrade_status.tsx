@@ -36,14 +36,17 @@ export function getUpgradeStartDelay(scheduledAt?: string): string {
 }
 
 export function getDownloadEstimate(metadata?: AgentUpgradeDetails['metadata']): string {
-  if (!metadata || (!metadata.download_percent && !metadata.download_rate)) {
+  if (
+    !metadata ||
+    (metadata.download_percent === undefined && metadata.download_rate === undefined)
+  ) {
     return '';
   }
   let tooltip = '';
-  if (metadata.download_percent) {
+  if (metadata.download_percent !== undefined) {
     tooltip = `${metadata.download_percent}%`;
   }
-  if (metadata.download_rate) {
+  if (metadata.download_rate !== undefined) {
     tooltip += ` at ${formatRate(metadata.download_rate)}`;
   }
 
@@ -57,7 +60,7 @@ const formatRate = (downloadRate: number) => {
     if (downloadRate < 1024) break;
     downloadRate = downloadRate / 1024;
   }
-  return Math.max(downloadRate, 0.1).toFixed(1) + byteUnits[i];
+  return downloadRate.toFixed(1) + byteUnits[i];
 };
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
