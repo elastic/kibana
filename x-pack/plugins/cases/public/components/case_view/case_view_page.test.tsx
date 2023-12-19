@@ -41,7 +41,6 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { actionTypesMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
-import { createQueryWithMarkup } from '../../common/test_utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { CaseMetricsFeature } from '../../../common/types/api';
 import { useGetCategories } from '../../containers/use_get_categories';
@@ -49,6 +48,8 @@ import { useSuggestUserProfiles } from '../../containers/user_profiles/use_sugge
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
+import type { ReturnUsePushToService } from '../use_push_to_service';
+import { usePushToService } from '../use_push_to_service';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -76,6 +77,7 @@ jest.mock('../connectors/resilient/api');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../use_push_to_service');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -96,6 +98,7 @@ const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const usePushToServiceMock = usePushToService as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -125,6 +128,17 @@ const userActionsStats = {
   total: 21,
   totalComments: 9,
   totalOtherActions: 11,
+};
+
+const usePushToServiceMockRes: ReturnUsePushToService = {
+  errorsMsg: [],
+  hasErrorMessages: false,
+  needsToBePushed: true,
+  hasBeenPushed: true,
+  isLoading: false,
+  hasLicenseError: false,
+  hasPushPermissions: true,
+  handlePushToService: jest.fn(),
 };
 
 describe('CaseViewPage', () => {
@@ -210,6 +224,7 @@ describe('CaseViewPage', () => {
     useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
     useUrlParamsMock.mockReturnValue({});
     useGetCurrentUserProfileMock.mockReturnValue({ isLoading: false, data: userProfiles[0] });
+    usePushToServiceMock.mockReturnValue(usePushToServiceMockRes);
 
     appMockRenderer = createAppMockRenderer({ license: platinumLicense });
   });
@@ -226,18 +241,20 @@ describe('CaseViewPage', () => {
       expect(await screen.findByTestId('case-view-metrics-panel')).toBeInTheDocument();
     });
 
-    it('should show closed indicators in header when case is closed', async () => {
-      useUpdateCaseMock.mockImplementation(() => ({
-        ...defaultUpdateCaseState,
-        caseData: basicCaseClosed,
-      }));
+    it('shows the case action bar', async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
+      expect(await screen.findByTestId('case-action-bar-wrapper')).toBeInTheDocument();
+    });
 
-      expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
+    it('shows the connectors in the sidebar', async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('sidebar-connectors')).toBeInTheDocument();
     });
 
     it('should push updates on button click', async () => {
+      usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
       useGetCaseConnectorsMock.mockImplementation(() => ({
         isLoading: false,
         data: {
@@ -257,22 +274,8 @@ describe('CaseViewPage', () => {
       userEvent.click(screen.getByTestId('push-to-external-service'));
 
       await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(usePushToServiceMockRes.handlePushToService).toHaveBeenCalled();
       });
-    });
-
-    it('should disable the push button when connector is invalid', async () => {
-      appMockRenderer.render(
-        <CaseViewPage
-          {...{
-            ...caseProps,
-            caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
-          }}
-        />
-      );
-
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
     });
 
     it('should call onComponentInitialized on mount', async () => {
@@ -341,31 +344,6 @@ describe('CaseViewPage', () => {
 
       expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
       expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
-    });
-
-    describe('Callouts', () => {
-      const errorText =
-        'The connector used to send updates to the external service has been deleted or you do not have the appropriate licenseExternal link(opens in a new tab or window) to use it. To update cases in external systems, select a different connector or create a new one.';
-
-      it('it shows the danger callout when a connector has been deleted', async () => {
-        useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-
-        const getByText = createQueryWithMarkup(screen.getByText);
-        expect(getByText(errorText)).toBeInTheDocument();
-      });
-
-      it('it does NOT shows the danger callout when connectors are loading', async () => {
-        useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-        expect(
-          screen.queryByTestId('case-callout-a25a5b368b6409b179ef4b6c5168244f')
-        ).not.toBeInTheDocument();
-      });
     });
 
     describe('Tabs', () => {
