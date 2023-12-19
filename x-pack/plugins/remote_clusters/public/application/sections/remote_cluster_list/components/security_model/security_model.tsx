@@ -29,7 +29,7 @@ export function SecurityModel({ securityModel }: { securityModel: Cluster['secur
             content={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.table.authTypeWarningMessage"
-                defaultMessage="If you need more fine-grained permissions on your remote cluster, you can now use API keys instead of certificates as authentication mechanism. Create a new remote cluster to use it."
+                defaultMessage="If you need more fine-grained permissions on your remote cluster, you can now use API keys instead of certificates as authentication mechanism."
               />
             }
           />
