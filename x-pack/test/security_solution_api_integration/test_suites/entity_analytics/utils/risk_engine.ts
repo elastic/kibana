@@ -41,8 +41,8 @@ const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
     '@timestamp': timestamp,
     inputs,
     notes,
-    category_5_count: cat5Count,
-    category_5_score: cat5Score,
+    category_2_count: cat2Count,
+    category_2_score: cat2Score,
     ...rest
   } = score;
   return rest;

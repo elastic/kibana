@@ -319,7 +319,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const [rawScore] = scores;
 
           expect(
-            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_5_score!
+            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
           ).to.be.within(
             score.calculated_score_norm! - 0.000000000000001,
             score.calculated_score_norm! + 0.000000000000001

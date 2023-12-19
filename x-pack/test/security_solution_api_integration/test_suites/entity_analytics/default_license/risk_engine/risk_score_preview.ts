@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id_value: 'host-1',
           });
 
-          expect(rawScore.category_1_score! + rawScore.category_5_score!).to.be.within(
+          expect(rawScore.category_1_score! + rawScore.category_2_score!).to.be.within(
             score.calculated_score_norm! - 0.000000000000001,
             score.calculated_score_norm! + 0.000000000000001
           );

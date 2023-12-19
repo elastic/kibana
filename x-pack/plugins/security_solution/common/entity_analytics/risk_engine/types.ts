@@ -63,8 +63,8 @@ export interface RiskScore {
   calculated_score_norm: number;
   category_1_score: number;
   category_1_count: number;
-  category_5_score?: number;
-  category_5_count?: number;
+  category_2_score?: number;
+  category_2_count?: number;
   notes: string[];
   inputs: RiskInputs;
 }

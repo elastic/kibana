@@ -94,8 +94,8 @@ const buildResponseMock = (
         calculated_score_norm: 30,
         category_1_score: 30,
         category_1_count: 12,
-        category_5_score: 0,
-        category_5_count: 0,
+        category_2_score: 0,
+        category_2_count: 0,
         notes: [],
         inputs: [
           {

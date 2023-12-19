@@ -77,8 +77,8 @@ const formatForResponse = ({
   const categoryFiveCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
-    category_5_score: categoryFiveScore,
-    category_5_count: categoryFiveCount,
+    category_2_score: categoryFiveScore,
+    category_2_count: categoryFiveCount,
     criticality_level: criticality?.criticality_level,
     criticality_modifier: criticalityModifier,
   };
