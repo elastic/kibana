@@ -14,7 +14,7 @@ import {
   BrowserFields,
   ConfigKey,
   CommonFields,
-  DataStream,
+  MonitorTypeEnum,
   Locations,
   ProjectMonitor,
   ScheduleUnit,
@@ -298,7 +298,7 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
   }, {});
 
 export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
-  const defaultFields = DEFAULT_FIELDS[monitor.type as DataStream];
+  const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);
   const {

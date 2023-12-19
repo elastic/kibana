@@ -49,6 +49,9 @@ export async function getBuckets({
       size: 0,
       query: {
         bool: {
+          must_not: {
+            term: { 'error.type': 'crash' },
+          },
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),

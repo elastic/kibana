@@ -85,7 +85,7 @@ export function AskAssistantButton({
         <EuiToolTip
           position="top"
           title={i18n.translate('xpack.observabilityAiAssistant.askAssistantButton.popoverTitle', {
-            defaultMessage: 'Elastic Assistant',
+            defaultMessage: 'AI Assistant for Observability',
           })}
           content={i18n.translate(
             'xpack.observabilityAiAssistant.askAssistantButton.popoverContent',
@@ -98,7 +98,7 @@ export function AskAssistantButton({
             aria-label={i18n.translate(
               'xpack.observabilityAiAssistant.askAssistantButton.popoverTitle',
               {
-                defaultMessage: 'Elastic Assistant',
+                defaultMessage: 'AI Assistant for Observability',
               }
             )}
             data-test-subj="observabilityAiAssistantAskAssistantButtonButtonIcon"

@@ -8,6 +8,8 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   ConfigSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
   SecretsSchema,
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -25,3 +27,5 @@ export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
 export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;

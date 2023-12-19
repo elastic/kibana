@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../common/constants';
 import type { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
 import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
@@ -44,11 +45,15 @@ export function handleEvents(
     } = req;
     const eventsClient = (await context.core).elasticsearch.client;
     const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
+    const shouldExcludeColdAndFrozenTiers = await (
+      await context.core
+    ).uiSettings.client.get<boolean>(EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER);
 
     const eventsQuery = new EventsQuery({
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
+      shouldExcludeColdAndFrozenTiers,
     });
     const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({

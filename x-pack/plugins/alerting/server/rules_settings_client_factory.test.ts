@@ -15,7 +15,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';

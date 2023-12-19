@@ -8,7 +8,7 @@
 import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
+import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
 interface TestDataTableActionLogPatternAnalysis {
   type: 'LogPatternAnalysis';

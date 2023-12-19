@@ -23,6 +23,20 @@ export interface ScoreByPolicyTemplateBucket {
           total_findings: { value: number };
         }>;
       };
+      score_by_benchmark_id: {
+        buckets: Array<{
+          key: string; // benchmark id
+          doc_count: number;
+          benchmark_versions: {
+            buckets: Array<{
+              key: string; // benchmark version
+              passed_findings: { doc_count: number };
+              failed_findings: { doc_count: number };
+              total_findings: { value: number };
+            }>;
+          };
+        }>;
+      };
     }>;
   };
 }

@@ -14,3 +14,27 @@ export const UPGRADE_INVESTIGATION_GUIDE = (requiredLicense: string) =>
       requiredLicense,
     },
   });
+
+export const UPGRADE_ALERT_ASSIGNMENTS = (requiredLicense: string) =>
+  i18n.translate('securitySolutionPackages.alertAssignments.upsell', {
+    defaultMessage: 'Upgrade to {requiredLicense} to make use of alert assignments',
+    values: {
+      requiredLicense,
+    },
+  });
+
+export const ALERT_SUPPRESSION_RULE_FORM = (requiredLicense: 'Platinum') =>
+  i18n.translate('securitySolutionPackages.alertSuppressionRuleForm.upsell', {
+    defaultMessage: 'Alert suppression is enabled with {requiredLicense} license or above',
+    values: {
+      requiredLicense,
+    },
+  });
+
+export const ALERT_SUPPRESSION_RULE_DETAILS = i18n.translate(
+  'securitySolutionPackages.alertSuppressionRuleDetails.upsell',
+  {
+    defaultMessage:
+      'Alert suppression is configured but will not be applied due to insufficient licensing',
+  }
+);

@@ -8,8 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {
@@ -81,14 +82,21 @@ export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  logger: Logger
 ): Promise<ComplianceDashboardData['stats']> => {
-  const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
-    getEvaluationsQuery(query, pitId, runtimeMappings)
-  );
+  try {
+    const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
+      getEvaluationsQuery(query, pitId, runtimeMappings)
+    );
 
-  const findingsEvaluations = evaluationsQueryResult.aggregations;
-  if (!findingsEvaluations) throw new Error('missing findings evaluations');
+    const findingsEvaluations = evaluationsQueryResult.aggregations;
+    if (!findingsEvaluations) throw new Error('missing findings evaluations');
 
-  return getStatsFromFindingsEvaluationsAggs(findingsEvaluations);
+    return getStatsFromFindingsEvaluationsAggs(findingsEvaluations);
+  } catch (err) {
+    logger.error(`Failed to fetch stats ${err.message}`);
+    logger.error(err);
+    throw err;
+  }
 };

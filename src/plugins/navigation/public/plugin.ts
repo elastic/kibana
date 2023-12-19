@@ -10,23 +10,30 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import {
-  NavigationPublicPluginSetup,
-  NavigationPublicPluginStart,
-  NavigationPluginStartDependencies,
+  NavigationPublicSetup,
+  NavigationPublicStart,
+  NavigationPublicSetupDependencies,
+  NavigationPublicStartDependencies,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { getWorkflows } from './workflows';
 
 export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
+  implements
+    Plugin<
+      NavigationPublicSetup,
+      NavigationPublicStart,
+      NavigationPublicSetupDependencies,
+      NavigationPublicStartDependencies
+    >
 {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): NavigationPublicPluginSetup {
+  public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -36,8 +43,8 @@ export class NavigationPublicPlugin
 
   public start(
     core: CoreStart,
-    { unifiedSearch, cloud }: NavigationPluginStartDependencies
-  ): NavigationPublicPluginStart {
+    { unifiedSearch, cloud }: NavigationPublicStartDependencies
+  ): NavigationPublicStart {
     const chrome = core.chrome as InternalChromeStart;
 
     const serverless = {

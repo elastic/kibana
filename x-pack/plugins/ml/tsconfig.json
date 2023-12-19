@@ -112,5 +112,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-ecs",
     "@kbn/core-chrome-browser",
+    "@kbn/ml-data-view-utils",
+    "@kbn/ml-creation-wizard-utils",
   ],
 }

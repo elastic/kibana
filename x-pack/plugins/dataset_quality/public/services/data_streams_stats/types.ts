@@ -7,7 +7,9 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
+  DataStreamDegradedDocsStatServiceResponse,
   DataStreamStatServiceResponse,
+  GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsStatsQuery,
 } from '../../../common/data_streams_stats';
 
@@ -23,4 +25,7 @@ export interface DataStreamsStatsServiceStartDeps {
 
 export interface IDataStreamsStatsClient {
   getDataStreamsStats(params?: GetDataStreamsStatsQuery): Promise<DataStreamStatServiceResponse>;
+  getDataStreamsDegradedStats(
+    params?: GetDataStreamsDegradedDocsStatsQuery
+  ): Promise<DataStreamDegradedDocsStatServiceResponse>;
 }

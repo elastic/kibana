@@ -191,7 +191,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should render the flyout if the output provided is a remote ES output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
     const { utils } = renderFlyout({
       type: 'remote_elasticsearch',
       name: 'remote es output',
@@ -208,6 +210,8 @@ describe('EditOutputFlyout', () => {
     expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
       'Remote Elasticsearch'
     );
+
+    expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
   });
 
   it('should not display remote ES output in type lists if serverless', async () => {

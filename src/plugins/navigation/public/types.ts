@@ -12,11 +12,11 @@ import { CloudStart } from '@kbn/cloud-plugin/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
-export interface NavigationPublicPluginSetup {
+export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-export interface NavigationPublicPluginStart {
+export interface NavigationPublicStart {
   ui: {
     TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
     AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
@@ -27,7 +27,10 @@ export interface NavigationPublicPluginStart {
   };
 }
 
-export interface NavigationPluginStartDependencies {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface NavigationPublicSetupDependencies {}
+
+export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud: CloudStart;
 }

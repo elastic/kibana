@@ -1596,14 +1596,11 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.path",
-            "type": "Array",
+            "type": "string",
             "tags": [],
             "label": "path",
             "description": [
               "Path in the tree of the node"
-            ],
-            "signature": [
-              "string[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -1657,12 +1654,30 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.isActive",
+            "id": "def-common.ChromeProjectNavigationNode.renderItem",
+            "type": "Function",
+            "tags": [],
+            "label": "renderItem",
+            "description": [
+              "\nHandler to render the node item with custom JSX. This handler is added to render the `children` of\nthe Navigation.Item component when React components are used to declare the navigation tree."
+            ],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.isElasticInternalLink",
             "type": "CompoundType",
             "tags": [],
-            "label": "isActive",
+            "label": "isElasticInternalLink",
             "description": [
-              "\nFlag to indicate if the node is currently active."
+              "\nFlag to indicate if the node is an \"external\" cloud link"
             ],
             "signature": [
               "boolean | undefined"
@@ -3226,7 +3241,7 @@
         "label": "EuiThemeSize",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | \"xxl\""
+          "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,

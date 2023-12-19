@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -18,59 +18,31 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WelcomeBanner } from '@kbn/search-api-panels';
 
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-
+import { ApiKeyPanel } from '../../../shared/api_key/api_key_panel';
 import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SearchLabsBanner } from '../../../shared/search_labs_banner/search_labs_banner';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import headerImage from '../../assets/search_header.svg';
+import headerImage from '../../assets/search_header.png';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
+import { WelcomeBanner } from './welcome_banner';
 
-interface ProductSelectorProps {
-  access: {
-    hasAppSearchAccess?: boolean;
-    hasWorkplaceSearchAccess?: boolean;
-  };
-  isWorkplaceSearchAdmin: boolean;
-}
-
-export const ProductSelector: React.FC<ProductSelectorProps> = ({
-  access,
-  isWorkplaceSearchAdmin,
-}) => {
-  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
+export const ProductSelector: React.FC = () => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
-  const { security } = useValues(KibanaLogic);
-
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
-
-  useEffect(() => {
-    try {
-      security.authc
-        .getCurrentUser()
-        .then(setUser)
-        .catch(() => {
-          setUser(null);
-        });
-    } catch {
-      setUser(null);
-    }
-  }, [security.authc]);
+  const { user } = useValues(KibanaLogic);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
@@ -81,17 +53,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0} customPageSections>
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
-          <EuiText color="ghost">
-            <WelcomeBanner user={user || undefined} image={headerImage} showDescription={false} />
-          </EuiText>
-        </EuiPageTemplate.Section>
-
-        <EuiPageTemplate.Section>
+          <WelcomeBanner user={user || undefined} image={headerImage} />
           <SetPageChrome />
           <SendTelemetry action="viewed" metric="overview" />
         </EuiPageTemplate.Section>
 
-        <EuiPageTemplate.Section>
+        <EuiPageTemplate.Section color="subdued">
+          <ApiKeyPanel />
           <EuiSpacer size="xl" />
           <EuiTitle>
             <h4>
@@ -150,15 +118,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             <EuiFlexItem>
               <ElasticsearchProductCard />
             </EuiFlexItem>
-            {(hasAppSearchAccess || hasWorkplaceSearchAccess) && (
-              <EuiFlexItem>
-                <EnterpriseSearchProductCard
-                  hasAppSearchAccess={hasAppSearchAccess ?? false}
-                  hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
-                  isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <SearchLabsBanner />
+            </EuiFlexItem>
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
                 <SetupGuideCta />

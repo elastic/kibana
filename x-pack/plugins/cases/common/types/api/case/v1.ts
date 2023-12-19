@@ -189,11 +189,11 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * The status of the case (open, closed, in-progress)
        */
-      status: CaseStatusRt,
+      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
       /**
        * The severity of the case
        */
-      severity: CaseSeverityRt,
+      severity: rt.union([CaseSeverityRt, rt.array(CaseSeverityRt)]),
       /**
        * The uids of the user profiles to filter by
        */

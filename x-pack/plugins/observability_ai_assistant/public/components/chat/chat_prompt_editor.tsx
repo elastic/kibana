@@ -6,22 +6,23 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFocusTrap,
   EuiPanel,
   EuiSpacer,
   EuiTextArea,
   keys,
-  EuiFocusTrap,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { MessageRole, type Message } from '../../../common';
-import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
+import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
+import { TelemetryEventTypeWithPayload, TELEMETRY } from '../../analytics';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
@@ -30,7 +31,8 @@ export interface ChatPromptEditorProps {
   initialSelectedFunctionName?: string;
   initialFunctionPayload?: string;
   trigger?: MessageRole;
-  onSubmit: (message: Message) => Promise<void>;
+  onSubmit: (message: Message) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
 }
 
 export function ChatPromptEditor({
@@ -40,6 +42,7 @@ export function ChatPromptEditor({
   initialSelectedFunctionName,
   initialFunctionPayload,
   onSubmit,
+  onSendTelemetry,
 }: ChatPromptEditorProps) {
   const isFocusTrapEnabled = Boolean(initialPrompt);
 
@@ -112,9 +115,11 @@ export function ChatPromptEditor({
     setFunctionPayload(undefined);
     handleResetTextArea();
 
+    let message: Message;
+
     try {
       if (selectedFunctionName) {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.Assistant,
@@ -125,20 +130,27 @@ export function ChatPromptEditor({
               arguments: currentPayload,
             },
           },
-        });
+        };
+        onSubmit(message);
 
         setFunctionPayload(undefined);
         setSelectedFunctionName(undefined);
       } else {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: { role: MessageRole.User, content: currentPrompt },
-        });
+        };
+        onSubmit(message);
       }
+
+      onSendTelemetry({
+        type: TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat,
+        payload: message,
+      });
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+  }, [functionPayload, loading, onSendTelemetry, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);
@@ -216,7 +228,10 @@ export function ChatPromptEditor({
               {selectedFunctionName ? (
                 <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
                   <CodeEditor
-                    aria-label="payloadEditor"
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatPromptEditor.codeEditor.payloadEditorLabel',
+                      { defaultMessage: 'payloadEditor' }
+                    )}
                     data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
                     fullWidth
                     height={functionEditorLineCount > 8 ? '200px' : '120px'}
@@ -284,7 +299,10 @@ export function ChatPromptEditor({
           <EuiSpacer size="xl" />
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-            aria-label="Submit"
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+              { defaultMessage: 'Submit' }
+            )}
             disabled={selectedFunctionName ? false : !prompt?.trim() || loading || disabled}
             display={
               selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'

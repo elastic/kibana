@@ -270,7 +270,17 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 },
               },
             },
+            service_token: {
+              dynamic: false,
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
           },
+        },
+        preset: {
+          type: 'keyword',
+          index: false,
         },
       },
     },
@@ -300,6 +310,38 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               service_token: { type: 'keyword', index: false },
+            },
+          },
+        ],
+      },
+      '3': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              secrets: {
+                properties: {
+                  service_token: {
+                    dynamic: false,
+                    properties: {
+                      id: { type: 'keyword' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      '4': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              preset: {
+                type: 'keyword',
+                index: false,
+              },
             },
           },
         ],
@@ -451,6 +493,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             deferred: { type: 'boolean' },
           },
         },
+        latest_install_failed_attempts: { type: 'object', enabled: false },
         installed_kibana: {
           dynamic: false,
           properties: {},
@@ -479,6 +522,18 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             },
           },
         },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              latest_install_failed_attempts: { type: 'object', enabled: false },
+            },
+          },
+        ],
       },
     },
     migrations: {
@@ -659,6 +714,8 @@ export function registerEncryptedSavedObjects(
       'timeout',
       'broker_timeout',
       'required_acks',
+      'preset',
+      'secrets',
     ]),
   });
   // Encrypted saved objects

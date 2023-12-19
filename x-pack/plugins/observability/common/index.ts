@@ -41,10 +41,13 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
-  profilingUseLegacyFlamegraphAPI,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
+  profilingUseLegacyCo2Calculation,
+  profilingPervCPUWattArm64,
+  profilingAWSCostDiscountRate,
+  profilingCostPervCPUPerHour,
 } from './ui_settings_keys';
 
 export {
