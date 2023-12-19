@@ -101,16 +101,10 @@ export interface RuleExecutorServices<
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
   /**
-   * Deprecate alertFactory and remove when all rules are onboarded to
-   * the alertsClient
-   * @deprecated
-   */
-  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
-  /**
    * Only available when framework alerts are enabled and rule
    * type has registered alert context with the framework with shouldWrite set to true
    */
-  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
+  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
