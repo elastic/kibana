@@ -8,7 +8,7 @@
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
-  useUiSetting$,
+  useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -19,7 +19,7 @@ import {
 import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -132,7 +132,10 @@ function MountApmHeaderActionMenu() {
 }
 
 export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const {
+    services: { theme },
+  } = useKibana();
+  const darkMode = useMemo(() => theme?.getTheme().darkMode ?? false, [theme]);
 
   return (
     <ThemeProvider
