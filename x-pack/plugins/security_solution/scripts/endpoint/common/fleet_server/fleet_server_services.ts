@@ -351,7 +351,8 @@ const startFleetServerWithDocker = async ({
       } catch (error) {
         if (retryAttempt < 1) {
           retryAttempt++;
-          log.info(`Failed to start fleet server, retrying. Error: ${error.message}`);
+          log.error(`Failed to start fleet server, retrying. Error: ${error.message}`);
+          log.verbose(dump(error));
           return attemptServerlessFleetServerSetup();
         }
 

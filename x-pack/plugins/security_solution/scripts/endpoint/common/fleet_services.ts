@@ -215,7 +215,7 @@ export const waitForHostToEnroll = async (
     );
   }
 
-  log.info(`Host [${hostname}] has been enrolled with fleet`);
+  log.debug(`Host [${hostname}] has been enrolled with fleet`);
   log.verbose(found);
 
   if (!awaitMetadata) {
@@ -223,7 +223,7 @@ export const waitForHostToEnroll = async (
   }
   log.info('Querying indices');
 
-  log.debug(
+  log.verbose(
     JSON.stringify(
       await esClient?.search({
         index: [
@@ -236,7 +236,7 @@ export const waitForHostToEnroll = async (
       2
     )
   );
-  log.info('Successfully queried indices.');
+  log.debug('Successfully queried indices.');
 
   log.info(`Awaiting host to show up in Metadata`);
 

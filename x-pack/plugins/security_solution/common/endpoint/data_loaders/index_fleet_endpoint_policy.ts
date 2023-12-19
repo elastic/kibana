@@ -135,7 +135,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     };
 
     let packagePolicy: CreatePackagePolicyResponse | undefined;
-    log?.info(`Creating package policy for ${policyName}`);
+    log?.debug(`Creating integration policy with name: ${policyName}`);
 
     while (!packagePolicy && !hasTimedOut()) {
       packagePolicy = await retryOnError(
@@ -153,7 +153,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       throw new Error(`Create package policy failed`);
     }
 
-    log?.info(`Created package policy for ${policyName}`);
+    log?.verbose(`Integration policy created:`, JSON.stringify(packagePolicy, null, 2));
 
     response.integrationPolicies.push(packagePolicy.item as PolicyData);
 
