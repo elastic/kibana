@@ -294,7 +294,7 @@ export const ModelSelect: React.FC = () => {
 
   const { modelID, pipelineName, isPipelineNameUserSupplied } = configuration;
   const rowHeight = useIsWithinMaxBreakpoint('s') ? euiTheme.base * 8 : euiTheme.base * 6;
-  const maxVisibleOptions = 4;
+  const maxVisibleOptions = 4.5;
   const [listHeight, setListHeight] = useState(maxVisibleOptions * rowHeight);
 
   const getModelSelectOptionProps = (models: MlModel[]): ModelSelectOptionProps[] =>
