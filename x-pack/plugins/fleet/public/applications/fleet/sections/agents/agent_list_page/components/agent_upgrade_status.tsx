@@ -35,13 +35,33 @@ export function getUpgradeStartDelay(scheduledAt?: string): string {
   return ` The upgrade will start in less than ${Math.ceil(timeDiffMillis / 36e5)} hours.`;
 }
 
-export function getDownloadEstimate(downloadPercent?: number): string {
-  if (!downloadPercent || downloadPercent === 0) {
+export function getDownloadEstimate(metadata?: AgentUpgradeDetails['metadata']): string {
+  if (
+    !metadata ||
+    (metadata.download_percent === undefined && metadata.download_rate === undefined)
+  ) {
     return '';
   }
+  let tooltip = '';
+  if (metadata.download_percent !== undefined) {
+    tooltip = `${metadata.download_percent}%`;
+  }
+  if (metadata.download_rate !== undefined) {
+    tooltip += ` at ${formatRate(metadata.download_rate)}`;
+  }
 
-  return ` (${downloadPercent}%)`;
+  return ` (${tooltip.trim()})`;
 }
+
+const formatRate = (downloadRate: number) => {
+  let i = 0;
+  const byteUnits = [' Bps', ' kBps', ' MBps', ' GBps'];
+  for (; i < byteUnits.length - 1; i++) {
+    if (downloadRate < 1024) break;
+    downloadRate = downloadRate / 1024;
+  }
+  return downloadRate.toFixed(1) + byteUnits[i];
+};
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   switch (agentUpgradeDetails?.state) {
@@ -97,9 +117,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
             defaultMessage="Downloading the new agent artifact version{downloadEstimate}."
             values={{
-              downloadEstimate: getDownloadEstimate(
-                agentUpgradeDetails?.metadata?.download_percent
-              ),
+              downloadEstimate: getDownloadEstimate(agentUpgradeDetails?.metadata),
             }}
           />
         ),
@@ -219,13 +237,38 @@ export const AgentUpgradeStatus: React.FC<{
   agentUpgradeStartedAt?: string | null;
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ isAgentUpgradable, agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
+  notUpgradeableMessage?: string | null;
+}> = ({
+  isAgentUpgradable,
+  agentUpgradeStartedAt,
+  agentUpgradedAt,
+  agentUpgradeDetails,
+  notUpgradeableMessage,
+}) => {
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
   const minVersion = '8.12';
+
+  if (!isAgentUpgradable && notUpgradeableMessage) {
+    return (
+      <EuiIconTip
+        type="iInCircle"
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"
+            defaultMessage="Agent not upgradeable: {reason}"
+            values={{
+              reason: notUpgradeableMessage,
+            }}
+          />
+        }
+        color="subdued"
+      />
+    );
+  }
 
   if (isAgentUpgradable) {
     return (

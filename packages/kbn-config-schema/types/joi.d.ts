@@ -7,13 +7,20 @@
  */
 
 import * as Joi from 'joi';
-import { ByteSizeValue } from '../src/byte_size_value';
+import type { ByteSizeValue } from '../src/byte_size_value';
+import type { DurationValueType } from '../src/types/duration_type';
 
 declare module 'joi' {
   interface BytesSchema extends AnySchema {
     min(limit: number | string | ByteSizeValue): this;
 
     max(limit: number | string | ByteSizeValue): this;
+  }
+
+  interface DurationSchema extends AnySchema {
+    min(limit: DurationValueType): this;
+
+    max(limit: DurationValueType): this;
   }
 
   interface MapSchema extends AnySchema {
@@ -34,7 +41,7 @@ declare module 'joi' {
 
   export type JoiRoot = Joi.Root & {
     bytes: () => BytesSchema;
-    duration: () => AnySchema;
+    duration: () => DurationSchema;
     map: () => MapSchema;
     record: () => RecordSchema;
     stream: () => AnySchema;

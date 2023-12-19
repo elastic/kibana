@@ -19,6 +19,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Rx.Observable,
         }
       }
