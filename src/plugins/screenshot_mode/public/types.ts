@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface ScreenshotModePluginSetup {
+export interface ScreenshotModePublicSetup {
   /**
    * Retrieves a value from the screenshotting context.
    * @param key Context key to get.
@@ -22,4 +22,10 @@ export interface ScreenshotModePluginSetup {
   isScreenshotMode(): boolean;
 }
 
-export type ScreenshotModePluginStart = ScreenshotModePluginSetup;
+export type ScreenshotModePublicStart = ScreenshotModePublicSetup;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ScreenshotModePublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ScreenshotModePublicStartDependencies {}
