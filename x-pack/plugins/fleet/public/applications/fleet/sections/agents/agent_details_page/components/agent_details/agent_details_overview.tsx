@@ -149,21 +149,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description: agent.last_checkin_message ? agent.last_checkin_message : '-',
             },
             {
-              title: i18n.translate('xpack.fleet.agentDetails.upgradeDetailsLabel', {
-                defaultMessage: 'Upgrade details',
-              }),
-              description: (
-                <AgentUpgradeStatus
-                  isAgentUpgradable={
-                    !!(latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion))
-                  }
-                  agentUpgradeStartedAt={agent.upgrade_started_at}
-                  agentUpgradedAt={agent.upgraded_at}
-                  agentUpgradeDetails={agent.upgrade_details}
-                />
-              ),
-            },
-            {
               title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
                 defaultMessage: 'Agent ID',
               }),
@@ -205,6 +190,25 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 ) : (
                   '-'
                 ),
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.upgradeDetailsLabel', {
+                defaultMessage: 'Upgrade details',
+              }),
+              description: (
+                <AgentUpgradeStatus
+                  isAgentUpgradable={
+                    !!(
+                      agentPolicy?.is_managed !== true &&
+                      latestAgentVersion &&
+                      isAgentUpgradeable(agent, latestAgentVersion)
+                    )
+                  }
+                  agentUpgradeStartedAt={agent.upgrade_started_at}
+                  agentUpgradedAt={agent.upgraded_at}
+                  agentUpgradeDetails={agent.upgrade_details}
+                />
+              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.hostNameLabel', {
