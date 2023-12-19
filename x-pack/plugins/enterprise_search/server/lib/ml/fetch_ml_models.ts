@@ -6,6 +6,7 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
@@ -207,7 +208,9 @@ const getUserFriendlyTitle = (modelId: string, modelType: string) => {
   return MODEL_TITLES_BY_TYPE[modelType] !== undefined
     ? MODEL_TITLES_BY_TYPE[modelType]!
     : modelId === LANG_IDENT_MODEL_ID
-    ? 'Lanugage Identification'
+    ? i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
+        defaultMessage: 'Language Identification',
+      })
     : modelId;
 };
 
