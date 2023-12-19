@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { generatePath } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Connector } from '@kbn/search-connectors';
-import { EDIT_CONNECTOR_PATH } from '../../components/connectors_router';
+import { EDIT_CONNECTOR_PATH } from '../../constants';
 import { useKibanaServices } from '../use_kibana';
 
 export const useCreateConnector = () => {
