@@ -16,6 +16,7 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -91,7 +92,8 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   Record<string, unknown>,
   Record<string, unknown>,
   AnomalyDetectionJobsHealthAlertContext,
-  AnomalyDetectionJobRealtimeIssue
+  AnomalyDetectionJobRealtimeIssue,
+  Alert
 >;
 
 export function registerJobsMonitoringRuleType({
@@ -106,7 +108,7 @@ export function registerJobsMonitoringRuleType({
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
     AnomalyDetectionJobRealtimeIssue,
-    'recovered',
+    RecoveredActionGroupId,
     Alert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
@@ -150,6 +152,11 @@ export function registerJobsMonitoringRuleType({
         services,
         rule: { name },
       } = options;
+      const { alertsClient } = services;
+
+      if (!alertsClient) {
+        throw new Error('no alerts client');
+      }
 
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
@@ -169,7 +176,7 @@ export function registerJobsMonitoringRuleType({
         );
 
         unhealthyTests.forEach(({ name: alertName, context }) => {
-          services.alertsClient.report({
+          alertsClient.report({
             id: alertName,
             actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
             context,
@@ -178,11 +185,11 @@ export function registerJobsMonitoringRuleType({
       }
 
       // Set context for recovered alerts
-      for (const recoveredAlert of services.alertsClient.getRecoveredAlerts()) {
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
         const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          services.alertsClient.setAlertData({
+          alertsClient.setAlertData({
             id: recoveredAlertId,
             context: testResult.context,
           });

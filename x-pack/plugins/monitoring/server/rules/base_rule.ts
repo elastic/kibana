@@ -261,6 +261,11 @@ export class BaseRule<Context extends AlertInstanceContext> {
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
+    const { alertsClient } = services;
+    if (!alertsClient) {
+      throw new Error(`no alerts client`);
+    }
+
     const esClient = services.scopedClusterClient.asCurrentUser;
     const clusters = await this.fetchClusters(esClient, params as CommonAlertParams);
     const data = await this.fetchData(params, esClient, clusters);
@@ -333,13 +338,13 @@ export class BaseRule<Context extends AlertInstanceContext> {
 
           const alertInstanceState = { alertStates: newAlertStates };
           // update the alert's state with the new node states
-          const alertId = node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid;
-          services.alertsClient.report({
-            id: alertId,
-            actionGroup: 'default',
-            state: alertInstanceState,
-          });
           if (newAlertStates.length) {
+            const alertId = node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid;
+            services.alertsClient?.report({
+              id: alertId,
+              actionGroup: 'default',
+              state: alertInstanceState,
+            });
             this.executeActions(services, alertId, alertInstanceState, null, cluster);
             state.lastExecutedAction = currentUTC;
           }

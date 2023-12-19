@@ -481,11 +481,6 @@ export class TaskRunner<
             scopedClusterClient.asInternalUser
           );
 
-          const executorAlertsClient = alertsClient.client();
-          if (!executorAlertsClient) {
-            throw new Error(`Alerts client not defined!`);
-          }
-
           executorResult = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
@@ -494,6 +489,7 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
+                alertFactory: alertsClient.factory(),
                 alertsClient: executorAlertsClient,
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,

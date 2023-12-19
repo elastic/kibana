@@ -13,6 +13,7 @@ import {
   DEFAULT_AAD_CONFIG,
 } from '@kbn/alerting-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
 
 type Params = TypeOf<typeof Params>;
 const Params = schema.object(
@@ -45,7 +46,16 @@ interface State extends RuleTypeState {
 
 type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default', Alert>;
 
-type RuleType = BaseRuleType<Params, never, State, {}, {}, 'default', 'recovered', Alert>;
+type RuleType = BaseRuleType<
+  Params,
+  never,
+  State,
+  {},
+  {},
+  'default',
+  RecoveredActionGroupId,
+  Alert
+>;
 export const ruleType: RuleType = getPatternRuleType();
 
 function getPatternRuleType(): RuleType {

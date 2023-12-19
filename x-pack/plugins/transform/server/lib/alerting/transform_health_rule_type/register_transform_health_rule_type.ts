@@ -11,6 +11,7 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-plugin/server';
@@ -75,7 +76,7 @@ export function getTransformHealthRuleType(
   AlertInstanceState,
   TransformHealthAlertContext,
   TransformIssue,
-  'recovered',
+  RecoveredActionGroupId,
   Alert
 > {
   return {
@@ -119,6 +120,10 @@ export function getTransformHealthRuleType(
         services: { scopedClusterClient, alertsClient, uiSettingsClient },
         params,
       } = options;
+
+      if (!alertsClient) {
+        throw new Error(`no alerts client`);
+      }
 
       const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(
         uiSettingsClient

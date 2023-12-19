@@ -110,7 +110,7 @@ export interface RuleExecutorServices<
    * Only available when framework alerts are enabled and rule
    * type has registered alert context with the framework with shouldWrite set to true
    */
-  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds>;
+  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;

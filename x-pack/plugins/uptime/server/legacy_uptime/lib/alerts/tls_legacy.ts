@@ -91,7 +91,7 @@ export const getCertSummary = (
   };
 };
 
-export const tlsLegacyAlertFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> = (
+export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> = (
   _server,
   libs
 ) => ({
@@ -117,6 +117,9 @@ export const tlsLegacyAlertFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> 
   minimumLicenseRequired: 'basic',
   alerts: DEFAULT_AAD_CONFIG,
   async executor({ services: { alertsClient, scopedClusterClient, savedObjectsClient }, state }) {
+    if (!alertsClient) {
+      throw new Error(`no alerts client`);
+    }
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = new UptimeEsClient(
