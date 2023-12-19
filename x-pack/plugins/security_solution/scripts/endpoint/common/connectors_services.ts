@@ -59,7 +59,7 @@ export const createConnector = async (
 ): Promise<Connector> => {
   return kbnClient
     .request<Connector>({
-      path: '/api/actions/connectors',
+      path: '/api/actions/connector',
       method: 'POST',
       body: createPayload,
     })

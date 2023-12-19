@@ -22,6 +22,7 @@ import {
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import {
+  createDetectionEngineSentinelOneRuleIfNeeded,
   createSentinelOneStackConnectorIfNeeded,
   installSentinelOneAgent,
   S1Client,
@@ -161,12 +162,15 @@ const runCli: RunFn = async ({ log, flags }) => {
       agentPolicyId,
     });
   } else {
-    log.info(
+    log.debug(
       `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
     );
   }
 
-  await createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url });
+  await Promise.all([
+    createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url }),
+    createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
+  ]);
 
   log.info(`Done!
 

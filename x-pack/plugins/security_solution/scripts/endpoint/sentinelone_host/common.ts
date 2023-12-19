@@ -10,6 +10,7 @@ import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { type RuleResponse } from '../../../common/api/detection_engine';
 import { dump } from '../endpoint_agent_runner/utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
@@ -21,6 +22,7 @@ import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import type { HostVm } from '../common/types';
 
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
+import { createRule, findRules } from '../common/detection_rules_services';
 
 interface S1ClientOptions {
   /** The base URL for SentinelOne */
@@ -249,4 +251,37 @@ export const createSentinelOneStackConnectorIfNeeded = async ({
     },
     connector_type_id: SENTINELONE_CONNECTOR_ID,
   });
+};
+
+export const createDetectionEngineSentinelOneRuleIfNeeded = async (
+  kbnClient: KbnClient,
+  log: ToolingLog
+): Promise<RuleResponse> => {
+  const ruleName = 'Promote SentinelOne alerts';
+  const sentinaleOneAlertsIndexPattern = 'logs-sentinel_one.alert';
+  const ruleQueryValue = 'observer.serial_number:*';
+
+  const { data } = await findRules(kbnClient, {
+    filter: `(alert.attributes.params.query: "${ruleQueryValue}" AND alert.attributes.params.index: ${sentinaleOneAlertsIndexPattern})`,
+  });
+
+  if (data.length) {
+    log.info(
+      `Detection engine rule for SentinelOne alerts already exists [${data[0].name}]. No need to create a new one.`
+    );
+
+    return data[0];
+  }
+
+  log.info(`Creating new detection engine rule named [${ruleName}] for SentinelOne`);
+
+  const createdRule = await createRule(kbnClient, {
+    index: [sentinaleOneAlertsIndexPattern],
+    query: ruleQueryValue,
+    from: 'now-3660s',
+  });
+
+  log.verbose(dump(createdRule));
+
+  return createdRule;
 };
