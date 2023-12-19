@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
+import { get } from 'lodash';
 
-import {
-  OptionsListRequestBody,
-  OptionsListSuggestions,
-  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
-} from '../../common/options_list/types';
-import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
+import { getIpRangeQuery } from '../../../common/options_list/ip_search';
+import { isValidSearch } from '../../../common/options_list/is_valid_search';
+import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
+import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import {
   getEscapedWildcardQuery,
   getIpBuckets,
@@ -23,19 +22,28 @@ import {
 } from './options_list_suggestion_query_helpers';
 
 /**
- * Suggestion aggregations
+ * Type-specific search suggestion aggregations. These queries are highly impacted by the field type.
  */
-export const getExpensiveSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListRequestBody) => {
-  if (fieldSpec?.type === 'boolean') {
-    return expensiveSuggestionAggSubtypes.boolean;
+export const getSearchSuggestionsAggregationBuilder = (request: OptionsListRequestBody) => {
+  const { fieldSpec } = request;
+
+  // note that date and boolean fields are non-searchable, so type-specific search aggs are not necessary;
+  // number fields, on the other hand, only support exact match searching - so, this also does not need a
+  // type-specific agg because it will be handled by `exactMatchSearchAggregation`
+  switch (fieldSpec?.type) {
+    case 'ip': {
+      return suggestionAggSubtypes.ip;
+    }
+    case 'string': {
+      return suggestionAggSubtypes.textOrKeywordOrNested;
+    }
+    default:
+      // safe guard just in case an invalid/unsupported field type somehow got through
+      return getExactMatchAggregationBuilder();
   }
-  if (fieldSpec?.type === 'ip') {
-    return expensiveSuggestionAggSubtypes.ip;
-  }
-  return expensiveSuggestionAggSubtypes.textOrKeywordOrNested;
 };
 
-const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
+const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
   /**
    * The "textOrKeywordOrNested" query / parser should be used whenever the field is built on some type of string field,
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
@@ -49,28 +57,19 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       sort,
       size,
     }: OptionsListRequestBody) => {
+      const hasSearchString = searchString && searchString.length > 0;
+      if (!hasSearchString || fieldSpec?.type === 'date') {
+        // we can assume that this is only ever called with a search string, and date fields are not
+        // currently searchable; so, if any of these things is true, this is invalid.
+        return undefined;
+      }
+
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       let textOrKeywordQuery: any = {
-        suggestions: {
-          terms: {
-            size,
-            field: fieldName,
-            shard_size: 10,
-            order: getSortType(sort),
-          },
-        },
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
-        },
-      };
-      // disabling for date fields because applying a search string will return an error
-      if (fieldSpec?.type !== 'date' && searchString && searchString.length > 0) {
-        textOrKeywordQuery = {
-          filteredSuggestions: {
-            filter: {
-              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
+        filteredSuggestions: {
+          filter: {
+            [(searchTechnique ?? getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]:
+              {
                 [fieldName]: {
                   value:
                     searchTechnique === 'wildcard'
@@ -79,11 +78,25 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
                   case_insensitive: true,
                 },
               },
-            },
-            aggs: { ...textOrKeywordQuery },
           },
-        };
-      }
+          aggs: {
+            suggestions: {
+              terms: {
+                size,
+                field: fieldName,
+                shard_size: 10,
+                order: getSortType(sort),
+              },
+            },
+            unique_terms: {
+              cardinality: {
+                field: fieldName,
+              },
+            },
+          },
+        },
+      };
+
       if (subTypeNested) {
         textOrKeywordQuery = {
           nestedSuggestions: {
@@ -98,11 +111,10 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       }
       return textOrKeywordQuery;
     },
-    parse: (rawEsResult, request) => {
+    parse: (rawEsResult, { fieldSpec }) => {
       let basePath = 'aggregations';
-      const isNested = request.fieldSpec && getFieldSubtypeNested(request.fieldSpec);
-      basePath += isNested ? '.nestedSuggestions' : '';
-      basePath += request.searchString ? '.filteredSuggestions' : '';
+      const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
+      basePath += isNested ? '.nestedSuggestions.filteredSuggestions' : '.filteredSuggestions';
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
@@ -119,55 +131,23 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
   },
 
   /**
-   * the "Boolean" query / parser should be used when the options list is built on a field of type boolean. The query is slightly different than a keyword query.
-   */
-  boolean: {
-    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
-      suggestions: {
-        terms: {
-          field: fieldName,
-          shard_size: 10,
-          order: getSortType(sort),
-        },
-      },
-    }),
-    parse: (rawEsResult) => {
-      const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          acc.push({ value: suggestion.key_as_string, docCount: suggestion.doc_count });
-          return acc;
-        },
-        []
-      );
-      return { suggestions, totalCardinality: suggestions.length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
-    },
-  },
-
-  /**
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
     buildAggregation: ({ fieldName, searchString, sort, size }: OptionsListRequestBody) => {
-      let ipRangeQuery: IpRangeQuery = {
-        validSearch: true,
-        rangeQuery: [
-          {
-            key: 'ipv6',
-            from: '::',
-            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
-          },
-        ],
+      const filteredSuggestions = {
+        terms: {
+          size,
+          field: fieldName,
+          shard_size: 10,
+          order: getSortType(sort),
+        },
       };
 
-      if (searchString && searchString.length > 0) {
-        ipRangeQuery = getIpRangeQuery(searchString);
-        if (!ipRangeQuery.validSearch) {
-          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
-          // simply don't return an aggregation query for the ES search request
-          return undefined;
-        }
+      const ipRangeQuery = getIpRangeQuery(searchString ?? '');
+      if (!ipRangeQuery.validSearch) {
+        return {};
       }
-
       return {
         suggestions: {
           ip_range: {
@@ -176,14 +156,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
             keyed: true,
           },
           aggs: {
-            filteredSuggestions: {
-              terms: {
-                size,
-                field: fieldName,
-                shard_size: 10,
-                order: getSortType(sort),
-              },
-            },
+            filteredSuggestions,
             unique_terms: {
               cardinality: {
                 field: fieldName,
@@ -193,18 +166,22 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
       };
     },
-    parse: (rawEsResult, request) => {
-      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
+    parse: (rawEsResult, { searchString, sort, fieldSpec, size, searchTechnique }) => {
+      if (
+        !searchString ||
+        !isValidSearch({ searchString, fieldType: fieldSpec?.type, searchTechnique })
+      ) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
         return { suggestions: [], totalCardinality: 0 };
       }
+
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
 
       const sortedSuggestions =
-        request.sort?.direction === 'asc'
+        sort?.direction === 'asc'
           ? buckets.sort(
               (bucketA: EsBucket, bucketB: EsBucket) => bucketA.doc_count - bucketB.doc_count
             )
@@ -213,7 +190,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
             );
 
       const suggestions = sortedSuggestions
-        .slice(0, request.size)
+        .slice(0, size)
         .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
           acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
           return acc;
