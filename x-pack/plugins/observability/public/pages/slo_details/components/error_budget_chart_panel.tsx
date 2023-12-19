@@ -28,21 +28,21 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
-  let remainingBudgetFormatted;
+  let errorBudgetTimeRemainingFormatted;
   if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
     const totalSlices =
       toMinutes(toDuration(slo.timeWindow.duration)) /
       toMinutes(toDuration(slo.objective.timesliceWindow!));
-    const remainingBudgetInTimeUnit =
+    const errorBudgetRemainingInMinute =
       slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
 
-    if (remainingBudgetInTimeUnit <= 0) {
-      remainingBudgetFormatted = '0min';
-    } else {
-      if (remainingBudgetInTimeUnit / 60 >= 1) {
-        remainingBudgetFormatted = `${Math.trunc(remainingBudgetInTimeUnit / 60)}h`;
+    if (errorBudgetRemainingInMinute > 0) {
+      if (errorBudgetRemainingInMinute / 60 >= 1) {
+        errorBudgetTimeRemainingFormatted = `${Math.trunc(errorBudgetRemainingInMinute / 60)}h`;
       }
-      remainingBudgetFormatted += `${Math.trunc(remainingBudgetInTimeUnit % 60)}min`;
+      errorBudgetTimeRemainingFormatted += `${Math.trunc(errorBudgetRemainingInMinute % 60)}min`;
+    } else {
+      errorBudgetTimeRemainingFormatted = `0min`;
     }
   }
 
@@ -87,11 +87,19 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
+<<<<<<< HEAD
           {!!remainingBudgetFormatted && (
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleColor={isSloFailed ? 'danger' : 'success'}
                 title={remainingBudgetFormatted}
+=======
+          {errorBudgetTimeRemainingFormatted ? (
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleColor={isSloFailed ? 'danger' : 'success'}
+                title={errorBudgetTimeRemainingFormatted}
+>>>>>>> dbedad11df2 (Add error budget remaining in time unit)
                 titleSize="s"
                 description={i18n.translate(
                   'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
@@ -100,7 +108,11 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
                 reverse
               />
             </EuiFlexItem>
+<<<<<<< HEAD
           )}
+=======
+          ) : null}
+>>>>>>> dbedad11df2 (Add error budget remaining in time unit)
         </EuiFlexGroup>
 
         <EuiFlexItem>
