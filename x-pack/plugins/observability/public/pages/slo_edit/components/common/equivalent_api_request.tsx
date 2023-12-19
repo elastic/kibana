@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -19,8 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { CreateSLOForm } from '../../types';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 
@@ -35,15 +35,17 @@ export function EquivalentApiRequest({
 
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
 
-  const { data } = useFetcher(async () => {
+  const [sloData, setSloData] = useState<CreateSLOInput>();
+
+  useEffect(() => {
     if (!isFlyoutVisible) {
       return;
     }
-    const isValid = await trigger();
-    if (!isValid) {
-      return;
-    }
-    return transformCreateSLOFormToCreateSLOInput(getValues());
+    trigger().then((isValid) => {
+      if (isValid) {
+        setSloData(transformCreateSLOFormToCreateSLOInput(getValues()));
+      }
+    });
   }, [getValues, trigger, isFlyoutVisible]);
 
   let flyout;
@@ -79,9 +81,16 @@ export function EquivalentApiRequest({
               defaultMessage="with the following body:"
             />
           </EuiText>
-          {data && (
+          {sloData ? (
             <EuiCodeBlock language="json" isCopyable paddingSize="s">
-              {JSON.stringify(data, null, 2)}
+              {JSON.stringify(sloData, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            <EuiCodeBlock language="javascript" isCopyable paddingSize="s">
+              {i18n.translate(
+                'xpack.observability.equivalentApiRequest.formIsNotValidCodeBlockLabel',
+                { defaultMessage: 'Form is not valid' }
+              )}
             </EuiCodeBlock>
           )}
         </EuiFlyoutBody>
