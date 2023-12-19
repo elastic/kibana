@@ -7,14 +7,7 @@
 
 import React from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
@@ -25,10 +18,9 @@ import { useSecuritySolutionContext } from '../../application/security_solution_
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
-import { BenchmarksCisId, PageUrlParams } from '../../../common/types/latest';
+import { PageUrlParams } from '../../../common/types/latest';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
-  const { euiTheme } = useEuiTheme();
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
@@ -53,15 +45,15 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false} style={{ marginBottom: `calc(${euiTheme.size.m}/2)` }}>
+                <EuiFlexItem grow={false} style={{ marginBottom: `6px` }}>
                   <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <CloudPosturePageTitle
                     title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                      defaultMessage: '{integrationName} - Rules',
+                      defaultMessage: '{benchmarkName} - Rules',
                       values: {
-                        integrationName: getBenchmarkCisName(params.benchmarkId as BenchmarksCisId),
+                        benchmarkName: getBenchmarkCisName(params.benchmarkId),
                       },
                     })}
                   />

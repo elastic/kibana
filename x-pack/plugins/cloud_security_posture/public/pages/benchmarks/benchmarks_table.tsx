@@ -40,12 +40,12 @@ interface BenchmarksTableProps
   'data-test-subj'?: string;
 }
 
-const IntegrationButtonLink = ({
-  packageName,
+const BenchmarkButtonLink = ({
+  benchmarkName,
   benchmarkVersion,
   benchmarkId,
 }: {
-  packageName: string;
+  benchmarkName: BenchmarksCisId;
   benchmarkVersion: string;
   benchmarkId: string;
 }) => {
@@ -60,7 +60,7 @@ const IntegrationButtonLink = ({
         }),
       })}
     >
-      {packageName}
+      {getBenchmarkCisName(benchmarkName)}
     </EuiLink>
   );
 };
@@ -152,11 +152,11 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     width: '17.5%',
     sortable: true,
-    render: (complianceScore: Benchmark['id'], benchmarkId) => (
-      <IntegrationButtonLink
-        packageName={getBenchmarkCisName(benchmarkId.id) || ''}
-        benchmarkId={benchmarkId.id || ''}
-        benchmarkVersion={benchmarkId.version || ''}
+    render: (benchmarkId: Benchmark['id'], benchmark: Benchmark) => (
+      <BenchmarkButtonLink
+        benchmarkName={benchmarkId || ''}
+        benchmarkId={benchmarkId || ''}
+        benchmarkVersion={benchmark.version || ''}
       />
     ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
@@ -201,8 +201,8 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
-    render: (complianceScore: Benchmark['evaluation'], data) => {
-      return getBenchmarkPlurals(data.id, data.evaluation);
+    render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
+      return getBenchmarkPlurals(benchmark.id, benchmarkEvaluation);
     },
   },
   {

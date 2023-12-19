@@ -186,8 +186,6 @@ export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
       return 'CIS EKS';
     case 'cis_gcp':
       return 'CIS GCP';
-    default:
-      return null;
   }
 };
 
@@ -203,8 +201,6 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
       return 'Amazon Elastic Kubernetes Service';
     case 'cis_gcp':
       return 'Google Cloud Provider';
-    default:
-      return null;
   }
 };
 
@@ -214,11 +210,11 @@ export const getBenchmarkFilterQuery = (
   selectParams?: BenchmarkRuleSelectParams
 ): string => {
   const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
-  const sectionQuery = ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams?.section}"`;
-  const ruleNumberQuery = ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams?.ruleNumber}"`;
-  if (!selectParams?.section && !selectParams?.ruleNumber) return baseQuery;
-  else if (selectParams.section && selectParams.ruleNumber)
-    return baseQuery + sectionQuery + ruleNumberQuery;
-  else if (selectParams.section) return baseQuery + sectionQuery;
-  else return baseQuery + ruleNumberQuery;
+  const sectionQuery = selectParams?.section
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams.section}"`
+    : '';
+  const ruleNumberQuery = selectParams?.ruleNumber
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams.ruleNumber}"`
+    : '';
+  return baseQuery + sectionQuery + ruleNumberQuery;
 };

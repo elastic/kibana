@@ -21,10 +21,10 @@ export const findBenchmarkRuleHandler = async (
   options: FindCspBenchmarkRuleRequest
 ): Promise<FindCspBenchmarkRuleResponse> => {
   if (!options.benchmarkId) {
-    throw new Error('Please provide BenchmarkId');
+    throw new Error('Please provide benchmarkId');
   }
 
-  const benchmarkId = options.benchmarkId ? options.benchmarkId : '';
+  const benchmarkId = options.benchmarkId;
 
   const cspCspBenchmarkRulesSo = await soClient.find<CspBenchmarkRule>({
     type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,

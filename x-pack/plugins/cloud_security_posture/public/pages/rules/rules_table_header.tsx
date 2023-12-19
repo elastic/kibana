@@ -60,7 +60,7 @@ export const RulesTableHeader = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={1}>
         <SearchField
           isSearching={isSearching}
           searchValue={searchValue}
@@ -69,11 +69,11 @@ export const RulesTableHeader = ({
           pageSize={pageSize}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none">
+      <EuiFlexItem grow={0}>
+        <EuiFlexGroup gutterSize="xs" direction="row">
           <EuiFlexItem
             css={css`
-              max-width: 200px;
+              min-width: 160px;
             `}
           >
             <EuiComboBox
@@ -95,7 +95,7 @@ export const RulesTableHeader = ({
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
-              max-width: 140px;
+              min-width: 160px;
             `}
           >
             <EuiComboBox

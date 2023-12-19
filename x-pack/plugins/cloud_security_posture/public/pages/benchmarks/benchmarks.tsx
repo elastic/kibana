@@ -183,7 +183,6 @@ export const Benchmarks = () => {
         <NoFindingsStates posturetype={'all'} />
       ) : (
         <>
-          {' '}
           <BenchmarkSearchField
             isLoading={queryResult.isFetching}
             onSearch={(name) => setQuery((current) => ({ ...current, name }))}

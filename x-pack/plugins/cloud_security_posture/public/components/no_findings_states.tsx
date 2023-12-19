@@ -34,6 +34,7 @@ import type { IndexDetails, PostureTypes } from '../../common/types_old';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -193,7 +194,17 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
         <p>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-            defaultMessage="Maintain the confidentiality, integrity, and availability of your data in the cloud by continuously identifying and remediating potential configuration risks, like publicly accessible s3 buckets, using Elastic Security posture management for Cloud & Kubernetes"
+            defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
+            values={{
+              learnMore: (
+                <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                    defaultMessage="Learn more about Cloud Security Posture"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </p>
       }
