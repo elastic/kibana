@@ -25,7 +25,7 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
-import { convertRowToFrame, getFunctionsRows, IFunctionRow } from './utils';
+import { convertRowToFrame, getFunctionsRows, getTotalCount, IFunctionRow } from './utils';
 
 interface Props {
   topNFunctions?: TopNFunctions;
@@ -75,13 +75,7 @@ export const TopNFunctionsGrid = ({
     }
   }
 
-  const totalCount = useMemo(() => {
-    if (!topNFunctions || !topNFunctions.TotalCount) {
-      return 0;
-    }
-
-    return topNFunctions.TotalCount;
-  }, [topNFunctions]);
+  const totalCount = useMemo(() => getTotalCount(topNFunctions), [topNFunctions]);
 
   const rows = useMemo(() => {
     return getFunctionsRows({

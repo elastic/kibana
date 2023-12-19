@@ -49,8 +49,8 @@ export function FramesSummary({
   baseValue,
   comparisonValue,
   isLoading,
-  hasBorder,
-  compressed,
+  hasBorder = false,
+  compressed = false,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
     ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
@@ -161,37 +161,33 @@ export function FramesSummary({
     </>
   );
 
-  return (
-    <>
-      {compressed ? (
-        <>{Summary}</>
-      ) : (
-        <EuiAccordion
-          initialIsOpen
-          id="TopNFunctionsSummary"
-          buttonContent={
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
-                  {data[0].title}
-                </EuiText>
-              </EuiFlexItem>
-              {data[0].baseIcon && (
-                <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-                  <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
-                  {data[0].baseValue}
-                </EuiTextColor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          {Summary}
-        </EuiAccordion>
-      )}
-    </>
+  return compressed ? (
+    <>{Summary}</>
+  ) : (
+    <EuiAccordion
+      initialIsOpen
+      id="TopNFunctionsSummary"
+      buttonContent={
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+              {data[0].title}
+            </EuiText>
+          </EuiFlexItem>
+          {data[0].baseIcon && (
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+              {data[0].baseValue}
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      {Summary}
+    </EuiAccordion>
   );
 }

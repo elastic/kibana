@@ -57,7 +57,7 @@ export function FrameInformationWindow({
   totalSamples,
   totalSeconds,
   rank,
-  compressed,
+  compressed = false,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
 

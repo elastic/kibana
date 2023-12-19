@@ -28,7 +28,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from '../topn_functions/function_row';
-import { convertRowToFrame, getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
+import {
+  convertRowToFrame,
+  getFunctionsRows,
+  getTotalCount,
+  IFunctionRow,
+} from '../topn_functions/utils';
 import { getColumns } from './get_columns';
 import { getCompareFrameAction } from './get_compare_frame_action';
 
@@ -87,14 +92,6 @@ interface Props {
   comparisonSortField: TopNComparisonFunctionSortField;
   totalSeconds: number;
   comparisonTotalSeconds: number;
-}
-
-function getTotalCount(topNFunctions?: TopNFunctions) {
-  if (!topNFunctions || !topNFunctions.TotalCount) {
-    return 0;
-  }
-
-  return topNFunctions.TotalCount;
 }
 
 export function DifferentialTopNFunctionsGrid({

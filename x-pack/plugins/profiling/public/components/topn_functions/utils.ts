@@ -32,6 +32,8 @@ export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFac
   return value * scaleFactor;
 }
 
+export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.TotalCount ?? 0;
+
 export interface IFunctionRow {
   id: string;
   rank: number;
