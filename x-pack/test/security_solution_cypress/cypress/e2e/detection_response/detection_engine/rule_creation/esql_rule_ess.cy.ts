@@ -86,7 +86,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172074
+  // FLAKY: https://github.com/elastic/kibana/issues/172881
   describe.skip('ES|QL query validation', () => {
     beforeEach(() => {
       login();

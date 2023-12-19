@@ -26,6 +26,7 @@ import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -289,7 +290,7 @@ describe('aggregate()', () => {
         filter: undefined,
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
@@ -350,7 +351,7 @@ describe('aggregate()', () => {
         ]),
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },

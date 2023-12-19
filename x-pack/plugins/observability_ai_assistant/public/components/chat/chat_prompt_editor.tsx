@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,12 +18,11 @@ import {
   EuiTextArea,
   keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common';
-import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { FunctionListPopover } from './function_list_popover';
+import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
+import { TelemetryEventTypeWithPayload, TELEMETRY } from '../../analytics';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
@@ -31,6 +32,7 @@ export interface ChatPromptEditorProps {
   initialFunctionPayload?: string;
   trigger?: MessageRole;
   onSubmit: (message: Message) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
 }
 
 export function ChatPromptEditor({
@@ -40,6 +42,7 @@ export function ChatPromptEditor({
   initialSelectedFunctionName,
   initialFunctionPayload,
   onSubmit,
+  onSendTelemetry,
 }: ChatPromptEditorProps) {
   const isFocusTrapEnabled = Boolean(initialPrompt);
 
@@ -112,9 +115,11 @@ export function ChatPromptEditor({
     setFunctionPayload(undefined);
     handleResetTextArea();
 
+    let message: Message;
+
     try {
       if (selectedFunctionName) {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.Assistant,
@@ -125,20 +130,27 @@ export function ChatPromptEditor({
               arguments: currentPayload,
             },
           },
-        });
+        };
+        onSubmit(message);
 
         setFunctionPayload(undefined);
         setSelectedFunctionName(undefined);
       } else {
-        await onSubmit({
+        message = {
           '@timestamp': new Date().toISOString(),
           message: { role: MessageRole.User, content: currentPrompt },
-        });
+        };
+        onSubmit(message);
       }
+
+      onSendTelemetry({
+        type: TELEMETRY.observability_ai_assistant_user_sent_prompt_in_chat,
+        payload: message,
+      });
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
+  }, [functionPayload, loading, onSendTelemetry, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);

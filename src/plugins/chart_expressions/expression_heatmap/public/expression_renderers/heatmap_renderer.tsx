@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -29,7 +30,6 @@ import {
   getPaletteService,
   getUISettings,
 } from '../services';
-import { getTimeZone } from '../utils/get_timezone';
 
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
