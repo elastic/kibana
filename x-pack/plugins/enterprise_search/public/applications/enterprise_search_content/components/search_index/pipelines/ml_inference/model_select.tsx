@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiScreenReaderLive,
   EuiSelectable,
   EuiText,
   EuiTextColor,
@@ -33,12 +34,28 @@ import { ModelSelectLogic } from './model_select_logic';
 import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
 import { normalizeModelName } from './utils';
 
-export const DeployModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
-  onClick,
-  disabled,
-}) => {
+export const DeployModelButton: React.FC<{
+  onClick: () => void;
+  modelId: string;
+  disabled: boolean;
+}> = ({ onClick, modelId, disabled }) => {
   return (
-    <EuiButton onClick={onClick} disabled={disabled} color="primary" iconType="download" size="s">
+    <EuiButton
+      onClick={onClick}
+      disabled={disabled}
+      color="primary"
+      iconType="download"
+      size="s"
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.deployButton.ariaLabel',
+        {
+          defaultMessage: 'Deploy {modelId} model',
+          values: {
+            modelId,
+          },
+        }
+      )}
+    >
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.deployButton.label',
         {
@@ -69,12 +86,28 @@ export const ModelDeployingButton: React.FC = () => {
   );
 };
 
-export const StartModelButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({
-  onClick,
-  disabled,
-}) => {
+export const StartModelButton: React.FC<{
+  onClick: () => void;
+  modelId: string;
+  disabled: boolean;
+}> = ({ onClick, modelId, disabled }) => {
   return (
-    <EuiButton onClick={onClick} disabled={disabled} color="success" iconType="play" size="s">
+    <EuiButton
+      onClick={onClick}
+      disabled={disabled}
+      color="success"
+      iconType="play"
+      size="s"
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.startButton.ariaLabel',
+        {
+          defaultMessage: 'Start {modelId} model',
+          values: {
+            modelId,
+          },
+        }
+      )}
+    >
       {i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.startButton.label',
         {
@@ -127,8 +160,40 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
   const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
 
+  const getSelectedModelAnnouncement = (model: MlModel) =>
+    model.isPlaceholder
+      ? i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotDeployedAnnouncement',
+          {
+            defaultMessage: '{modelId} model selected but not deployed',
+            values: {
+              modelId: model.modelId,
+            },
+          }
+        )
+      : model.deploymentState === MlModelDeploymentState.NotDeployed
+      ? i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelNotStartedAnnouncement',
+          {
+            defaultMessage: '{modelId} model selected but not started',
+            values: {
+              modelId: model.modelId,
+            },
+          }
+        )
+      : i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.modelSelect.selectedModelAnnouncement',
+          {
+            defaultMessage: '{modelId} model selected',
+            values: {
+              modelId: model.modelId,
+            },
+          }
+        );
+
   return (
     <EuiPanel color="subdued" title="Selected model">
+      <EuiScreenReaderLive>{getSelectedModelAnnouncement(model)}</EuiScreenReaderLive>
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
@@ -163,13 +228,14 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
             ].includes(model.deploymentState)) && (
             <>
               <EuiHorizontalRule margin="xs" />
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} aria-live="polite" aria-atomic="false">
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   {model.isPlaceholder ? (
                     <>
                       <EuiFlexItem grow={false}>
                         <DeployModelButton
                           onClick={() => createModel(model.modelId)}
+                          modelId={model.modelId}
                           disabled={areActionButtonsDisabled}
                         />
                       </EuiFlexItem>
@@ -194,6 +260,7 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
                     <EuiFlexItem grow={false}>
                       <StartModelButton
                         onClick={() => startModel(model.modelId)}
+                        modelId={model.modelId}
                         disabled={areActionButtonsDisabled}
                       />
                     </EuiFlexItem>
