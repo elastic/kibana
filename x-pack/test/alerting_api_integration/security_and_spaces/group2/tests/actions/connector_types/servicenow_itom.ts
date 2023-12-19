@@ -456,7 +456,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
