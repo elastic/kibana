@@ -82,7 +82,7 @@ export const assistantQuickPrompt: TelemetryEvent = {
   },
 };
 
-export const assistantKnowledgeBaseToggledEvent: TelemetryEvent = {
+export const assistantSettingToggledEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.AssistantSettingToggled,
   schema: {
     didEnableKnowledgeBase: {

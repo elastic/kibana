@@ -18,7 +18,7 @@ import {
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
-  assistantKnowledgeBaseToggledEvent,
+  assistantSettingToggledEvent,
   assistantMessageSentEvent,
   assistantQuickPrompt,
 } from './ai_assistant';
@@ -139,7 +139,7 @@ export const telemetryEvents = [
   assistantInvokedEvent,
   assistantMessageSentEvent,
   assistantQuickPrompt,
-  assistantKnowledgeBaseToggledEvent,
+  assistantSettingToggledEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
