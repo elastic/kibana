@@ -68,8 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172769
-  registry.when.skip(`with data loaded`, { config: 'basic', archives: [] }, () => {
+  registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     describe('error_count', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
