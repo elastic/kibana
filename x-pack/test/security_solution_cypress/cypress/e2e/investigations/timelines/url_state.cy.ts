@@ -24,44 +24,40 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
-  before(function () {
+  beforeEach(function () {
     login();
+
     visit(TIMELINES_URL);
 
     createTimeline(getTimeline()).then((response) => {
       timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;
       return response.body.data.persistTimeline.timeline.savedObjectId;
     });
-
     createRule(getNewRule());
+
     visitWithTimeRange(ALERTS_URL);
+
     waitForAlertsToPopulate();
   });
 
-  beforeEach(() => {
-    login();
+  it('should open a timeline via url alone without a saved object id', () => {
+    const urlWithoutSavedObjectId = `${ALERTS_URL}?timeline=(activeTab:query,isOpen:!t)`;
+    visit(urlWithoutSavedObjectId);
+    cy.get(TIMELINE_HEADER).should('be.visible');
   });
 
-  describe('open timeline from url exclusively', () => {
-    it('should open a timeline via url alone without a saved object id', () => {
-      const urlWithoutSavedObjectId = `${ALERTS_URL}?timeline=(activeTab:query,isOpen:!t)`;
-      visit(urlWithoutSavedObjectId);
-      cy.get(TIMELINE_HEADER).should('be.visible');
-    });
-
-    it('should also support opening with a saved object id', () => {
-      cy.location('search').then((search) => {
-        const params = new URLSearchParams(search);
-        const timelineParams = encode({
-          activeTab: 'query',
-          isOpen: true,
-          id: timelineSavedObjectId,
-        });
-        params.set('timeline', timelineParams);
-        const urlWithSavedObjectId = `${ALERTS_URL}?${params.toString()}`;
-        visit(urlWithSavedObjectId);
-        cy.get(TIMELINE_HEADER).should('be.visible');
+  it('should also support opening with a saved object id', () => {
+    cy.location('search').then((search) => {
+      const params = new URLSearchParams(search);
+      const timelineParams = encode({
+        activeTab: 'query',
+        isOpen: true,
+        id: timelineSavedObjectId,
       });
+      params.set('timeline', timelineParams);
+      const urlWithSavedObjectId = `${ALERTS_URL}?${params.toString()}`;
+      visit(urlWithSavedObjectId);
+      cy.get(TIMELINE_HEADER).should('be.visible');
     });
   });
 });

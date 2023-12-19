@@ -27,7 +27,7 @@ import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
