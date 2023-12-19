@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
@@ -26,6 +27,9 @@ jest.mock('react-router-dom', () => ({
   }),
   useHistory: jest.fn(),
 }));
+
+const { ObservabilityAIAssistantActionMenuItem, ObservabilityAIAssistantContextualInsight } =
+  observabilityAIAssistantPluginMock.createStartContract();
 
 describe('APMSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
@@ -61,6 +65,8 @@ describe('APMSection', () => {
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
+      ObservabilityAIAssistantActionMenuItem,
+      ObservabilityAIAssistantContextualInsight,
     }));
   });
 

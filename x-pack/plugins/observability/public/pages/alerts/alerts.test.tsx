@@ -15,6 +15,7 @@ import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintena
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { AlertsPage } from './alerts';
@@ -35,10 +36,19 @@ mockUseKibanaReturnValue.services.application.capabilities = {
   },
 };
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: jest.fn(() => ({
+    ...mockUseKibanaReturnValue,
+    services: {
+      ...mockUseKibanaReturnValue.services,
+      observabilityAIAssistant: mockObservabilityAIAssistant,
+    },
+  })),
 }));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),

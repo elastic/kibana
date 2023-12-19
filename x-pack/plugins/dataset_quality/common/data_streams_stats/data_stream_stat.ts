@@ -9,6 +9,7 @@ import { Integration } from './integration';
 import { DataStreamStatType, IntegrationType } from './types';
 
 export class DataStreamStat {
+  rawName: string;
   name: DataStreamStatType['name'];
   namespace: string;
   title: string;
@@ -19,6 +20,7 @@ export class DataStreamStat {
   degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
+    this.rawName = dataStreamStat.name;
     this.name = dataStreamStat.name;
     this.title = dataStreamStat.title ?? dataStreamStat.name;
     this.namespace = dataStreamStat.namespace;
@@ -33,7 +35,8 @@ export class DataStreamStat {
     const [_type, dataset, namespace] = dataStreamStat.name.split('-');
 
     const dataStreamStatProps = {
-      name: dataStreamStat.name,
+      rawName: dataStreamStat.name,
+      name: dataset,
       title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
       namespace,
       size: dataStreamStat.size,
