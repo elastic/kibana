@@ -15,7 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -27,7 +27,8 @@ import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { TimelineStatusInfo } from './timeline_status_info';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
+import { AddTimelineButton } from '../add_timeline_button';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
@@ -141,6 +142,14 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {!show ? (
+              <EuiFlexItem grow={false}>
+                <AddTimelineButton timelineId={timelineId} />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <AddToFavoritesButton timelineId={timelineId} compact />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ActiveTimelinesContainer grow={false}>
                 <ActiveTimelines
@@ -153,9 +162,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AddToFavoritesButton timelineId={timelineId} compact />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

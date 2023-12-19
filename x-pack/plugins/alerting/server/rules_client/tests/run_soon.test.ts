@@ -21,6 +21,7 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -64,7 +65,7 @@ describe('runSoon()', () => {
 
   const existingRule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'name',
       consumer: 'myApp',
@@ -154,7 +155,7 @@ describe('runSoon()', () => {
             action: 'rule_run_soon',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -172,7 +173,7 @@ describe('runSoon()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
