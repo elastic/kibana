@@ -43,8 +43,6 @@ export const postActionsConnectorExecuteRoute = (
       const assistantContext = await context.elasticAssistant;
       const logger: Logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
-      const shouldNotUseLangChain =
-        !request.body.isEnabledKnowledgeBase && !requestHasRequiredAnonymizationParams(request);
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -53,7 +51,10 @@ export const postActionsConnectorExecuteRoute = (
         const actions = (await context.elasticAssistant).actions;
 
         // if not langchain, call execute action directly and return the response:
-        if (shouldNotUseLangChain) {
+        if (
+          !request.body.isEnabledKnowledgeBase &&
+          !requestHasRequiredAnonymizationParams(request)
+        ) {
           logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
