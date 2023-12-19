@@ -63,6 +63,7 @@ import {
 } from '../common';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
+import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -99,6 +100,12 @@ export interface RuleExecutorServices<
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
+  /**
+   * Deprecate alertFactory and remove when all rules are onboarded to
+   * the alertsClient
+   * @deprecated
+   */
+  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   /**
    * Only available when framework alerts are enabled and rule
    * type has registered alert context with the framework with shouldWrite set to true

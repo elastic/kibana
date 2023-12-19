@@ -13,9 +13,10 @@ import type {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import type { RuleType } from '@kbn/alerting-plugin/server';
+import { DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
@@ -73,7 +74,9 @@ export function getTransformHealthRuleType(
   RuleTypeState,
   AlertInstanceState,
   TransformHealthAlertContext,
-  TransformIssue
+  TransformIssue,
+  'recovered',
+  Alert
 > {
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
@@ -110,9 +113,10 @@ export function getTransformHealthRuleType(
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
     doesSetRecoveryContext: true,
+    alerts: DEFAULT_AAD_CONFIG,
     async executor(options) {
       const {
-        services: { scopedClusterClient, alertFactory, uiSettingsClient },
+        services: { scopedClusterClient, alertsClient, uiSettingsClient },
         params,
       } = options;
 
@@ -131,18 +135,16 @@ export function getTransformHealthRuleType(
 
       if (unhealthyTests.length > 0) {
         unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = alertFactory.create(alertInstanceName);
-          alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
+          alertsClient.report({ id: alertInstanceName, actionGroup: TRANSFORM_ISSUE, context });
         });
       }
 
       // Set context for recovered alerts
-      const { getRecoveredAlerts } = alertFactory.done();
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const recoveredAlertId = recoveredAlert.getId();
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          recoveredAlert.setContext(testResult.context);
+          alertsClient.setAlertData({ id: recoveredAlertId, context: testResult.context });
         }
       }
 
