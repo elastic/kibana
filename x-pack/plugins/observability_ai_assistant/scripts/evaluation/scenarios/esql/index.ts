@@ -64,7 +64,7 @@ function createEsqlQueryEvaluation({
 //Using synthtrace degraded_logs.ts
 export const esqlLogLevel = createEsqlQueryEvaluation({
   question:
-    'How many logs per log.level are in the index .ds-logs-synth* in the last hour?',
+    'How many logs per log.level are in the index `.ds-logs-synth*` in the last hour?',
   expected: `FROM .ds-logs-synth*
 | WHERE @timestamp >= NOW() - 1 hour
 | STATS COUNT(*) BY log.level`,
@@ -73,7 +73,7 @@ export const esqlLogLevel = createEsqlQueryEvaluation({
 //Using synthtrace degraded_logs.ts
 export const esqlServiceLogCount = createEsqlQueryEvaluation({
   question:
-    'I have ECS log data in the index .ds-logs-synth* what are the top 5 services reporting logs in the last hour?',
+    'I have ECS log data in the index `.ds-logs-synth*` what are the top 5 services reporting logs in the last hour?',
   expected: `FROM .ds-logs-synth*
 | WHERE @timestamp >= NOW() - 1 hour
 | STATS count = COUNT(*) BY service.name
@@ -81,9 +81,44 @@ export const esqlServiceLogCount = createEsqlQueryEvaluation({
 | LIMIT 10`,
 });
 
+//Using synthtrace degraded_logs.ts
+export const fiveLatestLogs = createEsqlQueryEvaluation({
+  question:
+    'From `.ds-logs-synth*`, I want to see the 5 latest messages, I want to display only the date that they were indexed in and their log.level and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+  expected: `FROM .ds-logs-synth*
+| SORT @timestamp DESC
+| EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
+| KEEP formatted_date, log.level, message
+| LIMIT 5`,
+  execute: false,
+});
+
+//Using synthtrace logs_and_metrics.ts
+export const esqlMetricAverage = createEsqlQueryEvaluation({
+  question:
+    'Give me an ESQL query for the average system.cpu.total.norm.pct per service.name in `.ds-metrics-apm.app.synth*` in the last hour, in descending order',
+  expected: `FROM .ds-metrics-apm.app.synth*
+| WHERE @timestamp >= NOW() - 1 hour
+| STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY service.name
+| SORT avg_cpu DESC`,
+});
+
+//Using synthtrace logs_and_metrics.ts
+export const esqlMetricBucket = createEsqlQueryEvaluation({
+  question:
+    'My metric data is in `.ds-metrics-apm.app.synth*`. Show me a query that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last day.',
+  expected: `FROM .ds-metrics-apm.app.synth*
+| WHERE @timestamp >= NOW() - 1 day
+| EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
+| STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY service.name, bucket
+| SORT avg_cpu DESC
+| LIMIT 10`,
+});
+
+
 // export const esqlMetricsApmQuery = createEsqlQueryEvaluation({
 //   question:
-//     'I want to see a query for remote_cluster:metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets.',
+//     'I want to see a query for metrics-apm*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets.',
 //   expected: `FROM metrics-apm*
 //   | WHERE metricset.name == "transaction" AND metricset.interval == "1m"
 //   | EVAL bucket = AUTO_BUCKET(@timestamp, 50, <start-date>, <end-date>)
@@ -101,7 +136,7 @@ export const esqlServiceLogCount = createEsqlQueryEvaluation({
 
 // export const logsAvgCpuQuery = createEsqlQueryEvaluation({
 //   question:
-//     'My logs data (ECS) is in `remote_cluster:logs-*`. Show me a query that gets the average CPU per host, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
+//     'My logs data (ECS) is in `logs-*`. Show me a query that gets the average CPU per host, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
 //   expected: `FROM logs-*
 //   | WHERE @timestamp >= NOW() - 15 minutes
 //   | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
@@ -110,7 +145,7 @@ export const esqlServiceLogCount = createEsqlQueryEvaluation({
 // });
 
 // export const apmExitSpanQuery = createEsqlQueryEvaluation({
-//   question: `I've got APM data in \`remote_cluster:metrics-apm\`. Filter on \`metricset.name:service_destination\` and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
+//   question: `I've got APM data in \`metrics-apm\`. Filter on \`metricset.name:service_destination\` and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
 //   expected: `FROM metrics-apm
 //   | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
 //   | EVAL total_response_time = span.destination.service.response_time.sum.us / span.destination.service.response_time.count, total_failures = CASE(event.outcome == "failure", 1, 0) * span.destination.service.response_time.count
