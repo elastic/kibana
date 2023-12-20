@@ -34,7 +34,11 @@ describe(
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
-        enableExperimental: ['entityAnalyticsAssetCriticalityEnabled'],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'entityAnalyticsAssetCriticalityEnabled',
+          ])}`,
+        ],
       },
     },
   },
