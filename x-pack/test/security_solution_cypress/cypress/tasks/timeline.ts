@@ -215,16 +215,8 @@ export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
-  // Cypress doesn't properly wait for the data provider to finish expanding, so we wait for the animation to finish.
-  cy.wait(600);
-  cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
+  cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible'); // Cypress doesn't properly wait for the data provider to finish expanding, so we wait for the animation to finish.
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get('[data-popover-open]').should('exist');
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
-    .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
-    .should('have.focus'); // make sure the focus is ready before start typing
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);
@@ -242,7 +234,6 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
   }
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
 };
-
 export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
   const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(dragTargetSelector)
@@ -319,6 +310,18 @@ export const createNewTimeline = () => {
 
 export const openCreateTimelineOptionsPopover = () => {
   cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
+};
+
+export const createTimelineOptionsPopoverBottomBar = () => {
+  recurse(
+    () => {
+      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
+      return cy.get(CREATE_NEW_TIMELINE).eq(0);
+    },
+    (sub) => sub.is(':visible')
+  );
+
+  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 
 export const createTimelineTemplateOptionsPopoverBottomBar = () => {

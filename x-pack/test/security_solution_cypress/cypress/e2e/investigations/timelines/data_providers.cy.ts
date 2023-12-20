@@ -22,7 +22,7 @@ import {
   updateDataProviderbyDraggingField,
   addNameAndDescriptionToTimeline,
   populateTimeline,
-  createNewTimeline,
+  createTimelineOptionsPopoverBottomBar,
   updateDataProviderByFieldHoverAction,
   saveTimeline,
 } from '../../../tasks/timeline';
@@ -34,7 +34,7 @@ describe('Timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
-    createNewTimeline();
+    createTimelineOptionsPopoverBottomBar();
     addNameAndDescriptionToTimeline(getTimeline());
     populateTimeline();
   });
