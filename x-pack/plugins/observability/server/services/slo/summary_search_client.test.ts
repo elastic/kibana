@@ -36,7 +36,7 @@ describe('Summary Search Client', () => {
   it('returns an empty response on error', async () => {
     esClientMock.count.mockRejectedValue(new Error('Cannot reach es'));
 
-    await expect(service.search('', defaultSort, defaultPagination)).resolves
+    await expect(service.search('', '', defaultSort, defaultPagination)).resolves
       .toMatchInlineSnapshot(`
       Object {
         "page": 1,
@@ -53,7 +53,7 @@ describe('Summary Search Client', () => {
       _shards: { failed: 0, successful: 1, total: 1 },
     });
 
-    await expect(service.search('', defaultSort, defaultPagination)).resolves
+    await expect(service.search('', '', defaultSort, defaultPagination)).resolves
       .toMatchInlineSnapshot(`
       Object {
         "page": 1,
@@ -99,7 +99,7 @@ describe('Summary Search Client', () => {
       },
     });
 
-    const results = await service.search('', defaultSort, defaultPagination);
+    const results = await service.search('', '', defaultSort, defaultPagination);
 
     expect(esClientMock.deleteByQuery).toHaveBeenCalled();
     expect(esClientMock.deleteByQuery.mock.calls[0]).toMatchSnapshot();

@@ -22,8 +22,7 @@ const Template: ComponentStory<typeof Component> = (props: Props) => <Component 
 
 const defaultProps: Props = {
   loading: false,
-  onChangeQuery: () => {},
-  onChangeSort: () => {},
+  onStateChange: () => {},
   initialState: DEFAULT_STATE,
 };
 
