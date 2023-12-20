@@ -8,6 +8,7 @@
 import axios from 'axios';
 import { format } from 'url';
 import https from 'https';
+import { pick } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
@@ -52,19 +53,11 @@ export function registerKibanaFunction({
     ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request } = resources;
 
-      const {
-        protocol,
-        host,
-        username,
-        password,
-        pathname: pathnameFromRequest,
-      } = request.rewrittenUrl || request.url;
+      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
 
       const nextUrl = {
         host,
         protocol,
-        username,
-        password,
         pathname: pathnameFromRequest.replace(
           '/internal/observability_ai_assistant/chat/complete',
           pathname
@@ -74,13 +67,19 @@ export function registerKibanaFunction({
 
       return axios({
         method,
-        headers: request.headers,
+        headers: pick(
+          request.headers,
+          'kbn-version',
+          'user-agent',
+          'content-type',
+          'kbn-build-number',
+          'x-kbn-context',
+          'referer',
+          'cookie'
+        ),
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: false,
-        }),
       }).then((response) => {
         return { content: response.data };
       });
