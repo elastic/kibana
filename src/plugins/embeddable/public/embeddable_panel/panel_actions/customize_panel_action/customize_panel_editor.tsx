@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 
 import {
   EuiButton,
