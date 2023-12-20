@@ -166,6 +166,13 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
   });
 
+  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
+    renderConfigFlyout({
+      hidesSuggestions: true,
+    });
+    expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+  });
+
   it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
     renderConfigFlyout(
       {
