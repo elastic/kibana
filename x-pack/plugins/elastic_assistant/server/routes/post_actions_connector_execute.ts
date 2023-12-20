@@ -8,7 +8,10 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
+import {
+  ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT,
+  ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT,
+} from '../lib/telemetry/event_based_telemetry';
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import {
@@ -57,6 +60,11 @@ export const postActionsConnectorExecuteRoute = (
         ) {
           logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
+          telemetry.reportEvent(ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT.eventType, {
+            isEnabledLangChain: false,
+            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
+            isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+          });
           return response.ok({
             body: result,
           });
@@ -110,6 +118,11 @@ export const postActionsConnectorExecuteRoute = (
           telemetry,
         });
 
+        telemetry.reportEvent(ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT.eventType, {
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
+          isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+        });
         return response.ok({
           body: {
             ...langChainResponseBody,

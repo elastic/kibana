@@ -70,6 +70,34 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT: EventTypeOpts<{
+  isEnabledKnowledgeBase: boolean;
+  isEnabledLangChain: boolean;
+  isEnabledRAGAlerts: boolean;
+}> = {
+  eventType: 'actions_connector_execution_success',
+  schema: {
+    isEnabledLangChain: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is LangChain enabled',
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is Knowledge Base enabled',
+      },
+    },
+    isEnabledRAGAlerts: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is RAG Alerts enabled',
+      },
+    },
+  },
+};
+
 export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
   isEnabledKnowledgeBase: boolean;
@@ -108,5 +136,6 @@ export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT,
   ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT,
 ];
