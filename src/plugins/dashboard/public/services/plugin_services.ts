@@ -44,6 +44,7 @@ import { dashboardContentManagementServiceFactory } from './dashboard_content_ma
 import { contentManagementServiceFactory } from './content_management/content_management_service';
 import { serverlessServiceFactory } from './serverless/serverless_service';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
+import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -88,6 +89,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   serverless: new PluginServiceProvider(serverlessServiceFactory),
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
+  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();
