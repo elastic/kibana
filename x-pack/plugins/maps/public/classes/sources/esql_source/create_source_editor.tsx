@@ -14,6 +14,7 @@ import { ESQLEditor } from './esql_editor';
 import { ESQL_GEO_POINT_TYPE } from './esql_utils';
 
 interface Props {
+  mostCommonDataViewId?: string;
   onSourceConfigChange: (sourceConfig: Partial<ESQLSourceDescriptor> | null) => void;
 }
 
@@ -24,18 +25,24 @@ export function CreateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    getIndexPatternService()
-      .getDefaultDataView()
-      .then((defaultDataView) => {
+    
+    function getDataView() {
+      return props.mostCommonDataViewId
+        ? getIndexPatternService().get(props.mostCommonDataViewId)
+        : getIndexPatternService().getDefaultDataView()
+    }
+
+    getDataView()
+      .then((dataView) => {
         if (ignore) {
           return;
         }
 
-        if (defaultDataView) {
+        if (dataView) {
           let geoField: string | undefined;
           const initialDateFields: string[] = [];
-          for (let i = 0; i < defaultDataView.fields.length; i++) {
-            const field = defaultDataView.fields[i];
+          for (let i = 0; i < dataView.fields.length; i++) {
+            const field = dataView.fields[i];
             if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
               geoField = field.name;
             } else if ('date' === field.type) {
@@ -45,12 +52,12 @@ export function CreateSourceEditor(props: Props) {
 
           if (geoField) {
             let initialDateField: string | undefined;
-            if (defaultDataView.timeFieldName) {
-              initialDateField = defaultDataView.timeFieldName;
+            if (dataView.timeFieldName) {
+              initialDateField = dataView.timeFieldName;
             } else if (initialDateFields.length) {
               initialDateField = initialDateFields[0];
             }
-            const initialEsql = `from ${defaultDataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
+            const initialEsql = `from ${dataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
             setDateField(initialDateField);
             setEsql(initialEsql);
             props.onSourceConfigChange({

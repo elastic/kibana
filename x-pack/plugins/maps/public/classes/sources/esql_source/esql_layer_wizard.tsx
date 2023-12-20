@@ -21,7 +21,7 @@ export const esqlLayerWizardConfig: LayerWizard = {
   description: '',
   icon: DocumentsLayerIcon,
   isBeta: true,
-  renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers, mapColors, mostCommonDataViewId }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESQLSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
@@ -33,7 +33,7 @@ export const esqlLayerWizardConfig: LayerWizard = {
       previewLayers([layerDescriptor]);
     };
 
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    return <CreateSourceEditor mostCommonDataViewId={mostCommonDataViewId} onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
 };
