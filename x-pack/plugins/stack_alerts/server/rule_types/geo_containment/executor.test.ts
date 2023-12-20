@@ -11,37 +11,30 @@ import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/serve
 import sampleAggsJsonResponse from './tests/es_sample_response.json';
 import sampleShapesJsonResponse from './tests/es_sample_response_shapes.json';
 import { executor } from './executor';
-import type {
-  GeoContainmentRuleParams,
-  GeoContainmentAlertInstanceState,
-  GeoContainmentAlertInstanceContext,
-} from './types';
+import type { GeoContainmentRuleParams, GeoContainmentAlertInstanceContext } from './types';
 
-const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
-  create: (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertFactory.create<
-      GeoContainmentAlertInstanceState,
-      GeoContainmentAlertInstanceContext
-    >();
-    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
-      (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
-        // Check subset of alert for comparison to expected results
-        // @ts-ignore
-        const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-        testAlertActionArr.push({
-          actionGroupId,
-          instanceId,
-          context: contextSubset,
-        });
-      }
-    );
-    return alertInstance;
+const alertsClient = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
+  report: ({
+    id,
+    actionGroup,
+    context,
+  }: {
+    id: string;
+    actionGroup: string;
+    context?: GeoContainmentAlertInstanceContext;
+  }) => {
+    const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+    testAlertActionArr.push({
+      actionGroupId: actionGroup,
+      instanceId: id,
+      context: contextSubset,
+    });
+    return { uuid: '', start: null };
   },
-  alertLimit: {
-    getValue: () => 1000,
-    setLimitReached: () => {},
-  },
-  done: () => ({ getRecoveredAlerts: () => [] }),
+  setAlertData: () => {},
+  getAlertLimitValue: () => 1000,
+  setAlertLimitReached: () => {},
+  getRecoveredAlerts: () => [],
 });
 
 describe('getGeoContainmentExecutor', () => {
@@ -115,7 +108,7 @@ describe('getGeoContainmentExecutor', () => {
   const alertServicesWithSearchMock: RuleExecutorServicesMock = {
     ...alertsMock.createRuleExecutorServices(),
     // @ts-ignore
-    alertFactory: alertFactory(contextKeys, testAlertActionArr),
+    alertsClient: alertsClient(contextKeys, testAlertActionArr),
     // @ts-ignore
     scopedClusterClient: {
       asCurrentUser: esClient,

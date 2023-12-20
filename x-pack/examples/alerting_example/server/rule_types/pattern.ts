@@ -78,6 +78,10 @@ function getPatternRuleType(): RuleType {
 
 async function executor(options: RuleExecutorOptions): Promise<{ state: State }> {
   const { services, state, params } = options;
+  const { alertsClient } = services;
+  if (!alertsClient) {
+    throw new Error(`no alerts client`);
+  }
 
   if (state.runs == null) {
     state.runs = 0;
@@ -109,7 +113,7 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
     switch (action) {
       case 'a':
         const context = { patternIndex, action, pattern, runs };
-        services.alertsClient.report({ id: instance, actionGroup: 'default', context });
+        alertsClient.report({ id: instance, actionGroup: 'default', context });
         break;
       case '-':
         break;

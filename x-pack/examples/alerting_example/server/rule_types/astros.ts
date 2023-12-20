@@ -79,6 +79,10 @@ export const ruleType: RuleType<
     name: 'Has landed back on Earth',
   },
   async executor({ services, params }) {
+    const { alertsClient } = services;
+    if (!alertsClient) {
+      throw new Error(`no alerts client`);
+    }
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 
     const response = await axios.get<PeopleInSpace>('http://api.open-notify.org/astros.json');
@@ -90,7 +94,7 @@ export const ruleType: RuleType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services.alertsClient.report({ id: name, actionGroup: 'default', state: { craft } });
+        alertsClient.report({ id: name, actionGroup: 'default', state: { craft } });
       });
     }
 

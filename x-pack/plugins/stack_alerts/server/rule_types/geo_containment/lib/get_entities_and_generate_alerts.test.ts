@@ -6,39 +6,32 @@
  */
 
 import _ from 'lodash';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 import { OTHER_CATEGORY } from '../constants';
-import type {
-  GeoContainmentAlertInstanceState,
-  GeoContainmentAlertInstanceContext,
-} from '../types';
+import { GeoContainmentAlertInstanceContext } from '../types';
 
-const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
-  create: (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertFactory.create<
-      GeoContainmentAlertInstanceState,
-      GeoContainmentAlertInstanceContext
-    >();
-    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
-      (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
-        // Check subset of alert for comparison to expected results
-        // @ts-ignore
-        const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-        testAlertActionArr.push({
-          actionGroupId,
-          instanceId,
-          context: contextSubset,
-        });
-      }
-    );
-    return alertInstance;
+const alertsClient = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
+  report: ({
+    id,
+    actionGroup,
+    context,
+  }: {
+    id: string;
+    actionGroup: string;
+    context?: GeoContainmentAlertInstanceContext;
+  }) => {
+    const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+    testAlertActionArr.push({
+      actionGroupId: actionGroup,
+      instanceId: id,
+      context: contextSubset,
+    });
+    return { uuid: '', start: null };
   },
-  alertLimit: {
-    getValue: () => 1000,
-    setLimitReached: () => {},
-  },
-  done: () => ({ getRecoveredAlerts: () => [] }),
+  setAlertData: () => {},
+  getAlertLimitValue: () => 1000,
+  setAlertLimitReached: () => {},
+  getRecoveredAlerts: () => [],
 });
 
 describe('getEntitiesAndGenerateAlerts', () => {
@@ -129,7 +122,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -155,7 +148,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithIdenticalEntityEntry,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -195,7 +188,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithNonIdenticalEntityEntry,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -219,7 +212,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -271,7 +264,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithThreeMore,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -311,7 +304,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -346,7 +339,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      alertsClient(contextKeys, testAlertActionArr),
       emptyShapesIdsNamesMap,
       currentDateTime
     );

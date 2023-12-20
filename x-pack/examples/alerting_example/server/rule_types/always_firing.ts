@@ -70,12 +70,16 @@ export const ruleType: RuleType<
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
     state,
   }) {
+    const { alertsClient } = services;
+    if (!alertsClient) {
+      throw new Error(`no alerts client`);
+    }
     const count = (state.count ?? 0) + 1;
 
     range(instances)
       .map(() => uuidv4())
       .forEach((id: string) => {
-        services.alertsClient.report({
+        alertsClient.report({
           id,
           actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
           state: { triggerdOnCycle: count },
