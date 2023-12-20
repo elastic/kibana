@@ -265,3 +265,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
     </>
   );
 };
+
+// Default Export is needed to lazy load this react component
+// eslint-disable-next-line import/no-default-export
+export default IndexDetailOverview;

@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { IndexContent } from '@kbn/index-management-plugin/public/services';
 
 import { ServerlessSearchPluginStartDependencies } from '../../../types';
 
-import { IndexDetailOverview } from './index_overview';
+const IndexDetailOverview = lazy(() => import('./index_overview'));
 
 export const createIndexOverviewContent = (
   core: CoreStart,
@@ -28,7 +29,9 @@ export const createIndexOverviewContent = (
         <KibanaContextProvider services={{ ...core, ...services }}>
           <QueryClientProvider client={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
-            <IndexDetailOverview index={index.index} />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <IndexDetailOverview index={index.index} />
+            </Suspense>
           </QueryClientProvider>
         </KibanaContextProvider>
       );
