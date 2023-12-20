@@ -100,7 +100,7 @@ describe('LensEditConfigurationFlyout', () => {
       isNewPanel: true,
     });
     expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
-      'Create  visualization'
+      'Create ES|QL visualization'
     );
   });
 
