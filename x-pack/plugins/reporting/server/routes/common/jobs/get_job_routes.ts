@@ -82,18 +82,23 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       const docIndex = doc.index;
       const stream = await getContentStream(reporting, { id: docId, index: docIndex });
 
-      // An "error" event is emitted if an error is passed to the `stream.end` callback from the _final method
-      // This event _must_ be handled
+      // An "error" event is emitted if an error is
+      // passed to the `stream.end` callback from
+      // the _final method of the ContentStream.
+      // This event must be handled.
       stream.on('error', (err) => {
         const { logger } = reporting.getPluginSetupDeps();
         logger.get('delete-report-job').error(err);
       });
 
       try {
-        /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+        // Overwriting existing content with an
+        // empty buffer to remove all the chunks.
         await new Promise<void>((resolve, reject) => {
           stream.end('', 'utf8', (error?: Error) => {
             if (error) {
+              // handle error that could be thrown
+              // from the _write method of the ContentStream
               reject(error);
             } else {
               resolve();
@@ -107,6 +112,8 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
           body: { deleted: true },
         });
       } catch (error) {
+        const { logger } = reporting.getPluginSetupDeps();
+        logger.get('delete-report').error(error);
         return res.customError({
           statusCode: 500,
         });
