@@ -53,7 +53,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     get: jest.fn(),
     bulkGet: jest.fn(),
     push: jest.fn(),
-    update: jest.fn(),
+    bulkUpdate: jest.fn(),
     delete: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
