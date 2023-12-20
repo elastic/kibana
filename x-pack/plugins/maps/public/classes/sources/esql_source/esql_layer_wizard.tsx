@@ -33,7 +33,12 @@ export const esqlLayerWizardConfig: LayerWizard = {
       previewLayers([layerDescriptor]);
     };
 
-    return <CreateSourceEditor mostCommonDataViewId={mostCommonDataViewId} onSourceConfigChange={onSourceConfigChange} />;
+    return (
+      <CreateSourceEditor
+        mostCommonDataViewId={mostCommonDataViewId}
+        onSourceConfigChange={onSourceConfigChange}
+      />
+    );
   },
   title: sourceTitle,
 };

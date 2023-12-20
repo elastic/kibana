@@ -441,7 +441,7 @@ export const getMostCommonDataViewId = createSelector(
   (layerList, waitingForMapReadyLayerList) => {
     const counts: { [key: string]: number } = {};
     function incrementCount(ids: string[]) {
-      ids.forEach(id => {
+      ids.forEach((id) => {
         const count = counts.hasOwnProperty(id) ? counts[id] : 0;
         counts[id] = count + 1;
       });
@@ -460,7 +460,7 @@ export const getMostCommonDataViewId = createSelector(
 
     let mostCommonId: string | undefined;
     let mostCommonCount = 0;
-    Object.keys(counts).forEach(id => {
+    Object.keys(counts).forEach((id) => {
       if (counts[id] > mostCommonCount) {
         mostCommonId = id;
         mostCommonCount = counts[id];

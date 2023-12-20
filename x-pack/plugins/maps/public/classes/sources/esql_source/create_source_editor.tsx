@@ -25,11 +25,11 @@ export function CreateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    
+
     function getDataView() {
       return props.mostCommonDataViewId
         ? getIndexPatternService().get(props.mostCommonDataViewId)
-        : getIndexPatternService().getDefaultDataView()
+        : getIndexPatternService().getDefaultDataView();
     }
 
     getDataView()
