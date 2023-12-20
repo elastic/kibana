@@ -42,11 +42,7 @@ export async function executeEditAction({
   }
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(
-    startDependencies,
-    isNewPanel,
-    deletePanel
-  );
+  const ConfigPanel = await embeddable.openConfingPanel(startDependencies, isNewPanel, deletePanel);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
