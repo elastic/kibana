@@ -215,6 +215,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'low',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
                 },
                 {
                   id: 'normal',
@@ -225,6 +226,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'normal',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
                 },
               ]}
               data-test-subj={'mlModelsStartDeploymentModalPriority'}

@@ -475,6 +475,9 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           it(`stops deployment of the imported model ${model.id}`, async () => {
+            // Wait for the model to be deployed before stopping it.
+            await ml.testExecution.logTestStep('should have a Deployed state');
+            await ml.trainedModelsTable.assertModelState(model.id, 'Deployed');
             await ml.trainedModelsTable.stopDeployment(model.id);
             await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, true);
           });

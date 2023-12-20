@@ -52,6 +52,7 @@ export function TrainedModelsTableProvider(
           description: string;
           modelTypes: string[];
           createdAt: string;
+          state: string;
         } = {
           id: $tr
             .findTestSubject('mlModelsTableColumnId')
@@ -64,6 +65,11 @@ export function TrainedModelsTableProvider(
             .text()
             .trim(),
           modelTypes,
+          state: $tr
+            .findTestSubject('mlModelsTableColumnDeploymentState')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
           createdAt: $tr
             .findTestSubject('mlModelsTableColumnCreatedAt')
             .find('.euiTableCellContent')
@@ -540,6 +546,25 @@ export function TrainedModelsTableProvider(
         `Deployment for "${modelId}" has been started successfully.`
       );
       await this.waitForModelsToLoad();
+
+      await retry.tryForTime(
+        5 * 1000,
+        async () => {
+          await this.assertModelState(modelId, 'Deployed');
+        },
+        async () => {
+          await this.refreshModelsTable();
+        }
+      );
+    }
+
+    public async assertModelState(modelId: string, expectedValue = 'Deployed') {
+      const rows = await this.parseModelsTable();
+      const modelRow = rows.find((row) => row.id === modelId);
+      expect(modelRow?.state).to.eql(
+        expectedValue,
+        `Expected trained model row state to be '${expectedValue}' (got '${modelRow?.state!}')`
+      );
     }
 
     public async stopDeployment(modelId: string) {
