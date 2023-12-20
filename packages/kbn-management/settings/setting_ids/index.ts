@@ -163,8 +163,6 @@ export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipRepu
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
-export const SECURITY_SOLUTION_USE_DISCOVER_COMPONENTS_IN_TIMELINE =
-  'securitySolution:useDiscoverComponentsInTimeline';
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
 /** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
 export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =

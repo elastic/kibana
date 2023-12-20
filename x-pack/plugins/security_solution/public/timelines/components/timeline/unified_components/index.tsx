@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
-import { timelineActions } from '../../../store/timeline';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -43,12 +42,13 @@ import type { State, inputsModel } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
 import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
 import { DRAG_DROP_FIELD } from './translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
+import { timelineDefaults } from '../../../store/defaults';
+import { timelineActions } from '../../../store';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,

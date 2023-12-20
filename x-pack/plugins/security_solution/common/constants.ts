@@ -202,10 +202,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
 
-/** This Kibana Advanced Setting shows related integrations on the Rules Table */
-export const USE_DISCOVER_COMPONENTS_IN_TIMELINE =
-  'securitySolution:useDiscoverComponentsInTimeline' as const;
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

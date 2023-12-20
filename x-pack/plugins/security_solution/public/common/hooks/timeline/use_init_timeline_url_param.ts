@@ -10,7 +10,6 @@ import { safeDecode } from '@kbn/rison';
 
 import { useDispatch } from 'react-redux';
 
-import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../common/constants';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import {
   dispatchUpdateTimeline,
@@ -19,12 +18,12 @@ import {
 import type { TimelineUrl } from '../../../timelines/store/model';
 import { timelineActions } from '../../../timelines/store';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { useUiSetting$ } from '../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
-  const [useDiscoverComponentsInTimeline] = useUiSetting$<boolean>(
-    USE_DISCOVER_COMPONENTS_IN_TIMELINE
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'useDiscoverComponentsInTimeline'
   );
 
   const onInitialize = useCallback(

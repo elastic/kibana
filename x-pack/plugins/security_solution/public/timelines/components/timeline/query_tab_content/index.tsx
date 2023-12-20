@@ -26,6 +26,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -33,7 +34,7 @@ import { timelineActions, timelineSelectors } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
@@ -62,7 +63,6 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { UnifiedTimelineComponent } from '../unified_components';
-import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -188,8 +188,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
 }) => {
   const dispatch = useDispatch();
-  const [useDiscoverComponentsInTimeline] = useUiSetting$<boolean>(
-    USE_DISCOVER_COMPONENTS_IN_TIMELINE
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'useDiscoverComponentsInTimeline'
   );
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
   const rows = useMemo(() => pageRows.flat(), [pageRows]);

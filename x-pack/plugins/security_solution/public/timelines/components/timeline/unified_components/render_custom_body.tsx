@@ -14,11 +14,11 @@ import { useSelector } from 'react-redux';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import type { RowRenderer } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
 import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { EventsTrSupplement } from '../styles';
 import { formatAlertToEcsSignal } from '../../../../common/utils/alerts';
+import { timelineDefaults } from '../../../store/defaults';
 
 interface Props {
   discoverGridRows: DataTableRecord[];

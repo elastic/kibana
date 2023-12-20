@@ -32,7 +32,6 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
   SHOW_RELATED_INTEGRATIONS_SETTING,
-  USE_DISCOVER_COMPONENTS_IN_TIMELINE,
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
@@ -308,26 +307,6 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-    },
-    [USE_DISCOVER_COMPONENTS_IN_TIMELINE]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.useDiscoverComponentsInTimelineLabel',
-        {
-          defaultMessage: 'Use Discover Components',
-        }
-      ),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.useDiscoverComponentsInTimelineDescription',
-        {
-          defaultMessage:
-            '<p>Replaces default Timeline table with unified data table and unified fields list</p>',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
     },
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
