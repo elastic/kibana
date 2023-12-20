@@ -289,6 +289,51 @@ describe('TaskScheduling', () => {
         },
       ]);
     });
+
+    test('should offset runAt and scheduledAt by no more than 5m if more than one task is enabled', async () => {
+      const task = taskManagerMock.createTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      const task2 = taskManagerMock.createTask({
+        id: 'task-2',
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task), asOk(task2)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([task.id, task2.id]);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload.length).toBe(2);
+      expect(bulkUpdatePayload[0]).toEqual({
+        ...task,
+        enabled: true,
+        runAt: new Date('1970-01-01T00:00:00.000Z'),
+        scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
+      });
+
+      expect(omit(bulkUpdatePayload[1], 'runAt', 'scheduledAt')).toEqual({
+        ...omit(task2, 'runAt', 'scheduledAt'),
+        enabled: true,
+      });
+
+      const { runAt, scheduledAt } = bulkUpdatePayload[1];
+      expect(runAt.getTime()).toEqual(scheduledAt.getTime());
+      expect(runAt.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
+        5 * 60 * 1000
+      );
+    });
   });
 
   describe('bulkDisable', () => {
