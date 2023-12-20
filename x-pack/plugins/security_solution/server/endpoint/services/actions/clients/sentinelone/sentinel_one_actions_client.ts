@@ -131,9 +131,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
     try {
-      const response = await this.connectorActionsClient.execute<SentinelOneGetAgentsResponse>(
-        executeOptions
-      );
+      const response = await (this.connectorActionsClient.execute(executeOptions) as Promise<
+        ActionTypeExecutorResult<SentinelOneGetAgentsResponse>
+      >);
 
       this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${dump(response)}`);
 
