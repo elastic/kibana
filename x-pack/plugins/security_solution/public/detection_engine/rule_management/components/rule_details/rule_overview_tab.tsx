@@ -14,11 +14,13 @@ import {
   EuiHorizontalRule,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleAboutSection, Description } from './rule_about_section';
 import { RuleDefinitionSection } from './rule_definition_section';
 import { RuleScheduleSection } from './rule_schedule_section';
 import { RuleSetupGuideSection } from './rule_setup_guide_section';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 
 import * as i18n from './translations';
 
@@ -87,52 +89,56 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
 
 interface RuleOverviewTabProps {
   rule: RuleResponse;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   expandedOverviewSections: Record<keyof typeof defaultOverviewOpenSections, boolean>;
   toggleOverviewSection: Record<keyof typeof defaultOverviewOpenSections, () => void>;
 }
 
 export const RuleOverviewTab = ({
   rule,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   expandedOverviewSections,
   toggleOverviewSection,
-}: RuleOverviewTabProps) => (
-  <>
-    <EuiSpacer size="m" />
-    <ExpandableSection
-      title={i18n.ABOUT_SECTION_LABEL}
-      isOpen={expandedOverviewSections.about}
-      toggle={toggleOverviewSection.about}
-    >
-      {rule.description && <Description description={rule.description} />}
-      <RuleAboutSection rule={rule} hideDescription hideName />
-    </ExpandableSection>
-    <EuiHorizontalRule margin="m" />
-    <ExpandableSection
-      title={i18n.DEFINITION_SECTION_LABEL}
-      isOpen={expandedOverviewSections.definition}
-      toggle={toggleOverviewSection.definition}
-    >
-      <RuleDefinitionSection rule={rule} />
-    </ExpandableSection>
-    <EuiHorizontalRule margin="m" />
-    <ExpandableSection
-      title={i18n.SCHEDULE_SECTION_LABEL}
-      isOpen={expandedOverviewSections.schedule}
-      toggle={toggleOverviewSection.schedule}
-    >
-      <RuleScheduleSection rule={rule} />
-    </ExpandableSection>
-    {rule.setup && (
-      <>
-        <EuiHorizontalRule margin="m" />
-        <ExpandableSection
-          title={i18n.SETUP_GUIDE_SECTION_LABEL}
-          isOpen={expandedOverviewSections.setup}
-          toggle={toggleOverviewSection.setup}
-        >
-          <RuleSetupGuideSection setup={rule.setup} />
-        </ExpandableSection>
-      </>
-    )}
-  </>
-);
+}: RuleOverviewTabProps) => {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <ExpandableSection
+        title={i18n.ABOUT_SECTION_LABEL}
+        isOpen={expandedOverviewSections.about}
+        toggle={toggleOverviewSection.about}
+      >
+        {rule.description && <Description description={rule.description} />}
+        <RuleAboutSection rule={rule} columnWidths={columnWidths} hideDescription hideName />
+      </ExpandableSection>
+      <EuiHorizontalRule margin="m" />
+      <ExpandableSection
+        title={i18n.DEFINITION_SECTION_LABEL}
+        isOpen={expandedOverviewSections.definition}
+        toggle={toggleOverviewSection.definition}
+      >
+        <RuleDefinitionSection rule={rule} columnWidths={columnWidths} />
+      </ExpandableSection>
+      <EuiHorizontalRule margin="m" />
+      <ExpandableSection
+        title={i18n.SCHEDULE_SECTION_LABEL}
+        isOpen={expandedOverviewSections.schedule}
+        toggle={toggleOverviewSection.schedule}
+      >
+        <RuleScheduleSection rule={rule} columnWidths={columnWidths} />
+      </ExpandableSection>
+      {rule.setup && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <ExpandableSection
+            title={i18n.SETUP_GUIDE_SECTION_LABEL}
+            isOpen={expandedOverviewSections.setup}
+            toggle={toggleOverviewSection.setup}
+          >
+            <RuleSetupGuideSection setup={rule.setup} />
+          </ExpandableSection>
+        </>
+      )}
+    </>
+  );
+};

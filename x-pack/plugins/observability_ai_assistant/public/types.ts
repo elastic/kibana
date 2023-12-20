@@ -20,11 +20,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Serializable } from '@kbn/utility-types';
-import type {
-  CreateChatCompletionResponse,
-  CreateChatCompletionResponseChoicesInner,
-} from 'openai';
 import type { Observable } from 'rxjs';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
@@ -33,26 +28,23 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   ContextDefinition,
   FunctionDefinition,
+  FunctionResponse,
   Message,
-  RegisterContextDefinition,
-  RegisterFunctionDefinition,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
-import { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import type { StreamingChatResponseEvent } from '../common/conversation_complete';
+import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
+import type { InsightProps } from './components/insight/insight';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionResponse, 'choices'> & {
-  choices: Array<
-    Omit<CreateChatCompletionResponseChoicesInner, 'message'> & {
-      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
-    }
-  >;
-};
+export type { CreateChatCompletionResponseChunk } from '../common/types';
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
@@ -61,29 +53,23 @@ export interface ObservabilityAIAssistantChatService {
     connectorId: string;
     function?: 'none' | 'auto';
   }) => Observable<PendingMessage>;
+  complete: (options: {
+    messages: Message[];
+    connectorId: string;
+    persist: boolean;
+    conversationId?: string;
+    signal: AbortSignal;
+  }) => Observable<StreamingChatResponseEvent>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
   hasRenderFunction: (name: string) => boolean;
-  executeFunction: ({}: {
-    name: string;
-    args: string | undefined;
-    messages: Message[];
-    signal: AbortSignal;
-    connectorId: string;
-  }) => Promise<{ content?: Serializable; data?: Serializable } | Observable<PendingMessage>>;
   renderFunction: (
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string }
   ) => React.ReactNode;
 }
-
-export type AssistantRegistrationFunction = ({}: {
-  signal: AbortSignal;
-  registerFunction: RegisterFunctionDefinition;
-  registerContext: RegisterContextDefinition;
-}) => Promise<void>;
 
 export interface ObservabilityAIAssistantService {
   isEnabled: () => boolean;
@@ -92,15 +78,27 @@ export interface ObservabilityAIAssistantService {
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
-  register: (fn: AssistantRegistrationFunction) => void;
+  register: (fn: ChatRegistrationRenderFunction) => void;
 }
 
-export interface ObservabilityAIAssistantPluginStart {
-  service: ObservabilityAIAssistantService;
-  useGenAIConnectors: () => UseGenAIConnectorsResult;
-}
+export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
+  arguments: TArguments;
+  response: TResponse;
+}) => React.ReactNode;
 
-export interface ObservabilityAIAssistantPluginSetup {}
+export type RegisterRenderFunctionDefinition<
+  TFunctionArguments = any,
+  TFunctionResponse extends FunctionResponse = FunctionResponse
+> = (name: string, render: RenderFunction<TFunctionArguments, TFunctionResponse>) => void;
+
+export type ChatRegistrationRenderFunction = ({}: {
+  registerRenderFunction: RegisterRenderFunctionDefinition;
+}) => Promise<void>;
+
+export interface ConfigSchema {}
+
+export type { PendingMessage };
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -109,6 +107,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
+
 export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
@@ -120,6 +119,14 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export interface ConfigSchema {}
+export interface ObservabilityAIAssistantPluginSetup {}
 
-export type { PendingMessage };
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
+  ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
+    Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
+      RefAttributes<{}>
+  > | null;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
+}

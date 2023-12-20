@@ -835,6 +835,7 @@ test('successfully authorize system actions', async () => {
   await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    actionTypeId: '.cases',
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
@@ -875,7 +876,10 @@ test('Execute of SentinelOne sub-actions require create privilege', async () => 
 
   await actionExecutor.execute({ ...executeParams, actionId: 'sentinel-one-connector-authz' });
 
-  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({ operation: 'create' });
+  expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
+    operation: 'execute',
+    actionTypeId: '.sentinelone',
+  });
 });
 
 test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
@@ -909,6 +913,7 @@ test('pass the params to the actionTypeRegistry when authorizing system actions'
   });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    actionTypeId: '.cases',
     operation: 'execute',
     additionalPrivileges: ['test/create'],
   });
