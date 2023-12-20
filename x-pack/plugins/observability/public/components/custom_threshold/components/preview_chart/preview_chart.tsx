@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
+import { FillStyle } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -21,14 +21,11 @@ import {
 
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  Aggregators,
-  Comparator,
-  AggType,
-} from '../../../../../common/custom_threshold_rule/types';
+import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
+import { getBufferThreshold, getLensOperationFromRuleMetric } from './helpers';
 
 interface PreviewChartPros {
   metricExpression: MetricExpression;
@@ -37,15 +34,6 @@ interface PreviewChartPros {
   groupBy?: string | string[];
   error?: IErrorObject;
 }
-
-const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
-  if (aggType === Aggregators.AVERAGE) return 'average';
-  if (aggType === Aggregators.CARDINALITY) return 'unique_count';
-  return aggType;
-};
-
-export const getBufferThreshold = (threshold?: number): string =>
-  (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
 
 export function PreviewChart({
   metricExpression,
@@ -168,17 +156,7 @@ export function PreviewChart({
       return;
     }
     const aggMapFromMetrics = metrics.reduce((acc, metric) => {
-      const operation = getOperationTypeFromRuleAggType(metric.aggType);
-      let sourceField = metric.field;
-
-      if (metric.aggType === Aggregators.COUNT) {
-        sourceField = '___records___';
-      }
-      let operationField = `${operation}(${sourceField})`;
-      if (metric?.filter) {
-        const aggFilter = JSON.stringify(metric.filter).replace(/"|\\/g, '');
-        operationField = `${operation}(${sourceField},kql='${aggFilter}')`;
-      }
+      const operationField = getLensOperationFromRuleMetric(metric);
       return {
         ...acc,
         [metric.name]: operationField,

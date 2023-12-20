@@ -307,4 +307,22 @@ export const aggregationType: { [key: string]: AggregationType } = {
     value: Aggregators.SUM,
     validNormalizedTypes: ['number', 'histogram'],
   },
+  p95: {
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p95',
+      { defaultMessage: '95th Percentile' }
+    ),
+    fieldRequired: false,
+    value: Aggregators.P95,
+    validNormalizedTypes: ['number', 'histogram'],
+  },
+  p99: {
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p99',
+      { defaultMessage: '99th Percentile' }
+    ),
+    fieldRequired: false,
+    value: Aggregators.P99,
+    validNormalizedTypes: ['number', 'histogram'],
+  },
 };
