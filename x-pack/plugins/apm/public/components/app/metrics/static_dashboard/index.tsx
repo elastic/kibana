@@ -57,10 +57,6 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     });
   }, [dataView, serviceName, environment, dashboard]);
 
-  if (!dataViewId) {
-    return null;
-  }
-
   return (
     <DashboardRenderer
       getCreationOptions={() =>

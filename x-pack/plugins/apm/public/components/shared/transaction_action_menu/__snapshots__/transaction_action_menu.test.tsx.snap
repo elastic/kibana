@@ -3,28 +3,32 @@
 exports[`TransactionActionMenu component matches the snapshot 1`] = `
 <div>
   <div
-    class="euiPopover euiPopover-isOpen emotion-euiPopover-inline-block"
+    class="euiPopover euiPopover-isOpen emotion-euiPopover"
     id="transactionActionMenu"
   >
-    <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-      data-test-subj="apmActionMenuButtonInvestigateButton"
-      type="button"
+    <div
+      class="euiPopover__anchor css-16vtueo-render"
     >
-      <span
-        class="emotion-euiButtonDisplayContent"
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+        data-test-subj="apmActionMenuButtonInvestigateButton"
+        type="button"
       >
         <span
-          class="eui-textTruncate"
+          class="emotion-euiButtonDisplayContent"
         >
-          Investigate
+          <span
+            class="eui-textTruncate"
+          >
+            Investigate
+          </span>
+          <span
+            color="inherit"
+            data-euiicon-type="arrowDown"
+          />
         </span>
-        <span
-          color="inherit"
-          data-euiicon-type="arrowDown"
-        />
-      </span>
-    </button>
+      </button>
+    </div>
   </div>
 </div>
 `;
