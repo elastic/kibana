@@ -83,6 +83,12 @@ if is_pr; then
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
   fi
 
+  # These can be removed once we're not supporting Jenkins and Buildkite at the same time
+  # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
+  export ghprbGhRepository="elastic/kibana"
+  export ghprbActualCommit="$BUILDKITE_COMMIT"
+  export BUILD_URL="$BUILDKITE_BUILD_URL"
+
   set_git_merge_base
 
   # For backwards compatibility
