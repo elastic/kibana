@@ -7,9 +7,9 @@
 
 // import semverLte from 'semver/functions/lte';
 
-function parseSemver(semver: string) {
-  return semver.includes('-') ? semver.substring(0, semver.indexOf('-')) : semver;
-}
+// function parseSemver(semver: string) {
+//   return semver.includes('-') ? semver.substring(0, semver.indexOf('-')) : semver;
+// }
 
 // until a release is confirmed, or another feature-detection method is used, do not automatically
 // switch to "v2" logic
