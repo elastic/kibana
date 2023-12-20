@@ -170,5 +170,5 @@ export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export interface BulkActionBenchmarkRulesResponse {
   newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
-  disabledRules: number;
+  disabledRulesCounter: number;
 }

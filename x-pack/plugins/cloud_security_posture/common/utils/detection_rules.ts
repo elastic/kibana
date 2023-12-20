@@ -13,10 +13,10 @@ const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
 const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
 
-export function convertRuleTagsToKQL(tags: string[]): string {
+export const convertRuleTagsToKQL = (tags: string[]): string => {
   const TAGS_FIELD = 'alert.attributes.tags';
   return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(' AND ')})`;
-}
+};
 
 /*
  * Returns an array of CspFinding tags that can be used to search and filter a detection rule

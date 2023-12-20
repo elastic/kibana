@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/core/server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
@@ -29,15 +27,20 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
 
-const disableDetectionRules = async (
-  detectionRulesClient: RulesClient,
-  detectionRules: Array<FindResult<RuleParams>>
-) => {
+export const getRuleIdsToDisable = async (detectionRules: Array<FindResult<RuleParams>>) => {
   const idsToDisable = detectionRules
     .map((detectionRule) => {
       return detectionRule.data.map((data) => data.id);
     })
     .flat();
+  return idsToDisable;
+};
+
+const disableDetectionRules = async (
+  detectionRulesClient: RulesClient,
+  detectionRules: Array<FindResult<RuleParams>>
+) => {
+  const idsToDisable = await getRuleIdsToDisable(detectionRules);
   if (!idsToDisable.length) return;
   return await detectionRulesClient.bulkDisableRules({ ids: idsToDisable });
 };
@@ -85,8 +88,10 @@ export const muteDetectionRules = async (
   rulesIds: string[]
 ): Promise<number> => {
   const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
-  if (benchmarkRules.includes(undefined))
-    throw new Error('At least one of the provided benchmark rule id not exists');
+
+  if (benchmarkRules.includes(undefined)) {
+    throw new Error('At least one of the provided benchmark rule IDs does not exist');
+  }
   const benchmarkRulesTags = benchmarkRules.map((benchmarkRule) =>
     generateBenchmarkRuleTags(benchmarkRule!.metadata)
   );
@@ -123,49 +128,11 @@ export const setRulesStates = (
       muted: state,
       benchmark_id: benchmarkRule.metadata.benchmark.id,
       benchmark_version: benchmarkRule.metadata.benchmark.version,
-      rule_number: benchmarkRule.metadata.benchmark.rule_number
-        ? benchmarkRule.metadata.benchmark.rule_number
-        : '',
+      rule_number: benchmarkRule.metadata.benchmark.rule_number || '',
       rule_id: benchmarkRule.metadata.id,
     };
   });
   return rulesStates;
-};
-
-export const createCspSettingObject = async (encryptedSoClient: SavedObjectsClientContract) => {
-  return encryptedSoClient.create<CspSettings>(
-    INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-    {
-      rules: {},
-    },
-    { id: INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID }
-  );
-};
-
-export const createCspSettingObjectSafe = async (
-  encryptedSoClient: SavedObjectsClientContract,
-  logger: Logger
-) => {
-  const cspSettings = await getCspSettingsSafe(encryptedSoClient, logger);
-  return cspSettings;
-};
-
-export const getCspSettingsSafe = async (
-  encryptedSoClient: SavedObjectsClientContract,
-  logger: Logger
-): Promise<CspSettings> => {
-  try {
-    const cspSettings = await encryptedSoClient.get<CspSettings>(
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-      INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
-    );
-    return cspSettings.attributes;
-  } catch (err) {
-    const error = transformError(err);
-    logger.error(`An error occurred while trying to fetch csp settings: ${error}`);
-    logger.warn(`Trying to create new csp settings object`);
-    return (await createCspSettingObject(encryptedSoClient)).attributes;
-  }
 };
 
 export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
