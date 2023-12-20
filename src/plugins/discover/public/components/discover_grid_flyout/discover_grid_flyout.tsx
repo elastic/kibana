@@ -189,11 +189,11 @@ export function DiscoverGridFlyout({
   );
 
   const defaultFlyoutTitle = isPlainRecord
-    ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
-        defaultMessage: 'Expanded row',
+    ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
+        defaultMessage: 'Row',
       })
-    : i18n.translate('discover.grid.tableRow.detailHeading', {
-        defaultMessage: 'Expanded document',
+    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
+        defaultMessage: 'Document',
       });
   const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
 
@@ -209,17 +209,18 @@ export function DiscoverGridFlyout({
         ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle
-            size="s"
-            className="unifiedDataTable__flyoutHeader"
-            data-test-subj="docTableRowDetailsTitle"
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+            wrap={true}
           >
-            <h2>{flyoutTitle}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            {!isPlainRecord &&
-              flyoutActions.map((action) => action.enabled && <action.Content key={action.id} />)}
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s" data-test-subj="docTableRowDetailsTitle">
+                <h2>{flyoutTitle}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
@@ -229,12 +230,16 @@ export function DiscoverGridFlyout({
                   pageCount={pageCount}
                   activePage={activePage}
                   onPageClick={setPage}
-                  className="unifiedDataTable__flyoutDocumentNavigation"
                   compressed
                   data-test-subj="dscDocNavigation"
                 />
               </EuiFlexItem>
             )}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap={true}>
+            {!isPlainRecord &&
+              flyoutActions.map((action) => action.enabled && <action.Content key={action.id} />)}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>

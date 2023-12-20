@@ -74,9 +74,10 @@ const ViewDocument = () => {
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           <strong>
-            {i18n.translate('discover.grid.tableRow.viewText', {
-              defaultMessage: 'View:',
+            {i18n.translate('discover.grid.tableRow.actionsLabel', {
+              defaultMessage: 'Actions',
             })}
+            :
           </strong>
         </EuiText>
       </EuiFlexItem>
@@ -95,8 +96,8 @@ const SingleDocument = (props: FlyoutActionProps) => {
         data-test-subj="docTableRowAction"
         {...props}
       >
-        {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
-          defaultMessage: 'Single document',
+        {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkLabel', {
+          defaultMessage: 'View single document',
         })}
       </EuiButtonEmpty>
     </EuiFlexItem>
@@ -115,8 +116,8 @@ const SurroundingDocuments = (props: FlyoutActionProps) => {
           data-test-subj="docTableRowAction"
           {...props}
         >
-          {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
-            defaultMessage: 'Surrounding documents',
+          {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
+            defaultMessage: 'View surrounding documents',
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>

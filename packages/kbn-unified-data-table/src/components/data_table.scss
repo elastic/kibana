@@ -67,14 +67,6 @@
   min-height: 0;
 }
 
-.unifiedDataTable__flyoutHeader {
-  white-space: nowrap;
-}
-
-.unifiedDataTable__flyoutDocumentNavigation {
-  justify-content: flex-end;
-}
-
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
 
