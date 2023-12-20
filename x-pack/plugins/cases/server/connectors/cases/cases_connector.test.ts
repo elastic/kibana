@@ -513,7 +513,7 @@ describe('CasesConnector', () => {
 
         it('reopen closed cases if reopenClosedCases=true', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
-            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
             errors: [],
           });
 
@@ -533,7 +533,7 @@ describe('CasesConnector', () => {
 
         it('create new cases if reopenClosedCases=false and there are closed cases', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
-            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
             errors: [],
           });
 
