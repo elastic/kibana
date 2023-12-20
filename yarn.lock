@@ -4867,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-formula-docs@link:packages/kbn-lens-formula-docs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
   uid ""
