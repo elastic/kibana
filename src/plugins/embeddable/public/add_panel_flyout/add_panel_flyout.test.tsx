@@ -110,7 +110,7 @@ describe('add panel flyout', () => {
     // flush promises
     await new Promise((r) => setTimeout(r, 1));
 
-    expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+    expect(usageCollection?.reportUiCounter).toHaveBeenCalledWith(
       'HELLO_WORLD_CONTAINER',
       'click',
       'CONTACT_CARD_EMBEDDABLE:add'
