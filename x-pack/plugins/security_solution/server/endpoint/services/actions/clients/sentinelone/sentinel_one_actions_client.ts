@@ -76,13 +76,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   /**
-   * Sends actions to SentinelOne directly
+   * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
   private async sendAction(
     actionType: SUB_ACTION,
     actionParams: object
-    // FIXME:PT type properly the options above once PR 168441 for 8.12 merges
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const { id: connectorId } = await this.getConnector();
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
@@ -194,14 +193,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     await this.validateRequest(options);
-
-    const agentUUID = options.endpoint_ids[0];
-
     await this.sendAction(SUB_ACTION.RELEASE_HOST, {
-      uuid: agentUUID,
+      uuid: options.endpoint_ids[0],
     });
-
-    // FIXME:PT need to grab data from the response above and store it with the Request or Response documents on our side
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
       ...options,
