@@ -19,6 +19,11 @@ import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
@@ -29,7 +34,7 @@ import { SloCardItemActions } from './slo_card_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloCardItemBadges } from './slo_card_item_badges';
-
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<SloRule>> | undefined;
@@ -52,7 +57,7 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
   return colors[status ?? 'NO_DATA'];
 };
 
-const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
+const getSubTitle = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
 };
 
@@ -63,15 +68,17 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-
+  const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
-    slo,
-    setDeleteConfirmationModalOpen,
-    setIsActionsPopoverOpen,
-    setIsAddRuleFlyoutOpen,
-  });
+  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm, handleAttachToDashboardSave } =
+    useSloListActions({
+      slo,
+      setDeleteConfirmationModalOpen,
+      setIsActionsPopoverOpen,
+      setIsAddRuleFlyoutOpen,
+      setDashboardAttachmentReady,
+    });
 
   return (
     <>
@@ -88,14 +95,14 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           }
         }}
         paddingSize="none"
-        style={{
-          height: '182px',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
+        css={css`
+          height: 182px;
+          overflow: hidden;
+          position: relative;
+        `}
         title={slo.summary.status}
       >
-        <SloCardChart slo={slo} historicalSliData={historicalSliData} cardsPerRow={cardsPerRow} />
+        <SloCardChart slo={slo} historicalSliData={historicalSliData} />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
             slo={slo}
@@ -103,6 +110,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
+            setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
         )}
       </EuiPanel>
@@ -129,17 +137,34 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           onConfirm={handleDeleteConfirm}
         />
       ) : null}
+      {isDashboardAttachmentReady ? (
+        <SavedObjectSaveModalDashboard
+          objectType={i18n.translate(
+            'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
+            { defaultMessage: 'SLO Overview' }
+          )}
+          documentInfo={{
+            title: i18n.translate(
+              'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
+              { defaultMessage: 'SLO Overview' }
+            ),
+          }}
+          canSaveByReference={false}
+          onClose={() => {
+            setDashboardAttachmentReady(false);
+          }}
+          onSave={handleAttachToDashboardSave}
+        />
+      ) : null}
     </>
   );
 }
 
 export function SloCardChart({
   slo,
-  cardsPerRow,
   historicalSliData,
 }: {
   slo: SLOWithSummaryResponse;
-  cardsPerRow: number;
   historicalSliData?: Array<{ key?: number; value?: number }>;
 }) {
   const {
@@ -147,7 +172,7 @@ export function SloCardChart({
   } = useKibana().services;
 
   const cardColor = useSloCardColor(slo.summary.status);
-  const subTitle = getSubTitle(slo, cardsPerRow);
+  const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
 
   return (
