@@ -97,10 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.table.filterWithSearchString(transformConfigWithPivot.id, 1);
 
         await transform.testExecution.logTestStep('should display a disabled actions popover');
-        await transform.table.assertTransformRowActionsButtonEnabled(
-          transformConfigWithPivot.id,
-          false
-        );
+        await transform.table.assertTransformRowActionsEnabled(transformConfigWithPivot.id, false);
 
         await transform.testExecution.logTestStep('should show content in the expanded table row');
         await transform.table.assertTransformExpandedRow();
