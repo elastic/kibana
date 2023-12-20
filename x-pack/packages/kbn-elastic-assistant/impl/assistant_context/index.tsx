@@ -148,7 +148,7 @@ export interface UseAssistantContext {
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setDefaultAllowRepflacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
