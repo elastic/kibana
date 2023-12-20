@@ -20,6 +20,7 @@ type DIRECTION = 'asc' | 'desc';
 type SORT_FIELD = keyof DataStreamStat;
 
 const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
+  ['title']: 'name',
   ['size']: 'sizeBytes',
 };
 
@@ -77,7 +78,7 @@ export const useDatasetQualityTable = () => {
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
     const mergedData = data.map((dataStream) => {
-      const degradedDocs = find(degradedStats, { dataset: dataStream.name });
+      const degradedDocs = find(degradedStats, { dataset: dataStream.rawName });
 
       return {
         ...dataStream,

@@ -66,12 +66,12 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
   );
 
   useEffect(() => {
-    setConfigView(sortAndFilterConnectorConfiguration(localConfig, isNative));
-  }, [localConfig, isNative]);
+    setLocalConfig((localConf) => ({ ...configuration, ...localConf }));
+  }, [configuration]);
 
   useEffect(() => {
-    setLocalConfig(configuration);
-  }, [configuration]);
+    setConfigView(sortAndFilterConnectorConfiguration(localConfig, isNative));
+  }, [localConfig, isNative]);
 
   return (
     <EuiForm
