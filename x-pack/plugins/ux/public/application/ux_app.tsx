@@ -23,6 +23,7 @@ import {
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
+  useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -65,9 +66,9 @@ export const uxRoutes: RouteDefinition[] = [
 ];
 
 function UxApp() {
-  const { http, theme } = useKibanaServices();
+  const { http } = useKibanaServices();
   const basePath = http.basePath.get();
-  const darkMode = theme?.getTheme().darkMode ?? false;
+  const darkMode = useDarkMode(false);
 
   useBreadcrumbs([
     {

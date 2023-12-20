@@ -7,13 +7,10 @@
 
 import { DARK_THEME, LIGHT_THEME, Theme } from '@elastic/charts';
 import { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 
 export const useBaseChartTheme = (): Theme => {
-  const {
-    services: { theme },
-  } = useKibana();
-  const darkMode = useMemo(() => theme?.getTheme().darkMode ?? false, [theme]);
+  const darkMode = useDarkMode(false);
 
   return useMemo(() => {
     return darkMode ? DARK_THEME : LIGHT_THEME;
