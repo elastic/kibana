@@ -151,7 +151,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1
+          limit: 1        
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
@@ -200,7 +200,7 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
+          
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -235,7 +235,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1
+          limit: 1        
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
