@@ -34,7 +34,7 @@ import {
   selectCoverageOverviewSourceFilterOption,
 } from '../../../../tasks/rules_coverage_overview';
 
-export const getMitre1 = (): Threat => ({
+const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
     name: getMockThreatData().tactic.name,
