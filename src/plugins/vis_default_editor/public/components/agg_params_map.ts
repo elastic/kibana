@@ -32,9 +32,7 @@ const buckets = {
     extended_bounds: controls.ExtendedBoundsParamEditor,
   },
   [BUCKET_TYPES.IP_PREFIX]: {
-    prefixLength: controls.PrefixLengthParamEditor,
-    prefixLength64: controls.PrefixLengthParamEditor,
-    isIpv6: controls.IsIpv6ParamEditor,
+    prefixLength: controls.IpPrefixParamEditor,
   },
   [BUCKET_TYPES.IP_RANGE]: {
     ipRangeType: controls.IpRangeTypeParamEditor,

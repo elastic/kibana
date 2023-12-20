@@ -6,47 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { isUndefined } from 'lodash';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps } from '../../agg_param_props';
 
-export interface PrefixLengthParamEditorProps extends AggParamEditorProps<number | ''> {
-  iconTip?: React.ReactNode;
-  disabled?: boolean;
-}
-
-function PrefixLengthParamEditor({
-  aggParam,
-  disabled,
-  iconTip,
+function PrefixLengthObject({ 
   value,
   setValue,
-  showValidation,
   setValidity,
+  showValidation,
   setTouched,
-}: PrefixLengthParamEditorProps) {
-  const fieldTitle = aggParam.displayName == 'prefixLength64' ? 'IPv6' : 'IPv4';
-  const maxValue = aggParam.displayName == 'prefixLength64' ? 128 : 32;
+}: AggParamEditorProps<number>) {
 
   const label = (
     <>
       <FormattedMessage
-        id="visDefaultEditor.controls.prefixLengthLabel"
-        defaultMessage="{fieldTitle} Prefix Length"
-        values={{ fieldTitle }}
+        id="visDefaultEditor.controls.IpPrefix.prefixLengthLabel"
+        defaultMessage="Prefix Length"
       />
-      {iconTip}
     </>
   );
-
-  const isValid = disabled || (Number(value) >= 0 && Number(value) <= maxValue);
-
-  useEffect(() => {
-    setValidity(isValid);
-  }, [isValid, setValidity]);
 
   return (
     <EuiFormRow
@@ -63,12 +45,11 @@ function PrefixLengthParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={0}
-        max={maxValue}
-        disabled={disabled}
+        max={32}
         data-test-subj="prefixLengthParamEditor"
       />
     </EuiFormRow>
   );
 }
 
-export { PrefixLengthParamEditor };
+export { PrefixLengthObject };
