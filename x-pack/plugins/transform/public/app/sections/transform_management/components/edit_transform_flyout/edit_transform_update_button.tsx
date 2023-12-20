@@ -25,8 +25,8 @@ interface EditTransformUpdateButtonProps {
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const { config, formState, isFormValid, isFormTouched } = useEditTransformFlyout();
-  const requestConfig = applyFormStateToTransformConfig(config, formState);
+  const { config, formFields, formSections, isFormValid, isFormTouched } = useEditTransformFlyout();
+  const requestConfig = applyFormStateToTransformConfig(config, formFields, formSections);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
   const setApiError = useEditTransformFlyout((s) => s.setApiError);
 
