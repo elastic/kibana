@@ -348,7 +348,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
               });
