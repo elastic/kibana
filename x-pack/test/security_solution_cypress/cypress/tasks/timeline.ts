@@ -10,6 +10,7 @@ import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
+import { LOADING_INDICATOR } from '../screens/security_header';
 import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
 
 import {
@@ -64,6 +65,7 @@ import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
+  TIMELINE_DATA_PROVIDER_FIELD_INPUT,
   ACTIVE_TIMELINE_BOTTOM_BAR,
   EMPTY_DATA_PROVIDER_AREA,
   EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
@@ -82,7 +84,7 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
-  TIMELINE_DATA_PROVIDERS_CONTAINER,
+  OPEN_TIMELINE_MODAL,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -171,6 +173,7 @@ export const addNotesToTimeline = (notes: string) => {
     .then((notesCount) => {
       cy.get(NOTES_TEXT_AREA).type(notes, {
         parseSpecialCharSequences: false,
+        force: true,
       });
 
       cy.get(ADD_NOTE_BUTTON).click();
@@ -211,26 +214,25 @@ export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
-  cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
-  cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible'); // Cypress doesn't properly wait for the data provider to finish expanding, so we wait for the animation to finish.
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get('[data-popover-open]').should('exist');
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
+    .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
+    .should('have.focus'); // make sure the focus is ready before start typing
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);
-
-  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
-    .find(`${COMBO_BOX_INPUT} input`)
-    .type(`{selectall}{backspace}{selectall}{backspace}`);
-
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.operator}{downarrow}{enter}`);
-
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
 };
+
 export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
   const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(dragTargetSelector)
@@ -255,7 +257,7 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
-  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover');
+  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
   cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
   recurse(
     () => {
@@ -290,7 +292,9 @@ export const clickIdToggleField = () => {
   clickIdHoverActionOverflowButton();
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
-  cy.get(ID_TOGGLE_FIELD).click();
+  cy.get(ID_TOGGLE_FIELD).click({
+    force: true,
+  });
 };
 
 export const closeTimeline = () => {
@@ -299,12 +303,12 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-  cy.get(CREATE_NEW_TIMELINE).first().click();
+  cy.get(NEW_TIMELINE_ACTION).trigger('click');
+  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
 };
 
 export const createTimelineOptionsPopoverBottomBar = () => {
@@ -322,13 +326,13 @@ export const createTimelineOptionsPopoverBottomBar = () => {
 export const createTimelineTemplateOptionsPopoverBottomBar = () => {
   recurse(
     () => {
-      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
       return cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
     },
     (sub) => sub.is(':visible')
   );
 
-  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
+  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 
 export const createNewTimelineTemplate = () => {
@@ -384,7 +388,6 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).click();
 };
 
@@ -402,9 +405,18 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
     // value of null. Some tests return an "any" which is why this could happen.
     cy.log('"timelineId" is null or undefined');
   }
-  // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
-  // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click();
+};
+
+export const openTimelineByIdFromOpenTimelineModal = (
+  timelineId: string
+): Cypress.Chainable<JQuery<HTMLElement>> => {
+  if (timelineId == null) {
+    // Log out if for some reason this happens to be null just in case for our tests we experience
+    // value of null. Some tests return an "any" which is why this could happen.
+    cy.log('"timelineId" is null or undefined');
+  }
+  return cy.get(`${OPEN_TIMELINE_MODAL} ${TIMELINE_TITLE_BY_ID(timelineId)}`).click();
 };
 
 export const openActiveTimeline = () => {

@@ -14,6 +14,7 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
@@ -23,48 +24,41 @@ import { visit } from '../../../tasks/navigation';
 import {
   markAsFavorite,
   openTimelineById,
+  openTimelineByIdFromOpenTimelineModal,
   openTimelineFromSettings,
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
-
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
-  describe('Open timeline modal', () => {
-    before(function () {
-      login();
-      visit(TIMELINES_URL);
-      createTimeline(getTimeline())
-        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-        .then((timelineId: string) => {
-          refreshTimelinesUntilTimeLinePresent(timelineId)
-            // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
-            // request responses and indeterminism since on clicks to activates URL's.
-            .then(() => cy.wrap(timelineId).as('timelineId'))
-            // eslint-disable-next-line cypress/no-unnecessary-waiting
-            .then(() => cy.wait(1000))
-            .then(() =>
-              addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
-                expect(response.status).to.equal(200)
-              )
-            )
-            .then(() => openTimelineById(timelineId))
-            .then(() => pinFirstEvent())
-            .then(() => markAsFavorite());
-        });
-    });
+const defaultTimeline = getTimeline();
 
-    it('should display timeline info', function () {
-      openTimelineFromSettings();
-      openTimelineById(this.timelineId);
-      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-      cy.contains(getTimeline().title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).last().should('have.text', '1');
-      cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
-      cy.get(TIMELINES_FAVORITE).last().should('exist');
-      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-    });
+describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
+  beforeEach(function () {
+    login();
+    visit(TIMELINES_URL);
+    deleteTimelines();
+    createTimeline(defaultTimeline)
+      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((timelineId: string) => {
+        cy.wrap(timelineId).as('timelineId');
+        refreshTimelinesUntilTimeLinePresent(timelineId);
+        addNoteToTimeline(defaultTimeline.notes, timelineId);
+        openTimelineById(timelineId);
+        pinFirstEvent();
+        markAsFavorite();
+      });
+  });
+
+  it('should show timeline metadata', function () {
+    openTimelineFromSettings();
+    cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
+    openTimelineByIdFromOpenTimelineModal(this.timelineId);
+    cy.contains(defaultTimeline.title).should('exist');
+    cy.get(TIMELINES_DESCRIPTION).should('have.text', defaultTimeline.description);
+    cy.get(TIMELINES_PINNED_EVENT_COUNT).should('have.text', '1');
+    cy.get(TIMELINES_NOTES_COUNT).should('have.text', '1');
+    cy.get(TIMELINES_FAVORITE).should('exist');
+    cy.get(TIMELINE_TITLE).should('have.text', defaultTimeline.title);
   });
 });
