@@ -19,6 +19,14 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import _ from 'lodash';
 
+import pMap from 'p-map';
+
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+  outputYmlIncludesReservedPerformanceKey,
+} from '../../common/services/output_helpers';
+
 import type {
   NewOutput,
   Output,
@@ -42,12 +50,14 @@ import {
   kafkaPartitionType,
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
+  RESERVED_CONFIG_YML_KEYS,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
+  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -427,14 +437,24 @@ class OutputService {
       secretHashes?: Record<string, any>;
     }
   ): Promise<Output> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Creating new output`);
+
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
-    if (output.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
+
+    if (outputTypeSupportPresets(data.type)) {
+      if (
+        data.preset === 'balanced' &&
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', safeLoad)
+      ) {
         throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
+          `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+            ', '
+          )}`
         );
       }
     }
+
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
@@ -498,6 +518,10 @@ class OutputService {
     // Remove the shipper data if the shipper is not enabled from the yaml config
     if (!output.config_yaml && output.shipper) {
       data.shipper = null;
+    }
+
+    if (!data.preset && data.type === outputType.Elasticsearch) {
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
     }
 
     if (output.config_yaml) {
@@ -577,7 +601,7 @@ class OutputService {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
-
+    logger.debug(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
 
@@ -667,7 +691,7 @@ class OutputService {
     });
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     return outputSavedObjectToOutput(outputSO);
@@ -680,6 +704,9 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Deleting output ${id}`);
+
     const originalOutput = await this.get(soClient, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
@@ -714,7 +741,7 @@ class OutputService {
       esClient: appContextService.getInternalUserESClient(),
       output: originalOutput,
     });
-
+    logger.debug(`Deleted output ${id}`);
     return soDeleteResult;
   }
 
@@ -730,13 +757,8 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
-    if (data.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
-        throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
-        );
-      }
-    }
+    const logger = appContextService.getLogger();
+    logger.debug(`Updating output ${id}`);
 
     let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
@@ -752,6 +774,19 @@ class OutputService {
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+
+    if (updateData.type && outputTypeSupportPresets(updateData.type)) {
+      if (
+        updateData.preset === 'balanced' &&
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', safeLoad)
+      ) {
+        throw new OutputInvalidError(
+          `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+            ', '
+          )}`
+        );
+      }
+    }
     if (isOutputSecretsEnabled()) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
@@ -800,6 +835,10 @@ class OutputService {
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
+      if (data.type === outputType.Elasticsearch && updateData.type === outputType.Elasticsearch) {
+        updateData.preset = null;
+      }
+
       if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
@@ -924,6 +963,10 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    if (!data.preset && data.type === outputType.Elasticsearch) {
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
+    }
+
     // Remove the shipper data if the shipper is not enabled from the yaml config
     if (!data.config_yaml && data.shipper) {
       updateData.shipper = null;
@@ -950,30 +993,59 @@ class OutputService {
     );
 
     if (outputSO.error) {
-      throw new Error(outputSO.error.message);
+      throw new FleetError(outputSO.error.message);
     }
 
     if (secretsToDelete.length) {
       try {
         await deleteSecrets({ esClient, ids: secretsToDelete.map((s) => s.id) });
       } catch (err) {
-        appContextService
-          .getLogger()
-          .warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
+        logger.warn(`Error cleaning up secrets for output ${id}: ${err.message}`);
       }
     }
+    logger.debug(`Updated output ${id}`);
+  }
+
+  public async backfillAllOutputPresets(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
+  ) {
+    const outputs = await this.list(soClient);
+
+    await pMap(
+      outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
+      async (output) => {
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', safeLoad);
+
+        await outputService.update(
+          soClient,
+          esClient,
+          output.id,
+          { preset },
+          { fromPreconfiguration: true }
+        );
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      },
+      {
+        concurrency: 5,
+      }
+    );
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
-    const response = await esClient.search({
-      index: OUTPUT_HEALTH_DATA_STREAM,
-      query: { bool: { filter: { term: { output: id } } } },
-      sort: { '@timestamp': 'desc' },
-      size: 1,
-    });
-    if (response.hits.hits.length === 0) {
+    const response = await esClient.search(
+      {
+        index: OUTPUT_HEALTH_DATA_STREAM,
+        query: { bool: { filter: { term: { output: id } } } },
+        sort: { '@timestamp': 'desc' },
+        size: 1,
+      },
+      { ignore: [404] }
+    );
+
+    if (!response.hits || response.hits.hits.length === 0) {
       return {
-        state: 'UNKOWN',
+        state: 'UNKNOWN',
         message: '',
         timestamp: '',
       };

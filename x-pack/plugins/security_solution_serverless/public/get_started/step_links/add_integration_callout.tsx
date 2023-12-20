@@ -6,37 +6,27 @@
  */
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { LinkAnchor } from '@kbn/security-solution-navigation/links';
+import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS_STEP } from './translations';
-import { AddAndValidateYourDataCardsId, AddIntegrationsSteps, SectionId } from '../types';
-import { useStepContext } from '../context/step_context';
+import { AddIntegrationsSteps } from '../types';
 
 const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) => {
   const { calloutWrapperStyles, calloutTitleStyles, calloutAnchorStyles } =
     useAddIntegrationsCalloutStyles();
   const { euiTheme } = useEuiTheme();
   const { navigateTo } = useNavigateTo();
-  const { onStepClicked } = useStepContext();
 
   const toggleStep = useCallback(() => {
-    onStepClicked({
-      stepId: AddIntegrationsSteps.connectToDataSources,
-      cardId: AddAndValidateYourDataCardsId.addIntegrations,
-      sectionId: SectionId.addAndValidateYourData,
-      isExpanded: true,
-    });
-
     navigateTo({
       deepLinkId: SecurityPageName.landing,
       path: `#${AddIntegrationsSteps.connectToDataSources}`,
     });
-  }, [navigateTo, onStepClicked]);
+  }, [navigateTo]);
 
   return (
     <EuiCallOut
@@ -55,14 +45,10 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
               defaultMessage="To {stepName} add integrations first {addIntegration}"
               values={{
                 addIntegration: (
-                  <LinkAnchor
-                    id={SecurityPageName.landing}
-                    onClick={toggleStep}
-                    css={calloutAnchorStyles}
-                  >
+                  <EuiLink onClick={toggleStep} css={calloutAnchorStyles}>
                     {ADD_INTEGRATIONS_STEP}
                     <EuiIcon type="arrowRight" size="s" css={calloutAnchorStyles} />
-                  </LinkAnchor>
+                  </EuiLink>
                 ),
                 stepName: stepName ?? (
                   <FormattedMessage

@@ -6,27 +6,33 @@
  */
 
 import { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
+import { getAgentConfigEtagMetrics } from './get_agent_config_etag_metrics';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
-export async function listConfigurations(
-  internalESClient: APMInternalESClient,
-  apmIndices: APMIndices
-) {
+export async function listConfigurations({
+  internalESClient,
+  apmEventClient,
+  apmIndices,
+}: {
+  internalESClient: APMInternalESClient;
+  apmEventClient?: APMEventClient;
+  apmIndices: APMIndices;
+}) {
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
     size: 200,
   };
 
-  const [agentConfigs, configsAppliedToAgentsThroughFleet] = await Promise.all([
+  const [agentConfigs, appliedEtags = []] = await Promise.all([
     internalESClient.search<AgentConfiguration>(
       'list_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet(internalESClient, apmIndices),
+    apmEventClient ? getAgentConfigEtagMetrics(apmEventClient) : undefined,
   ]);
 
   return agentConfigs.hits.hits
@@ -36,7 +42,7 @@ export async function listConfigurations(
         ...hit._source,
         applied_by_agent:
           hit._source.applied_by_agent ||
-          configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
+          appliedEtags.includes(hit._source.etag),
       };
     });
 }

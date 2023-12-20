@@ -15,8 +15,8 @@ import {
   dispatchUpdateTimeline,
   queryTimelineById,
 } from '../../../timelines/components/open_timeline/helpers';
-import type { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { timelineActions } from '../../../timelines/store/timeline';
+import type { TimelineUrl } from '../../../timelines/store/model';
+import { timelineActions } from '../../../timelines/store';
 import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimelineFromUrlParam = () => {

@@ -3491,6 +3491,10 @@
               },
               {
                 "plugin": "observability",
+                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
+              },
+              {
+                "plugin": "observability",
                 "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
@@ -3671,8 +3675,8 @@
                 "pluginId": "share",
                 "scope": "server",
                 "docId": "kibSharePluginApi",
-                "section": "def-server.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-server.SharePublicStart",
+                "text": "SharePublicStart"
               }
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
@@ -4792,6 +4796,21 @@
           " & { enabled: () => boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.RULE_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "RULE_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"alert\""
+        ],
+        "path": "x-pack/plugins/alerting/server/saved_objects/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
