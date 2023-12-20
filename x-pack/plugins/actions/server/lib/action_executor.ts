@@ -148,7 +148,11 @@ export class ActionExecutor {
         }
 
         if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          try {
+            actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          } catch (e) {
+            throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+          }
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
@@ -457,26 +461,29 @@ export class ActionExecutor {
       );
     }
 
-    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-      'action',
-      actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
-    );
+    try {
+      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+        'action',
+        actionId,
+        {
+          namespace: namespace === 'default' ? undefined : namespace,
+        }
+      );
+      const {
+        attributes: { secrets, actionTypeId, config, name },
+      } = rawAction;
 
-    const {
-      attributes: { secrets, actionTypeId, config, name },
-    } = rawAction;
-
-    return {
-      actionTypeId,
-      name,
-      config,
-      secrets,
-      actionId,
-      rawAction: rawAction.attributes,
-    };
+      return {
+        actionTypeId,
+        name,
+        config,
+        secrets,
+        actionId,
+        rawAction: rawAction.attributes,
+      };
+    } catch (e) {
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
   }
 }
 

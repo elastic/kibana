@@ -24,6 +24,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1148,9 +1149,13 @@ test('throws an error when failing to load action through savedObjectsClient', a
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
     new Error('No access')
   );
-  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"No access"`
-  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('No access');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
 });
 
 test('throws an error if actionType is not enabled', async () => {
@@ -1180,9 +1185,13 @@ test('throws an error if actionType is not enabled', async () => {
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
   });
-  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"not enabled for test"`
-  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('not enabled for test');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
 
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
 });
@@ -1297,11 +1306,15 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     inMemoryConnectors: [],
     getActionsAuthorizationWithRequest,
   });
-  await expect(
-    customActionExecutor.execute(executeParams)
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-  );
+
+  try {
+    await customActionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe(
+      'Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+    );
+    expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+  }
 });
 
 test('should not throw error if action is preconfigured and isESOCanEncrypt is false', async () => {
