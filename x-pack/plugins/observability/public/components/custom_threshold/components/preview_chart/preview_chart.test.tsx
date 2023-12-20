@@ -13,7 +13,8 @@ import { Comparator, Aggregators } from '../../../../../common/custom_threshold_
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { MetricExpression } from '../../types';
-import { getBufferThreshold, PreviewChart } from './preview_chart';
+import { PreviewChart } from './preview_chart';
+import { getBufferThreshold } from './helpers';
 
 jest.mock('../../../../utils/kibana_react');
 
