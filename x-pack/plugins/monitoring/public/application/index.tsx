@@ -99,7 +99,7 @@ const MonitoringApp: React.FC<{
   theme$: Observable<CoreTheme>;
 }> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
   const history = createPreserveQueryHistory();
-  const darkMode = useMemo(() => core.theme.getTheme().darkMode, [core.theme]);
+  const darkMode = core.theme.getTheme().darkMode;
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
