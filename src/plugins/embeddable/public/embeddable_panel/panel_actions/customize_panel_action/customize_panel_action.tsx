@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError, Trigger } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 
-import { core } from '../../../kibana_services';
 import {
-  IEmbeddable,
+  EditPanelAction,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  EditPanelAction,
+  IEmbeddable,
 } from '../../..';
-import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
+import { core } from '../../../kibana_services';
+import { CommonlyUsedRange, ViewMode } from '../../../lib/types';
 import { tracksOverlays } from '../track_overlays';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
@@ -50,6 +50,7 @@ export function hasTimeRange(
 
 export interface CustomizePanelActionContext {
   embeddable: IEmbeddable | Embeddable<TimeRangeInput>;
+  trigger?: Trigger;
 }
 
 export class CustomizePanelAction implements Action<CustomizePanelActionContext> {
@@ -104,7 +105,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     );
   }
 
-  public async execute({ embeddable }: CustomizePanelActionContext) {
+  public async execute({ embeddable, trigger }: CustomizePanelActionContext) {
     const isCompatible = await this.isCompatible({ embeddable });
     if (!isCompatible) {
       throw new IncompatibleActionError();
@@ -126,6 +127,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       toMountPoint(
         <KibanaReactContextProvider>
           <CustomizePanelEditor
+            titleFocus={!trigger}
             embeddable={embeddable}
             timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
             dateFormat={this.dateFormat}

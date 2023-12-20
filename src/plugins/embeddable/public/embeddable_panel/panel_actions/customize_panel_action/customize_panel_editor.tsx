@@ -6,39 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiForm,
-  EuiTextArea,
-  EuiFlyoutFooter,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { TimeRangeInput } from './customize_panel_action';
-import { canInheritTimeRange } from './can_inherit_time_range';
-import { doesInheritTimeRange } from './does_inherit_time_range';
 import {
-  IEmbeddable,
-  Embeddable,
   CommonlyUsedRange,
-  ViewMode,
+  Embeddable,
+  IEmbeddable,
   isFilterableEmbeddable,
+  ViewMode,
 } from '../../../lib';
+import { canInheritTimeRange } from './can_inherit_time_range';
+import { TimeRangeInput } from './customize_panel_action';
+import { doesInheritTimeRange } from './does_inherit_time_range';
 import { FiltersDetails } from './filters_details';
 
 type PanelSettings = {
@@ -55,10 +56,11 @@ interface CustomizePanelProps {
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
   onEdit: () => void;
+  titleFocus?: boolean;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit, titleFocus } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -75,6 +77,13 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       ? (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange
       : undefined
   );
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (titleFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [inputRef, titleFocus]);
 
   const commonlyUsedRangesForDatePicker = props.commonlyUsedRanges
     ? props.commonlyUsedRanges.map(
@@ -154,6 +163,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           }
         >
           <EuiFieldText
+            inputRef={inputRef}
             id="panelTitleInput"
             className="panelTitleInputText"
             data-test-subj="customEmbeddablePanelTitleInput"
