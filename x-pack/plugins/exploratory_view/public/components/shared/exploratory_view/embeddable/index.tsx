@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider, getDarkMode } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import styled from 'styled-components';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -70,7 +70,7 @@ export function getExploratoryViewEmbeddable(
 
     const series = attributes[0];
 
-    const isDarkMode = getDarkMode(theme);
+    const isDarkMode = theme?.getTheme().darkMode ?? false;
 
     const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
       if (lenStateHelperPromise) {
