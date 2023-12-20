@@ -9,6 +9,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
+import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
 import type { SLOView } from '../components/toggle_slo_view';
@@ -26,6 +27,8 @@ export interface SearchState {
   view: SLOView;
   compact: boolean;
   filters: Filter[];
+  isPaused?: boolean;
+  refreshInterval?: number;
 }
 
 export const DEFAULT_STATE = {
@@ -36,26 +39,46 @@ export const DEFAULT_STATE = {
   view: 'cardView' as const,
   compact: true,
   filters: [],
+  isPaused: false,
+  refreshInterval: 60000,
 };
 
 export function useUrlSearchState(): {
   state: SearchState;
   store: (state: Partial<SearchState>) => Promise<string | undefined>;
 } {
+  const [state, setState] = useState<SearchState>(DEFAULT_STATE);
   const history = useHistory();
-  const urlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    useHashQuery: false,
-  });
+  const urlStateStorage = useRef(
+    createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: false,
+    })
+  );
 
-  const searchState =
-    urlStateStorage.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ?? DEFAULT_STATE;
+  useEffect(() => {
+    const sub = urlStateStorage.current
+      ?.change$<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY)
+      .subscribe((newSearchState) => {
+        if (newSearchState) {
+          setState(newSearchState);
+        }
+      });
+
+    setState(
+      urlStateStorage.current?.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ?? DEFAULT_STATE
+    );
+
+    return () => {
+      sub?.unsubscribe();
+    };
+  }, [urlStateStorage]);
 
   return {
-    state: deepmerge(DEFAULT_STATE, searchState),
-    store: (state: Partial<SearchState>) =>
-      urlStateStorage.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, deepmerge(searchState, state), {
+    state: deepmerge(DEFAULT_STATE, state),
+    store: (newState: Partial<SearchState>) =>
+      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, deepmerge(state, newState), {
         replace: true,
       }),
   };

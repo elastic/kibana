@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -16,11 +16,9 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../../common/locators/paths';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
@@ -35,9 +33,6 @@ export function SlosPage() {
 
   const { isLoading, isError, data: sloList } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
-
-  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(getAutoRefreshState());
 
   useBreadcrumbs([
     {
@@ -59,11 +54,6 @@ export function SlosPage() {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
-  const handleToggleAutoRefresh = () => {
-    setIsAutoRefreshing(!isAutoRefreshing);
-    storeAutoRefreshState(!isAutoRefreshing);
-  };
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -80,10 +70,6 @@ export function SlosPage() {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
-          <AutoRefreshButton
-            isAutoRefreshing={isAutoRefreshing}
-            onClick={handleToggleAutoRefresh}
-          />,
           <FeedbackButton />,
         ],
         bottomBorder: false,
@@ -92,8 +78,7 @@ export function SlosPage() {
     >
       <HeaderMenu />
       <SloOutdatedCallout />
-      <EuiSpacer size="l" />
-      <SloList autoRefresh={isAutoRefreshing} />
+      <SloList />
     </ObservabilityPageTemplate>
   );
 }

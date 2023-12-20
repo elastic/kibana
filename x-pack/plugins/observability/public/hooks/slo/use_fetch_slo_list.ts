@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useCreateDataView } from '../use_create_data_view';
 import {
@@ -28,6 +28,7 @@ interface SLOListParams {
   shouldRefetch?: boolean;
   perPage?: number;
   filters?: Filter[];
+  refetchInterval?: number;
 }
 
 export interface UseFetchSloListResponse {
@@ -47,15 +48,18 @@ export function useFetchSloList({
   shouldRefetch,
   perPage = DEFAULT_SLO_PAGE_SIZE,
   filters: filterDSL = [],
+  refetchInterval = SLO_SHORT_REFETCH_INTERVAL,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const [stateRefetchInterval, setStateRefetchInterval] = useState<number>(
-    SLO_SHORT_REFETCH_INTERVAL
-  );
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number>(refetchInterval);
+
+  useEffect(() => {
+    setStateRefetchInterval(refetchInterval);
+  }, [refetchInterval]);
 
   const { dataView } = useCreateDataView({
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
