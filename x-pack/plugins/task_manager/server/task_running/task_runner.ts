@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, isUndefined, omit } from 'lodash';
+import { defaults, flow, identity, isUndefined, omit, random } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
@@ -934,9 +934,10 @@ export function calculateDelay(attempts: number) {
   if (attempts === 1) {
     return 30 * 1000; // 30s
   } else {
-    // get multiples of 5 min
     const defaultBackoffPerFailure = 5 * 60 * 1000;
-    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+    const maxDelay = 60 * 60 * 1000;
+    // returns exponential delay with jitter capped at 1 hour
+    return random(Math.min(maxDelay, defaultBackoffPerFailure * Math.pow(2, attempts - 2)));
   }
 }
 
