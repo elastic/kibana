@@ -34,20 +34,21 @@ import React, { FC, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types/latest';
-import {
-  parseQuery,
-  getTagFindReferences,
-} from '@kbn/saved-objects-management-plugin/public';
-import {
-  fetchExportByTypeAndSearch,
-  extractExportDetails,
-} from '@kbn/saved-objects-management-plugin/public/lib';
+import { parseQuery, getTagFindReferences } from '@kbn/saved-objects-management-plugin/public';
+import { fetchExportByTypeAndSearch } from '@kbn/saved-objects-management-plugin/public/lib';
 
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
+import { css } from '@emotion/react';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService, UrlParamExtension } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
+
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
+}
 interface EmbedModalPageProps {
   isEmbedded?: boolean;
   allowShortUrl: boolean;
@@ -65,10 +66,10 @@ interface EmbedModalPageProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
-  // onExportAll props
+  // onExportAll() props
   notifications: NotificationsStart;
   http: HttpStart;
-  taggingApi: SavedObjectsTaggingApi;
+  taggingApi?: SavedObjectsTaggingApi;
   allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
@@ -102,52 +103,50 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
-  const [exportAllSelectedOptions, setExportAllSelectedOptions] = useState<Record<string, boolean>>(
-    {}
-  );
-  const [isIncludeReferencesDeepChecked, setIsIncludeReferencesDeepCheck] = useState<boolean>(true);
-  const [activeQuery, setActiveQuery] = useState<Query>(Query.parse(''));
-  interface UrlParams {
-    [extensionName: string]: {
-      [queryParam: string]: boolean;
-    };
-  }
+  const [exportAllSelectedOptions] = useState<Record<string, boolean>>({});
+  const [isIncludeReferencesDeepChecked] = useState<boolean>(true);
+  const [activeQuery] = useState<Query>(Query.parse(''));
 
-  // useEffect(() => {
-  //   setActiveQuery(Query.parse(''))
-  // },[])
+  /**
+   *
+   * SECTION I: These functions are smaller, helper-like functions
+   */
 
-  const makeUrlEmbeddable = (url: string): string => {
+  const makeUrlEmbeddable = (tempUrl: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
+      return tempUrl.replace('?', `${embedParam}&`);
     }
 
-    return `${url}${embedParam}`;
+    return `${tempUrl}${embedParam}`;
   };
 
-  const makeIframeTag = (url: string) => {
-    if (!url) {
+  const makeIframeTag = (tempUrl: string) => {
+    if (!tempUrl) {
       return;
     }
 
-    return `<iframe src="${url}" height="600" width="800"></iframe>`;
+    return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
   };
 
-  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-    return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tipContent} position="bottom" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  const isNotSaved = () => {
+    return objectId === undefined || objectId === '';
   };
 
-  const getUrlParamExtensions = (url: string): string => {
+  const updateUrlParams = (tempUrl: string) => {
+    tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+    tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+
+    return tempUrl;
+  };
+
+  /**
+   * These functions are more extensive logic handling
+   */
+
+  const getUrlParamExtensions = (tempUrl: string): string => {
     return urlParams
       ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
           const urlParam = urlParams[key];
@@ -159,15 +158,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
                   : queryAccumulator;
               }, urlAccumulator)
             : urlAccumulator;
-        }, url)
-      : url;
-  };
-
-  const updateUrlParams = (url: string) => {
-    url = isEmbedded ? makeUrlEmbeddable(url) : url;
-    url = urlParams ? getUrlParamExtensions(url) : url;
-
-    return url;
+        }, tempUrl)
+      : tempUrl;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -214,10 +206,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     setUrlHelper();
   };
 
-  const isNotSaved = () => {
-    return objectId === undefined || objectId === '';
-  };
-
   const getSavedObjectUrl = () => {
     if (isNotSaved()) {
       return;
@@ -250,12 +238,12 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return updateUrlParams(formattedUrl);
   };
 
-  const addUrlAnonymousAccessParameters = (url: string): string => {
+  const addUrlAnonymousAccessParameters = (tempUrl: string): string => {
     if (!anonymousAccessParameters || !usePublicUrl) {
-      return url;
+      return tempUrl;
     }
 
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(tempUrl);
 
     for (const [name, value] of Object.entries(anonymousAccessParameters)) {
       parsedUrl.searchParams.set(name, value);
@@ -327,10 +315,23 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       });
       throw e;
     }
-
+    // do we want to display this instead of saving the blob...
+    // console.log({ blob });
     saveAs(blob, 'export.ndjson');
+  };
 
-    // this.showExportCompleteMessage(exportDetails);
+  /**
+   * These functions extract out presentational components from the rendering portion
+   */
+  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   };
 
   const renderShortUrlSwitch = () => {
@@ -397,7 +398,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     selectedRadio === 'savedObject' ? 'saved object' : 'snapshot'
   }`;
 
-
   return (
     <EuiModal onClose={onClose}>
       <I18nProvider>
@@ -431,7 +431,16 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiSpacer size="m" />
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiCodeBlock isCopyable>{placeholderEmbedCode}</EuiCodeBlock>
+          <button
+            onClick={async () => await onExportAll()}
+            css={css`
+              &:hover: {
+                cursor: pointer;
+              }
+            `}
+          >
+            <EuiCodeBlock isCopyable>{placeholderEmbedCode}</EuiCodeBlock>
+          </button>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiButton fill onClick={onClose}>

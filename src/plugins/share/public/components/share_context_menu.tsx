@@ -14,6 +14,10 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { OverlayStart } from '@kbn/core-overlays-browser';
+import { HttpStart } from '@kbn/core-http-browser';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
+import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { LocatorPublic } from '../../common';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -44,6 +48,10 @@ export interface ShareContextMenuProps {
   openModal: OverlayStart['openModal'];
   theme: CoreStart['theme'];
   i18nStart: CoreStart['i18n'];
+  notifications: NotificationsStart;
+  http: HttpStart;
+  allowedTypes: SavedObjectManagementTypeInfo[];
+  taggingApi?: SavedObjectsTaggingApi;
 }
 
 export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextMenuProps) => {
@@ -58,6 +66,11 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     shareMenuItems,
     objectTypeTitle,
     objectId,
+    // onExportAll props
+    notifications,
+    http,
+    taggingApi,
+    allowedTypes,
   } = props;
 
   const openLinkModal = () => {
@@ -93,6 +106,10 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           }}
           urlService={urlService}
           objectType={objectType}
+          notifications={notifications}
+          http={http}
+          taggingApi={taggingApi}
+          allowedTypes={allowedTypes}
         />,
         { theme, i18n: i18nStart }
       ),

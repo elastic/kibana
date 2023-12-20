@@ -11,15 +11,19 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { HttpStart, NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { getAllowedTypes } from '@kbn/saved-objects-management-plugin/public/lib';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
+const getTypes = async (core: CoreStart) => await getAllowedTypes(core.http);
 export class ShareMenuManager {
   private isOpen = false;
 
@@ -30,6 +34,7 @@ export class ShareMenuManager {
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     disableEmbed: boolean,
+    taggingApi?: SavedObjectsTaggingApi,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -38,13 +43,14 @@ export class ShareMenuManager {
        * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
        * @param options
        */
-      toggleShareContextMenu: (options: ShowShareMenuOptions) => {
+      toggleShareContextMenu: async (options: ShowShareMenuOptions) => {
         const onClose = () => {
           this.onClose();
           options.onClose?.();
         };
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
         const anonymousAccess = anonymousAccessServiceProvider?.();
+
         this.toggleShareContextMenu({
           ...options,
           allowEmbed: disableEmbed ? false : options.allowEmbed,
@@ -55,6 +61,10 @@ export class ShareMenuManager {
           theme: core.theme,
           overlays: core.overlays,
           i18n: core.i18n,
+          notifications: core.notifications,
+          http: core.http,
+          taggingApi,
+          allowedTypes: await getTypes(core),
         });
       },
     };
@@ -87,6 +97,10 @@ export class ShareMenuManager {
     disabledShareUrl,
     i18n,
     overlays,
+    notifications,
+    http,
+    taggingApi,
+    allowedTypes,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
@@ -95,6 +109,10 @@ export class ShareMenuManager {
     onClose: () => void;
     i18n: CoreStart['i18n'];
     overlays: OverlayStart;
+    notifications: NotificationsStart;
+    http: HttpStart;
+    taggingApi?: SavedObjectsTaggingApi;
+    allowedTypes: SavedObjectManagementTypeInfo[];
   }) {
     if (this.isOpen) {
       onClose();
@@ -136,6 +154,10 @@ export class ShareMenuManager {
               openModal={overlays.openModal}
               theme={theme}
               i18nStart={i18n}
+              notifications={notifications}
+              http={http}
+              taggingApi={taggingApi}
+              allowedTypes={allowedTypes}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>
