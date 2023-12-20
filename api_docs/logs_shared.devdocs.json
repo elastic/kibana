@@ -2633,6 +2633,26 @@
         "children": [
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistantProps.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogAIAssistantProps.doc",
             "type": "Object",
             "tags": [],
@@ -3315,24 +3335,50 @@
         {
           "parentPluginId": "logsShared",
           "id": "def-public.LogsSharedClientStartExports.LogAIAssistant",
-          "type": "CompoundType",
+          "type": "Function",
           "tags": [],
           "label": "LogAIAssistant",
           "description": [],
           "signature": [
-            "React.ComponentClass<",
-            "Optional",
-            "<",
-            "LogAIAssistantDeps",
-            ", \"observabilityAIAssistant\">, any> | React.FunctionComponent<",
-            "Optional",
-            "<",
-            "LogAIAssistantDeps",
-            ", \"observabilityAIAssistant\">>"
+            "(props: Omit<",
+            {
+              "pluginId": "logsShared",
+              "scope": "public",
+              "docId": "kibLogsSharedPluginApi",
+              "section": "def-public.LogAIAssistantProps",
+              "text": "LogAIAssistantProps"
+            },
+            ", \"observabilityAIAssistant\">) => JSX.Element"
           ],
           "path": "x-pack/plugins/logs_shared/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "logsShared",
+              "id": "def-public.LogsSharedClientStartExports.LogAIAssistant.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                {
+                  "pluginId": "logsShared",
+                  "scope": "public",
+                  "docId": "kibLogsSharedPluginApi",
+                  "section": "def-public.LogAIAssistantProps",
+                  "text": "LogAIAssistantProps"
+                },
+                ", \"observabilityAIAssistant\">"
+              ],
+              "path": "x-pack/plugins/logs_shared/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
