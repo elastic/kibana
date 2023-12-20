@@ -32,28 +32,21 @@ export const getAddPanelActionMenuItems = (
   deleteEmbeddable: (embeddableId: string) => void,
   closePopover: () => void
 ) => {
-  const actionsWithContext =
-    actions?.map((action) => ({
-      action,
-      context: {
+  return (
+    actions?.map((item) => {
+      const context = {
         createNewEmbeddable,
         deleteEmbeddable,
-      },
-      trigger: addPanelMenuTrigger,
-    })) ?? [];
-
-  return actionsWithContext?.map((item) => {
-    const context: ActionExecutionContext<object> = {
-      ...item.context,
-      trigger: item.trigger,
-    };
-    const actionName = item.action.getDisplayName(context);
-    return {
-      name: actionName,
-      icon: item.action.getIconType(context),
-      onClick: onAddPanelActionClick(item.action, context, closePopover),
-      'data-test-subj': `create-action-${actionName}`,
-      toolTipContent: item.action?.getDisplayNameTooltip?.(context),
-    };
-  });
+        trigger: addPanelMenuTrigger,
+      };
+      const actionName = item.getDisplayName(context);
+      return {
+        name: actionName,
+        icon: item.getIconType(context),
+        onClick: onAddPanelActionClick(item, context, closePopover),
+        'data-test-subj': `create-action-${actionName}`,
+        toolTipContent: item?.getDisplayNameTooltip?.(context),
+      };
+    }) ?? []
+  );
 };
