@@ -54,8 +54,8 @@
     background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
   }
 
-  .euiDataGridRowCell__autoHeight,
-  .euiDataGridRowCell__lineCountHeight {
+  .euiDataGridRowCell__content--autoHeight,
+  .euiDataGridRowCell__content--lineCountHeight {
     white-space: pre-wrap;
   }
 }
@@ -114,14 +114,14 @@
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
   margin-top: -3px;
-  .euiDataGridRowCell__defaultHeight & { // "Single line" row height setting
+  .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
   }
 }
 
 .unifiedDataTable__descriptionList {
   // force the content truncation when "Single line" row height setting is active
-  .euiDataGridRowCell__defaultHeight & {
+  .euiDataGridRowCell__content--defaultHeight & {
     -webkit-line-clamp: 1;
     display: -webkit-box;
     -webkit-box-orient: vertical;
