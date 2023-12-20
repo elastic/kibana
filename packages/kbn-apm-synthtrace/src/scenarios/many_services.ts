@@ -14,8 +14,8 @@ import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
-  const { services: numServices = 500 } = scenarioOpts ?? {};
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services: 500 } }) => {
+  const numServices = scenarioOpts.services;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
   const agentVersions: Record<string, string[]> = {
