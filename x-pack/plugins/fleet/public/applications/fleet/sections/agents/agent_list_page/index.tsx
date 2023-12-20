@@ -169,7 +169,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [selectedStatus]);
 
   // filters kuery
-  const kuery = useMemo(() => {
+  const filteredKuery = useMemo(() => {
     return getKuery({
       search,
       selectedAgentPolicies,
@@ -178,8 +178,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
-  // filters kuery for all tags
-  const kueryAllTags = useMemo(() => {
+  const allTagsKuery = useMemo(() => {
     return getKuery({});
   }, []);
 
@@ -188,7 +187,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
-  const [allAddRemoveTags, setAllAddRemoveTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [shownAgents, setShownAgents] = useState(0);
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
@@ -250,13 +248,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentsResponse,
             totalInactiveAgentsResponse,
             managedAgentPoliciesResponse,
-            agentTagsResponse,
             allAgentTagsResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
+              kuery: filteredKuery && filteredKuery !== '' ? filteredKuery : undefined,
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
               showInactive,
@@ -273,11 +270,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               full: false,
             }),
             sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              showInactive,
-            }),
-            sendGetAgentTags({
-              kuery: kueryAllTags && kueryAllTags !== '' ? kueryAllTags : undefined,
+              kuery: allTagsKuery && allTagsKuery !== '' ? allTagsKuery : undefined,
               showInactive,
             }),
           ]);
@@ -298,10 +291,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (managedAgentPoliciesResponse.error) {
             throw new Error(managedAgentPoliciesResponse.error.message);
           }
-          if (agentTagsResponse.error || allAgentTagsResponse.error) {
-            throw agentTagsResponse.error;
+          if (allAgentTagsResponse.error) {
+            throw allAgentTagsResponse.error;
           }
-          if (!agentTagsResponse.data || !allAgentTagsResponse.data) {
+          if (!allAgentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
 
@@ -311,18 +304,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          const newAllTags = agentTagsResponse.data.items;
+          const newAllTags = allAgentTagsResponse.data.items;
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
-          }
-
-          const newAllAddRemoveTags = allAgentTagsResponse.data.items;
-          if (!allAddRemoveTags || refreshTags || !isEqual(newAllAddRemoveTags, allAddRemoveTags)) {
-            setAllAddRemoveTags(newAllAddRemoveTags);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
@@ -373,7 +361,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     [
       pagination.currentPage,
       pagination.pageSize,
-      kuery,
+      filteredKuery,
       sortField,
       sortOrder,
       showInactive,
@@ -570,7 +558,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {showTagsAddRemove && (
         <TagsAddRemove
           agentId={agentToAddRemoveTags?.id!}
-          allTags={allAddRemoveTags ?? []}
+          allTags={allTags ?? []}
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
@@ -623,7 +611,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
         selectionMode={selectionMode}
-        currentQuery={kuery}
+        currentQuery={filteredKuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
