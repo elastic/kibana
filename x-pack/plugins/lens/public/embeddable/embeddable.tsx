@@ -847,7 +847,7 @@ export class Embeddable
   async openConfingPanel(
     startDependencies: LensPluginStartDependencies,
     isNewPanel?: boolean,
-    onDeletePanel?: () => void
+    deletePanel?: () => void
   ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
@@ -879,7 +879,7 @@ export class Embeddable
           displayFlyoutHeader={true}
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
-          onDeletePanel={onDeletePanel}
+          deletePanel={deletePanel}
         />
       );
     }
@@ -1259,6 +1259,7 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
+      now: this.deps.data.nowProvider.get().getTime(),
       timeRange:
         input.timeslice !== undefined
           ? {

@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// import React from 'react';
-// import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-// import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../plugin';

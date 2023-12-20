@@ -111,7 +111,7 @@ export async function executeCreateAction({
   const embeddable = await createNewEmbeddable(factory, input, true);
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
-    const onDeletePanel = () => {
+    const deletePanel = () => {
       deleteEmbeddable(embeddable.id);
     };
 
@@ -121,7 +121,7 @@ export async function executeCreateAction({
       overlays: core.overlays,
       theme: core.theme,
       isNewPanel: true,
-      onDeletePanel,
+      deletePanel,
     });
   }
 }

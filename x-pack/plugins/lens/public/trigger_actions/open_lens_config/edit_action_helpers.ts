@@ -19,7 +19,7 @@ interface Context {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   isNewPanel?: boolean;
-  onDeletePanel?: () => void;
+  deletePanel?: () => void;
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
@@ -34,7 +34,7 @@ export async function executeEditAction({
   overlays,
   theme,
   isNewPanel,
-  onDeletePanel,
+  deletePanel,
 }: Context) {
   const isCompatibleAction = await isEditActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
@@ -45,7 +45,7 @@ export async function executeEditAction({
   const ConfigPanel = await embeddable.openConfingPanel(
     startDependencies,
     isNewPanel,
-    onDeletePanel
+    deletePanel
   );
   if (ConfigPanel) {
     const handle = overlays.openFlyout(

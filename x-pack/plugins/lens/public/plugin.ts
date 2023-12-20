@@ -562,7 +562,7 @@ export class LensPlugin {
     this.gaugeVisualization.setup(core, dependencies);
     this.tagcloudVisualization.setup(core, dependencies);
 
-    this.queuedVisualizations?.forEach((queuedVis) => {
+    this.queuedVisualizations.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);
     });
     this.editorFrameSetup = editorFrameSetupInterface;
