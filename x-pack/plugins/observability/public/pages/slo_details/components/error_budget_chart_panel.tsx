@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
@@ -26,6 +27,24 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
+
+  let remainingBudgetFormatted;
+  if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
+    const totalSlices =
+      toMinutes(toDuration(slo.timeWindow.duration)) /
+      toMinutes(toDuration(slo.objective.timesliceWindow!));
+    const remainingBudgetInTimeUnit =
+      slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
+
+    if (remainingBudgetInTimeUnit <= 0) {
+      remainingBudgetFormatted = '0min';
+    } else {
+      if (remainingBudgetInTimeUnit / 60 >= 1) {
+        remainingBudgetFormatted = `${Math.trunc(remainingBudgetInTimeUnit / 60)}h`;
+      }
+      remainingBudgetFormatted += `${Math.trunc(remainingBudgetInTimeUnit % 60)}min`;
+    }
+  }
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorBudgetChartPanel">
@@ -68,6 +87,20 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
+          {!!remainingBudgetFormatted && (
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleColor={isSloFailed ? 'danger' : 'success'}
+                title={remainingBudgetFormatted}
+                titleSize="s"
+                description={i18n.translate(
+                  'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
+                  { defaultMessage: 'Remaining' }
+                )}
+                reverse
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiFlexItem>
