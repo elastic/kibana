@@ -46,8 +46,7 @@
     padding-right: 0;
   }
 
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__actions--overlay {
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }
 

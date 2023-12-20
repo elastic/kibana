@@ -49,9 +49,6 @@ export const useStyles = () => {
     & .euiDataGridRowCell__actions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
-    & .euiDataGridRowCell__actions--overlay {
-      padding: 0;
-    }
 
     & .euiDataGridRowCell__contentWrapper {
       display: flex;
