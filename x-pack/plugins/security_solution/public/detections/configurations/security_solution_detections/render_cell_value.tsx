@@ -7,7 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
@@ -40,55 +40,54 @@ import type { RenderCellValueContext } from './fetch_page_context';
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
-  memo((props) => {
-    const { columnId, rowIndex, scopeId } = props;
-    const isTourAnchor = useMemo(
-      () =>
-        columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-        isDetectionsAlertsTable(scopeId) &&
-        rowIndex === 0 &&
-        !props.isDetails,
-      [columnId, props.isDetails, rowIndex, scopeId]
-    );
+export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
+  props
+) => {
+  const { columnId, rowIndex, scopeId } = props;
+  const isTourAnchor = useMemo(
+    () =>
+      columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
+      isDetectionsAlertsTable(scopeId) &&
+      rowIndex === 0 &&
+      !props.isDetails,
+    [columnId, props.isDetails, rowIndex, scopeId]
+  );
 
-    // We check both ecsData and data for the suppression count because it could be in either one,
-    // depending on where RenderCellValue is being used - when used in cases, data is populated,
-    // whereas in the regular security alerts table it's in ecsData
-    const ecsSuppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count?.[0];
-    const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data)
-      ?.value?.[0] as number | undefined;
-    const actualSuppressionCount = ecsSuppressionCount
-      ? parseInt(ecsSuppressionCount, 10)
-      : dataSuppressionCount;
+  // We check both ecsData and data for the suppression count because it could be in either one,
+  // depending on where RenderCellValue is being used - when used in cases, data is populated,
+  // whereas in the regular security alerts table it's in ecsData
+  const ecsSuppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count?.[0];
+  const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data)
+    ?.value?.[0] as number | undefined;
+  const actualSuppressionCount = ecsSuppressionCount
+    ? parseInt(ecsSuppressionCount, 10)
+    : dataSuppressionCount;
 
-    const component = (
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        step={AlertsCasesTourSteps.pointToAlertName}
-        tourId={SecurityStepId.alertsCases}
-      >
-        <DefaultCellRenderer {...props} />
-      </GuidedOnboardingTourStep>
-    );
+  const component = (
+    <GuidedOnboardingTourStep
+      isTourAnchor={isTourAnchor}
+      step={AlertsCasesTourSteps.pointToAlertName}
+      tourId={SecurityStepId.alertsCases}
+    >
+      <DefaultCellRenderer {...props} />
+    </GuidedOnboardingTourStep>
+  );
 
-    return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-      actualSuppressionCount &&
-      actualSuppressionCount > 0 ? (
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}>
-            <EuiIcon type="layers" />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{component}</EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      component
-    );
-  });
-
-RenderCellValue.displayName = 'RenderCellValue';
+  return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
+    actualSuppressionCount &&
+    actualSuppressionCount > 0 ? (
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}>
+          <EuiIcon type="layers" />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{component}</EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    component
+  );
+};
 
 export const getRenderCellValueHook = ({
   scopeId,

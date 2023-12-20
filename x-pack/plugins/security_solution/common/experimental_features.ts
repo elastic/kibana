@@ -167,7 +167,7 @@ export const allowedExperimentalValues = Object.freeze({
   /*
    * Enables Discover components UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  useDiscoverComponentsInTimeline: false,
+  useDiscoverComponentsInTimeline: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

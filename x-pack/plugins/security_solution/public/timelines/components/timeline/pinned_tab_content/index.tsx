@@ -183,7 +183,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [dataLoadingState, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+  const [dataLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -261,7 +261,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               <Footer
                 activePage={pageInfo.activePage}
                 data-test-subj="timeline-footer"
-                updatedAt={updatedAt}
+                updatedAt={refreshedAt}
                 height={footerHeight}
                 id={timelineId}
                 isLive={false}

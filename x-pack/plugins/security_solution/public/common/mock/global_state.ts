@@ -384,6 +384,7 @@ export const mockGlobalState: State = {
         isDiscoverSavedSearchLoaded: false,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 100,
       },
     },
     insertTimeline: null,

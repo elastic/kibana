@@ -461,7 +461,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         onRowSelected,
         onRuleChange,
         selectedEventIds,
-        showCheckboxes,
+        showCheckboxes: false,
         tabType: 'query',
         timelineId: tableId,
         isSelectAllChecked,
