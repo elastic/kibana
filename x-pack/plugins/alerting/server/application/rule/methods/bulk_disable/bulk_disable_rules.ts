@@ -11,6 +11,7 @@ import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -132,7 +133,7 @@ const bulkDisableRulesWithOCC = async (
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -200,7 +201,7 @@ const bulkDisableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.DISABLE,
                 outcome: 'unknown',
-                savedObject: { type: 'alert', id: rule.id },
+                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
               })
             );
           } catch (error) {
