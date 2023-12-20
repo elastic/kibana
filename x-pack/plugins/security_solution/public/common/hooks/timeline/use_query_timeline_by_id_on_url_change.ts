@@ -11,8 +11,8 @@ import { useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDispatch } from 'react-redux';
 import { safeDecode } from '@kbn/rison';
-import type { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import type { TimelineUrl } from '../../../timelines/store/model';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
 import { useShallowEqualSelector } from '../use_selector';
 
