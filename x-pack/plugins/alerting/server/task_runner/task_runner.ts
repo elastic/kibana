@@ -490,7 +490,7 @@ export class TaskRunner<
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
                 alertFactory: alertsClient.factory(),
-                alertsClient: executorAlertsClient,
+                alertsClient: alertsClient.client(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),

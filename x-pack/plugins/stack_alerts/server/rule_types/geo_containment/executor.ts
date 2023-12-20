@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
@@ -36,8 +37,12 @@ export async function executor({
   GeoContainmentRuleState,
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  Alert
 >): Promise<{ state: GeoContainmentRuleState }> {
+  if (!services.alertsClient) {
+    throw new Error(`no alerts client`);
+  }
   const boundariesRequestMeta = {
     geoField: params.geoField,
     boundaryIndexTitle: params.boundaryIndexTitle,
@@ -82,14 +87,13 @@ export async function executor({
   const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
     prevLocationMap,
     currLocationMap,
-    services.alertFactory,
+    services.alertsClient,
     shapesIdsNamesMap,
     windowEnd
   );
 
-  const { getRecoveredAlerts } = services.alertFactory.done();
-  for (const recoveredAlert of getRecoveredAlerts()) {
-    const recoveredAlertId = recoveredAlert.getId();
+  for (const recoveredAlert of services.alertsClient?.getRecoveredAlerts()) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
     try {
       const context = getRecoveredAlertContext({
         alertId: recoveredAlertId,
@@ -98,7 +102,7 @@ export async function executor({
         windowEnd,
       });
       if (context) {
-        recoveredAlert.setContext(context);
+        services.alertsClient?.setAlertData({ id: recoveredAlertId, context });
       }
     } catch (e) {
       logger.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);

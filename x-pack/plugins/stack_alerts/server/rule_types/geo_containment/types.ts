@@ -13,6 +13,7 @@ import {
   AlertInstanceContext,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { ActionGroupId, RecoveryActionGroupId } from './constants';
 
 export interface BoundariesRequestMeta {
@@ -82,5 +83,6 @@ export type GeoContainmentRuleType = RuleType<
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
   typeof ActionGroupId,
-  typeof RecoveryActionGroupId
+  typeof RecoveryActionGroupId,
+  Alert
 >;
