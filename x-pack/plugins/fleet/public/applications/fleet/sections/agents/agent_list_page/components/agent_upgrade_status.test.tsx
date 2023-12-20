@@ -48,12 +48,38 @@ describe('getDownloadEstimate', () => {
     expect(getDownloadEstimate()).toEqual('');
   });
 
-  it('should return an empty string if the agent has a zero download percent', () => {
-    expect(getDownloadEstimate(0)).toEqual('');
+  it('should display 0% if the agent has a zero download percent', () => {
+    expect(getDownloadEstimate({ download_percent: 0 })).toEqual(' (0%)');
+  });
+
+  it('should display 0 Bps if the agent has a zero download rate', () => {
+    expect(getDownloadEstimate({ download_rate: 0 })).toEqual(' (at 0.0 Bps)');
   });
 
   it('should return a formatted string if the agent has a positive download percent', () => {
-    expect(getDownloadEstimate(16.4)).toEqual(' (16.4%)');
+    expect(getDownloadEstimate({ download_percent: 16.4 })).toEqual(' (16.4%)');
+  });
+
+  it('should return a formatted string if the agent has a kBps download rate', () => {
+    expect(getDownloadEstimate({ download_rate: 1024 })).toEqual(' (at 1.0 kBps)');
+  });
+
+  it('should return a formatted string if the agent has a download rate and download percent', () => {
+    expect(getDownloadEstimate({ download_rate: 10, download_percent: 99 })).toEqual(
+      ' (99% at 10.0 Bps)'
+    );
+  });
+
+  it('should return a formatted string if the agent has a MBps download rate', () => {
+    expect(getDownloadEstimate({ download_rate: 1200000 })).toEqual(' (at 1.1 MBps)');
+  });
+
+  it('should return a formatted string if the agent has a GBps download rate', () => {
+    expect(getDownloadEstimate({ download_rate: 2400000000 })).toEqual(' (at 2.2 GBps)');
+  });
+
+  it('should return a formatted string if the agent has a GBps download rate more than 1024', () => {
+    expect(getDownloadEstimate({ download_rate: 1200000000 * 1024 })).toEqual(' (at 1144.4 GBps)');
   });
 });
 
