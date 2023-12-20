@@ -114,6 +114,7 @@ export async function getEditLensConfiguration(
     navigateToLensEditor,
     displayFlyoutHeader,
     canEditTextBasedQuery,
+    hidesSuggestions,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -205,6 +206,7 @@ export async function getEditLensConfiguration(
       navigateToLensEditor,
       displayFlyoutHeader,
       canEditTextBasedQuery,
+      hidesSuggestions,
       setCurrentAttributes,
     };
 
