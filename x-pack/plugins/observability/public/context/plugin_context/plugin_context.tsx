@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core/public';
 import { createContext } from 'react';
+import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import { ConfigSchema } from '../../plugin';
+import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import type { ConfigSchema } from '../../plugin';
 
 export interface PluginContextValue {
   config: ConfigSchema;
