@@ -71,5 +71,6 @@
     "@kbn/event-annotation-plugin",
     "@kbn/event-annotation-common",
     "@kbn/links-plugin",
+    "@kbn/ftr-common-functional-ui-services",
   ]
 }
