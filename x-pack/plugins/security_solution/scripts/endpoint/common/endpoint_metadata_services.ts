@@ -23,6 +23,7 @@ import {
   METADATA_DATASTREAM,
 } from '../../../common/endpoint/constants';
 import type { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
+import { HostStatus } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 
 const endpointGenerator = new EndpointDocGenerator();
@@ -152,13 +153,11 @@ const fetchLastStreamedEndpointUpdate = async (
  * Endpoint Details API (transform destination index)
  * @param kbnClient
  * @param endpointAgentId
- * @param endpointHostname
  * @param timeoutMs
  */
 export const waitForEndpointToStreamData = async (
   kbnClient: KbnClient,
   endpointAgentId: string,
-  endpointHostname: string,
   timeoutMs: number = 60000
 ): Promise<HostInfo> => {
   const started = new Date();
@@ -172,12 +171,9 @@ export const waitForEndpointToStreamData = async (
     found = await retryOnError(
       async () =>
         fetchEndpointMetadataList(kbnClient, {
-          kuery: `united.endpoint.agent.id:  "${endpointAgentId}" or united.endpoint.host.hostname: "${endpointAgentId}"`,
+          kuery: `united.endpoint.agent.id: "${endpointAgentId}"`,
         }).then((response) => {
-          return response.data.filter(
-            (record) =>
-              record.metadata.host.hostname === endpointHostname && record.host_status === 'healthy'
-          )[0];
+          return response.data.filter((record) => record.host_status === HostStatus.HEALTHY)[0];
         }),
       RETRYABLE_TRANSIENT_ERRORS
     );
