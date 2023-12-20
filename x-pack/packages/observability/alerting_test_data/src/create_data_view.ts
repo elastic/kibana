@@ -28,7 +28,7 @@ export const createDataView = async ({
       fieldFormatMap: '{}',
       typeMeta: '{}',
       runtimeFieldMap: '{}',
-      name: indexPattern,
+      name: id,
     },
     options: { id },
     version: 1,
