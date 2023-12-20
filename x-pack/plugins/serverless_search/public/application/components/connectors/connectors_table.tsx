@@ -227,12 +227,17 @@ export const ConnectorsTable: React.FC = () => {
         filter ? `${connector[filter]}`.toLowerCase().includes(query.toLowerCase()) : true
       )
       .slice(pageIndex * pageSize, (pageIndex + 1) * pageSize) ?? [];
-
   return (
     <>
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
-          <EuiSearchBar onChange={({ queryText }) => setQuery(queryText ?? '')} query={query} />
+          <EuiSearchBar
+            box={{
+              'data-test-subj': `serverlessSearchConnectorsTableSearchBar`,
+            }}
+            onChange={({ queryText }) => setQuery(queryText ?? '')}
+            query={query}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -262,6 +267,7 @@ export const ConnectorsTable: React.FC = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        data-test-subj="serverlessSearchConnectorTable"
         columns={columns}
         loading={isLoading}
         items={items}
