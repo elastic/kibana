@@ -22,7 +22,7 @@ export interface GlobalSearchBarPluginStartDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
+export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBarPluginStartDeps> {
   public setup({ analytics }: CoreSetup) {
     eventTypes.forEach((eventType) => {
       analytics.registerEventType(eventType);

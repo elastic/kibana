@@ -69,6 +69,7 @@ export interface CspApiRequestHandlerContext {
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  encryptedSavedObjects: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;

@@ -27,7 +27,7 @@
         "label": "getDocLinks",
         "description": [],
         "signature": [
-          "({ kibanaBranch }: ",
+          "({ kibanaBranch, buildFlavor }: ",
           "GetDocLinkOptions",
           ") => ",
           {
@@ -47,7 +47,7 @@
             "id": "def-common.getDocLinks.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaBranch }",
+            "label": "{ kibanaBranch, buildFlavor }",
             "description": [],
             "signature": [
               "GetDocLinkOptions"
@@ -69,7 +69,7 @@
         "label": "getDocLinksMeta",
         "description": [],
         "signature": [
-          "({ kibanaBranch }: ",
+          "({ kibanaBranch, buildFlavor, }: ",
           "GetDocLinksMetaOptions",
           ") => ",
           {
@@ -89,7 +89,7 @@
             "id": "def-common.getDocLinksMeta.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaBranch }",
+            "label": "{\n  kibanaBranch,\n  buildFlavor,\n}",
             "description": [],
             "signature": [
               "GetDocLinksMetaOptions"
@@ -644,7 +644,7 @@
             "label": "apis",
             "description": [],
             "signature": [
-              "{ readonly bulkIndexAlias: string; readonly indexStats: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly restApis: string; readonly searchPreference: string; readonly securityApis: string; readonly simulatePipeline: string; readonly tasks: string; readonly timeUnits: string; readonly unfreezeIndex: string; readonly updateTransform: string; }"
+              "{ readonly bulkIndexAlias: string; readonly indexStats: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly inferTrainedModel: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly restApis: string; readonly searchPreference: string; readonly securityApis: string; readonly simulatePipeline: string; readonly tasks: string; readonly timeUnits: string; readonly unfreezeIndex: string; readonly updateTransform: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -840,7 +840,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; readonly remoteESOoutput: string; readonly performancePresets: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

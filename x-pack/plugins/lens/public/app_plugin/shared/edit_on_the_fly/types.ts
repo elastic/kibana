@@ -77,6 +77,8 @@ export interface EditConfigPanelProps {
   canEditTextBasedQuery?: boolean;
   /** Optional callback for cancel/apply flyout buttons */
   onApplyCb?: (input: TypedLensByValueInput['attributes']) => void;
+  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
+  hidesSuggestions?: boolean;
 }
 
 export interface LayerConfigurationProps {

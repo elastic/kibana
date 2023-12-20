@@ -62,6 +62,7 @@ export function LensEditConfigurationFlyout({
   displayFlyoutHeader,
   canEditTextBasedQuery,
   onApplyCb,
+  hidesSuggestions,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -73,11 +74,13 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
-  const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
     (state) => state.lens
   );
+  // use the latest activeId, but fallback to attributes
+  const activeVisualization =
+    visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
@@ -272,8 +275,8 @@ export function LensEditConfigurationFlyout({
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
-  // Example is the Discover editing where we dont want to render the text based editor on the panel
-  if (!canEditTextBasedQuery) {
+  // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
+  if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
@@ -309,7 +312,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         attributesChanged={attributesChanged}
-        language={getLanguageDisplayName(textBasedMode)}
+        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
         isScrollable={false}
       >
         <EuiFlexGroup
@@ -340,7 +343,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          {isOfAggregateQueryType(query) && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
               <TextBasedLangEditor
                 query={query}
