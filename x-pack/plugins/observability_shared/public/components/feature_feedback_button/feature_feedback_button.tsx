@@ -66,7 +66,7 @@ export const FeatureFeedbackButton = ({
   sanitizedPath,
   surveyButtonText = (
     <FormattedMessage
-      id="xpack.infra.homePage.tellUsWhatYouThinkLink"
+      id="xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink"
       defaultMessage="Tell us what you think!"
     />
   ),
