@@ -19,7 +19,11 @@ import {
   EuiSpacer,
   EuiPortal,
   EuiPagination,
+  useIsWithinBreakpoints,
   keys,
+  EuiText,
+  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -69,6 +73,7 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
+  const isLargeScreen = useIsWithinBreakpoints(['l', 'xl']);
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
 
@@ -218,8 +223,55 @@ export function DiscoverGridFlyout({
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            {!isPlainRecord &&
-              flyoutActions.map((action) => action.enabled && <action.Content key={action.id} />)}
+            {isPlainRecord
+              ? null
+              : flyoutActions.length > 0 && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>
+                          {i18n.translate('discover.grid.tableRow.actionsLabel', {
+                            defaultMessage: 'Actions',
+                          })}
+                          :
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexGroup
+                      responsive={false}
+                      alignItems="center"
+                      gutterSize={isLargeScreen ? 's' : 'none'}
+                    >
+                      {flyoutActions.map((action) => (
+                        <EuiFlexItem key={action.id} grow={false}>
+                          {isLargeScreen ? (
+                            // eslint-disable-next-line @elastic/eui/href-or-on-click
+                            <EuiButtonEmpty
+                              size="s"
+                              iconSize="s"
+                              flush="left"
+                              iconType={action.iconType}
+                              data-test-subj={action.dataTestSubj}
+                              href={action.href}
+                              onClick={action.onClick}
+                            >
+                              {action.label}
+                            </EuiButtonEmpty>
+                          ) : (
+                            <EuiButtonIcon
+                              size="s"
+                              iconType={action.iconType}
+                              title={action.label}
+                              aria-label={action.label}
+                              href={action.href}
+                              onClick={action.onClick}
+                            />
+                          )}
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </>
+                )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination

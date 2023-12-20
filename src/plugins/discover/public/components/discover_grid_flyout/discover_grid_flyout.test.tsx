@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiFlexItem } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
@@ -251,12 +250,18 @@ describe('Discover flyout', function () {
             {
               id: 'action-item-1',
               enabled: true,
-              Content: () => <EuiFlexItem data-test-subj="customActionItem1">Action 1</EuiFlexItem>,
+              label: 'Action 1',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem1',
+              onClick: jest.fn(),
             },
             {
               id: 'action-item-2',
               enabled: true,
-              Content: () => <EuiFlexItem data-test-subj="customActionItem2">Action 2</EuiFlexItem>,
+              label: 'Action 2',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem2',
+              onClick: jest.fn(),
             },
           ]),
         };
