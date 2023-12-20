@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
-import { addError } from '../../../common/store/app/actions';
+import { addError } from '../../common/store/app/actions';
 import {
   endTimelineSaving,
   updateIsFavorite,
@@ -23,10 +23,10 @@ import {
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { TimelineById } from './types';
-import type { inputsModel } from '../../../common/store/inputs';
-import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
-import { persistFavorite } from '../../containers/api';
+import type { inputsModel } from '../../common/store/inputs';
+import type { ResponseFavoriteTimeline } from '../../../common/api/timeline';
+import { TimelineType } from '../../../common/api/timeline';
+import { persistFavorite } from '../containers/api';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
 

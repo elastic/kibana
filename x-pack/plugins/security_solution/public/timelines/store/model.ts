@@ -8,11 +8,11 @@
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../../common/types';
+import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../common/types';
 import type {
   EqlOptionsSelected,
   TimelineNonEcsData,
-} from '../../../../common/search_strategy/timeline';
+} from '../../../common/search_strategy/timeline';
 import type {
   TimelineTabs,
   ScrollToTopEvent,
@@ -21,14 +21,14 @@ import type {
   DataProvider,
   SerializedFilterQuery,
   TimelineEventsType,
-} from '../../../../common/types/timeline';
+} from '../../../common/types/timeline';
 import type {
   RowRendererId,
   TimelineStatus,
   TimelineType,
   PinnedEvent,
-} from '../../../../common/api/timeline';
-import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+} from '../../../common/api/timeline';
+import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
 
