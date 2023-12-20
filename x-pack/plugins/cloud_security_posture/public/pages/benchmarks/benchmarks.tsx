@@ -180,7 +180,7 @@ export const Benchmarks = () => {
       />
       <EuiSpacer />
       {showConfigurationInstallPrompt ? (
-        <NoFindingsStates posturetype={'all'} />
+        <NoFindingsStates postureType={'all'} />
       ) : (
         <>
           <BenchmarkSearchField
