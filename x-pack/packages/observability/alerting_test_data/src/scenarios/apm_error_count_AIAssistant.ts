@@ -16,10 +16,10 @@ export const apm_error_count_AIAssistant = {
       windowUnit: 'h',
       transactionType: undefined,
       serviceName: undefined,
-      environment: 'ENVIRONMENT_ALL',
+      environment: 'Synthtrace: high_throughput',
       searchConfiguration: {
         query: {
-          query: `service.environment: "Synthtrace: high_throughput"`,
+          query: ``,
           language: 'kuery',
         },
       },

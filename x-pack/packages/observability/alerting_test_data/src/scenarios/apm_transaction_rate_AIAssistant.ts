@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export const apm_transaction_rate = {
+export const apm_transaction_rate_AIAssistant = {
   ruleParams: {
     consumer: 'apm',
-    name: 'apm_failed_transaction_rate_threshold',
+    name: 'apm_error_count_AIAssistant',
     ruleTypeId: 'apm.transaction_error_rate',
     params: {
       threshold: 30,
@@ -16,14 +16,14 @@ export const apm_transaction_rate = {
       windowUnit: 'h',
       transactionType: undefined,
       serviceName: undefined,
-      environment: 'ENVIRONMENT_ALL',
+      environment: 'Synthtrace: high_throughput',
       searchConfiguration: {
         query: {
           query: ``,
           language: 'kuery',
         },
       },
-      groupBy: ['service.name', 'service.environment', 'transaction.type'],
+      groupBy: ['service.name', 'service.environment'],
       useKqlFilter: true,
     },
   },

@@ -10,7 +10,7 @@ import { createCustomThresholdRule } from './create_custom_threshold_rule';
 import { createDataView } from './create_data_view';
 import { createIndexConnector } from './create_index_connector';
 
-import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
+import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
 
 const scenarios_custom_threshold = [
   // Logs use-cases
@@ -28,7 +28,8 @@ const scenarios_custom_threshold = [
 const scenarios_apm = [
   apm_error_count,
   apm_transaction_rate,
-  apm_error_count_AIAssistant
+  apm_error_count_AIAssistant,
+  apm_transaction_rate_AIAssistant
 ];
 
 /* eslint-disable no-console */
