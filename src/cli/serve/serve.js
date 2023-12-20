@@ -294,6 +294,8 @@ export default function (program) {
       unknownOptions.serverless
     );
 
+    opts.runExamples = true;
+
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
