@@ -43,7 +43,6 @@ describe('Timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
 
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
-    cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`).focus();
     cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
       .first()
       .parent()

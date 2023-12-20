@@ -84,6 +84,7 @@ import {
   TIMELINE_KQLMODE_SEARCH,
   OPEN_TIMELINE_MODAL,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
+  ROW_ADD_NOTES_BUTTON,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -182,6 +183,15 @@ export const addNotesToTimeline = (notes: string) => {
 
   goToQueryTab();
   goToNotesTab();
+};
+
+export const addNoteToFirstRowEvent = (notes: string) => {
+  cy.get(ROW_ADD_NOTES_BUTTON).first().click();
+  cy.get(NOTES_TEXT_AREA).type(notes, {
+    parseSpecialCharSequences: false,
+  });
+
+  cy.get(ADD_NOTE_BUTTON).click();
 };
 
 export const addEqlToTimeline = (eql: string) => {
@@ -301,7 +311,7 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).trigger('click');
+  cy.get(NEW_TIMELINE_ACTION).click();
   cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 

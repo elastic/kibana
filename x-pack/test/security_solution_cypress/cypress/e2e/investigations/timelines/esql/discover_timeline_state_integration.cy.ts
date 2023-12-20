@@ -35,7 +35,7 @@ import {
   addNameToTimelineAndSave,
   createNewTimeline,
   goToEsqlTab,
-  openTimelineById,
+  openTimelineByIdFromOpenTimelineModal,
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -139,7 +139,7 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId);
+            openTimelineByIdFromOpenTimelineModal(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             goToEsqlTab();
             verifyDiscoverEsqlQuery(esqlQuery);
@@ -189,7 +189,7 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId);
+            openTimelineByIdFromOpenTimelineModal(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
             goToEsqlTab();
             cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
@@ -240,7 +240,7 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId);
+            openTimelineByIdFromOpenTimelineModal(timelineId);
             cy.get(TIMELINE_TITLE).should('have.text', timelineName);
             const timelineDesc = 'Timeline Description with Saved Seach';
             addDescriptionToTimeline(timelineDesc);
