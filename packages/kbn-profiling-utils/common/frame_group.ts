@@ -61,7 +61,7 @@ export function createFrameGroupID(
     return `elf;${fileID};${functionName}`;
   }
 
-  if (equivalenceMap.has(sourceFilename + ":" + functionName)) {
+  if (equivalenceMap.has(`${sourceFilename}:${functionName}`)) {
     var replacementString = equivalenceMap.get(sourceFilename + ":" + functionName);
     return `full;kernel;${replacementString}`;
   }
