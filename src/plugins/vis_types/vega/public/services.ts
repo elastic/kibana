@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
+import type {
+  NotificationsStart,
+  IUiSettingsClient,
+  DocLinksStart,
+  CoreStart,
+} from '@kbn/core/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -35,3 +40,5 @@ export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('doc
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection');
+
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');

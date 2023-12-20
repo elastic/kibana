@@ -21,6 +21,7 @@ import {
   setDataViews,
   setInjectedVars,
   setUISettings,
+  setCoreStart,
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
@@ -104,6 +105,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
+    setCoreStart(core);
     setUsageCollectionStart(usageCollection);
   }
 }
