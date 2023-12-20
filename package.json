@@ -1473,7 +1473,6 @@
     "@types/webpack-env": "^1.15.3",
     "@types/webpack-merge": "^4.1.5",
     "@types/webpack-sources": "^0.1.4",
-    "@types/xml-crypto": "^1.4.6",
     "@types/xml2js": "^0.4.11",
     "@types/yargs": "^15.0.0",
     "@types/yauzl": "^2.9.1",
