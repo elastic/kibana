@@ -41,6 +41,19 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(screen.getByText('Stack Rules')).toBeInTheDocument();
   });
 
+  it('should be able to initialize to the prop initialSelectedConsumer', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        initialSelectedConsumer={'logs'}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).toHaveBeenLastCalledWith('logs');
+  });
+
   it('should be able to select infrastructure and call onChange', () => {
     render(
       <RuleFormConsumerSelection

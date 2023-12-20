@@ -67,13 +67,20 @@ export interface RuleFormConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
   onChange: (consumer: RuleCreationValidConsumer | null) => void;
   errors: IErrorObject;
-  selectedConsumer: RuleCreationValidConsumer | null | undefined;
+  selectedConsumer?: RuleCreationValidConsumer | null;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
-  const { consumers, errors, onChange, selectedConsumer } = props;
+  const {
+    consumers,
+    errors,
+    onChange,
+    selectedConsumer,
+    initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
+  } = props;
   const isInvalid = errors?.consumer?.length > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
@@ -125,8 +132,8 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
   useEffect(() => {
     // At initialization, select Stack Alerts, or the first value
     if (!validatedSelectedConsumer) {
-      if (consumers.includes(STACK_ALERTS_FEATURE_ID)) {
-        onChange(STACK_ALERTS_FEATURE_ID);
+      if (initialSelectedConsumer && consumers.includes(initialSelectedConsumer)) {
+        onChange(initialSelectedConsumer);
         return;
       }
       onChange(consumers[0] as RuleCreationValidConsumer);
