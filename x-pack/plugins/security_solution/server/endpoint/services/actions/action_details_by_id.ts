@@ -127,7 +127,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     agentType: normalizedActionRequest.agentType,
     agents: normalizedActionRequest.agents,
     hosts: normalizedActionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-      acc[id] = { name: agentsHostInfo[id] ?? '' };
+      acc[id] = { name: agentsHostInfo[id] || normalizedActionRequest.hosts[id]?.name || '' };
       return acc;
     }, {}),
     command: normalizedActionRequest.command,

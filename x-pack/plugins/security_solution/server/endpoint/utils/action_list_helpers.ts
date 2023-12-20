@@ -61,12 +61,7 @@ export const getActions = async ({
 
   const dateFilters = getDateFilters({ startDate, endDate });
 
-  const actionsFilters = [
-    { term: { input_type: 'endpoint' } },
-    { term: { type: 'INPUT_ACTION' } },
-    ...dateFilters,
-    ...additionalFilters,
-  ];
+  const actionsFilters = [...dateFilters, ...additionalFilters];
 
   const must: SearchRequest = [
     {

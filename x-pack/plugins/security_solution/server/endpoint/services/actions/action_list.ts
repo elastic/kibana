@@ -284,13 +284,16 @@ const getActionDetailsList = async ({
       wasSuccessful,
     });
 
+    const hosts = action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentsHostInfo[id] || action.hosts[id]?.name || '' };
+      return acc;
+    }, {});
+
     const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
-      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] ?? '' };
-        return acc;
-      }, {}),
+      agentType: action.agentType,
+      hosts,
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,

@@ -67,6 +67,8 @@ interface NormalizedActionRequest {
   ruleId?: string;
   ruleName?: string;
   error?: EcsError;
+  /** Host info that might have been stored along with the Action Request (ex. 3rd party EDR actions) */
+  hosts: ActionDetails['hosts'];
 }
 
 /**
@@ -97,6 +99,7 @@ export const mapToNormalizedActionRequest = (
       ruleId: actionRequest.rule?.id,
       ruleName: actionRequest.rule?.name,
       error: actionRequest.error,
+      hosts: actionRequest.EndpointActions.data.hosts ?? {},
     };
   }
 
@@ -112,6 +115,7 @@ export const mapToNormalizedActionRequest = (
     id: actionRequest.action_id,
     type,
     parameters: actionRequest.data.parameters,
+    hosts: {},
   };
 };
 
