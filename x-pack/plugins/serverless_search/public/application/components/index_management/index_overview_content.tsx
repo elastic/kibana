@@ -5,40 +5,32 @@
  * 2.0.
  */
 
-import { IndexDetailsTab } from '@kbn/index-management-plugin/common/constants';
 import React, { Suspense, lazy } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { EuiLoadingSpinner } from '@elastic/eui';
+
+import { IndexContent } from '@kbn/index-management-plugin/public/services';
 
 import { ServerlessSearchPluginStartDependencies } from '../../../types';
 
-const IndexDocuments = lazy(() => import('./documents'));
+const IndexDetailOverview = lazy(() => import('./index_overview'));
 
-export const createIndexDocumentsContent = (
+export const createIndexOverviewContent = (
   core: CoreStart,
   services: ServerlessSearchPluginStartDependencies
-): IndexDetailsTab => {
+): IndexContent => {
   return {
-    id: 'documents',
-    name: (
-      <FormattedMessage
-        defaultMessage="Documents"
-        id="xpack.serverlessSearch.indexManagementTab.documents"
-      />
-    ),
-    order: 11,
-    renderTabContent: ({ index }) => {
+    renderContent: (index) => {
       const queryClient = new QueryClient();
       return (
         <KibanaContextProvider services={{ ...core, ...services }}>
           <QueryClientProvider client={queryClient}>
             <ReactQueryDevtools initialIsOpen={false} />
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <IndexDocuments indexName={index.name} />
+              <IndexDetailOverview index={index.index} />
             </Suspense>
           </QueryClientProvider>
         </KibanaContextProvider>
