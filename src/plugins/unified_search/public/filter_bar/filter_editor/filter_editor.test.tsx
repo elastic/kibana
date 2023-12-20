@@ -110,7 +110,9 @@ describe('<FilterEditor />', () => {
       const { exists, component, find } = testBed;
       component.update();
       expect(exists('filterIndexPatternsSelect')).toBe(true);
-      expect(find('filterIndexPatternsSelect').text()).toBe(dataViewMockList[1].getName());
+      expect(find('filterIndexPatternsSelect').find('input').props().value).toBe(
+        dataViewMockList[1].getName()
+      );
     });
   });
   describe('UI renders when data view fallback promise is rejected', () => {
@@ -136,14 +138,14 @@ describe('<FilterEditor />', () => {
         docLinks: coreMock.createStart().docLinks,
         dataViews: dataMock.dataViews,
       };
-      testBed = await registerTestBed(FilterEditor, { defaultProps })();
+      testBed = registerTestBed(FilterEditor, { defaultProps })();
     });
 
     it('renders the right data view to be selected', async () => {
-      const { exists, component, find } = testBed;
+      const { exists, component, find } = await testBed;
       component.update();
       expect(exists('filterIndexPatternsSelect')).toBe(true);
-      expect(find('filterIndexPatternsSelect').text()).toBe('Select a data view');
+      expect(find('filterIndexPatternsSelect').find('input').props().value).toBe('');
     });
   });
 });
