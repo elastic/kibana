@@ -426,7 +426,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  experimentalFeatures: Partial<ExperimentalFeatures>
+  experimentalFeatures?: Partial<ExperimentalFeatures>
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
