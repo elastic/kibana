@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
@@ -23,7 +23,14 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiAccordion,
+  EuiButtonIcon,
 } from '@elastic/eui';
+import {
+  INGEST_PIPELINES_APP_LOCATOR,
+  INGEST_PIPELINES_PAGES,
+  IngestPipelinesListParams,
+} from '@kbn/ingest-pipelines-plugin/public';
+import { ObservabilityPublicPluginsStart } from '../../../..';
 import { useInspectSlo } from '../../../../hooks/slo/use_inspect_slo';
 import { CreateSLOForm } from '../../types';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
@@ -52,6 +59,7 @@ function SLOInspect({
   getValues: () => CreateSLOForm;
   trigger: () => Promise<boolean>;
 }) {
+  const { share, http } = useKibana<ObservabilityPublicPluginsStart>().services;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { mutateAsync: inspectSlo, data, isLoading } = useInspectSlo();
 
@@ -68,6 +76,17 @@ function SLOInspect({
     return sloForm;
   }, [isFlyoutVisible, trigger, getValues, inspectSlo]);
 
+  const { data: pipeLineUrl } = useFetcher(async () => {
+    const ingestPipeLocator = share.url.locators.get<IngestPipelinesListParams>(
+      INGEST_PIPELINES_APP_LOCATOR
+    );
+    const ingestPipeLineId = data?.pipeline?.id;
+    return ingestPipeLocator?.getUrl({
+      pipelineId: ingestPipeLineId,
+      page: INGEST_PIPELINES_PAGES.LIST,
+    });
+  }, [data?.pipeline?.id, share.url.locators]);
+
   const closeFlyout = () => {
     setIsFlyoutVisible(false);
     setIsInspecting(false);
@@ -75,8 +94,12 @@ function SLOInspect({
 
   const [isInspecting, setIsInspecting] = useState(false);
   const onButtonClick = () => {
-    setIsInspecting(() => !isInspecting);
-    setIsFlyoutVisible(() => !isFlyoutVisible);
+    trigger().then((isValid) => {
+      if (isValid) {
+        setIsInspecting(() => !isInspecting);
+        setIsFlyoutVisible(() => !isFlyoutVisible);
+      }
+    });
   };
 
   let flyout;
@@ -110,6 +133,13 @@ function SLOInspect({
                   { defaultMessage: 'Rollup transform' }
                 )}
                 json={data.rollUpTransform}
+                extraAction={
+                  <EuiButtonIcon
+                    iconType="link"
+                    data-test-subj="o11ySLOInspectDetailsButton"
+                    href={http?.basePath.prepend('/app/management/data/transform')}
+                  />
+                }
               />
               <EuiSpacer size="s" />
 
@@ -120,6 +150,13 @@ function SLOInspect({
                   { defaultMessage: 'Summary transform' }
                 )}
                 json={data.summaryTransform}
+                extraAction={
+                  <EuiButtonIcon
+                    iconType="link"
+                    data-test-subj="o11ySLOInspectDetailsButton"
+                    href={http?.basePath.prepend('/app/management/data/transform')}
+                  />
+                }
               />
               <EuiSpacer size="s" />
 
@@ -129,6 +166,13 @@ function SLOInspect({
                   'xpack.observability.sLOInspect.codeBlockAccordion.ingestPipelineLabel',
                   { defaultMessage: 'SLO Ingest pipeline' }
                 )}
+                extraAction={
+                  <EuiButtonIcon
+                    iconType="link"
+                    data-test-subj="o11ySLOInspectDetailsButton"
+                    href={pipeLineUrl}
+                  />
+                }
                 json={data.pipeline}
               />
               <EuiSpacer size="s" />
@@ -160,7 +204,10 @@ function SLOInspect({
   }
   return (
     <>
-      <EuiToolTip content={sloData ? VIEW_FORMATTED_CONFIG_LABEL : VALID_CONFIG_LABEL}>
+      <EuiToolTip
+        content={sloData ? VIEW_FORMATTED_CONFIG_LABEL : VALID_CONFIG_LABEL}
+        repositionOnScroll
+      >
         <EuiButton
           data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
           onClick={onButtonClick}
@@ -176,10 +223,21 @@ function SLOInspect({
   );
 }
 
-function CodeBlockAccordion({ id, label, json }: { id: string; label: string; json: any }) {
+function CodeBlockAccordion({
+  id,
+  label,
+  json,
+  extraAction,
+}: {
+  id: string;
+  label: string;
+  json: any;
+  extraAction?: ReactNode;
+}) {
   return (
     <EuiAccordion
       id={id}
+      extraAction={extraAction}
       buttonContent={
         <EuiTitle size="xs">
           <h3>{label}</h3>
