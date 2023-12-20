@@ -123,33 +123,39 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     params: TransportRequestParams,
     options?: TransportRequestOptions
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
-    const requestOptions = options ?? {};
-
     // Wrap ES|QL requests with an abort signal
     if (params.method === 'POST' && params.path === '/_esql') {
-      const start = Date.now();
-      opts.logger.debug(
-        `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
-          opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}`
-      );
-      const result = (await originalRequestFn.call(opts.esClient.transport, params, {
-        ...requestOptions,
-        signal: opts.abortController.signal,
-      })) as Promise<TResponse> | TransportResult<TResponse, TContext>;
+      try {
+        const requestOptions = options ?? {};
+        const start = Date.now();
+        opts.logger.debug(
+          `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}`
+        );
+        const result = (await originalRequestFn.call(opts.esClient.transport, params, {
+          ...requestOptions,
+          signal: opts.abortController.signal,
+        })) as Promise<TResponse> | TransportResult<TResponse, TContext>;
 
-      const end = Date.now();
-      const durationMs = end - start;
+        const end = Date.now();
+        const durationMs = end - start;
 
-      opts.logMetricsFn({ esSearchDuration: 0, totalSearchDuration: durationMs });
-      return result;
+        opts.logMetricsFn({ esSearchDuration: 0, totalSearchDuration: durationMs });
+        return result;
+      } catch (e) {
+        if (opts.abortController.signal.aborted) {
+          throw new Error('ES|QL search has been aborted due to cancelled execution');
+        }
+        throw e;
+      }
     }
 
     // No wrap
     return (await originalRequestFn.call(
       opts.esClient.transport,
       params,
-      requestOptions
+      options
     )) as Promise<TResponse>;
   }
 
@@ -205,7 +211,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
+        throw new Error('EQL search has been aborted due to cancelled execution');
       }
       throw e;
     }
