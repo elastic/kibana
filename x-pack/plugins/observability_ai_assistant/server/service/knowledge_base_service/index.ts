@@ -12,7 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { map } from 'lodash';
+import { map, orderBy } from 'lodash';
+import { encode } from 'gpt-tokenizer';
 import {
   ELSER_MODEL_ID,
   INDEX_QUEUED_DOCUMENTS_TASK_ID,
@@ -34,8 +35,8 @@ export interface RecalledEntry {
   id: string;
   text: string;
   score: number | null;
-  is_correction: boolean;
-  labels: Record<string, string>;
+  is_correction?: boolean;
+  labels?: Record<string, string>;
 }
 
 function isAlreadyExistsError(error: Error) {
@@ -291,64 +292,202 @@ export class KnowledgeBaseService {
     }
   };
 
+  private async recallFromKnowledgeBase({
+    queries,
+    contexts,
+    namespace,
+    user,
+    modelId,
+  }: {
+    queries: string[];
+    contexts?: string[];
+    namespace: string;
+    user: { name: string };
+    modelId: string;
+  }): Promise<RecalledEntry[]> {
+    const query = {
+      bool: {
+        should: queries.map((text) => ({
+          text_expansion: {
+            'ml.tokens': {
+              model_text: text,
+              model_id: modelId,
+            },
+          } as unknown as QueryDslTextExpansionQuery,
+        })),
+        filter: [
+          ...getAccessQuery({
+            user,
+            namespace,
+          }),
+          ...getCategoryQuery({ contexts }),
+        ],
+      },
+    };
+
+    const response = await this.dependencies.esClient.search<
+      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
+    >({
+      index: [this.dependencies.resources.aliases.kb],
+      query,
+      size: 20,
+      _source: {
+        includes: ['text', 'is_correction', 'labels'],
+      },
+    });
+
+    return response.hits.hits.map((hit) => ({
+      ...hit._source!,
+      score: hit._score!,
+      id: hit._id,
+    }));
+  }
+
+  private async recallFromConnectors({
+    queries,
+    asCurrentUser,
+    modelId,
+  }: {
+    queries: string[];
+    asCurrentUser: ElasticsearchClient;
+    modelId: string;
+  }): Promise<RecalledEntry[]> {
+    const ML_INFERENCE_PREFIX = 'ml.inference.';
+
+    const fieldCaps = await asCurrentUser.fieldCaps({
+      index: 'search*',
+      fields: `${ML_INFERENCE_PREFIX}*`,
+      allow_no_indices: true,
+      types: ['sparse_vector'],
+      filters: '-metadata,-parent',
+    });
+
+    const fieldsWithVectors = Object.keys(fieldCaps.fields).map((field) =>
+      field.replace('_expanded.predicted_value', '').replace(ML_INFERENCE_PREFIX, '')
+    );
+
+    if (!fieldsWithVectors.length) {
+      return [];
+    }
+
+    const esQueries = fieldsWithVectors.flatMap((field) => {
+      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
+      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
+
+      return queries.map((query) => {
+        return {
+          bool: {
+            should: [
+              {
+                text_expansion: {
+                  [vectorField]: {
+                    model_text: query,
+                    model_id: modelId,
+                  },
+                } as unknown as QueryDslTextExpansionQuery,
+              },
+            ],
+            filter: [
+              {
+                term: {
+                  [modelField]: modelId,
+                },
+              },
+            ],
+          },
+        };
+      });
+    });
+
+    const response = await asCurrentUser.search<unknown>({
+      index: 'search-*',
+      query: {
+        bool: {
+          should: esQueries,
+        },
+      },
+      size: 20,
+      _source: {
+        exclude: ['_*', 'ml*'],
+      },
+    });
+
+    return response.hits.hits.map((hit) => ({
+      text: JSON.stringify(hit._source),
+      score: hit._score!,
+      is_correction: false,
+      id: hit._id,
+    }));
+  }
+
   recall = async ({
     user,
     queries,
     contexts,
     namespace,
+    asCurrentUser,
   }: {
     queries: string[];
     contexts?: string[];
     user: { name: string };
     namespace: string;
+    asCurrentUser: ElasticsearchClient;
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    try {
-      const query = {
-        bool: {
-          should: queries.map((text) => ({
-            text_expansion: {
-              'ml.tokens': {
-                model_text: text,
-                model_id: ELSER_MODEL_ID,
-              },
-            } as unknown as QueryDslTextExpansionQuery,
-          })),
-          filter: [
-            ...getAccessQuery({
-              user,
-              namespace,
-            }),
-            ...getCategoryQuery({ contexts }),
-          ],
-        },
-      };
+    const modelId = ELSER_MODEL_ID;
 
-      const response = await this.dependencies.esClient.search<
-        Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
-      >({
-        index: [this.dependencies.resources.aliases.kb],
-        query,
-        size: 20,
-        _source: {
-          includes: ['text', 'is_correction', 'labels'],
-        },
-      });
+    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
+      this.recallFromKnowledgeBase({
+        user,
+        queries,
+        contexts,
+        namespace,
+        modelId,
+      }).catch((error) => {
+        if (isAlreadyExistsError(error)) {
+          throwKnowledgeBaseNotReady(error.body);
+        }
+        throw error;
+      }),
+      this.recallFromConnectors({
+        asCurrentUser,
+        queries,
+        modelId,
+      }).catch((error) => {
+        this.dependencies.logger.debug('Error getting data from search indices');
+        this.dependencies.logger.debug(error);
+        return [];
+      }),
+    ]);
 
-      return {
-        entries: response.hits.hits.map((hit) => ({
-          ...hit._source!,
-          score: hit._score!,
-          id: hit._id,
-        })),
-      };
-    } catch (error) {
-      if (isAlreadyExistsError(error)) {
-        throwKnowledgeBaseNotReady(error.body);
-      }
-      throw error;
+    const sortedEntries = orderBy(
+      documentsFromKb.concat(documentsFromConnectors),
+      'score',
+      'desc'
+    ).slice(0, 20);
+
+    const MAX_TOKENS = 4000;
+
+    let tokenCount = 0;
+
+    const returnedEntries: RecalledEntry[] = [];
+
+    let entry: RecalledEntry | undefined;
+    while ((entry = sortedEntries.shift()) && tokenCount <= MAX_TOKENS) {
+      returnedEntries.push(entry);
+      tokenCount += encode(entry.text).length;
     }
+
+    if (returnedEntries.length <= sortedEntries.length) {
+      this.dependencies.logger.debug(
+        `Dropped ${sortedEntries.length - returnedEntries.length} entries because of token limit`
+      );
+    }
+
+    return {
+      entries: returnedEntries,
+    };
   };
 
   getEntries = async ({
