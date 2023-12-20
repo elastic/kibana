@@ -17,6 +17,7 @@ import { Stackframe as StackframeComponent } from './stackframe';
 interface Props {
   stackframes?: Stackframe[];
   codeLanguage?: string;
+  stackTrace?: string;
 }
 
 export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
