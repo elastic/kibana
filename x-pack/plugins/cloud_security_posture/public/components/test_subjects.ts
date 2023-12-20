@@ -39,3 +39,16 @@ export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score
 
 export const TAKE_ACTION_SUBJ = 'csp:take_action';
 export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
+
+export const CSP_GROUPING = 'cloudSecurityGrouping';
+export const CSP_GROUPING_LOADING = 'cloudSecurityGroupingLoading';
+export const CSP_FINDINGS_COMPLIANCE_SCORE = 'cloudSecurityFindingsComplianceScore';
+
+export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
+export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
+  CLOUDFORMATION: 'aws-cloudformation-setup-option',
+  MANUAL: 'aws-manual-setup-option',
+};
+
+export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';

@@ -17,8 +17,8 @@ import type { OpenTimelineResult } from '../../timelines/components/open_timelin
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { TimelineModel } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -2027,6 +2027,7 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineVersion: null,
   version: '1',
   savedSearchId: null,
+  savedSearch: null,
   isDataProviderVisible: false,
 };
 
@@ -2209,6 +2210,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     version: null,
     savedSearchId: null,
     isDiscoverSavedSearchLoaded: false,
+    savedSearch: null,
     isDataProviderVisible: false,
   },
   to: '2018-11-05T19:03:25.937Z',

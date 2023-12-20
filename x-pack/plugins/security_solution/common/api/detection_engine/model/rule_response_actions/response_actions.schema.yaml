@@ -49,7 +49,6 @@ components:
       required:
         - id
         - query
-      x-modify: requiredOptional
 
     OsqueryParams:
       type: object
@@ -66,7 +65,6 @@ components:
           type: string
         saved_query_id:
           type: string
-      x-modify: requiredOptional
 
     OsqueryParamsCamelCase:
       type: object
@@ -83,7 +81,6 @@ components:
           type: string
         savedQueryId:
           type: string
-      x-modify: requiredOptional
 
     OsqueryResponseAction:
       type: object
@@ -123,7 +120,6 @@ components:
           type: string
       required:
         - command
-      x-modify: requiredOptional
 
     EndpointResponseAction:
       type: object

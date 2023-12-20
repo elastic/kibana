@@ -70,7 +70,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
 export interface GetCasesColumn {
-  filterStatus: string;
+  filterStatus: string[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   selectedColumns: CasesColumnSelection[];

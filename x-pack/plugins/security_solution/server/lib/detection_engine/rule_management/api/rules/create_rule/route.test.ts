@@ -237,7 +237,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "saved_query", saved_id: Required, type: Invalid literal value, expected "threshold", and 18 more'
+        'response_actions.0.action_type_id: Invalid literal value, expected ".osquery", response_actions.0.params.command: Invalid literal value, expected "isolate"'
       );
     });
   });

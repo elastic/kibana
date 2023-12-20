@@ -11,12 +11,14 @@ import { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { ActionTypes } from './use_actions';
+import * as lensHook from './use_embeddable_attributes';
 
 jest.mock('../header/add_to_case_action', () => ({
   AddToCaseAction: jest.fn(() => <div>mockAddToCaseAction</div>),
 }));
 
 const mockLensAttrs = {
+  title: '',
   hidePanelTitles: true,
   description: '',
   visualizationType: 'lnsMetric',
@@ -102,17 +104,19 @@ describe('Embeddable', () => {
     jest.clearAllMocks();
   });
 
+  jest.spyOn(lensHook, 'useEmbeddableAttributes').mockReturnValue(mockLensAttrs as any);
+
   it('renders title', async () => {
     const { container, getByText } = render(
       <Embeddable
         caseOwner={mockOwner}
-        customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
         dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         title={mockTitle}
         withActions={mockActions}
+        attributes={[]}
       />
     );
     expect(container.querySelector(`[data-test-subj="exploratoryView-title"]`)).toBeInTheDocument();
@@ -123,12 +127,12 @@ describe('Embeddable', () => {
     const { container } = render(
       <Embeddable
         caseOwner={mockOwner}
-        customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
         dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
     expect(
@@ -140,12 +144,12 @@ describe('Embeddable', () => {
     const { container } = render(
       <Embeddable
         caseOwner={mockOwner}
-        customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
         dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
 
@@ -174,13 +178,13 @@ describe('Embeddable', () => {
     render(
       <Embeddable
         caseOwner={mockOwner}
-        customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
         dataViewState={mockDataViews}
         isSingleMetric={true}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
+        attributes={[]}
       />
     );
 

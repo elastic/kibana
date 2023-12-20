@@ -38,7 +38,8 @@
       "savedObjectsTaggingOss",
       "lens",
       "noDataPage",
-      "globalSearch"
+      "globalSearch",
+      "serverless"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
     "extraPublicDirs": ["common"]

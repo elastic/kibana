@@ -15,6 +15,8 @@ import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
+export type { ActionVariable } from '@kbn/alerting-types';
+
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -240,14 +242,6 @@ export interface AlertsHealth {
     status: HealthStatus;
     timestamp: string;
   };
-}
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  deprecated?: boolean;
-  useWithTripleBracesInTemplates?: boolean;
-  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {

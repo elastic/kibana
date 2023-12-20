@@ -14,7 +14,7 @@ import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
-import { readConsoleRequestBody } from '../../../../../common/api/risk_score';
+import { readConsoleRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getView } from '../utils';

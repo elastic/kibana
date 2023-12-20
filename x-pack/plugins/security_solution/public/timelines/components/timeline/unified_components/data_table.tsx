@@ -33,7 +33,6 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
-import { timelineActions } from '../../../store/timeline';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -57,13 +56,14 @@ import { Actions } from '../../../../common/components/header_actions/actions';
 import { getColumnHeaderUnified } from '../body/column_headers/helpers';
 import { eventIsPinned } from '../body/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field_udt';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
 import type { NotesMap } from './render_custom_body';
 import CustomGridBodyControls, { TimelineDataTableContext } from './render_custom_body';
 import RowDetails from './row_details';
+import { timelineDefaults } from '../../../store/defaults';
+import { timelineActions } from '../../../store';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);

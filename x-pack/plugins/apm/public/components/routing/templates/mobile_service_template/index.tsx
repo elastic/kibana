@@ -24,13 +24,18 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { MobileSearchBar } from '../../../app/mobile/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'overview' | 'transactions' | 'service-map' | 'alerts';
+  key:
+    | 'overview'
+    | 'transactions'
+    | 'dependencies'
+    | 'errors-and-crashes'
+    | 'service-map'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -122,9 +127,6 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <BetaBadge icon="beta" />
-                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -189,6 +191,26 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
           defaultMessage: 'Transactions',
         }
       ),
+    },
+    {
+      key: 'dependencies',
+      href: router.link('/mobile-services/{serviceName}/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
+      }),
+    },
+    {
+      key: 'errors-and-crashes',
+      href: router.link('/mobile-services/{serviceName}/errors-and-crashes', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
+        defaultMessage: 'Errors & Crashes',
+      }),
     },
     {
       key: 'service-map',

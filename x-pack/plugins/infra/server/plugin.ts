@@ -118,7 +118,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
        * before enabling this flag.
        */
       profilingEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
     }),

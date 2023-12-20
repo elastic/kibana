@@ -462,9 +462,9 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.mock-idp.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
         "--env",
-        "xpack.security.authc.realms.saml.mock-idp.attributes.name=http://saml.elastic-cloud.com/attributes/email",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.name=http://saml.elastic-cloud.com/attributes/name",
         "--env",
-        "xpack.security.authc.realms.saml.mock-idp.attributes.mail=http://saml.elastic-cloud.com/attributes/name",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
       ]
     `);
   });
