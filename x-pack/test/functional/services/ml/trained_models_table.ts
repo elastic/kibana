@@ -198,13 +198,17 @@ export function TrainedModelsTableProvider(
     }
 
     public async toggleActionsContextMenu(modelId: string, expectOpen = true) {
-      await testSubjects.click(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
-      const panelElement = await find.byCssSelector('.euiContextMenuPanel');
-      const isDisplayed = await panelElement.isDisplayed();
-      expect(isDisplayed).to.eql(
-        expectOpen,
-        `Expected the action context menu for '${modelId}' to be ${expectOpen ? 'open' : 'closed'}`
-      );
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
+        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+        const isDisplayed = await panelElement.isDisplayed();
+        expect(isDisplayed).to.eql(
+          expectOpen,
+          `Expected the action context menu for '${modelId}' to be ${
+            expectOpen ? 'open' : 'closed'
+          }`
+        );
+      });
     }
 
     public async assertModelDeleteActionButtonExists(modelId: string, expectedValue: boolean) {
