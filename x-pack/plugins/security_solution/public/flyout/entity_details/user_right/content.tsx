@@ -19,6 +19,7 @@ import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { RiskSummary } from '../shared/components/risk_summary';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import type { UserDetailsLeftPanelTab } from '../user_detais_left/tabs';
 
 interface UserPanelContentProps {
   observedUser: ObservedUserData;
@@ -27,6 +28,7 @@ interface UserPanelContentProps {
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
+  openDetailsPanel: (tab: UserDetailsLeftPanelTab) => void;
 }
 
 export const UserPanelContent = ({
@@ -36,12 +38,17 @@ export const UserPanelContent = ({
   contextID,
   scopeId,
   isDraggable,
+  openDetailsPanel,
 }: UserPanelContentProps) => {
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
-          <RiskSummary riskScoreData={riskScoreState} queryId={USER_PANEL_RISK_SCORE_QUERY_ID} />
+          <RiskSummary
+            riskScoreData={riskScoreState}
+            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule margin="m" />
         </>
       )}
@@ -52,7 +59,12 @@ export const UserPanelContent = ({
         isDraggable={isDraggable}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser managedUser={managedUser} contextID={contextID} isDraggable={isDraggable} />
+      <ManagedUser
+        managedUser={managedUser}
+        contextID={contextID}
+        isDraggable={isDraggable}
+        openDetailsPanel={openDetailsPanel}
+      />
     </FlyoutBody>
   );
 };

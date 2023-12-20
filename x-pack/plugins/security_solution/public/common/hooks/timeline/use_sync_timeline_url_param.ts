@@ -8,8 +8,8 @@
 import { useEffect, useMemo } from 'react';
 
 import { useUpdateUrlParam } from '../../utils/global_query_string';
-import type { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import type { TimelineUrl } from '../../../timelines/store/model';
+import { timelineSelectors } from '../../../timelines/store';
 import { TimelineId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../use_selector';
 import { URL_PARAM_KEY } from '../use_url_state';
