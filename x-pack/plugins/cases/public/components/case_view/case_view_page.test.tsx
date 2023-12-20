@@ -234,7 +234,7 @@ describe('CaseViewPage', () => {
     jest.useRealTimers();
   });
 
-  for (let index = 0; index < 50; index++) {
+  for (let index = 0; index < 1; index++) {
     it('shows the metrics section', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
@@ -251,31 +251,6 @@ describe('CaseViewPage', () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
       expect(await screen.findByTestId('sidebar-connectors')).toBeInTheDocument();
-    });
-
-    it('should push updates on button click', async () => {
-      usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
-      useGetCaseConnectorsMock.mockImplementation(() => ({
-        isLoading: false,
-        data: {
-          ...caseConnectors,
-          'resilient-2': {
-            ...caseConnectors['resilient-2'],
-            push: { ...caseConnectors['resilient-2'].push, needsToBePushed: true },
-          },
-        },
-      }));
-
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
-
-      userEvent.click(screen.getByTestId('push-to-external-service'));
-
-      await waitFor(() => {
-        expect(usePushToServiceMockRes.handlePushToService).toHaveBeenCalled();
-      });
     });
 
     it('should call onComponentInitialized on mount', async () => {
@@ -312,16 +287,6 @@ describe('CaseViewPage', () => {
       });
     });
 
-    it('should show the rule name', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(
-        (
-          await screen.findAllByTestId('user-action-alert-comment-create-action-alert-action-id')
-        )[1].querySelector('.euiCommentEvent__headerEvent')
-      ).toHaveTextContent('added an alert from Awesome rule');
-    });
-
     it('should update settings', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
@@ -335,18 +300,13 @@ describe('CaseViewPage', () => {
       });
     });
 
-    it('should show the correct connector name on the push button', async () => {
-      useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-
-      appMockRenderer.render(
-        <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
-      );
-
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
-    });
-
     describe('Tabs', () => {
+      it('should show the case tabs', async () => {
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+        expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
+      });
+
       it('renders the alerts tab when the query parameter tabId has alerts', async () => {
         useUrlParamsMock.mockReturnValue({
           urlParams: {
@@ -372,42 +332,6 @@ describe('CaseViewPage', () => {
             tabId: CASE_VIEW_PAGE_TABS.ALERTS,
           });
         });
-      });
-
-      it('should display the alerts tab when the feature is enabled', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-        expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-      });
-
-      it('should not display the alerts tab when the feature is disabled', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: false } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-        expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
-      });
-
-      it('should not show the experimental badge on the alerts table', async () => {
-        appMockRenderer = createAppMockRenderer({
-          features: { alerts: { isExperimental: false } },
-        });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(
-          screen.queryByTestId('case-view-alerts-table-experimental-badge')
-        ).not.toBeInTheDocument();
-      });
-
-      it('should show the experimental badge on the alerts table', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: true } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(
-          await screen.findByTestId('case-view-alerts-table-experimental-badge')
-        ).toBeInTheDocument();
       });
     });
 

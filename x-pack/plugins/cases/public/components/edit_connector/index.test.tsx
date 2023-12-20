@@ -23,6 +23,7 @@ import { basicCase, connectorsMock } from '../../containers/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { ReturnUsePushToService } from '../use_push_to_service';
 import { usePushToService } from '../use_push_to_service';
+import { ConnectorTypes } from '../../../common';
 
 const onSubmit = jest.fn();
 const caseConnectors = getCaseConnectorsMockResponse();
@@ -78,7 +79,7 @@ describe('EditConnector ', () => {
     expect(await screen.findByText(errorMsg.description)).toBeInTheDocument();
   });
 
-  it('Edit external service on submit', async () => {
+  it('calls onSubmit when changing connector', async () => {
     render(
       <TestProviders>
         <EditConnector {...defaultProps} />
@@ -111,6 +112,31 @@ describe('EditConnector ', () => {
         type: '.resilient',
       })
     );
+  });
+
+  it('should call handlePushToService when pushing to an external service', async () => {
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
+    const props = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          ...defaultProps.caseData.connector,
+          id: 'servicenow-1',
+        },
+      },
+    };
+
+    render(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+
+    expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('push-to-external-service'));
+
+    await waitFor(() => expect(handlePushToService).toHaveBeenCalled());
   });
 
   it('reverts to the initial selection if the caseData do not change', async () => {
@@ -407,5 +433,24 @@ describe('EditConnector ', () => {
 
     expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
     expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+  });
+
+  it('should show the correct connector name on the push button', async () => {
+    const props = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          id: 'resilient-2',
+          name: 'old name',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+      },
+    };
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
   });
 });
