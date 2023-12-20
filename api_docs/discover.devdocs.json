@@ -133,11 +133,11 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/unified-data-table",
+                "pluginId": "savedSearch",
                 "scope": "common",
-                "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-common.UnifiedDataTableSettings",
-                "text": "UnifiedDataTableSettings"
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
               },
               " | undefined"
             ],
@@ -2601,6 +2601,29 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/discover/common/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.grid",
+            "type": "Object",
+            "tags": [],
+            "label": "grid",
+            "description": [
+              "\nData Grid related state"
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/discover/common/locator.ts",
             "deprecated": false,
