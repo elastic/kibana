@@ -8,6 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
@@ -217,7 +218,13 @@ export function DiscoverGridFlyout({
             wrap={true}
           >
             <EuiFlexItem grow={false}>
-              <EuiTitle size="s" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle
+                size="s"
+                data-test-subj="docTableRowDetailsTitle"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
                 <h2>{flyoutTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
