@@ -739,10 +739,6 @@
                 "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
               },
               {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
