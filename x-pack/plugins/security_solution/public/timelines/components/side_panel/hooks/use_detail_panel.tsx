@@ -12,12 +12,12 @@ import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
 
