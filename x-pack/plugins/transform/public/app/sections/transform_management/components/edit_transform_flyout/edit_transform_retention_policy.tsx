@@ -18,10 +18,7 @@ import { isLatestTransform, isPivotTransform } from '../../../../../../common/ty
 import { useGetTransformsPreview } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import {
-  applyFormStateToTransformConfig,
-  useEditTransformFlyout,
-} from './use_edit_transform_flyout';
+import { useEditTransformFlyout } from './use_edit_transform_flyout';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {
@@ -30,21 +27,19 @@ export const EditTransformRetentionPolicy: FC = () => {
   const toastNotifications = useToastNotifications();
 
   const dataViewId = useEditTransformFlyout((s) => s.dataViewId);
-  const formFields = useEditTransformFlyout((s) => s.formFields);
   const formSections = useEditTransformFlyout((s) => s.formSections);
   const retentionPolicyField = useEditTransformFlyout((s) => s.formFields.retentionPolicyField);
   const config = useEditTransformFlyout((s) => s.config);
-  const requestConfig = applyFormStateToTransformConfig(config, formFields, formSections);
   const setFormField = useEditTransformFlyout((s) => s.setFormField);
   const setFormSection = useEditTransformFlyout((s) => s.setFormSection);
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
       source: config.source,
-      ...(isPivotTransform(requestConfig) ? { pivot: requestConfig.pivot } : {}),
-      ...(isLatestTransform(requestConfig) ? { latest: requestConfig.latest } : {}),
+      ...(isPivotTransform(config) ? { pivot: config.pivot } : {}),
+      ...(isLatestTransform(config) ? { latest: config.latest } : {}),
     };
-  }, [config, requestConfig]);
+  }, [config]);
 
   const { error: transformsPreviewError, data: transformPreview } =
     useGetTransformsPreview(previewRequest);
