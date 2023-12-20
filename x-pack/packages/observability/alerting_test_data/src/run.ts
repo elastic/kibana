@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { createApmErrorCountRule } from './create_apm_error_count_threshold_rule';
-import { createApmFailedTransactionRateRule } from './create_apm_failed_transaction_rate_rule';
+import { createApmRule } from './createApmRule';
 import { createCustomThresholdRule } from './create_custom_threshold_rule';
 import { createDataView } from './create_data_view';
 import { createIndexConnector } from './create_index_connector';
 
-import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6 } from './scenarios';
+import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
 
-const scenarios = [
+const scenarios_custom_threshold = [
   // Logs use-cases
   scenario1,
   scenario2,
@@ -22,6 +21,14 @@ const scenarios = [
   scenario4,
   scenario5,
   scenario6,
+  custom_threshold_AIAssistant_log_count,
+  custom_threshold_AIAssistant_metric_avg
+];
+
+const scenarios_apm = [
+  apm_error_count,
+  apm_transaction_rate,
+  apm_error_count_AIAssistant
 ];
 
 /* eslint-disable no-console */
@@ -30,22 +37,22 @@ export async function run() {
   const response = await createIndexConnector();
   const actionId = await response.data.id;
   console.log('Creating index connector - finished - actionId: ', actionId);
-  for (const scenario of scenarios) {
-    if (scenario.dataView.shouldCreate) {
-      console.log('Creating data view - start - id: ', scenario.dataView.id);
-      await createDataView(scenario.dataView);
-      console.log('Creating data view - finished - id: ', scenario.dataView.id);
+  for (const scenario of scenarios_custom_threshold) {
+    if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
+      if (scenario.dataView.shouldCreate) {
+        console.log('Creating data view - start - id: ', scenario.dataView.id);
+        await createDataView(scenario.dataView);
+        console.log('Creating data view - finished - id: ', scenario.dataView.id);
+      }
+      console.log('Creating Custom threshold rule - start - name: ', scenario.ruleParams.name);
+      await createCustomThresholdRule(actionId, scenario.dataView.id, scenario.ruleParams);
+      console.log('Creating Custom threshold rule - finished - name: ', scenario.ruleParams.name);
     }
-    console.log('Creating Custom threshold rule - start - name: ', scenario.ruleParams.name);
-    await createCustomThresholdRule(actionId, scenario.dataView.id, scenario.ruleParams);
-    console.log('Creating Custom threshold rule - finished - name: ', scenario.ruleParams.name);
+  }
+  for (const scenario of scenarios_apm) {
+    console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name}`,);
+    await createApmRule(actionId, scenario.ruleParams);
+    console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name} finished`);
   }
 
-  console.log('Creating APM error count rule - start');
-  await createApmErrorCountRule(actionId);
-  console.log('Creating APM error count rule - finished');
-
-  console.log('Creating APM failed transaction rate rule - start');
-  await createApmFailedTransactionRateRule(actionId);
-  console.log('Creating APM failed transaction rate rule - finished');
 }

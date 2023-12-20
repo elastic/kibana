@@ -7,27 +7,49 @@
 
 import { createRule } from './create_rule';
 
-export const createApmFailedTransactionRateRule = async (actionId: string, serviceEnvironment = "rule-test") => {
-  const apmErrorRateRuleParams = {
-    tags: ['apm'],
-    consumer: 'apm',
-    name: 'apm_failed_transaction_rate_threshold',
-    rule_type_id: 'apm.transaction_error_rate',
-    params: {
-      threshold: 30,
-      windowSize: 5,
-      windowUnit: 'm',
-      transactionType: undefined,
-      serviceName: undefined,
-      environment: 'ENVIRONMENT_ALL',
+export const createApmRule = async (
+  actionId: string,
+  ruleParams: {
+    consumer?: string;
+    name?: string;
+    ruleTypeId?: string;
+    params?: {
+      threshold?: number;
+      windowSize?: number;
+      windowUnit?: string;
+      transactionType?: string;
+      serviceName?: string;
+      environment?: string;
       searchConfiguration: {
         query: {
-          query: `service.environment: "${serviceEnvironment}"`,
-          language: 'kuery',
+          query?: string;
+          language?: string;
+        };
+      };
+      groupBy?: string[];
+      useKqlFilter?: boolean;
+    };
+  }) => {
+  const apmErrorRateRuleParams = {
+    tags: ['apm'],
+    consumer: ruleParams.consumer || 'apm',
+    name: ruleParams.name || 'Default APM rule name',
+    rule_type_id: ruleParams.ruleTypeId || 'apm.transaction_error_rate',
+    params: {
+      threshold: ruleParams.params?.threshold || 30,
+      windowSize: ruleParams.params?.windowSize || 5,
+      windowUnit: ruleParams.params?.windowUnit || 'm',
+      transactionType: ruleParams.params?.transactionType || undefined,
+      serviceName: ruleParams.params?.serviceName || undefined,
+      environment: ruleParams.params?.environment || 'ENVIRONMENT_ALL',
+      searchConfiguration: {
+        query: {
+          query: ruleParams.params?.searchConfiguration.query.query || '',
+          language: ruleParams.params?.searchConfiguration.query.language || 'kuery',
         },
       },
-      groupBy: ['service.name', 'service.environment', 'transaction.type'],
-      useKqlFilter: true,
+      groupBy: ruleParams.params?.groupBy || ['service.name', 'service.environment', 'transaction.type'],
+      useKqlFilter: ruleParams.params?.useKqlFilter || true,
     },
     actions: [
       {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { createApmErrorCountRule } from './src/create_apm_error_count_threshold_rule';
-export { createApmFailedTransactionRateRule } from './src/create_apm_failed_transaction_rate_rule';
+export { createApmRule } from './src/createApmRule';
 export { createCustomThresholdRule } from './src/create_custom_threshold_rule';
 export { createDataView } from './src/create_data_view';
 export { createIndexConnector } from './src/create_index_connector';

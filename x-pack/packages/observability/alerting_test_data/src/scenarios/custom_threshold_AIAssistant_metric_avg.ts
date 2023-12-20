@@ -10,29 +10,30 @@ import {
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 
-export const scenario4 = {
+export const custom_threshold_AIAssistant_metric_avg = {
   dataView: {
-    indexPattern: 'high-cardinality-data-fake_hosts.fake_hosts-*',
-    id: 'data-view-id',
-    shouldCreate: false,
+    indexPattern: '.ds-metrics-apm.app.synth*',
+    id: 'data-view-id-metrics',
+    shouldCreate: true,
   },
   ruleParams: {
     consumer: 'logs',
-    name: 'custom_threshold_metric_avg',
+    name: 'metric_synth',
     ruleTypeId: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {
           comparator: Comparator.GT,
-          threshold: [80],
-          timeSize: 1,
-          timeUnit: 'm',
-          metrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: Aggregators.AVERAGE }],
+          threshold: [0.5],
+          timeSize: 2,
+          timeUnit: 'h',
+          metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: Aggregators.AVERAGE }],
         },
       ],
+      groupBy: ['service.name'],
       searchConfiguration: {
         query: {
-          query: 'labels.scenario: custom_threshold_metric_avg',
+          query: '',
         },
       },
     },

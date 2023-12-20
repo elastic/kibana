@@ -11,3 +11,8 @@ export { scenario3 } from './custom_threshold_log_count_nodata';
 export { scenario4 } from './custom_threshold_metric_avg';
 export { scenario5 } from './custom_threshold_metric_avg_groupby';
 export { scenario6 } from './custom_threshold_metric_avg_nodata';
+export { apm_error_count } from './apm_error_count';
+export { apm_transaction_rate } from './apm_transaction_rate';
+export { custom_threshold_AIAssistant_log_count } from './custom_threshold_AIAssistant_log_count';
+export { custom_threshold_AIAssistant_metric_avg } from './custom_threshold_AIAssistant_metric_avg';
+export { apm_error_count_AIAssistant } from './apm_error_count_AIAssistant';

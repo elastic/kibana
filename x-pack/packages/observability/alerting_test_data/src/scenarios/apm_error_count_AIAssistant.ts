@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export const apm_error_count_AIAssistant = {
+  ruleParams: {
+    consumer: 'apm',
+    name: 'apm_error_count_AIAssistant',
+    ruleTypeId: 'apm.error_rate',
+    params: {
+      threshold: 5,
+      windowSize: 1,
+      windowUnit: 'h',
+      transactionType: undefined,
+      serviceName: undefined,
+      environment: 'ENVIRONMENT_ALL',
+      searchConfiguration: {
+        query: {
+          query: `service.environment: "Synthtrace: high_throughput"`,
+          language: 'kuery',
+        },
+      },
+      groupBy: ['service.name', 'service.environment'],
+      useKqlFilter: true,
+    },
+  },
+};
