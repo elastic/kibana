@@ -18,6 +18,8 @@ export type LogDocument = Fields &
     'data_stream.type': string;
     'data_stream.dataset': string;
     message?: string;
+    'error.message'?: string;
+    'event.original'?: string;
     'event.dataset': string;
     'log.level'?: string;
     'host.name'?: string;

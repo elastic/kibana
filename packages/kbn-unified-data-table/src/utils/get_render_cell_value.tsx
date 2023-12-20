@@ -31,6 +31,7 @@ import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
+import { CustomCellRenderer } from '../..';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -52,10 +53,7 @@ export const getRenderCellValueFn = ({
   closePopover: () => void;
   fieldFormats: FieldFormatsStart;
   maxEntries: number;
-  externalCustomRenderers?: Record<
-    string,
-    (props: EuiDataGridCellValueElementProps) => React.ReactNode
-  >;
+  externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
 }) => {
   return ({
@@ -67,6 +65,8 @@ export const getRenderCellValueFn = ({
     isExpandable,
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
+    const row = rows ? rows[rowIndex] : undefined;
+
     if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
       return (
         <>
@@ -78,11 +78,12 @@ export const getRenderCellValueFn = ({
             isExpandable,
             isExpanded,
             colIndex,
+            row,
+            dataView,
           })}
         </>
       );
     }
-    const row = rows ? rows[rowIndex] : undefined;
 
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);

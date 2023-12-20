@@ -12,6 +12,8 @@ export const TIMESTAMP_FIELD = '@timestamp';
 export const HOST_NAME_FIELD = 'host.name';
 export const LOG_LEVEL_FIELD = 'log.level';
 export const MESSAGE_FIELD = 'message';
+export const ERROR_MESSAGE_FIELD = 'error.message';
+export const EVENT_ORIGINAL_FIELD = 'event.original';
 export const SERVICE_NAME_FIELD = 'service.name';
 export const TRACE_ID_FIELD = 'trace.id';
 
@@ -27,6 +29,9 @@ export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
 export const DATASTREAM_DATASET_FIELD = 'data_stream.dataset';
 
+// Virtual column fields
+export const CONTENT_FIELD = 'content';
+
 // Sizing
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
@@ -34,15 +39,15 @@ export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 // UI preferences
 export const DEFAULT_COLUMNS = [
   {
+    field: CONTENT_FIELD,
+  },
+  {
     field: SERVICE_NAME_FIELD,
     width: DATA_GRID_COLUMN_WIDTH_SMALL,
   },
   {
     field: HOST_NAME_FIELD,
     width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
-  },
-  {
-    field: MESSAGE_FIELD,
   },
 ];
 export const DEFAULT_ROWS_PER_PAGE = 100;

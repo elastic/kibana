@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import React from 'react';
+
 /**
  * User configurable state of data grid, persisted in saved search
  */
@@ -27,3 +32,13 @@ export type ValueToStringConverter = (
  * Custom column types per column name
  */
 export type DataTableColumnTypes = Record<string, string>;
+
+export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
+  row?: DataTableRecord;
+  dataView: DataView;
+};
+
+export type CustomCellRenderer = Record<
+  string,
+  (props: DataGridCellValueElementProps) => React.ReactNode
+>;

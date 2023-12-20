@@ -6,26 +6,43 @@
  */
 
 import React from 'react';
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge, type EuiBadgeProps, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FlyoutDoc } from '../types';
 
-const LEVEL_DICT: Record<string, EuiBadgeProps['color']> = {
+const LEVEL_DICT = {
   error: 'danger',
   warn: 'warning',
   info: 'primary',
-  default: 'default',
-};
+} as const;
 
 interface LogLevelProps {
   level: FlyoutDoc['log.level'];
+  iconType?: EuiBadgeProps['iconType'];
+  iconSide?: EuiBadgeProps['iconSide'];
+  hollow?: boolean;
 }
 
-export function LogLevel({ level }: LogLevelProps) {
-  if (!level) return null;
-  const levelColor = LEVEL_DICT[level] ?? LEVEL_DICT.default;
+export function LogLevel({ level = '-', iconType, iconSide }: LogLevelProps) {
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+  const { euiTheme } = useEuiTheme();
+  const levelColor = LEVEL_DICT[level as keyof typeof LEVEL_DICT]
+    ? euiTheme.colors[LEVEL_DICT[level as keyof typeof LEVEL_DICT]]
+    : euiTheme.colors.text;
 
   return (
-    <EuiBadge color={levelColor} data-test-subj="logExplorerFlyoutLogLevel">
+    <EuiBadge
+      color="hollow"
+      iconType={iconType}
+      iconSide={iconSide}
+      data-test-subj="logExplorerFlyoutLogLevel"
+      css={css`
+        border: 2px solid ${levelColor};
+        font-size: ${xsFontSize};
+        display: flex;
+        justify-content: center;
+      `}
+    >
       {level}
     </EuiBadge>
   );

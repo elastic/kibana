@@ -33,6 +33,12 @@ export function useDocDetail(
   const level = levelArray && levelArray.length ? levelArray[0]?.toLowerCase() : undefined;
   const messageArray = doc.flattened[constants.MESSAGE_FIELD];
   const message = messageArray && messageArray.length ? messageArray[0] : undefined;
+  const errorMessageArray = doc.flattened[constants.ERROR_MESSAGE_FIELD];
+  const errorMessage =
+    errorMessageArray && errorMessageArray.length ? errorMessageArray[0] : undefined;
+  const eventOriginalArray = doc.flattened[constants.EVENT_ORIGINAL_FIELD];
+  const eventOriginal =
+    eventOriginalArray && eventOriginalArray.length ? eventOriginalArray[0] : undefined;
   const timestamp = formatField(constants.TIMESTAMP_FIELD);
 
   // Service Highlights
@@ -61,6 +67,8 @@ export function useDocDetail(
     [constants.LOG_LEVEL_FIELD]: level,
     [constants.TIMESTAMP_FIELD]: timestamp,
     [constants.MESSAGE_FIELD]: message,
+    [constants.ERROR_MESSAGE_FIELD]: errorMessage,
+    [constants.EVENT_ORIGINAL_FIELD]: eventOriginal,
     [constants.SERVICE_NAME_FIELD]: serviceName,
     [constants.TRACE_ID_FIELD]: traceId,
     [constants.HOST_NAME_FIELD]: hostname,
