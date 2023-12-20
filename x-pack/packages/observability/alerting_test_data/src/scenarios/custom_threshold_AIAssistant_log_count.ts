@@ -23,7 +23,7 @@ export const custom_threshold_AIAssistant_log_count = {
     params: {
       criteria: [
         {
-          comparator: Comparator.LT,
+          comparator: Comparator.GT,
           threshold: [100],
           timeSize: 2,
           timeUnit: 'h',
