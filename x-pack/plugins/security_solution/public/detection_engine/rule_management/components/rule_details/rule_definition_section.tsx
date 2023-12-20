@@ -668,16 +668,14 @@ const prepareDefinitionSectionListItems = (
       });
     }
 
-    if (rule.type !== 'threshold') {
-      definitionSectionListItems.push({
-        title: (
-          <span data-test-subj="alertSuppressionDurationPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
-          </span>
-        ),
-        description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
-      });
-    }
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="alertSuppressionDurationPropertyTitle">
+          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+        </span>
+      ),
+      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
+    });
 
     if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
