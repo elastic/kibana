@@ -843,6 +843,53 @@ test('successfully authorize system actions', async () => {
   });
 });
 
+test('actionType Executor returns status "error" and an error message', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn().mockReturnValue({
+      actionId: 'test',
+      status: 'error',
+      message: 'test error message',
+      retry: true,
+    }),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  const result = await actionExecutor.execute(executeParams);
+
+  expect(result).toEqual({
+    actionId: 'test',
+    errorSource: TaskErrorSource.USER,
+    message: 'test error message',
+    retry: true,
+    status: 'error',
+  });
+});
+
 test('Execute of SentinelOne sub-actions require create privilege', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.sentinelone',
