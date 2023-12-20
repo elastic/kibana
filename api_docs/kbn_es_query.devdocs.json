@@ -5407,6 +5407,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-query",
+            "id": "def-common.ExecutionContextSearch.now",
+            "type": "number",
+            "tags": [],
+            "label": "now",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/expressions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
             "id": "def-common.ExecutionContextSearch.filters",
             "type": "Array",
             "tags": [],
