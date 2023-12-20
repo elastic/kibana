@@ -61,9 +61,6 @@ export function createFrameGroupID(
     return `elf;${fileID};${functionName}`;
   }
 
-  if(sourceFilename === "clone3.S") {
-    console.log(functionName)
-  }
   if (equivalenceMap.has(sourceFilename + ":" + functionName)) {
     console.log("replacing " + sourceFilename + ":" + functionName)
     var replacementString = equivalenceMap.get(sourceFilename + ":" + functionName);
