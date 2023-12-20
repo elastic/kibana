@@ -21,6 +21,7 @@ import {
   isOfQueryType,
   getAggregateQueryMode,
   ExecutionContextSearch,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -740,7 +741,7 @@ export class Embeddable
     }
     const query = this.savedVis?.state.query as unknown as AggregateQuery;
     const language = getAggregateQueryMode(query);
-    return String(language).toUpperCase();
+    return getLanguageDisplayName(language).toUpperCase();
   }
 
   /**
@@ -844,7 +845,11 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfingPanel(
+    startDependencies: LensPluginStartDependencies,
+    isNewPanel?: boolean,
+    deletePanel?: () => void
+  ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -874,6 +879,8 @@ export class Embeddable
           }
           displayFlyoutHeader={true}
           canEditTextBasedQuery={this.isTextBasedLanguage()}
+          isNewPanel={isNewPanel}
+          deletePanel={deletePanel}
         />
       );
     }
@@ -1253,6 +1260,7 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
+      now: this.deps.data.nowProvider.get().getTime(),
       timeRange:
         input.timeslice !== undefined
           ? {

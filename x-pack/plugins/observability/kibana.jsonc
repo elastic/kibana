@@ -21,6 +21,7 @@
       "dataViewEditor",
       "embeddable",
       "uiActions",
+      "presentationUtil",
       "exploratoryView",
       "features",
       "files",
@@ -29,6 +30,7 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
       "security",
       "share",
@@ -54,7 +56,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "embeddable"
     ],
     "extraPublicDirs": [
       "common"
