@@ -10,12 +10,9 @@ import 'jest-canvas-mock';
 import React, { useState, useCallback } from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { mockGlobals } from '../../../utils/testing';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
 import { CodeEditorMode } from '../types';
-
-mockGlobals();
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,

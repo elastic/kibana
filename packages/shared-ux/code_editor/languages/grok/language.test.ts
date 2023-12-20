@@ -23,12 +23,6 @@ beforeAll(() => {
       dispatchEvent: jest.fn(),
     })),
   });
-  window.ResizeObserver = class ResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-
   registerLanguage(Lang);
 });
 
