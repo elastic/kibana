@@ -100,19 +100,11 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
-<<<<<<< HEAD
-          {!!remainingBudgetFormatted && (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={remainingBudgetFormatted}
-=======
           {errorBudgetTimeRemainingFormatted ? (
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleColor={isSloFailed ? 'danger' : 'success'}
                 title={errorBudgetTimeRemainingFormatted}
->>>>>>> dbedad11df2 (Add error budget remaining in time unit)
                 titleSize="s"
                 description={i18n.translate(
                   'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
@@ -121,11 +113,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
                 reverse
               />
             </EuiFlexItem>
-<<<<<<< HEAD
-          )}
-=======
           ) : null}
->>>>>>> dbedad11df2 (Add error budget remaining in time unit)
         </EuiFlexGroup>
 
         <EuiFlexItem>
