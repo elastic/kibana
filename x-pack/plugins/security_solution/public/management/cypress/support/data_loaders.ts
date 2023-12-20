@@ -412,7 +412,7 @@ ${s1Info.status}
                   log,
                   kbnClient,
                 });
-            await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
+            await waitForEndpointToStreamData(kbnClient, newHost.agentId, newHost.hostname, 360000);
             return newHost;
           } catch (err) {
             log.info(`Caught error when setting up the agent: ${err}`);

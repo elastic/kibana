@@ -59,8 +59,6 @@ import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
-import { fetchEndpointMetadataList } from './endpoint_metadata_services';
-import type { HostInfo } from '../../../common/endpoint/types';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
@@ -164,15 +162,13 @@ export const fetchFleetAgents = async (
  * @param hostname
  * @param timeoutMs
  * @param esClient
- * @param awaitMetadata
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   log: ToolingLog,
   hostname: string,
   timeoutMs: number = 30000,
-  esClient: Client | undefined = undefined,
-  awaitMetadata = false
+  esClient: Client | undefined = undefined
 ): Promise<Agent> => {
   log.info(`Waiting for host [${hostname}] to enroll with fleet`);
 
@@ -218,66 +214,11 @@ export const waitForHostToEnroll = async (
   log.debug(`Host [${hostname}] has been enrolled with fleet`);
   log.verbose(found);
 
-  if (!awaitMetadata) {
-    return found;
-  }
-  log.info('Querying indices');
-
-  log.verbose(
-    JSON.stringify(
-      await esClient?.search({
-        index: [
-          '.fleet-agents',
-          'metrics-endpoint.metadata_current_default',
-          '.metrics-endpoint.metadata_united_default',
-        ],
-      }),
-      null,
-      2
-    )
-  );
-  log.debug('Successfully queried indices.');
-
-  log.info(`Awaiting host to show up in Metadata`);
-
-  const metadataLookupStartedTime = new Date();
-  const hasTimedOutMetadataLookup = (): boolean => {
-    const elapsedTime = Date.now() - metadataLookupStartedTime.getTime();
-    return elapsedTime > timeoutMs;
-  };
-  let metadataFound: HostInfo | undefined;
-
-  while (!metadataFound && !hasTimedOutMetadataLookup()) {
-    metadataFound = await retryOnError(
-      async () =>
-        fetchEndpointMetadataList(kbnClient, {
-          kuery: `united.endpoint.agent.id:  "${agentId}" or united.endpoint.host.hostname: "${hostname}"`,
-        }).then((response) => {
-          return response.data.filter(
-            (record) =>
-              record.metadata.host.hostname === hostname && record.host_status === 'healthy'
-          )[0];
-        }),
-      RETRYABLE_TRANSIENT_ERRORS
-    );
-
-    if (!metadataFound) {
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-  }
-
-  if (!metadataFound) {
-    throw Object.assign(
-      new Error(
-        `Timed out waiting for host [${hostname}] to show up in Metadata. Waited ${
-          timeoutMs / 1000
-        } seconds`
-      ),
-      { agentId, hostname }
-    );
-  }
-
-  log.info(`Host [${hostname}] is healthy.`);
+  // Workaround for united metadata sometimes being unable to find docs in .fleet-agents index. This
+  // seems to be a timing issue with the index refresh.
+  await esClient?.search({
+    index: AGENTS_INDEX,
+  });
 
   return found;
 };

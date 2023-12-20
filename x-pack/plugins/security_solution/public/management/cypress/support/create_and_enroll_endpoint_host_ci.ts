@@ -131,8 +131,7 @@ export const createAndEnrollEndpointHostCI = async ({
     log,
     hostVm.name,
     5 * 60 * 1000,
-    esClient,
-    true
+    esClient
   );
 
   return {

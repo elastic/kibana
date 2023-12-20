@@ -10,6 +10,10 @@ import type { KbnClient } from '@kbn/test';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
@@ -148,11 +152,13 @@ const fetchLastStreamedEndpointUpdate = async (
  * Endpoint Details API (transform destination index)
  * @param kbnClient
  * @param endpointAgentId
+ * @param endpointHostname
  * @param timeoutMs
  */
 export const waitForEndpointToStreamData = async (
   kbnClient: KbnClient,
   endpointAgentId: string,
+  endpointHostname: string,
   timeoutMs: number = 60000
 ): Promise<HostInfo> => {
   const started = new Date();
@@ -163,15 +169,18 @@ export const waitForEndpointToStreamData = async (
   let found: HostInfo | undefined;
 
   while (!found && !hasTimedOut()) {
-    found = await fetchEndpointMetadata(kbnClient, endpointAgentId).catch((error) => {
-      // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
-      // been streamed yet.
-      if (error?.response?.status === 404) {
-        return undefined;
-      }
-
-      throw error;
-    });
+    found = await retryOnError(
+      async () =>
+        fetchEndpointMetadataList(kbnClient, {
+          kuery: `united.endpoint.agent.id:  "${endpointAgentId}" or united.endpoint.host.hostname: "${endpointAgentId}"`,
+        }).then((response) => {
+          return response.data.filter(
+            (record) =>
+              record.metadata.host.hostname === endpointHostname && record.host_status === 'healthy'
+          )[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
 
     if (!found) {
       // sleep and check again
