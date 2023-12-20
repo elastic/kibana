@@ -20,13 +20,13 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import type { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
