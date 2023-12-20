@@ -61,7 +61,6 @@ export function createFrameGroupID(
     return `elf;${fileID};${functionName}`;
   }
 
-  console.log(sourceFilename + ":" + functionName)
   if(sourceFilename === "clone3.S") {
     console.log(functionName)
   }
