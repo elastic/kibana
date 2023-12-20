@@ -7,7 +7,7 @@
 
 import { createRule } from './create_rule';
 
-export const createApmFailedTransactionRateRule = async (actionId: string) => {
+export const createApmFailedTransactionRateRule = async (actionId: string, serviceEnvironment = "rule-test") => {
   const apmErrorRateRuleParams = {
     tags: ['apm'],
     consumer: 'apm',
@@ -22,7 +22,7 @@ export const createApmFailedTransactionRateRule = async (actionId: string) => {
       environment: 'ENVIRONMENT_ALL',
       searchConfiguration: {
         query: {
-          query: 'service.environment: "rule-test"',
+          query: `service.environment: "${serviceEnvironment}"`,
           language: 'kuery',
         },
       },
