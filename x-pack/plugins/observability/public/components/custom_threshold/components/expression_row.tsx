@@ -325,4 +325,13 @@ export const aggregationType: { [key: string]: AggregationType } = {
     value: Aggregators.P99,
     validNormalizedTypes: ['number', 'histogram'],
   },
+  rate: {
+    text: i18n.translate(
+      'xpack.observability..customThreshold.rule.alertFlyout.aggregationText.rate',
+      { defaultMessage: '' }
+    ),
+    fieldRequired: false,
+    value: Aggregators.RATE,
+    validNormalizedTypes: ['number'],
+  },
 };
