@@ -28,7 +28,7 @@ import { timelineActions, timelineSelectors } from '../../../store';
 import { appActions } from '../../../../common/store/app';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -121,14 +121,6 @@ function useDeleteNote(noteId: string | null | undefined, eventId: string | null
             id: noteId,
           })
         );
-        if (eventId) {
-          dispatch(
-            timelineActions.unPinEvent({
-              id: TimelineId.active,
-              eventId,
-            })
-          );
-        }
       }
     },
     onError: (err: string) => {
