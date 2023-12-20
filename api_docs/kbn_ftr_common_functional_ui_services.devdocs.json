@@ -1,0 +1,143 @@
+{
+  "id": "@kbn/ftr-common-functional-ui-services",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.FtrProviderContext",
+        "type": "Type",
+        "tags": [],
+        "label": "FtrProviderContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.GenericFtrProviderContext",
+            "text": "GenericFtrProviderContext"
+          },
+          "<{ retryOnStale: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; }, {}, ProvidedTypeMap<{ retryOnStale: ({ getService }: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; }>, ProvidedTypeMap<{}>>"
+        ],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/ftr_provider_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.services",
+        "type": "Object",
+        "tags": [],
+        "label": "services",
+        "description": [],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.services.retryOnStale",
+            "type": "Function",
+            "tags": [],
+            "label": "retryOnStale",
+            "description": [],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.services.retryOnStale.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; }, {}, ProvidedTypeMap<{ retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/retry_on_stale.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

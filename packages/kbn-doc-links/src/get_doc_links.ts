@@ -39,6 +39,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
   const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
+  const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
@@ -316,7 +317,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
     },
     indexPatterns: {
-      introduction: `${KIBANA_DOCS}data-views.html`,
+      introduction: isServerless ? `${SERVERLESS_DOCS}data-views` : `${KIBANA_DOCS}data-views.html`,
       fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
       fieldFormattersString: `${KIBANA_DOCS}managing-data-views.html#string-field-formatters`,
       runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
@@ -486,7 +487,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     management: {
       dashboardSettings: `${KIBANA_DOCS}advanced-options.html#kibana-dashboard-settings`,
-      indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
+      indexManagement: isServerless
+        ? `${SERVERLESS_DOCS}index-management`
+        : `${ELASTICSEARCH_DOCS}index-mgmt.html`,
       kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
       discoverSettings: `${KIBANA_DOCS}advanced-options.html#kibana-discover-settings`,
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
@@ -529,7 +532,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {
-      guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+      guide: isServerless ? `${SERVERLESS_DOCS}transforms` : `${ELASTICSEARCH_DOCS}transforms.html`,
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
@@ -562,8 +565,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       sloBurnRateRule: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/slo-burn-rate-alert.html`,
     },
     alerting: {
-      guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
-      actionTypes: `${KIBANA_DOCS}action-types.html`,
+      guide: isServerless
+        ? `${SERVERLESS_DOCS}rules`
+        : `${KIBANA_DOCS}create-and-manage-rules.html`,
+      actionTypes: isServerless
+        ? `${SERVERLESS_DOCS}action-connectors`
+        : `${KIBANA_DOCS}action-types.html`,
       apmRules: `${KIBANA_DOCS}apm-alerts.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
@@ -573,7 +580,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexAction: `${KIBANA_DOCS}index-action-type.html`,
       esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
       indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
-      maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
+      maintenanceWindows: isServerless
+        ? `${SERVERLESS_DOCS}maintenance-windows`
+        : `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
       preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
@@ -590,7 +599,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     maps: {
       connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
-      guide: `${KIBANA_DOCS}maps.html`,
+      guide: isServerless ? `${SERVERLESS_DOCS}maps` : `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
       termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
@@ -662,6 +671,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
       executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
       indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
+      inferTrainedModel: `${ELASTICSEARCH_DOCS}infer-trained-model.html`,
       multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
       openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
       putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
@@ -730,7 +740,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       kv: `${ELASTICSEARCH_DOCS}kv-processor.html`,
       lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
       pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
-      pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
+      pipelines: isServerless
+        ? `${SERVERLESS_DOCS}ingest-pipelines`
+        : `${ELASTICSEARCH_DOCS}ingest.html`,
       csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${DOC_LINK_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
       processors: `${ELASTICSEARCH_DOCS}processors.html`,
@@ -770,7 +782,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
-      apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
+      apiKeysLearnMore: isServerless ? `${SERVERLESS_DOCS}api-keys` : `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
       packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,

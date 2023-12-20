@@ -19,6 +19,7 @@ import { getRuleExecutionStatusPendingAttributes } from '../../lib/rule_executio
 import { isDetectionEngineAADRuleType } from '../../saved_objects/migrations/utils';
 import { createNewAPIKeySet, createRuleSavedObject } from '../lib';
 import { RulesClientContext } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export type CloneArguments = [string, { newId?: string }];
 
@@ -33,9 +34,13 @@ export async function clone<Params extends RuleTypeParams = never>(
     ruleSavedObject = await withSpan(
       { name: 'encryptedSavedObjectsClient.getDecryptedAsInternalUser', type: 'rules' },
       () =>
-        context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-          namespace: context.namespace,
-        })
+        context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+          RULE_SAVED_OBJECT_TYPE,
+          id,
+          {
+            namespace: context.namespace,
+          }
+        )
     );
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
@@ -45,7 +50,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     // Still attempt to load the object using SOC
     ruleSavedObject = await withSpan(
       { name: 'unsecuredSavedObjectsClient.get', type: 'rules' },
-      () => context.unsecuredSavedObjectsClient.get<RawRule>('alert', id)
+      () => context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id)
     );
   }
 
@@ -80,7 +85,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -125,7 +130,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     ruleAuditEvent({
       action: RuleAuditAction.CREATE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
