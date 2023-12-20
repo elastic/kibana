@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FindSLOResponse } from '@kbn/slo-schema';
 import { SLOViewSettings } from './slo_view_settings';
 
 export type SLOView = 'cardView' | 'listView';
@@ -17,6 +19,7 @@ interface Props {
   onChangeView: (view: SLOView) => void;
   isCompact: boolean;
   sloView: SLOView;
+  sloList?: FindSLOResponse;
 }
 
 const toggleButtonsIcons = [
@@ -39,10 +42,18 @@ export function ToggleSLOView({
   onChangeView,
   onToggleCompactView,
   isCompact = true,
+  sloList,
 }: Props) {
+  const total = sloList?.total ?? 0;
+  const pageSize = sloList?.perPage ?? 0;
+  const pageIndex = sloList?.page ?? 1;
+
+  const rangeStart = (total === 0 ? 0 : pageSize * (pageIndex - 1)) + 1;
+  const rangeEnd = Math.min(total, pageSize * (pageIndex - 1) + pageSize);
+
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonGroup
           legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
             defaultMessage: 'SLO View',
@@ -52,6 +63,26 @@ export function ToggleSLOView({
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.observability.overview.pagination.description"
+            defaultMessage="Showing {currentCount} of {total} {slos}"
+            values={{
+              currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
+              total,
+              slos: (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.observability.overview.slos.label"
+                    defaultMessage="SLOs"
+                  />
+                </strong>
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />

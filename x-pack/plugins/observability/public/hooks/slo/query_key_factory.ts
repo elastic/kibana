@@ -14,6 +14,7 @@ interface SloListFilter {
   sortBy: string;
   sortDirection: string;
   filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {

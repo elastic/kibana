@@ -6,18 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { HeaderTitle } from './components/header_title';
-import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
@@ -28,7 +24,6 @@ export function SlosPage() {
     http: { basePath },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
   const { isLoading, isError, data: sloList } = useFetchSloList();
@@ -50,32 +45,8 @@ export function SlosPage() {
     }
   }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
 
-  const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
-  };
-
   return (
-    <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: <HeaderTitle />,
-        rightSideItems: [
-          <EuiButton
-            color="primary"
-            data-test-subj="slosPageCreateNewSloButton"
-            disabled={!hasWriteCapabilities}
-            fill
-            onClick={handleClickCreateSlo}
-          >
-            {i18n.translate('xpack.observability.slo.sloList.pageHeader.createNewButtonLabel', {
-              defaultMessage: 'Create new SLO',
-            })}
-          </EuiButton>,
-          <FeedbackButton />,
-        ],
-        bottomBorder: false,
-      }}
-      data-test-subj="slosPage"
-    >
+    <ObservabilityPageTemplate data-test-subj="slosPage">
       <HeaderMenu />
       <SloOutdatedCallout />
       <SloList />

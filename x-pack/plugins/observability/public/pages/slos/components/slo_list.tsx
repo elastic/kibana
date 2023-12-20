@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React from 'react';
+import { CreateSloBtn } from './common/create_slo_btn';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
@@ -30,8 +31,7 @@ export function SloList() {
     kqlQuery,
     sortBy: state.sort.by,
     sortDirection: state.sort.direction,
-    shouldRefetch: !state.isPaused,
-    refetchInterval: state.refreshInterval,
+    lastRefresh: state.lastRefresh,
   });
 
   const { results = [], total = 0 } = sloList ?? {};
@@ -48,16 +48,24 @@ export function SloList() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
-        <SloListSearchBar
-          query={kqlQuery}
-          filters={filters}
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
-          onStateChange={onStateChange}
-          initialState={state}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={true}>
+            <SloListSearchBar
+              query={kqlQuery}
+              filters={filters}
+              loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+              onStateChange={onStateChange}
+              initialState={state}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CreateSloBtn />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ToggleSLOView
+          sloList={sloList}
           sloView={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
           onToggleCompactView={() => onStateChange({ compact: !isCompact })}

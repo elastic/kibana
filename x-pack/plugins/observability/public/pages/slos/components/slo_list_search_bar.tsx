@@ -8,10 +8,11 @@
 import { EuiSelectableOption } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
 import { Filter } from '@kbn/es-query';
 import styled from 'styled-components';
+import { useKibana } from '../../../utils/kibana_react';
+import { ObservabilityPublicPluginsStart } from '../../..';
 import { SortBySelect } from './common/sort_by_select';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
@@ -41,9 +42,16 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   });
 
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana<ObservabilityPublicPluginsStart>().services;
+
   return (
     <Container>
       <SearchBar
+        appName="observability"
         placeholder={i18n.translate('xpack.observability.slo.list.search', {
           defaultMessage: 'Search your SLOs...',
         })}
@@ -61,18 +69,14 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
           onStateChange({ filters: newFilters });
         }}
         onQuerySubmit={({ query: value }) => {
-          onStateChange({ kqlQuery: String(value?.query) });
+          onStateChange({ kqlQuery: String(value?.query), lastRefresh: Date.now() });
         }}
         query={{ query: String(query), language: 'kuery' }}
-        showSubmitButton={false}
-        showAutoRefreshOnly={true}
-        refreshInterval={initialState.refreshInterval}
-        isRefreshPaused={initialState.isPaused}
-        onRefreshChange={(val) => {
-          onStateChange({ ...val });
-        }}
+        showSubmitButton={true}
+        showDatePicker={false}
         onQueryChange={(value) => onStateChange({ kqlQuery: String(value?.query) })}
         submitOnBlur={true}
+        showQueryInput={true}
       />
     </Container>
   );
@@ -81,8 +85,5 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
 const Container = styled.div`
   .uniSearchBar {
     padding: 0;
-    .kbnQueryBar {
-      padding-bottom: 8px;
-    }
   }
 `;

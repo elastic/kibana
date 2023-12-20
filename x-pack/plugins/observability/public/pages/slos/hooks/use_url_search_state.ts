@@ -27,8 +27,7 @@ export interface SearchState {
   view: SLOView;
   compact: boolean;
   filters: Filter[];
-  isPaused?: boolean;
-  refreshInterval?: number;
+  lastRefresh?: number;
 }
 
 export const DEFAULT_STATE = {
@@ -39,8 +38,7 @@ export const DEFAULT_STATE = {
   view: 'cardView' as const,
   compact: true,
   filters: [],
-  isPaused: false,
-  refreshInterval: 60000,
+  lastRefresh: Date.now(),
 };
 
 export function useUrlSearchState(): {
@@ -78,8 +76,12 @@ export function useUrlSearchState(): {
   return {
     state: deepmerge(DEFAULT_STATE, state),
     store: (newState: Partial<SearchState>) =>
-      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, deepmerge(state, newState), {
-        replace: true,
-      }),
+      urlStateStorage.current?.set(
+        SLO_LIST_SEARCH_URL_STORAGE_KEY,
+        { ...state, ...newState },
+        {
+          replace: true,
+        }
+      ),
   };
 }
