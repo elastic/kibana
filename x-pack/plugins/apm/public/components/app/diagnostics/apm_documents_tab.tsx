@@ -20,7 +20,7 @@ import React, { useMemo, useState } from 'react';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useDataViewId } from '../../../hooks/use_data_view_id';
+import { useStaticDataViewId } from '../../../hooks/use_static_data_view_id';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -28,7 +28,7 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
-  const dataViewId = useDataViewId();
+  const dataViewId = useStaticDataViewId();
 
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');

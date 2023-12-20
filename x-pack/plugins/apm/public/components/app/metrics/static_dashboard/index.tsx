@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { NotificationsStart } from '@kbn/core/public';
-import { useDataViewId } from '../../../../hooks/use_data_view_id';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -32,7 +31,6 @@ import { convertObjectToPanels, MetricsDashboardProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  // const dataViewId = useDataViewId();
   const { dataView } = dashboardProps;
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -41,8 +39,6 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
-
-  // const { dataView } = useAdHocApmDataView();
 
   const { serviceName } = useApmServiceContext();
 

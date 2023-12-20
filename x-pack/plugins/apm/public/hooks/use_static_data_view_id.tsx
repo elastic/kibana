@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { getDataViewId } from '../../common/data_view_constants';
 import { ApmPluginStartDeps } from '../plugin';
 
-export function useDataViewId() {
+export function useStaticDataViewId() {
   const [dataViewId, setDataViewId] = useState<string>(
     getDataViewId('default')
   );

@@ -12,7 +12,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import rison from '@kbn/rison';
 import url from 'url';
-import { useDataViewId } from '../../../../hooks/use_data_view_id';
+import { useStaticDataViewId } from '../../../../hooks/use_static_data_view_id';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';
 
@@ -64,7 +64,7 @@ export const getDiscoverHref = ({
 export function DiscoverLink({ query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
-  const dataViewId = useDataViewId();
+  const dataViewId = useStaticDataViewId();
 
   const href = getDiscoverHref({
     basePath: core.http.basePath,
