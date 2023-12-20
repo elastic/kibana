@@ -61,6 +61,9 @@ export function LensEditConfigurationFlyout({
   navigateToLensEditor,
   displayFlyoutHeader,
   canEditTextBasedQuery,
+  isNewPanel,
+  deletePanel,
+  hidesSuggestions,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -164,18 +167,23 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
+    // for a newly created chart, I want cancelling to also remove the panel
+    if (isNewPanel && deletePanel) {
+      deletePanel();
+    }
     closeFlyout?.();
   }, [
-    previousAttributes,
     attributesChanged,
+    isNewPanel,
+    deletePanel,
     closeFlyout,
+    visualization.activeId,
+    savedObjectId,
     datasourceMap,
     datasourceId,
     updatePanelState,
     updateSuggestion,
-    savedObjectId,
     updateByRefInput,
-    visualization,
   ]);
 
   const onApply = useCallback(() => {
@@ -267,8 +275,8 @@ export function LensEditConfigurationFlyout({
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
-  // Example is the Discover editing where we dont want to render the text based editor on the panel
-  if (!canEditTextBasedQuery) {
+  // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
+  if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
@@ -278,6 +286,7 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isScrollable={true}
         attributesChanged={attributesChanged}
+        isNewPanel={isNewPanel}
       >
         <LayerConfiguration
           getUserMessages={getUserMessages}
@@ -304,8 +313,9 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         attributesChanged={attributesChanged}
-        language={getLanguageDisplayName(textBasedMode)}
+        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
         isScrollable={false}
+        isNewPanel={isNewPanel}
       >
         <EuiFlexGroup
           css={css`
@@ -335,7 +345,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          {isOfAggregateQueryType(query) && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
               <TextBasedLangEditor
                 query={query}
