@@ -16,39 +16,27 @@ import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
 
 import type {
-  MatrixHistogramProps,
   MatrixHistogramOption,
   MatrixHistogramQueryProps,
-  GetTitle,
-  GetSubTitle,
+  MatrixHistogramConfigs,
 } from './types';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import type {
-  GetLensAttributes,
-  LensAttributes,
-  VisualizationResponse,
-} from '../visualization_actions/types';
+import type { VisualizationResponse } from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
 
-export type MatrixHistogramComponentProps = MatrixHistogramProps &
-  Omit<MatrixHistogramQueryProps, 'stackByField'> & {
-    defaultStackByOption: MatrixHistogramOption;
-    getLensAttributes?: GetLensAttributes;
+export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
+  MatrixHistogramConfigs & {
     headerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     id: string;
-    lensAttributes?: LensAttributes;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
-    stackByOptions: MatrixHistogramOption[];
-    subtitle?: string | GetSubTitle;
     sourcererScopeId?: SourcererScopeName;
-    title: string | GetTitle;
     hideQueryToggle?: boolean;
     applyGlobalQueriesAndFilters?: boolean;
   };
