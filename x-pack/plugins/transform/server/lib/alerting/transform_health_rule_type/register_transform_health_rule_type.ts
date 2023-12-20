@@ -14,10 +14,10 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
@@ -77,7 +77,7 @@ export function getTransformHealthRuleType(
   TransformHealthAlertContext,
   TransformIssue,
   RecoveredActionGroupId,
-  Alert
+  DefaultAlert
 > {
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
@@ -122,7 +122,7 @@ export function getTransformHealthRuleType(
       } = options;
 
       if (!alertsClient) {
-        throw new Error(`no alerts client`);
+        throw new AlertsClientError();
       }
 
       const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(

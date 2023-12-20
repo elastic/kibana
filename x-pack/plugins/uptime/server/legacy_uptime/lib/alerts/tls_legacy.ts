@@ -10,7 +10,11 @@ import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { DEFAULT_AAD_CONFIG, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import {
+  AlertsClientError,
+  DEFAULT_AAD_CONFIG,
+  GetViewInAppRelativeUrlFnOpts,
+} from '@kbn/alerting-plugin/server';
 import { LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
@@ -118,7 +122,7 @@ export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> =
   alerts: DEFAULT_AAD_CONFIG,
   async executor({ services: { alertsClient, scopedClusterClient, savedObjectsClient }, state }) {
     if (!alertsClient) {
-      throw new Error(`no alerts client`);
+      throw new AlertsClientError();
     }
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 

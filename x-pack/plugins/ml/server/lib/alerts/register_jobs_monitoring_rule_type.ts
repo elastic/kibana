@@ -19,8 +19,9 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -93,7 +94,7 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   Record<string, unknown>,
   AnomalyDetectionJobsHealthAlertContext,
   AnomalyDetectionJobRealtimeIssue,
-  Alert
+  DefaultAlert
 >;
 
 export function registerJobsMonitoringRuleType({
@@ -109,7 +110,7 @@ export function registerJobsMonitoringRuleType({
     AnomalyDetectionJobsHealthAlertContext,
     AnomalyDetectionJobRealtimeIssue,
     RecoveredActionGroupId,
-    Alert
+    DefaultAlert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
@@ -155,7 +156,7 @@ export function registerJobsMonitoringRuleType({
       const { alertsClient } = services;
 
       if (!alertsClient) {
-        throw new Error('no alerts client');
+        throw new AlertsClientError();
       }
 
       const fakeRequest = {} as KibanaRequest;

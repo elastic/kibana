@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { BaseContext, BaseRule } from './base_rule';
@@ -91,7 +91,7 @@ export class LogstashVersionMismatchRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
@@ -123,7 +123,7 @@ export class LogstashVersionMismatchRule extends BaseRule<Context> {
       state.ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
-    services.alertsClient.setAlertData({
+    services.alertsClient?.setAlertData({
       id: alertId,
       context: {
         internalShortMessage: i18n.translate(

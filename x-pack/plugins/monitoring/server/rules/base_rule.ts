@@ -7,7 +7,7 @@
 
 import { Logger, ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import {
   RuleType,
   RuleNotifyWhen,
@@ -15,6 +15,7 @@ import {
   RulesClient,
   RuleExecutorServices,
   DEFAULT_AAD_CONFIG,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import {
   Rule,
@@ -94,7 +95,16 @@ export class BaseRule<Context extends AlertInstanceContext> {
     this.scopedLogger = Globals.app.getLogger(ruleOptions.id);
   }
 
-  public getRuleType(): RuleType<never, never, never, never, Context, 'default', never, AlertType> {
+  public getRuleType(): RuleType<
+    never,
+    never,
+    never,
+    never,
+    Context,
+    'default',
+    never,
+    DefaultAlert
+  > {
     const { id, name, actionVariables } = this.ruleOptions;
     return {
       id,
@@ -117,7 +127,7 @@ export class BaseRule<Context extends AlertInstanceContext> {
           AlertInstanceState,
           Context,
           'default',
-          AlertType
+          DefaultAlert
         > & {
           state: ExecutedState;
         }
@@ -254,7 +264,7 @@ export class BaseRule<Context extends AlertInstanceContext> {
     services,
     params,
     state,
-  }: RuleExecutorOptions<never, never, AlertInstanceState, Context, 'default', AlertType> & {
+  }: RuleExecutorOptions<never, never, AlertInstanceState, Context, 'default', DefaultAlert> & {
     state: ExecutedState;
   }): Promise<any> {
     this.scopedLogger.debug(
@@ -263,7 +273,7 @@ export class BaseRule<Context extends AlertInstanceContext> {
 
     const { alertsClient } = services;
     if (!alertsClient) {
-      throw new Error(`no alerts client`);
+      throw new AlertsClientError();
     }
 
     const esClient = services.scopedClusterClient.asCurrentUser;
@@ -299,7 +309,7 @@ export class BaseRule<Context extends AlertInstanceContext> {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -378,7 +388,7 @@ export class BaseRule<Context extends AlertInstanceContext> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     alertId: string,
     alertState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,

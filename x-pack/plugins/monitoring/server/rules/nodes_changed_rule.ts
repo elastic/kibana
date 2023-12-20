@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { BaseContext, BaseRule } from './base_rule';
@@ -181,7 +181,7 @@ export class NodesChangedRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
@@ -206,7 +206,7 @@ export class NodesChangedRule extends BaseRule<Context> {
     const added = states.added.map((node) => node.nodeName).join(',');
     const removed = states.removed.map((node) => node.nodeName).join(',');
     const restarted = states.restarted.map((node) => node.nodeName).join(',');
-    services.alertsClient.setAlertData({
+    services.alertsClient?.setAlertData({
       id: alertId,
       context: {
         internalShortMessage: i18n.translate(

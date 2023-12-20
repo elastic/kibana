@@ -6,7 +6,7 @@
  */
 
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import type {
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
@@ -22,7 +22,7 @@ export function getEntitiesAndGenerateAlerts(
     GeoContainmentAlertInstanceState,
     GeoContainmentAlertInstanceContext,
     typeof ActionGroupId,
-    Alert
+    DefaultAlert
   >['alertsClient'],
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date

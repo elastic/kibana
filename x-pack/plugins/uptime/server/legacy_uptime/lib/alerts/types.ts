@@ -12,7 +12,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
@@ -47,5 +47,5 @@ export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
   AlertInstanceContext,
   TActionGroupIds,
   RecoveredActionGroupId,
-  Alert
+  DefaultAlert
 >;

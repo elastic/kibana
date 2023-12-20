@@ -7,9 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
-import { DEFAULT_AAD_CONFIG, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
+import {
+  DEFAULT_AAD_CONFIG,
+  RuleType,
+  RuleTypeState,
+  AlertsClientError,
+} from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -53,7 +58,7 @@ export const ruleType: RuleType<
   never,
   AlwaysFiringActionGroupIds,
   never,
-  Alert
+  DefaultAlert
 > = {
   id: 'example.always-firing',
   name: 'Always firing',
@@ -72,7 +77,7 @@ export const ruleType: RuleType<
   }) {
     const { alertsClient } = services;
     if (!alertsClient) {
-      throw new Error(`no alerts client`);
+      throw new AlertsClientError();
     }
     const count = (state.count ?? 0) + 1;
 

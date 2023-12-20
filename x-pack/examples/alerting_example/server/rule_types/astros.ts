@@ -11,9 +11,10 @@ import {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -66,7 +67,7 @@ export const ruleType: RuleType<
   never,
   'default',
   'hasLandedBackOnEarth',
-  Alert
+  DefaultAlert
 > = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
@@ -81,7 +82,7 @@ export const ruleType: RuleType<
   async executor({ services, params }) {
     const { alertsClient } = services;
     if (!alertsClient) {
-      throw new Error(`no alerts client`);
+      throw new AlertsClientError();
     }
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 

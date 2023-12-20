@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
@@ -38,10 +39,10 @@ export async function executor({
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
   typeof ActionGroupId,
-  Alert
+  DefaultAlert
 >): Promise<{ state: GeoContainmentRuleState }> {
   if (!services.alertsClient) {
-    throw new Error(`no alerts client`);
+    throw new AlertsClientError();
   }
   const boundariesRequestMeta = {
     geoField: params.geoField,

@@ -22,6 +22,7 @@ describe('pattern rule type', () => {
     const options = {
       params,
       state,
+      services: { alertsClient: {} },
     };
     try {
       await ruleType.executor(options as any);

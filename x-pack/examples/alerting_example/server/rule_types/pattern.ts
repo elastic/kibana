@@ -11,8 +11,9 @@ import {
   RuleTypeState,
   RuleExecutorOptions as BaseRuleExecutorOptions,
   DEFAULT_AAD_CONFIG,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
 
 type Params = TypeOf<typeof Params>;
@@ -44,7 +45,7 @@ interface State extends RuleTypeState {
   runs?: number;
 }
 
-type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default', Alert>;
+type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default', DefaultAlert>;
 
 type RuleType = BaseRuleType<
   Params,
@@ -54,7 +55,7 @@ type RuleType = BaseRuleType<
   {},
   'default',
   RecoveredActionGroupId,
-  Alert
+  DefaultAlert
 >;
 export const ruleType: RuleType = getPatternRuleType();
 
@@ -80,7 +81,7 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
   const { services, state, params } = options;
   const { alertsClient } = services;
   if (!alertsClient) {
-    throw new Error(`no alerts client`);
+    throw new AlertsClientError();
   }
 
   if (state.runs == null) {

@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseContext, BaseRule } from './base_rule';
@@ -147,7 +147,7 @@ export class LicenseExpirationRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
@@ -166,7 +166,7 @@ export class LicenseExpirationRule extends BaseRule<Context> {
     });
     const action = `[${actionText}](elasticsearch/nodes)`;
     const expiredDate = $duration.humanize();
-    services.alertsClient.setAlertData({
+    services.alertsClient?.setAlertData({
       id: alertId,
       context: {
         internalShortMessage: i18n.translate(

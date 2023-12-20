@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { Rule, RawAlertInstance, AlertInstanceState } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { BaseContext, BaseRule } from './base_rule';
@@ -182,7 +182,7 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule<Context> {
     };
   }
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', AlertType>,
+    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
     alertId: string,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
@@ -250,7 +250,7 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule<Context> {
       }
     );
 
-    services.alertsClient.setAlertData({
+    services.alertsClient?.setAlertData({
       id: alertId,
       context: {
         internalShortMessage,
