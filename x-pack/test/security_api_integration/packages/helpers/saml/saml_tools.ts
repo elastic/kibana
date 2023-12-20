@@ -28,6 +28,7 @@ const parseStringAsync = promisify(parseString);
 
 const signingKey = fs.readFileSync(KBN_KEY_PATH);
 const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
+const canonicalizationAlgorithm = 'http://www.w3.org/2001/10/xml-exc-c14n#';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
   const inflatedSAMLRequest = (await inflateRawAsync(
@@ -85,6 +86,7 @@ export async function getSAMLResponse({
 
   const signature = new SignedXml({ privateKey: signingKey });
   signature.signatureAlgorithm = signatureAlgorithm;
+  signature.canonicalizationAlgorithm = canonicalizationAlgorithm;
 
   // Adds a reference to a `Assertion` xml element and an array of transform algorithms to be used during signing.
   signature.addReference({

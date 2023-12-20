@@ -151,6 +151,7 @@ export async function createSAMLResponse(options: {
 
   const signature = new SignedXml({ privateKey: await readFile(KBN_KEY_PATH) });
   signature.signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
+  signature.canonicalizationAlgorithm = 'http://www.w3.org/2001/10/xml-exc-c14n#';
 
   // Adds a reference to a `Assertion` xml element and an array of transform algorithms to be used during signing.
   signature.addReference({
