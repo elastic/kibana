@@ -14,6 +14,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "./emotion.d.ts", // Emotion EUI theme typing
   ],
   "exclude": [
     "target/**/*"

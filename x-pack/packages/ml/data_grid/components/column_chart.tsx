@@ -6,40 +6,27 @@
  */
 
 import React, { type FC } from 'react';
-import { css } from '@emotion/react';
 
 import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
-import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
-
-import { euiThemeVars } from '@kbn/ui-theme';
+import { mathWithUnits, type UseEuiTheme, type EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isUnsupportedChartData, ChartData } from '../lib/field_histograms';
 
 import { useColumnChart } from '../hooks/use_column_chart';
 
-const cssHistogram = css({
+const cssHistogram = ({ euiTheme }: UseEuiTheme) => ({
   width: '100%',
-  height: `calc(${euiThemeVars.euiSizeXL} + ${euiThemeVars.euiSizeXXL})`,
+  height: mathWithUnits([euiTheme.size.xl, euiTheme.size.xxl], (x, y) => x + y),
 });
 
-const cssHistogramLegend = css([
-  css`
-    ${euiTextTruncate()}
-  `,
-  {
-    color: euiThemeVars.euiColorMediumShade,
-    display: 'block',
-    overflowX: 'hidden',
-    margin: `${euiThemeVars.euiSizeXS} 0 0 0`,
-    fontSize: euiThemeVars.euiFontSizeXS,
+const cssHistogramLegend = ({ euiTheme }: UseEuiTheme) =>
+  ({
+    color: euiTheme.colors.mediumShade,
+    marginTop: euiTheme.size.xs,
     fontStyle: 'italic',
     fontWeight: 'normal',
-    textAlign: 'left',
-  },
-]);
-
-const cssHistogramLegendNumeric = css([cssHistogramLegend, { textAlign: 'right' }]);
+  } as const);
 
 interface Props {
   chartData: ChartData;
@@ -100,12 +87,17 @@ export const ColumnChart: FC<Props> = ({
         </div>
       )}
       <div
-        css={columnType.schema === 'number' ? cssHistogramLegendNumeric : cssHistogramLegend}
+        className="eui-textTruncate"
+        css={cssHistogramLegend}
         data-test-subj={`${dataTestSubj}-legend`}
       >
         {legendText}
       </div>
-      {!hideLabel && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
+      {!hideLabel && (
+        <div data-test-subj={`${dataTestSubj}-id`} className="eui-textTruncate histogramLabel">
+          {columnType.id}
+        </div>
+      )}
     </div>
   );
 };
