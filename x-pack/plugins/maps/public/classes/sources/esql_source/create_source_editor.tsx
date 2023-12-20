@@ -57,7 +57,7 @@ export function CreateSourceEditor(props: Props) {
             } else if (initialDateFields.length) {
               initialDateField = initialDateFields[0];
             }
-            const initialEsql = `from ${dataView.getIndexPattern()} | KEEP ${geoField} | limit 10000`;
+            const initialEsql = `from ${dataView.getIndexPattern()} | keep ${geoField} | limit 10000`;
             setDateField(initialDateField);
             setEsql(initialEsql);
             props.onSourceConfigChange({
