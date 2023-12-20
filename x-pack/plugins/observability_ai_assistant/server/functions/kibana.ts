@@ -65,6 +65,9 @@ export function registerKibanaFunction({
         query,
       };
 
+      resources.logger.info(JSON.stringify(request.url));
+      resources.logger.info(JSON.stringify(request.headers, null));
+
       return axios({
         method,
         headers: pick(
@@ -75,7 +78,10 @@ export function registerKibanaFunction({
           'kbn-build-number',
           'x-kbn-context',
           'referer',
-          'cookie'
+          'cookie',
+          'authorization',
+          'origin',
+          'sec-ch-ua'
         ),
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
