@@ -478,10 +478,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
-  const allPipesAreInNewLine = useMemo(() => {
+  const linesBreaksButtonsStatus = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
-    return pipes?.length === pipesWithNewLine?.length;
+    return {
+      addLineBreaksDisabled: pipes?.length === pipesWithNewLine?.length,
+      removeLineBreaksDisabled: pipesWithNewLine?.length === 1,
+    };
   }, [code]);
 
   const onResize = ({ width }: { width: number }) => {
@@ -565,7 +568,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       defaultMessage: 'Add line breaks on pipes',
                     }
                   )}
-                  condition={!allPipesAreInNewLine}
+                  condition={!linesBreaksButtonsStatus.addLineBreaksDisabled}
                 >
                   <EuiButtonIcon
                     iconType="pipeBreaks"
@@ -578,7 +581,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         defaultMessage: 'Add line breaks on pipes',
                       }
                     )}
-                    isDisabled={allPipesAreInNewLine}
+                    isDisabled={linesBreaksButtonsStatus.addLineBreaksDisabled}
                     onClick={() => {
                       const updatedCode = getWrappedInPipesCode(code, false);
                       if (code !== updatedCode) {
@@ -597,7 +600,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       defaultMessage: 'Remove line breaks on pipes',
                     }
                   )}
-                  condition={lines !== 1}
+                  condition={!linesBreaksButtonsStatus.removeLineBreaksDisabled}
                 >
                   <EuiButtonIcon
                     iconType="pipeNoBreaks"
@@ -610,7 +613,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         defaultMessage: 'Remove line breaks on pipes',
                       }
                     )}
-                    isDisabled={lines === 1}
+                    isDisabled={linesBreaksButtonsStatus.removeLineBreaksDisabled}
                     onClick={() => {
                       const updatedCode = getWrappedInPipesCode(code, true);
                       if (code !== updatedCode) {
