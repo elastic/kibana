@@ -83,7 +83,6 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 const CommonUseField = getUseField({ component: Field });
