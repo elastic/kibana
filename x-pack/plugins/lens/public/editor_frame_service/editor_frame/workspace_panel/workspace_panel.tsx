@@ -777,7 +777,7 @@ export const VisualizationWrapper = ({
             ? errorsFromRequest
             : errorMessage
             ? [errorMessage]
-            : [''];
+            : [];
 
           if (!hasDynamicError) {
             setDynamicError(true);
