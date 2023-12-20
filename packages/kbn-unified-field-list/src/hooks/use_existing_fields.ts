@@ -12,10 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
@@ -25,7 +24,7 @@ const generateId = htmlIdGenerator();
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
   existingFieldsByFieldNameMap: Record<string, boolean>;
-  newFields?: DataViewField[];
+  newFields?: FieldSpec[];
   numberOfFetches: number;
   hasDataViewRestrictions?: boolean;
 }
@@ -56,7 +55,7 @@ export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
   getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
   isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
-  getNewFields: (dataViewId: string) => DataViewField[];
+  getNewFields: (dataViewId: string) => FieldSpec[];
 }
 
 const initialData: ExistingFieldsByDataViewMap = {};
@@ -255,7 +254,12 @@ export const useExistingFieldsFetcher = (
   );
 };
 
-export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
+export const useExistingFieldsReader: () => {
+  getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
+  isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
+  getNewFields: (dataViewId: string) => FieldSpec[];
+  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
+} = () => {
   const mountedRef = useRef<boolean>(true);
   const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
     useState<ExistingFieldsByDataViewMap>(globalMap$.getValue());

@@ -24,7 +24,6 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
@@ -106,7 +105,6 @@ export function TextBasedDataPanel({
     getCustomFieldType,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
-    isCompatibleField: isFieldLensCompatible,
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(

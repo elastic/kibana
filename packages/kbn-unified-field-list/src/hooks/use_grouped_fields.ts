@@ -10,7 +10,7 @@ import { groupBy } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   type FieldListGroups,
@@ -41,7 +41,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
-  isCompatibleField?: (field: DataViewField) => boolean;
+  getNewFieldsBySpec?: (field: FieldSpec[], dataView: DataView | null) => T[];
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -53,7 +53,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
     fieldsExistInIndex: boolean;
     screenReaderDescriptionId?: string;
   };
-  allFields: T[] | null; // `null` is for loading indicator
+  allFieldsModified: T[] | null; // `null` is for loading indicator
   hasNewFields: boolean;
 }
 
@@ -68,7 +68,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
-  isCompatibleField,
+  getNewFieldsBySpec,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -129,20 +129,24 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     // Taking care of new fields that were ingested after the selected data view was loaded
     // Those replace existing fields if updated, or are added to the list
-    const newFields = dataViewId
-      ? fieldsExistenceReader.getNewFields(dataViewId).filter(isCompatibleField || (() => true))
-      : [];
+    const newFields =
+      dataViewId && getNewFieldsBySpec
+        ? getNewFieldsBySpec(fieldsExistenceReader.getNewFields(dataViewId), dataView)
+        : [];
     // Filtering out fields that e.g. Discover provides by analyzing the resultset, that are not part of the loaded DataView
     // These can be replaced by the new fields, which are mapped correctly, and therefore can be used in the right way
-    const allFieldsExlNew = allFields
-      ? allFields.filter((field) => !newFields.some((newField) => newField.name === field.name))
-      : [];
+    const allFieldsExlNew =
+      allFields && newFields.length
+        ? allFields.filter((field) => !newFields.some((newField) => newField.name === field.name))
+        : allFields;
 
-    const allFieldsInclNew = [...allFieldsExlNew, ...newFields] as unknown as T[];
-
-    const sortedFields = allFieldsInclNew.sort(sortFields);
-    allFieldsToReturn.current = sortedFields;
+    const allFieldsInclNew = newFields.length
+      ? [...(allFieldsExlNew || []), ...newFields]
+      : allFields || [];
+    allFieldsToReturn.current = newFields.length ? allFieldsInclNew : allFields;
     hasNewFields.current = Boolean(newFields.length);
+    const sortedFields = [...allFieldsInclNew].sort(sortFields);
+
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
@@ -347,7 +351,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     onSelectedFieldFilter,
     onSupportedFieldFilter,
     dataView,
-    isCompatibleField,
+    getNewFieldsBySpec,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -406,7 +410,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   return {
     fieldListGroupedProps,
     fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
-    allFields: allFieldsToReturn.current,
+    allFieldsModified: allFieldsToReturn.current,
     hasNewFields: hasNewFields.current,
   };
 }

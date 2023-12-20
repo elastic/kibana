@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -28,7 +28,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import { buildIndexPatternField } from '../../data_views_service/loader';
 import type {
   DatasourceDataPanelProps,
   FramePublicAPI,
@@ -262,7 +262,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       onSupportedFieldFilter,
       onSelectedFieldFilter,
       onOverrideFieldGroupDetails,
-      isCompatibleField: isFieldLensCompatible,
+      getNewFieldsBySpec: (spec, dataView) => {
+        return spec.map((fieldSpec) =>
+          buildIndexPatternField(new DataViewField(fieldSpec), dataView)
+        );
+      },
     });
 
   const closeFieldEditor = useRef<() => void | undefined>();
