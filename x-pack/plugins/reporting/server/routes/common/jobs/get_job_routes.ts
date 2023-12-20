@@ -81,17 +81,36 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
     return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
       const docIndex = doc.index;
       const stream = await getContentStream(reporting, { id: docId, index: docIndex });
-      /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-      await new Promise<void>((resolve) => {
-        stream.end('', 'utf8', () => {
-          resolve();
-        });
-      });
-      await jobsQuery.delete(docIndex, docId);
 
-      return res.ok({
-        body: { deleted: true },
+      // An "error" event is emitted if an error is passed to the `stream.end` callback from the _final method
+      // This event _must_ be handled
+      stream.on('error', (err) => {
+        const { logger } = reporting.getPluginSetupDeps();
+        logger.get('delete-report-job').error(err);
       });
+
+      try {
+        /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+        await new Promise<void>((resolve, reject) => {
+          stream.end('', 'utf8', (error?: Error) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        await jobsQuery.delete(docIndex, docId);
+
+        return res.ok({
+          body: { deleted: true },
+        });
+      } catch (error) {
+        return res.customError({
+          statusCode: 500,
+        });
+      }
     });
   };
 
