@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
 import { ReportDocument, ReportOutput, ReportSource } from '@kbn/reporting-common/types';
 import moment from 'moment';
-import type { IReport, Report } from '.';
+import type { Report } from '.';
 import { SavedReport } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
@@ -271,7 +271,7 @@ export class ReportingStore {
           `[id: ${taskJson.id}] [index: ${taskJson.index}]`
       );
       this.logger.error(err);
-      this.reportingCore.getEventLogger({ _id: taskJson.id } as IReport).logError(err);
+      this.reportingCore.getEventLogger({ _id: taskJson.id }).logError(err);
       throw err;
     }
   }
