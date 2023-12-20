@@ -7,9 +7,9 @@
  */
 
 import color from 'color';
-import { getCoreStart } from '../../services';
+import { getUISettings } from '../../services';
 
-const isDarkTheme = () => getCoreStart().theme.getTheme().darkMode;
+const isDarkTheme = () => getUISettings().get('theme:darkMode');
 
 /**
  * Returns true if the color that is passed has low luminosity

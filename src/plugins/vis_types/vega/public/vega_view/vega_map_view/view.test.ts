@@ -22,7 +22,6 @@ import type { IServiceSettings } from './service_settings/service_settings_types
 
 import {
   setInjectedVars,
-  setCoreStart,
   setData,
   setNotifications,
   setUISettings,
@@ -119,7 +118,6 @@ describe('vega_map_view/view', () => {
     setInjectedVars({
       enableExternalUrls: true,
     });
-    setCoreStart(coreStart);
     setData(dataPluginStart);
     setDataViews(dataViewsStart);
     setNotifications(coreStart.notifications);
