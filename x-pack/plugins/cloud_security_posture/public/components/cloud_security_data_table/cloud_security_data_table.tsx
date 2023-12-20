@@ -78,6 +78,16 @@ interface CloudSecurityDataGridProps {
    * Height override for the data grid.
    */
   height?: number;
+  /**
+   * Callback Function when the DataView field is edited.
+   * Required to enable editing of the field in the data grid.
+   */
+  dataViewRefetch?: () => void;
+  /**
+   * Flag to indicate if the data view is refetching.
+   * Required for smoothing re-rendering the DataTable columns.
+   */
+  dataViewIsRefetching?: boolean;
 }
 
 export const CloudSecurityDataTable = ({
@@ -93,6 +103,8 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
+  dataViewRefetch,
+  dataViewIsRefetching,
   ...rest
 }: CloudSecurityDataGridProps) => {
   const {
@@ -237,6 +249,9 @@ export const CloudSecurityDataTable = ({
     opacity: isLoading ? 1 : 0,
   };
 
+  const loadingState =
+    isLoading || dataViewIsRefetching ? DataLoadingState.loading : DataLoadingState.loaded;
+
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
@@ -251,7 +266,7 @@ export const CloudSecurityDataTable = ({
           columns={currentColumns}
           expandedDoc={expandedDoc}
           dataView={dataView}
-          loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+          loadingState={loadingState}
           onFilter={onAddFilter as DocViewFilterFn}
           onResize={onResize}
           onSetColumns={onSetColumns}
@@ -276,6 +291,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          onFieldEdited={dataViewRefetch}
         />
       </div>
     </CellActionsProvider>
