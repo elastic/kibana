@@ -4,39 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { encode } from '@kbn/rison';
-
 import { getTimeline } from '../../../objects/timeline';
-
 import { TIMELINE_HEADER } from '../../../screens/timeline';
-
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-
 import { ALERTS_URL } from '../../../urls/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
-
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
-
 import { TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   beforeEach(function () {
     login();
-
+    deleteTimelines();
     visit(TIMELINES_URL);
-
     createTimeline(getTimeline()).then((response) => {
       timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;
       return response.body.data.persistTimeline.timeline.savedObjectId;
     });
     createRule(getNewRule());
-
     visitWithTimeRange(ALERTS_URL);
-
     waitForAlertsToPopulate();
   });
 
