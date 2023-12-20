@@ -33,7 +33,7 @@ export class PainlessError extends EsError {
         defaultMessage:
           'Error executing runtime field or scripted field on data view {indexPatternName}',
         values: {
-          indexPatternName: dataView?.title ? dataView?.title : '',
+          indexPatternName: dataView?.title || '',
         },
       }),
       openInInspector
