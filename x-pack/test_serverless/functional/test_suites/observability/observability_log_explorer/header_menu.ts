@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
   ]);
 
-  describe('Header menu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/173165
+  describe.skip('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
