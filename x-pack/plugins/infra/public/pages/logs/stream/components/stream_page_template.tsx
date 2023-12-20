@@ -55,7 +55,7 @@ export const LogStreamPageTemplate: React.FC<LogsPageTemplateProps> = (props) =>
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <FormattedMessage
-                          id="xpack.infra.assetDetails.header.return"
+                          id="xpack.infra.logStreamPageTemplate.backtoLogsStream"
                           defaultMessage="Back to Logs Stream"
                         />
                       </EuiFlexItem>
