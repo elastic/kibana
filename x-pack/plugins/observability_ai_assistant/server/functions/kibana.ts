@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { format } from 'url';
+import https from 'https';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
