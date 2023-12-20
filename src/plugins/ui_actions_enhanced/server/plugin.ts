@@ -12,24 +12,33 @@ import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { dynamicActionEnhancement } from './dynamic_action_enhancement';
 import { ActionFactoryRegistry, SerializedEvent, ActionFactoryDefinition } from './types';
 
-export interface SetupContract {
+export interface UiActionsEnhancedServerSetup {
   registerActionFactory: (definition: ActionFactoryDefinition) => void;
 }
 
-export type StartContract = void;
+export type UiActionsEnhancedServerStart = void;
 
-interface SetupDependencies {
+interface UiActionsEnhancedServerSetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UiActionsEnhancedServerStartDependencies {}
+
 export class AdvancedUiActionsServerPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies>
+  implements
+    Plugin<
+      UiActionsEnhancedServerSetup,
+      UiActionsEnhancedServerStart,
+      UiActionsEnhancedServerSetupDependencies,
+      UiActionsEnhancedServerStartDependencies
+    >
 {
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
   constructor() {}
 
-  public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
+  public setup(_core: CoreSetup, { embeddable }: UiActionsEnhancedServerSetupDependencies) {
     const getActionFactory = (actionFactoryId: string) => this.actionFactories.get(actionFactoryId);
 
     embeddable.registerEnhancement(dynamicActionEnhancement(getActionFactory));
