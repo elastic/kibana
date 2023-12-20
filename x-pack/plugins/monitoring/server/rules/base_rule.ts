@@ -60,15 +60,6 @@ interface RuleOptions {
   accessorKey?: string;
 }
 
-export interface BaseContext extends AlertInstanceContext {
-  internalShortMessage: string;
-  internalFullMessage: string;
-  state: string;
-  clusterName: string;
-  action: string;
-  actionPlain: string;
-}
-
 const defaultRuleOptions = (): RuleOptions => {
   return {
     id: '',
@@ -79,7 +70,7 @@ const defaultRuleOptions = (): RuleOptions => {
     actionVariables: [],
   };
 };
-export class BaseRule<Context extends AlertInstanceContext> {
+export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
@@ -98,9 +89,9 @@ export class BaseRule<Context extends AlertInstanceContext> {
   public getRuleType(): RuleType<
     never,
     never,
-    never,
-    never,
-    Context,
+    ExecutedState,
+    AlertInstanceState,
+    AlertInstanceContext,
     'default',
     never,
     DefaultAlert
@@ -123,14 +114,12 @@ export class BaseRule<Context extends AlertInstanceContext> {
       executor: (
         options: RuleExecutorOptions<
           never,
-          never,
+          ExecutedState,
           AlertInstanceState,
-          Context,
+          AlertInstanceContext,
           'default',
           DefaultAlert
-        > & {
-          state: ExecutedState;
-        }
+        >
       ): Promise<any> => this.execute(options),
       category: DEFAULT_APP_CATEGORIES.management.id,
       producer: 'monitoring',
@@ -264,9 +253,14 @@ export class BaseRule<Context extends AlertInstanceContext> {
     services,
     params,
     state,
-  }: RuleExecutorOptions<never, never, AlertInstanceState, Context, 'default', DefaultAlert> & {
-    state: ExecutedState;
-  }): Promise<any> {
+  }: RuleExecutorOptions<
+    never,
+    ExecutedState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default',
+    DefaultAlert
+  >): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -309,7 +303,12 @@ export class BaseRule<Context extends AlertInstanceContext> {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -388,7 +387,12 @@ export class BaseRule<Context extends AlertInstanceContext> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     alertState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,

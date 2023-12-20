@@ -8,9 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { Rule, RawAlertInstance, AlertInstanceState } from '@kbn/alerting-plugin/common';
+import {
+  Rule,
+  RawAlertInstance,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -30,12 +35,7 @@ import { Globals } from '../static_globals';
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
-interface Context extends BaseContext {
-  threadPoolType: string;
-  count: number;
-  node?: string;
-}
-export class ThreadPoolRejectionsRuleBase extends BaseRule<Context> {
+export class ThreadPoolRejectionsRuleBase extends BaseRule {
   protected static createActionVariables(type: string) {
     return [
       {
@@ -182,7 +182,12 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule<Context> {
     };
   }
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,

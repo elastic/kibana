@@ -10,9 +10,9 @@ import numeral from '@elastic/numeral';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -33,13 +33,7 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
-interface Context extends BaseContext {
-  nodes: string;
-  count: number;
-  node: string;
-}
-
-export class CpuUsageRule extends BaseRule<Context> {
+export class CpuUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CPU_USAGE,
@@ -151,7 +145,12 @@ export class CpuUsageRule extends BaseRule<Context> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

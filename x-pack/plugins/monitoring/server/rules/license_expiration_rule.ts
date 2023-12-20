@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { BaseContext, BaseRule } from './base_rule';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -31,10 +31,7 @@ import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
-interface Context extends BaseContext {
-  expiredDate: string;
-}
-export class LicenseExpirationRule extends BaseRule<Context> {
+export class LicenseExpirationRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LICENSE_EXPIRATION,
@@ -147,7 +144,12 @@ export class LicenseExpirationRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { SanitizedRule, RawAlertInstance } from '@kbn/alerting-plugin/common';
+import { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -30,11 +30,7 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
-interface Context extends BaseContext {
-  shardIndices: string;
-  shardIndex: string;
-}
-export class LargeShardSizeRule extends BaseRule<Context> {
+export class LargeShardSizeRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LARGE_SHARD_SIZE,
@@ -154,7 +150,12 @@ export class LargeShardSizeRule extends BaseRule<Context> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

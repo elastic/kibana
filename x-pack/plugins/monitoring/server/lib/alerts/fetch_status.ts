@@ -13,12 +13,12 @@ import { RULES } from '../../../common/constants';
 
 export async function fetchStatus(
   rulesClient: RulesClient,
-  alertTypes: string[] | undefined,
+  ruleTypes: string[] | undefined,
   clusterUuids: string[],
   filters: CommonAlertFilter[] = []
 ): Promise<RulesByType> {
   const rulesByType = await Promise.all(
-    (alertTypes || RULES).map(async (type) => RulesFactory.getByType(type, rulesClient))
+    (ruleTypes || RULES).map(async (type) => RulesFactory.getByType(type, rulesClient))
   );
   if (!rulesByType.length) return {};
 

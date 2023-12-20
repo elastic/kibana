@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -26,10 +26,7 @@ import { AlertingDefaults } from './alert_helpers';
 import { Globals } from '../static_globals';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
-interface Context extends BaseContext {
-  versionList: string[];
-}
-export class KibanaVersionMismatchRule extends BaseRule<Context> {
+export class KibanaVersionMismatchRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_KIBANA_VERSION_MISMATCH,
@@ -101,7 +98,12 @@ export class KibanaVersionMismatchRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

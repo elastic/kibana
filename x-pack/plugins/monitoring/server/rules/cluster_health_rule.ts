@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { BaseContext, BaseRule } from './base_rule';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -37,11 +37,7 @@ const YELLOW_STATUS_MESSAGE = i18n.translate(
   }
 );
 
-interface Context extends BaseContext {
-  clusterHealth: AlertClusterHealthType;
-}
-
-export class ClusterHealthRule extends BaseRule<Context> {
+export class ClusterHealthRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CLUSTER_HEALTH,
@@ -121,7 +117,12 @@ export class ClusterHealthRule extends BaseRule<Context> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

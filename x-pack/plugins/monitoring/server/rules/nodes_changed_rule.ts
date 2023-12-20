@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -30,12 +30,6 @@ interface AlertNodesChangedStates {
   removed: AlertClusterStatsNode[];
   added: AlertClusterStatsNode[];
   restarted: AlertClusterStatsNode[];
-}
-
-interface Context extends BaseContext {
-  added: string;
-  restarted: string;
-  removed: string;
 }
 
 function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
@@ -62,7 +56,7 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
   };
 }
 
-export class NodesChangedRule extends BaseRule<Context> {
+export class NodesChangedRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_NODES_CHANGED,
@@ -181,7 +175,12 @@ export class NodesChangedRule extends BaseRule<Context> {
   }
 
   protected async executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,

@@ -9,10 +9,15 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { AlertInstanceState, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RawAlertInstance,
+  SanitizedRule,
+} from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { BaseContext, BaseRule } from './base_rule';
+import { BaseRule } from './base_rule';
 import {
   AlertData,
   AlertCluster,
@@ -32,12 +37,7 @@ import { Globals } from '../static_globals';
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
-interface Context extends BaseContext {
-  nodes: string;
-  count: number;
-  node: string;
-}
-export class MissingMonitoringDataRule extends BaseRule<Context> {
+export class MissingMonitoringDataRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_MISSING_MONITORING_DATA,
@@ -143,7 +143,12 @@ export class MissingMonitoringDataRule extends BaseRule<Context> {
   }
 
   protected executeActions(
-    services: RuleExecutorServices<AlertInstanceState, Context, 'default', DefaultAlert>,
+    services: RuleExecutorServices<
+      AlertInstanceState,
+      AlertInstanceContext,
+      'default',
+      DefaultAlert
+    >,
     alertId: string,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
