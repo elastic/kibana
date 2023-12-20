@@ -720,6 +720,7 @@ test('successfully executes with system connector', async () => {
     secrets: {},
     params: { foo: true },
     logger: loggerMock,
+    request: {},
   });
 
   expect(loggerMock.debug).toBeCalledWith(
@@ -810,6 +811,75 @@ test('successfully executes with system connector', async () => {
       ],
     ]
   `);
+});
+
+test('passes the Kibana request on the executor of a system action', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'system-connector-.cases',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+    request: {},
+  });
+});
+
+test('does not pass the Kibana request on the executor if the action is not a system action', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
+    executor: jest.fn(),
+  };
+
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute(executeParams);
+
+  const args = actionType.executor.mock.calls[0][0];
+
+  expect(args.request).toBeUndefined();
 });
 
 test('successfully authorize system actions', async () => {
@@ -1278,6 +1348,7 @@ test('should not throws an error if actionType is system action', async () => {
     secrets: {},
     params: { foo: true },
     logger: loggerMock,
+    request: {},
   });
 });
 
@@ -1510,6 +1581,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
     secrets: {},
     params: { foo: true },
     logger: loggerMock,
+    request: {},
   });
 
   expect(loggerMock.debug).toBeCalledWith(
