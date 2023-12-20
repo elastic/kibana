@@ -138,9 +138,9 @@ export const esqlApmTraceDurationQuery = createEsqlQueryEvaluation({
 //Using synthtrace distributed_trace_long.ts
 export const esqlApmServiceInventoryQuery = createEsqlQueryEvaluation({
   question:
-    'My data is in `.ds-traces-apm-default-*`. I want a query for the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests by service in the last 24 hours.',
+    'My data is in `.ds-traces-apm-default-*`. I want a query for the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests by service in the last 2 hours.',
   expected: `FROM .ds-traces-apm-default-*
-| WHERE @timestamp >= NOW() - 24 hours
+| WHERE @timestamp >= NOW() - 2 hours
 | EVAL is_success = CASE(event.outcome == "success", 1, 0)
 | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
 | STATS avg_duration = AVG(transaction.duration.us), total_success = SUM(is_success), total_failure = SUM(is_failure), total_requests = COUNT(*) BY service.name
