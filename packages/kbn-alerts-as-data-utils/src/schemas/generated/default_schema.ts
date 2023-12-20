@@ -68,7 +68,9 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const DefaultAlertRequired = rt.type({
 });
-const DefaultAlertOptional = rt.partial({});
+// prettier-ignore
+const DefaultAlertOptional = rt.partial({
+});
 
 // prettier-ignore
 export const DefaultAlertSchema = rt.intersection([DefaultAlertRequired, DefaultAlertOptional, AlertSchema]);

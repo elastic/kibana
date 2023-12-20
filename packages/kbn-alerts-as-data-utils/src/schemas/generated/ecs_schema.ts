@@ -70,6 +70,7 @@ const EcsRequired = rt.type({
   '@timestamp': schemaDate,
   'ecs.version': schemaString,
 });
+// prettier-ignore
 const EcsOptional = rt.partial({
   'agent.build.original': schemaString,
   'agent.ephemeral_id': schemaString,
