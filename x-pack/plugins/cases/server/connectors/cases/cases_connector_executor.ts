@@ -55,29 +55,70 @@ export class CasesConnectorExecutor {
     const { alerts, groupingBy } = params;
 
     const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
+
+    /**
+     * Based on the rule ID, the grouping, the owner, the space ID,
+     * the oracle record ID is generated
+     */
     const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
 
     /**
-     * Add circuit breakers to the number of oracles they can be created or retrieved
+     * TODO: Add circuit breakers to the number of oracles they can be created or retrieved
+     */
+
+    /**
+     * Gets all records by the IDs that produces in generateOracleKeys.
+     * If a record does not exist it will create the record.
+     * A record does not exist if it is the first time the connector run for a specific grouping.
+     * The returned map will contain all records old and new.
      */
     const oracleRecordsMap = await this.upsertOracleRecords(groupedAlertsWithOracleKey);
+
+    /**
+     * If the time window has passed for a case we need to create a new case.
+     * To do that we need to increase the record counter by one. Increasing the
+     * counter will generate a new case ID for the same grouping.
+     * The returned map contain all records with their counters updated correctly
+     */
     const oracleRecordMapWithTimeWindowHandled = await this.handleTimeWindow(
       params,
       oracleRecordsMap
     );
 
+    /**
+     * Based on the rule ID, the grouping, the owner, the space ID,
+     * and the counter of the oracle record the case ID is generated
+     */
     const groupedAlertsWithCaseId = this.generateCaseIds(
       params,
       oracleRecordMapWithTimeWindowHandled
     );
 
+    /**
+     * Gets all records by the IDs that produces in generateCaseIds.
+     * If a case does not exist it will create the case.
+     * A case does not exist if it is the first time the connector run for a specific grouping
+     * or the time window has elapsed and a new one should be created for the same grouping.
+     * The returned map will contain all cases old and new.
+     */
     const groupedAlertsWithCases = await this.upsertCases(params, groupedAlertsWithCaseId);
 
+    /**
+     * A user can configure how to handle closed cases. Based on the configuration
+     * we open the closed cases by updating their status or we create new cases by
+     * increasing the counter of the corresponding oracle record, generating the new
+     * case ID, and creating the new case.
+     * The map contains all cases updated and new without any remaining closed case.
+     */
     const groupedAlertsWithClosedCasesHandled = await this.handleClosedCases(
       params,
       groupedAlertsWithCases
     );
 
+    /**
+     * Now that all cases are fetched or created per grouping, we attach the alerts
+     * to the corresponding cases.
+     */
     await this.attachAlertsToCases(groupedAlertsWithClosedCasesHandled, params);
   }
 
@@ -344,10 +385,10 @@ export class CasesConnectorExecutor {
       cases: bulkCreateReq,
     });
 
-    for (const res of bulkCreateCasesResponse.cases) {
-      if (groupedAlertsWithCaseId.has(res.id)) {
-        const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
-        casesMap.set(res.id, { ...data, theCase: res });
+    for (const theCase of bulkCreateCasesResponse.cases) {
+      if (groupedAlertsWithCaseId.has(theCase.id)) {
+        const data = groupedAlertsWithCaseId.get(theCase.id) as GroupedAlertsWithCaseId;
+        casesMap.set(theCase.id, { ...data, theCase });
       }
     }
 
@@ -461,7 +502,7 @@ export class CasesConnectorExecutor {
     closedCasesEntries: GroupedAlertsWithCases[],
     casesMap: Map<string, GroupedAlertsWithCases>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
-    const casesMapWithClosedCasesOpened = new Map(casesMap);
+    const casesMapWithNewCases = new Map(casesMap);
     const casesMapAsArray = Array.from(casesMap.values());
 
     const findEntryByOracleRecord = (oracleId: string) => {
@@ -496,14 +537,14 @@ export class CasesConnectorExecutor {
       cases: bulkCreateReq,
     });
 
-    for (const res of bulkCreateCasesResponse.cases) {
-      if (groupedAlertsWithCaseId.has(res.id)) {
-        const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
-        casesMapWithClosedCasesOpened.set(res.id, { ...data, theCase: res });
+    for (const theCase of bulkCreateCasesResponse.cases) {
+      if (groupedAlertsWithCaseId.has(theCase.id)) {
+        const data = groupedAlertsWithCaseId.get(theCase.id) as GroupedAlertsWithCaseId;
+        casesMapWithNewCases.set(theCase.id, { ...data, theCase });
       }
     }
 
-    return casesMapWithClosedCasesOpened;
+    return casesMapWithNewCases;
   }
 
   private async attachAlertsToCases(
