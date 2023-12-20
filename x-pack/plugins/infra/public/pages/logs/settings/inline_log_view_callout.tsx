@@ -20,7 +20,7 @@ export const InlineLogViewCallout = ({
       color="warning"
       title={
         <FormattedMessage
-          id="xpack.infra.logStreamPageTemplate.widgetDescription"
+          id="xpack.infra.logs.settings.inlineLogViewCalloutWidgetTitle"
           defaultMessage="You are configuring an embedded widget"
         />
       }
@@ -28,7 +28,7 @@ export const InlineLogViewCallout = ({
       <>
         <p>
           <FormattedMessage
-            id="xpack.infra.logStreamPageTemplate.widgetDescription"
+            id="xpack.infra.logs.settings.inlineLogViewCalloutWidgetDescription"
             defaultMessage="Changes will be synchronized to the URL, but they will not be persisted to the default Logs Stream view."
           />
         </p>
