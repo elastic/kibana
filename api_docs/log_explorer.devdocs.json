@@ -52,6 +52,80 @@
       },
       {
         "parentPluginId": "logExplorer",
+        "id": "def-public.getDiscoverFiltersFromState",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiscoverFiltersFromState",
+        "description": [],
+        "signature": [
+          "(filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], controls?: ",
+          "ControlOptions",
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.getDiscoverFiltersFromState.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.getDiscoverFiltersFromState.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "controls",
+            "description": [],
+            "signature": [
+              "ControlOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logExplorer",
         "id": "def-public.getDiscoverGridFromDisplayOptions",
         "type": "Function",
         "tags": [],
@@ -68,11 +142,11 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/unified-data-table",
+            "pluginId": "savedSearch",
             "scope": "common",
-            "docId": "kibKbnUnifiedDataTablePluginApi",
-            "section": "def-common.UnifiedDataTableSettings",
-            "text": "UnifiedDataTableSettings"
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettings",
+            "text": "DiscoverGridSettings"
           },
           " | undefined"
         ],
@@ -470,27 +544,26 @@
         "tags": [],
         "label": "LogExplorerFlyoutContentProps",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "logExplorer",
-            "scope": "public",
-            "docId": "kibLogExplorerPluginApi",
-            "section": "def-public.LogExplorerFlyoutContentProps",
-            "text": "LogExplorerFlyoutContentProps"
-          },
-          " extends ",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.FlyoutContentProps",
-            "text": "FlyoutContentProps"
-          }
-        ],
         "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.LogExplorerFlyoutContentProps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ addFilter: ",
+              "DocViewFilterFn",
+              " | undefined; addColumn: ((columnName: string) => void) | undefined; removeColumn: ((columnName: string) => void) | undefined; }"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "logExplorer",
             "id": "def-public.LogExplorerFlyoutContentProps.dataView",

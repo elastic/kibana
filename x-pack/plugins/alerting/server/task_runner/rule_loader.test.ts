@@ -18,6 +18,7 @@ import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../..
 import { ErrorWithReason, getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -199,7 +200,7 @@ describe('rule_loader', () => {
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
-      expect(esoArgs).toEqual(['alert', ruleId, { namespace: undefined }]);
+      expect(esoArgs).toEqual([RULE_SAVED_OBJECT_TYPE, ruleId, { namespace: undefined }]);
     });
 
     test('succeeds with non-default space', async () => {
@@ -218,7 +219,7 @@ describe('rule_loader', () => {
       });
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
-      expect(esoArgs).toEqual(['alert', ruleId, { namespace: spaceId }]);
+      expect(esoArgs).toEqual([RULE_SAVED_OBJECT_TYPE, ruleId, { namespace: spaceId }]);
     });
 
     test('fails', async () => {

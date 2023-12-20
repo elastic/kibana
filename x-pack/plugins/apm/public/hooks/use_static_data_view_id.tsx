@@ -19,7 +19,9 @@ export function useStaticDataViewId() {
   useEffect(() => {
     const fetchSpaceId = async () => {
       const space = await spaces?.getActiveSpace();
-      setDataViewId(getDataViewId(space?.id ?? 'default'));
+      if (space?.id) {
+        setDataViewId(getDataViewId(space?.id));
+      }
     };
 
     fetchSpaceId();
