@@ -22,6 +22,24 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
+function formatTime(minutes: number) {
+  if (minutes > 59) {
+    const mins = minutes % 60;
+    const hours = (minutes - mins) / 60;
+    return i18n.translate(
+      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteHoursLabel',
+      {
+        defaultMessage: '{hours}h {mins}m',
+        values: { hours: Math.trunc(hours), mins: Math.trunc(mins) },
+      }
+    );
+  }
+  return i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
+}
+
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
@@ -36,14 +54,9 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
     const errorBudgetRemainingInMinute =
       slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
 
-    if (errorBudgetRemainingInMinute > 0) {
-      if (errorBudgetRemainingInMinute / 60 >= 1) {
-        errorBudgetTimeRemainingFormatted = `${Math.trunc(errorBudgetRemainingInMinute / 60)}h`;
-      }
-      errorBudgetTimeRemainingFormatted += `${Math.trunc(errorBudgetRemainingInMinute % 60)}min`;
-    } else {
-      errorBudgetTimeRemainingFormatted = `0min`;
-    }
+    errorBudgetTimeRemainingFormatted = formatTime(
+      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
+    );
   }
 
   return (
