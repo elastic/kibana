@@ -33,9 +33,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       search: data.search,
     });
 
-    const LogAIAssistant = createLogAIAssistant({
-      observabilityAIAssistant: observabilityAIAssistant.service,
-    });
+    const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
 
     return {
       logViews,

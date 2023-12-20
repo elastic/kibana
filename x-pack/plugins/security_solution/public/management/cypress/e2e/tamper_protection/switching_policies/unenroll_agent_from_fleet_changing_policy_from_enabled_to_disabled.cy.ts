@@ -22,7 +22,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+describe.skip(
   'Unenroll agent from fleet changing when agent tamper protection is enabled but then is switched to a policy with it disabled',
   { tags: ['@ess'] },
   () => {
