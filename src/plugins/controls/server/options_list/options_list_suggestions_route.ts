@@ -8,17 +8,15 @@
 
 import { Observable } from 'rxjs';
 
-import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
-import { schema } from '@kbn/config-schema';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
-import { getExpensiveSuggestionAggregationBuilder } from './options_list_expensive_suggestion_queries';
-import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
-import { OptionsListSuggestionAggregationBuilder } from './types';
+import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -51,6 +49,13 @@ export const setupOptionsListSuggestionsRoute = (
                 fieldSpec: schema.maybe(schema.any()),
                 allowExpensiveQueries: schema.boolean(),
                 searchString: schema.maybe(schema.string()),
+                searchTechnique: schema.maybe(
+                  schema.oneOf([
+                    schema.literal('exact'),
+                    schema.literal('prefix'),
+                    schema.literal('wildcard'),
+                  ])
+                ),
                 selectedOptions: schema.maybe(
                   schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(schema.number())])
                 ),
@@ -97,18 +102,13 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
+    const { runPastTimeout, filters, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
-    let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
-    if (allowExpensiveQueries) {
-      suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
-    } else {
-      suggestionBuilder = getCheapSuggestionAggregationBuilder(request);
-    }
+    const suggestionBuilder = getSuggestionAggregationBuilder(request);
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
@@ -134,6 +134,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
+
     /**
      * Run ES query
      */

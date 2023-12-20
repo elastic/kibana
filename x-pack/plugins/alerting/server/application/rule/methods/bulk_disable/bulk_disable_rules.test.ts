@@ -35,6 +35,7 @@ import {
   siemRuleForBulkOps2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../task_runner/alert_task_instance', () => ({
   taskInstanceToAlertTaskInstance: jest.fn(),
@@ -428,8 +429,8 @@ describe('bulkDisableRules', () => {
 
       taskManager.bulkRemove.mockResolvedValue({
         statuses: [
-          { id: 'id1', type: 'alert', success: true },
-          { id: 'id2', type: 'alert', success: false },
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: false },
         ],
       });
 
@@ -543,12 +544,12 @@ describe('bulkDisableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_disable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 
