@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
+import { RESULTS_TABLE_BUTTON, RESULTS_TABLE_COLUMNS_BUTTON } from '../screens/live_query';
 import { closeToastIfVisible, generateRandomStringName } from './integrations';
 import {
   checkResults,
@@ -45,7 +45,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains('Exit fullscreen').should('exist');
 
         // hidden columns
-        cy.contains('columns hidden').should('not.exist');
+        cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns35');
         cy.getBySel('dataGridHeaderCell-osquery.cmdline').click();
         cy.contains(/Hide column$/).click();
         cy.getBySel('dataGridHeaderCell-osquery.cwd').click();
@@ -54,10 +54,10 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel('dataGridHeaderCell-osquery.disk_bytes_written.number').click();
 
         cy.contains(/Hide column$/).click();
-        cy.contains('columns hidden').should('exist');
+        cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
         // change pagination
         cy.getBySel('pagination-button-next').click().wait(500).click();
-        cy.contains('columns hidden').should('exist');
+        cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
 
         // enter fullscreen
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
@@ -69,7 +69,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel('dataGridHeaderCell-osquery.egid').click();
 
         cy.contains(/Sort A-Z$/).click();
-        cy.contains('columns hidden').should('exist');
+        cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
         cy.contains(/Enter fullscreen$/).should('exist');
 
