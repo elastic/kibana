@@ -170,7 +170,7 @@ export function registerAnomalyDetectionAlertType({
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
-      defaultMessage: 'Anomaly detection alert',
+      defaultMessage: 'Anomaly detection',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
