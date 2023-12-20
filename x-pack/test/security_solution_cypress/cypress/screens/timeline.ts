@@ -6,7 +6,7 @@
  */
 
 import type { TimelineFilter } from '../objects/timeline';
-import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -24,12 +24,7 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
-export const CORRELATION_EVENT_TABLE_CELL =
-  '[data-test-subj="eql-events-table"] [data-test-subj="statefulCell"]';
-
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
-
-export const COMBO_BOX = 'button.euiFilterSelectItem[role="option"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
@@ -47,23 +42,7 @@ export const DATAGRID_HEADER = (header: string) => {
   return `[data-test-subj="dataGridHeaderCell-${header}"]`;
 };
 
-export const DATE_PICKER_END = '[data-test-subj="superDatePickerendDatePopoverButton"]';
-
-export const DATE_PICKER_START = '[data-test-subj="superDatePickerstartDatePopoverButton"]';
-
-export const DELETE_TIMELINE_BTN = '[data-test-subj="delete-timeline"]';
-
-export const DELETION_CONFIRMATION = '[data-test-subj="confirmModalConfirmButton"]';
-
-export const DESTINATION_IP_KPI = '[data-test-subj="siem-timeline-destination-ip-kpi"]';
-
-export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
-
 export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
-
-export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
-
-export const HOST_KPI = '[data-test-subj="siem-timeline-host-kpi"]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 
@@ -77,15 +56,9 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
 
-export const NOTES = '[data-test-subj="note-card-body"]';
-
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
-export const EVENT_NOTE = '[data-test-subj="timeline-notes-button-small"]';
-
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
-
-export const NOTE_PREVIEW = '[data-test-subj^="note-preview"]';
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
@@ -108,20 +81,9 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
-export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
-
-export const OPEN_TIMELINE_TEMPLATE_ICON =
-  '[data-test-subj="open-timeline-modal-body-filter-template"]';
-
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
-export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
-
-export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
-
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
-
-export const PROVIDER_BADGE_DELETE = '.delete-data-provider';
 
 export const RESET_FIELDS =
   '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
@@ -133,16 +95,11 @@ export const SEARCH_OR_FILTER_CONTAINER =
 
 export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
-export const QUERY_EVENT_TABLE_CELL =
-  '[data-test-subj="query-events-table"] [data-test-subj="statefulCell"]';
-
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
-
-export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 
@@ -172,8 +129,6 @@ export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
 
 export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
-
-export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
 export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
@@ -218,8 +173,6 @@ export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
-export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
-
 export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-empty-button"]`;
@@ -228,7 +181,7 @@ export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
-export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
+export const TIMELINE_SETTINGS_ICON = '[data-test-subj="timeline-create-open-control"]';
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
 
@@ -254,8 +207,6 @@ export const TIMESTAMP_TOGGLE_FIELD =
   '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
-
-export const TIMELINE_SAVE_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-btn"]';
 
 export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
@@ -299,16 +250,10 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 
-export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
-
 export const TIMELINE_STATUS = '[data-test-subj="timeline-status"]';
-
-export const SAVE_TIMELINE_BTN_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
-
-export const ALERT_TABLE_ACTIONS_HEADER = '[data-gridcell-column-id="expandColumn"]';
 
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
 
@@ -348,14 +293,6 @@ export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');
 export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
   'timeline-date-picker-container'
 );
-
-export const OPEN_TIMELINE_MODAL_SEARCH_BAR = `${OPEN_TIMELINE_MODAL}  ${getDataTestSubjectSelector(
-  'search-bar'
-)}`;
-
-export const OPEN_TIMELINE_MODAL_TIMELINE_NAMES = `${OPEN_TIMELINE_MODAL} ${getDataTestSubjectSelectorStartWith(
-  'timeline-title-'
-)}`;
 
 export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
 

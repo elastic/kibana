@@ -20,11 +20,12 @@ import {
   TimeRange,
   isOfQueryType,
   getAggregateQueryMode,
+  ExecutionContextSearch,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
-  ExecutionContextSearch,
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
@@ -740,7 +741,7 @@ export class Embeddable
     }
     const query = this.savedVis?.state.query as unknown as AggregateQuery;
     const language = getAggregateQueryMode(query);
-    return String(language).toUpperCase();
+    return getLanguageDisplayName(language).toUpperCase();
   }
 
   /**
@@ -1253,6 +1254,7 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
+      now: this.deps.data.nowProvider.get().getTime(),
       timeRange:
         input.timeslice !== undefined
           ? {
