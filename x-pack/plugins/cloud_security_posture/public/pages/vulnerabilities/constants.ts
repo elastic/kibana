@@ -7,6 +7,7 @@
 
 import { FindingsBaseURLQuery } from '../../common/types';
 import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
+import { vulnerabilitiesColumns } from './vulnerabilities_table_columns';
 
 export const DEFAULT_TABLE_HEIGHT = 512;
 
@@ -18,16 +19,19 @@ export const getDefaultQuery = ({
 } => ({
   query,
   filters,
-  sort: [['@timestamp', 'desc']],
+  sort: [
+    [vulnerabilitiesColumns.severity, 'desc'],
+    [vulnerabilitiesColumns.cvss, 'desc'],
+  ],
 });
 
 export const defaultColumns: CloudSecurityDefaultColumn[] = [
-  { id: 'result.evaluation', width: 80 },
-  { id: 'resource.id' },
+  { id: 'vulnerability.id' },
+  { id: 'vulnerability.score.base' },
   { id: 'resource.name' },
-  { id: 'resource.sub_type' },
-  { id: 'rule.benchmark.rule_number' },
-  { id: 'rule.name' },
-  { id: 'rule.section' },
-  { id: '@timestamp' },
+  { id: 'resource.id' },
+  { id: 'vulnerability.severity' },
+  { id: 'package.name' },
+  { id: 'package.version' },
+  { id: 'package.fixed_version' },
 ];

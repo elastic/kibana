@@ -38,12 +38,16 @@ interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
   enabled: boolean;
 }
 
+const getMultiFieldsSort = (sort: string[][]) => {
+  return sort.map(([id, direction]) => ({ [id]: direction }));
+};
+
 export const getVulnerabilitiesQuery = (
   { query, sort }: VulnerabilitiesQuery,
   pageParam: number
 ) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  sort,
+  sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {
     ...query,

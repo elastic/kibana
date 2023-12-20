@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
+import React from 'react';
+import { LatestVulnerabilitiesTable } from './latest_vulnerabilities_table';
 
-export const LatestVulnerabilitiesContainer = ({ dataView }: { dataView: DataView }) => {};
+export const LatestVulnerabilitiesContainer = ({ dataView }: { dataView: DataView }) => {
+  return <LatestVulnerabilitiesTable dataView={dataView} />;
+};

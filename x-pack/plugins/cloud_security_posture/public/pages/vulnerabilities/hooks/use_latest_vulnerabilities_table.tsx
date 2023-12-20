@@ -42,6 +42,7 @@ export const useLatestVulnerabilitiesTable = ({
   });
 
   const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
+  const total = data?.pages[0].total || 0;
 
   const error = fetchError || queryError;
 
@@ -51,5 +52,6 @@ export const useLatestVulnerabilitiesTable = ({
     error,
     isFetching,
     fetchNextPage,
+    total,
   };
 };
