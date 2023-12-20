@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { AlertRawData } from '../content';
+import type { AlertRawData } from '../tabs/risk_inputs';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {
