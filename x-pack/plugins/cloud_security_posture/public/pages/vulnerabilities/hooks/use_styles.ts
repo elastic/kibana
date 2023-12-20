@@ -45,15 +45,18 @@ export const useStyles = () => {
     }
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
+      // Vertically center content
+      display: flex;
+      align-items: center;
+
+      // Stretch content to full-width
+      .euiDataGridRowCell__content {
+        flex-grow: 1;
+      }
     }
     /* EUI QUESTION: Why is this being done via CSS instead of setting isExpandable: false in the columns API? */
     & .euiDataGridRowCell__actions > .euiDataGridRowCell__expandCell {
       display: none;
-    }
-
-    & .euiDataGridRowCell__contentWrapper {
-      display: flex;
-      align-items: center;
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
       text-align: left;

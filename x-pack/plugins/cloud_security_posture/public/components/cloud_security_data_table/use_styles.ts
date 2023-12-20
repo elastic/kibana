@@ -33,9 +33,14 @@ export const useStyles = () => {
 
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
-    }
-    & .euiDataGridRowCell__expandFlex {
+      // Vertically center content
+      display: flex;
       align-items: center;
+
+      // Stretch content to full-width
+      .euiDataGridRowCell__content {
+        flex-grow: 1;
+      }
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
       text-align: left;
