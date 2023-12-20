@@ -40,11 +40,11 @@ export interface LegacyIRuleActionsAttributes extends Record<string, unknown> {
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-interface LegacyRuleNotificationAlertTypeParams extends RuleTypeParams {
+interface LegacyRuleNotificationRuleTypeParams extends RuleTypeParams {
   ruleAlertId: string;
 }
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export type LegacyRuleNotificationAlertType = Rule<LegacyRuleNotificationAlertTypeParams>;
+export type LegacyRuleNotificationRuleType = Rule<LegacyRuleNotificationRuleTypeParams>;

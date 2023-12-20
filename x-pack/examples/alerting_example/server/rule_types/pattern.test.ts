@@ -183,7 +183,6 @@ describe('pattern rule type', () => {
   });
 });
 
-// services.alertFactory.create(instance).scheduleActions('default', context);
 type ScheduledAction = [string, string, any];
 function getServices() {
   const scheduledActions: ScheduledAction[] = [];

@@ -12,7 +12,7 @@ import type {
   SavedObjectAttribute,
 } from '@kbn/core/server';
 
-import type { LegacyRuleNotificationAlertType } from './types';
+import type { LegacyRuleNotificationRuleType } from './types';
 
 export const migrateLegacyActionsMock = {
   legacyActions: [],
@@ -25,7 +25,7 @@ export const migrateLegacyActionsMock = {
 export const legacyGetHourlyNotificationResult = (
   id = '456',
   ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
+): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -74,7 +74,7 @@ export const legacyGetHourlyNotificationResult = (
 export const legacyGetWeeklyNotificationResult = (
   id = '456',
   ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
+): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -123,7 +123,7 @@ export const legacyGetWeeklyNotificationResult = (
 export const legacyGetDailyNotificationResult = (
   id = '456',
   ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
+): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],

@@ -19,7 +19,7 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
@@ -148,6 +148,7 @@ export function registerJobsMonitoringRuleType({
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
+    alerts: DEFAULT_AAD_CONFIG,
     async executor(options) {
       const {
         services,

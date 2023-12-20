@@ -19,19 +19,20 @@ import type {
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export interface LegacyRuleNotificationAlertTypeParams extends RuleTypeParams {
+export interface LegacyRuleNotificationRuleTypeParams extends RuleTypeParams {
   ruleAlertId: string;
 }
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export type LegacyRuleNotificationAlertType = Rule<LegacyRuleNotificationAlertTypeParams>;
+export type LegacyRuleNotificationRuleType = Rule<LegacyRuleNotificationRuleTypeParams>;
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -81,35 +82,40 @@ export interface LegacyReadNotificationParams {
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyIsAlertType = (
-  partialAlert: PartialRule<RuleTypeParams>
-): partialAlert is LegacyRuleNotificationAlertType => {
-  return partialAlert.alertTypeId === LEGACY_NOTIFICATIONS_ID;
+export const isLegacyRuleType = (
+  partialRule: PartialRule<RuleTypeParams>
+): partialRule is LegacyRuleNotificationRuleType => {
+  return partialRule.alertTypeId === LEGACY_NOTIFICATIONS_ID;
 };
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type LegacyNotificationExecutorOptions = RuleExecutorOptions<
-  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationRuleTypeParams,
   RuleTypeState,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  'default',
+  DefaultAlert
 >;
 
 /**
- * This returns true because by default a NotificationAlertTypeDefinition is an AlertType
+ * This returns true because by default a NotificationRuleTypeDefinition is an RuleType
  * since we are only increasing the strictness of params.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyIsNotificationAlertExecutor = (
-  obj: LegacyNotificationAlertTypeDefinition
+export const isLegacyNotificationRuleExecutor = (
+  obj: LegacyNotificationRuleTypeDefinition
 ): obj is RuleType<
-  LegacyRuleNotificationAlertTypeParams,
-  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationRuleTypeParams,
+  LegacyRuleNotificationRuleTypeParams,
   RuleTypeState,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  'default',
+  never,
+  DefaultAlert
 > => {
   return true;
 };
@@ -117,14 +123,16 @@ export const legacyIsNotificationAlertExecutor = (
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export type LegacyNotificationAlertTypeDefinition = Omit<
+export type LegacyNotificationRuleTypeDefinition = Omit<
   RuleType<
-    LegacyRuleNotificationAlertTypeParams,
-    LegacyRuleNotificationAlertTypeParams,
+    LegacyRuleNotificationRuleTypeParams,
+    LegacyRuleNotificationRuleTypeParams,
     RuleTypeState,
     AlertInstanceState,
     AlertInstanceContext,
-    'default'
+    'default',
+    never,
+    DefaultAlert
   >,
   'executor'
 > & {
@@ -136,17 +144,17 @@ export type LegacyNotificationAlertTypeDefinition = Omit<
 };
 
 /**
- * This is the notification type used within legacy_rules_notification_alert_type for the alert params.
+ * This is the notification type used within legacy_rules_notification_rule_type for the alert params.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * @see legacy_rules_notification_alert_type
+ * @see legacy_rules_notification_rule_type
  */
 export const legacyRulesNotificationParams = schema.object({
   ruleAlertId: schema.string(),
 });
 
 /**
- * This legacy rules notification type used within legacy_rules_notification_alert_type for the alert params.
+ * This legacy rules notification type used within legacy_rules_notification_rule_type for the alert params.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * @see legacy_rules_notification_alert_type
+ * @see legacy_rules_notification_rule_type
  */
 export type LegacyRulesNotificationParams = TypeOf<typeof legacyRulesNotificationParams>;
