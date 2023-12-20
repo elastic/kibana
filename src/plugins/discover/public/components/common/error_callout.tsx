@@ -8,7 +8,7 @@
 
 import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -22,7 +22,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
   const { core } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
 
-  const overrideDisplay = getSearchErrorOverrideDisplay({
+  const searchErrorDisplay = renderSearchError({
     error,
     application: core.application,
   });
@@ -31,15 +31,17 @@ export const ErrorCallout = ({ title, error }: Props) => {
     <EuiEmptyPrompt
       iconType="error"
       color="danger"
-      title={<h2 data-test-subj="discoverErrorCalloutTitle">{overrideDisplay?.title ?? title}</h2>}
-      actions={overrideDisplay?.actions ?? []}
+      title={
+        <h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>
+      }
+      actions={searchErrorDisplay?.actions ?? []}
       body={
         <div
           css={css`
             text-align: left;
           `}
         >
-          {overrideDisplay?.body ?? (
+          {searchErrorDisplay?.body ?? (
             <>
               <p
                 css={css`

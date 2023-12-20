@@ -39,6 +39,12 @@ describe('createChatService', () => {
     }
 
     beforeEach(async () => {
+      clientSpy.mockImplementationOnce(async () => {
+        return {
+          functionDefinitions: [],
+          contextDefinitions: [],
+        };
+      });
       service = await createChatService({
         analytics: {
           optIn: () => {},

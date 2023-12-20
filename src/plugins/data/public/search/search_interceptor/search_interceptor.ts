@@ -34,7 +34,6 @@ import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 import {
@@ -50,6 +49,14 @@ import {
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { BfetchRequestError } from '@kbn/bfetch-error';
+import {
+  EsError,
+  isEsError,
+  isPainlessError,
+  PainlessError,
+  renderSearchError,
+} from '@kbn/search-errors';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -63,21 +70,14 @@ import {
   type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
-import {
-  EsError,
-  isEsError,
-  isPainlessError,
-  PainlessError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  SearchSessionIncompleteWarning,
-} from '../errors';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
-import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
 import type { SearchServiceStartDependencies } from '../search_service';
+import { createRequestHash } from './create_request_hash';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -585,15 +585,15 @@ export class SearchInterceptor {
       return;
     }
 
-    const overrideDisplay = getSearchErrorOverrideDisplay({
+    const searchErrorDisplay = renderSearchError({
       error: e,
       application: this.application,
     });
 
-    if (overrideDisplay) {
+    if (searchErrorDisplay) {
       this.deps.toasts.addDanger({
-        title: overrideDisplay.title,
-        text: toMountPoint(overrideDisplay.body, { theme$: this.deps.theme.theme$ }),
+        title: searchErrorDisplay.title,
+        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

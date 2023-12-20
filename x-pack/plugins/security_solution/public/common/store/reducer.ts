@@ -19,7 +19,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
-import type { TimelinePluginReducer } from '../../timelines/store/timeline';
+import type { TimelinePluginReducer } from '../../timelines/store';
 
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';

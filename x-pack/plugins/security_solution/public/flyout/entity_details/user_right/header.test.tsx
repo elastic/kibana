@@ -24,7 +24,7 @@ const mockProps = {
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserDetailsContent', () => {
+describe('UserPanelHeader', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -75,7 +75,6 @@ describe('UserDetailsContent', () => {
                     '@timestamp': [futureDay],
                   },
                 },
-                [ManagedUserDatasetKey.OKTA]: undefined,
               },
             },
           }}
@@ -126,10 +125,7 @@ describe('UserDetailsContent', () => {
             ...mockProps,
             managedUser: {
               ...mockManagedUserData,
-              data: {
-                [ManagedUserDatasetKey.ENTRA]: undefined,
-                [ManagedUserDatasetKey.OKTA]: undefined,
-              },
+              data: {},
             },
           }}
         />

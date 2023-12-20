@@ -20,6 +20,8 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 
+// This is the Conversation application.
+
 export function Application({
   coreStart,
   history,
@@ -36,12 +38,14 @@ export function Application({
   const theme = useMemo(() => {
     return { theme$ };
   }, [theme$]);
+
   return (
     <EuiErrorBoundary>
       <KibanaThemeProvider theme={theme}>
         <KibanaContextProvider
           services={{
             ...coreStart,
+            ...pluginsStart,
             plugins: {
               start: pluginsStart,
             },
