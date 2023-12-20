@@ -259,6 +259,7 @@ export class ActionExecutor {
             configurationUtilities,
             logger,
             source,
+            ...(actionType.isSystemActionType ? { request } : {}),
           });
         } catch (err) {
           if (
