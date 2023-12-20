@@ -337,8 +337,14 @@ export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
-  /** The action id passed only if returnActionIdCommands contains the command */
+  /**
+   * The action ID. This is a legacy property action and should not longer be used. Only here for
+   * backwards compatibility
+   *
+   * @deprecated
+   */
   action?: string;
+
   /** The action id */
   id: string;
   /**
@@ -389,6 +395,8 @@ export interface ActionDetails<
   alertIds?: string[];
   ruleId?: string;
   ruleName?: string;
+  /** The agent type to where the response action was sent */
+  agentType: ResponseActionAgentType;
 }
 
 export interface ActionDetailsApiResponse<

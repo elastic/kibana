@@ -187,6 +187,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   ): ActionDetails<TOutputType, TParameters> {
     const details: ActionDetails = {
       agents: ['agent-a'],
+      agentType: 'endpoint',
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },

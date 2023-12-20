@@ -8,7 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@kbn/ecs';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -52,6 +55,7 @@ export const isLogsEndpointActionResponse = (
 interface NormalizedActionRequest {
   id: string;
   type: 'ACTION_REQUEST';
+  agentType: ResponseActionAgentType;
   expiration: string;
   agents: string[];
   createdBy: string;
@@ -80,6 +84,7 @@ export const mapToNormalizedActionRequest = (
       agents: Array.isArray(actionRequest.agent.id)
         ? actionRequest.agent.id
         : [actionRequest.agent.id],
+      agentType: actionRequest.EndpointActions.input_type,
       command: actionRequest.EndpointActions.data.command,
       comment: actionRequest.EndpointActions.data.comment,
       createdBy: actionRequest.user.id,
@@ -98,6 +103,7 @@ export const mapToNormalizedActionRequest = (
   // Else, it's a Fleet Endpoint Action record
   return {
     agents: actionRequest.agents,
+    agentType: actionRequest.input_type,
     command: actionRequest.data.command,
     comment: actionRequest.data.comment,
     createdBy: actionRequest.user_id,
