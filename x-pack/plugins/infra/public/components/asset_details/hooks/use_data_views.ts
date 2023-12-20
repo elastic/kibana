@@ -23,8 +23,8 @@ const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
     loading: logsReferenceLoading,
   } = useLogViewReference({
     id: 'asset-details-logs-view',
-    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.logsForAssetWidgetName', {
-      defaultMessage: '{type} logs from "{name}"',
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.assetLogsWidgetName', {
+      defaultMessage: 'Logs from {type} "{name}"',
       values: {
         name: asset.name,
         type: findInventoryModel(asset.type).singularDisplayName,
