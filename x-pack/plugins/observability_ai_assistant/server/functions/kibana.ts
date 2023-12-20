@@ -78,9 +78,9 @@ export function registerKibanaFunction({
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,
-        // httpsAgent: new https.Agent({
-        //   rejectUnauthorized: false,
-        // }),
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
       }).then((response) => {
         return { content: response.data };
       });
