@@ -558,7 +558,6 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: true,
-            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -618,7 +617,6 @@ describe('<TemplateCreate />', () => {
       await testBed.actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         lifecycle: {
           enabled: true,
           value: 1,
