@@ -37,8 +37,8 @@ export const AddDataPanelContent: React.FC<AddDataPanelContentProps> = ({
   return (
     <CodeBox
       languages={languageDefinitions}
-      codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'testConnection', codeArgs)}
-      consoleRequest={getConsoleRequest('testConnection')}
+      codeSnippet={getLanguageDefinitionCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
+      consoleRequest={getConsoleRequest('ingestData')}
       selectedLanguage={selectedLanguage}
       setSelectedLanguage={setSelectedLanguage}
       assetBasePath={assetBasePath}

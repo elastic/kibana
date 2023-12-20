@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { fetchAssetCriticalityPrivileges } from '../api';
+import { useEntityAnalyticsRoutes } from '../api';
 
 export const useAssetCriticalityPrivileges = () => {
+  const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
   return useQuery(['GET', 'FETCH_ASSET_CRITICALITY_PRIVILEGES'], fetchAssetCriticalityPrivileges);
 };

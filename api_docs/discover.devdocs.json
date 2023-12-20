@@ -133,11 +133,11 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/unified-data-table",
+                "pluginId": "savedSearch",
                 "scope": "common",
-                "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-common.UnifiedDataTableSettings",
-                "text": "UnifiedDataTableSettings"
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
               },
               " | undefined"
             ],
@@ -885,99 +885,6 @@
       },
       {
         "parentPluginId": "discover",
-        "id": "def-public.FlyoutContentActions",
-        "type": "Interface",
-        "tags": [],
-        "label": "FlyoutContentActions",
-        "description": [],
-        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.FlyoutContentActions.addFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "addFilter",
-            "description": [],
-            "signature": [
-              "DocViewFilterFn",
-              " | undefined"
-            ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.FlyoutContentActions.addColumn",
-            "type": "Function",
-            "tags": [],
-            "label": "addColumn",
-            "description": [],
-            "signature": [
-              "(column: string) => void"
-            ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "discover",
-                "id": "def-public.FlyoutContentActions.addColumn.$1",
-                "type": "string",
-                "tags": [],
-                "label": "column",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.FlyoutContentActions.removeColumn",
-            "type": "Function",
-            "tags": [],
-            "label": "removeColumn",
-            "description": [],
-            "signature": [
-              "(column: string) => void"
-            ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "discover",
-                "id": "def-public.FlyoutContentActions.removeColumn.$1",
-                "type": "string",
-                "tags": [],
-                "label": "column",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-public.FlyoutContentProps",
         "type": "Interface",
         "tags": [],
@@ -995,13 +902,9 @@
             "label": "actions",
             "description": [],
             "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.FlyoutContentActions",
-                "text": "FlyoutContentActions"
-              }
+              "{ filter?: ",
+              "DocViewFilterFn",
+              " | undefined; onAddColumn?: ((columnName: string) => void) | undefined; onRemoveColumn?: ((columnName: string) => void) | undefined; }"
             ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
@@ -1133,6 +1036,43 @@
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.docViewsRegistry",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "docViewsRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-common.DocViewsRegistry",
+                "text": "DocViewsRegistry"
+              },
+              " | ((prevRegistry: ",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-common.DocViewsRegistry",
+                "text": "DocViewsRegistry"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-common.DocViewsRegistry",
+                "text": "DocViewsRegistry"
+              },
+              ") | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1243,8 +1183,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               " | undefined; }"
             ],
@@ -2459,18 +2399,6 @@
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts"
-              },
-              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
               },
@@ -2481,6 +2409,18 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts"
               },
               {
                 "plugin": "synthetics",
@@ -2661,6 +2601,29 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/discover/common/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.grid",
+            "type": "Object",
+            "tags": [],
+            "label": "grid",
+            "description": [
+              "\nData Grid related state"
+            ],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/discover/common/locator.ts",
             "deprecated": false,
