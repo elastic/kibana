@@ -173,7 +173,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isWordWrapped, setIsWordWrapped] = useState(false);
 
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -479,15 +478,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
-  useEffect(() => {
-    if (isCodeEditorExpanded && !isWordWrapped) {
-      const pipes = code?.split('|');
-      const pipesWithNewLine = code?.split('\n|');
-      if (pipes?.length === pipesWithNewLine?.length) {
-        setIsWordWrapped(true);
-      }
-    }
-  }, [code, isCodeEditorExpanded, isWordWrapped]);
+  const allPipesAreInNewLine = useMemo(() => {
+    const pipes = code?.split('|');
+    const pipesWithNewLine = code?.split('\n|');
+    return pipes?.length === pipesWithNewLine?.length;
+  }, [code]);
 
   const onResize = ({ width }: { width: number }) => {
     setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
@@ -500,7 +495,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
-      setIsWordWrapped(false);
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
@@ -571,7 +565,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       defaultMessage: 'Add line breaks on pipes',
                     }
                   )}
-                  condition={!isWordWrapped}
+                  condition={!allPipesAreInNewLine}
                 >
                   <EuiButtonIcon
                     iconType="pipeBreaks"
@@ -584,9 +578,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         defaultMessage: 'Add line breaks on pipes',
                       }
                     )}
-                    isDisabled={isWordWrapped}
+                    isDisabled={allPipesAreInNewLine}
                     onClick={() => {
-                      setIsWordWrapped(true);
                       const updatedCode = getWrappedInPipesCode(code, false);
                       if (code !== updatedCode) {
                         setCode(updatedCode);
@@ -604,7 +597,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       defaultMessage: 'Remove line breaks on pipes',
                     }
                   )}
-                  condition={isWordWrapped}
+                  condition={lines !== 1}
                 >
                   <EuiButtonIcon
                     iconType="pipeNoBreaks"
@@ -617,9 +610,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         defaultMessage: 'Remove line breaks on pipes',
                       }
                     )}
-                    isDisabled={!isWordWrapped}
+                    isDisabled={lines === 1}
                     onClick={() => {
-                      setIsWordWrapped(false);
                       const updatedCode = getWrappedInPipesCode(code, true);
                       if (code !== updatedCode) {
                         setCode(updatedCode);
