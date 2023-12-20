@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  EuiProgress,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
@@ -58,7 +58,7 @@ import { eventIsPinned } from '../body/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledTimelineUnifiedDataTable, progressStyle } from './styles';
+import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from './styles';
 import type { NotesMap } from './render_custom_body';
 import CustomGridBodyControls, { TimelineDataTableContext } from './render_custom_body';
 import RowDetails from './row_details';
@@ -605,12 +605,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       <StyledTimelineUnifiedDataTable>
         {(dataLoadingState === DataLoadingState.loading ||
           dataLoadingState === DataLoadingState.loadingMore) && (
-          <EuiProgress
-            data-test-subj="discoverDataGridUpdating"
-            size="xs"
-            color="accent"
-            css={progressStyle}
-          />
+          <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
         )}
         <TimelineDataTableContext.Provider value={timelineDataTableContextValue}>
           <DataGridMemoized

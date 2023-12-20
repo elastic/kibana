@@ -82,10 +82,6 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
-
-  &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -191,6 +187,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
     'useDiscoverComponentsInTimeline'
   );
+
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
   const rows = useMemo(() => pageRows.flat(), [pageRows]);
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -368,9 +365,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       })),
     [ACTION_BUTTON_COUNT]
   );
-  const isDatePickerDisabled = useMemo(() => {
-    return (combinedQueries && combinedQueries.kqlError != null) || false;
-  }, [combinedQueries]);
 
   const header = useMemo(
     () => (
@@ -435,7 +429,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </StyledTableFlexItem>
         </StyledTableFlexGroup>
       ) : (
-        <FullWidthFlexGroup gutterSize="none">
+        <FullWidthFlexGroup direction="column" gutterSize="s">
           <ScrollableFlexItem grow={2}>
             {header}
             <EventDetailsWidthProvider>
