@@ -4,25 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType } from 'react';
-import { Optional } from '@kbn/utility-types';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import React from 'react';
 import { dynamic } from '../../../common/dynamic';
-import type { LogAIAssistantDeps } from './log_ai_assistant';
 
 export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
 
-interface LogAIAssistantFactoryDeps {
-  observabilityAIAssistant: LogAIAssistantDeps['observabilityAIAssistant'];
-}
-
-export type LogAIAssistantComponent = ComponentType<
-  Optional<LogAIAssistantDeps, 'observabilityAIAssistant'>
->;
-
 export function createLogAIAssistant({
-  observabilityAIAssistant: aiAssistantService,
-}: LogAIAssistantFactoryDeps): LogAIAssistantComponent {
-  return ({ observabilityAIAssistant = aiAssistantService, ...props }) => (
+  observabilityAIAssistant,
+}: {
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+}) {
+  return ({ ...props }) => (
     <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} {...props} />
   );
 }
