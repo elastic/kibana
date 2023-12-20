@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
+    key: check_types
     agents:
       queue: n2-16-spot
     timeout_in_minutes: 60
