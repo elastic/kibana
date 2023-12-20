@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
-      expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'String']);
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'String', 'String']);
 
       expect(await findFirstDocViewerTokens()).to.eql([
         'String',
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Number',
         'String',
         'String',
-        'Unknown field',
+        'String',
         'String',
         'String',
       ]);

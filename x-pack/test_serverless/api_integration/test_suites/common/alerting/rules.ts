@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -926,7 +927,7 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
   expect(event?.kibana?.saved_objects).to.eql([
     {
       rel: 'primary',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       id: params.ruleId,
       type_id: params.ruleTypeId,
     },

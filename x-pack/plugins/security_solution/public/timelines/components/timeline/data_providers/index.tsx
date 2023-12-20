@@ -21,13 +21,13 @@ import { droppableTimelineProvidersPrefix } from '../../../../common/components/
 
 import { Empty } from './empty';
 import { Providers } from './providers';
-import { timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 
 import * as i18n from './translations';
 import { options } from '../search_or_filter/helpers';
-import type { KqlMode } from '../../../store/timeline/model';
-import { updateKqlMode } from '../../../store/timeline/actions';
+import type { KqlMode } from '../../../store/model';
+import { updateKqlMode } from '../../../store/actions';
 
 interface Props {
   timelineId: string;

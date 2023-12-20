@@ -7,13 +7,16 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiBetaBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHighlight,
   EuiPopover,
   EuiSelectable,
   EuiSelectableOption,
-  EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -26,12 +29,14 @@ interface FunctionListOption {
 }
 
 export function FunctionListPopover({
+  mode,
   selectedFunctionName,
   onSelectFunction,
   disabled,
 }: {
+  mode: 'prompt' | 'function';
   selectedFunctionName?: string;
-  onSelectFunction: (func: string) => void;
+  onSelectFunction: (func: string | undefined) => void;
   disabled: boolean;
 }) {
   const { getFunctions } = useObservabilityAIAssistantChatService();
@@ -46,6 +51,12 @@ export function FunctionListPopover({
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
   const handleClickFunctionList = () => {
+    if (selectedFunctionName) {
+      onSelectFunction(undefined);
+      setIsFunctionListOpen(false);
+      return;
+    }
+
     setIsFunctionListOpen(!isFunctionListOpen);
   };
 
@@ -86,17 +97,29 @@ export function FunctionListPopover({
     searchValue: string
   ) => {
     return (
-      <>
-        <EuiText size="s">
-          <strong>
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
-          </strong>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
-          <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
-        </EuiText>
-      </>
+      <EuiFlexGroup gutterSize="xs" direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>{' '}
+                  <EuiBetaBadge label="beta" size="s" style={{ verticalAlign: 'middle' }} />
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+            style={{ textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: 4 }}
+          >
+            <EuiHighlight search={searchValue}>{option.searchableLabel || ''}</EuiHighlight>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -104,20 +127,30 @@ export function FunctionListPopover({
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiButtonEmpty
-          data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
-          iconType="arrowRight"
-          iconSide="right"
-          size="xs"
-          onClick={handleClickFunctionList}
-          disabled={disabled}
+        <EuiToolTip
+          content={
+            mode === 'prompt'
+              ? i18n.translate(
+                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.selectAFunctionLabel',
+                  { defaultMessage: 'Select a function' }
+                )
+              : i18n.translate(
+                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.clearFunction',
+                  {
+                    defaultMessage: 'Clear function',
+                  }
+                )
+          }
+          display="block"
         >
-          {selectedFunctionName
-            ? selectedFunctionName
-            : i18n.translate('xpack.observabilityAiAssistant.prompt.functionList.callFunction', {
-                defaultMessage: 'Call function',
-              })}
-        </EuiButtonEmpty>
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
+            disabled={disabled}
+            iconType={selectedFunctionName ? 'cross' : 'plusInCircle'}
+            size="xs"
+            onClick={handleClickFunctionList}
+          />
+        </EuiToolTip>
       }
       closePopover={handleClickFunctionList}
       css={{ maxWidth: 400 }}
@@ -172,12 +205,12 @@ function mapFunctions({
   selectedFunctionName: string | undefined;
 }) {
   return functions
-    .filter((func) => func.options.visibility !== FunctionVisibility.System)
+    .filter((func) => func.visibility !== FunctionVisibility.System)
     .map((func) => ({
-      label: func.options.name,
-      searchableLabel: func.options.descriptionForUser || func.options.description,
+      label: func.name,
+      searchableLabel: func.descriptionForUser || func.description,
       checked:
-        func.options.name === selectedFunctionName
+        func.name === selectedFunctionName
           ? ('on' as EuiSelectableOptionCheckedType)
           : ('off' as EuiSelectableOptionCheckedType),
     }));

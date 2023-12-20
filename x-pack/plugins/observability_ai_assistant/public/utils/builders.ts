@@ -7,7 +7,12 @@
 
 import { merge, uniqueId } from 'lodash';
 import { DeepPartial } from 'utility-types';
-import { MessageRole, Conversation, FunctionDefinition, Message } from '../../common/types';
+import {
+  type Conversation,
+  type FunctionDefinition,
+  type Message,
+  MessageRole,
+} from '../../common/types';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
 type BuildMessageProps = DeepPartial<Message> & {
@@ -121,28 +126,25 @@ export function buildConversation(params?: Partial<Conversation>) {
 
 export function buildFunction(): FunctionDefinition {
   return {
-    options: {
-      name: 'elasticsearch',
-      contexts: ['core'],
-      description: 'Call Elasticsearch APIs on behalf of the user',
-      descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
-      parameters: {
-        type: 'object',
-        properties: {
-          method: {
-            type: 'string',
-            description: 'The HTTP method of the Elasticsearch endpoint',
-            enum: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'] as const,
-          },
-          path: {
-            type: 'string',
-            description: 'The path of the Elasticsearch endpoint, including query parameters',
-          },
+    name: 'elasticsearch',
+    contexts: ['core'],
+    description: 'Call Elasticsearch APIs on behalf of the user',
+    descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
+    parameters: {
+      type: 'object',
+      properties: {
+        method: {
+          type: 'string',
+          description: 'The HTTP method of the Elasticsearch endpoint',
+          enum: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'] as const,
         },
-        required: ['method' as const, 'path' as const],
+        path: {
+          type: 'string',
+          description: 'The path of the Elasticsearch endpoint, including query parameters',
+        },
       },
+      required: ['method' as const, 'path' as const],
     },
-    respond: async (options: { arguments: any }, signal: AbortSignal) => ({}),
   };
 }
 
@@ -150,16 +152,13 @@ export const buildFunctionElasticsearch = buildFunction;
 
 export function buildFunctionServiceSummary(): FunctionDefinition {
   return {
-    options: {
-      name: 'get_service_summary',
-      contexts: ['core'],
-      description:
-        'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
-      descriptionForUser: 'Get a summary for a single service.',
-      parameters: {
-        type: 'object',
-      },
+    name: 'get_service_summary',
+    contexts: ['core'],
+    description:
+      'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
+    descriptionForUser: 'Get a summary for a single service.',
+    parameters: {
+      type: 'object',
     },
-    respond: async (options: { arguments: any }, signal: AbortSignal) => ({}),
   };
 }

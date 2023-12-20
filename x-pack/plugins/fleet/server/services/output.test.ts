@@ -11,6 +11,8 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { Logger } from '@kbn/logging';
 
+import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+
 import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -703,12 +705,12 @@ describe('Output Service', () => {
       );
     });
 
-    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+    it('should not throw when a remote es output is attempted to be created as default data output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
 
-      await expect(
+      expect(
         outputService.create(
           soClient,
           esClientMock,
@@ -720,9 +722,123 @@ describe('Output Service', () => {
           },
           { id: 'output-1' }
         )
-      ).rejects.toThrow(
-        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
+      ).resolves.not.toThrow();
+    });
+
+    it('should set preset: balanced by default when creating a new ES output', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+        },
+        {
+          id: 'output-1',
+        }
       );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        // Preset should be inferred as balanced if not provided
+        expect.objectContaining({
+          preset: 'balanced',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should set preset: custom when config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            bulk_max_size: 1000
+          `,
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should honor preset: custom in attributes', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          config_yaml: `
+            some_non_reserved_key: foo
+          `,
+          preset: 'custom',
+        },
+        {
+          id: 'output-1',
+        }
+      );
+
+      expect(soClient.create).toBeCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          preset: 'custom',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should throw an error when preset: balanced is provided but config_yaml contains a reserved key', async () => {
+      const soClient = getMockedSoClient({});
+
+      expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'elasticsearch',
+            config_yaml: `
+            bulk_max_size: 1000
+          `,
+            preset: 'balanced',
+          },
+          {
+            id: 'output-1',
+          }
+        )
+      ).rejects.toThrow(
+        `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
+          ', '
+        )}`
+      );
+
+      expect(soClient.create).not.toBeCalled();
     });
   });
 
@@ -931,6 +1047,7 @@ describe('Output Service', () => {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
         ssl: null,
+        preset: 'balanced',
       });
     });
 
@@ -969,6 +1086,7 @@ describe('Output Service', () => {
         headers: null,
         username: null,
         version: null,
+        preset: 'balanced',
       });
     });
 
@@ -1524,21 +1642,19 @@ describe('Output Service', () => {
       );
     });
 
-    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+    it('should not throw when a remote es output is attempted to be updated as default data output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
 
-      await expect(
+      expect(
         outputService.update(soClient, esClientMock, 'output-test', {
           is_default: true,
           is_default_monitoring: false,
           name: 'Test',
           type: 'remote_elasticsearch',
         })
-      ).rejects.toThrow(
-        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
-      );
+      ).resolves.not.toThrow();
     });
   });
 
@@ -1681,7 +1797,7 @@ describe('Output Service', () => {
   });
 
   describe('getLatestOutputHealth', () => {
-    it('should return unkown state if no hits', async () => {
+    it('should return unknown state if no hits', async () => {
       esClientMock.search.mockResolvedValue({
         hits: {
           hits: [],
@@ -1691,7 +1807,7 @@ describe('Output Service', () => {
       const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
 
       expect(response).toEqual({
-        state: 'UNKOWN',
+        state: 'UNKNOWN',
         message: '',
         timestamp: '',
       });
@@ -1719,6 +1835,68 @@ describe('Output Service', () => {
         message: 'connection error',
         timestamp: '2023-11-30T14:25:31Z',
       });
+    });
+  });
+
+  describe('backfillAllOutputPresets', () => {
+    it('should update non-preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('non-preconfigured-output', {
+              is_preconfigured: false,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('non-preconfigured-output', {
+          is_preconfigured: false,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
+    });
+
+    it('should update preconfigured output', async () => {
+      const soClient = getMockedSoClient({});
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockOutputSO('preconfigured-output', {
+              is_preconfigured: true,
+              type: 'elasticsearch',
+            }),
+            score: 0,
+          },
+        ],
+        total: 1,
+        per_page: 1,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        ...mockOutputSO('preconfigured-output', {
+          is_preconfigured: true,
+          type: 'elasticsearch',
+        }),
+      });
+
+      const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
+
+      await expect(promise).resolves.not.toThrow();
     });
   });
 });

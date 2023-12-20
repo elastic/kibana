@@ -9,19 +9,19 @@ import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspRuleTemplates } from './use_csp_rules';
+import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
+import type { CspBenchmarkRule } from '../../../common/types/latest';
 import { useParams } from 'react-router-dom';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CspRuleTemplate } from '../../../common/schemas';
 
 const chance = new Chance();
 
-jest.mock('./use_csp_rules', () => ({
-  useFindCspRuleTemplates: jest.fn(),
-  useBulkUpdateCspRuleTemplates: jest.fn(),
+jest.mock('./use_csp_benchmark_rules', () => ({
+  useFindCspBenchmarkRule: jest.fn(),
+  useBulkUpdateCspBenchmarkRule: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -52,7 +52,7 @@ const getWrapper =
     return <TestProvider core={core}>{children}</TestProvider>;
   };
 
-const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
+const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
   ({
     metadata: {
       audit: chance.sentence(),
@@ -75,7 +75,7 @@ const getRuleMock = (id = chance.guid()): CspRuleTemplate =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspRuleTemplate);
+  } as CspBenchmarkRule);
 
 const params = {
   packagePolicyId: chance.guid(),
@@ -93,7 +93,7 @@ describe('<RulesContainer />', () => {
     const Wrapper = getWrapper();
     const rule1 = getRuleMock();
 
-    (useFindCspRuleTemplates as jest.Mock).mockReturnValue({
+    (useFindCspBenchmarkRule as jest.Mock).mockReturnValue({
       status: 'success',
       data: {
         total: 1,
