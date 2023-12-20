@@ -7,7 +7,6 @@
 
 import axios from 'axios';
 import { format } from 'url';
-import https from 'https';
 import { pick } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
