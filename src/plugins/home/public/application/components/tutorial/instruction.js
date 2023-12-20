@@ -67,7 +67,7 @@ export function Instruction({
     );
   }
 
-  const darkTheme = theme.getTheme().darkMode;
+  const darkTheme = theme?.getTheme().darkMode ?? false;
 
   return (
     <div>
