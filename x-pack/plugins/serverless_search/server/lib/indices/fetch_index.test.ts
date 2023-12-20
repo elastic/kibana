@@ -77,7 +77,7 @@ describe('fetch index lib function', () => {
     });
   });
 
-  it('should throw an error if client calls error', () => {
+  it('should throw an error if get index rejects', () => {
     const expectedError = new Error('Boom!');
 
     mockClient.indices.get.mockRejectedValue(expectedError);
@@ -86,26 +86,57 @@ describe('fetch index lib function', () => {
     (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
 
     expect(fetchIndex(client(), indexName)).rejects.toEqual(expectedError);
+  });
+
+  it('should return partial data if index stats rejects', () => {
+    const expectedError = new Error('Boom!');
 
     mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
     mockClient.indices.stats.mockRejectedValue(expectedError);
     mockClient.count.mockResolvedValue(indexCountResponse);
     (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
 
-    expect(fetchIndex(client(), indexName)).rejects.toEqual(expectedError);
+    expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
+        count: 100,
+        connector: indexConnector,
+      },
+    });
+  });
+
+  it('should return partial data if index count rejects', () => {
+    const expectedError = new Error('Boom!');
 
     mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
     mockClient.indices.stats.mockResolvedValue(regularIndexStatsResponse);
     mockClient.count.mockRejectedValue(expectedError);
     (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
 
-    expect(fetchIndex(client(), indexName)).rejects.toEqual(expectedError);
+    expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
+        count: 0,
+        connector: indexConnector,
+        stats: regularIndexStatsResponse.indices[indexName],
+      },
+    });
+  });
+
+  it('should return partial data if fetch connector rejects', () => {
+    const expectedError = new Error('Boom!');
 
     mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
     mockClient.indices.stats.mockResolvedValue(regularIndexStatsResponse);
     mockClient.count.mockResolvedValue(indexCountResponse);
     (fetchConnectorByIndexName as unknown as jest.Mock).mockRejectedValue(expectedError);
 
-    expect(fetchIndex(client(), indexName)).rejects.toEqual(expectedError);
+    expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
+        count: 100,
+        stats: regularIndexStatsResponse.indices[indexName],
+      },
+    });
   });
 });

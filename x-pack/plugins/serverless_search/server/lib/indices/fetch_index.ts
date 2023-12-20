@@ -14,21 +14,32 @@ export async function fetchIndex(
   client: ElasticsearchClient,
   indexName: string
 ): Promise<FetchIndexResult | undefined> {
-  const [indexData, indexStats, indexCount, connector] = await Promise.all([
-    client.indices.get({ index: indexName }),
-    client.indices.stats({ index: indexName }),
-    client.count({ index: indexName }),
-    fetchConnectorByIndexName(client, indexName),
-  ]);
+  const [indexDataResult, indexStatsResult, indexCountResult, connectorResult] =
+    await Promise.allSettled([
+      client.indices.get({ index: indexName }),
+      client.indices.stats({ index: indexName }),
+      client.count({ index: indexName }),
+      fetchConnectorByIndexName(client, indexName),
+    ]);
+  if (indexDataResult.status === 'rejected') {
+    throw indexDataResult.reason;
+  }
+  const indexData = indexDataResult.value;
   if (!indexData || !indexData[indexName]) return undefined;
 
   const index = indexData[indexName];
+  const count = indexCountResult.status === 'fulfilled' ? indexCountResult.value.count : 0;
+  const connector = connectorResult.status === 'fulfilled' ? connectorResult.value : undefined;
+  const stats =
+    indexStatsResult.status === 'fulfilled'
+      ? indexStatsResult.value.indices?.[indexName]
+      : undefined;
   return {
     index: {
       ...index,
-      count: indexCount.count,
+      count,
       connector,
-      stats: indexStats.indices?.[indexName],
+      stats,
     },
   };
 }
