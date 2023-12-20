@@ -24,7 +24,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { isQueryInput } from '../../store/inputs/helpers';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { useUiSetting$ } from '../../lib/kibana';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';

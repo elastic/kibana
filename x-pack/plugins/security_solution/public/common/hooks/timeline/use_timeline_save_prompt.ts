@@ -17,7 +17,7 @@ import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../use_selector';
 import { APP_ID, APP_PATH } from '../../../../common/constants';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import {
   UNSAVED_TIMELINE_SAVE_PROMPT,
   UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
