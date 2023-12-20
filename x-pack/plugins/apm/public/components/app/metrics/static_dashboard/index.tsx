@@ -74,16 +74,16 @@ async function getCreationOptions(
   dataView: DataView
 ): Promise<DashboardCreationOptions> {
   try {
-    // const builder = controlGroupInputBuilder;
-    // const controlGroupInput = getDefaultControlGroupInput();
+    const builder = controlGroupInputBuilder;
+    const controlGroupInput = getDefaultControlGroupInput();
 
-    // await builder.addDataControlFromField(controlGroupInput, {
-    //   dataView,
-    //   title: 'Node name',
-    //   fieldName: 'service.node.name',
-    //   width: 'medium',
-    //   grow: true,
-    // });
+    await builder.addDataControlFromField(controlGroupInput, {
+      dataViewId: dataView.id ?? '',
+      title: 'Node name',
+      fieldName: 'service.node.name',
+      width: 'medium',
+      grow: true,
+    });
     const panels = await convertObjectToPanels(dashboardProps, dataView);
 
     if (!panels) {
@@ -95,6 +95,7 @@ async function getCreationOptions(
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
+        controlGroupInput,
       }),
     };
   } catch (error) {
