@@ -14,6 +14,7 @@ const LEVEL_DICT = {
   error: 'danger',
   warn: 'warning',
   info: 'primary',
+  debug: 'accent',
 } as const;
 
 interface LogLevelProps {
@@ -23,12 +24,13 @@ interface LogLevelProps {
   hollow?: boolean;
 }
 
-export function LogLevel({ level = '-', iconType, iconSide }: LogLevelProps) {
+export function LogLevel({ level, iconType, iconSide }: LogLevelProps) {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
+  if (!level) return null;
   const levelColor = LEVEL_DICT[level as keyof typeof LEVEL_DICT]
     ? euiTheme.colors[LEVEL_DICT[level as keyof typeof LEVEL_DICT]]
-    : euiTheme.colors.text;
+    : null;
 
   return (
     <EuiBadge
@@ -37,7 +39,7 @@ export function LogLevel({ level = '-', iconType, iconSide }: LogLevelProps) {
       iconSide={iconSide}
       data-test-subj="logExplorerFlyoutLogLevel"
       css={css`
-        border: 2px solid ${levelColor};
+        ${levelColor ? `border: 2px solid ${levelColor};` : ''}
         font-size: ${xsFontSize};
         display: flex;
         justify-content: center;

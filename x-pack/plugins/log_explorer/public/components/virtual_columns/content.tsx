@@ -19,13 +19,15 @@ const Content = ({ row, dataView }: DataGridCellValueElementProps) => {
 
   return (
     <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
-        <LogLevel
-          level={parsedDoc[constants.LOG_LEVEL_FIELD] ?? '-'}
-          iconType={parsedDoc[constants.LOG_LEVEL_FIELD] ? 'arrowDown' : undefined}
-          iconSide="right"
-        />
-      </EuiFlexItem>
+      {parsedDoc[constants.LOG_LEVEL_FIELD] && (
+        <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
+          <LogLevel
+            level={parsedDoc[constants.LOG_LEVEL_FIELD]}
+            iconType="arrowDown"
+            iconSide="right"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="xs">
           {field && (
