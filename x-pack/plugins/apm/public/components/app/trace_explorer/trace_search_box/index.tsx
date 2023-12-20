@@ -20,7 +20,7 @@ import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../../common/trace_explorer';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_ad_hoc_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 import { EQLCodeEditor } from '../../../shared/monaco_code_editor';
@@ -60,7 +60,7 @@ export function TraceSearchBox({
     services: { storage },
   } = useKibana<ApmPluginStartDeps>();
 
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
 
   return (
     <EuiFlexGroup direction="row">

@@ -25,7 +25,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_ad_hoc_apm_data_view';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { convertObjectToPanels, MetricsDashboardProps } from './helper';
@@ -42,7 +42,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     core: { notifications },
   } = useApmPluginContext();
 
-  // const { dataView } = useApmDataView();
+  // const { dataView } = useAdHocApmDataView();
 
   const { serviceName } = useApmServiceContext();
 

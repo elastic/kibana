@@ -19,13 +19,14 @@ async function getApmDataViewIndexPattern() {
   return res.apmDataViewIndexPattern;
 }
 
-export function useApmDataView() {
+export function useAdHocApmDataView() {
   const { services, notifications } = useKibana<ApmPluginStartDeps>();
   const [dataView, setDataView] = useState<DataView | undefined>();
 
   useEffect(() => {
     async function fetchDataView() {
       const indexPattern = await getApmDataViewIndexPattern();
+
       try {
         const displayError = false;
         return await services.dataViews.create(

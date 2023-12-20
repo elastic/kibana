@@ -34,7 +34,7 @@ import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
 import { DashboardSelector } from './dashboard_selector';
-import { useApmDataView } from '../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -58,7 +58,7 @@ export function ServiceDashboards() {
     useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
   const { share } = useApmPluginContext();
 
   const { data, status, refetch } = useFetcher(
