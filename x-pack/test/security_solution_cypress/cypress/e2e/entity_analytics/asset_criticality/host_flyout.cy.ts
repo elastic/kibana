@@ -11,14 +11,12 @@ import {
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION,
-  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL,
 } from '../../../screens/asset_criticality/flyouts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import {
   expandFirstAlertHostFlyout,
+  selectAssetCriticalityLevel,
   toggleAssetCriticalityAccordion,
   toggleAssetCriticalityModal,
 } from '../../../tasks/asset_criticality/common';
@@ -51,12 +49,10 @@ describe(
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      expandFirstAlertHostFlyout();
     });
 
     describe('Host flyout', () => {
-      beforeEach(() => {
-        expandFirstAlertHostFlyout();
-      });
       it('should display header section', () => {
         cy.log('header and content');
 
@@ -88,14 +84,7 @@ describe(
       it('should update asset criticality state', () => {
         cy.log('asset criticality update');
 
-        toggleAssetCriticalityModal();
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT).should('be.visible').click();
-
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION)
-          .contains('Important')
-          .click();
-
-        cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN).should('be.visible').click();
+        selectAssetCriticalityLevel('Important');
         cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
           .contains('Important')
           .should('be.visible');

@@ -10,6 +10,9 @@ import {
   OPEN_USER_FLYOUT_BUTTON,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION,
+  HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN,
 } from '../../screens/asset_criticality/flyouts';
 
 /**
@@ -30,8 +33,7 @@ export const expandFirstAlertUserFlyout = () => {
  * Open the asset criticality accordion
  */
 export const toggleAssetCriticalityAccordion = () => {
-  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).scrollIntoView();
-  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should('be.visible').click();
+  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).click();
 };
 
 /**
@@ -39,6 +41,16 @@ export const toggleAssetCriticalityAccordion = () => {
  */
 export const toggleAssetCriticalityModal = () => {
   toggleAssetCriticalityAccordion();
+  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).click();
+};
 
-  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('be.visible').click();
+/**
+ * Open the asset criticality modal
+ */
+export const selectAssetCriticalityLevel = (option: string) => {
+  toggleAssetCriticalityAccordion();
+  toggleAssetCriticalityModal();
+  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT).click();
+  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION).contains(option).click();
+  cy.get(HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN).click();
 };
