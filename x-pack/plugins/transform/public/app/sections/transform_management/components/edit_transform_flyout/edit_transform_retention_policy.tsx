@@ -13,6 +13,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../../common/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { useGetTransformsPreview } from '../../../../hooks';
 
@@ -29,21 +30,21 @@ export const EditTransformRetentionPolicy: FC = () => {
   const toastNotifications = useToastNotifications();
 
   const dataViewId = useEditTransformFlyout((s) => s.dataViewId);
+  const formFields = useEditTransformFlyout((s) => s.formFields);
   const formSections = useEditTransformFlyout((s) => s.formSections);
   const retentionPolicyField = useEditTransformFlyout((s) => s.formFields.retentionPolicyField);
   const config = useEditTransformFlyout((s) => s.config);
-  const formState = useEditTransformFlyout((s) => s.formState);
-  const requestConfig = applyFormStateToTransformConfig(config, formState);
+  const requestConfig = applyFormStateToTransformConfig(config, formFields, formSections);
   const setFormField = useEditTransformFlyout((s) => s.setFormField);
   const setFormSection = useEditTransformFlyout((s) => s.setFormSection);
 
-  const previewRequest = useMemo(() => {
+  const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
-      source: requestConfig.source,
+      source: config.source,
       ...(isPivotTransform(requestConfig) ? { pivot: requestConfig.pivot } : {}),
       ...(isLatestTransform(requestConfig) ? { latest: requestConfig.latest } : {}),
     };
-  }, [requestConfig]);
+  }, [config, requestConfig]);
 
   const { error: transformsPreviewError, data: transformPreview } =
     useGetTransformsPreview(previewRequest);
