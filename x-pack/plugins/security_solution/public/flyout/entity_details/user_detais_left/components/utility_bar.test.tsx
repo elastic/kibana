@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { alertDataMock } from '../mocks';
 import { RiskInputsUtilityBar } from './utility_bar';
 
-describe('RiskInputsPanel', () => {
+describe('RiskInputsUtilityBar', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>

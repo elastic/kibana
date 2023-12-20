@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import type { SimpleRiskInput } from '../../../../common/entity_analytics/risk_engine';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { RiskInputsPanel } from '.';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { times } from 'lodash/fp';
-import { alertDataMock } from './mocks';
+import { alertDataMock } from '../mocks';
+import { RiskInputsTab } from './risk_inputs';
 
 const mockUseAlertsByIds = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../common/containers/alerts/use_alerts_by_ids', () => ({
+jest.mock('../../../../common/containers/alerts/use_alerts_by_ids', () => ({
   useAlertsByIds: () => mockUseAlertsByIds(),
 }));
 
-const TEST_RISK_INPUT: SimpleRiskInput = {
-  id: '123',
-  index: '_test_index',
-  category: RiskCategories.category_1,
-  description: 'test description',
-  risk_score: 70,
-  timestamp: '2023-05-15T16:12:14.967Z',
-};
+const ALERT_IDS = ['123'];
 
-describe('RiskInputsPanel', () => {
+describe('RiskInputsTab', () => {
   it('renders', () => {
     mockUseAlertsByIds.mockReturnValue({
       loading: false,
@@ -39,19 +30,25 @@ describe('RiskInputsPanel', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsPanel riskInputs={[TEST_RISK_INPUT]} />
+        <RiskInputsTab alertIds={ALERT_IDS} />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-inputs-panel')).toBeInTheDocument();
+    expect(getByTestId('risk-input-tab-title')).toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
       'Risk inputRule Name'
     );
   });
 
   it('paginates', () => {
-    const riskInputs = times((index) => ({ ...TEST_RISK_INPUT, id: index.toString() }), 11);
-    const alerts = times((index) => ({ ...alertDataMock, _id: index.toString() }), 11);
+    const alertsIds = times((number) => number.toString(), 11);
+    const alerts = times(
+      (number) => ({
+        ...alertDataMock,
+        _id: number.toString(),
+      }),
+      11
+    );
 
     mockUseAlertsByIds.mockReturnValue({
       loading: false,
@@ -61,7 +58,7 @@ describe('RiskInputsPanel', () => {
 
     const { getAllByTestId, getByLabelText } = render(
       <TestProviders>
-        <RiskInputsPanel riskInputs={riskInputs} />
+        <RiskInputsTab alertIds={alertsIds} />
       </TestProviders>
     );
 
