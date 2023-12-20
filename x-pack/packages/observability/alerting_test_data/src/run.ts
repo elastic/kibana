@@ -7,7 +7,7 @@
 
 import { createApmRule } from './createApmRule';
 import { createCustomThresholdRule } from './create_custom_threshold_rule';
-import { createDataView } from './create_data_view';
+import { createDataView, deleteDataView } from './create_data_view';
 import { createIndexConnector } from './create_index_connector';
 
 import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
@@ -42,6 +42,7 @@ export async function run() {
     if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
       if (scenario.dataView.shouldCreate) {
         console.log('Creating data view - start - id: ', scenario.dataView.id);
+        await deleteDataView(scenario.dataView);
         await createDataView(scenario.dataView);
         console.log('Creating data view - finished - id: ', scenario.dataView.id);
       }
