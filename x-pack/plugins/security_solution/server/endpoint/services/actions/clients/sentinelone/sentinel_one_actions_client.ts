@@ -20,7 +20,7 @@ import type {
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { dump } from '../../../../utils/dump';
 import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails } from '../../../../../../common/endpoint/types';
+import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
   BaseActionRequestBody,
@@ -72,6 +72,20 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       this.log.debug(`Using SentinelOne stack connector: ${connector.name} (${connector.id})`);
 
       return connector;
+    });
+  }
+
+  protected async writeActionRequestToEndpointIndex(
+    actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
+  ): Promise<LogsEndpointAction> {
+    const agentId = actionRequest.endpoint_ids[0];
+    const agentDetails = await this.getAgentDetails(agentId);
+
+    return super.writeActionRequestToEndpointIndex({
+      ...actionRequest,
+      hosts: {
+        [agentId]: { name: agentDetails.computerName },
+      },
     });
   }
 
@@ -164,18 +178,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     await this.validateRequest(options);
+    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
 
-    const agentUUID = options.endpoint_ids[0];
-
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: agentUUID });
-
-    const agentDetails = await this.getAgentDetails(agentUUID);
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: 'isolate',
-      hosts: {
-        [agentUUID]: { name: agentDetails.computerName },
-      },
     };
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
