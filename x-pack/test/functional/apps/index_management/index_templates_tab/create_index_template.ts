@@ -32,8 +32,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Complete required fields from step 1
       await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
       await testSubjects.setValue('indexPatternsField', 'test-1');
-      // Enable data stream
-      await testSubjects.click('dataStreamField > input');
       // Enable data retention
       await testSubjects.click('dataRetentionToggle > input');
       // Set the retention to 7 hours
