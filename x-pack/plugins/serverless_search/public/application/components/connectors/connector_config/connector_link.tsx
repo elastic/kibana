@@ -110,7 +110,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                   <strong>connector_id</strong>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} data-test-subj="serverlessSearchConnectorConnectorId">
                 <EuiCode>{connectorId}</EuiCode>
               </EuiFlexItem>
             </EuiFlexGroup>
