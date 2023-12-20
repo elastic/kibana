@@ -14,7 +14,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { useUnifiedDocViewerServices } from './use_doc_viewer_services';
+import { getUnifiedDocViewerServices } from '../plugin';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
@@ -53,7 +53,7 @@ export function useEsDocSearch({
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
-  const { data, uiSettings, analytics } = useUnifiedDocViewerServices();
+  const { data, uiSettings, analytics } = getUnifiedDocViewerServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {

@@ -119,7 +119,7 @@ export interface MLInferencePipelineOption {
   indexFields: string[];
 }
 
-interface MLInferenceProcessorsActions {
+export interface MLInferenceProcessorsActions {
   addSelectedFieldsToMapping: (isTextExpansionModelSelected: boolean) => {
     isTextExpansionModelSelected: boolean;
   };

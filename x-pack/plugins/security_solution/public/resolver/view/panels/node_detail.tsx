@@ -35,6 +35,8 @@ const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
 `;
 
+const COLUMN_WIDTH = ['fit-content(10em)', 'auto'];
+
 const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
   defaultMessage: 'Node details were unable to be retrieved',
 });
@@ -249,6 +251,7 @@ const NodeDetailView = memo(function ({
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"
         type="column"
+        columnWidths={COLUMN_WIDTH}
         align="left"
         titleProps={
           {

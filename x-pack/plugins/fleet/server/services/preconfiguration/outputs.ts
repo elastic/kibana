@@ -18,6 +18,7 @@ import type {
   OutputSecret,
   KafkaOutput,
   NewLogstashOutput,
+  NewRemoteElasticsearchOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
@@ -189,13 +190,21 @@ async function hashSecrets(output: PreconfiguredOutput) {
   }
   if (output.type === 'logstash') {
     const logstashOutput = output as NewLogstashOutput;
-
     if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
       const key = await hashSecret(logstashOutput.secrets?.ssl?.key);
       return {
         ssl: {
           key,
         },
+      };
+    }
+  }
+  if (output.type === 'remote_elasticsearch') {
+    const remoteESOutput = output as NewRemoteElasticsearchOutput;
+    if (typeof remoteESOutput.secrets?.service_token === 'string') {
+      const serviceToken = await hashSecret(remoteESOutput.secrets?.service_token);
+      return {
+        service_token: serviceToken,
       };
     }
   }
@@ -337,6 +346,21 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     return sslKeyHashIsDifferent;
   };
 
+  const remoteESFieldsAreDifferent = async (): Promise<boolean> => {
+    if (
+      existingOutput.type !== 'remote_elasticsearch' ||
+      preconfiguredOutput.type !== 'remote_elasticsearch'
+    ) {
+      return false;
+    }
+    const serviceTokenIsDifferent = await isSecretDifferent(
+      preconfiguredOutput.secrets?.service_token,
+      existingOutput.secrets?.service_token
+    );
+
+    return serviceTokenIsDifferent;
+  };
+
   return (
     !existingOutput.is_preconfigured ||
     isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
@@ -361,7 +385,10 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
     isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
     isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    (preconfiguredOutput.preset &&
+      isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
     (await kafkaFieldsAreDifferent()) ||
-    (await logstashFieldsAreDifferent())
+    (await logstashFieldsAreDifferent()) ||
+    (await remoteESFieldsAreDifferent())
   );
 }

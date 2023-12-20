@@ -17,5 +17,7 @@ export interface Prompt {
 }
 
 export interface KnowledgeBaseConfig {
+  alerts: boolean;
   assistantLangChain: boolean;
+  latestAlerts: number;
 }

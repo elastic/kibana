@@ -38,6 +38,7 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
+import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
@@ -147,7 +148,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     getInspectQuery,
   } = alertsData;
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient({ context: AlertsTableQueryContext });
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
     props.maintenanceWindows;
@@ -158,6 +159,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
     });
+
+  const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
+    alerts,
+    columns: props.columns,
+  });
 
   const {
     isBulkActionsColumnActive,
@@ -178,6 +184,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const refreshData = useCallback(() => {
     alertsRefresh();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
   }, [alertsRefresh, queryClient]);
 
@@ -213,10 +220,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
-    (alert) => {
-      const idx = alerts.findIndex((a) =>
-        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
-      );
+    (alertId: string) => {
+      const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
       setFlyoutAlertIndex(idx);
     },
     [alerts, setFlyoutAlertIndex]
@@ -373,9 +378,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
+            context: renderCellContext,
           })
         : basicRenderCellValue,
-    [handleFlyoutAlert, props.alertsTableConfiguration]
+    [handleFlyoutAlert, props.alertsTableConfiguration, renderCellContext]
   )();
 
   const handleRenderCellValue = useCallback(
