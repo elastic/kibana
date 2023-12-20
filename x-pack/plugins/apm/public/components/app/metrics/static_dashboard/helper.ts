@@ -11,7 +11,6 @@ import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,
   loadDashboardFile,
 } from './dashboards/dashboard_catalog';
-import { get } from 'lodash';
 
 export interface MetricsDashboardProps {
   agentName?: string;
@@ -21,10 +20,10 @@ export interface MetricsDashboardProps {
 }
 
 export function hasDashboardFile(props: MetricsDashboardProps) {
-  return !!getDashboardFile(props);
+  return !!getDashboardFileName(props);
 }
 
-function getDashboardFile({ agentName }: MetricsDashboardProps) {
+function getDashboardFileName({ agentName }: MetricsDashboardProps) {
   const dashboardFile =
     agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
   return dashboardFile;
@@ -38,24 +37,23 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   };
 };
 
-export async function convertObjectToPanels(
+export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
 ): Promise<DashboardPanelMap | undefined> {
-  const dashboardFile = getDashboardFile(props);
-  const panelsRawObj = !!dashboardFile
-    ? await loadDashboardFile(dashboardFile)
+  const dashboardFilename = getDashboardFileName(props);
+  const dashboardJSON = !!dashboardFilename
+    ? await loadDashboardFile(dashboardFilename)
     : undefined;
 
-  if (!dashboardFile || !panelsRawObj) {
+  if (!dashboardFilename || !dashboardJSON) {
     return undefined;
   }
 
   const panelsRawObjects = JSON.parse(
-    panelsRawObj.attributes.panelsJSON
+    dashboardJSON.attributes.panelsJSON
   ) as any[];
 
-  console.log('panelsRawObjects', panelsRawObjects);
   const panels = panelsRawObjects.reduce((acc, panel) => {
     const { gridData, embeddableConfig, panelIndex, title } = panel;
     const { attributes } = embeddableConfig;
