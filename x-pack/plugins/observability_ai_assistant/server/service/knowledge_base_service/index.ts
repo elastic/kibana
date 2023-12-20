@@ -275,15 +275,18 @@ export class KnowledgeBaseService {
       const elserModelStats = modelStats.trained_model_stats[0];
       const deploymentState = elserModelStats.deployment_stats?.state;
       const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+
       return {
         ready: deploymentState === 'started' && allocationState === 'fully_allocated',
         deployment_state: deploymentState,
         allocation_state: allocationState,
+        model_name: ELSER_MODEL_ID,
       };
     } catch (error) {
       return {
         error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
+        model_name: ELSER_MODEL_ID,
       };
     }
   };
@@ -327,7 +330,7 @@ export class KnowledgeBaseService {
       >({
         index: [this.dependencies.resources.aliases.kb],
         query,
-        size: 5,
+        size: 20,
         _source: {
           includes: ['text', 'is_correction', 'labels'],
         },

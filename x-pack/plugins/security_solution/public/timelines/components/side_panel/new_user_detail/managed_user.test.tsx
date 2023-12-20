@@ -108,7 +108,6 @@ describe('ManagedUser', () => {
             managedUser: {
               ...mockManagedUserData,
               data: {
-                [ManagedUserDatasetKey.ENTRA]: undefined,
                 [ManagedUserDatasetKey.OKTA]: {
                   fields: mockOktaUserFields,
                   _index: '123',

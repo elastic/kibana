@@ -272,15 +272,15 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
               <EuiCodeBlock paddingSize="s" isCopyable>
                 {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
       cat <<EOF > /etc/yum.repos.d/elastic.repo
-      [elastic-${majorVersion}.x]
-      name=Elastic repository for ${majorVersion}.x packages
-      baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
-      gpgcheck=1
-      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-      enabled=1
-      autorefresh=1
-      type=rpm-md
-      EOF`}
+[elastic-${majorVersion}.x]
+name=Elastic repository for ${majorVersion}.x packages
+baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF`}
               </EuiCodeBlock>
             ),
           },

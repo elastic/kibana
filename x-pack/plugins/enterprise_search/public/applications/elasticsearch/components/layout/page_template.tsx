@@ -22,6 +22,7 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
+      restrictWidth
       solutionNav={{
         name: ELASTICSEARCH_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),

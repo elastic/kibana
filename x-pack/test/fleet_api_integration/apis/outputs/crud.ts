@@ -314,6 +314,59 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
+      it('should respond 400 when setting an unknown preset', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${ESOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+            preset: 'some_unknown_preset',
+          })
+          .expect(400);
+      });
+
+      it('should allow changing the preset from balanced to custom and back', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${ESOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+            preset: 'custom',
+            config_yaml: 'some_random_field: foo',
+          })
+          .expect(200);
+
+        await supertest
+          .put(`/api/fleet/outputs/${ESOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+            preset: 'balanced',
+            config_yaml: 'some_random_field: foo',
+          })
+          .expect(200);
+      });
+
+      it('should respond 400 when changing the preset from custom to balanced with reserved key', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${ESOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+            preset: 'balanced',
+            config_yaml: 'bulk_max_size: 1000',
+          })
+          .expect(400);
+      });
+
       it('should allow to update a non-default ES output to logstash', async function () {
         const { body: postResponse2 } = await supertest
           .post(`/api/fleet/outputs`)
@@ -608,7 +661,60 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['https://test.fr:443'],
           is_default: false,
           is_default_monitoring: false,
+          preset: 'balanced',
         });
+      });
+
+      it('should allow creating a new ES output with preset: custom', async () => {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            preset: 'custom',
+            config_yaml: 'some_random_key: foo',
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'My output',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr:443'],
+          is_default: false,
+          is_default_monitoring: false,
+          preset: 'custom',
+          config_yaml: 'some_random_key: foo',
+        });
+      });
+
+      it('should respond with 400 when creating a new ES output with preset: balanced and a reserved key in config_yaml', async () => {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            preset: 'balanced',
+            config_yaml: 'bulk_max_size: 1000',
+          })
+          .expect(400);
+      });
+
+      it('should respond with 400 when creating a new ES output with an unknown preset', async () => {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            preset: 'some_unknown_preset',
+          })
+          .expect(400);
       });
 
       it('should allow to create a new default ES output ', async function () {
@@ -630,6 +736,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['https://test.fr:443'],
           is_default: true,
           is_default_monitoring: false,
+          preset: 'balanced',
         });
       });
 

@@ -57,6 +57,7 @@ export class TimePickerPageObject extends FtrService {
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
+      await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');
     }
   }
 
@@ -106,6 +107,8 @@ export class TimePickerPageObject extends FtrService {
     } else {
       await this.testSubjects.setValue(dataTestSubj, value);
     }
+
+    await this.testSubjects.pressEnter(dataTestSubj);
   }
 
   private async showStartEndTimes() {
