@@ -3350,8 +3350,8 @@
             "pluginId": "@kbn/core-theme-browser",
             "scope": "common",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           "; }) => (error: ",
           {
@@ -3568,8 +3568,8 @@
                     "pluginId": "@kbn/core-theme-browser",
                     "scope": "common",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
+                    "section": "def-common.ThemeServiceSetup",
+                    "text": "ThemeServiceSetup"
                   }
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
