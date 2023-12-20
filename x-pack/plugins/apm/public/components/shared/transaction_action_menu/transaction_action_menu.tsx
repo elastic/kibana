@@ -32,7 +32,6 @@ import {
   NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
-import { useStaticDataViewId } from '../../../hooks/use_static_data_view_id';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -44,6 +43,7 @@ import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 import { CustomLinkFlyout } from './custom_link_flyout';
+import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -139,7 +139,7 @@ function ActionMenuSections({
   const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
-  const dataViewId = useStaticDataViewId();
+  const { dataView } = useAdHocApmDataView();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
     ALL_DATASETS_LOCATOR_ID
@@ -175,7 +175,7 @@ function ActionMenuSections({
     allDatasetsLocator,
     logsLocator,
     nodeLogsLocator,
-    dataViewId,
+    dataViewId: dataView?.id,
   });
 
   const externalMenuItems = useAsync(() => {
