@@ -269,7 +269,7 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   const ruleQueryValue = 'observer.serial_number:*';
 
   const { data } = await findRules(kbnClient, {
-    filter: `(alert.attributes.params.query: "${ruleQueryValue}" AND alert.attributes.params.index: ${sentinaleOneAlertsIndexPattern})`,
+    filter: `(alert.attributes.params.query: "${ruleQueryValue}" AND alert.attributes.params.index: ${sentinelOneAlertsIndexPattern})`,
   });
 
   if (data.length) {
@@ -283,7 +283,7 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log.info(`Creating new detection engine rule named [${ruleName}] for SentinelOne`);
 
   const createdRule = await createRule(kbnClient, {
-    index: [sentinaleOneAlertsIndexPattern],
+    index: [sentinelOneAlertsIndexPattern],
     query: ruleQueryValue,
     from: 'now-3660s',
   });
