@@ -33,7 +33,7 @@ import {
   showTimeline,
   updateDataView,
   updateEqlOptions,
-} from '../../timelines/store/timeline/actions';
+} from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 

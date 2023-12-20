@@ -98,7 +98,6 @@ export const getRuleExecutor = ({
       const alertLimit = alertFactory.alertLimit.getValue();
       let hasReachedLimit = false;
       let scheduledActionsCount = 0;
-
       for (const result of results) {
         const {
           instanceId,
@@ -172,40 +171,40 @@ export const getRuleExecutor = ({
           scheduledActionsCount++;
         }
       }
-
-      const { getRecoveredAlerts } = alertFactory.done();
-      const recoveredAlerts = getRecoveredAlerts();
-      for (const recoveredAlert of recoveredAlerts) {
-        const alertId = recoveredAlert.getId();
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = recoveredAlert.getUuid();
-        const alertDetailsUrl = await getAlertUrl(
-          alertUuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        );
-
-        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          `/app/observability/slos/${slo.id}${urlQuery}`
-        );
-
-        const context = {
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          alertDetailsUrl,
-          sloId: slo.id,
-          sloName: slo.name,
-          sloInstanceId: alertId,
-        };
-
-        recoveredAlert.setContext(context);
-      }
       alertFactory.alertLimit.setLimitReached(hasReachedLimit);
+    }
+
+    const { getRecoveredAlerts } = alertFactory.done();
+    const recoveredAlerts = getRecoveredAlerts();
+    for (const recoveredAlert of recoveredAlerts) {
+      const alertId = recoveredAlert.getId();
+      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+      const alertUuid = recoveredAlert.getUuid();
+      const alertDetailsUrl = await getAlertUrl(
+        alertUuid,
+        spaceId,
+        indexedStartedAt,
+        alertsLocator,
+        basePath.publicBaseUrl
+      );
+
+      const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
+      const viewInAppUrl = addSpaceIdToPath(
+        basePath.publicBaseUrl,
+        spaceId,
+        `/app/observability/slos/${slo.id}${urlQuery}`
+      );
+
+      const context = {
+        timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        alertDetailsUrl,
+        sloId: slo.id,
+        sloName: slo.name,
+        sloInstanceId: alertId,
+      };
+
+      recoveredAlert.setContext(context);
     }
 
     return { state: {} };
