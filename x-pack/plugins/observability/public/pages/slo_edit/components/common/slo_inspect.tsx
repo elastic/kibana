@@ -30,17 +30,14 @@ import {
   INGEST_PIPELINES_PAGES,
   IngestPipelinesListParams,
 } from '@kbn/ingest-pipelines-plugin/public';
+import { SloInspectPortalProps } from './inspect_slo_portal';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { useInspectSlo } from '../../../../hooks/slo/use_inspect_slo';
-import { CreateSLOForm } from '../../types';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { enableInspectEsQueries } from '../../../../../common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
-export function SLOInspectWrapper(props: {
-  getValues: () => CreateSLOForm;
-  trigger: () => Promise<boolean>;
-}) {
+export function SLOInspectWrapper(props: SloInspectPortalProps) {
   const {
     services: { uiSettings },
   } = useKibana();
@@ -52,13 +49,7 @@ export function SLOInspectWrapper(props: {
   return isDev || isInspectorEnabled ? <SLOInspect {...props} /> : null;
 }
 
-function SLOInspect({
-  getValues,
-  trigger,
-}: {
-  getValues: () => CreateSLOForm;
-  trigger: () => Promise<boolean>;
-}) {
+function SLOInspect({ getValues, trigger, slo }: SloInspectPortalProps) {
   const { share, http } = useKibana<ObservabilityPublicPluginsStart>().services;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { mutateAsync: inspectSlo, data, isLoading } = useInspectSlo();
@@ -72,9 +63,9 @@ function SLOInspect({
       return;
     }
     const sloForm = transformCreateSLOFormToCreateSLOInput(getValues());
-    inspectSlo({ slo: sloForm });
+    inspectSlo({ slo: { ...sloForm, id: slo?.id, revision: slo?.revision } });
     return sloForm;
-  }, [isFlyoutVisible, trigger, getValues, inspectSlo]);
+  }, [isFlyoutVisible, trigger, getValues, inspectSlo, slo]);
 
   const { data: pipeLineUrl } = useFetcher(async () => {
     const ingestPipeLocator = share.url.locators.get<IngestPipelinesListParams>(

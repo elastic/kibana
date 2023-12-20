@@ -241,7 +241,7 @@ export function SloEditForm({ slo }: Props) {
             />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        <InspectSLOPortal trigger={trigger} getValues={getValues} />
+        <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
       </FormProvider>
 
       <BurnRateRuleFlyout

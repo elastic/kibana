@@ -119,7 +119,7 @@ export class CreateSLO {
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
-      revision: 1,
+      revision: params.revision ?? 1,
       enabled: true,
       tags: params.tags ?? [],
       createdAt: now,

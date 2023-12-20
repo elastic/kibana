@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
+import { GetSLOResponse } from '@kbn/slo-schema';
 import { CreateSLOForm } from '../../types';
 import { SLOInspectWrapper } from './slo_inspect';
 import { InspectSLOPortalNode } from '../../slo_edit';
 
-export function InspectSLOPortal(props: {
+export interface SloInspectPortalProps {
   getValues: () => CreateSLOForm;
   trigger: () => Promise<boolean>;
-}) {
+  slo?: GetSLOResponse;
+}
+export function InspectSLOPortal(props: SloInspectPortalProps) {
   return (
     <InPortal node={InspectSLOPortalNode}>
       <SLOInspectWrapper {...props} />
