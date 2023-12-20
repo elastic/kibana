@@ -671,6 +671,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
       executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
       indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
+      inferTrainedModel: `${ELASTICSEARCH_DOCS}infer-trained-model.html`,
       multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
       openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
       putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,

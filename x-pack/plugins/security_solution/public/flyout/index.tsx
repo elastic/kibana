@@ -24,14 +24,8 @@ import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
-import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
-import type { AssetDocumentLeftPanelProps } from './entity_details/asset_document_left';
-import {
-  AssetDocumentLeftPanel,
-  AssetDocumentLeftPanelKey,
-} from './entity_details/asset_document_left';
-
+import type { UserDetailsPanelProps } from './entity_details/user_detais_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_detais_left';
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -42,14 +36,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
-    ),
-  },
-  {
-    key: AssetDocumentLeftPanelKey,
-    component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <AssetDocumentLeftPanel {...(props as AssetDocumentLeftPanelProps)} />
       </RightPanelProvider>
     ),
   },
@@ -82,9 +68,9 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
-    key: RiskInputsPanelKey,
+    key: UserDetailsPanelKey,
     component: (props) => (
-      <RiskInputsPanel {...(props as RiskInputsExpandableFlyoutProps).params} />
+      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
     ),
   },
 ];

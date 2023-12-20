@@ -18,7 +18,7 @@ import type {
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import {
   ALERTS_PATH,
   HOSTS_PATH,
