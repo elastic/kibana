@@ -29,6 +29,7 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import { REPORTING_EXECUTE_TYPE, ReportTaskParams, ReportingTask, ReportingTaskStatus } from '.';
 import { ExportTypesRegistry, getContentStream } from '..';
@@ -403,7 +404,8 @@ export class ExecuteReportTask implements ReportingTask {
 
             const error = mapToReportingError(failedToExecuteErr);
 
-            throw error;
+            const timeBetweenAttempts = 10 * 1000; // 10 seconds
+            throwRetryableError(error, new Date(Date.now() + timeBetweenAttempts));
           } finally {
             this.reporting.untrackReport(jobId);
             this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
