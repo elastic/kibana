@@ -456,6 +456,7 @@ enabled:
   - x-pack/performance/journeys/tags_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/performance/journeys/apm_service_inventory.ts
+  - x-pack/performance/journeys/infra_hosts_table.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts
