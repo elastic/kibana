@@ -12,9 +12,9 @@ import type { Observable } from 'rxjs';
 import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/operators';
 
-import { addError } from '../../../common/store/app/actions';
-import type { inputsModel } from '../../../common/store/inputs';
-import type { PinnedEventResponse } from '../../../../common/api/timeline';
+import { addError } from '../../common/store/app/actions';
+import type { inputsModel } from '../../common/store/inputs';
+import type { PinnedEventResponse } from '../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -26,7 +26,7 @@ import {
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import type { TimelineById } from './types';
-import { persistPinnedEvent } from '../../containers/pinned_event/api';
+import { persistPinnedEvent } from '../containers/pinned_event/api';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
 
