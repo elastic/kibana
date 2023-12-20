@@ -182,9 +182,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
-  const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForThresholdRuleEnabled'
-  );
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
@@ -808,8 +805,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled =
-    isQueryRule(ruleType) || (isThresholdRule && isAlertSuppressionForThresholdRuleFeatureEnabled);
+  const isAlertSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
 
   return (
     <>
