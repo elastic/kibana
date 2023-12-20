@@ -234,7 +234,7 @@ describe('CaseViewPage', () => {
     jest.useRealTimers();
   });
 
-  for (let index = 0; index < 1; index++) {
+  for (let index = 0; index < 50; index++) {
     it('shows the metrics section', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
