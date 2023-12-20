@@ -16,7 +16,7 @@ export const apm_transaction_rate_AIAssistant = {
       windowUnit: 'h',
       transactionType: undefined,
       serviceName: undefined,
-      environment: 'Synthtrace: high_throughput',
+      environment: 'Synthtrace: logs_and_metrics',
       searchConfiguration: {
         query: {
           query: ``,
