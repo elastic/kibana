@@ -223,9 +223,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
 
-        const parsedViewInAppUrl = parseSearchParams(
+        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
-        ) as { params: LogExplorerLocatorParsedParams };
+        );
 
         expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({

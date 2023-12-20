@@ -6,6 +6,7 @@
  */
 
 import { Query, TimeRange } from '@kbn/es-query';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export interface ActionDocument {
   ruleType: string;
@@ -17,7 +18,7 @@ export interface ActionDocument {
   group?: string;
 }
 
-export interface LogExplorerLocatorParsedParams {
+export interface LogExplorerLocatorParsedParams extends SerializableRecord {
   dataset: string;
   timeRange: TimeRange;
   query: Query;
