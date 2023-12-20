@@ -265,6 +265,10 @@ export class ActionExecutor {
             logger,
             source,
           });
+
+          if (rawResult && rawResult.status === 'error') {
+            rawResult.errorSource = TaskErrorSource.USER;
+          }
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
