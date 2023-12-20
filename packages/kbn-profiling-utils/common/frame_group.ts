@@ -62,9 +62,7 @@ export function createFrameGroupID(
   }
 
   if (equivalenceMap.has(sourceFilename + ":" + functionName)) {
-    console.log("replacing " + sourceFilename + ":" + functionName)
     var replacementString = equivalenceMap.get(sourceFilename + ":" + functionName);
-    console.log("with " + replacementString)
     return `full;kernel;${replacementString}`;
   }
   return `full;${exeFilename};${functionName};${stripLeadingSubdirs(sourceFilename || '')}`;
