@@ -13,8 +13,8 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -245,7 +245,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         </div>
       </TimelineContainer>
       {showTimelineTour ? (
-        <TimelineTour activeTab={activeTab} switchToTab={handleSwitchToTab} />
+        <TimelineTour
+          activeTab={activeTab}
+          switchToTab={handleSwitchToTab}
+          timelineType={timelineType}
+        />
       ) : null}
     </TimelineContext.Provider>
   );
