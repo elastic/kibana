@@ -547,7 +547,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
