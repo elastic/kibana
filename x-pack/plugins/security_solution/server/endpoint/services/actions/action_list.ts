@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 
 import { getActions, getActionResponses } from '../../utils/action_list_helpers';
@@ -17,10 +17,9 @@ import { getActions, getActionResponses } from '../../utils/action_list_helpers'
 import {
   formatEndpointActionResults,
   categorizeResponseResults,
-  getActionCompletionInfo,
   mapToNormalizedActionRequest,
   getAgentHostNamesWithIds,
-  getActionStatus,
+  createActionDetailsRecord,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
@@ -274,44 +273,12 @@ const getActionDetailsList = async ({
         : categorizedResponse.item.data.action_id === action.id
     );
 
-    // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors, agentState, outputs } =
-      getActionCompletionInfo(action, matchedResponses);
+    const actionRecord = createActionDetailsRecord(action, matchedResponses, agentsHostInfo);
 
-    const { isExpired, status } = getActionStatus({
-      expirationDate: action.expiration,
-      isCompleted,
-      wasSuccessful,
-    });
-
-    const hosts = action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-      acc[id] = { name: agentsHostInfo[id] || action.hosts[id]?.name || '' };
-      return acc;
-    }, {});
-
-    const actionRecord: ActionListApiResponse['data'][number] = {
-      id: action.id,
-      agents: action.agents,
-      agentType: action.agentType,
-      hosts,
-      command: action.command,
-      startedAt: action.createdAt,
-      isCompleted,
-      completedAt,
-      wasSuccessful,
-      errors: action.error?.message ? [action.error.message] : errors,
-      agentState,
-      isExpired,
-      status,
-      // 8.8 onwards, show outputs only for actions with matching requested action ids
-      outputs: withOutputs && withOutputs.includes(action.id) ? outputs : undefined,
-      createdBy: action.createdBy,
-      comment: action.comment,
-      parameters: action.parameters,
-      alertIds: action.alertIds,
-      ruleId: action.ruleId,
-      ruleName: action.ruleName,
-    };
+    if (withOutputs && withOutputs.includes(action.id)) {
+      delete actionRecord.outputs;
+      return actionRecord;
+    }
 
     return actionRecord;
   });

@@ -534,3 +534,43 @@ export const getAgentHostNamesWithIds = async ({
 
   return agentsMetadataInfo;
 };
+
+export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(
+  actionRequest: NormalizedActionRequest,
+  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>,
+  agentHostInfo: Record<string, string>
+): T => {
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+    getActionCompletionInfo(actionRequest, actionResponses);
+
+  const { isExpired, status } = getActionStatus({
+    expirationDate: actionRequest.expiration,
+    isCompleted,
+    wasSuccessful,
+  });
+
+  const actionDetails: ActionDetails = {
+    id: actionRequest.id,
+    agentType: actionRequest.agentType,
+    agents: actionRequest.agents,
+    hosts: actionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentHostInfo[id] || actionRequest.hosts[id]?.name || '' };
+      return acc;
+    }, {}),
+    command: actionRequest.command,
+    startedAt: actionRequest.createdAt,
+    isCompleted,
+    completedAt,
+    wasSuccessful,
+    errors,
+    isExpired,
+    status,
+    outputs,
+    agentState,
+    createdBy: actionRequest.createdBy,
+    comment: actionRequest.comment,
+    parameters: actionRequest.parameters,
+  };
+
+  return actionDetails as T;
+};
