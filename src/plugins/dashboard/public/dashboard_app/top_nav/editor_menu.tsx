@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -55,6 +55,7 @@ export const EditorMenu = ({
   deleteEmbeddable,
   isDisabled,
 }: Props) => {
+  const isMounted = useRef(false);
   const {
     embeddable,
     visualizations: {
@@ -136,6 +137,14 @@ export const EditorMenu = ({
 
   let panelCount = 1 + aggBasedPanelID;
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   // Retrieve ADD_PANEL_TRIGGER actions
   useEffect(() => {
     async function loadPanelActions() {
@@ -143,7 +152,9 @@ export const EditorMenu = ({
         ADD_PANEL_TRIGGER,
         {}
       );
-      setAddPanelActions(registeredActions);
+      if (isMounted.current) {
+        setAddPanelActions(registeredActions);
+      }
     }
     loadPanelActions();
   }, [uiActions]);
