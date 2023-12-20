@@ -14,13 +14,13 @@ import { isEmpty } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
 import { isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
