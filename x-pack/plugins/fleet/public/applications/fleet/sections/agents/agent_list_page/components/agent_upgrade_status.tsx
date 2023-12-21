@@ -62,6 +62,10 @@ const formatRate = (downloadRate: number) => {
   }
   return downloadRate.toFixed(1) + byteUnits[i];
 };
+const formatRetryUntil = (retryUntil: string | undefined) => {
+  if (!retryUntil) return '';
+  return `Retrying until: ${new Date(retryUntil).toISOString()}`;
+};
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   switch (agentUpgradeDetails?.state) {
@@ -103,6 +107,28 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         ),
       };
     case 'UPG_DOWNLOADING':
+      if (agentUpgradeDetails?.metadata?.retry_error_msg) {
+        return {
+          Badge: (
+            <EuiBadge color="accent" iconType="download">
+              <FormattedMessage
+                id="xpack.fleet.agentUpgradeStatusBadge.upgradeDownloading"
+                defaultMessage="Upgrade downloading"
+              />
+            </EuiBadge>
+          ),
+          WarningTooltipText: (
+            <FormattedMessage
+              id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
+              defaultMessage="Upgrade failing: {retryMsg}. {retryUntil}"
+              values={{
+                retryMsg: agentUpgradeDetails?.metadata?.retry_error_msg,
+                retryUntil: formatRetryUntil(agentUpgradeDetails?.metadata?.retry_until),
+              }}
+            />
+          ),
+        };
+      }
       return {
         Badge: (
           <EuiBadge color="accent" iconType="download">
@@ -285,9 +311,16 @@ export const AgentUpgradeStatus: React.FC<{
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{status.Badge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip type="iInCircle" content={status.TooltipText} color="subdued" />
-        </EuiFlexItem>
+        {status.TooltipText && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="iInCircle" content={status.TooltipText} color="subdued" />
+          </EuiFlexItem>
+        )}
+        {status.WarningTooltipText && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="warning" content={status.WarningTooltipText} color="warning" />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

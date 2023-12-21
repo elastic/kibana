@@ -176,6 +176,43 @@ describe('AgentUpgradeStatus', () => {
       await expectTooltip(results, 'Downloading the new agent artifact version (16.4%).');
     });
 
+    it('should render UPG_DOWNLOADING with a warning if agent has a retry_message and retry_until', async () => {
+      const results = render({
+        agentUpgradeDetails: {
+          target_version: 'XXX',
+          action_id: 'xxx',
+          state: 'UPG_DOWNLOADING',
+          metadata: {
+            download_percent: 16.4,
+            retry_error_msg: 'unable to download',
+            retry_until: '2024-01-30T16:03:38.159292',
+          },
+        },
+      });
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade downloading');
+      await expectTooltip(
+        results,
+        'Upgrade failing: unable to download. Retrying until: 2024-01-30T15:03:38.159Z'
+      );
+    });
+    it('should render UPG_DOWNLOADING with a warning if agent has a retry_message', async () => {
+      const results = render({
+        agentUpgradeDetails: {
+          target_version: 'XXX',
+          action_id: 'xxx',
+          state: 'UPG_DOWNLOADING',
+          metadata: {
+            download_percent: 16.4,
+            retry_error_msg: 'unable to download',
+          },
+        },
+      });
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade downloading');
+      await expectTooltip(results, 'Upgrade failing: unable to download.');
+    });
+
     it('should render UPG_EXTRACTING state correctly', async () => {
       const results = render({
         agentUpgradeDetails: {
