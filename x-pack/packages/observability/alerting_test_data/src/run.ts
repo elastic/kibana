@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createApmRule } from './createApmRule';
+import { createApmRule } from './create_apm_rule';
 import { createCustomThresholdRule } from './create_custom_threshold_rule';
 import { createDataView, deleteDataView } from './create_data_view';
 import { createIndexConnector } from './create_index_connector';
