@@ -6,7 +6,7 @@
  */
 
 import { isEqual, merge } from 'lodash';
-import React, { createContext, useContext, useMemo, type FC } from 'react';
+import React, { useEffect, type FC } from 'react';
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, useStore, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -347,93 +347,84 @@ interface EditTransformFlyoutFormState {
   isFormValid: boolean;
 }
 
-// The state we manage via redux combines the provider props and the form state.
-export type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
-  EditTransformFlyoutFormState;
-type EditTransformFlyoutSlice = ReturnType<typeof createEditTransformFlyoutSlice>;
-const createEditTransformFlyoutSlice = ({
-  config,
-  dataViewId,
-}: EditTransformFlyoutProviderProps) => {
+const isFormTouched = (config: TransformConfigUnion, currentState: EditTransformFlyoutState) => {
   const defaultState = getDefaultState(config);
   const defaultFieldValues = getFieldValues(defaultState.formFields);
   const defaultSectionValues = getSectionValues(defaultState.formSections);
-
-  const isFormTouched = (d: EditTransformFlyoutState) =>
-    !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
-    !isEqual(defaultSectionValues, getSectionValues(d.formSections));
-
-  return createSlice({
-    name: 'editTransformFlyout',
-    initialState: {
-      ...defaultState,
-      config,
-      dataViewId,
-    },
-    reducers: {
-      setApiError: (state, action: PayloadAction<string | undefined>) => {
-        state.apiErrorMessage = action.payload;
-      },
-      // Updates a form field with its new value, runs validation and
-      // populates `errorMessages` if any errors occur.
-      setFormField: (
-        state,
-        action: PayloadAction<{ field: EditTransformFormFields; value: string }>
-      ) => {
-        const formField = state.formFields[action.payload.field];
-        formField.errorMessages =
-          formField.isOptional &&
-          typeof action.payload.value === 'string' &&
-          action.payload.value.length === 0
-            ? []
-            : formField.validator(action.payload.value, formField.isOptional);
-        formField.value = action.payload.value;
-        state.formFields[action.payload.field] = formField;
-
-        state.isFormTouched = isFormTouched(state);
-        state.isFormValid = isFormValid(state.formFields);
-      },
-      // Updates a form section.
-      setFormSection: (
-        state,
-        action: PayloadAction<{ section: EditTransformFormSections; enabled: boolean }>
-      ) => {
-        state.formSections[action.payload.section].enabled = action.payload.enabled;
-        state.isFormTouched = isFormTouched(state);
-        state.isFormValid = isFormValid(state.formFields);
-      },
-    },
-  });
+  return (
+    !isEqual(defaultFieldValues, getFieldValues(currentState.formFields)) ||
+    !isEqual(defaultSectionValues, getSectionValues(currentState.formSections))
+  );
 };
 
-const EditTransformFlyoutContext = createContext<EditTransformFlyoutSlice | null>(null);
+// The state we manage via redux combines the provider props and the form state.
+export type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
+  EditTransformFlyoutFormState;
 
-// Provider wrapper
+const editTransformFlyoutSlice = createSlice({
+  name: 'editTransformFlyout',
+  initialState: undefined as unknown as EditTransformFlyoutState,
+  reducers: {
+    initialize: (state, action: PayloadAction<EditTransformFlyoutProviderProps>) => {
+      const defaultState = getDefaultState(action.payload.config);
+      return {
+        ...defaultState,
+        config: action.payload.config,
+        dataViewId: action.payload.dataViewId,
+      };
+    },
+    setApiError: (state, action: PayloadAction<string | undefined>) => {
+      state.apiErrorMessage = action.payload;
+    },
+    // Updates a form field with its new value, runs validation and
+    // populates `errorMessages` if any errors occur.
+    setFormField: (
+      state,
+      action: PayloadAction<{ field: EditTransformFormFields; value: string }>
+    ) => {
+      const formField = state.formFields[action.payload.field];
+      formField.errorMessages =
+        formField.isOptional &&
+        typeof action.payload.value === 'string' &&
+        action.payload.value.length === 0
+          ? []
+          : formField.validator(action.payload.value, formField.isOptional);
+      formField.value = action.payload.value;
+      state.formFields[action.payload.field] = formField;
+
+      state.isFormTouched = isFormTouched(state.config, state);
+      state.isFormValid = isFormValid(state.formFields);
+    },
+    // Updates a form section.
+    setFormSection: (
+      state,
+      action: PayloadAction<{ section: EditTransformFormSections; enabled: boolean }>
+    ) => {
+      state.formSections[action.payload.section].enabled = action.payload.enabled;
+      state.isFormTouched = isFormTouched(state.config, state);
+      state.isFormValid = isFormValid(state.formFields);
+    },
+  },
+});
+
 export const EditTransformFlyoutProvider: FC<
   React.PropsWithChildren<EditTransformFlyoutProviderProps>
 > = ({ children, ...props }) => {
-  const slice = useMemo(() => createEditTransformFlyoutSlice(props), [props]);
+  const store = configureStore({
+    reducer: editTransformFlyoutSlice.reducer,
+  });
 
-  const store = useMemo(() => {
-    return configureStore({
-      reducer: slice.reducer,
-    });
-  }, [slice]);
+  // initialize redux state
+  useEffect(() => {
+    store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
+  }, [props, store]);
 
-  return (
-    <Provider store={store}>
-      <EditTransformFlyoutContext.Provider value={slice}>
-        {children}
-      </EditTransformFlyoutContext.Provider>
-    </Provider>
-  );
+  return <Provider store={store}>{children}</Provider>;
 };
 
 export function useEditTransformFlyoutActions() {
   const dispatch = useDispatch();
-  const slice = useContext(EditTransformFlyoutContext);
-  if (!slice) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
-  return bindActionCreators(slice.actions, dispatch);
+  return bindActionCreators(editTransformFlyoutSlice.actions, dispatch);
 }
 
 export function useEditTransformFlyoutState() {
