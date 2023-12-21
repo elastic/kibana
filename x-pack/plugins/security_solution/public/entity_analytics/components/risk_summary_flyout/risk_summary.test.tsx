@@ -17,7 +17,11 @@ describe('RiskSummary', () => {
   it('renders risk summary table', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
+        <RiskSummary
+          riskScoreData={mockRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
       </TestProviders>
     );
 
@@ -32,6 +36,7 @@ describe('RiskSummary', () => {
         <RiskSummary
           riskScoreData={{ ...mockRiskScoreState, data: undefined }}
           queryId={'testQuery'}
+          openDetailsPanel={() => {}}
         />
       </TestProviders>
     );
@@ -41,7 +46,11 @@ describe('RiskSummary', () => {
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
+        <RiskSummary
+          riskScoreData={mockRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
       </TestProviders>
     );
 
@@ -51,7 +60,11 @@ describe('RiskSummary', () => {
   it('renders updated at', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
+        <RiskSummary
+          riskScoreData={mockRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
       </TestProviders>
     );
 

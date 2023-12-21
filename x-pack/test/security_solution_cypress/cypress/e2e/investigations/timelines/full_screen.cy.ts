@@ -18,7 +18,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RiskInputsPanelKey } from '../../../entity_analytics/components/risk_inputs_flyout_panel';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -23,6 +23,8 @@ import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
+import { UserDetailsPanelKey } from '../user_details_left';
+import type { UserDetailsLeftPanelTab } from '../user_details_left/tabs';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -60,7 +62,8 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
 
   const observedUser = useObservedUser(userName);
-  const managedUser = useManagedUser(userName, observedUser);
+  const email = observedUser.details.user?.email;
+  const managedUser = useManagedUser(userName, email, observedUser.isLoading);
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -75,14 +78,33 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   });
 
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const openPanel = useCallback(() => {
-    openLeftPanel({
-      id: RiskInputsPanelKey,
-      params: {
-        riskInputs: userRiskData?.user.risk.inputs,
-      },
-    });
-  }, [openLeftPanel, userRiskData?.user.risk.inputs]);
+  const openPanelTab = useCallback(
+    (tab?: UserDetailsLeftPanelTab) => {
+      openLeftPanel({
+        id: UserDetailsPanelKey,
+        params: {
+          riskInputs: {
+            alertIds: userRiskData?.user.risk.inputs?.map(({ id }) => id) ?? [],
+          },
+          user: {
+            name: userName,
+            email,
+          },
+        },
+        path: tab ? { tab } : undefined,
+      });
+    },
+    [email, openLeftPanel, userName, userRiskData?.user.risk.inputs]
+  );
+
+  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
+
+  const a = managedUser.data?.[ManagedUserDatasetKey.OKTA];
+
+  const hasUserDetailsData =
+    !!userRiskData?.user.risk ||
+    !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
+    !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
   if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
     return <FlyoutLoading />;
@@ -107,8 +129,8 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!!userRiskData?.user.risk}
-              expandDetails={openPanel}
+              flyoutIsExpandable={hasUserDetailsData}
+              expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader
               userName={userName}
@@ -122,6 +144,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
+              openDetailsPanel={openPanelTab}
             />
           </>
         );
