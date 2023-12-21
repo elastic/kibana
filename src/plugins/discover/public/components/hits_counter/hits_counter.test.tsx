@@ -34,7 +34,7 @@ describe('hits counter', function () {
       <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
     );
     expect(findTestSubject(component2, 'discoverQueryHits').text()).toBe('1');
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1 hit');
+    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1 result');
     expect(component2.find('[data-test-subj="discoverQueryHits"]').length).toBe(1);
   });
 
@@ -54,7 +54,7 @@ describe('hits counter', function () {
       <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
     );
     expect(findTestSubject(component2, 'discoverQueryHits').text()).toBe('1,899');
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1,899 hits');
+    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('1,899 results');
   });
 
   it('should render a EuiLoadingSpinner when status is partial', () => {
@@ -79,7 +79,7 @@ describe('hits counter', function () {
       <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
     );
     expect(component.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component, 'discoverQueryTotalHits').text()).toBe('≥2 hits');
+    expect(findTestSubject(component, 'discoverQueryTotalHits').text()).toBe('≥2 results');
   });
 
   it('should not render if loading', () => {
