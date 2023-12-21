@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useTimelineTitle } from '../../../hooks/use_timeline_title';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { focusActiveTimelineButton } from '../../timeline/helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
@@ -38,10 +44,6 @@ const FlyoutHeaderPanelContentFlexGroupContainer = styled(EuiFlexGroup)`
   overflow-x: auto;
 `;
 
-const ActiveTimelinesContainer = styled(EuiFlexItem)`
-  overflow: hidden;
-`;
-
 const TimelinePanel = euiStyled(EuiPanel)<{ $isOpen?: boolean }>`
   backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
   color: ${(props) => props.theme.eui.euiTextColor};
@@ -54,20 +56,14 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
+
+  const title = useTimelineTitle({ timelineId });
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { activeTab, dataProviders, kqlQuery, title, timelineType, show, filters, kqlMode } =
+  const { activeTab, dataProviders, kqlQuery, timelineType, show, filters, kqlMode } =
     useDeepEqualSelector((state) =>
       pick(
-        [
-          'activeTab',
-          'dataProviders',
-          'kqlQuery',
-          'title',
-          'timelineType',
-          'show',
-          'filters',
-          'kqlMode',
-        ],
+        ['activeTab', 'dataProviders', 'kqlQuery', 'timelineType', 'show', 'filters', 'kqlMode'],
         getTimeline(state, timelineId) ?? timelineDefaults
       )
     );
@@ -107,7 +103,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const handleClose = useCallback(() => {
     createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
-    focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
   return (
@@ -137,14 +132,15 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               <AddToFavoritesButton timelineId={timelineId} compact />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ActiveTimelinesContainer grow={false}>
-                <ActiveTimelines
-                  timelineId={timelineId}
-                  timelineType={timelineType}
-                  timelineTitle={title}
-                  isOpen={show}
-                />
-              </ActiveTimelinesContainer>
+              <EuiText
+                grow={false}
+                data-test-subj="timeline-title"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                <h3>{title}</h3>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TimelineSaveStatus timelineId={timelineId} />
