@@ -454,7 +454,7 @@ describe('<RemoteClusterList />', () => {
 
       test('Should display authentication type', () => {
         actions.clickRemoteClusterAt(2);
-        expect(exists('authenticationTypeLabel')).toBe(false);
+        expect(exists('remoteClusterDetailAuthType')).toBe(true);
       });
     });
   });
