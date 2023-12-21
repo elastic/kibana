@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { ComponentProps, ComponentType, lazy, Suspense } from 'react';
 
-type LoadableComponent = () => Promise<{
-  default: React.ComponentType<any>;
+type LoadableComponent<TComponent extends ComponentType<any>> = () => Promise<{
+  default: TComponent;
 }>;
 
 interface DynamicOptions {
@@ -21,10 +21,13 @@ interface DynamicOptions {
  * @example
  * const Header = dynamic(() => import('./components/header'))
  */
-export function dynamic(loader: LoadableComponent, options: DynamicOptions = {}) {
+export function dynamic<TComponent extends ComponentType<any>>(
+  loader: LoadableComponent<TComponent>,
+  options: DynamicOptions = {}
+) {
   const Component = lazy(loader);
 
-  return (props: any) => (
+  return (props: ComponentProps<TComponent>) => (
     <Suspense fallback={options.fallback ?? null}>
       <Component {...props} />
     </Suspense>
