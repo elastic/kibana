@@ -19,4 +19,51 @@ describe('FullJitterBackoff', () => {
       `"maxBackoffTime must not be negative"`
     );
   });
+
+  it('starts with minimum of 1ms', () => {
+    const backoff = fullJitterBackOffFactory(1, 4).create();
+    expect(backoff.nextBackOff()).toBeGreaterThanOrEqual(1);
+  });
+
+  it('caps based on the maxBackoffTime', () => {
+    const maxBackoffTime = 4;
+
+    const backoff = fullJitterBackOffFactory(1, maxBackoffTime).create();
+
+    for (const _ of Array.from({ length: 1000 })) {
+      // maxBackoffTime plus the minimum 1ms
+      expect(backoff.nextBackOff()).toBeLessThanOrEqual(maxBackoffTime + 1);
+    }
+  });
+
+  it('caps retries', () => {
+    // 2^53 − 1
+    const maxBackoffTime = Number.MAX_SAFE_INTEGER;
+    // The ceiling for the tries is 2^32
+    const expectedCappedBackOff = Math.pow(2, 32);
+
+    const backoff = fullJitterBackOffFactory(1, maxBackoffTime).create();
+
+    for (const _ of Array.from({ length: 1000 })) {
+      // maxBackoffTime plus the minimum 1ms
+      expect(backoff.nextBackOff()).toBeLessThanOrEqual(expectedCappedBackOff + 1);
+    }
+  });
+
+  it('returns a random number between the expected range correctly', () => {
+    const baseDelay = 5;
+    const maxBackoffTime = 2000;
+    // 2^11 = 2048 < maxBackoffTime
+    const totalTries = 11;
+
+    const backoff = fullJitterBackOffFactory(baseDelay, maxBackoffTime).create();
+
+    for (const index of Array.from(Array(totalTries).keys())) {
+      const maxExpectedRange = Math.min(maxBackoffTime, baseDelay * Math.pow(2, index));
+      const nextBackOff = backoff.nextBackOff();
+
+      expect(nextBackOff).toBeGreaterThanOrEqual(1);
+      expect(nextBackOff).toBeLessThanOrEqual(maxExpectedRange + 1);
+    }
+  });
 });
