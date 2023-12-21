@@ -102,11 +102,8 @@ export function getStateFromKbnUrl<State>(
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false, storeInHashQuery = true }: SetStateToKbnUrlHashOptions = {
-    useHash: false,
-    storeInHashQuery: true,
-  },
-  rawUrl = window.location.href
+  { useHash = false, storeInHashQuery = true }: SetStateToKbnUrlHashOptions,
+  rawUrl: string
 ) {
   return internalSetStateToKbnUrl(key, state, { useHash, storeInHashQuery }, rawUrl);
 }
