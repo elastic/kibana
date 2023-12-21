@@ -54,7 +54,7 @@ const SourcePopoverContent = ({
 }) => {
   const closeButton = (
     <EuiButtonIcon
-      aria-label={i18n.translate('logExplorer.grid.closePopover', {
+      aria-label={i18n.translate('xpack.logExplorer.grid.closePopover', {
         defaultMessage: `Close popover`,
       })}
       data-test-subj="docTableClosePopover"
