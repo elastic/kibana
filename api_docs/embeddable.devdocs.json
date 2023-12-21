@@ -1774,8 +1774,8 @@
                     "pluginId": "@kbn/core-theme-browser",
                     "scope": "common",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
+                    "section": "def-common.ThemeServiceSetup",
+                    "text": "ThemeServiceSetup"
                   }
                 ],
                 "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",

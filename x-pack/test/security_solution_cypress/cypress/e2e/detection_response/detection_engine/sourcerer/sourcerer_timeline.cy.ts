@@ -37,10 +37,9 @@ import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/t
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
-const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
+const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
@@ -78,12 +77,8 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServer
     it('shows modified badge when index patterns change and removes when reset', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
-      openDataViewSelection();
-      cy.get(SOURCERER.selectListOption).contains(dataViews[1]).click();
-      isDataViewSelection(dataViews[1]);
       openAdvancedSettings();
-      const patterns = dataViews[1].split(',');
-      deselectSourcererOptions([patterns[0]]);
+      deselectSourcererOptions(['.alerts-security.alerts-default']);
       saveSourcerer();
       cy.get(SOURCERER.badgeModified).should(`exist`);
       openSourcerer('timeline');

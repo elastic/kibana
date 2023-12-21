@@ -10,19 +10,24 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
+import { useProfilingIntegrationSetting } from '../../../../../hooks/use_profiling_integration_setting';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 
 export function CpuProfilingPrompt() {
   const { showTab } = useTabSwitcherContext();
-  const { featureFlags } = usePluginConfig();
+  const isProfilingEnabled = useProfilingIntegrationSetting();
 
-  if (!featureFlags.profilingEnabled) {
+  if (!isProfilingEnabled) {
     return null;
   }
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexStart"
+      gutterSize="s"
+      data-test-subj="infraAssetDetailsCPUProfilingPrompt"
+    >
       <EuiBadge color="success">
         {i18n.translate('xpack.infra.cpuProfilingPrompt.newBadgeLabel', {
           defaultMessage: 'NEW',

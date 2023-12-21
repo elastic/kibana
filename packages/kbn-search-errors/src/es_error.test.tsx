@@ -6,41 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { EsError } from './es_error';
-import { IEsError } from './types';
+import type { ReactElement } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { createEsError } from './create_es_error';
+import { renderSearchError } from './render_search_error';
+import { shallow } from 'enzyme';
+import { coreMock } from '@kbn/core/public/mocks';
+
+const services = {
+  application: coreMock.createStart().application,
+  docLinks: {
+    links: {
+      fleet: {
+        datastreamsTSDSMetrics: '',
+      },
+    },
+  } as CoreStart['docLinks'],
+};
 
 describe('EsError', () => {
-  it('contains the same body as the wrapped error', () => {
-    const error = {
-      statusCode: 500,
-      message: 'nope',
-      attributes: {
-        error: {
-          type: 'top_level_exception_type',
-          reason: 'top-level reason',
-        },
-      },
-    } as IEsError;
-    const esError = new EsError(error, () => {});
-
-    expect(typeof esError.attributes).toEqual('object');
-    expect(esError.attributes).toEqual(error.attributes);
-  });
-
-  it('contains some explanation of the error in the message', () => {
-    // error taken from Vega's issue
-    const error = {
-      message:
-        'x_content_parse_exception: [x_content_parse_exception] Reason: [1:78] [date_histogram] failed to parse field [calendar_interval]',
+  const esError = createEsError(
+    {
       statusCode: 400,
+      message: 'search_phase_execution_exception',
       attributes: {
         error: {
-          root_cause: [
-            {
-              type: 'x_content_parse_exception',
-              reason: '[1:78] [date_histogram] failed to parse field [calendar_interval]',
-            },
-          ],
           type: 'x_content_parse_exception',
           reason: '[1:78] [date_histogram] failed to parse field [calendar_interval]',
           caused_by: {
@@ -49,10 +39,27 @@ describe('EsError', () => {
           },
         },
       },
-    } as IEsError;
-    const esError = new EsError(error, () => {});
+    },
+    () => {},
+    services
+  );
+
+  test('should set error.message to root "error cause" reason', () => {
     expect(esError.message).toEqual(
-      'EsError: The supplied interval [2q] could not be parsed as a calendar interval.'
+      'The supplied interval [2q] could not be parsed as a calendar interval.'
     );
+  });
+
+  test('should render error message', () => {
+    const searchErrorDisplay = renderSearchError(esError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  test('should return 1 action', () => {
+    const searchErrorDisplay = renderSearchError(esError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    expect(searchErrorDisplay?.actions?.length).toBe(1);
   });
 });
