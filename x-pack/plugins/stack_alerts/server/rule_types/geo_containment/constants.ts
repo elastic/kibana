@@ -14,7 +14,7 @@ export const OTHER_CATEGORY = 'other';
 
 export const FIELD_KEY_ENTITY_ID = `${ALERT_NAMESPACE}.entityId`;
 export const FIELD_KEY_ENTITY_TIMESTAMP = `${ALERT_NAMESPACE}.entityTimestamp`;
-export const FIELD_KEY_ENTITY_LOCATION = `${ALERT_NAMESPACE}.entityId`;
+export const FIELD_KEY_ENTITY_LOCATION = `${ALERT_NAMESPACE}.entityLocation`;
 export const FIELD_KEY_DETECTION_TIMESTAMP = `${ALERT_NAMESPACE}.detectionTimestamp`;
 export const FIELD_KEY_BOUNDARY_ID = `${ALERT_NAMESPACE}.boundaryId`;
 export const FIELD_KEY_BOUNDARY_NAME = `${ALERT_NAMESPACE}.boundaryName`;
