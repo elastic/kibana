@@ -1513,7 +1513,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('partial updates', () => {
-      it('should not result to a version conflict (409) when adding a comment to an updated case', async () => {
+      it('should not result to a version conflict (409) when adding comments to an updated case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         /**
