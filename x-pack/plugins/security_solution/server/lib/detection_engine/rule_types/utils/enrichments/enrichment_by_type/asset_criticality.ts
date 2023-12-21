@@ -11,25 +11,9 @@ import {
   ALERT_USER_CRITICALITY,
 } from '../../../../../../../common/field_maps/field_names';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
-import type {
-  CreateCriticalityEnrichment,
-  DoesAssetCriticalityAvailable,
-  CreateEnrichmentFunction,
-} from '../types';
+import type { CreateCriticalityEnrichment, CreateEnrichmentFunction } from '../types';
 import { getFieldValue } from '../utils/events';
 import { getAssetCriticalityIndex } from '../../../../../../../common/entity_analytics/asset_criticality';
-
-export const doesAssetCriticalityIndexExist: DoesAssetCriticalityAvailable = async ({
-  spaceId,
-  services,
-}) => {
-  const isAssetCriticalityIndexExist =
-    await services.scopedClusterClient.asInternalUser.indices.exists({
-      index: getAssetCriticalityIndex(spaceId),
-    });
-
-  return isAssetCriticalityIndexExist;
-};
 
 const enrichmentResponseFields = ['id_value', 'criticality_level'];
 

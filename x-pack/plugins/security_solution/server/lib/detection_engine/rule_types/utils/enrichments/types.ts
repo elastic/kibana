@@ -75,10 +75,7 @@ export type GetIsRiskScoreAvailable = (params: {
   isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
-export type DoesAssetCriticalityAvailable = (params: {
-  spaceId: string;
-  services: RuleServices;
-}) => Promise<boolean>;
+export type IsIndexExist = (params: { services: RuleServices; index: string }) => Promise<boolean>;
 
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {

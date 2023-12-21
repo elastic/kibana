@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import {
-  createHostRiskEnrichments,
-  getIsHostRiskScoreAvailable,
-} from './enrichment_by_type/host_risk';
+import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
 
-import {
-  createUserRiskEnrichments,
-  getIsUserRiskScoreAvailable,
-} from './enrichment_by_type/user_risk';
+import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
 
 import {
   createHostAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
-  doesAssetCriticalityIndexExist,
 } from './enrichment_by_type/asset_criticality';
-
+import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import type {
   EnrichEventsFunction,
   EventsMapByEnrichments,
   CreateEnrichEventsFunction,
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
+import { isIndexExist } from './utils/isIndexExist';
+import {
+  getHostRiskIndex,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,
@@ -45,16 +43,21 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
-      isNewRiskScoreModuleInstalled = await getIsHostRiskScoreAvailable({
-        spaceId,
+      isNewRiskScoreModuleInstalled = await isIndexExist({
         services,
-        isNewRiskScoreModuleInstalled: true,
+        index: getHostRiskIndex(spaceId, true, true),
       });
     }
 
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      getIsHostRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleInstalled }),
-      getIsUserRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleInstalled }),
+      isIndexExist({
+        services,
+        index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+      }),
+      isIndexExist({
+        services,
+        index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+      }),
     ]);
 
     if (isHostRiskScoreIndexExist) {
@@ -82,9 +85,9 @@ export const enrichEvents: EnrichEventsFunction = async ({
     }
 
     if (isAssetCriticalityEnabled) {
-      const assetCriticalityIndexExist = await doesAssetCriticalityIndexExist({
-        spaceId,
+      const assetCriticalityIndexExist = await isIndexExist({
         services,
+        index: getAssetCriticalityIndex(spaceId),
       });
       if (assetCriticalityIndexExist) {
         enrichments.push(
