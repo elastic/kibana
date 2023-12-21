@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { TopNFunctions } from '@kbn/profiling-utils';
 import React from 'react';
-import { EMBEDDABLE_FUNCTIONS } from '.';
+import { EMBEDDABLE_THREADS } from '.';
 import { ProfilingEmbeddable } from './profiling_embeddable';
 
 interface Props {
-  data?: TopNFunctions;
-  isLoading: boolean;
+  kuery: string;
   rangeFrom: number;
   rangeTo: number;
 }
 
-export function EmbeddableFunctions(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FUNCTIONS} />;
+export function EmbeddableThreads(props: Props) {
+  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_THREADS} />;
 }

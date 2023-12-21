@@ -15,6 +15,10 @@ export const EMBEDDABLE_FUNCTIONS = 'EMBEDDABLE_FUNCTIONS';
 /** Profiling functions embeddable */
 export { EmbeddableFunctions } from './embeddable_functions';
 
+/** Profiling threads embeddable key */
+export const EMBEDDABLE_THREADS = 'EMBEDDABLE_THREADS';
+export { EmbeddableThreads } from './embeddable_threads';
+
 /** Profiling search bar embeddable key */
 export const EMBEDDABLE_PROFILING_SEARCH_BAR = 'EMBEDDABLE_PROFILING_SEARCH_BAR';
 /** Profiling search bar embeddable */
