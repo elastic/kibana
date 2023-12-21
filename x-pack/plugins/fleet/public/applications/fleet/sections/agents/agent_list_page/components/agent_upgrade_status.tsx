@@ -119,7 +119,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
           ),
           WarningTooltipText: (
             <FormattedMessage
-              id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
+              id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloadingFailed"
               defaultMessage="Upgrade failing: {retryMsg}. {retryUntil}"
               values={{
                 retryMsg: agentUpgradeDetails?.metadata?.retry_error_msg,
