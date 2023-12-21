@@ -9,10 +9,10 @@
 import {
   EuiButton,
   EuiCheckboxGroup,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormLabel,
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
@@ -22,7 +22,6 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
@@ -143,14 +142,14 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
+    let tempUrl = '';
     if (forSavedObject && shareableUrlForSavedObject) {
-      url = shareableUrlForSavedObject;
+      tempUrl = shareableUrlForSavedObject;
     }
-    if (!url) {
-      url = shareableUrl || window.location.href;
+    if (!tempUrl) {
+      tempUrl = shareableUrl || window.location.href;
     }
-    return updateUrlParams(url);
+    return updateUrlParams(tempUrl);
   };
 
   const createShortUrl = async () => {
@@ -335,7 +334,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'snapshot', label: 'Snapshot' },
   ];
 
-  const placeholderEmbedCode = '';
+  const copyEmbed = () => alert('implement this');
 
   return (
     <EuiModal onClose={onClose}>
@@ -346,8 +345,9 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiText>{`Share this ${props.objectType}`}</EuiText>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row">
+          <EuiFlexGroup direction="column">
             <EuiFlexItem grow={1}>
+              <EuiFormLabel>Include in Embed</EuiFormLabel>
               <EuiCheckboxGroup
                 options={checkboxOptions}
                 idToSelectedMap={checkboxSelectedMap}
@@ -357,6 +357,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
+            <EuiFormLabel>Type to Embed</EuiFormLabel>
               <EuiRadioGroup
                 options={radioOptions}
                 onChange={(id) => setSelectedRadio(id)}
@@ -365,12 +366,13 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
-            <EuiSpacer size="m" />
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiCopy textToCopy={placeholderEmbedCode} anchorClassName="eui-displayBlock">
-            {(copy) => <EuiTextArea placeholder={placeholderEmbedCode} fullWidth />}
-          </EuiCopy>
+          <EuiFlexGroup>
+            <EuiButton fill onClick={() => copyEmbed()}>
+              <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
+            </EuiButton>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiButton fill onClick={onClose}>

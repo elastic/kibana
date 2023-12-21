@@ -128,11 +128,11 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       : tempUrl;
   };
 
-  const updateUrlParams = (url: string) => {
-    url = isEmbedded ? makeUrlEmbeddable(url) : url;
-    url = urlParams ? getUrlParamExtensions(url) : url;
+  const updateUrlParams = (tempUrl: string) => {
+    tempUrl = isEmbedded ? makeUrlEmbeddable(url) : tempUrl;
+    tempUrl = urlParams ? getUrlParamExtensions(url) : tempUrl;
 
-    return url;
+    return tempUrl;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -140,10 +140,10 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     if (forSavedObject && shareableUrlForSavedObject) {
       tempUrl = shareableUrlForSavedObject;
     }
-    if (!url) {
+    if (!tempUrl) {
       tempUrl = shareableUrl || window.location.href;
     }
-    return updateUrlParams(url);
+    return updateUrlParams(tempUrl);
   };
 
   const isNotSaved = () => {
@@ -308,6 +308,9 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       </EuiFormRow>
     );
   };
+
+  const copyLink = () => {}
+
   return (
     <EuiModal onClose={onClose}>
       <EuiForm className="kbnShareContextMenu__finalPanel">
@@ -328,6 +331,12 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
         <EuiSpacer size="m" />
         {saveNeeded}
         <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiButton fill onClick={() => copyLink()}>
+            <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy Link" />
+          </EuiButton>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" justifyContent="flexEnd">
           <EuiButton fill onClick={onClose}>
