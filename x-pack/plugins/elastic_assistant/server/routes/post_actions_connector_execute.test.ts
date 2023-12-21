@@ -201,7 +201,6 @@ describe('postActionsConnectorExecuteRoute', () => {
         await handler(mockContext, mockRequest, mockResponse);
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
           isEnabledRAGAlerts: false,
         });
@@ -231,7 +230,6 @@ describe('postActionsConnectorExecuteRoute', () => {
         await handler(mockContext, ragRequest, mockResponse);
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
           isEnabledRAGAlerts: true,
         });
@@ -262,7 +260,6 @@ describe('postActionsConnectorExecuteRoute', () => {
         await handler(mockContext, req, mockResponse);
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: true,
         });
@@ -289,7 +286,6 @@ describe('postActionsConnectorExecuteRoute', () => {
         await handler(mockContext, req, mockResponse);
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledLangChain: false,
           isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: false,
         });
@@ -314,7 +310,6 @@ describe('postActionsConnectorExecuteRoute', () => {
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
           isEnabledRAGAlerts: false,
         });
@@ -343,7 +338,6 @@ describe('postActionsConnectorExecuteRoute', () => {
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
           isEnabledRAGAlerts: true,
         });
@@ -376,7 +370,6 @@ describe('postActionsConnectorExecuteRoute', () => {
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: true,
         });
@@ -405,7 +398,6 @@ describe('postActionsConnectorExecuteRoute', () => {
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
-          isEnabledLangChain: false,
           isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: false,
         });

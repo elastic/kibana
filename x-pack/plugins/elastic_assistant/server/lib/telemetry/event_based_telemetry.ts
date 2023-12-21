@@ -72,17 +72,10 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   isEnabledKnowledgeBase: boolean;
-  isEnabledLangChain: boolean;
   isEnabledRAGAlerts: boolean;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
-    isEnabledLangChain: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is LangChain enabled',
-      },
-    },
     isEnabledKnowledgeBase: {
       type: 'boolean',
       _meta: {
@@ -101,7 +94,6 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
 export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
   isEnabledKnowledgeBase: boolean;
-  isEnabledLangChain: boolean;
   isEnabledRAGAlerts: boolean;
 }> = {
   eventType: 'invoke_assistant_error',
@@ -110,12 +102,6 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Error message from Elasticsearch',
-      },
-    },
-    isEnabledLangChain: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is LangChain enabled',
       },
     },
     isEnabledKnowledgeBase: {

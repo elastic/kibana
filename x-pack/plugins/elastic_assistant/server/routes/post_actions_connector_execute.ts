@@ -61,7 +61,6 @@ export const postActionsConnectorExecuteRoute = (
           logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-            isEnabledLangChain: false,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
@@ -119,7 +118,6 @@ export const postActionsConnectorExecuteRoute = (
         });
 
         telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-          isEnabledLangChain: true,
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
         });
@@ -133,8 +131,6 @@ export const postActionsConnectorExecuteRoute = (
         logger.error(err);
         const error = transformError(err);
         telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-          isEnabledLangChain:
-            request.body.isEnabledKnowledgeBase || request.body.isEnabledRAGAlerts,
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           errorMessage: error.message,
