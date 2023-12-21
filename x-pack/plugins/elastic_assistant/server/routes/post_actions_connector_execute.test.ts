@@ -219,6 +219,9 @@ describe('postActionsConnectorExecuteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
+        allow: ['@timestamp'],
+        allowReplacement: ['host.name'],
+        replacements: {},
         isEnabledRAGAlerts: true,
       },
     };
@@ -241,8 +244,39 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
+  it('reports success events to telemetry - kb off, RAG alerts on', async () => {
+    const req = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+        allow: ['@timestamp'],
+        allowReplacement: ['host.name'],
+        replacements: {},
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        await handler(mockContext, req, mockResponse);
+
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: false,
+          isEnabledRAGAlerts: true,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
   it('reports success events to telemetry - kb off, RAG alerts off', async () => {
-    const plainRequest = {
+    const req = {
       ...mockRequest,
       body: {
         ...mockRequest.body,
@@ -252,7 +286,7 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
-        await handler(mockContext, plainRequest, mockResponse);
+        await handler(mockContext, req, mockResponse);
 
         expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
           isEnabledLangChain: false,
@@ -311,6 +345,39 @@ describe('postActionsConnectorExecuteRoute', () => {
           errorMessage: 'simulated error',
           isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
+          isEnabledRAGAlerts: true,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb off, RAG alerts on', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+        allow: ['@timestamp'],
+        allowReplacement: ['host.name'],
+        replacements: {},
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        await handler(mockContext, badRequest, mockResponse);
+
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+          errorMessage: 'simulated error',
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: true,
         });
       }),
