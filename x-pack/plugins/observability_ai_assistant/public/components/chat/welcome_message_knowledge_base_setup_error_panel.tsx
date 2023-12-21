@@ -37,7 +37,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 }) {
   const { http } = useKibana().services;
 
-  const modelName = knowledgeBase.status.value?.model_name;
+  const modelName = knowledgeBase.status.value?.elser?.modelName;
 
   return (
     <div
@@ -57,7 +57,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
           <EuiDescriptionListDescription>
             <ul>
-              {!knowledgeBase.status.value?.deployment_state ? (
+              {!knowledgeBase.status.value?.elser?.deploymentState ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
@@ -70,8 +70,8 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                 </li>
               ) : null}
 
-              {knowledgeBase.status.value?.deployment_state &&
-              knowledgeBase.status.value.deployment_state !== 'started' ? (
+              {knowledgeBase.status.value?.elser?.deploymentState &&
+              knowledgeBase.status.value.elser?.deploymentState !== 'started' ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
@@ -80,15 +80,15 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                     values={{
                       modelName: <EuiCode>{modelName}</EuiCode>,
                       deploymentState: (
-                        <EuiCode>{knowledgeBase.status.value?.deployment_state}</EuiCode>
+                        <EuiCode>{knowledgeBase.status.value?.elser?.deploymentState}</EuiCode>
                       ),
                     }}
                   />
                 </li>
               ) : null}
 
-              {knowledgeBase.status.value?.allocation_state &&
-              knowledgeBase.status.value.allocation_state !== 'fully_allocated' ? (
+              {knowledgeBase.status.value?.elser?.allocationState &&
+              knowledgeBase.status.value.elser?.allocationState !== 'fully_allocated' ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
@@ -97,7 +97,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                     values={{
                       modelName: <EuiCode>{modelName}</EuiCode>,
                       allocationState: (
-                        <EuiCode>{knowledgeBase.status.value?.allocation_state}</EuiCode>
+                        <EuiCode>{knowledgeBase.status.value?.elser?.allocationState}</EuiCode>
                       ),
                     }}
                   />

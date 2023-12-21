@@ -7,7 +7,11 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
@@ -594,12 +598,15 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.status();
+  getKnowledgeBaseStatus = (
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) => {
+    return this.dependencies.knowledgeBaseService.status(request, savedObjectsClient);
   };
 
-  setupKnowledgeBase = () => {
-    return this.dependencies.knowledgeBaseService.setup();
+  setupKnowledgeBase = (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
+    return this.dependencies.knowledgeBaseService.setup(request, savedObjectsClient);
   };
 
   createKnowledgeBaseEntry = async ({

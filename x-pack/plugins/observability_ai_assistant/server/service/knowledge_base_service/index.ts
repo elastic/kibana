@@ -6,25 +6,32 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { serverUnavailable } from '@hapi/boom';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
-import pRetry from 'p-retry';
 import { map } from 'lodash';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { MlHelper } from '../util/ml_helper';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
   resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
-  getModelId: () => Promise<string>;
+  ml: MlHelper;
+  savedObjectsStart: SavedObjectsServiceStart;
 }
 
 export interface RecalledEntry {
@@ -76,90 +83,15 @@ export class KnowledgeBaseService {
     this.ensureTaskScheduled();
   }
 
-  setup = async () => {
-    const elserModelId = await this.dependencies.getModelId();
-
-    const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-
-    const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
-      await this.dependencies.esClient.ml.putTrainedModel(
-        {
-          model_id: elserModelId,
-          input: {
-            field_names: ['text_field'],
-          },
-          // @ts-expect-error
-          wait_for_completion: true,
-        },
-        { requestTimeout: '20m' }
-      );
-      this.dependencies.logger.info('Finished installing ELSER model');
-    };
-
-    const getIsModelInstalled = async () => {
-      const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
-        model_id: elserModelId,
-        include: 'definition_status',
-      });
-
-      this.dependencies.logger.debug(
-        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-      );
-
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
-    };
-
-    await pRetry(async () => {
-      let isModelInstalled: boolean = false;
-      try {
-        isModelInstalled = await getIsModelInstalled();
-      } catch (error) {
-        if (isAlreadyExistsError(error)) {
-          await installModel();
-          isModelInstalled = await getIsModelInstalled();
-        }
-      }
-
-      if (!isModelInstalled) {
-        throwKnowledgeBaseNotReady({
-          message: 'Model is not fully defined',
-        });
-      }
-    }, retryOptions);
-
+  setup = async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
     try {
-      await this.dependencies.esClient.ml.startTrainedModelDeployment({
-        model_id: elserModelId,
-        wait_for: 'fully_allocated',
-      });
+      await this.dependencies.ml.setupElser(request, savedObjectsClient);
     } catch (error) {
-      this.dependencies.logger.debug('Error starting model deployment');
-      this.dependencies.logger.debug(error);
-      if (!isAlreadyExistsError(error)) {
-        throw error;
-      }
+      throwKnowledgeBaseNotReady({
+        message: error,
+      });
     }
 
-    await pRetry(async () => {
-      const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-
-      if (
-        response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
-        'fully_allocated'
-      ) {
-        return Promise.resolve();
-      }
-
-      this.dependencies.logger.debug('Model is not allocated yet');
-      this.dependencies.logger.debug(JSON.stringify(response));
-
-      throw gatewayTimeout();
-    }, retryOptions);
-
-    this.dependencies.logger.info('Model is ready');
     this.ensureTaskScheduled();
   };
 
@@ -217,7 +149,9 @@ export class KnowledgeBaseService {
       return;
     }
 
-    if (!(await this.status()).ready) {
+    const savedObjectsRepo = this.dependencies.savedObjectsStart.createInternalRepository();
+    // We make a fake request to bypass ML guards
+    if (!(await this.status({} as any, new SavedObjectsClient(savedObjectsRepo))).ready) {
       this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
       return;
     }
@@ -266,30 +200,27 @@ export class KnowledgeBaseService {
     });
   }
 
-  status = async () => {
-    const elserModelId = await this.dependencies.getModelId();
+  status = async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
+    const elserStatus = await this.dependencies.ml.elserStatus(request, savedObjectsClient);
 
-    try {
-      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-      const elserModelStats = modelStats.trained_model_stats[0];
-      const deploymentState = elserModelStats.deployment_stats?.state;
-      const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
-
+    if (elserStatus.error) {
       return {
-        ready: deploymentState === 'started' && allocationState === 'fully_allocated',
-        deployment_state: deploymentState,
-        allocation_state: allocationState,
-        model_name: elserModelId,
-      };
-    } catch (error) {
-      return {
-        error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
-        model_name: elserModelId,
+        error: elserStatus.error,
+        elser: {
+          modelName: elserStatus.modelName,
+        },
       };
     }
+
+    return {
+      ready: elserStatus.ready,
+      elser: {
+        modelName: elserStatus.modelName,
+        deploymentState: elserStatus.deploymentState,
+        allocationState: elserStatus.allocationState,
+      },
+    };
   };
 
   recall = async ({
@@ -305,7 +236,7 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    const elserModelId = await this.dependencies.getModelId();
+    const elserModelId = await this.dependencies.ml.recommendedElserModelId();
 
     try {
       const query = {

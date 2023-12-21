@@ -18,9 +18,11 @@ export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<{
     ready: boolean;
     error?: any;
-    deployment_state?: MlDeploymentState;
-    allocation_state?: MlDeploymentAllocationState;
-    model_name?: string;
+    elser?: {
+      deploymentState?: MlDeploymentState;
+      allocationState?: MlDeploymentAllocationState;
+      modelName?: string;
+    };
   }>;
   isInstalling: boolean;
   installError?: Error;

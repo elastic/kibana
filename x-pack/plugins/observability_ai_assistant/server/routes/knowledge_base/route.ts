@@ -25,9 +25,11 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   ): Promise<{
     ready: boolean;
     error?: any;
-    deployment_state?: MlDeploymentState;
-    allocation_state?: MlDeploymentAllocationState;
-    model_name?: string;
+    elser?: {
+      deploymentState?: MlDeploymentState;
+      allocationState?: MlDeploymentAllocationState;
+      modelName?: string;
+    };
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
@@ -35,7 +37,10 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseStatus();
+    return await client.getKnowledgeBaseStatus(
+      resources.request,
+      (await resources.context.core).savedObjects.getClient()
+    );
   },
 });
 
@@ -54,7 +59,10 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    await client.setupKnowledgeBase();
+    await client.setupKnowledgeBase(
+      resources.request,
+      (await resources.context.core).savedObjects.getClient()
+    );
 
     return {};
   },

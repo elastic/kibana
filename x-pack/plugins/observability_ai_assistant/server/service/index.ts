@@ -32,6 +32,7 @@ import type {
   RegisterFunction,
   RespondFunctionResources,
 } from './types';
+import { MlHelper } from './util/ml_helper';
 import { splitKbText } from './util/split_kb_text';
 
 const ajv = new Ajv({
@@ -82,7 +83,7 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getModelId: () => Promise<string>;
+  private readonly ml: MlHelper;
   private kbService?: KnowledgeBaseService;
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
@@ -93,16 +94,16 @@ export class ObservabilityAIAssistantService {
     logger,
     core,
     taskManager,
-    getModelId,
+    ml,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
-    getModelId: () => Promise<string>;
+    ml: MlHelper;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getModelId = getModelId;
+    this.ml = ml;
 
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
@@ -124,17 +125,11 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  getKnowledgeBaseStatus() {
-    return this.init().then(() => {
-      return this.kbService!.status();
-    });
-  }
-
   init = once(async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
-      const elserModelId = await this.getModelId();
+      const elserModelId = await this.ml.recommendedElserModelId();
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -241,7 +236,8 @@ export class ObservabilityAIAssistantService {
         esClient,
         resources: this.resourceNames,
         taskManagerStart: pluginsStart.taskManager,
-        getModelId: this.getModelId,
+        ml: this.ml,
+        savedObjectsStart: coreStart.savedObjects,
       });
 
       this.logger.info('Successfully set up index assets');
