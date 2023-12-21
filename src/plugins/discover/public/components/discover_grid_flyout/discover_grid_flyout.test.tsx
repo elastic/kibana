@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
@@ -263,6 +264,14 @@ describe('Discover flyout', function () {
               dataTestSubj: 'customActionItem2',
               onClick: jest.fn(),
             },
+            {
+              id: 'action-item-3',
+              enabled: false,
+              label: 'Action 3',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem3',
+              onClick: jest.fn(),
+            },
           ]),
         };
 
@@ -273,6 +282,47 @@ describe('Discover flyout', function () {
 
         expect(action1.text()).toBe('Action 1');
         expect(action2.text()).toBe('Action 2');
+        expect(findTestSubject(component, 'customActionItem3').exists()).toBe(false);
+      });
+
+      it('should display multiple actions added by getActionItems', async () => {
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 5 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(
+          findTestSubject(component, 'docViewerFlyoutActions')
+            .find(EuiButtonIcon)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'docViewerMoreFlyoutActionsButton',
+        ]);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMoreFlyoutActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual(['customActionItem2', 'customActionItem3', 'customActionItem4']);
       });
 
       it('should allow disabling default actions', async () => {

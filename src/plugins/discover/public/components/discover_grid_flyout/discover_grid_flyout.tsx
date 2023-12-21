@@ -255,6 +255,7 @@ export function DiscoverGridFlyout({
                       responsive={false}
                       alignItems="center"
                       gutterSize={showFlyoutIconsOnly ? 'none' : 's'}
+                      data-test-subj="docViewerFlyoutActions"
                     >
                       {visibleFlyoutActions.map((action) => (
                         <EuiFlexItem key={action.id} grow={false}>
@@ -262,6 +263,7 @@ export function DiscoverGridFlyout({
                             <EuiButtonIcon
                               size="s"
                               iconType={action.iconType}
+                              data-test-subj={action.dataTestSubj}
                               title={action.label}
                               aria-label={action.label}
                               href={action.href}
@@ -291,6 +293,7 @@ export function DiscoverGridFlyout({
                               <EuiButtonIcon
                                 size="s"
                                 iconType="boxesVertical"
+                                data-test-subj="docViewerMoreFlyoutActionsButton"
                                 title={i18n.translate(
                                   'discover.grid.tableRow.moreFlyoutActionsButton',
                                   {
