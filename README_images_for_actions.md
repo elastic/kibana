@@ -17,7 +17,7 @@ alerts.  Here are assumptions / constraints:
 - images will not be persisted to Kibana, because of the size
 
 - images will not be remotely available via Kibana URL, as this would
-  require authorization which is unlikely to work write when using
+  require authorization which is unlikely to work correctly when using
   notification clients like GMail and Slack, which requests
   images serverside
 
@@ -28,9 +28,11 @@ alerts.  Here are assumptions / constraints:
 
 - images could be SVG, if supported by client (I think gmail will work,
   unclear on Slack) - it looks like Slack does not support SVG well at all.
+  GMail also does not support SVG, as it turns out.
 
-- otherwise, images should be raw image data, using a `data:` url; Slack
-  does not support these, but supports uploading an image file, marking it
+- currently converting SVG to PNG via puppeteer
+
+- Slack supports uploading an image file, marking it
   "public", and then referring to it: 
   https://stackoverflow.com/questions/58186399/how-to-create-a-slack-message-containing-an-uploaded-image
 
@@ -59,18 +61,14 @@ alerts.  Here are assumptions / constraints:
   we can get the link for it and reference it in the Slack blockit 
   message.  
 
-- For email - not sure - I think in theory we could add the image inline
-  as a data url, perhaps in SVG format.  Perhaps I should trial-baloon
-  that one first!
-
-## pre setup
-
-`node-canvas` was added as an npm package to Kibana.  This requires
-a number of system packages to be installed.  On Mac, use:
-
-    brew install pkg-config cairo pango libpng jpeg giflib librsvg pixman
+- For email, we use nodemailer which has support for adding attachments;
+  follow the links from here: https://nodemailer.com/message/
 
 ## extending slack to support block kit
+
+_Note: this is unneeded; messages with images are posted by uploading
+the image with an "initial_comment", other messages are sent the old
+way._
 
 Made a quick hack to the slack api connector - if the first character
 starts with `[` or `{`, we treat the text as JSON "blocks".  Here's an
@@ -103,4 +101,39 @@ example to use in an action:
 ]
 ```
 
+## embedding an image in a rule action
 
+This only works with index threshold and the slack api connector.
+
+Use `{{{context.chartData}}}` in an index threshold rule action to 
+expand into the goop that a Slack action will use as data for an
+image.
+
+For example, this is a nice, small message:
+
+    {{context.message}}
+
+    {{{context.chartData}}}
+
+## testing with just http action invocation
+
+We can simulate what a rule would populate with `{{{context.chartData}}}`,
+with the following curl invocation, assuming `slack-api` is the 
+id of a `.slack_api` connector:
+
+(see also script [`test-images-in-actions.sh`](./test-images-in-actions.sh))
+
+```sh
+curl $KB_URL/api/actions/connector/slack-api/_execute \
+  -H "content-type: application/json" \
+  -H "kbn-xsrf: foo" \
+  -d '{
+    "params": {
+      "subAction": "postMessage",
+      "subActionParams": {
+        "channels": ["kibana-alerting"],
+        "text": "<kibana-chart-data>{\"values\":[{\"d\":\"2023-12-19T12:20:43.000Z\",\"v\":0,\"g\":\"group A\"},{\"d\":\"2023-12-19T12:20:44.000Z\",\"v\":1,\"g\":\"group A\"}],\"field\":\"some.field\",\"thresholds\":[2.5]}</kibana-chart-data>"
+      }
+    }
+  }'
+```

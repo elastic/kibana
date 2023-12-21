@@ -22875,11 +22875,6 @@ node-cache@^5.1.0:
   dependencies:
     clone "2.x"
 
-node-canvas@^2.9.0:
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/node-canvas/-/node-canvas-2.9.0.tgz#703ead42750f3e6e7c50e6dc2e9ec06dd437d699"
-  integrity sha512-QYqBq9vm+hWrPyqRUyIRYlrWCWL8IysaDuvM79ZLx694ojctbpHQ4Iu45SZZYSBgiGtSuP2oil9ae1xQloeC9Q==
-
 node-dir@^0.1.10:
   version "0.1.17"
   resolved "https://registry.yarnpkg.com/node-dir/-/node-dir-0.1.17.tgz#5f5665d93351335caabef8f1c554516cf5f1e4e5"

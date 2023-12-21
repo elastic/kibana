@@ -9,8 +9,13 @@ import puppeteer from 'puppeteer';
 import { View, parse as parseVegaSpec } from 'vega';
 import { compile as vegaLiteCompile } from 'vega-lite';
 
-const CHART_WIDTH = 1000;
-const CHART_HEIGHT = 750;
+const CHART_WIDTH_RATIO = 4;
+const CHART_HEIGHT_RATIO = 3;
+const CHART_FACTOR = 200;
+
+const CHART_WIDTH = CHART_WIDTH_RATIO * CHART_FACTOR;
+const CHART_HEIGHT = CHART_HEIGHT_RATIO * CHART_FACTOR;
+
 interface ChartDatum {
   d: string; // date
   v: number; // value
@@ -22,14 +27,14 @@ interface ChartData {
   thresholds: number[];
 }
 
-interface ChartDataSplit {
+export interface ChartDataSplit {
   text: string;
   chartData?: ChartData;
 }
 
 type VegaLiteSpec = Record<string, unknown>;
 
-const chartDataRegex = /(.*?)<kibana-chart-data>(.*?)<\/kibana-chart-data>(.*?)/;
+const chartDataRegex = /^([\s\S]*)<kibana-chart-data>([\s\S]*)<\/kibana-chart-data>([\s\S]*)$/;
 
 export function getChartData(text: string): ChartDataSplit {
   const result: ChartDataSplit = { text };
@@ -42,7 +47,7 @@ export function getChartData(text: string): ChartDataSplit {
   try {
     result.chartData = JSON.parse(match[2]) as ChartData;
   } catch (err) {
-    console.log('error getting chart data:', err);
+    throw new Error(`error getting chart data: ${err.message}`);
   }
 
   return result;
@@ -71,16 +76,20 @@ export async function generateChartSvg(chartSpec: VegaLiteSpec): Promise<string>
   return await view.toSVG(2.0);
 }
 
-export async function svg2png(svg: string): Promise<string> {
-  const browser = await puppeteer.launch();
+export async function svg2png(svg: string): Promise<Buffer> {
+  const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
 
-  await page.setViewport({ width: 1000, height: 750 });
+  const viewPortScale = 2.5;
+  await page.setViewport({
+    width: CHART_WIDTH * viewPortScale,
+    height: CHART_HEIGHT * viewPortScale,
+  });
   await page.setContent(svg);
 
   // console.log(await page.content());
   const pngData = await page.screenshot();
   await browser.close();
 
-  return pngData.toString('base64');
+  return pngData;
 }

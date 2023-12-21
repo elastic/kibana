@@ -87,5 +87,4 @@ export interface SlackApiService {
     channelIds,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
-  uploadChart(stream: ReadableStream): Promise<string>;
 }

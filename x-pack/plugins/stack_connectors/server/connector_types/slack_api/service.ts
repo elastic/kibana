@@ -30,7 +30,7 @@ import {
 } from '../../../common/slack_api/lib';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { generateChartPngStream, generateVegaChartSpec, getChartData } from './vega-chart';
+import { getChartData, generateVegaChartSpec, generateChartSvg, svg2png } from './vega_chart';
 const buildSlackExecutorErrorResponse = ({
   slackApiError,
   logger,
@@ -194,85 +194,68 @@ export const createExternalService = (
         });
       }
 
-      logger.warn(`original: ${text}`);
       const blocks = getBlocks(text);
       const { text: messageText, chartData } = getChartData(text);
-      logger.warn(`chartData: ${JSON.stringify(chartData)}`);
 
       if (chartData) {
-        blocks[0].text.text = messageText;
-
         const spec = generateVegaChartSpec(chartData);
-        const stream = await generateChartPngStream(spec);
-        const chartUrl = await uploadChart(stream);
-        logger.warn(`chartUrl: ${chartUrl}`);
-        blocks.push({
-          type: 'image',
-          image_url: chartUrl,
-          alt_text: 'chart of recent alert data',
+        const svg = await generateChartSvg(spec);
+        const png = await svg2png(svg);
+
+        const result: AxiosResponse<UploadResponse> = await request({
+          axios: axiosInstance,
+          method: 'post',
+          url: `${SLACK_URL}files.upload`,
+          logger,
+          data: {
+            channels: channelToUse,
+            content: png,
+            initial_comment: messageText,
+            filetype: 'png',
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          configurationUtilities,
         });
+
+        // console.log(`resultUpload: ${JSON.stringify(result.data, null, 4)}`);
+        if (result?.data?.error) {
+          throw new Error(`image upload failed: ${result?.data?.error}`);
+        }
+        return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
+      } else {
+        const result: AxiosResponse<PostMessageResponse> = await request({
+          axios: axiosInstance,
+          method: 'post',
+          url: `${SLACK_URL}chat.postMessage`,
+          logger,
+          data: { channel: channelToUse, blocks: JSON.stringify(blocks) },
+          headers,
+          configurationUtilities,
+        });
+
+        return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
       }
-
-      console.log('blocks', JSON.stringify(blocks));
-      const result: AxiosResponse<PostMessageResponse> = await request({
-        axios: axiosInstance,
-        method: 'post',
-        url: `${SLACK_URL}chat.postMessage`,
-        logger,
-        data: { channel: channelToUse, blocks: JSON.stringify(blocks) },
-        headers,
-        configurationUtilities,
-      });
-
-      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
     }
   };
 
   interface UploadResponse {
+    ok: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [x: string]: any;
     file: {
       id: string;
     };
   }
 
-  async function uploadChart(stream: ReadableStream): Promise<string> {
-    const resultUpload: AxiosResponse<UploadResponse> = await request({
-      axios: axiosInstance,
-      method: 'post',
-      url: `${SLACK_URL}file.upload`,
-      logger,
-      data: { file: stream },
-      headers,
-      configurationUtilities,
-    });
-
-    const uploadId = resultUpload.data.file.id;
-
-    interface ShareResponse {
-      file: {
-        permalink: string;
-      };
-    }
-
-    const resultShared: AxiosResponse<ShareResponse> = await request({
-      axios: axiosInstance,
-      method: 'post',
-      url: `${SLACK_URL}file.sharedPublicURL`,
-      logger,
-      data: { file: uploadId },
-      headers,
-      configurationUtilities,
-    });
-
-    return resultShared.data.file.permalink;
-  }
-
   return {
     validChannelId,
     postMessage,
-    uploadChart,
   };
 };
 
