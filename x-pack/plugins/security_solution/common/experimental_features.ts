@@ -72,6 +72,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionUploadEnabled: true,
 
   /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -124,11 +129,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
 
   /**
    * Disables the timeline save tour.
