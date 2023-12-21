@@ -98,7 +98,7 @@
     "@kbn/cell-actions",
     "@kbn/calculate-width-from-char-count",
     "@kbn/discover-utils",
-    "@kbn/lens-formula-docs"
+    "@kbn/lens-formula-docs",
     "@kbn/visualization-utils"
   ],
   "exclude": [
