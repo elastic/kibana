@@ -7,7 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../common/endpoint/constants';
 import {
   formatEndpointActionResults,
   categorizeResponseResults,
@@ -27,7 +32,7 @@ import type {
 import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async <T extends ActionDetails = ActionDetails>(
@@ -42,7 +47,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
 
   try {
     // Get both the Action Request(s) and action Response(s)
-    const [actionRequestEsSearchResults, actionResponsesEsSearchResults] = await Promise.all([
+    const [actionRequestEsSearchResults, allResponseEsHits] = await Promise.all([
       // Get the action request(s)
       esClient
         .search<LogsEndpointAction>(
@@ -62,23 +67,55 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         )
         .catch(catchAndWrapError),
 
-      // Get the Action Response(s)
-      esClient
-        .search<EndpointActionResponse | LogsEndpointActionResponse>(
-          {
-            index: ACTION_RESPONSE_INDICES,
-            size: ACTIONS_SEARCH_PAGE_SIZE,
-            body: {
-              query: {
-                bool: {
-                  filter: [{ term: { action_id: actionId } }],
+      // Get the Action Response(s) from both the Fleet action response index and the Endpoint
+      // action response index.
+      // We query both indexes separately in order to ensure they are both queried - example if the
+      // Fleet actions responses index does not exist yet, ES would generate a `404` and would
+      // never actually query the Endpoint Actions index.
+      Promise.all([
+        // Responses in Fleet index
+        esClient
+          .search<EndpointActionResponse | LogsEndpointActionResponse>(
+            {
+              index: AGENT_ACTIONS_RESULTS_INDEX,
+              size: ACTIONS_SEARCH_PAGE_SIZE,
+              body: {
+                query: {
+                  bool: {
+                    filter: [{ term: { action_id: actionId } }],
+                  },
                 },
               },
             },
-          },
-          { ignore: [404] }
-        )
-        .catch(catchAndWrapError),
+            { ignore: [404] }
+          )
+          .catch(catchAndWrapError),
+
+        // Response in Endpoint index
+        esClient
+          .search<EndpointActionResponse | LogsEndpointActionResponse>(
+            {
+              index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+              size: ACTIONS_SEARCH_PAGE_SIZE,
+              body: {
+                query: {
+                  bool: {
+                    filter: [{ term: { action_id: actionId } }],
+                  },
+                },
+              },
+            },
+            { ignore: [404] }
+          )
+          .catch(catchAndWrapError),
+      ]).then(([fleetResponses, endpointResponses]) => {
+        // Combine the hists and return
+        const allResponses: Array<
+          estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+        > = [...(fleetResponses?.hits?.hits ?? []), ...(endpointResponses?.hits?.hits ?? [])];
+
+        return allResponses;
+      }),
     ]);
 
     actionRequestsLogEntries = formatEndpointActionResults(
@@ -94,8 +131,8 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     }
 
     actionResponses = categorizeResponseResults({
-      results: actionResponsesEsSearchResults?.hits?.hits ?? [],
-    }) as Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+      results: allResponseEsHits,
+    });
   } catch (error) {
     throw new EndpointError(error.message, error);
   }
