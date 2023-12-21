@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from './config';
 
-const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
+const defaultLogColumns = ['@timestamp', 'content', 'service.name', 'host.name'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -40,9 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo({
           pageState: {
             columns: [
+              { field: 'content' },
               { field: 'service.name' },
               { field: 'host.name' },
-              { field: 'message' },
               { field: 'data_stream.namespace' },
             ],
           },
