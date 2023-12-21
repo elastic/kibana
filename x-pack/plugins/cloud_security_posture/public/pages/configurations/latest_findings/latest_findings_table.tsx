@@ -93,7 +93,7 @@ export const LatestFindingsTable = ({
   dataViewIsRefetching,
 }: LatestFindingsTableProps) => {
   const {
-    cloudPostureTable,
+    cloudPostureDataTable,
     rows,
     error,
     isFetching,
@@ -138,7 +138,7 @@ export const LatestFindingsTable = ({
             rows={rows}
             total={total}
             flyoutComponent={flyoutComponent}
-            cloudPostureTable={cloudPostureTable}
+            cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}
             customCellRenderer={customCellRenderer}

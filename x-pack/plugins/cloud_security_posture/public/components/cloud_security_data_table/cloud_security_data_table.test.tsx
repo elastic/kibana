@@ -25,7 +25,7 @@ const mockDataView = {
 
 const mockDefaultColumns = [{ id: 'field1' }, { id: 'field2' }];
 
-const mockCloudPostureTable = {
+const mockCloudPostureDataTable = {
   setUrlQuery: jest.fn(),
   columnsLocalStorageKey: 'test',
   filters: [],
@@ -53,7 +53,7 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
     rows: [],
     total: 0,
     flyoutComponent: () => <></>,
-    cloudPostureTable: mockCloudPostureTable,
+    cloudPostureDataTable: mockCloudPostureDataTable,
     loadMore: jest.fn(),
     title: 'Test Table',
   };

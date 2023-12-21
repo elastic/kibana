@@ -52,10 +52,10 @@ export interface CloudSecurityDataTableProps {
    */
   flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   /**
-   * This is the object that contains all the data and functions from the useCloudPostureTable hook.
+   * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
    */
-  cloudPostureTable: CloudPostureDataTableResult;
+  cloudPostureDataTable: CloudPostureDataTableResult;
   title: string;
   /**
    * This is a function that returns a map of column ids to custom cell renderers.
@@ -97,7 +97,7 @@ export const CloudSecurityDataTable = ({
   rows,
   total,
   flyoutComponent,
-  cloudPostureTable,
+  cloudPostureDataTable,
   loadMore,
   title,
   customCellRenderer,
@@ -116,7 +116,7 @@ export const CloudSecurityDataTable = ({
     onResetFilters,
     filters,
     sort,
-  } = cloudPostureTable;
+  } = cloudPostureDataTable;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
