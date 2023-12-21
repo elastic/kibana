@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createBrowserHistory } from 'history';
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -18,7 +19,9 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
+  const globalStateContainer = getDiscoverGlobalStateContainer(
+    createKbnUrlStateStorage({ history: createBrowserHistory() })
+  );
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {

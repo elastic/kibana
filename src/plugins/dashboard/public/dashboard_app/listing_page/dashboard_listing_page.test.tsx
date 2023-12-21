@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createBrowserHistory } from 'history';
 
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
@@ -39,7 +40,7 @@ jest.mock('../no_data/dashboard_app_no_data', () => {
 function makeDefaultProps(): DashboardListingPageProps {
   return {
     redirectTo: jest.fn(),
-    kbnUrlStateStorage: createKbnUrlStateStorage(),
+    kbnUrlStateStorage: createKbnUrlStateStorage({ history: createBrowserHistory() }),
   };
 }
 

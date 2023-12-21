@@ -23,6 +23,7 @@ import {
 import { Filter } from '@kbn/es-query';
 import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createBrowserHistory } from 'history';
 
 import { createDashboard } from './create_dashboard';
 import { getSampleDashboardPanel } from '../../../mocks';
@@ -212,7 +213,7 @@ test('applies filters and query from state to query service', async () => {
   await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
-      kbnUrlStateStorage: createKbnUrlStateStorage(),
+      kbnUrlStateStorage: createKbnUrlStateStorage({ history: createBrowserHistory() }),
     },
     getInitialInput: () => ({ filters, query }),
   });
@@ -228,7 +229,7 @@ test('applies time range and refresh interval from initial input to query servic
   await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
-      kbnUrlStateStorage: createKbnUrlStateStorage(),
+      kbnUrlStateStorage: createKbnUrlStateStorage({ history: createBrowserHistory() }),
     },
     getInitialInput: () => ({ timeRange, refreshInterval, timeRestore: true }),
   });
@@ -246,7 +247,7 @@ test('applies time range from query service to initial input if time restore is 
   pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
     .fn()
     .mockReturnValue(urlTimeRange);
-  const kbnUrlStateStorage = createKbnUrlStateStorage();
+  const kbnUrlStateStorage = createKbnUrlStateStorage({ history: createBrowserHistory() });
   kbnUrlStateStorage.get = jest.fn().mockReturnValue({ time: urlTimeRange });
 
   const dashboard = await createDashboard({
@@ -271,7 +272,7 @@ test('applies time range from query service to initial input if time restore is 
   const dashboard = await createDashboard({
     useUnifiedSearchIntegration: true,
     unifiedSearchSettings: {
-      kbnUrlStateStorage: createKbnUrlStateStorage(),
+      kbnUrlStateStorage: createKbnUrlStateStorage({ history: createBrowserHistory() }),
     },
   });
   expect(dashboard).toBeDefined();
