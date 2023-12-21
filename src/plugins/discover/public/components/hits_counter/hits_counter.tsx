@@ -36,13 +36,13 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
   }
 
   const formattedHits = (
-    <strong
+    <span
       data-test-subj={
         hitsStatus === FetchStatus.PARTIAL ? 'discoverQueryHitsPartial' : 'discoverQueryHits'
       }
     >
       <FormattedNumber value={hitsTotal ?? 0} />
-    </strong>
+    </span>
   );
 
   const hitsCounterCss = css`
@@ -63,34 +63,33 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
       data-test-subj="discoverQueryTotalHits"
     >
       <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
-        <EuiText
-          className="eui-textTruncate"
-          size={mode === HitsCounterMode.standalone ? 'm' : 's'}
-        >
-          {hitsStatus === FetchStatus.PARTIAL &&
-            (mode === HitsCounterMode.standalone ? (
-              <FormattedMessage
-                id="discover.hitsCounter.partialHitsPluralTitle"
-                defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
-                values={{ hits: hitsTotal, formattedHits }}
-              />
-            ) : (
-              <FormattedMessage
-                id="discover.hitsCounter.partialHits"
-                defaultMessage="≥{formattedHits}"
-                values={{ formattedHits }}
-              />
-            ))}
-          {hitsStatus !== FetchStatus.PARTIAL &&
-            (mode === HitsCounterMode.standalone ? (
-              <FormattedMessage
-                id="discover.hitsCounter.hitsPluralTitle"
-                defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
-                values={{ hits: hitsTotal, formattedHits }}
-              />
-            ) : (
-              formattedHits
-            ))}
+        <EuiText className="eui-textTruncate" size="s">
+          <strong>
+            {hitsStatus === FetchStatus.PARTIAL &&
+              (mode === HitsCounterMode.standalone ? (
+                <FormattedMessage
+                  id="discover.hitsCounter.partialHitsPluralTitle"
+                  defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
+                  values={{ hits: hitsTotal, formattedHits }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="discover.hitsCounter.partialHits"
+                  defaultMessage="≥{formattedHits}"
+                  values={{ formattedHits }}
+                />
+              ))}
+            {hitsStatus !== FetchStatus.PARTIAL &&
+              (mode === HitsCounterMode.standalone ? (
+                <FormattedMessage
+                  id="discover.hitsCounter.hitsPluralTitle"
+                  defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
+                  values={{ hits: hitsTotal, formattedHits }}
+                />
+              ) : (
+                formattedHits
+              ))}
+          </strong>
         </EuiText>
       </EuiFlexItem>
       {hitsStatus === FetchStatus.PARTIAL && (
