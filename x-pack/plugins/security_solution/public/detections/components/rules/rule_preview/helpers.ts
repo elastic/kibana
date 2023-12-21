@@ -6,12 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { Position, ScaleType } from '@elastic/charts';
 import type { EuiSelectOption } from '@elastic/eui';
 import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
-import { histogramDateTimeFormatter } from '../../../../common/components/utils';
-import type { ChartSeriesConfigs } from '../../../../common/components/charts/common';
+
 import type { FieldValueQueryBar } from '../query_bar';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
@@ -59,54 +57,6 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'M', text: i18n.LAST_MONTH },
     ];
   }
-};
-
-/**
- * Config passed into elastic-charts settings.
- * @param to
- * @param from
- */
-export const getHistogramConfig = (
-  to: string,
-  from: string,
-  showLegend = false
-): ChartSeriesConfigs => {
-  return {
-    series: {
-      xScaleType: ScaleType.Time,
-      yScaleType: ScaleType.Linear,
-      stackAccessors: ['g'],
-    },
-    axis: {
-      xTickFormatter: histogramDateTimeFormatter([to, from]),
-      yTickFormatter: (value: string | number): string => value.toLocaleString(),
-      tickSize: 8,
-    },
-    yAxisTitle: i18n.QUERY_GRAPH_COUNT,
-    settings: {
-      legendPosition: Position.Right,
-      showLegend,
-      showLegendExtra: showLegend,
-      theme: {
-        scales: {
-          barsPadding: 0.08,
-        },
-        chartMargins: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        chartPaddings: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-      },
-    },
-    customHeight: 200,
-  };
 };
 
 const isNewTermsPreviewDisabled = (newTermsFields: string[]): boolean => {

@@ -209,7 +209,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const visualizationResponse = useVisualizationResponse({ visualizationId });
+  const { responses } = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
@@ -217,10 +217,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     if (typeof subtitle === 'function') {
       if (isChartEmbeddablesEnabled) {
-        if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+        if (!responses || !visualizationResponseHasData(responses[0])) {
           return subtitle(0);
         }
-        const visualizationCount = visualizationResponse[0].hits.total;
+        const visualizationCount = responses[0].hits.total;
         return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
       } else {
         return totalCount >= 0 ? subtitle(totalCount) : null;
@@ -228,7 +228,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     }
 
     return subtitle;
-  }, [isChartEmbeddablesEnabled, isInitialLoading, subtitle, totalCount, visualizationResponse]);
+  }, [isChartEmbeddablesEnabled, isInitialLoading, responses, subtitle, totalCount]);
 
   const hideHistogram = useMemo(
     () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),

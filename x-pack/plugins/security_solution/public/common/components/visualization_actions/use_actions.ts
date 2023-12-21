@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useCallback, useMemo } from 'react';
+import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
@@ -19,38 +21,43 @@ import {
   OPEN_IN_LENS,
 } from './translations';
 import type { LensAttributes } from './types';
+import { VisualizationContextMenuActions } from './types';
 import { INSPECT } from '../inspect/translations';
 
-export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
+export const DEFAULT_ACTIONS: VisualizationContextMenuActions[] = [
+  VisualizationContextMenuActions.inspect,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.saveToLibrary,
+  VisualizationContextMenuActions.openInLens,
+];
+
+export const INSPECT_ACTION: VisualizationContextMenuActions[] = [
+  VisualizationContextMenuActions.inspect,
+];
+
+export const VISUALIZATION_CONTEXT_MENU_TRIGGER: Trigger = {
+  id: 'VISUALIZATION_CONTEXT_MENU_TRIGGER',
+};
 
 export const useActions = ({
   attributes,
   extraActions,
   inspectActionProps,
   timeRange,
-  withActions,
+  withActions = [],
 }: {
   attributes: LensAttributes | null;
   extraActions?: Action[];
-  inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
+  inspectActionProps: {
+    handleInspectClick: () => void;
+    isInspectButtonDisabled: boolean;
+  };
   timeRange: { from: string; to: string };
-  withActions?: boolean;
+  withActions?: VisualizationContextMenuActions[];
 }) => {
   const { lens } = useKibana().services;
-  const { navigateToPrefilledEditor } = lens;
-  const [defaultActions, setDefaultActions] = useState([
-    'inspect',
-    'addToNewCase',
-    'addToExistingCase',
-    'saveToLibrary',
-    'openInLens',
-  ]);
-
-  useEffect(() => {
-    if (withActions === false) {
-      setDefaultActions([]);
-    }
-  }, [withActions]);
+  const { navigateToPrefilledEditor, canUseEditor } = lens;
 
   const onOpenInLens = useCallback(() => {
     if (!timeRange || !attributes) {
@@ -80,62 +87,71 @@ export const useActions = ({
   });
 
   const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({ attributes });
+
   const actions = useMemo(
     () =>
-      defaultActions?.reduce<Action[]>((acc, action) => {
-        if (action === 'inspect' && inspectActionProps != null) {
-          return [
-            ...acc,
+      withActions?.reduce<Action[]>((acc, action) => {
+        if (action === VisualizationContextMenuActions.inspect) {
+          acc.push(
             getInspectAction({
-              callback: inspectActionProps?.onInspectActionClicked,
-              disabled: inspectActionProps?.isDisabled,
-            }),
-          ];
+              execute: async () => inspectActionProps.handleInspectClick(),
+              disabled: inspectActionProps.isInspectButtonDisabled,
+            })
+          );
         }
-        if (action === 'addToExistingCase') {
-          return [
-            ...acc,
+        if (action === VisualizationContextMenuActions.addToExistingCase) {
+          acc.push(
             getAddToExistingCaseAction({
-              callback: onAddToExistingCaseClicked,
+              execute: async () => {
+                onAddToExistingCaseClicked();
+              },
               disabled: isAddToExistingCaseDisabled,
-            }),
-          ];
+            })
+          );
         }
-        if (action === 'addToNewCase') {
-          return [
-            ...acc,
+        if (action === VisualizationContextMenuActions.addToNewCase) {
+          acc.push(
             getAddToNewCaseAction({
-              callback: onAddToNewCaseClicked,
+              execute: async () => onAddToNewCaseClicked(),
               disabled: isAddToNewCaseDisabled,
-            }),
-          ];
+            })
+          );
         }
-        if (action === 'openInLens') {
-          return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
+        if (action === VisualizationContextMenuActions.openInLens) {
+          acc.push(
+            getOpenInLensActions({
+              execute: async () => {
+                onOpenInLens();
+              },
+              isCompatible: async () => canUseEditor(),
+            })
+          );
         }
 
-        if (action === 'saveToLibrary') {
-          return [
-            ...acc,
+        if (action === VisualizationContextMenuActions.saveToLibrary) {
+          acc.push(
             getSaveToLibraryAction({
-              callback: openSaveVisualizationFlyout,
+              execute: async () => {
+                openSaveVisualizationFlyout();
+              },
               disabled: disableVisualizations,
-            }),
-          ];
+            })
+          );
         }
 
         return acc;
       }, []),
     [
-      defaultActions,
+      withActions,
       inspectActionProps,
-      onAddToExistingCaseClicked,
       isAddToExistingCaseDisabled,
-      onAddToNewCaseClicked,
+      onAddToExistingCaseClicked,
       isAddToNewCaseDisabled,
+      onAddToNewCaseClicked,
       onOpenInLens,
-      openSaveVisualizationFlyout,
+      canUseEditor,
       disableVisualizations,
+      openSaveVisualizationFlyout,
     ]
   );
 
@@ -150,131 +166,89 @@ export const useActions = ({
   return withExtraActions;
 };
 
-const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
-  return {
-    id: 'openInLens',
-
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return OPEN_IN_LENS;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'visArea';
-    },
+const getOpenInLensActions = ({
+  execute,
+  isCompatible,
+}: {
+  execute: ActionDefinition['execute'];
+  isCompatible: ActionDefinition['isCompatible'];
+}): Action =>
+  createAction({
+    id: VisualizationContextMenuActions.openInLens,
+    isCompatible,
+    getDisplayName: () => OPEN_IN_LENS,
+    getIconType: () => 'visArea',
     type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
+    execute,
     order: 0,
-  };
-};
+  });
 
 const getSaveToLibraryAction = ({
-  callback,
+  execute,
   disabled,
 }: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'saveToLibrary',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADDED_TO_LIBRARY;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'save';
-    },
+  execute: ActionDefinition['execute'];
+  disabled: ActionDefinition['disabled'];
+}): Action =>
+  createAction({
+    id: VisualizationContextMenuActions.saveToLibrary,
+    getDisplayName: () => ADDED_TO_LIBRARY,
+    getIconType: () => 'save',
     type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
+    execute,
     disabled,
     order: 1,
-  };
-};
+  });
 
 const getAddToExistingCaseAction = ({
-  callback,
+  execute,
   disabled,
 }: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'addToExistingCase',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADD_TO_EXISTING_CASE;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'casesApp';
-    },
+  execute: ActionDefinition['execute'];
+  disabled: ActionDefinition['disabled'];
+}): Action =>
+  createAction({
+    id: VisualizationContextMenuActions.addToExistingCase,
+    getDisplayName: () => ADD_TO_EXISTING_CASE,
+    getIconType: () => 'casesApp',
     type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
+    execute,
     disabled,
     order: 2,
-  };
-};
+  });
 
 const getAddToNewCaseAction = ({
-  callback,
+  execute,
   disabled,
 }: {
-  callback: () => void;
-  disabled?: boolean;
-}): Action => {
-  return {
-    id: 'addToNewCase',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return ADD_TO_NEW_CASE;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'casesApp';
-    },
+  execute: ActionDefinition['execute'];
+  disabled: ActionDefinition['disabled'];
+}): Action =>
+  createAction({
+    id: VisualizationContextMenuActions.addToNewCase,
+    getDisplayName: () => ADD_TO_NEW_CASE,
+    getIconType: () => 'casesApp',
     type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
-    },
+    execute,
     disabled,
     order: 3,
-  };
-};
+  });
 
 const getInspectAction = ({
-  callback,
+  execute,
   disabled,
 }: {
-  callback: () => void;
+  execute: () => void;
   disabled?: boolean;
-}): Action => {
-  return {
-    id: 'inspect',
-    getDisplayName(context: ActionExecutionContext<object>): string {
-      return INSPECT;
-    },
-    getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'inspect';
-    },
+}): Action =>
+  createAction({
+    id: VisualizationContextMenuActions.inspect,
+    getDisplayName: () => INSPECT,
+    getIconType: () => 'inspect',
     type: 'actionButton',
-    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-      return true;
-    },
-    async execute(context: ActionExecutionContext<object>): Promise<void> {
-      callback();
+    execute: async () => {
+      execute();
     },
     disabled,
     order: 4,
-  };
-};
+  });
