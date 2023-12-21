@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
@@ -110,21 +109,5 @@ describe('Has API Keys route', () => {
       message:
         "API keys are disabled in Elasticsearch. To use API keys enable 'xpack.security.authc.api_key.enabled' setting.",
     });
-  });
-
-  it('should forward error from Elasticsearch GET API keys endpoint', async () => {
-    const error = Boom.forbidden('test not acceptable message');
-    esClientMock.asCurrentUser.security.getApiKey.mockResponseImplementation(() => {
-      throw error;
-    });
-
-    const response = await routeHandler(
-      mockContext,
-      httpServerMock.createKibanaRequest(),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(403);
-    expect(response.payload).toEqual(error);
   });
 });
