@@ -50,12 +50,13 @@ describe('Tests detection rules utils', () => {
     const result = generateBenchmarkRuleTags(cspBenchmarkRule);
 
     const expectedTags = [
-      'STATIC_RULE_TAGS', // Replace with actual value of STATIC_RULE_TAGS
+      'Cloud Security',
+      'Use Case: Configuration Audit',
       'CIS',
       'GCP',
       'CIS GCP 1.1',
       'CSPM',
-      'CSP_RULE_TAG_DATA_SOURCE_PREFIXCSPM',
+      'Data Source: CSPM',
       'Domain: Cloud',
     ];
     expect(result).toEqual(expectedTags);
