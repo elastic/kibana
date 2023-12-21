@@ -123,7 +123,11 @@ export const useModelMemoryEstimator = (
           title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
             defaultMessage: 'Model memory limit could not be calculated',
           }),
-          text: extractErrorMessage(error),
+          text: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryErrorText', {
+            defaultMessage:
+              '{errorText}. You can proceed with creating the job, but check for warning messages once the job is running that the configured limit has not been exceeded.',
+            values: { errorText: extractErrorMessage(error) },
+          }),
         });
       })
     );
