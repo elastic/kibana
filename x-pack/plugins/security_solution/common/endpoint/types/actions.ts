@@ -155,6 +155,7 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
     action_id: string;
     // Endpoint Response documents do not have `parameters` in the `data`
     data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+    input_type: ResponseActionAgentType;
   };
   error?: EcsError;
 }

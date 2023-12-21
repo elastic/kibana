@@ -17,6 +17,7 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { dump } from '../../../../utils/dump';
 import { ResponseActionsClientError } from '../errors';
@@ -36,6 +37,7 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 };
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
@@ -144,9 +146,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
     try {
-      const response = await (this.connectorActionsClient.execute(executeOptions) as Promise<
-        ActionTypeExecutorResult<SentinelOneGetAgentsResponse>
-      >);
+      const response = (await this.connectorActionsClient.execute(
+        executeOptions
+      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 
       this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${dump(response)}`);
 
@@ -185,15 +187,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'isolate',
     };
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    // TODO: un-comment code below once we have proper authz given to `kibana_system` account (security issue #8190)
-    // await this.writeActionResponseToEndpointIndex({
-    //   actionId: actionRequestDoc.EndpointActions.action_id,
-    //   agentId: actionRequestDoc.agent.id,
-    //   data: {
-    //     command: actionRequestDoc.EndpointActions.data.command,
-    //   },
-    // });
+    await this.writeActionResponseToEndpointIndex({
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      agentId: actionRequestDoc.agent.id,
+      data: {
+        command: actionRequestDoc.EndpointActions.data.command,
+      },
+    });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
