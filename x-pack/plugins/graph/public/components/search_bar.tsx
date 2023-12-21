@@ -7,15 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -103,13 +102,9 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const {
     uiSettings,
     appName,
-    unifiedSearch,
-    data,
-    dataViews,
-    storage,
-    notifications,
-    http,
-    docLinks,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
     contentManagement,
   } = services;
   if (!overlays) return null;
@@ -179,16 +174,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             query={query}
             onChange={setQuery}
             appName={appName}
-            deps={{
-              unifiedSearch,
-              data,
-              dataViews,
-              storage,
-              notifications,
-              http,
-              docLinks,
-              uiSettings,
-            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
