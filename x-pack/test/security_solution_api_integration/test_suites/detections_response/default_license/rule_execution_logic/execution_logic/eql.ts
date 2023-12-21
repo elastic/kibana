@@ -639,9 +639,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
-        if (!fullAlert) {
-          return expect(fullAlert).to.be.ok();
-        }
         expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('important');
       });
     });
