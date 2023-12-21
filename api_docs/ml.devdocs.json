@@ -1942,6 +1942,8 @@
             "section": "def-common.ModelDefinitionResponse",
             "text": "ModelDefinitionResponse"
           },
+          ">; installElasticModel(modelId: string): Promise<",
+          "MlTrainedModelConfig",
           ">; }"
         ],
         "path": "x-pack/plugins/ml/server/shared.ts",
