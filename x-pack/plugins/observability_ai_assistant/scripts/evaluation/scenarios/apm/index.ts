@@ -49,3 +49,32 @@ export const apm_performance: EvaluationFunction = async ({ chatClient }) => {
   return evaluation;
 };
 
+export const apm_service: EvaluationFunction = async ({ chatClient }) => {
+  let conversation = await chatClient.complete(
+    'What are the active services in the environment "Synthtrace: logs_and_metrics"?'
+  );
+
+  conversation = await chatClient.complete(
+    conversation.conversationId!,
+    conversation.messages.concat({
+      content: 'What is the average error rate per service over the past 4 hours?',
+      role: MessageRole.User
+    })
+  );
+
+  conversation = await chatClient.complete(
+    conversation.conversationId!,
+    conversation.messages.concat({
+      content: 'Are there any alert for those services?',
+      role: MessageRole.User
+    })
+  );
+
+  const evaluation = await chatClient.evaluate(conversation, [
+    'Responds with the active services in the environment "Synthtrace: logs_and_metrics"',
+    'Executes get_apm_timeseries to obtain the error rate of the services for the last 4 hours',
+    'Returns the current alerts for the services'
+  ]);
+
+  return evaluation;
+};

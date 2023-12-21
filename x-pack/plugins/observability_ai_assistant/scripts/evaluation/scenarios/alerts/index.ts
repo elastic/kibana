@@ -23,7 +23,7 @@ export const alerts_summary: EvaluationFunction = async ({ chatClient }) => {
 
 export const alerts_filtered: EvaluationFunction = async ({ chatClient }) => {
   let conversation = await chatClient.complete(
-    'Do I have any active alerts related to log_synth?'
+    'Do I have any active alerts related to logs_synth?'
   );
 
   conversation = await chatClient.complete(
@@ -36,7 +36,7 @@ export const alerts_filtered: EvaluationFunction = async ({ chatClient }) => {
 
 
   const evaluation = await chatClient.evaluate(conversation, [
-    'Uses alerts function to retrieve active alerts for log_synth',
+    'Uses alerts function to retrieve active alerts for logs_synth',
     'Uses alerts function to filtering on service.name synth-service-0 to retrieve active alerts for that service',
   ]);
 
