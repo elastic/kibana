@@ -68,15 +68,15 @@ const packages: Package[] = [
       },
       'darwin-x64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/darwin-x64-115.gz',
-        sha256: '215b6ffb1e5d124439a7dbdd09e4ed1263e065839354a6ad67091ce00d14ee9b',
+        sha256: '1e0d79983c94222c414a5410444ec0ccf37614fd0e45187d0f313a19b203702c',
       },
       'darwin-arm64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/darwin-arm64-115.gz',
-        sha256: '0a8bc28150c9efd04f3b52ac214cc7898bde1b8e1f8e6900ae711b03665ff657',
+        sha256: '192c8e036062504b818941989c44ddb799efe0419d039f7089caedb09d49a597',
       },
       'win32-x64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.9/win32-x64-115.gz',
-        sha256: '117872144e4a2bb61611aacc51ac9fd24e494c209cf63366f236099a662316eb',
+        sha256: '01ae2df89f976f4097e50e121d7ec6ac62ec8050c838107dcfb976d037a60d59',
       },
     },
   },
