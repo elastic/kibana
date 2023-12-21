@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, chunk } from 'lodash';
+import { chunk } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
 import { makeSingleFieldMatchQuery } from './utils/requests';
 import { getEventValue, getFieldValue } from './utils/events';
@@ -27,11 +27,9 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   try {
     logger.debug(`Enrichment ${name}: started`);
 
-    // gets just the events we will enrich
-    const eventsWithField = events.filter((event) => getEventValue(event, mappingField.eventField));
+    const eventsToEnrich = events.filter((event) => getEventValue(event, mappingField.eventField));
 
-    // gets the values for that field, and makes a map of field_value to event
-    const eventsMapByFieldValue = eventsWithField.reduce((acc, event) => {
+    const eventsMapByFieldValue = eventsToEnrich.reduce((acc, event) => {
       const eventFieldValue = getEventValue(event, mappingField.eventField);
 
       if (!eventFieldValue) return {};
@@ -42,10 +40,8 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
       return acc;
     }, {} as { [key: string]: typeof events });
 
-    // list of e.g. user.name's of host.names
     const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
 
-    // array of arrays of e.g. user.name's of host.names
     const chunksUniqueEventsValuesToSearchBy = chunk(uniqueEventsValuesToSearchBy, MAX_CLAUSES);
 
     const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
@@ -67,12 +63,9 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
         })
       );
 
-    const enrichmentsResults = (await Promise.allSettled(getAllEnrichment))
+    const enrichments = (await Promise.allSettled(getAllEnrichment))
       .filter((result) => result.status === 'fulfilled')
-      .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
-
-    // search hits.
-    const enrichments = flatten(enrichmentsResults);
+      .flatMap((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
 
     if (enrichments.length === 0) {
       logger.debug(`Enrichment ${name}: no enrichment found`);
