@@ -361,6 +361,9 @@ export const MLInferenceLogic = kea<
         });
         // Continue to the next step so we don't have to save it to state, we will change
         // back to the Configuration step if we find a pipeline with the same name
+
+        // Re-fetch ML model list to include those that were deployed in this step
+        actions.makeMLModelsRequest(undefined);
       }
       actions.setAddInferencePipelineStep(step);
     },
