@@ -60,6 +60,11 @@ describe('Has API Keys route', () => {
         hasApiKeys: true,
       })
     );
+    expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledTimes(1);
+    expect(esClientMock.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({
+      owner: true,
+      active_only: true,
+    });
   });
 
   it('should calculate when user does not have API keys', async () => {
