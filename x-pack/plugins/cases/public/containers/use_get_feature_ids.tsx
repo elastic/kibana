@@ -64,7 +64,6 @@ export const useGetFeatureIds = (alertIds: string[], enabled: boolean) => {
     },
     {
       select: transformResponseToFeatureIds,
-      retry: true,
       enabled,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
