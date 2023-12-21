@@ -19,7 +19,7 @@ export const SurveyKubernetes = () => {
   const [isToastSeen, setIsToastSeen] = useLocalStorage(KUBERNETES_TOAST_STORAGE_KEY, false);
   const markToastAsSeen = () => setIsToastSeen(true);
   const {
-    services: { kibanaVersion, isCloudEnv, isServerlessEnv },
+    kibanaEnvironment: { kibanaVersion, isCloudEnv, isServerlessEnv },
   } = useKibanaContextForPlugin();
 
   return (

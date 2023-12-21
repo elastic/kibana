@@ -17,7 +17,7 @@ const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_ur
 export const SurveySection = () => {
   const { nodeType } = useWaffleOptionsContext();
   const {
-    services: { kibanaVersion, isCloudEnv, isServerlessEnv },
+    kibanaEnvironment: { kibanaVersion, isCloudEnv, isServerlessEnv },
   } = useKibanaContextForPlugin();
 
   return (

@@ -22,11 +22,18 @@ export const createKibanaContextForPlugin = (
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports
 ) =>
-  createKibanaReactContext<PluginKibanaContextValue>({
-    ...core,
-    ...plugins,
-    ...pluginStart,
-  });
+  createKibanaReactContext<PluginKibanaContextValue>(
+    {
+      ...core,
+      ...plugins,
+      ...pluginStart,
+    },
+    {
+      kibanaVersion: plugins.kibanaVersion,
+      isCloudEnv: plugins.isCloudEnv,
+      isServerlessEnv: plugins.isServerlessEnv,
+    }
+  );
 
 export const useKibanaContextForPlugin =
   useKibana as () => KibanaReactContextValue<PluginKibanaContextValue>;
@@ -40,7 +47,6 @@ export const useKibanaContextForPluginProvider = (
     () => createKibanaContextForPlugin(core, plugins, pluginStart),
     [core, pluginStart, plugins]
   );
-
   return Provider;
 };
 

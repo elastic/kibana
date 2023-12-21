@@ -30,7 +30,7 @@ const HOSTS_FEEDBACK_LINK =
 export const HostsPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
   const {
-    services: { kibanaVersion, isCloudEnv, isServerlessEnv },
+    kibanaEnvironment: { kibanaVersion, isCloudEnv, isServerlessEnv },
   } = useKibanaContextForPlugin();
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });

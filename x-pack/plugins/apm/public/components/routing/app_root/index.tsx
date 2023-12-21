@@ -72,6 +72,11 @@ export function ApmAppRoot({
         <ApmPluginContext.Provider value={apmPluginContextValue}>
           <KibanaContextProvider
             services={{ ...core, ...pluginsStart, storage, ...apmServices }}
+            kibanaEnvironment={{
+              kibanaVersion: pluginsStart.kibanaVersion,
+              isCloudEnv: pluginsStart.isCloudEnv,
+              isServerlessEnv: pluginsStart.isServerlessEnv,
+            }}
           >
             <i18nCore.Context>
               <TimeRangeIdContextProvider>

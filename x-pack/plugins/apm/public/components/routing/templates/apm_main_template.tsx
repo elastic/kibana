@@ -58,16 +58,9 @@ export function ApmMainTemplate({
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
 
-  const { services } = useKibana<ApmPluginStartDeps>();
-  const {
-    http,
-    docLinks,
-    observabilityShared,
-    application,
-    kibanaVersion,
-    isCloudEnv,
-    isServerlessEnv,
-  } = services;
+  const { services, kibanaEnvironment } = useKibana<ApmPluginStartDeps>();
+  const { http, docLinks, observabilityShared, application } = services;
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
 

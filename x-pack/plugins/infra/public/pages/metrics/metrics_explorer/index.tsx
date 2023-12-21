@@ -53,7 +53,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   const { currentView } = useMetricsExplorerViews();
   const { source: sourceContext, metricIndicesExist } = useSourceContext();
   const {
-    services: { kibanaVersion, isCloudEnv, isServerlessEnv },
+    kibanaEnvironment: { kibanaVersion, isCloudEnv, isServerlessEnv },
   } = useKibanaContextForPlugin();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
