@@ -1544,14 +1544,14 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@61.0.3":
-  version "61.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-61.0.3.tgz#77a2e1f18a39dd4b421a91edfd30f19cde740594"
-  integrity sha512-TY7hUieULTchNFgvpi6Rt7wMxrYMCmuZ4bbS6szOGBIY4WKJvZCgMfgZ2kUdC5MVG/jEzd8Qu+Xixce7GDpRxw==
+"@elastic/charts@61.2.0":
+  version "61.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-61.2.0.tgz#fa065b85324d5660e4b6355390cca8699ef0d6ff"
+  integrity sha512-LBmZ+6wSR9/BCR+go5eIBy51Jpxr0cbK/a7vslZNYIGCdpHsWxGZgcqG3KgshFxOmUvcP7kj9LEEmeCTEGhbUQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
-    chroma-js "^2.1.0"
+    chroma-js "^2.4.2"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-cloud "^1.2.5"
