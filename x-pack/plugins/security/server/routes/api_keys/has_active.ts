@@ -6,7 +6,6 @@
  */
 
 import type { RouteDefinitionParams } from '..';
-import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**
@@ -29,36 +28,32 @@ export function defineHasApiKeysRoutes({
       },
     },
     createLicensedRouteHandler(async (context, _request, response) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client;
-        const authenticationService = getAuthenticationService();
+      const esClient = (await context.core).elasticsearch.client;
+      const authenticationService = getAuthenticationService();
 
-        const areApiKeysEnabled = await authenticationService.apiKeys.areAPIKeysEnabled();
+      const areApiKeysEnabled = await authenticationService.apiKeys.areAPIKeysEnabled();
 
-        if (!areApiKeysEnabled) {
-          return response.notFound({
-            body: {
-              message:
-                "API keys are disabled in Elasticsearch. To use API keys enable 'xpack.security.authc.api_key.enabled' setting.",
-            },
-          });
-        }
-
-        const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
-          owner: true,
-          // @ts-expect-error @elastic/elasticsearch SecurityGetApiKeyRequest.active_only: boolean | undefined
-          active_only: true,
-        });
-
-        // simply return true if the result array is non-empty
-        return response.ok<HasAPIKeysResult>({
+      if (!areApiKeysEnabled) {
+        return response.notFound({
           body: {
-            hasApiKeys: apiKeys.length > 0,
+            message:
+              "API keys are disabled in Elasticsearch. To use API keys enable 'xpack.security.authc.api_key.enabled' setting.",
           },
         });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
       }
+
+      const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
+        owner: true,
+        // @ts-expect-error @elastic/elasticsearch SecurityGetApiKeyRequest.active_only: boolean | undefined
+        active_only: true,
+      });
+
+      // simply return true if the result array is non-empty
+      return response.ok<HasAPIKeysResult>({
+        body: {
+          hasApiKeys: apiKeys.length > 0,
+        },
+      });
     })
   );
 }
