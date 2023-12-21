@@ -11,11 +11,15 @@ import { random } from 'lodash';
 import { pipeline, Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
-import { deleteSummaryFieldTransform } from '../lib/utils/transform_helpers';
+import {
+  addObserverVersionTransform,
+  deleteSummaryFieldTransform,
+} from '../lib/utils/transform_helpers';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
-  const isLegacy = versionOverride && semver.lt(versionOverride as string, '8.7.0');
+  const version = versionOverride as string;
+  const isLegacy = versionOverride && semver.lt(version, '8.7.0');
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
@@ -24,11 +28,16 @@ const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
             base
           ) as unknown as NodeJS.ReadableStream;
 
-          return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-            if (err) {
-              logger.error(err);
+          return pipeline(
+            defaultPipeline,
+            addObserverVersionTransform(version),
+            deleteSummaryFieldTransform(),
+            (err) => {
+              if (err) {
+                logger.error(err);
+              }
             }
-          });
+          );
         });
       }
     },

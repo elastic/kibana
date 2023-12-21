@@ -13,6 +13,8 @@ import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { getDurationLegacyFilter } from './transactions';
 
+const NUMBER_OF_QUERIES = 3;
+
 const getRequest = ({
   documentType,
   rollupInterval,
@@ -120,9 +122,10 @@ export async function getDocumentSources({
 
   const checkedSources = sourcesToCheck.map((source, index) => {
     const { documentType, rollupInterval } = source;
-    const responseBefore = allResponses[index * 3];
-    const responseAfter = allResponses[index * 3 + 1];
-    const responseDurationSummaryCheck = allResponses[index * 3 + 2];
+    const responseBefore = allResponses[index * NUMBER_OF_QUERIES];
+    const responseAfter = allResponses[index * NUMBER_OF_QUERIES + 1];
+    const responseDurationSummaryCheck =
+      allResponses[index * NUMBER_OF_QUERIES + 2];
 
     const hasDocBefore = responseBefore.hits.total.value > 0;
     const hasDocAfter = responseAfter.hits.total.value > 0;
