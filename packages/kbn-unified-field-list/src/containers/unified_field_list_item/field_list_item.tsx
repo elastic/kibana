@@ -67,9 +67,14 @@ function getCommonFieldItemButtonProps({
   };
 }
 
+export interface FieldListMultiField {
+  field: DataViewField;
+  isSelected: boolean;
+}
+
 interface MultiFieldsProps {
   stateService: UnifiedFieldListSidebarContainerStateService;
-  multiFields: NonNullable<UnifiedFieldListItemProps['multiFields']>;
+  multiFields: NonNullable<FieldListMultiField[]>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
   size: FieldItemButtonProps<DataViewField>['size'];
@@ -163,9 +168,9 @@ export interface UnifiedFieldListItemProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
-   * Multi fields for the current field
+   * Get multi fields for the given field
    */
-  multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
+  getMultiFields?: (field: DataViewField) => FieldListMultiField[] | undefined;
   /**
    * Callback to edit a field from data view
    * @param fieldName name of the field to edit
@@ -212,7 +217,7 @@ function UnifiedFieldListItemComponent({
   isEmpty,
   isSelected,
   trackUiMetric,
-  multiFields,
+  getMultiFields,
   onEditField,
   onDeleteField,
   workspaceSelectedFieldNames,
@@ -253,8 +258,6 @@ function UnifiedFieldListItemComponent({
     [onAddFieldToWorkspace, onRemoveFieldFromWorkspace, closePopover]
   );
 
-  const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
-
   const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(() => {
     const dataTestSubjPrefix =
       stateService.creationOptions.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
@@ -275,6 +278,9 @@ function UnifiedFieldListItemComponent({
   }, [field.name, stateService.creationOptions]);
 
   const renderPopover = () => {
+    const multiFields = getMultiFields?.(field);
+    const rawMultiFields = multiFields?.map((f) => f.field);
+
     return (
       <>
         <UnifiedFieldListItemStats
