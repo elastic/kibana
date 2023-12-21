@@ -6,9 +6,9 @@
  */
 
 import { isEqual, merge } from 'lodash';
-import React, { useEffect, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { useDispatch, useSelector, useStore, Provider } from 'react-redux';
+import { useDispatch, useSelector, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
@@ -48,7 +48,6 @@ type ValidatorName = keyof typeof validators;
 type DefaultParser = (v: string) => string;
 type NullableNumberParser = (v: string) => number | null;
 type NumberParser = (v: string) => number;
-type ValueParser = DefaultParser | NullableNumberParser | NumberParser;
 
 const defaultParser: DefaultParser = (v) => v;
 const nullableNumberParser: NullableNumberParser = (v) => (v === '' ? null : +v);
@@ -379,9 +378,9 @@ export type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
 
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
-  initialState: undefined as unknown as EditTransformFlyoutState,
+  initialState: undefined as EditTransformFlyoutState | undefined,
   reducers: {
-    initialize: (state, action: PayloadAction<EditTransformFlyoutProviderProps>) => {
+    initialize: (_, action: PayloadAction<EditTransformFlyoutProviderProps>) => {
       const defaultState = getDefaultState(action.payload.config);
       return {
         ...defaultState,
@@ -390,7 +389,9 @@ const editTransformFlyoutSlice = createSlice({
       };
     },
     setApiError: (state, action: PayloadAction<string | undefined>) => {
-      state.apiErrorMessage = action.payload;
+      if (state) {
+        state.apiErrorMessage = action.payload;
+      }
     },
     // Updates a form field with its new value, runs validation and
     // populates `errorMessages` if any errors occur.
@@ -398,27 +399,31 @@ const editTransformFlyoutSlice = createSlice({
       state,
       action: PayloadAction<{ field: EditTransformFormFields; value: string }>
     ) => {
-      const formField = state.formFields[action.payload.field];
-      formField.errorMessages =
-        formField.isOptional &&
-        typeof action.payload.value === 'string' &&
-        action.payload.value.length === 0
-          ? []
-          : validators[formField.validator](action.payload.value, formField.isOptional);
-      formField.value = action.payload.value;
-      state.formFields[action.payload.field] = formField;
+      if (state) {
+        const formField = state.formFields[action.payload.field];
+        formField.errorMessages =
+          formField.isOptional &&
+          typeof action.payload.value === 'string' &&
+          action.payload.value.length === 0
+            ? []
+            : validators[formField.validator](action.payload.value, formField.isOptional);
+        formField.value = action.payload.value;
+        state.formFields[action.payload.field] = formField;
 
-      state.isFormTouched = isFormTouched(state.config, state);
-      state.isFormValid = isFormValid(state.formFields);
+        state.isFormTouched = isFormTouched(state.config, state);
+        state.isFormValid = isFormValid(state.formFields);
+      }
     },
     // Updates a form section.
     setFormSection: (
       state,
       action: PayloadAction<{ section: EditTransformFormSections; enabled: boolean }>
     ) => {
-      state.formSections[action.payload.section].enabled = action.payload.enabled;
-      state.isFormTouched = isFormTouched(state.config, state);
-      state.isFormValid = isFormValid(state.formFields);
+      if (state) {
+        state.formSections[action.payload.section].enabled = action.payload.enabled;
+        state.isFormTouched = isFormTouched(state.config, state);
+        state.isFormValid = isFormValid(state.formFields);
+      }
     },
   },
 });
@@ -426,14 +431,19 @@ const editTransformFlyoutSlice = createSlice({
 export const EditTransformFlyoutProvider: FC<
   React.PropsWithChildren<EditTransformFlyoutProviderProps>
 > = ({ children, ...props }) => {
-  const store = configureStore({
-    reducer: editTransformFlyoutSlice.reducer,
-  });
+  const store = useMemo(
+    () =>
+      configureStore({
+        reducer: editTransformFlyoutSlice.reducer,
+      }),
+    []
+  );
 
   // initialize redux state
   useEffect(() => {
     store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
-  }, [props, store]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <Provider store={store}>{children}</Provider>;
 };
@@ -441,10 +451,6 @@ export const EditTransformFlyoutProvider: FC<
 export function useEditTransformFlyoutActions() {
   const dispatch = useDispatch();
   return bindActionCreators(editTransformFlyoutSlice.actions, dispatch);
-}
-
-export function useEditTransformFlyoutState() {
-  return useStore<EditTransformFlyoutState>().getState();
 }
 
 export function useEditTransformFlyoutSelector<T>(selector: (s: EditTransformFlyoutState) => T) {
