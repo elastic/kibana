@@ -88,7 +88,6 @@ export const muteDetectionRules = async (
   rulesIds: string[]
 ): Promise<number> => {
   const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
-
   if (benchmarkRules.includes(undefined)) {
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
   }
@@ -135,6 +134,7 @@ export const setRulesStates = (
   return rulesStates;
 };
 
-export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
-  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
+export const buildRuleKey = (benchmarkRule: CspBenchmarkRule) => {
+  const ruleNumber = benchmarkRule.metadata.benchmark.rule_number;
+  return `${benchmarkRule.metadata.benchmark.id};${benchmarkRule.metadata.benchmark.version};${ruleNumber}`;
 };

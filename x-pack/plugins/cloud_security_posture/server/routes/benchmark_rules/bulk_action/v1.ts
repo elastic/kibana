@@ -39,11 +39,8 @@ export const bulkActionBenchmarkRulesHandler = async (
   if (benchmarkRules.includes(undefined))
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
 
-  const rulesKeys = rulesToUpdate.map((rule) =>
-    buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
-  );
-
   const benchmarkRulesSafe = benchmarkRules as CspBenchmarkRule[]; // verified all rules are exists.
+  const rulesKeys = benchmarkRulesSafe.map((benchmarkRuleSafe) => buildRuleKey(benchmarkRuleSafe));
 
   const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], benchmarkRulesSafe);
 

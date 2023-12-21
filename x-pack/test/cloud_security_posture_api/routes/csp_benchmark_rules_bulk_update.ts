@@ -22,12 +22,6 @@ import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-interface RuleIdentifier {
-  benchmarkId: string;
-  benchmarkVersion: string;
-  ruleNumber: string;
-}
-
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -37,22 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   const generateRuleKey = (rule: CspBenchmarkRule): string => {
     return `${rule.metadata.benchmark.id};${rule.metadata.benchmark.version};${rule.metadata.benchmark.rule_number}`;
-  };
-
-  const generateRandomRule = (): RuleIdentifier => {
-    const majorVersionNumber = Math.floor(Math.random() * 10); // Random major number between 0 and 9
-    const minorVersionNumber = Math.floor(Math.random() * 10);
-    const benchmarksIds = ['cis_aws', 'cis_k8s', 'cis_k8s'];
-    const benchmarksVersions = ['v2.0.0', 'v2.0.1', 'v2.0.3', 'v3.0.0'];
-    const randomBenchmarkId = benchmarksIds[Math.floor(Math.random() * benchmarksIds.length)];
-    const randomBenchmarkVersion =
-      benchmarksVersions[Math.floor(Math.random() * benchmarksVersions.length)];
-
-    return {
-      benchmarkId: randomBenchmarkId,
-      benchmarkVersion: randomBenchmarkVersion,
-      ruleNumber: `${majorVersionNumber}.${minorVersionNumber}`,
-    };
   };
 
   const getRandomCspBenchmarkRule = async () => {
@@ -137,19 +115,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
             {
-              benchmark_id: rule2.metadata.benchmark.id,
-              benchmark_version: rule2.metadata.benchmark.version,
-              rule_number: rule2.metadata.benchmark.rule_number
-                ? rule2.metadata.benchmark.rule_number
-                : '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -194,19 +162,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'unmute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
             {
-              benchmark_id: rule2.metadata.benchmark.id,
-              benchmark_version: rule2.metadata.benchmark.version,
-              rule_number: rule2.metadata.benchmark.rule_number
-                ? rule2.metadata.benchmark.rule_number
-                : '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -252,19 +210,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'unmute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
             {
-              benchmark_id: rule2.metadata.benchmark.id,
-              benchmark_version: rule2.metadata.benchmark.version,
-              rule_number: rule2.metadata.benchmark.rule_number
-                ? rule2.metadata.benchmark.rule_number
-                : '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -304,19 +252,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
             {
-              benchmark_id: rule3.metadata.benchmark.id,
-              benchmark_version: rule3.metadata.benchmark.version,
-              rule_number: rule3.metadata.benchmark.rule_number
-                ? rule3.metadata.benchmark.rule_number
-                : '',
               rule_id: rule3.metadata.id,
             },
           ],
@@ -361,11 +299,6 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
           ],
@@ -390,19 +323,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
-              benchmark_id: rule1.metadata.benchmark.id,
-              benchmark_version: rule1.metadata.benchmark.version,
-              rule_number: rule1.metadata.benchmark.rule_number
-                ? rule1.metadata.benchmark.rule_number
-                : '',
               rule_id: rule1.metadata.id,
             },
             {
-              benchmark_id: rule2.metadata.benchmark.id,
-              benchmark_version: rule2.metadata.benchmark.version,
-              rule_number: rule2.metadata.benchmark.rule_number
-                ? rule2.metadata.benchmark.rule_number
-                : '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -413,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('set wrong action input', async () => {
-      const rule1 = generateRandomRule();
+      const rule1 = await getRandomCspBenchmarkRule();
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -424,10 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'foo',
           rules: [
             {
-              benchmark_id: rule1.benchmarkId,
-              benchmark_version: rule1.benchmarkVersion,
-              rule_number: rule1.ruleNumber,
-              rule_id: '2f7d9d2a-ec1f-545a-8258-ea62bbffad7f',
+              rule_id: rule1.metadata.id,
             },
           ],
         });
