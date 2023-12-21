@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin as CorePlugin,
+} from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
@@ -29,6 +35,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { getSectionsServiceStartPrivate } from '@kbn/management-plugin/public/management_sections_service';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -219,6 +226,18 @@ export class Plugin
         defaultMessage: 'Detect conditions using rules.',
       }
     );
+    const alertsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayName',
+      {
+        defaultMessage: 'Alerts',
+      }
+    );
+    const alertsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayDescription',
+      {
+        defaultMessage: 'TODO', // TODO
+      }
+    );
     const connectorsFeatureTitle = i18n.translate(
       'xpack.triggersActionsUI.managementSection.connectors.displayName',
       {
@@ -233,6 +252,15 @@ export class Plugin
     );
 
     if (plugins.home) {
+      // plugins.home.featureCatalogue.register({
+      //   id: 'alerts',
+      //   title: alertsFeatureTitle,
+      //   description: alertsFeatureDescription,
+      //   icon: 'watchesApp',
+      //   path: '/app/management',
+      //   showOnHomePage: false,
+      //   category: 'admin',
+      // });
       plugins.home.featureCatalogue.register({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -252,6 +280,36 @@ export class Plugin
         category: 'admin',
       });
     }
+
+    core.application.register({
+      id: 'alerts',
+      title: alertsFeatureTitle,
+      order: 8080,
+      euiIconType: 'watchesApp',
+      category: DEFAULT_APP_CATEGORIES.management,
+      // updater$: this.appUpdater,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application/alerts_app');
+        const [coreStart, deps] = await core.getStartServices();
+
+        return renderApp(params, {
+          sections: getSectionsServiceStartPrivate(),
+          kibanaVersion,
+          coreStart,
+          setBreadcrumbs: (newBreadcrumbs) => {
+            if (deps.serverless) {
+              // drop the root management breadcrumb in serverless because it comes from the navigation tree
+              const [, ...trailingBreadcrumbs] = newBreadcrumbs;
+              deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
+            } else {
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+            }
+          },
+          isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
+          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+        });
+      },
+    });
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: PLUGIN_ID,
