@@ -32,3 +32,15 @@ export const RISK_SCORE_RANGES = {
   [RiskSeverity.high]: { start: 70, stop: 90 },
   [RiskSeverity.critical]: { start: 90, stop: 100 },
 };
+
+export enum UserRiskScoreQueryId {
+  USERS_BY_RISK = 'UsersByRisk',
+  USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
+}
+
+export enum HostRiskScoreQueryId {
+  DEFAULT = 'HostRiskScore',
+  HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
+  OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
+  HOSTS_BY_RISK = 'HostsByRisk',
+}
