@@ -11,7 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
-import { UserDetailsLeftPanelTab } from '../../../../flyout/entity_details/user_detais_left/tabs';
+import { UserDetailsLeftPanelTab } from '../../../../flyout/entity_details/user_details_left/tabs';
 import { ExpandablePanel } from '../../../../flyout/shared/components/expandable_panel';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 
