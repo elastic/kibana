@@ -44,16 +44,16 @@ export function defineHasApiKeysRoutes({
           });
         }
 
-        const apiResponse = await esClient.asCurrentUser.security.getApiKey({
+        const { api_keys: apiKeys } = await esClient.asCurrentUser.security.getApiKey({
           owner: true,
+          // @ts-expect-error @elastic/elasticsearch SecurityGetApiKeyRequest.active_only: boolean | undefined
+          active_only: true,
         });
-
-        const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
 
         // simply return true if the result array is non-empty
         return response.ok<HasAPIKeysResult>({
           body: {
-            hasApiKeys: validKeys.length > 0,
+            hasApiKeys: apiKeys.length > 0,
           },
         });
       } catch (error) {
