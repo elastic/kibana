@@ -28,7 +28,7 @@ export const journey = new Journey({
   },
 }).step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
   await page.goto(kbnUrl.get(`app/metrics/hosts`));
-  await page.waitForSelector(`[data-test-subj="hostsView-table"]`);
+  await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
 });
 
 export function generateHostsData({
@@ -49,5 +49,13 @@ export function generateHostsData({
   return range
     .interval('1m')
     .rate(1)
-    .generator((timestamp, index) => hosts.map((host) => host.metrics().timestamp(timestamp)));
+    .generator((timestamp, index) =>
+      hosts.flatMap((host) => [
+        host.cpu().timestamp(timestamp),
+        host.memory().timestamp(timestamp),
+        host.network().timestamp(timestamp),
+        host.load().timestamp(timestamp),
+        host.filesystem().timestamp(timestamp),
+      ])
+    );
 }
