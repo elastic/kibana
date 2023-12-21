@@ -18,7 +18,10 @@ import { isLatestTransform, isPivotTransform } from '../../../../../../common/ty
 import { useGetTransformsPreview } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutSelector,
+} from './use_edit_transform_flyout';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {
@@ -26,12 +29,13 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   const toastNotifications = useToastNotifications();
 
-  const dataViewId = useEditTransformFlyout((s) => s.dataViewId);
-  const formSections = useEditTransformFlyout((s) => s.formSections);
-  const retentionPolicyField = useEditTransformFlyout((s) => s.formFields.retentionPolicyField);
-  const config = useEditTransformFlyout((s) => s.config);
-  const setFormField = useEditTransformFlyout((s) => s.setFormField);
-  const setFormSection = useEditTransformFlyout((s) => s.setFormSection);
+  const dataViewId = useEditTransformFlyoutSelector((s) => s.dataViewId);
+  const formSections = useEditTransformFlyoutSelector((s) => s.formSections);
+  const retentionPolicyField = useEditTransformFlyoutSelector(
+    (s) => s.formFields.retentionPolicyField
+  );
+  const config = useEditTransformFlyoutSelector((s) => s.config);
+  const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {

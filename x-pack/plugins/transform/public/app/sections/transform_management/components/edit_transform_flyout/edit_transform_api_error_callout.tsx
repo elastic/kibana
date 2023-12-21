@@ -11,10 +11,10 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import { useEditTransformFlyoutSelector } from './use_edit_transform_flyout';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const apiErrorMessage = useEditTransformFlyout((s) => s.apiErrorMessage);
+  const apiErrorMessage = useEditTransformFlyoutSelector((s) => s.apiErrorMessage);
 
   return (
     <>

@@ -17,7 +17,8 @@ import { useUpdateTransform } from '../../../../hooks';
 
 import {
   applyFormStateToTransformConfig,
-  useEditTransformFlyout,
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutState,
 } from './use_edit_transform_flyout';
 
 interface EditTransformUpdateButtonProps {
@@ -25,10 +26,12 @@ interface EditTransformUpdateButtonProps {
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const { config, formFields, formSections, isFormValid, isFormTouched } = useEditTransformFlyout();
+  const { config, formFields, formSections, isFormValid, isFormTouched } =
+    useEditTransformFlyoutState();
   const requestConfig = applyFormStateToTransformConfig(config, formFields, formSections);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
-  const setApiError = useEditTransformFlyout((s) => s.setApiError);
+
+  const { setApiError } = useEditTransformFlyoutActions();
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 

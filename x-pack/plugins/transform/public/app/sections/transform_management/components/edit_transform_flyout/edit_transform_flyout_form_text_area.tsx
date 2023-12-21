@@ -11,7 +11,11 @@ import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useEditTransformFlyout, type EditTransformFormFields } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutSelector,
+  type EditTransformFormFields,
+} from './use_edit_transform_flyout';
 import { capitalizeFirstLetter } from './capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {
@@ -27,8 +31,10 @@ export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInpu
   helpText,
   placeHolder = false,
 }) => {
-  const { defaultValue, errorMessages, value } = useEditTransformFlyout((s) => s.formFields[field]);
-  const setFormField = useEditTransformFlyout((s) => s.setFormField);
+  const { defaultValue, errorMessages, value } = useEditTransformFlyoutSelector(
+    (s) => s.formFields[field]
+  );
+  const { setFormField } = useEditTransformFlyoutActions();
   const upperCaseField = capitalizeFirstLetter(field);
 
   return (
