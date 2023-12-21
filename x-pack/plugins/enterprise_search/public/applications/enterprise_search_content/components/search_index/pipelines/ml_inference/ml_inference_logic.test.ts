@@ -598,7 +598,7 @@ describe('MlInferenceLogic', () => {
           MLInferenceLogic.values.addInferencePipelineModal.configuration.isModelPlaceholderSelected
         ).toBe(true);
       });
-    });    
+    });
     describe('createPipeline', () => {
       const mockModelConfiguration = {
         ...DEFAULT_VALUES.addInferencePipelineModal,
