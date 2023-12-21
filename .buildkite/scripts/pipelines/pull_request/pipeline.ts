@@ -176,7 +176,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml')
+      );
     }
 
     if (
@@ -189,7 +191,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
+      );
     }
 
     if (
@@ -212,12 +216,22 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_assistant.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/detection_engine.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/entity_analytics.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/explore.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/investigations.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/rule_management.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
+      );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
