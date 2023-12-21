@@ -60,7 +60,7 @@ export function getEntitiesAndGenerateAlerts(
           payload: {
             [FIELD_KEY_ENTITY_ID]: context.entityId,
             [FIELD_KEY_ENTITY_TIMESTAMP]: context.entityDateTime,
-            [FIELD_KEY_ENTITY_LOCATION]: context.FIELD_KEY_ENTITY_LOCATION,
+            [FIELD_KEY_ENTITY_LOCATION]: context.entityLocation,
             [FIELD_KEY_DETECTION_TIMESTAMP]: context.detectionDateTime,
             [FIELD_KEY_BOUNDARY_ID]: context.containingBoundaryId,
             [FIELD_KEY_BOUNDARY_NAME]: context.containingBoundaryName,
