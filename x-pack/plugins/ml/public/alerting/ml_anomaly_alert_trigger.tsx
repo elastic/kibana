@@ -16,6 +16,7 @@ import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
+import { useToastNotificationService } from '../application/services/toast_notification_service';
 import { SeverityControl } from '../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
@@ -44,11 +45,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 }) => {
   const {
     services: { http },
-    notifications: { toasts },
   } = useMlKibana();
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
   const alertingApiService = useMemo(() => alertingApiProvider(mlHttpService), [mlHttpService]);
+  const { displayErrorToast } = useToastNotificationService();
 
   const [jobConfigs, setJobConfigs] = useState<CombinedJobWithStats[]>([]);
 
@@ -74,13 +75,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       const jobs = await adJobsApiService.jobs(jobsAndGroupIds);
       setJobConfigs(jobs);
     } catch (e) {
-      toasts.danger({
-        title: i18n.translate('xpack.ml.anomalyDetectionAlert.errorFetchingJobs', {
+      displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.anomalyDetectionAlert.errorFetchingJobs', {
           defaultMessage: 'Unable to fetch jobs configuration',
         }),
-        body: e.message,
-        toastLifeTimeMs: 5000,
-      });
+        5000
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobsAndGroupIds]);
