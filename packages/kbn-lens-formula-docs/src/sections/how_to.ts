@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const howToSection = i18n.translate('xpack.lens.formulaDocumentation.markdown', {
+export const howToSection = i18n.translate('lensFormulaDocs.documentation.markdown', {
   defaultMessage: `## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and

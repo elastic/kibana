@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const NORMALIZE_BY_UNIT_ID = 'normalize_by_unit';
-export const NORMALIZE_BY_UNIT_NAME = i18n.translate('xpack.lens.indexPattern.timeScale', {
+export const NORMALIZE_BY_UNIT_NAME = i18n.translate('lensFormulaDocs.timeScale', {
   defaultMessage: 'Normalize by unit',
 });
 
@@ -19,10 +19,10 @@ export const normalizeByUnit: OperationDocumentationType = {
   name: NORMALIZE_BY_UNIT_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.time_scale', {
+    signature: i18n.translate('lensFormulaDocs.time_scale', {
       defaultMessage: 'metric: number, unit: s|m|h|d|w|M|y',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.time_scale.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.time_scale.documentation.markdown', {
       defaultMessage: `
 This advanced function is useful for normalizing counts and sums to a specific time interval. It allows for integration with metrics that are stored already normalized to a specific time interval.
 

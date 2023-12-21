@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const LAST_VALUE_ID = 'last_value';
-export const LAST_VALUE_NAME = i18n.translate('xpack.lens.indexPattern.lastValue', {
+export const LAST_VALUE_NAME = i18n.translate('lensFormulaDocs.lastValue', {
   defaultMessage: 'Last value',
 });
 
@@ -19,10 +19,10 @@ export const lastValue: OperationDocumentationType = {
   name: LAST_VALUE_NAME,
   documentation: {
     section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
+    signature: i18n.translate('lensFormulaDocs.lastValue.signature', {
       defaultMessage: 'field: string',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.lastValue.documentation.markdown', {
       defaultMessage: `
 Returns the value of a field from the last document, ordered by the default time field of the data view.
 

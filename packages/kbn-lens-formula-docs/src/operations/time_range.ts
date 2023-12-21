@@ -17,7 +17,7 @@ export const TIME_RANGE_NAME = i18n.translate('lensFormulaDocs.time_range', {
 export const timeRange = buildContextVariableDocumentationDefinition({
   id: TIME_RANGE_ID,
   name: TIME_RANGE_NAME,
-  documentation: i18n.translate('xpack.lens.formula.timeRange.help', {
+  documentation: i18n.translate('lensFormulaDocs.timeRange.help', {
     defaultMessage: `
 The specified time range, in milliseconds (ms).
 

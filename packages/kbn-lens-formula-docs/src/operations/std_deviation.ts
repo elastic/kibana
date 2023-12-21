@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const STD_DEVIATION_ID = 'standard_deviation';
-export const STD_DEVIATION_NAME = i18n.translate('xpack.lens.indexPattern.standardDeviation', {
+export const STD_DEVIATION_NAME = i18n.translate('lensFormulaDocs.standardDeviation', {
   defaultMessage: 'Standard deviation',
 });
 
@@ -18,7 +18,7 @@ export const stdDeviation = buildMetricDocumentationDefinition({
   id: STD_DEVIATION_ID,
   name: STD_DEVIATION_NAME,
   documentation: i18n.translate(
-    'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
+    'lensFormulaDocs.standardDeviation.documentation.markdown',
     {
       defaultMessage: `
 Returns the amount of variation or dispersion of the field. The function works only for number fields.

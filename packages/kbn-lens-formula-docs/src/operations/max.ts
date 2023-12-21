@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const MAX_ID = 'max';
-export const MAX_NAME = i18n.translate('xpack.lens.indexPattern.max', {
+export const MAX_NAME = i18n.translate('lensFormulaDocs.max', {
   defaultMessage: 'Maximum',
 });
 

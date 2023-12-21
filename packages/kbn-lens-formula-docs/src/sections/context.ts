@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const contextSection = {
-  label: i18n.translate('xpack.lens.formulaDocumentation.constantsSection', {
+  label: i18n.translate('lensFormulaDocs.documentation.constantsSection', {
     defaultMessage: 'Kibana context',
   }),
-  description: i18n.translate('xpack.lens.formulaDocumentation.constantsSectionDescription', {
+  description: i18n.translate('lensFormulaDocs.documentation.constantsSectionDescription', {
     defaultMessage:
       'These functions are used to retrieve Kibana context variables, which are the date histogram `interval`, the current `now` and the selected `time_range` and help you to compute date math operations.',
   }),

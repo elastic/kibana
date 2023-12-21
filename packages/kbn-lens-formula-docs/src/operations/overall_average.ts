@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const OVERALL_AVERAGE_ID = 'overall_average';
-export const OVERALL_AVERAGE_NAME = i18n.translate('xpack.lens.indexPattern.overallAverage', {
+export const OVERALL_AVERAGE_NAME = i18n.translate('lensFormulaDocs.overallAverage', {
   defaultMessage: 'Overall average',
 });
 
@@ -19,10 +19,10 @@ export const overallAverge: OperationDocumentationType = {
   name: OVERALL_AVERAGE_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.overall_metric', {
+    signature: i18n.translate('lensFormulaDocs.overall_metric', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.overall_average.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.overall_average.documentation.markdown', {
       defaultMessage: `
 Calculates the average of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.

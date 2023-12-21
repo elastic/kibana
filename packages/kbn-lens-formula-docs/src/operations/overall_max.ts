@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const OVERALL_MAX_ID = 'overall_max';
-export const OVERALL_MAX_NAME = i18n.translate('xpack.lens.indexPattern.overallMax', {
+export const OVERALL_MAX_NAME = i18n.translate('lensFormulaDocs.overallMax', {
   defaultMessage: 'Overall max',
 });
 
@@ -19,10 +19,10 @@ export const overallMax: OperationDocumentationType = {
   name: OVERALL_MAX_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.overall_metric', {
+    signature: i18n.translate('lensFormulaDocs.overall_metric', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.overall_max.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.overall_max.documentation.markdown', {
       defaultMessage: `
 Calculates the maximum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
 Other dimensions breaking down the data like top values or filter are treated as separate series.

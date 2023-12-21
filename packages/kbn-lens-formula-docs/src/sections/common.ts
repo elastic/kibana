@@ -9,21 +9,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const commonFormulas = {
-  label: i18n.translate('xpack.lens.formulaFrequentlyUsedHeading', {
+  label: i18n.translate('lensFormulaDocs.frequentlyUsedHeading', {
     defaultMessage: 'Common formulas',
   }),
-  description: i18n.translate('xpack.lens.formulaCommonFormulaDocumentation', {
+  description: i18n.translate('lensFormulaDocs.CommonFormulaDocumentation', {
     defaultMessage: `The most common formulas are dividing two values to produce a percent. To display accurately, set "value format" to "percent".`,
   }),
   items: [
     {
-      label: i18n.translate('xpack.lens.formulaDocumentation.filterRatio', {
+      label: i18n.translate('lensFormulaDocs.documentation.filterRatio', {
         defaultMessage: 'Filter ratio',
       }),
-      description: i18n.translate(
-        'xpack.lens.formulaDocumentation.filterRatioDescription.markdown',
-        {
-          defaultMessage: `### Filter ratio:
+      description: i18n.translate('lensFormulaDocs.documentation.filterRatioDescription.markdown', {
+        defaultMessage: `### Filter ratio:
 
 Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
 For example, to see how the error rate changes over time:
@@ -33,17 +31,16 @@ count(kql='response.status_code > 400') / count()
 \`\`\`
   `,
 
-          description:
-            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-        }
-      ),
+        description:
+          'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      }),
     },
     {
-      label: i18n.translate('xpack.lens.formulaDocumentation.weekOverWeek', {
+      label: i18n.translate('lensFormulaDocs.documentation.weekOverWeek', {
         defaultMessage: 'Week over week',
       }),
       description: i18n.translate(
-        'xpack.lens.formulaDocumentation.weekOverWeekDescription.markdown',
+        'lensFormulaDocs.documentation.weekOverWeekDescription.markdown',
         {
           defaultMessage: `### Week over week:
 
@@ -62,11 +59,11 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
       ),
     },
     {
-      label: i18n.translate('xpack.lens.formulaDocumentation.percentOfTotal', {
+      label: i18n.translate('lensFormulaDocs.documentation.percentOfTotal', {
         defaultMessage: 'Percent of total',
       }),
       description: i18n.translate(
-        'xpack.lens.formulaDocumentation.percentOfTotalDescription.markdown',
+        'lensFormulaDocs.documentation.percentOfTotalDescription.markdown',
         {
           defaultMessage: `### Percent of total
 
@@ -84,11 +81,11 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
       ),
     },
     {
-      label: i18n.translate('xpack.lens.formulaDocumentation.recentChange', {
+      label: i18n.translate('lensFormulaDocs.documentation.recentChange', {
         defaultMessage: 'Recent change',
       }),
       description: i18n.translate(
-        'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
+        'lensFormulaDocs.documentation.recentChangeDescription.markdown',
         {
           defaultMessage: `### Recent change
 

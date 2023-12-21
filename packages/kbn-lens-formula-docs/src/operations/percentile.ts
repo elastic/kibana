@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const PERCENTILE_ID = 'percentile';
-export const PERCENTILE_NAME = i18n.translate('xpack.lens.indexPattern.percentile', {
+export const PERCENTILE_NAME = i18n.translate('lensFormulaDocs.percentile', {
   defaultMessage: 'Percentile',
 });
 
@@ -19,10 +19,10 @@ export const percentile: OperationDocumentationType = {
   name: PERCENTILE_NAME,
   documentation: {
     section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.percentile.signature', {
+    signature: i18n.translate('lensFormulaDocs.percentile.signature', {
       defaultMessage: 'field: string, [percentile]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.percentile.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.percentile.documentation.markdown', {
       defaultMessage: `
 Returns the specified percentile of the values of a field. This is the value n percent of the values occuring in documents are smaller.
 

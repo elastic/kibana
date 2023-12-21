@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const PERCENTILE_RANK_ID = 'percentile_rank';
-export const PERCENTILE_RANK_NAME = i18n.translate('xpack.lens.indexPattern.percentileRank', {
+export const PERCENTILE_RANK_NAME = i18n.translate('lensFormulaDocs.percentileRank', {
   defaultMessage: 'Percentile rank',
 });
 
@@ -19,10 +19,10 @@ export const percentileRank: OperationDocumentationType = {
   name: PERCENTILE_RANK_NAME,
   documentation: {
     section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.percentileRanks.signature', {
+    signature: i18n.translate('lensFormulaDocs.percentileRanks.signature', {
       defaultMessage: 'field: string, [value]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.percentileRanks.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.percentileRanks.documentation.markdown', {
       defaultMessage: `
 Returns the percentage of values which are below a certain value. For example, if a value is greater than or equal to 95% of the observed values it is said to be at the 95th percentile rank
 

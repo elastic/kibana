@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const AVG_ID = 'average';
-export const AVG_NAME = i18n.translate('xpack.lens.indexPattern.avg', {
+export const AVG_NAME = i18n.translate('lensFormulaDocs.avg', {
   defaultMessage: 'Average',
 });
 

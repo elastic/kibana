@@ -17,7 +17,7 @@ export const INTERVAL_NAME = i18n.translate('lensFormulaDocs.interval', {
 export const interval = buildContextVariableDocumentationDefinition({
   id: INTERVAL_ID,
   name: INTERVAL_NAME,
-  documentation: i18n.translate('xpack.lens.formula.interval.help', {
+  documentation: i18n.translate('lensFormulaDocs.interval.help', {
     defaultMessage: `
 The specified minimum interval for the date histogram, in milliseconds (ms).
 

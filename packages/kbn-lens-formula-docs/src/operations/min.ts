@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const MIN_ID = 'min';
-export const MIN_NAME = i18n.translate('xpack.lens.indexPattern.min', {
+export const MIN_NAME = i18n.translate('lensFormulaDocs.min', {
   defaultMessage: 'Minimum',
 });
 

@@ -12,7 +12,7 @@ import { comparisonSection } from './comparison';
 import { mathSection } from './math';
 import { calculationsSection } from './calculations';
 import { contextSection } from './context';
-import { howToSection } from './howTo';
+import { howToSection } from './how_to';
 
 export const sections = {
   howTo: howToSection,

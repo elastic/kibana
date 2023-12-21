@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const DIFFERENCES_ID = 'differences';
-export const DIFFERENCES_NAME = i18n.translate('xpack.lens.indexPattern.derivative', {
+export const DIFFERENCES_NAME = i18n.translate('lensFormulaDocs.derivative', {
   defaultMessage: 'Differences',
 });
 
@@ -19,10 +19,10 @@ export const differences: OperationDocumentationType = {
   name: DIFFERENCES_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
+    signature: i18n.translate('lensFormulaDocs.differences.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.differences.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.differences.documentation.markdown', {
       defaultMessage: `
 Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
 Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.

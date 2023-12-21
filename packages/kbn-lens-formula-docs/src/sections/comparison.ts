@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const comparisonSection = {
-  label: i18n.translate('xpack.lens.formulaDocumentation.comparisonSection', {
+  label: i18n.translate('lensFormulaDocs.documentation.comparisonSection', {
     defaultMessage: 'Comparison',
   }),
-  description: i18n.translate('xpack.lens.formulaDocumentation.comparisonSectionDescription', {
+  description: i18n.translate('lensFormulaDocs.documentation.comparisonSectionDescription', {
     defaultMessage: 'These functions are used to perform value comparison.',
   }),
 };

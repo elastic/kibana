@@ -9,14 +9,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const calculationsSection = {
-  label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
+  label: i18n.translate('lensFormulaDocs.documentation.columnCalculationSection', {
     defaultMessage: 'Column calculations',
   }),
-  description: i18n.translate(
-    'xpack.lens.formulaDocumentation.columnCalculationSectionDescription',
-    {
-      defaultMessage:
-        'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
-    }
-  ),
+  description: i18n.translate('lensFormulaDocs.documentation.columnCalculationSectionDescription', {
+    defaultMessage:
+      'These functions are executed for each row, but are provided with the whole column as context. This is also known as a window function.',
+  }),
 };

@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const elasticsearchSection = {
-  label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
+  label: i18n.translate('lensFormulaDocs.documentation.elasticsearchSection', {
     defaultMessage: 'Elasticsearch',
   }),
-  description: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSectionDescription', {
+  description: i18n.translate('lensFormulaDocs.documentation.elasticsearchSectionDescription', {
     defaultMessage:
       'These functions will be executed on the raw documents for each row of the resulting table, aggregating all documents matching the break down dimensions into a single value.',
   }),

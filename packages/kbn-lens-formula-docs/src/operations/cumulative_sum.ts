@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const CUMULATIVE_SUM_ID = 'cumulative_sum';
-export const CUMULATIVE_SUM_NAME = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+export const CUMULATIVE_SUM_NAME = i18n.translate('lensFormulaDocs.cumulativeSum', {
   defaultMessage: 'Cumulative sum',
 });
 
@@ -19,10 +19,10 @@ export const cumulativeSum: OperationDocumentationType = {
   name: CUMULATIVE_SUM_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.cumulative_sum.signature', {
+    signature: i18n.translate('lensFormulaDocs.cumulative_sum.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.cumulativeSum.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.cumulativeSum.documentation.markdown', {
       defaultMessage: `
 Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
 

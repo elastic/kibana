@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const mathSection = {
-  label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
+  label: i18n.translate('lensFormulaDocs.documentation.mathSection', {
     defaultMessage: 'Math',
   }),
-  description: i18n.translate('xpack.lens.formulaDocumentation.mathSectionDescription', {
+  description: i18n.translate('lensFormulaDocs.documentation.mathSectionDescription', {
     defaultMessage:
       'These functions will be executed for reach row of the resulting table using single values from the same row calculated using other functions.',
   }),

@@ -17,7 +17,7 @@ export const NOW_NAME = i18n.translate('lensFormulaDocs.now', {
 export const now = buildContextVariableDocumentationDefinition({
   id: NOW_ID,
   name: NOW_NAME,
-  documentation: i18n.translate('xpack.lens.formula.now.help', {
+  documentation: i18n.translate('lensFormulaDocs.now.help', {
     defaultMessage: `
 The current now moment used in Kibana expressed in milliseconds (ms).
 

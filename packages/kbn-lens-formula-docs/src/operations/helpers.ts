@@ -47,7 +47,7 @@ export function buildMetricDocumentationDefinition({
     name,
     documentation:
       documentation ||
-      i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
+      i18n.translate('lensFormulaDocs.metric.documentation.markdown', {
         defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 
@@ -62,7 +62,7 @@ Example: Get the {metric} of price for orders from the UK:
         },
       }),
     section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
+    signature: i18n.translate('lensFormulaDocs.metric.signature', {
       defaultMessage: 'field: string',
     }),
   });

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const COUNTER_RATE_ID = 'counter_rate';
-export const COUNTER_RATE_NAME = i18n.translate('xpack.lens.indexPattern.counterRate', {
+export const COUNTER_RATE_NAME = i18n.translate('lensFormulaDocs.counterRate', {
   defaultMessage: 'Counter rate',
 });
 
@@ -19,10 +19,10 @@ export const counterRate: OperationDocumentationType = {
   name: COUNTER_RATE_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.counterRate.signature', {
+    signature: i18n.translate('lensFormulaDocs.counterRate.signature', {
       defaultMessage: 'metric: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.counterRate.documentation.markdown', {
       defaultMessage: `
 Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
 If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDocumentationType } from './types';
 
 export const MOVING_AVERAGE_ID = 'moving_average';
-export const MOVING_AVERAGE_NAME = i18n.translate('xpack.lens.indexPattern.movingAverage', {
+export const MOVING_AVERAGE_NAME = i18n.translate('lensFormulaDocs.movingAverage', {
   defaultMessage: 'Moving average',
 });
 export const MOVING_AVERAGE_WINDOW_DEFAULT_VALUE = 5;
@@ -20,10 +20,10 @@ export const movingAverage: OperationDocumentationType = {
   name: MOVING_AVERAGE_NAME,
   documentation: {
     section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.moving_average.signature', {
+    signature: i18n.translate('lensFormulaDocs.moving_average.signature', {
       defaultMessage: 'metric: number, [window]: number',
     }),
-    description: i18n.translate('xpack.lens.indexPattern.movingAverage.documentation.markdown', {
+    description: i18n.translate('lensFormulaDocs.movingAverage.documentation.markdown', {
       defaultMessage: `
 Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
 The default window value is {defaultValue}.

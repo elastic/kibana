@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const MEDIAN_ID = 'median';
-export const MEDIAN_NAME = i18n.translate('xpack.lens.indexPattern.median', {
+export const MEDIAN_NAME = i18n.translate('lensFormulaDocs.median', {
   defaultMessage: 'Median',
 });
 

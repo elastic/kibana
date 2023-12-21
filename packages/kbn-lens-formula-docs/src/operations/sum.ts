@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildMetricDocumentationDefinition } from './helpers';
 
 export const SUM_ID = 'sum';
-export const SUM_NAME = i18n.translate('xpack.lens.indexPattern.sum', {
+export const SUM_NAME = i18n.translate('lensFormulaDocs.sum', {
   defaultMessage: 'Sum',
 });
 
