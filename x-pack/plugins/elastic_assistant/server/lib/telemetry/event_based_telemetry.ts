@@ -70,12 +70,12 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
-export const ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT: EventTypeOpts<{
+export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   isEnabledKnowledgeBase: boolean;
   isEnabledLangChain: boolean;
   isEnabledRAGAlerts: boolean;
 }> = {
-  eventType: 'actions_connector_execution_success',
+  eventType: 'invoke_assistant_success',
   schema: {
     isEnabledLangChain: {
       type: 'boolean',
@@ -98,13 +98,13 @@ export const ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT: EventTypeOpts<{
   },
 };
 
-export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
+export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
   isEnabledKnowledgeBase: boolean;
   isEnabledLangChain: boolean;
   isEnabledRAGAlerts: boolean;
 }> = {
-  eventType: 'actions_connector_execution_error',
+  eventType: 'invoke_assistant_error',
   schema: {
     errorMessage: {
       type: 'keyword',
@@ -136,6 +136,6 @@ export const ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT: EventTypeOpts<{
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
-  ACTIONS_CONNECTOR_EXECUTE_SUCCESS_EVENT,
-  ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+  INVOKE_ASSISTANT_ERROR_EVENT,
 ];

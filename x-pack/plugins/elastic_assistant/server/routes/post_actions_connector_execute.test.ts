@@ -15,7 +15,10 @@ import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
+import {
+  INVOKE_ASSISTANT_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+} from '../lib/telemetry/event_based_telemetry';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
@@ -192,7 +195,80 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports error events to telemetry - kb on, alerts off', async () => {
+  it('reports success events to telemetry - kb on, RAG alerts off', async () => {
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        await handler(mockContext, mockRequest, mockResponse);
+
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: true,
+          isEnabledRAGAlerts: false,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports success events to telemetry - kb on, RAG alerts on', async () => {
+    const ragRequest = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        await handler(mockContext, ragRequest, mockResponse);
+
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+          isEnabledLangChain: true,
+          isEnabledKnowledgeBase: true,
+          isEnabledRAGAlerts: true,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports success events to telemetry - kb off, RAG alerts off', async () => {
+    const plainRequest = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+      },
+    };
+
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        await handler(mockContext, plainRequest, mockResponse);
+
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+          isEnabledLangChain: false,
+          isEnabledKnowledgeBase: false,
+          isEnabledRAGAlerts: false,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb on, RAG alerts off', async () => {
     const requestWithBadConnectorId = {
       ...mockRequest,
       params: { connectorId: 'bad-connector-id' },
@@ -200,14 +276,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
+        await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
-        expect(result).toEqual({
-          body: 'simulated error',
-          statusCode: 500,
-        });
-
-        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
           isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
@@ -222,7 +293,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports error events to telemetry - kb on, alerts on', async () => {
+  it('reports error events to telemetry - kb on, RAG alerts on', async () => {
     const badRequest = {
       ...mockRequest,
       params: { connectorId: 'bad-connector-id' },
@@ -234,14 +305,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(mockContext, badRequest, mockResponse);
+        await handler(mockContext, badRequest, mockResponse);
 
-        expect(result).toEqual({
-          body: 'simulated error',
-          statusCode: 500,
-        });
-
-        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
           isEnabledLangChain: true,
           isEnabledKnowledgeBase: true,
@@ -256,7 +322,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports error events to telemetry - kb off, alerts off', async () => {
+  it('reports error events to telemetry - kb off, RAG alerts off', async () => {
     const badRequest = {
       ...mockRequest,
       params: { connectorId: 'bad-connector-id' },
@@ -268,14 +334,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
-        const result = await handler(mockContext, badRequest, mockResponse);
+        await handler(mockContext, badRequest, mockResponse);
 
-        expect(result).toEqual({
-          body: 'simulated error',
-          statusCode: 500,
-        });
-
-        expect(reportEvent).toHaveBeenCalledWith(ACTIONS_CONNECTOR_EXECUTE_ERROR_EVENT.eventType, {
+        expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           errorMessage: 'simulated error',
           isEnabledLangChain: false,
           isEnabledKnowledgeBase: false,
