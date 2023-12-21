@@ -66,25 +66,6 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-
-    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
-      return (
-        <>
-          {externalCustomRenderers[columnId]({
-            rowIndex,
-            columnId,
-            isDetails,
-            setCellProps,
-            isExpandable,
-            isExpanded,
-            colIndex,
-            row,
-            dataView,
-          })}
-        </>
-      );
-    }
-
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
@@ -108,6 +89,26 @@ export const getRenderCellValueFn = ({
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
+    }
+
+    if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
+      return (
+        <>
+          {externalCustomRenderers[columnId]({
+            rowIndex,
+            columnId,
+            isDetails,
+            setCellProps,
+            isExpandable,
+            isExpanded,
+            colIndex,
+            row,
+            dataView,
+            fieldFormats,
+            closePopover,
+          })}
+        </>
+      );
     }
 
     /**
@@ -134,36 +135,17 @@ export const getRenderCellValueFn = ({
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
-      const pairs: FormattedHit = useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-            0,
-            maxEntries
-          )
-        : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
-
       return (
-        <EuiDescriptionList
-          type="inline"
-          compressed
-          className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
-        >
-          {pairs.map(([fieldDisplayName, value, fieldName]) => {
-            // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-            // hide the empty one from the Document view
-            if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
-            return (
-              <Fragment key={fieldDisplayName}>
-                <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                  {fieldDisplayName}
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription
-                  className="unifiedDataTable__descriptionListDescription"
-                  dangerouslySetInnerHTML={{ __html: value }}
-                />
-              </Fragment>
-            );
-          })}
-        </EuiDescriptionList>
+        <SourceDocument
+          useTopLevelObjectColumns={useTopLevelObjectColumns}
+          row={row}
+          dataView={dataView}
+          columnId={columnId}
+          fieldFormats={fieldFormats}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          maxEntries={maxEntries}
+          isPlainRecord={isPlainRecord}
+        />
       );
     }
 
@@ -179,6 +161,58 @@ export const getRenderCellValueFn = ({
     );
   };
 };
+
+export function SourceDocument({
+  useTopLevelObjectColumns,
+  row,
+  columnId,
+  dataView,
+  shouldShowFieldHandler,
+  maxEntries,
+  isPlainRecord,
+  fieldFormats,
+}: {
+  useTopLevelObjectColumns: boolean;
+  row: DataTableRecord;
+  columnId: string;
+  dataView: DataView;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  maxEntries: number;
+  isPlainRecord?: boolean;
+  fieldFormats: FieldFormatsStart;
+}) {
+  const pairs: FormattedHit = useTopLevelObjectColumns
+    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
+        0,
+        maxEntries
+      )
+    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+
+  return (
+    <EuiDescriptionList
+      type="inline"
+      compressed
+      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
+    >
+      {pairs.map(([fieldDisplayName, value, fieldName]) => {
+        // temporary solution for text based mode. As there are a lot of unsupported fields we want to
+        // hide the empty one from the Document view
+        if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
+        return (
+          <Fragment key={fieldDisplayName}>
+            <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+              {fieldDisplayName}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription
+              className="unifiedDataTable__descriptionListDescription"
+              dangerouslySetInnerHTML={{ __html: value }}
+            />
+          </Fragment>
+        );
+      })}
+    </EuiDescriptionList>
+  );
+}
 
 /**
  * Helper function to show top level objects
@@ -233,25 +267,12 @@ function renderPopoverContent({
   );
   if (useTopLevelObjectColumns || field?.type === '_source') {
     return (
-      <EuiFlexGroup
-        gutterSize="none"
-        direction="column"
-        justifyContent="flexEnd"
-        className="unifiedDataTable__cellPopover"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-            <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            json={getJSON(columnId, row, useTopLevelObjectColumns)}
-            width={defaultMonacoEditorWidth}
-            height={200}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SourcePopoverContent
+        row={row}
+        columnId={columnId}
+        useTopLevelObjectColumns={useTopLevelObjectColumns}
+        closeButton={closeButton}
+      />
     );
   }
 
@@ -277,6 +298,41 @@ function renderPopoverContent({
     </EuiFlexGroup>
   );
 }
+
+export const SourcePopoverContent = ({
+  closeButton,
+  columnId,
+  row,
+  useTopLevelObjectColumns,
+}: {
+  closeButton: JSX.Element;
+  columnId: string;
+  row: DataTableRecord;
+  useTopLevelObjectColumns: boolean;
+}) => {
+  return (
+    <EuiFlexGroup
+      gutterSize="none"
+      direction="column"
+      justifyContent="flexEnd"
+      className="unifiedDataTable__cellPopover"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+          <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <JsonCodeEditor
+          json={getJSON(columnId, row, useTopLevelObjectColumns)}
+          width={defaultMonacoEditorWidth}
+          height={200}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 /**
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset

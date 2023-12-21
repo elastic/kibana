@@ -5,17 +5,95 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  SourceDocument,
+  SourcePopoverContent as DiscoverSourcePopoverContent,
+} from '@kbn/unified-data-table/src/utils/get_render_cell_value';
+import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail } from '../flyout_detail/use_doc_detail';
 import { FlyoutDoc, LogDocument } from '../../controller';
 import { LogLevel } from '../flyout_detail/sub_components/log_level';
 import * as constants from '../../../common/constants';
 
-const Content = ({ row, dataView }: DataGridCellValueElementProps) => {
+const LogMessage = ({ field, value }: { field: string; value: string }) => {
+  return (
+    <EuiFlexGroup gutterSize="xs">
+      {field && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            css={{ fontWeight: 700 }}
+            data-test-subj="logExplorerDataTableMessageKey"
+          >
+            {field}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <EuiText size="xs" data-test-subj="logExplorerDataTableMessageValue">
+          {value}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const SourcePopoverContent = ({
+  row,
+  columnId,
+  closePopover,
+}: {
+  row: DataTableRecord;
+  columnId: string;
+  closePopover: () => void;
+}) => {
+  const closeButton = (
+    <EuiButtonIcon
+      aria-label={i18n.translate('logExplorer.grid.closePopover', {
+        defaultMessage: `Close popover`,
+      })}
+      data-test-subj="docTableClosePopover"
+      iconSize="s"
+      iconType="cross"
+      size="xs"
+      onClick={closePopover}
+    />
+  );
+  return (
+    <DiscoverSourcePopoverContent
+      row={row}
+      columnId={columnId}
+      closeButton={closeButton}
+      useTopLevelObjectColumns={false}
+    />
+  );
+};
+
+const Content = ({
+  row,
+  dataView,
+  fieldFormats,
+  isDetails,
+  columnId,
+  closePopover,
+}: DataGridCellValueElementProps) => {
   const parsedDoc = useDocDetail(row as LogDocument, { dataView });
   const { field, value } = getMessageWithFallbacks(parsedDoc);
+  const renderLogMessage = field && value;
+
+  const shouldShowFieldHandler = useMemo(() => {
+    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+    return getShouldShowFieldHandler(dataViewFields, dataView, true);
+  }, [dataView]);
+
+  if (isDetails && !renderLogMessage) {
+    return <SourcePopoverContent row={row} columnId={columnId} closePopover={closePopover} />;
+  }
 
   return (
     <EuiFlexGroup gutterSize="xs">
@@ -25,22 +103,24 @@ const Content = ({ row, dataView }: DataGridCellValueElementProps) => {
             level={parsedDoc[constants.LOG_LEVEL_FIELD]}
             iconType="arrowDown"
             iconSide="right"
+            dataTestSubj="logExplorerDataTableLogLevel"
           />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs">
-          {field && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" css={{ fontWeight: 700 }}>
-                {field}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiText size="xs">{value}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {renderLogMessage ? (
+          <LogMessage field={field} value={value} />
+        ) : (
+          <SourceDocument
+            useTopLevelObjectColumns={false}
+            row={row}
+            dataView={dataView}
+            columnId={columnId}
+            fieldFormats={fieldFormats}
+            shouldShowFieldHandler={shouldShowFieldHandler}
+            maxEntries={50}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -64,5 +144,5 @@ const getMessageWithFallbacks = (doc: FlyoutDoc) => {
   }
 
   // If none of the ranks are present, return the whole object
-  return { field: null, value: JSON.stringify(doc) };
+  return { field: null };
 };

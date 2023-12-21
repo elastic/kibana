@@ -21,10 +21,15 @@ interface LogLevelProps {
   level: FlyoutDoc['log.level'];
   iconType?: EuiBadgeProps['iconType'];
   iconSide?: EuiBadgeProps['iconSide'];
-  hollow?: boolean;
+  dataTestSubj?: string;
 }
 
-export function LogLevel({ level, iconType, iconSide }: LogLevelProps) {
+export function LogLevel({
+  level,
+  iconType,
+  iconSide,
+  dataTestSubj = 'logExplorerFlyoutLogLevel',
+}: LogLevelProps) {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
   if (!level) return null;
@@ -37,7 +42,7 @@ export function LogLevel({ level, iconType, iconSide }: LogLevelProps) {
       color="hollow"
       iconType={iconType}
       iconSide={iconSide}
-      data-test-subj="logExplorerFlyoutLogLevel"
+      data-test-subj={dataTestSubj}
       css={css`
         ${levelColor ? `border: 2px solid ${levelColor};` : ''}
         font-size: ${xsFontSize};
