@@ -87,7 +87,7 @@ const mockKibana = () => {
       },
       dataViews: {
         create: jest.fn().mockResolvedValue({
-          getIndexPattern: jest.fn(),
+          getIndexPattern: jest.fn().mockReturnValue('some-index'),
         }),
       },
       docLinks: {

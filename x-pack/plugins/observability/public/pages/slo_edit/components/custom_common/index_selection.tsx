@@ -42,7 +42,7 @@ export function IndexSelection() {
           },
           true
         );
-        if (dataView) {
+        if (dataView.getIndexPattern() === currentIndexPattern) {
           setAdHocDataViews((prev) => [...prev, dataView]);
         }
       }
