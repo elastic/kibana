@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiCheckboxGroup,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -21,34 +20,17 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
-  Query,
 } from '@elastic/eui';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { Capabilities } from '@kbn/core-capabilities-common';
-import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import React, { FC, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types/latest';
-import { parseQuery, getTagFindReferences } from '@kbn/saved-objects-management-plugin/public';
-import { fetchExportByTypeAndSearch } from '@kbn/saved-objects-management-plugin/public/lib';
-
-// @ts-expect-error
-import { saveAs } from '@elastic/filesaver';
-import { css } from '@emotion/react';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService, UrlParamExtension } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
 
-interface UrlParams {
-  [extensionName: string]: {
-    [queryParam: string]: boolean;
-  };
-}
 interface EmbedModalPageProps {
   isEmbedded?: boolean;
   allowShortUrl: boolean;
@@ -66,11 +48,6 @@ interface EmbedModalPageProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
-  // onExportAll() props
-  notifications: NotificationsStart;
-  http: HttpStart;
-  taggingApi?: SavedObjectsTaggingApi;
-  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) => {
@@ -83,70 +60,56 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     shareableUrlLocatorParams,
     urlService,
     onClose,
-    notifications,
-    http,
-    taggingApi,
-    allowedTypes,
   } = props;
   const isMounted = useMountedState();
-  const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean>(false);
+  const [shortUrl, isCreatingShortUrl] = useState<boolean>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
-  const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
-  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({
-    ['filterBar']: true,
-  });
+  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
-  const [url, setUrl] = useState<string>('');
+
   const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
-  const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
-  const [exportAllSelectedOptions] = useState<Record<string, boolean>>({});
-  const [isIncludeReferencesDeepChecked] = useState<boolean>(true);
-  const [activeQuery] = useState<Query>(Query.parse(''));
+  interface UrlParams {
+    [extensionName: string]: {
+      [queryParam: string]: boolean;
+    };
+  }
 
-  /**
-   *
-   * SECTION I: These functions are smaller, helper-like functions
-   */
-
-  const makeUrlEmbeddable = (tempUrl: string): string => {
+  const makeUrlEmbeddable = (url: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+    const urlHasQueryString = url.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return tempUrl.replace('?', `${embedParam}&`);
+      return url.replace('?', `${embedParam}&`);
     }
 
-    return `${tempUrl}${embedParam}`;
+    return `${url}${embedParam}`;
   };
 
-  const makeIframeTag = (tempUrl: string) => {
-    if (!tempUrl) {
+  const makeIframeTag = (url?: string) => {
+    if (!url) {
       return;
     }
 
-    return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
+    return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
   };
 
-  const isNotSaved = () => {
-    return objectId === undefined || objectId === '';
+  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   };
 
-  const updateUrlParams = (tempUrl: string) => {
-    tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
-    tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
-
-    return tempUrl;
-  };
-
-  /**
-   * These functions are more extensive logic handling
-   */
-
-  const getUrlParamExtensions = (tempUrl: string): string => {
+  const getUrlParamExtensions = (url: string): string => {
     return urlParams
       ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
           const urlParam = urlParams[key];
@@ -158,33 +121,43 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
                   : queryAccumulator;
               }, urlAccumulator)
             : urlAccumulator;
-        }, tempUrl)
-      : tempUrl;
+        }, url)
+      : url;
+  };
+
+  const updateUrlParams = (url: string) => {
+    url = isEmbedded ? makeUrlEmbeddable(url) : url;
+    url = urlParams ? getUrlParamExtensions(url) : url;
+
+    return url;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
+    let url = '';
     if (forSavedObject && shareableUrlForSavedObject) {
-      setUrl(shareableUrlForSavedObject);
+      url = shareableUrlForSavedObject;
     }
     if (!url) {
-      setUrl(shareableUrl || window.location.href);
+      url = shareableUrl || window.location.href;
     }
     return updateUrlParams(url);
   };
 
   const createShortUrl = async () => {
-    setIsShortUrl(true);
+    setShortUrl(true);
     setShortUrlErrorMsg(undefined);
 
     try {
       if (shareableUrlLocatorParams) {
         const shortUrls = urlService.shortUrls.get(null);
-        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
-        setShortUrlCache(await shortUrl.locator.getUrl(shortUrl.params, { absolute: true }));
+        const tempShortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        setShortUrlCache(
+          await tempShortUrl.locator.getUrl(tempShortUrl.params, { absolute: true })
+        );
       } else {
         const snapshotUrl = getSnapshotUrl();
-        const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
-        setShortUrlCache(shortUrl.url);
+        const tempShortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+        setShortUrlCache(tempShortUrl.url);
       }
     } catch (fetchError) {
       if (!isMounted) {
@@ -192,8 +165,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       }
 
       setShortUrlCache(undefined);
-      setIsShortUrl(false);
-      setIsCreatingShortUrl(false);
+      setShortUrl(false);
+      isCreatingShortUrl(false);
       setShortUrlErrorMsg(
         i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
           defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
@@ -203,7 +176,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
         })
       );
     }
-    setUrlHelper();
+    setUrl();
+  };
+
+  const isNotSaved = () => {
+    return objectId === undefined || objectId === '';
   };
 
   const getSavedObjectUrl = () => {
@@ -211,11 +188,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       return;
     }
 
-    setUrl(getSnapshotUrl(true));
+    const url = getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
-      return url;
+      return;
     }
 
     // Get the application route, after the hash, and remove the #.
@@ -238,12 +215,12 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return updateUrlParams(formattedUrl);
   };
 
-  const addUrlAnonymousAccessParameters = (tempUrl: string): string => {
+  const addUrlAnonymousAccessParameters = (url: string): string => {
     if (!anonymousAccessParameters || !usePublicUrl) {
-      return tempUrl;
+      return url;
     }
 
-    const parsedUrl = new URL(tempUrl);
+    const parsedUrl = new URL(url);
 
     for (const [name, value] of Object.entries(anonymousAccessParameters)) {
       parsedUrl.searchParams.set(name, value);
@@ -252,86 +229,39 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return parsedUrl.toString();
   };
 
-  const setUrlHelper = () => {
+  const setUrl = () => {
+    let url: string | undefined;
+
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      setUrl(getSavedObjectUrl()!);
-    } else if (isShortUrl !== undefined && shortUrlCache !== undefined) {
-      setUrl(shortUrlCache);
+      url = getSavedObjectUrl();
+    } else if (setShortUrl !== undefined) {
+      url = shortUrlCache;
     } else {
-      setUrl(getSnapshotUrl());
+      url = getSnapshotUrl();
     }
 
-    if (url !== '') {
-      setUrl(addUrlAnonymousAccessParameters(url));
+    if (url) {
+      url = addUrlAnonymousAccessParameters(url);
     }
 
-    if (isEmbedded && url !== undefined) {
-      setUrl(makeIframeTag(url)!);
+    if (isEmbedded) {
+      url = makeIframeTag(url);
     }
 
-    setUrl(url);
+    setUrl();
   };
 
-  const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setCheckShortUrlSwitch(evt.target.checked);
-    if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
-      setIsShortUrl(true);
-      setUrlHelper();
+  const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
+    const isChecked = evt.target.checked;
+
+    if (!isChecked || shortUrlCache !== undefined) {
+      setShortUrl(true);
+      setUrl();
       return;
     }
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
     createShortUrl();
-  };
-
-  const onExportAll = async () => {
-    const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
-      if (selected) {
-        accum.push(id);
-      }
-      return accum;
-    }, [] as string[]);
-
-    const references = getTagFindReferences({ selectedTags, taggingApi });
-
-    let blob;
-    try {
-      blob = await fetchExportByTypeAndSearch({
-        http,
-        search: queryText ? `${queryText}*` : undefined,
-        types: exportTypes,
-        references,
-        includeReferencesDeep: isIncludeReferencesDeepChecked,
-      });
-    } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
-          defaultMessage: 'Unable to generate export: {error}',
-          values: {
-            error: e.body?.message ?? e,
-          },
-        }),
-      });
-      throw e;
-    }
-    // do we want to display this instead of saving the blob...
-    // console.log({ blob });
-    saveAs(blob, 'export.ndjson');
-  };
-
-  /**
-   * These functions extract out presentational components from the rendering portion
-   */
-  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-    return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tipContent} position="bottom" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
   };
 
   const renderShortUrlSwitch = () => {
@@ -341,18 +271,19 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel = isCreatingShortUrl ? (
-      <span>
-        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-      </span>
-    ) : (
-      shortUrlLabel
-    );
+    const switchLabel =
+      isCreatingShortUrl !== undefined ? (
+        <span>
+          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+        </span>
+      ) : (
+        shortUrlLabel
+      );
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
+        checked={setShortUrl as unknown as boolean}
         onChange={handleShortUrlChange}
-        checked={checkShortUrlSwitch}
         data-test-subj="useShortUrl"
       />
     );
@@ -373,6 +304,16 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     );
   };
 
+  const checkboxOnChangeHandler = (id: string): void => {
+    const newCheckboxMap = {
+      ...checkboxSelectedMap,
+      ...{
+        [id]: !checkboxSelectedMap,
+      },
+    };
+    setCheckboxIdSelectedMap(newCheckboxMap);
+  };
+
   const checkboxOptions = [
     { id: 'filterBar', label: 'Filter bar', 'data-test-sub': 'filter-bar-embed' },
     { id: 'query', label: 'Query', 'data-test-sub': 'query-embed' },
@@ -380,33 +321,15 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'topMenu', label: 'Top menu', 'data-test-sub': 'top-menu-embed' },
   ];
 
-  const checkboxOnChangeHandler = (id: string): void => {
-    setCheckboxIdSelectedMap((prev) => {
-      return {
-        ...prev,
-        [id]: prev[id] ? !prev[id] : true,
-      };
-    });
-  };
-
   const radioOptions = [
     { id: 'savedObject', label: 'Saved object' },
     { id: 'snapshot', label: 'Snapshot' },
   ];
 
-  const placeholderEmbedCode = `Click copy icon to generate ${
-    selectedRadio === 'savedObject' ? 'saved object' : 'snapshot'
-  }`;
-
   return (
     <EuiModal onClose={onClose}>
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-          <EuiSpacer size="xs" />
-          <EuiTitle>
-            <EuiText>{`Share this ${props.objectType}`}</EuiText>
-          </EuiTitle>
-          <EuiSpacer size="m" />
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={1}>
               <EuiCheckboxGroup
@@ -420,9 +343,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiFlexItem grow={1}>
               <EuiRadioGroup
                 options={radioOptions}
-                onChange={(id) => {
-                  setSelectedRadio(id);
-                }}
+                onChange={(id) => setSelectedRadio(id)}
                 name="embed radio group"
                 idSelected={selectedRadio}
               />
@@ -430,17 +351,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
             <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
             <EuiSpacer size="m" />
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <button
-            onClick={async () => await onExportAll()}
-            css={css`
-              &:hover: {
-                cursor: pointer;
-              }
-            `}
-          >
-            <EuiCodeBlock isCopyable>{placeholderEmbedCode}</EuiCodeBlock>
-          </button>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiButton fill onClick={onClose}>
