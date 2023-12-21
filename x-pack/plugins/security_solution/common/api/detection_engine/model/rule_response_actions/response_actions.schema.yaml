@@ -65,6 +65,8 @@ components:
           type: string
         saved_query_id:
           type: string
+        timeout:
+          type: number
 
     OsqueryParamsCamelCase:
       type: object
@@ -81,6 +83,8 @@ components:
           type: string
         savedQueryId:
           type: string
+        timeout:
+          type: number
 
     OsqueryResponseAction:
       type: object

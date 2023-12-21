@@ -18,6 +18,7 @@ import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { SvlTriggersActionsPageProvider } from './svl_triggers_actions_ui_page';
 import { SvlRuleDetailsPageProvider } from './svl_rule_details_ui_page';
+import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -28,6 +29,7 @@ export const pageObjects = {
   svlObltOnboardingPage: SvlObltOnboardingPageProvider,
   SvlObltOnboardingStreamLogFilePage: SvlObltOnboardingStreamLogFilePageProvider,
   svlObltOverviewPage: SvlObltOverviewPageProvider,
+  svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
   svlSecLandingPage: SvlSecLandingPageProvider,
   svlTriggersActionsUI: SvlTriggersActionsPageProvider,

@@ -232,6 +232,19 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             } = await import('./register_helper');
             registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
+            if (
+              pluginsSetup.triggersActionsUi &&
+              ((fullLicense && mlCapabilities.canUseMlAlerts && mlCapabilities.canGetJobs) ||
+                // Register rules for basic license to show them in the UI as disabled
+                !fullLicense)
+            ) {
+              registerMlAlerts(
+                pluginsSetup.triggersActionsUi,
+                core.getStartServices,
+                pluginsSetup.alerting
+              );
+            }
+
             if (fullLicense) {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
@@ -240,18 +253,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
-                }
-
-                if (
-                  pluginsSetup.triggersActionsUi &&
-                  mlCapabilities.canUseMlAlerts &&
-                  mlCapabilities.canGetJobs
-                ) {
-                  registerMlAlerts(
-                    pluginsSetup.triggersActionsUi,
-                    core.getStartServices,
-                    pluginsSetup.alerting
-                  );
                 }
 
                 if (pluginsSetup.maps) {
