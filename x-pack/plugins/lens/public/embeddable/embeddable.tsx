@@ -845,7 +845,11 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfingPanel(
+    startDependencies: LensPluginStartDependencies,
+    isNewPanel?: boolean,
+    deletePanel?: () => void
+  ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -875,6 +879,8 @@ export class Embeddable
           }
           displayFlyoutHeader={true}
           canEditTextBasedQuery={this.isTextBasedLanguage()}
+          isNewPanel={isNewPanel}
+          deletePanel={deletePanel}
         />
       );
     }
