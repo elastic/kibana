@@ -7,7 +7,10 @@
 
 import { dump } from '../../../utils/dump';
 import type { HapiReadableStream } from '../../../../types';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { updateCases } from '../create/update_cases';
 import type { CreateActionPayload } from '../create/types';
 import type {
@@ -36,6 +39,8 @@ import type {
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];

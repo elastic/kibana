@@ -13,7 +13,10 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
-import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -82,7 +85,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
     Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends object = object
+  TOutputContent extends object = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -92,8 +95,10 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
 /**
  * Base class for a Response Actions client
  */
-export class ResponseActionsClientImpl implements ResponseActionsClient {
+export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected abstract readonly agentType: ResponseActionAgentType;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
     this.log = options.endpointService.createLogger(
@@ -224,7 +229,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
         action_id: uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
-        input_type: actionRequest.agent_type ?? 'endpoint',
+        input_type: this.agentType,
         data: {
           command: actionRequest.command,
           comment: actionRequest.comment ?? undefined,
@@ -276,7 +281,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
    * @param options
    * @protected
    */
-  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = object>({
+  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = {}>({
     actionId,
     error,
     agentId,
@@ -292,6 +297,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       },
       EndpointActions: {
         action_id: actionId,
+        input_type: this.agentType,
         started_at: timestamp,
         completed_at: timestamp,
         data,
