@@ -72,6 +72,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionUploadEnabled: true,
 
   /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -126,11 +131,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
@@ -162,7 +162,7 @@ export const allowedExperimentalValues = Object.freeze({
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
