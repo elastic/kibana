@@ -14,21 +14,16 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface FrameValue {
-  selfCPU: number;
-  totalCPU: number;
   totalCount: number;
-  duration: number;
   scaleFactor?: number;
   totalAnnualCO2Kgs: number;
   totalAnnualCostUSD: number;
@@ -38,6 +33,8 @@ interface Props {
   baseValue?: FrameValue;
   comparisonValue?: FrameValue;
   isLoading: boolean;
+  hasBorder?: boolean;
+  compressed?: boolean;
 }
 
 const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
@@ -48,15 +45,13 @@ function getScaleFactor(scaleFactor: number = 1) {
   return scaleFactor;
 }
 
-export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) {
-  const {
-    start: { core },
-  } = useProfilingDependencies();
-  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
-    profilingUseLegacyCo2Calculation
-  );
-  const calculateImpactEstimates = useCalculateImpactEstimate();
-
+export function FramesSummary({
+  baseValue,
+  comparisonValue,
+  isLoading,
+  hasBorder = false,
+  compressed = false,
+}: Props) {
   const baselineScaledTotalSamples = baseValue
     ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
     : 0;
@@ -66,62 +61,23 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
-    const baseImpactEstimates = baseValue
-      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
-        calculateImpactEstimates({
-          countExclusive: baseValue.selfCPU,
-          countInclusive: baseValue.totalCPU,
-          totalSamples: baseValue.totalCount,
-          totalSeconds: baseValue.duration,
-        })
-      : undefined;
-
-    const comparisonImpactEstimates = comparisonValue
-      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
-        calculateImpactEstimates({
-          countExclusive: comparisonValue.selfCPU,
-          countInclusive: comparisonValue.totalCPU,
-          totalSamples: comparisonValue.totalCount,
-          totalSeconds: comparisonValue.duration,
-        })
-      : undefined;
-
     return {
       totalSamplesDiff: calculateBaseComparisonDiff({
         baselineValue: baselineScaledTotalSamples || 0,
         comparisonValue: comparisonScaledTotalSamples || 0,
       }),
       co2EmissionDiff: calculateBaseComparisonDiff({
-        baselineValue:
-          (shouldUseLegacyCo2Calculation
-            ? baseImpactEstimates?.totalSamples?.annualizedCo2
-            : baseValue?.totalAnnualCO2Kgs) || 0,
-        comparisonValue:
-          (shouldUseLegacyCo2Calculation
-            ? comparisonImpactEstimates?.totalSamples.annualizedCo2
-            : comparisonValue?.totalAnnualCO2Kgs) || 0,
+        baselineValue: baseValue?.totalAnnualCO2Kgs || 0,
+        comparisonValue: comparisonValue?.totalAnnualCO2Kgs || 0,
         formatValue: (value) => asWeight(value, 'kgs'),
       }),
       costImpactDiff: calculateBaseComparisonDiff({
-        baselineValue:
-          (shouldUseLegacyCo2Calculation
-            ? baseImpactEstimates?.totalSamples.annualizedDollarCost
-            : baseValue?.totalAnnualCostUSD) || 0,
-        comparisonValue:
-          (shouldUseLegacyCo2Calculation
-            ? comparisonImpactEstimates?.totalSamples.annualizedDollarCost
-            : comparisonValue?.totalAnnualCostUSD) || 0,
+        baselineValue: baseValue?.totalAnnualCostUSD || 0,
+        comparisonValue: comparisonValue?.totalAnnualCostUSD || 0,
         formatValue: asCost,
       }),
     };
-  }, [
-    baseValue,
-    baselineScaledTotalSamples,
-    calculateImpactEstimates,
-    comparisonScaledTotalSamples,
-    comparisonValue,
-    shouldUseLegacyCo2Calculation,
-  ]);
+  }, [baseValue, baselineScaledTotalSamples, comparisonScaledTotalSamples, comparisonValue]);
 
   const data = [
     {
@@ -143,6 +99,7 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
       baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,
+      hidden: isEmpty(comparisonValue),
     },
     {
       id: 'annualizedCo2',
@@ -182,7 +139,31 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
     },
   ];
 
-  return (
+  const Summary = (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="row">
+        {data
+          .filter((item) => !item.hidden)
+          .map((item) => {
+            return (
+              <EuiFlexItem key={item.id}>
+                <SummaryItem
+                  {...item}
+                  isLoading={isLoading}
+                  hasBorder={hasBorder}
+                  compressed={compressed}
+                />
+              </EuiFlexItem>
+            );
+          })}
+      </EuiFlexGroup>
+    </>
+  );
+
+  return compressed ? (
+    <>{Summary}</>
+  ) : (
     <EuiAccordion
       initialIsOpen
       id="TopNFunctionsSummary"
@@ -206,18 +187,7 @@ export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) 
         </EuiFlexGroup>
       }
     >
-      <>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="row">
-          {data.map((item, idx) => {
-            return (
-              <EuiFlexItem key={idx}>
-                <SummaryItem {...item} isLoading={isLoading} />
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
-      </>
+      {Summary}
     </EuiAccordion>
   );
 }

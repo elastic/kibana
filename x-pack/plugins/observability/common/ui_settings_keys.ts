@@ -17,6 +17,8 @@ export const apmServiceGroupMaxNumberOfServices =
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
+export const enableInfrastructureProfilingIntegration =
+  'observability:enableInfrastructureProfilingIntegration';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
@@ -31,6 +33,5 @@ export const profilingPervCPUWattX86 = 'observability:profilingPerVCPUWattX86';
 export const profilingPervCPUWattArm64 = 'observability:profilingPervCPUWattArm64';
 export const profilingCo2PerKWH = 'observability:profilingCo2PerKWH';
 export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';
-export const profilingUseLegacyCo2Calculation = 'observability:profilingUseLegacyCo2Calculation';
 export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDiscountRate';
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
