@@ -219,64 +219,189 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": ".gz",
-            }
+      <SourceDocument
+        columnId="_source"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
-            }
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
+        }
+        maxEntries={100}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": Object {
+                "bytes": 100,
+                "extension": ".gz",
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -302,57 +427,46 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": Object {
-                  "bytes": 100,
-                  "extension": ".gz",
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
-              }
-            }
-            width={370}
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": Object {
+                "bytes": 100,
+                "extension": ".gz",
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -379,51 +493,190 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
-            }
+      <SourceDocument
+        columnId="_source"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
+        }
+        isPlainRecord={true}
+        maxEntries={100}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": 100,
+              "extension": null,
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": Object {
+                "bytes": 100,
+                "extension": null,
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
           }
-        />
-      </EuiDescriptionList>
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -449,68 +702,198 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
+      <SourceDocument
+        columnId="_source"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
               ],
-            }
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
+          }
+        }
+        maxEntries={100}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": Array [
                 100,
               ],
-            }
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": Array [
+                  100,
+                ],
+                "extension": Array [
+                  ".gz",
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -537,40 +920,198 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
+      <SourceDocument
+        columnId="_source"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
+          }
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
+          }
+        }
+        maxEntries={1}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
                 ".gz",
               ],
-            }
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": Array [
+                  100,
+                ],
+                "extension": Array [
+                  ".gz",
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
           }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          and 3 more fields
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "",
-            }
-          }
-        />
-      </EuiDescriptionList>
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -596,62 +1137,55 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": undefined,
-                "fields": Object {
-                  "bytes": Array [
-                    100,
-                  ],
-                  "extension": Array [
-                    ".gz",
-                  ],
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
-              }
-            }
-            width={370}
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": Array [
+                  100,
+                ],
+                "extension": Array [
+                  ".gz",
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -678,25 +1212,198 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          object.value
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "100",
-            }
+      <SourceDocument
+        columnId="object"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
           }
-        />
-      </EuiDescriptionList>
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
+          }
+        }
+        maxEntries={100}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "extension": Array [
+                ".gz",
+              ],
+              "object.value": Array [
+                100,
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "extension": Array [
+                  ".gz",
+                ],
+                "object.value": Array [
+                  100,
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={true}
+      />
     `);
   });
 
@@ -724,25 +1431,198 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          object.value
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "100",
-            }
+      <SourceDocument
+        columnId="object"
+        dataView={
+          Object {
+            "docvalueFields": Array [],
+            "fields": Array [
+              Object {
+                "aggregatable": false,
+                "filterable": false,
+                "name": "_source",
+                "scripted": false,
+                "type": "_source",
+              },
+              Object {
+                "aggregatable": false,
+                "filterable": true,
+                "name": "_index",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": false,
+                "displayName": "message",
+                "filterable": false,
+                "name": "message",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "extension",
+                "filterable": true,
+                "name": "extension",
+                "scripted": false,
+                "type": "string",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "bytesDisplayName",
+                "filterable": true,
+                "name": "bytes",
+                "scripted": false,
+                "sortable": true,
+                "type": "number",
+              },
+              Object {
+                "displayName": "scripted",
+                "filterable": false,
+                "name": "scripted",
+                "scripted": true,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "object.value",
+                "filterable": true,
+                "name": "object.value",
+                "scripted": false,
+                "type": "number",
+              },
+              Object {
+                "aggregatable": true,
+                "displayName": "@timestamp",
+                "filterable": true,
+                "name": "@timestamp",
+                "scripted": false,
+                "type": "date",
+              },
+            ],
+            "getComputedFields": [Function],
+            "getFieldByName": [MockFunction],
+            "getFormatterForField": [MockFunction] {
+              "calls": Array [
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "displayName": "bytesDisplayName",
+                    "filterable": true,
+                    "name": "bytes",
+                    "scripted": false,
+                    "sortable": true,
+                    "type": "number",
+                  },
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "convert": [Function],
+                  },
+                },
+              ],
+            },
+            "getIndexPattern": [Function],
+            "getName": [Function],
+            "getSourceFiltering": [Function],
+            "getTimeField": [Function],
+            "id": "the-data-view-id",
+            "isPersisted": [Function],
+            "isTimeBased": [Function],
+            "isTimeNanosBased": [Function],
+            "metaFields": Array [
+              "_index",
+              "_score",
+            ],
+            "name": "the-data-view",
+            "timeFieldName": "",
+            "title": "the-data-view-title",
+            "toMinimalSpec": [Function],
+            "toSpec": [Function],
+            "type": "default",
           }
-        />
-      </EuiDescriptionList>
+        }
+        fieldFormats={
+          Object {
+            "getDefaultInstance": [MockFunction],
+          }
+        }
+        maxEntries={100}
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "extension": Array [
+                ".gz",
+              ],
+              "object.value": Array [
+                100,
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "extension": Array [
+                  ".gz",
+                ],
+                "object.value": Array [
+                  100,
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        shouldShowFieldHandler={[Function]}
+        useTopLevelObjectColumns={true}
+      />
     `);
   });
 
@@ -769,48 +1649,55 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        }
+        columnId="object"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "extension": Array [
+                ".gz",
+              ],
+              "object.value": Array [
+                100,
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "extension": Array [
+                  ".gz",
+                ],
                 "object.value": Array [
                   100,
                 ],
-              }
-            }
-            width={370}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={true}
+      />
     `);
   });
 
