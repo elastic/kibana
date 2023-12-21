@@ -45,6 +45,7 @@
     "cypress:run:qa:serverless:rule_management:prebuilt_rules": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:exceptions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
-    "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'"
+    "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
+    "cypress:open:component": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider NODE_TLS_REJECT_UNAUTHORIZED=0 ../../../node_modules/.bin/cypress open --config-file ../../test/security_solution_cypress/cypress/cypress_component.config.ts"
   }
 }
