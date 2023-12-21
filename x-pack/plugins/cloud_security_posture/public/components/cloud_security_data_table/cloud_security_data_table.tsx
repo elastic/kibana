@@ -17,7 +17,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureTableResult } from '../../common/hooks/use_cloud_posture_table';
+import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
@@ -40,7 +40,7 @@ const useNewFieldsApi = true;
 // Hide Checkbox, enable open details Flyout
 const controlColumnIds = ['openDetails'];
 
-interface CloudSecurityDataGridProps {
+export interface CloudSecurityDataTableProps {
   dataView: DataView;
   isLoading: boolean;
   defaultColumns: CloudSecurityDefaultColumn[];
@@ -55,7 +55,7 @@ interface CloudSecurityDataGridProps {
    * This is the object that contains all the data and functions from the useCloudPostureTable hook.
    * This is also used to manage the table state from the parent component.
    */
-  cloudPostureTable: CloudPostureTableResult;
+  cloudPostureTable: CloudPostureDataTableResult;
   title: string;
   /**
    * This is a function that returns a map of column ids to custom cell renderers.
@@ -106,7 +106,7 @@ export const CloudSecurityDataTable = ({
   dataViewRefetch,
   dataViewIsRefetching,
   ...rest
-}: CloudSecurityDataGridProps) => {
+}: CloudSecurityDataTableProps) => {
   const {
     columnsLocalStorageKey,
     pageSize,

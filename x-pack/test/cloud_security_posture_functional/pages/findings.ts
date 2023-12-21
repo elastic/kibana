@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
@@ -94,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  describe('Findings Page', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -207,6 +208,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
+      });
+    });
+
+    describe('DataTable features', () => {
+      it('Edit data view field option is Enabled', async () => {
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
+        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
       });
     });
   });
