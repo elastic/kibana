@@ -81,14 +81,15 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
     return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
       const docIndex = doc.index;
       const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+      const reportingSetup = reporting.getPluginSetupDeps();
+      const logger = reportingSetup.logger.get('delete-report');
 
       // An "error" event is emitted if an error is
       // passed to the `stream.end` callback from
       // the _final method of the ContentStream.
       // This event must be handled.
       stream.on('error', (err) => {
-        const { logger } = reporting.getPluginSetupDeps();
-        logger.get('delete-report-job').error(err);
+        logger.error(err);
       });
 
       try {
@@ -112,8 +113,7 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
           body: { deleted: true },
         });
       } catch (error) {
-        const { logger } = reporting.getPluginSetupDeps();
-        logger.get('delete-report').error(error);
+        logger.error(error);
         return res.customError({
           statusCode: 500,
         });
