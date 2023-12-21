@@ -20,7 +20,7 @@ import type {
   CreateEnrichEventsFunction,
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
-import { isIndexExist } from './utils/isIndexExist';
+import { isIndexExist } from './utils/is_index_exist';
 import {
   getHostRiskIndex,
   getUserRiskIndex,

@@ -12,7 +12,7 @@ import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 
-import { isIndexExist } from './utils/isIndexExist';
+import { isIndexExist } from './utils/is_index_exist';
 
 import { allowedExperimentalValues } from '../../../../../../common';
 
@@ -21,7 +21,7 @@ jest.mock('./search_enrichments', () => ({
 }));
 const mockSearchEnrichments = searchEnrichments as jest.Mock;
 
-jest.mock('./utils/isIndexExist', () => ({
+jest.mock('./utils/is_index_exist', () => ({
   isIndexExist: jest.fn(),
 }));
 const mockIsIndexExist = isIndexExist as jest.Mock;
