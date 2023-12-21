@@ -278,24 +278,6 @@ export const AgentUpgradeStatus: React.FC<{
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
   const minVersion = '8.12';
 
-  if (!isAgentUpgradable && notUpgradeableMessage) {
-    return (
-      <EuiIconTip
-        type="iInCircle"
-        content={
-          <FormattedMessage
-            id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"
-            defaultMessage="Agent not upgradeable: {reason}"
-            values={{
-              reason: notUpgradeableMessage,
-            }}
-          />
-        }
-        color="subdued"
-      />
-    );
-  }
-
   if (isAgentUpgradable) {
     return (
       <EuiBadge color="hollow" iconType="sortUp">
@@ -335,6 +317,24 @@ export const AgentUpgradeStatus: React.FC<{
             defaultMessage="Detailed upgrade status is available for Elastic Agents on version {minVersion} and higher."
             values={{
               minVersion,
+            }}
+          />
+        }
+        color="subdued"
+      />
+    );
+  }
+
+  if (!isAgentUpgradable && notUpgradeableMessage) {
+    return (
+      <EuiIconTip
+        type="iInCircle"
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"
+            defaultMessage="Agent not upgradeable: {reason}"
+            values={{
+              reason: notUpgradeableMessage,
             }}
           />
         }
