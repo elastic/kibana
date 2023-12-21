@@ -7,7 +7,7 @@
 
 import { FunctionDefinition } from '../../common/types';
 
-type Params = FunctionDefinition['options']['parameters'];
+type Params = FunctionDefinition['parameters'];
 
 export function createInitializedObject(parameters: Params) {
   const emptyObject: Record<string, string | any> = {};

@@ -32,6 +32,7 @@ export const FlyoutWrapper = ({
   displayFlyoutHeader,
   language,
   attributesChanged,
+  isNewPanel,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -49,17 +50,30 @@ export const FlyoutWrapper = ({
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
-                  {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                    defaultMessage: 'Edit {lang} visualization',
-                    values: { lang: language },
-                  })}
+                  {isNewPanel
+                    ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
+                        defaultMessage: 'Create {lang} visualization',
+                        values: { lang: language },
+                      })
+                    : i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                        defaultMessage: 'Edit {lang} visualization',
+                        values: { lang: language },
+                      })}
                   <EuiToolTip
-                    content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                      defaultMessage:
-                        'Technical preview, ES|QL currently offers limited configuration options',
-                    })}
+                    content={
+                      language
+                        ? i18n.translate('xpack.lens.config.experimentalLabelTextBased', {
+                            defaultMessage:
+                              'Technical preview, {lang} currently offers limited configuration options',
+                            values: { lang: language },
+                          })
+                        : i18n.translate('xpack.lens.config.experimentalLabelDataview', {
+                            defaultMessage:
+                              'Technical preview, inline editing currently offers limited configuration options',
+                          })
+                    }
                   >
                     <EuiBetaBadge
                       label="Lab"
@@ -139,7 +153,7 @@ export const FlyoutWrapper = ({
                 aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
                   defaultMessage: 'Apply changes',
                 })}
-                disabled={!attributesChanged}
+                disabled={Boolean(isNewPanel) ? false : !attributesChanged}
                 iconType="check"
                 data-test-subj="applyFlyoutButton"
               >

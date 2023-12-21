@@ -17,7 +17,7 @@ import {
 import { PaletteColorStop } from '@elastic/eui/src/components/color_picker/color_palette_picker';
 import { i18n } from '@kbn/i18n';
 import { getSeverityStatusColor } from '../../../common/utils/get_vulnerability_colors';
-import { VulnSeverity } from '../../../../common/types';
+import { VulnSeverity } from '../../../../common/types_old';
 import { SeverityStatusBadge } from '../../../components/vulnerability_badges';
 
 interface Props {
