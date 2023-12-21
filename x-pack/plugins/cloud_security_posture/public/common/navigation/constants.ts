@@ -37,11 +37,24 @@ const NAV_ITEMS_NAMES = {
 /** The base path for all cloud security posture pages. */
 export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
 
+const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
+const KSPM_DASHBOARD_TAB_NAME = 'Kubernetes';
+
 export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   dashboard: {
     name: NAV_ITEMS_NAMES.DASHBOARD,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
     id: 'cloud_security_posture-dashboard',
+  },
+  cspm_dashboard: {
+    name: CSPM_DASHBOARD_TAB_NAME,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard/${CSPM_POLICY_TEMPLATE}`,
+    id: 'cloud_security_posture-cspm-dashboard',
+  },
+  kspm_dashboard: {
+    name: KSPM_DASHBOARD_TAB_NAME,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard/${KSPM_POLICY_TEMPLATE}`,
+    id: 'cloud_security_posture-kspm-dashboard',
   },
   vulnerability_dashboard: {
     name: NAV_ITEMS_NAMES.VULNERABILITY_DASHBOARD,
