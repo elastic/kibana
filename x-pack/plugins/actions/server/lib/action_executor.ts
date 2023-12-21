@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
@@ -14,24 +14,25 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
-  validateParams,
   validateConfig,
-  validateSecrets,
   validateConnector,
+  validateParams,
+  validateSecrets,
 } from './validate_with_schema';
 import {
   ActionType,
-  ActionTypeExecutorResult,
+  ActionTypeConfig,
   ActionTypeExecutorRawResult,
+  ActionTypeExecutorResult,
   ActionTypeRegistryContract,
+  ActionTypeSecrets,
   GetServicesFunction,
   InMemoryConnector,
   RawAction,
   ValidatorServices,
-  ActionTypeSecrets,
-  ActionTypeConfig,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionExecutionSource } from './action_execution_source';
@@ -147,7 +148,11 @@ export class ActionExecutor {
         }
 
         if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          try {
+            actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          } catch (e) {
+            throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+          }
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
@@ -259,12 +264,14 @@ export class ActionExecutor {
             configurationUtilities,
             logger,
             source,
+            ...(actionType.isSystemActionType ? { request } : {}),
           });
+
+          if (rawResult && rawResult.status === 'error') {
+            rawResult.errorSource = TaskErrorSource.USER;
+          }
         } catch (err) {
-          if (
-            err.reason === ActionExecutionErrorReason.Validation ||
-            err.reason === ActionExecutionErrorReason.Authorization
-          ) {
+          if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -274,6 +281,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
+              errorSource: TaskErrorSource.USER,
             };
           }
         }
@@ -450,31 +458,37 @@ export class ActionExecutor {
     }
 
     if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      throw createTaskRunError(
+        new Error(
+          `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        ),
+        TaskErrorSource.USER
       );
     }
 
-    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-      'action',
-      actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
-    );
+    try {
+      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+        'action',
+        actionId,
+        {
+          namespace: namespace === 'default' ? undefined : namespace,
+        }
+      );
+      const {
+        attributes: { secrets, actionTypeId, config, name },
+      } = rawAction;
 
-    const {
-      attributes: { secrets, actionTypeId, config, name },
-    } = rawAction;
-
-    return {
-      actionTypeId,
-      name,
-      config,
-      secrets,
-      actionId,
-      rawAction: rawAction.attributes,
-    };
+      return {
+        actionTypeId,
+        name,
+        config,
+        secrets,
+        actionId,
+        rawAction: rawAction.attributes,
+      };
+    } catch (e) {
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
   }
 }
 
@@ -539,6 +553,7 @@ function validateAction(
       status: 'error',
       message: err.message,
       retry: !!taskInfo,
+      errorSource: TaskErrorSource.FRAMEWORK,
     });
   }
 }
@@ -584,6 +599,7 @@ const ensureAuthorizedToExecute = async ({
       status: 'error',
       message: error.message,
       retry: false,
+      errorSource: TaskErrorSource.USER,
     });
   }
 };

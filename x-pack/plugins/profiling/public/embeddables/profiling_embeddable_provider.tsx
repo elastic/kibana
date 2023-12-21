@@ -6,7 +6,6 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { ReactChild, useMemo } from 'react';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -53,11 +52,7 @@ export function ProfilingEmbeddableProvider({ deps, children }: Props) {
     <i18nCore.Context>
       <KibanaContextProvider services={{ ...deps.coreStart, ...deps.pluginsStart, storage }}>
         <ProfilingDependenciesContextProvider value={profilingDependencies}>
-          <ObservabilityAIAssistantProvider
-            value={deps.pluginsStart.observabilityAIAssistant.service}
-          >
-            {children}
-          </ObservabilityAIAssistantProvider>
+          {children}
         </ProfilingDependenciesContextProvider>
       </KibanaContextProvider>
     </i18nCore.Context>
