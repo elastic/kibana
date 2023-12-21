@@ -22,7 +22,6 @@ const mockUseAssistantContext = {
       prepend: jest.fn(),
     },
   },
-  ragOnAlerts: true,
   setAllSystemPrompts: jest.fn(),
   setConversations: jest.fn(),
 };
@@ -210,7 +209,7 @@ describe('Knowledge base settings', () => {
     expect(queryByTestId('knowledgeBaseActionButton')).not.toBeInTheDocument();
   });
 
-  it('renders the alerts settings when ragOnAlerts is true', () => {
+  it('renders the alerts settings', () => {
     const { getByTestId } = render(
       <TestProviders>
         <KnowledgeBaseSettings {...defaultProps} />

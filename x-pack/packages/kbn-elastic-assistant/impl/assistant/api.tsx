@@ -29,7 +29,6 @@ export interface FetchConnectorExecuteAction {
   http: HttpSetup;
   messages: Message[];
   onNewReplacements: (newReplacements: Record<string, string>) => void;
-  ragOnAlerts: boolean;
   replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -55,7 +54,6 @@ export const fetchConnectorExecuteAction = async ({
   http,
   messages,
   onNewReplacements,
-  ragOnAlerts,
   replacements,
   apiConfig,
   signal,
@@ -90,7 +88,6 @@ export const fetchConnectorExecuteAction = async ({
     alertsIndexPattern,
     allow,
     allowReplacement,
-    ragOnAlerts,
     replacements,
     size,
   });
@@ -194,7 +191,6 @@ export const fetchConnectorExecuteAction = async ({
       response: hasParsableResponse({
         isEnabledRAGAlerts,
         isEnabledKnowledgeBase,
-        ragOnAlerts,
       })
         ? getFormattedMessageContent(response.data)
         : response.data,

@@ -47,7 +47,7 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http, ragOnAlerts } = useAssistantContext();
+    const { http } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -303,12 +303,10 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        {ragOnAlerts && (
-          <AlertsSettings
-            knowledgeBase={knowledgeBase}
-            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-          />
-        )}
+        <AlertsSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+        />
       </>
     );
   }
