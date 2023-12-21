@@ -12,8 +12,7 @@ import {
   getFindingsDetectionRuleSearchTags,
 } from './detection_rules';
 
-describe('Tests detection rules utils', () => {
-  // Test case:
+describe('Detection rules utils', () => {
   it('should convert tags to KQL format', () => {
     const inputTags = ['tag1', 'tag2', 'tag3'];
 
@@ -23,7 +22,7 @@ describe('Tests detection rules utils', () => {
     expect(result).toBe(expectedKQL);
   });
 
-  it('should convert tags to KQL format', () => {
+  it('Should convert tags to KQL format', () => {
     const inputTags = [] as string[];
 
     const result = convertRuleTagsToKQL(inputTags);
@@ -32,7 +31,7 @@ describe('Tests detection rules utils', () => {
     expect(result).toBe(expectedKQL);
   });
 
-  it('should generate search tags for a CSP benchmark rule', () => {
+  it('Should generate search tags for a CSP benchmark rule', () => {
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',
@@ -46,14 +45,14 @@ describe('Tests detection rules utils', () => {
     expect(result).toEqual(expectedTags);
   });
 
-  it('should handle undefined benchmark object gracefully', () => {
+  it('Should handle undefined benchmark object gracefully', () => {
     const cspBenchmarkRule = { benchmark: {} } as any;
     const expectedTags: string[] = [];
     const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
     expect(result).toEqual(expectedTags);
   });
 
-  it('should handle undefined rule number gracefully', () => {
+  it('Should handle undefined rule number gracefully', () => {
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',
@@ -64,7 +63,7 @@ describe('Tests detection rules utils', () => {
     expect(result).toEqual(expectedTags);
   });
 
-  it('should generate tags for a CSPM benchmark rule', () => {
+  it('Should generate tags for a CSPM benchmark rule', () => {
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',
@@ -88,7 +87,7 @@ describe('Tests detection rules utils', () => {
     expect(result).toEqual(expectedTags);
   });
 
-  it('should generate tags for a KSPM benchmark rule', () => {
+  it('Should generate tags for a KSPM benchmark rule', () => {
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',

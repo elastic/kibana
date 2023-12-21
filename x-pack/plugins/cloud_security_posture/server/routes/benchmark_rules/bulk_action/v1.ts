@@ -34,20 +34,21 @@ export const bulkActionBenchmarkRulesHandler = async (
   logger: Logger
 ): Promise<BulkActionBenchmarkRulesResponse> => {
   const rulesIds = rulesToUpdate.map((rule) => rule.rule_id);
-  const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
 
+  const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
   if (benchmarkRules.includes(undefined))
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
 
-  const benchmarkRulesSafe = benchmarkRules as CspBenchmarkRule[]; // verified all rules are exists.
-  const rulesKeys = benchmarkRulesSafe.map((benchmarkRuleSafe) => buildRuleKey(benchmarkRuleSafe));
-
-  const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], benchmarkRulesSafe);
+  const rulesKeys = benchmarkRules.map((benchmarkRule) => buildRuleKey(benchmarkRule!));
+  const newRulesStates = setRulesStates(
+    rulesKeys,
+    muteStatesMap[action],
+    benchmarkRules as CspBenchmarkRule[]
+  );
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
-
   const disabledRulesCounter =
-    action == 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : 0;
+    action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : 0;
 
   return { newCspSettings, disabledRulesCounter };
 };
