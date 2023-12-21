@@ -40,29 +40,6 @@ export const createDataView = async ({
       username: USERNAME,
       password: PASSWORD,
     },
-  });
-};
-
-export const deleteDataView = async ({
-  indexPattern,
-  id,
-}: {
-  indexPattern: string;
-  id: string;
-}) => {
-  const DATA_VIEW_CREATION_API = `${await getKibanaUrl()}/api/content_management/rpc/delete`;
-  const dataViewParams = {
-    contentTypeId: 'index-pattern',
-    id,
-    options: { force: true },
-    version: 1,
-  };
-
-  return axios.post(DATA_VIEW_CREATION_API, dataViewParams, {
-    headers: HEADERS,
-    auth: {
-      username: USERNAME,
-      password: PASSWORD,
-    },
+    validateStatus: () => true
   });
 };
