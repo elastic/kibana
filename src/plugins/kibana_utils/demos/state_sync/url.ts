@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createBrowserHistory } from 'history';
 import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
 import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
@@ -21,7 +22,9 @@ const stateContainer = createStateContainer<TodoState, TodoActions>(defaultState
 const { start, stop } = syncState({
   stateContainer: withDefaultState(stateContainer, defaultState),
   storageKey: '_s',
-  stateStorage: createKbnUrlStateStorage(),
+  stateStorage: createKbnUrlStateStorage({
+    history: createBrowserHistory(),
+  }),
 });
 
 start();

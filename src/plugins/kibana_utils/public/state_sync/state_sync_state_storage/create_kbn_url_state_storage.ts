@@ -56,24 +56,19 @@ export interface IKbnUrlStateStorage extends IStateStorage {
  * @returns - {@link IKbnUrlStateStorage}
  * @public
  */
-export const createKbnUrlStateStorage = (
-  {
-    useHash = false,
-    useHashQuery = true,
-    history,
-    onGetError,
-    onSetError,
-  }: {
-    useHash: boolean;
-    useHashQuery?: boolean;
-    history?: History;
-    onGetError?: (error: Error) => void;
-    onSetError?: (error: Error) => void;
-  } = {
-    useHash: false,
-    useHashQuery: true,
-  }
-): IKbnUrlStateStorage => {
+export const createKbnUrlStateStorage = ({
+  history,
+  useHash = false,
+  useHashQuery = true,
+  onGetError,
+  onSetError,
+}: {
+  history: History;
+  useHash?: boolean;
+  useHashQuery?: boolean;
+  onGetError?: (error: Error) => void;
+  onSetError?: (error: Error) => void;
+}): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
   const onGetErrorThrottled = onGetError ? throttle((e) => onGetError(e), 100) : undefined;
   return {
@@ -117,7 +112,7 @@ export const createKbnUrlStateStorage = (
         };
       }).pipe(
         map(() =>
-          getStateFromKbnUrl<State>(key, history?.createHref(history.location), {
+          getStateFromKbnUrl<State>(key, history.createHref(history.location), {
             getFromHashQuery: useHashQuery,
           })
         ),

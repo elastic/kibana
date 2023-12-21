@@ -8,7 +8,7 @@
 
 import { format as formatUrl } from 'url';
 import { stringify } from 'query-string';
-import { createBrowserHistory, History } from 'history';
+import { History } from 'history';
 import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
 import { decodeState } from '../state_encoder';
 import { url as urlUtils } from '../../../common';
@@ -39,7 +39,7 @@ export const getCurrentUrl = (history: History) => history.createHref(history.lo
  *
  */
 export function getStatesFromKbnUrl<State extends object = Record<string, unknown>>(
-  url: string = window.location.href,
+  url: string,
   keys?: Array<keyof State>,
   { getFromHashQuery = true }: { getFromHashQuery: boolean } = { getFromHashQuery: true }
 ): State {
@@ -75,7 +75,7 @@ export function getStatesFromKbnUrl<State extends object = Record<string, unknow
  */
 export function getStateFromKbnUrl<State>(
   key: string,
-  url: string = window.location.href,
+  url: string,
   { getFromHashQuery = true }: { getFromHashQuery: boolean } = { getFromHashQuery: true }
 ): State | null {
   return (getStatesFromKbnUrl(url, [key], { getFromHashQuery })[key] as State) || null;
@@ -145,8 +145,9 @@ export interface IKbnUrlControls {
 
   /**
    * If there is a pending url update - returns url that is scheduled for update
+   * Otherwise - returns current url
    */
-  getPendingUrl: () => string | undefined;
+  getPendingUrl: () => string;
 
   /**
    * Synchronously flushes scheduled url updates. Returns new flushed url, if there was an update. Otherwise - undefined.
@@ -161,9 +162,7 @@ export interface IKbnUrlControls {
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string | undefined;
 
-export const createKbnUrlControls = (
-  history: History = createBrowserHistory()
-): IKbnUrlControls => {
+export const createKbnUrlControls = (history: History): IKbnUrlControls => {
   const updateQueue: UrlUpdaterFnType[] = [];
 
   // if we should replace or push with next async update,
