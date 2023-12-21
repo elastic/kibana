@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import { FieldsSelectorModal } from './fields_selector';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldsSelectorModal, useFieldsModal } from './fields_selector';
 import { useStyles } from './use_styles';
 import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 
@@ -30,6 +30,7 @@ export const AdditionalControls = ({
   onAddColumn,
   onRemoveColumn,
   groupSelectorComponent,
+  onResetColumns,
 }: {
   total: number;
   title: string;
@@ -38,11 +39,10 @@ export const AdditionalControls = ({
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   groupSelectorComponent?: JSX.Element;
+  onResetColumns: () => void;
 }) => {
-  const [isFieldSelectorModalVisible, setIsFieldSelectorModalVisible] = useState(false);
-
-  const closeModal = () => setIsFieldSelectorModalVisible(false);
-  const showModal = () => setIsFieldSelectorModalVisible(true);
+  const { isFieldSelectorModalVisible, closeFieldsSelectorModal, openFieldsSelectorModal } =
+    useFieldsModal();
 
   return (
     <>
@@ -50,9 +50,10 @@ export const AdditionalControls = ({
         <FieldsSelectorModal
           columns={columns}
           dataView={dataView}
-          closeModal={closeModal}
+          closeModal={closeFieldsSelectorModal}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
+          onResetColumns={onResetColumns}
         />
       )}
       <EuiFlexItem grow={0}>
@@ -62,13 +63,11 @@ export const AdditionalControls = ({
         <EuiButtonEmpty
           className="cspDataTableFields"
           iconType="tableOfContents"
-          onClick={showModal}
+          onClick={openFieldsSelectorModal}
           size="xs"
           color="text"
         >
-          {i18n.translate('xpack.csp.dataTable.fields', {
-            defaultMessage: 'Fields',
-          })}
+          <FormattedMessage id="xpack.csp.dataTable.fieldsButton" defaultMessage="Fields" />
         </EuiButtonEmpty>
       </EuiFlexItem>
       {groupSelectorComponent && (
