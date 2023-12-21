@@ -112,8 +112,6 @@ export class RemoteClusterTable extends Component {
     const { selectedItems, filteredClusters } = this.state;
     const { history } = getRouter();
 
-    console.log(this.props.clusters);
-
     const columns = [
       {
         field: 'name',
