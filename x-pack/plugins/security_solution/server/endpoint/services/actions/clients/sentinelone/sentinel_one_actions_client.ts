@@ -209,14 +209,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'unisolate',
     });
 
-    // TODO: un-comment code below once we have proper authz given to `kibana_system` account (security issue #8190)
-    // await this.writeActionResponseToEndpointIndex({
-    //   actionId: actionRequestDoc.EndpointActions.action_id,
-    //   agentId: actionRequestDoc.agent.id,
-    //   data: {
-    //     command: actionRequestDoc.EndpointActions.data.command,
-    //   },
-    // });
+    await this.writeActionResponseToEndpointIndex({
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      agentId: actionRequestDoc.agent.id,
+      data: {
+        command: actionRequestDoc.EndpointActions.data.command,
+      },
+    });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     //
