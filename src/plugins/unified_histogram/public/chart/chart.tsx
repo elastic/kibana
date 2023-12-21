@@ -310,20 +310,25 @@ export function Chart({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            {chartVisible && breakdown && (
-              <BreakdownFieldSelector
-                dataView={dataView}
-                breakdown={breakdown}
-                onBreakdownFieldChange={onBreakdownFieldChange}
-              />
-            )}
-            {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-              <SuggestionSelector
-                suggestions={allSuggestions}
-                activeSuggestion={currentSuggestion}
-                onSuggestionChange={onSuggestionSelectorChange}
-              />
-            )}
+            <div>
+              {chartVisible && breakdown && (
+                <BreakdownFieldSelector
+                  dataView={dataView}
+                  breakdown={breakdown}
+                  onBreakdownFieldChange={onBreakdownFieldChange}
+                />
+              )}
+              {chartVisible &&
+                currentSuggestion &&
+                allSuggestions &&
+                allSuggestions?.length > 1 && (
+                  <SuggestionSelector
+                    suggestions={allSuggestions}
+                    activeSuggestion={currentSuggestion}
+                    onSuggestionChange={onSuggestionSelectorChange}
+                  />
+                )}
+            </div>
           </EuiFlexItem>
           {chartVisible && actions.length > 0 && (
             <EuiFlexItem grow={false}>

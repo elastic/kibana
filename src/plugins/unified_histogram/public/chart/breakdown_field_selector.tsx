@@ -85,10 +85,16 @@ export const BreakdownFieldSelector = ({
       data-selected-value={breakdown?.field?.name}
       searchable
       buttonLabel={
-        breakdown?.field?.displayName ||
-        i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
-          defaultMessage: 'No breakdown',
-        })
+        breakdown?.field?.displayName
+          ? i18n.translate('unifiedHistogram.breakdownFieldSelector.breakdownByButtonLabel', {
+              defaultMessage: 'Breakdown by {fieldName}',
+              values: {
+                fieldName: breakdown?.field?.displayName,
+              },
+            })
+          : i18n.translate('unifiedHistogram.breakdownFieldSelector.noBreakdownButtonLabel', {
+              defaultMessage: 'No breakdown',
+            })
       }
       popoverTitle={i18n.translate(
         'unifiedHistogram.breakdownFieldSelector.breakdownFieldPopoverTitle',

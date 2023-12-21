@@ -72,7 +72,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     [dataTestSubj, searchable, setSearchTerm]
   );
 
-  const panelMinWidth = calculateWidthFromEntries(options, ['label']);
+  const panelMinWidth = calculateWidthFromEntries(options, ['label']) + 2 * euiTheme.base; // plus extra width for the right Enter button
 
   return (
     <EuiPopover
@@ -90,7 +90,8 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         <ToolbarButton
           size="s"
           css={css`
-            max-width: ${euiTheme.base * 12}px;
+            font-weight: ${euiTheme.font.weight.medium};
+            max-width: ${euiTheme.base * 20}px;
           `}
           data-test-subj={`${dataTestSubj}Button`}
           data-selected-value={dataSelectedValue}
