@@ -486,7 +486,25 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
   describe('delete report', () => {
     it('handles content stream errors', async () => {
-      //
+      stream = new Readable({
+        read() {
+          this.push('test');
+          this.push(null);
+        },
+      }) as typeof stream;
+      stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+        callback(new Error('An error occurred in ending the content stream'));
+      });
+
+      (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
+        .expect(500)
+        .expect('Content-Type', 'application/json; charset=utf-8');
     });
   });
 });

@@ -294,5 +294,26 @@ describe(`Reporting Job Management Routes: Public`, () => {
   });
 
   describe('delete report', () => {
+    it('handles content stream errors', async () => {
+      stream = new Readable({
+        read() {
+          this.push('test');
+          this.push(null);
+        },
+      }) as typeof stream;
+      stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+        callback(new Error('An error occurred in ending the content stream'));
+      });
+
+      (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete('/api/reporting/jobs/delete/denk')
+        .expect(500)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+    });
   });
 });
