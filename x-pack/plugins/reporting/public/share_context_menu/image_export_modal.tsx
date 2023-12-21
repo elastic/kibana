@@ -362,10 +362,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           name="image reporting radio group"
           idSelected={selectedRadio}
         />
-        {saveWarningMessageWithButton}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
+      <EuiFlexItem>
         {layoutOption && (
           <FormattedMessage
             css={{ overflowWrap: 'normal' }}
@@ -373,10 +372,17 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
           />
         )}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row">
         <EuiFlexItem>{renderOptions()}</EuiFlexItem>
+        <EuiSpacer size="m" />
       </EuiFlexGroup>
-      <EuiFlexGroup>{renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}</EuiFlexGroup>
-
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        {saveWarningMessageWithButton}
+      <EuiSpacer size="m" />
+      {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}</EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" justifyContent="flexEnd">
         <EuiButton fill onSubmit={onClose}>

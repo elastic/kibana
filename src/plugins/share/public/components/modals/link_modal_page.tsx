@@ -29,8 +29,11 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService } from '../../types';
-import { ExportUrlAsType } from '../url_panel_content';
 
+export enum ExportUrlAsType {
+  EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
+  EXPORT_URL_AS_SNAPSHOT = 'snapshot',
+}
 interface LinksModalPageProps {
   isEmbedded: boolean;
   allowShortUrl: boolean;
@@ -73,22 +76,21 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
   const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
 
-
   interface UrlParams {
     [extensionName: string]: {
       [queryParam: string]: boolean;
     };
   }
 
-  const makeUrlEmbeddable = (url: string): string => {
+  const makeUrlEmbeddable = (tempUrl: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
+      return setUrl(tempUrl.replace('?', `${embedParam}&`));
     }
 
-    return `${url}${embedParam}`;
+    return setUrl(`${tempUrl}${embedParam}`);
   };
 
   const makeIframeTag = (url?: string) => {
@@ -110,7 +112,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     );
   };
 
-  const getUrlParamExtensions = (url: string): string => {
+  const getUrlParamExtensions = (tempUrl: string): string => {
     return urlParams
       ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
           const urlParam = urlParams[key];
@@ -122,8 +124,8 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
                   : queryAccumulator;
               }, urlAccumulator)
             : urlAccumulator;
-        }, url)
-      : url;
+        }, tempUrl)
+      : tempUrl;
   };
 
   const updateUrlParams = (url: string) => {
@@ -134,12 +136,12 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
+    let tempUrl = '';
     if (forSavedObject && shareableUrlForSavedObject) {
-      url = shareableUrlForSavedObject;
+      tempUrl = shareableUrlForSavedObject;
     }
     if (!url) {
-      url = shareableUrl || window.location.href;
+      tempUrl = shareableUrl || window.location.href;
     }
     return updateUrlParams(url);
   };
@@ -256,10 +258,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     setUrl(url);
   };
 
-
-  const handleShortUrlChange = (evt: {
-    target: { checked: React.SetStateAction<boolean> };
-  }) => {
+  const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
     setCheckShortUrlSwitch(evt.target.checked);
     if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
       setIsShortUrl(true);
