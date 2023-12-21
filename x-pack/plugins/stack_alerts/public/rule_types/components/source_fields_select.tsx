@@ -83,7 +83,7 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
           <h5>
             <FormattedMessage
               id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"
-              defaultMessage="Select fields to copy into alerts"
+              defaultMessage="Add more fields to alert details"
             />
           </h5>
         </EuiTitle>
