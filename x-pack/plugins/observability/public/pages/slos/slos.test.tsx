@@ -110,6 +110,9 @@ const mockKibana = () => {
         },
       },
       unifiedSearch: {
+        ui: {
+          SearchBar: () => <div>SearchBar</div>,
+        },
         autocomplete: {
           hasQuerySuggestions: () => {},
         },
@@ -178,22 +181,7 @@ describe('SLOs Page', () => {
         render(<SlosPage />);
       });
 
-      expect(screen.getByText('Create new SLO')).toBeTruthy();
-    });
-
-    it('should have an Auto Refresh button', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
-
-      useFetchHistoricalSummaryMock.mockReturnValue({
-        isLoading: false,
-        data: historicalSummaryData,
-      });
-
-      await act(async () => {
-        render(<SlosPage />);
-      });
-
-      expect(screen.getByTestId('autoRefreshButton')).toBeTruthy();
+      expect(screen.getByText('Create SLO')).toBeTruthy();
     });
 
     describe('when API has returned results', () => {
@@ -215,7 +203,7 @@ describe('SLOs Page', () => {
         expect(screen.queryByTestId('slosPage')).toBeTruthy();
         expect(screen.queryByTestId('sloList')).toBeTruthy();
         expect(screen.queryAllByTestId('sloItem')).toBeTruthy();
-        expect(screen.queryAllByTestId('sloItem').length).toBe(sloList.results.length);
+        expect((await screen.findAllByTestId('sloItem')).length).toBe(sloList.results.length);
       });
 
       it('allows editing an SLO', async () => {
