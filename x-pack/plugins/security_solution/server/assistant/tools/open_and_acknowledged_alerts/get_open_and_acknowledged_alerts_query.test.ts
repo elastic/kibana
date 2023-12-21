@@ -49,8 +49,8 @@ describe('getOpenAndAcknowledgedAlertsQuery', () => {
                     {
                       range: {
                         '@timestamp': {
-                          gte: 'now-1d/d',
-                          lte: 'now/d',
+                          gte: 'now-24h',
+                          lte: 'now',
                           format: 'strict_date_optional_time',
                         },
                       },
