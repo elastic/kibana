@@ -639,7 +639,7 @@ describe('MlInferenceLogic', () => {
           AddInferencePipelineSteps.Fields
         );
       });
-      it('triggers pipeline fetch when moving from configuration step', () => {
+      it('triggers pipeline and model fetch when moving from configuration step', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           pipelineName: 'unit-test-pipeline',
@@ -647,12 +647,14 @@ describe('MlInferenceLogic', () => {
           existingPipeline: false,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
           pipelineName: 'ml-inference-unit-test-pipeline',
         });
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
       });
-      it('does not trigger pipeline fetch existing pipeline is selected', () => {
+      it('does not trigger pipeline and model fetch existing pipeline is selected', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           pipelineName: 'unit-test-pipeline',
@@ -660,8 +662,10 @@ describe('MlInferenceLogic', () => {
           existingPipeline: true,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).not.toHaveBeenCalled();
       });
     });
     describe('fetchPipelineSuccess', () => {
