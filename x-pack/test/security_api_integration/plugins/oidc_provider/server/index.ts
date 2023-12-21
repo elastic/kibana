@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core/server';
+import { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup: (core) => initRoutes(core.http.createRouter()),
+export const plugin: PluginInitializer<void, void> = async (
+  initializerContext
+): Promise<Plugin> => ({
+  setup: (core: CoreSetup) => initRoutes(initializerContext, core),
   start: () => {},
   stop: () => {},
 });

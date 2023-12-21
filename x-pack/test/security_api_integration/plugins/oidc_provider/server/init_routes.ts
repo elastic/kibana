@@ -6,10 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import { createTokens } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 
-export function initRoutes(router: IRouter) {
+export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
+  const logger = initializerContext.logger.get();
+  const router = core.http.createRouter();
+
   let nonce = '';
   router.get(
     {
@@ -69,17 +72,26 @@ export function initRoutes(router: IRouter) {
       options: { authRequired: false, xsrfRequired: false },
     },
     (context, request, response) => {
-      const userId = request.body.code.substring(4);
-      const { accessToken, idToken } = createTokens(userId, nonce);
-      return response.ok({
-        body: {
-          access_token: accessToken,
-          token_type: 'Bearer',
-          refresh_token: `valid-refresh-token${userId}`,
-          expires_in: 3600,
-          id_token: idToken,
-        },
-      });
+      try {
+        const userId = request.body.code.substring(4);
+        logger.info(
+          `Accessing token endpoint for user ${userId} (headers: ${JSON.stringify(request.headers)}`
+        );
+
+        const { accessToken, idToken } = createTokens(userId, nonce);
+        return response.ok({
+          body: {
+            access_token: accessToken,
+            token_type: 'Bearer',
+            refresh_token: `valid-refresh-token${userId}`,
+            expires_in: 3600,
+            id_token: idToken,
+          },
+        });
+      } catch (err) {
+        logger.error(`Failed to create tokens: ${err?.message ?? err}`, err);
+        throw err;
+      }
     }
   );
 
