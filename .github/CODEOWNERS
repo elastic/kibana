@@ -694,7 +694,7 @@ packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
-packages/kbn-server-route-repository @elastic/obs-knowledge-team @elastic/obs-ux-management-team
+packages/kbn-server-route-repository @elastic/obs-knowledge-team
 x-pack/plugins/serverless @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/platform-deployment-management
 x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/obs-ux-management-team
@@ -1497,17 +1497,12 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 x-pack/plugins/security_solution/common/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/search_strategy/security_solution/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
-x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
-x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
-x-pack/plugins/security_solution/public/overview/components/entity_analytics
 x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
-/x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
-/x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows

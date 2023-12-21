@@ -6,24 +6,19 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import {
+  ControlWidth,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  ControlWidth,
 } from '@kbn/controls-plugin/common';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/types';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
-
-const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
-  default: 'No field selected yet',
-  [OPTIONS_LIST_CONTROL]: 'Options list',
-  [RANGE_SLIDER_CONTROL]: 'Range slider',
-};
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 interface OptionsListAdditionalSettings {
   searchTechnique?: OptionsListSearchTechnique;
@@ -112,7 +107,14 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    await this.controlEditorVerifyType('default');
+
+    /** All control type options should be disabled until a field is selected */
+    const controlTypeOptions = await this.find.allByCssSelector(
+      '[data-test-subj="controlTypeMenu"] > li > button'
+    );
+    await asyncForEach(controlTypeOptions, async (controlTypeOption) => {
+      expect(await controlTypeOption.isEnabled()).to.be(false);
+    });
   }
 
   /* -----------------------------------------------------------
@@ -183,45 +185,17 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateAllQuerySyncSettings(querySync: boolean) {
-    this.log.debug(`Update all control group query sync settings to ${querySync}`);
+  public async updateFilterSyncSetting(querySync: boolean) {
+    this.log.debug(`Update filter sync setting to ${querySync}`);
     await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(querySync, 'control-group-query-sync');
+    await this.setSwitchState(querySync, 'control-group-filter-sync');
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async ensureAdvancedQuerySyncIsOpened() {
-    const advancedAccordion = await this.testSubjects.find(`control-group-query-sync-advanced`);
-    const opened = await advancedAccordion.elementHasClass('euiAccordion-isOpen');
-    if (!opened) {
-      await this.testSubjects.click(`control-group-query-sync-advanced`);
-      await this.retry.try(async () => {
-        expect(await advancedAccordion.elementHasClass('euiAccordion-isOpen')).to.be(true);
-      });
-    }
-  }
-
-  public async updateSyncTimeRangeAdvancedSetting(syncTimeRange: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncTimeRange}`);
+  public async updateTimeRangeSyncSetting(syncTimeRange: boolean) {
+    this.log.debug(`Update time range sync setting to ${syncTimeRange}`);
     await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
     await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncQueryAdvancedSetting(syncQuery: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncQuery}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncQuery, 'control-group-query-sync-query');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncFilterAdvancedSetting(syncFilters: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncFilters}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncFilters, 'control-group-query-sync-filters');
     await this.testSubjects.click('control-group-editor-save');
   }
 
@@ -270,7 +244,10 @@ export class DashboardPageControls extends FtrService {
     await this.openCreateControlFlyout();
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
+    if (fieldName) {
+      await this.controlsEditorSetfield(fieldName);
+      await this.controlsEditorSetControlType(controlType);
+    }
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
     if (grow !== undefined) await this.controlEditorSetGrow(grow);
@@ -387,10 +364,11 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-popover`);
+      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`optionsList-control-popover`);
+      });
     });
   }
 
@@ -601,11 +579,7 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
 
-  public async controlsEditorSetfield(
-    fieldName: string,
-    expectedType?: string,
-    shouldSearch: boolean = true
-  ) {
+  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = true) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
@@ -614,13 +588,31 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
-    if (expectedType) await this.controlEditorVerifyType(expectedType);
   }
 
-  public async controlEditorVerifyType(type: string) {
-    this.log.debug(`Verifying that the control editor picked the type ${type}`);
-    const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
-    expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES[type]);
+  public async controlsEditorVerifySupportedControlTypes({
+    supportedTypes,
+    selectedType = OPTIONS_LIST_CONTROL,
+  }: {
+    supportedTypes: string[];
+    selectedType?: string;
+  }) {
+    this.log.debug(`Verifying that control types match what is expected for the selected field`);
+    asyncForEach(supportedTypes, async (type) => {
+      const controlTypeItem = await this.testSubjects.find(`create__${type}`);
+      expect(await controlTypeItem.isEnabled()).to.be(true);
+      if (type === selectedType) {
+        expect(await controlTypeItem.getAttribute('aria-pressed')).to.be('true');
+      }
+    });
+  }
+
+  public async controlsEditorSetControlType(type: string) {
+    this.log.debug(`Setting control type to ${type}`);
+    const controlTypeItem = await this.testSubjects.find(`create__${type}`);
+    expect(await controlTypeItem.isEnabled()).to.be(true);
+    await controlTypeItem.click();
+    expect(await controlTypeItem.getAttribute('aria-pressed')).to.be('true');
   }
 
   // Options List editor functions
