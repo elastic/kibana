@@ -12,7 +12,7 @@ import {
   queryTimelineById,
 } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
+import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
