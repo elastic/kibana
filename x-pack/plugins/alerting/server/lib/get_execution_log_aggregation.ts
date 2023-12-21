@@ -303,13 +303,21 @@ export function getExecutionLogAggregation({
           terms: {
             field: EXECUTION_UUID_FIELD,
             size: DEFAULT_MAX_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
           },
           aggs: {
-            filtered: {
+            ruleExecution: {
               filter: {
                 bool: {
                   ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
                   must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
                 },
               },
             },
@@ -319,7 +327,7 @@ export function getExecutionLogAggregation({
         // to DEFAULT_MAX_BUCKETS_LIMIT. Instead, we sum the buckets and call it a cardinality.
         executionUuidCardinality: {
           sum_bucket: {
-            buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
+            buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
           },
         },
         executionUuid: {

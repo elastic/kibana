@@ -147,16 +147,17 @@ describe('getExecutionLogAggregation', () => {
         aggs: {
           executionUuidCardinality: {
             sum_bucket: {
-              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
           },
           executionUuidCardinalityBuckets: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
               size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
             },
             aggs: {
-              filtered: {
+              ruleExecution: {
                 filter: {
                   bool: {
                     must: [
@@ -179,6 +180,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
@@ -339,16 +341,17 @@ describe('getExecutionLogAggregation', () => {
         aggs: {
           executionUuidCardinality: {
             sum_bucket: {
-              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
           },
           executionUuidCardinalityBuckets: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
               size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
             },
             aggs: {
-              filtered: {
+              ruleExecution: {
                 filter: {
                   bool: {
                     filter: {
@@ -383,6 +386,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
@@ -555,16 +559,17 @@ describe('getExecutionLogAggregation', () => {
         aggs: {
           executionUuidCardinality: {
             sum_bucket: {
-              buckets_path: 'executionUuidCardinalityBuckets>filtered._count',
+              buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
             },
           },
           executionUuidCardinalityBuckets: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
               size: 10000,
+              order: [{ 'ruleExecution>executeStartTime': 'desc' }],
             },
             aggs: {
-              filtered: {
+              ruleExecution: {
                 filter: {
                   bool: {
                     filter: {
@@ -599,6 +604,7 @@ describe('getExecutionLogAggregation', () => {
                     ],
                   },
                 },
+                aggs: { executeStartTime: { min: { field: 'event.start' } } },
               },
             },
           },
