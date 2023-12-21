@@ -391,6 +391,7 @@ export interface DocLinks {
     cronExpressions: string;
     executeWatchActionModes: string;
     indexExists: string;
+    inferTrainedModel: string;
     multiSearch: string;
     openIndex: string;
     putComponentTemplate: string;
@@ -536,6 +537,7 @@ export interface DocLinks {
     elasticAgentInputConfiguration: string;
     policySecrets: string;
     remoteESOoutput: string;
+    performancePresets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -633,3 +635,5 @@ export interface DocLinks {
     readonly settings: string;
   };
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

@@ -79,7 +79,9 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(liveQueryQuery);
         cy.get(`[aria-label="Run query"]`).first().should('not.be.disabled');
         cy.get(`[aria-label="Run query"]`).first().click();
-        cy.contains(savedQueryName);
+        cy.get('[data-test-subj="savedQuerySelect"]')
+          .find('input')
+          .should('have.value', savedQueryName);
         submitQuery();
         checkResults();
       });

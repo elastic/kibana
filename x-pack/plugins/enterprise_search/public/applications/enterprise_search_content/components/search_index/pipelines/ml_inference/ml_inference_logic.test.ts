@@ -550,6 +550,25 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'Name already used by another pipeline.',
         });
       });
+      it('has errors when non-deployed model is selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
+          isModelPlaceholderSelected: true,
+        });
+
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          modelStatus: 'Model must be deployed before use.',
+        });
+      });
     });
   });
 
