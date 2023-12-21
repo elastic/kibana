@@ -17,10 +17,8 @@ export const STD_DEVIATION_NAME = i18n.translate('lensFormulaDocs.standardDeviat
 export const stdDeviation = buildMetricDocumentationDefinition({
   id: STD_DEVIATION_ID,
   name: STD_DEVIATION_NAME,
-  documentation: i18n.translate(
-    'lensFormulaDocs.standardDeviation.documentation.markdown',
-    {
-      defaultMessage: `
+  documentation: i18n.translate('lensFormulaDocs.standardDeviation.documentation.markdown', {
+    defaultMessage: `
 Returns the amount of variation or dispersion of the field. The function works only for number fields.
 
 #### Examples
@@ -29,6 +27,5 @@ To get the standard deviation of price, use \`standard_deviation(price)\`.
 
 To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
 `,
-    }
-  ),
+  }),
 });
