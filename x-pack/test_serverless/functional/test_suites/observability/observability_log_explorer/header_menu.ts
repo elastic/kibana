@@ -91,9 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
+            'content',
             'service.name',
             'host.name',
-            'message',
           ]);
         });
         await retry.try(async () => {
@@ -150,9 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).not.to.eql([
             '@timestamp',
+            'content',
             'service.name',
             'host.name',
-            'message',
           ]);
         });
 
