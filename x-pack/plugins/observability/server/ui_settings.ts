@@ -33,7 +33,6 @@ import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
-  profilingUseLegacyCo2Calculation,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
@@ -478,14 +477,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-  },
-  [profilingUseLegacyCo2Calculation]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingUseLegacyCo2Calculation', {
-      defaultMessage: 'Use legacy CO2 and Dollar cost calculations in Universal Profiling',
-    }),
-    value: false,
-    schema: schema.boolean(),
   },
   [profilingAWSCostDiscountRate]: {
     category: [observabilityFeatureId],
