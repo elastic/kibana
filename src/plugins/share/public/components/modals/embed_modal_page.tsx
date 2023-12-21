@@ -313,14 +313,14 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const checkboxOnChangeHandler = (id: string): void => {
-    const newCheckboxMap = {
-      ...checkboxSelectedMap,
-      ...{
-        [id]: !checkboxSelectedMap,
-      },
-    };
-    setCheckboxIdSelectedMap(newCheckboxMap);
+    setCheckboxIdSelectedMap((prev) => {
+      return {
+        ...prev,
+        [id]: prev[id] ? !prev[id] : true,
+      };
+    });
   };
+
 
   const checkboxOptions = [
     { id: 'filterBar', label: 'Filter bar', 'data-test-sub': 'filter-bar-embed' },
@@ -357,7 +357,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
-            <EuiFormLabel>Type to Embed</EuiFormLabel>
               <EuiRadioGroup
                 options={radioOptions}
                 onChange={(id) => setSelectedRadio(id)}

@@ -24,15 +24,21 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
+import { AnonymousAccessServiceContract, AnonymousAccessState, LocatorPublic } from '../../../common';
 import { BrowserUrlService } from '../../types';
 
 export enum ExportUrlAsType {
   EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
+}
+
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
 }
 interface LinksModalPageProps {
   isEmbedded: boolean;
@@ -47,6 +53,9 @@ interface LinksModalPageProps {
   urlService: BrowserUrlService;
   shareableUrl?: string;
   objectType: string;
+  snapshotShareWarning?: string;
+  anonymousAccess?: AnonymousAccessServiceContract;
+  showPublicUrlSwitch: boolean;
 }
 
 export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
@@ -60,27 +69,64 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     urlService,
     onClose,
     objectType,
+    snapshotShareWarning,
+    anonymousAccess,
+    showPublicUrlSwitch
   } = props;
 
   const isMounted = useMountedState();
-  const [shortUrl, isCreatingShortUrl] = useState<boolean | string>(false);
+  const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
+  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
+  const [useShortUrl, setUseShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
+  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
+  const [url, setUrl] = useState<string>('');
+  const [anonymousAccessParameters, setAnonymousAccessParameters] = useState<null | AnonymousAccessState['accessURLParameters']>(null);
+  const [ showWarningButton, setShowWarningButton ] = useState<boolean>(Boolean(snapshotShareWarning))
+  
+  useEffect(() =>{
+    isMounted();
+    setUrlHelper();
+
+    if (anonymousAccess) {
+      (async () => {
+        const { accessURLParameters: anonymousAccessParameters} = 
+        await anonymousAccess!.getState();
+
+        if(!isMounted) {
+          return
+        }
+
+        if (!anonymousAccessParameters) {
+          return
+        }
+
+        let showPublicUrlSwitch: boolean = false;
+
+        if (showPublicUrlSwitch) {
+          const anonymousUserCapabilities = await anonymousAccess!.getCapabilities();
+
+          if (!isMounted()) {
+            return;
+          }
+
+          try {
+            setUsePublicUrl!(Boolean(anonymousUserCapabilities))
+          } catch {
+            setUsePublicUrl(false)
+          }
+        }
+        setAnonymousAccessParameters(anonymousAccessParameters)
+        setUsePublicUrl(true)
+      })
+    }
+  }, [])
+  
+  const [, isCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
-  const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
-  const [url, setUrl] = useState<string>('');
-  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
-  const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
-  const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
-  const [usePublicUrl] = useState<boolean>(false);
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
-  const [isShortUrl, setIsShortUrl] = useState<EuiSwitchEvent | string | boolean>();
-
-  interface UrlParams {
-    [extensionName: string]: {
-      [queryParam: string]: boolean;
-    };
-  }
 
   const makeUrlEmbeddable = (url: string): string => {
     const embedParam = '?embed=true';
@@ -241,7 +287,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const setUrlHelper = () => {
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       setUrl(getSavedObjectUrl()!);
-    } else if (isShortUrl !== undefined && shortUrlCache !== undefined) {
+    } else if (useShortUrl !== undefined && shortUrlCache !== undefined) {
       setUrl(shortUrlCache);
     } else {
       setUrl(getSnapshotUrl());
@@ -261,7 +307,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
     setCheckShortUrlSwitch(evt.target.checked);
     if (!checkShortUrlSwitch || shortUrlCache !== undefined) {
-      setIsShortUrl(true);
+      setShortUrl(true);
       setUrlHelper();
       return;
     }
