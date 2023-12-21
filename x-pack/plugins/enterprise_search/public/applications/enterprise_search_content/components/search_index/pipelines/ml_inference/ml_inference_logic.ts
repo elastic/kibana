@@ -133,6 +133,7 @@ export interface MLInferenceProcessorsActions {
   >['apiSuccess'];
   attachPipeline: () => void;
   clearFetchedPipeline: FetchPipelineApiLogicActions['apiReset'];
+  clearModelPlaceholderFlag: (modelId: string) => { modelId: string };
   createApiError: Actions<
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
@@ -179,7 +180,6 @@ export interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
-  setSelectedModelNotPlaceholder: (modelId: string) => { modelId: string };
   setTargetField: (targetFieldName: string) => { targetFieldName: string };
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
@@ -223,6 +223,7 @@ export const MLInferenceLogic = kea<
     }),
     attachPipeline: true,
     clearFormErrors: true,
+    clearModelPlaceholderFlag: (modelId: string) => ({ modelId }),
     createPipeline: true,
     onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => ({ step }),
     removeFieldFromMapping: (fieldName: string) => ({ fieldName }),
@@ -233,7 +234,6 @@ export const MLInferenceLogic = kea<
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
       configuration,
     }),
-    setSelectedModelNotPlaceholder: (modelId: string) => ({ modelId }),
     setTargetField: (targetFieldName: string) => ({ targetFieldName }),
   },
   connect: {
@@ -300,6 +300,19 @@ export const MLInferenceLogic = kea<
         pipelineName,
       });
     },
+    clearModelPlaceholderFlag: ({ modelId }) => {
+      const {
+        addInferencePipelineModal: { configuration },
+      } = values;
+
+      // Don't change the flag if the user clicked away from the selected model
+      if (modelId !== configuration.modelID) return;
+
+      actions.setInferencePipelineConfiguration({
+        ...configuration,
+        isModelPlaceholderSelected: false,
+      });
+    },
     createPipeline: () => {
       const {
         addInferencePipelineModal: { configuration, indexName },
@@ -331,19 +344,6 @@ export const MLInferenceLogic = kea<
       actions.makeMlInferencePipelinesRequest(undefined);
       actions.makeMLModelsRequest(undefined);
       actions.makeMappingRequest({ indexName });
-    },
-    setSelectedModelNotPlaceholder: ({ modelId }) => {
-      const {
-        addInferencePipelineModal: { configuration },
-      } = values;
-
-      // Don't change the flag if the user clicked away from the selected model
-      if (modelId !== configuration.modelID) return;
-
-      actions.setInferencePipelineConfiguration({
-        ...configuration,
-        isModelPlaceholderSelected: false,
-      });
     },
     mlInferencePipelinesSuccess: (data) => {
       if (

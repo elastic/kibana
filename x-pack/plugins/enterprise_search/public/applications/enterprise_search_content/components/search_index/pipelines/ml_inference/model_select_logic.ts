@@ -32,6 +32,7 @@ import {
 } from './ml_inference_logic';
 
 export interface ModelSelectActions {
+  clearModelPlaceholderFlagFromMLInferenceLogic: MLInferenceProcessorsActions['clearModelPlaceholderFlag'];
   createModel: (modelId: string) => { modelId: string };
   createModelError: CreateModelApiLogicActions['apiError'];
   createModelMakeRequest: CreateModelApiLogicActions['makeRequest'];
@@ -42,7 +43,6 @@ export interface ModelSelectActions {
   fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   setInferencePipelineConfiguration: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
   setInferencePipelineConfigurationFromMLInferenceLogic: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
-  setSelectedModelNotPlaceholderFromMLInferenceLogic: MLInferenceProcessorsActions['setSelectedModelNotPlaceholder'];
   startModel: (modelId: string) => { modelId: string };
   startModelError: CreateModelApiLogicActions['apiError'];
   startModelMakeRequest: StartModelApiLogicActions['makeRequest'];
@@ -94,7 +94,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       MLInferenceLogic,
       [
         'setInferencePipelineConfiguration as setInferencePipelineConfigurationFromMLInferenceLogic',
-        'setSelectedModelNotPlaceholder as setSelectedModelNotPlaceholderFromMLInferenceLogic',
+        'clearModelPlaceholderFlag as clearModelPlaceholderFlagFromMLInferenceLogic',
       ],
       StartModelApiLogic,
       [
@@ -128,7 +128,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
     createModelSuccess: (response) => {
       actions.startPollingModels();
       // The create action succeeded, so the model is no longer a placeholder
-      actions.setSelectedModelNotPlaceholderFromMLInferenceLogic(response.modelId);
+      actions.clearModelPlaceholderFlagFromMLInferenceLogic(response.modelId);
     },
     fetchModels: () => {
       actions.fetchModelsMakeRequest({});
