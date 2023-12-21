@@ -166,12 +166,7 @@ export const getTopNavLinks = ({
       // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
       // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
       // so instead we add an empty object for the '_g' parameter to the URL.
-      shareableUrlForSavedObject = setStateToKbnUrl(
-        '_g',
-        {},
-        undefined,
-        shareableUrlForSavedObject
-      );
+      shareableUrlForSavedObject = setStateToKbnUrl('_g', {}, {}, shareableUrlForSavedObject);
 
       services.share.toggleShareContextMenu({
         anchorElement,
