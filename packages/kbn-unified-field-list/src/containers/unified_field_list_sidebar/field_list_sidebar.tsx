@@ -223,26 +223,14 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onSupportedFieldFilter:
         stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
       onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
-      getNewFieldsBySpec: (fieldSpecArr) => {
-        return fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec));
-      },
+      getNewFieldsBySpec: (fieldSpecArr) =>
+        fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec)),
     });
 
-  const useMultiFields = useMemo(() => {
-    if (
-      searchMode !== 'documents' ||
-      !useNewFieldsApi ||
-      stateService.creationOptions.disableMultiFieldsGroupingByParent
-    ) {
-      return false;
-    } else {
-      return true;
-    }
-  }, [
-    stateService.creationOptions.disableMultiFieldsGroupingByParent,
-    useNewFieldsApi,
-    searchMode,
-  ]);
+  const useMultiFields =
+    searchMode === 'documents' &&
+    useNewFieldsApi &&
+    !stateService.creationOptions.disableMultiFieldsGroupingByParent;
 
   const getMultiFieldsByField = useCallback(
     (field: DataViewField) =>
