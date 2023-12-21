@@ -18,6 +18,8 @@ class ESDocLinks {
   public metadata: string = '';
   public roleDescriptors: string = '';
   public securityApis: string = '';
+  public ingestionPipelines: string = '';
+  public dataStreams: string = '';
   // Client links
   public elasticsearchClients: string = '';
   // go
@@ -59,6 +61,8 @@ class ESDocLinks {
     this.metadata = newDocLinks.security.mappingRoles;
     this.roleDescriptors = newDocLinks.serverlessSecurity.apiKeyPrivileges;
     this.securityApis = newDocLinks.apis.securityApis;
+    this.ingestionPipelines = newDocLinks.ingest.pipelines;
+    this.dataStreams = newDocLinks.elasticsearch.dataStreams;
 
     // Client links
     this.elasticsearchClients = newDocLinks.serverlessClients.clientLib;

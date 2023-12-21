@@ -288,7 +288,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders different solutions', async () => {
           await openModal();
 
-          await testSubjects.existOrFail('solution-filter-popover-button');
+          await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
             await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
@@ -316,6 +316,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
             await closeModal();
           }
+        });
+
+        it('filters with multiple selection', async () => {
+          await openModal();
+
+          let popupAlreadyOpen = false;
+          for (const [owner] of createdCases.entries()) {
+            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
+            popupAlreadyOpen = true;
+          }
+          await cases.casesTable.waitForTableToFinishLoading();
+
+          for (const caseId of createdCases.values()) {
+            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+          }
+          await closeModal();
         });
 
         it('attaches correctly', async () => {

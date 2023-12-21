@@ -34,7 +34,9 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CspStatusCode, IndexDetails } from '../common/types';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
+import { CspStatusCode, IndexDetails } from '../common/types_old';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -47,6 +49,7 @@ export interface CspServerPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   security: SecurityPluginSetup;
   cloud: CloudSetup;
+  alerting: AlertingPluginSetup;
   // optional
   usageCollection?: UsageCollectionSetup;
 }
@@ -69,6 +72,7 @@ export interface CspApiRequestHandlerContext {
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  encryptedSavedObjects: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
@@ -79,6 +83,7 @@ export interface CspApiRequestHandlerContext {
 export type CspRequestHandlerContext = CustomRequestHandlerContext<{
   csp: CspApiRequestHandlerContext;
   fleet: FleetRequestHandlerContext['fleet'];
+  alerting: AlertingApiRequestHandlerContext;
 }>;
 
 /**

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import { ConfigKey, DataStream, FormMonitorType, MonitorFields } from '../types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {
-  const monitorType = fields[ConfigKey.MONITOR_TYPE] as DataStream;
+  const monitorType = fields[ConfigKey.MONITOR_TYPE] as MonitorTypeEnum;
   const monitorFields: Record<string, any> = {};
   const defaults = DEFAULT_FIELDS[monitorType] as MonitorFields;
   Object.keys(defaults).map((key) => {

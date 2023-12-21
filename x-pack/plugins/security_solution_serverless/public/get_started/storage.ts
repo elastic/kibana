@@ -7,20 +7,47 @@
 
 import type { ProductLine } from '../../common/product';
 import type { CardId, StepId } from './types';
-import { GetSetUpCardId } from './types';
-import { storage } from '../common/lib/storage';
 
-export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
-export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
-export const EXPANDED_CARDS_STORAGE_KEY = 'EXPANDED_CARDS';
+import {
+  QuickStartSectionCardsId,
+  AddAndValidateYourDataCardsId,
+  GetStartedWithAlertsCardsId,
+} from './types';
+
+import { storage } from '../common/lib/storage';
+import { defaultFinishedSteps, isDefaultFinishedCardStep } from './helpers';
+import { getSections } from './sections';
+
+export const ACTIVE_PRODUCTS_STORAGE_KEY = 'securitySolution.getStarted.activeProducts';
+export const FINISHED_STEPS_STORAGE_KEY = 'securitySolution.getStarted.finishedSteps';
+export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.getStarted.expandedCards';
 
 export const defaultExpandedCards = {
-  [GetSetUpCardId.configure]: { isExpanded: true, expandedSteps: [] },
-  [GetSetUpCardId.introduction]: { isExpanded: true, expandedSteps: [] },
-  [GetSetUpCardId.explore]: { isExpanded: true, expandedSteps: [] },
+  [QuickStartSectionCardsId.watchTheOverviewVideo]: { isExpanded: false, expandedSteps: [] },
+  [QuickStartSectionCardsId.createFirstProject]: { isExpanded: false, expandedSteps: [] },
+  [AddAndValidateYourDataCardsId.addIntegrations]: { isExpanded: false, expandedSteps: [] },
+  [AddAndValidateYourDataCardsId.viewDashboards]: { isExpanded: false, expandedSteps: [] },
+  [GetStartedWithAlertsCardsId.enablePrebuiltRules]: { isExpanded: false, expandedSteps: [] },
+  [GetStartedWithAlertsCardsId.viewAlerts]: { isExpanded: false, expandedSteps: [] },
 };
 
 export const getStartedStorage = {
+  setDefaultFinishedSteps: (cardId: CardId) => {
+    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
+    const defaultFinishedStepsByCardId = defaultFinishedSteps[cardId];
+    const hasDefaultFinishedSteps = defaultFinishedStepsByCardId != null;
+    if (!hasDefaultFinishedSteps) {
+      return;
+    }
+
+    storage.set(FINISHED_STEPS_STORAGE_KEY, {
+      ...allFinishedSteps,
+      [cardId]: Array.from(
+        // dedupe card steps
+        new Set([...(defaultFinishedStepsByCardId ?? []), ...(allFinishedSteps[cardId] ?? [])])
+      ),
+    });
+  },
   getActiveProductsFromStorage: () => {
     const activeProducts: ProductLine[] = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
     return activeProducts ?? [];
@@ -37,18 +64,26 @@ export const getStartedStorage = {
     return activeProducts;
   },
   getFinishedStepsFromStorageByCardId: (cardId: CardId) => {
-    const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-    const card: StepId[] = finishedSteps[cardId] ?? [];
-    return card;
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
+    const steps: StepId[] = finishedSteps[cardId] ?? [];
+    return steps;
   },
   getAllFinishedStepsFromStorage: () => {
-    const allFinishedSteps: Record<CardId, StepId[]> =
-      storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-    return allFinishedSteps;
+    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
+    if (allFinishedSteps == null) {
+      storage.set(FINISHED_STEPS_STORAGE_KEY, defaultFinishedSteps);
+    } else {
+      getSections().forEach((section) => {
+        section.cards?.forEach((card) => {
+          getStartedStorage.setDefaultFinishedSteps(card.id);
+        });
+      });
+    }
+    return storage.get(FINISHED_STEPS_STORAGE_KEY);
   },
 
   addFinishedStepToStorage: (cardId: CardId, stepId: StepId) => {
-    const finishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
     const card: StepId[] = finishedSteps[cardId] ?? [];
     if (card.indexOf(stepId) < 0) {
       card.push(stepId);
@@ -56,7 +91,10 @@ export const getStartedStorage = {
     }
   },
   removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId) => {
-    const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    if (isDefaultFinishedCardStep(cardId, stepId)) {
+      return;
+    }
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
     const steps: StepId[] = finishedSteps[cardId] ?? [];
     const index = steps.indexOf(stepId);
     if (index >= 0) {
@@ -78,24 +116,24 @@ export const getStartedStorage = {
     storage.set(
       EXPANDED_CARDS_STORAGE_KEY,
       Object.entries(activeCards).reduce((acc, [cardId, card]) => {
-        acc[cardId as CardId] = { ...card, expandedSteps: [] };
+        acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
         return acc;
       }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
     );
   },
-  addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
+  addExpandedCardStepToStorage: (cardId: CardId, stepId: StepId) => {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
       getStartedStorage.getAllExpandedCardStepsFromStorage();
     const card = activeCards[cardId]
-      ? { ...activeCards[cardId], isExpanded: true }
-      : {
+      ? {
+          expandedSteps: [stepId],
           isExpanded: true,
+        }
+      : {
+          isExpanded: false,
           expandedSteps: [],
         };
 
-    if (stepId && card && card.expandedSteps.indexOf(stepId) < 0) {
-      card.expandedSteps.push(stepId);
-    }
     storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });
   },
   removeExpandedCardStepFromStorage: (cardId: CardId, stepId?: StepId) => {
@@ -111,6 +149,7 @@ export const getStartedStorage = {
       const index = card.expandedSteps.indexOf(stepId);
       if (index >= 0) {
         card.expandedSteps.splice(index, 1);
+        card.isExpanded = false;
       }
     }
     storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });

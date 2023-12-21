@@ -1907,8 +1907,8 @@
             "pluginId": "@kbn/ml-trained-models-utils",
             "scope": "common",
             "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
-            "section": "def-common.GetElserOptions",
-            "text": "GetElserOptions"
+            "section": "def-common.GetModelDownloadConfigOptions",
+            "text": "GetModelDownloadConfigOptions"
           },
           " | undefined): Promise<",
           {
@@ -1918,6 +1918,32 @@
             "section": "def-common.ModelDefinitionResponse",
             "text": "ModelDefinitionResponse"
           },
+          ">; getCuratedModelConfig(modelName: ",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.ElasticCuratedModelName",
+            "text": "ElasticCuratedModelName"
+          },
+          ", options?: ",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.GetModelDownloadConfigOptions",
+            "text": "GetModelDownloadConfigOptions"
+          },
+          " | undefined): Promise<",
+          {
+            "pluginId": "@kbn/ml-trained-models-utils",
+            "scope": "common",
+            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+            "section": "def-common.ModelDefinitionResponse",
+            "text": "ModelDefinitionResponse"
+          },
+          ">; installElasticModel(modelId: string): Promise<",
+          "MlTrainedModelConfig",
           ">; }"
         ],
         "path": "x-pack/plugins/ml/server/shared.ts",

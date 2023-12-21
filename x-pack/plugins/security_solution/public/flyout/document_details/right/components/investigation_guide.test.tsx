@@ -24,6 +24,7 @@ import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../le
 jest.mock('../../shared/hooks/use_investigation_guide');
 
 const NO_DATA_MESSAGE = 'Investigation guideThere’s no investigation guide for this rule.';
+const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
 
 const renderInvestigationGuide = () =>
   render(
@@ -95,6 +96,21 @@ describe('<InvestigationGuide />', () => {
     const { queryByTestId, getByTestId } = renderInvestigationGuide();
     expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
+  });
+
+  it('should render preview message when flyout is in preview', () => {
+    const { queryByTestId, getByTestId } = render(
+      <IntlProvider locale="en">
+        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+            <InvestigationGuide />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 
   it('should navigate to investigation guide when clicking on button', () => {

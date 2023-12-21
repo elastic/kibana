@@ -9,6 +9,8 @@ import {
   getBlockBotConversation,
   getDefaultConnector,
   getFormattedMessageContent,
+  getOptionalRequestParams,
+  hasParsableResponse,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -229,6 +231,108 @@ describe('getBlockBotConversation', () => {
       const content = 'plain text content';
 
       expect(getFormattedMessageContent(content)).toBe(content);
+    });
+  });
+
+  describe('getOptionalRequestParams', () => {
+    it('should return an empty object when ragOnAlerts is false', () => {
+      const params = {
+        alerts: true,
+        alertsIndexPattern: 'indexPattern',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        ragOnAlerts: false, // <-- false
+        replacements: { key: 'value' },
+        size: 10,
+      };
+
+      const result = getOptionalRequestParams(params);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return an empty object when alerts is false', () => {
+      const params = {
+        alerts: false, // <-- false
+        alertsIndexPattern: 'indexPattern',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        ragOnAlerts: true,
+        replacements: { key: 'value' },
+        size: 10,
+      };
+
+      const result = getOptionalRequestParams(params);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return the optional request params when ragOnAlerts is true and alerts is true', () => {
+      const params = {
+        alerts: true,
+        alertsIndexPattern: 'indexPattern',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        ragOnAlerts: true,
+        replacements: { key: 'value' },
+        size: 10,
+      };
+
+      const result = getOptionalRequestParams(params);
+
+      expect(result).toEqual({
+        alertsIndexPattern: 'indexPattern',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        replacements: { key: 'value' },
+        size: 10,
+      });
+    });
+
+    it('should return (only) the optional request params that are defined when some optional params are not provided', () => {
+      const params = {
+        alerts: true,
+        ragOnAlerts: true,
+        allow: ['a', 'b', 'c'], // all the others are undefined
+      };
+
+      const result = getOptionalRequestParams(params);
+
+      expect(result).toEqual({
+        allow: ['a', 'b', 'c'],
+      });
+    });
+  });
+
+  describe('hasParsableResponse', () => {
+    it('returns true when assistantLangChain is true', () => {
+      const result = hasParsableResponse({
+        alerts: false,
+        assistantLangChain: true,
+        ragOnAlerts: false,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('returns true when ragOnAlerts is true and alerts is true', () => {
+      const result = hasParsableResponse({
+        alerts: true,
+        assistantLangChain: false,
+        ragOnAlerts: true,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when assistantLangChain, ragOnAlerts, and alerts are all false', () => {
+      const result = hasParsableResponse({
+        alerts: false,
+        assistantLangChain: false,
+        ragOnAlerts: false,
+      });
+
+      expect(result).toBe(false);
     });
   });
 });

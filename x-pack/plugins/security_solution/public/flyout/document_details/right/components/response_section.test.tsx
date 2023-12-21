@@ -10,10 +10,13 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RESPONSE_SECTION_CONTENT_TEST_ID, RESPONSE_SECTION_HEADER_TEST_ID } from './test_ids';
 import { RightPanelContext } from '../context';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ResponseSection } from './response_section';
 
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
+
+const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const panelContextValue = {} as unknown as RightPanelContext;
 
 const renderResponseSection = () =>
@@ -46,5 +49,19 @@ describe('<ResponseSection />', () => {
 
     getByTestId(RESPONSE_SECTION_HEADER_TEST_ID).click();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render preview message if flyout is in preview', () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+          <RightPanelContext.Provider value={{ ...panelContextValue, isPreview: true }}>
+            <ResponseSection />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </IntlProvider>
+    );
+    getByTestId(RESPONSE_SECTION_HEADER_TEST_ID).click();
+    expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 });

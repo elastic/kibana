@@ -16,9 +16,9 @@ describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {
     const hit = buildDataTableRecord({ _index: 'test', _id: '1' }, dataViewMock);
     const props = {
+      id: 'doc_view_test',
       title: 'test',
       component: jest.fn(),
-      id: 1,
       render: jest.fn(),
       renderProps: {
         hit,

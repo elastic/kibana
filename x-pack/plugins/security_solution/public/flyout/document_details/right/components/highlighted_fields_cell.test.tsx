@@ -13,6 +13,7 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
@@ -24,7 +25,7 @@ jest.mock('../../../../management/hooks');
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',

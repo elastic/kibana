@@ -16,7 +16,7 @@ import { AllUsersQueryTabBody, AuthenticationsQueryTabBody } from './navigation'
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
 
-import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
+import { UserRiskScoreQueryTabBody } from '../../../entity_analytics/components/user_risk_score_tab_body';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './details/helpers';
 
