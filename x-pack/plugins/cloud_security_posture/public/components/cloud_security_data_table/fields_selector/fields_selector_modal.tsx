@@ -20,6 +20,11 @@ import { type DataView } from '@kbn/data-views-plugin/common';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
 import { FieldsSelectorTable } from './fields_selector_table';
+import {
+  CSP_FIELDS_SELECTOR_CLOSE_BUTTON,
+  CSP_FIELDS_SELECTOR_MODAL,
+  CSP_FIELDS_SELECTOR_RESET_BUTTON,
+} from '../../test_subjects';
 
 interface FieldsSelectorModalProps {
   dataView: DataView;
@@ -55,7 +60,7 @@ export const FieldsSelectorModal = ({
   );
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} data-test-subj={CSP_FIELDS_SELECTOR_MODAL}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -71,13 +76,13 @@ export const FieldsSelectorModal = ({
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onResetColumns}>
+        <EuiButtonEmpty onClick={onResetColumns} data-test-subj={CSP_FIELDS_SELECTOR_RESET_BUTTON}>
           <FormattedMessage
             id="xpack.csp.dataTable.fieldsModalReset"
             defaultMessage="Reset Fields"
           />
         </EuiButtonEmpty>
-        <EuiButton onClick={closeModal} fill>
+        <EuiButton onClick={closeModal} fill data-test-subj={CSP_FIELDS_SELECTOR_CLOSE_BUTTON}>
           <FormattedMessage id="xpack.csp.dataTable.fieldsModalClose" defaultMessage="Close" />
         </EuiButton>
       </EuiModalFooter>

@@ -129,7 +129,8 @@ export const FieldsSelectorTable = ({
         return (
           <EuiCheckbox
             checked={columns.includes(id)}
-            id={id}
+            id={`cloud-security-fields-selector-item-${id}`}
+            data-test-subj={`cloud-security-fields-selector-item-${id}`}
             onChange={(e) => {
               const isChecked = e.target.checked;
               return isChecked ? onAddColumn(id) : onRemoveColumn(id);
