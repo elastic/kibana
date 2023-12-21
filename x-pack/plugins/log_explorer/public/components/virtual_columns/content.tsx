@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import {
   SourceDocument,
@@ -20,7 +20,7 @@ import { FlyoutDoc, LogDocument } from '../../controller';
 import { LogLevel } from '../flyout_detail/sub_components/log_level';
 import * as constants from '../../../common/constants';
 
-const LogMessage = ({ field, value }: { field: string; value: string }) => {
+const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (
     <EuiFlexGroup gutterSize="xs">
       {field && (
@@ -144,5 +144,5 @@ const getMessageWithFallbacks = (doc: FlyoutDoc) => {
   }
 
   // If none of the ranks are present, return the whole object
-  return { field: null };
+  return { field: undefined };
 };
