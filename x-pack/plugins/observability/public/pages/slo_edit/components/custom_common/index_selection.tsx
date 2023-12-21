@@ -33,7 +33,7 @@ export function IndexSelection() {
       (dataView) => dataView.getIndexPattern() === currentIndexPattern
     );
 
-    if (!missingAdHocDataView) {
+    if (!missingAdHocDataView && currentIndexPattern) {
       async function loadMissingDataView() {
         const dataView = await dataViewsService.create(
           {
