@@ -121,7 +121,10 @@ export class ObservabilityAIAssistantPlugin
 
         return elserModelDefinition.model_id;
       } catch (error) {
-        throw new Error(`Failed to resolve ELSER model definition: ${error}`);
+        this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
+
+        // Fallback to ELSER v2
+        return '.elser_model_2';
       }
     });
 
