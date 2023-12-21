@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const assertWorkspaceDimensions = async (expectedWidth: string, expectedHeight: string) => {
-      await retry.try(() => {
+      await retry.try(async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
 
         expect(width).to.be(expectedWidth);
