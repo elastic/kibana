@@ -47,7 +47,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApiServices, mlUtilsService },
     },
   } = useMlKibana();
 
@@ -74,7 +74,13 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
       : undefined;
-    const searchBounds = getBoundsRoundedToInterval(bounds, contextAggregationInterval, false);
+    const searchBounds = mlUtilsService
+      ? mlUtilsService.mlTimeBuckets.getBoundsRoundedToInterval(
+          bounds,
+          contextAggregationInterval,
+          false
+        )
+      : getBoundsRoundedToInterval(bounds, contextAggregationInterval, false);
 
     /**
      * Loads the full list of annotations for job without any aggs or time boundaries

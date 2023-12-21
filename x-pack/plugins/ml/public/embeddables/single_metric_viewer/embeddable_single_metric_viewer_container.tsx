@@ -5,40 +5,34 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo, useRef } from 'react'; // useEffect
-import { EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui'; // EuiCallOut
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-// import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
-// import { withKibana } from '@kbn/kibana-react-plugin/public';
-// import { UI_SETTINGS } from '@kbn/data-plugin/common';
-// import useObservable from 'react-use/lib/useObservable';
-// import {
-//   type MlEntityField,
-//   type MlEntityFieldOperation,
-//   // ML_ANOMALY_THRESHOLD,
-// } from '@kbn/ml-anomaly-utils';
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import usePrevious from 'react-use/lib/usePrevious';
+import { useToastNotificationService } from '../../application/services/toast_notification_service';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useSingleMetricViwerInputResolver } from './use_single_metric_viewer_input_resolver';
-// import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type { ISingleMetricViewerEmbeddable } from './single_metric_viewer_embeddable';
 import type {
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerEmbeddableServices,
 } from '..';
-
-// import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-// import { ML_APP_LOCATOR } from '../../../common/constants/locator';
-// import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-// import { TimeBuckets } from '../../application/util/time_buckets';
-// import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-// import { MlLocatorParams } from '../../../common/types/locator';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
+import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface EmbeddableAnomalyChartsContainerProps {
+interface AppStateZoom {
+  from?: string;
+  to?: string;
+}
+
+export interface EmbeddableSingleMetricViewerContainerProps {
   id: string;
   embeddableContext: InstanceType<ISingleMetricViewerEmbeddable>;
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>;
@@ -51,7 +45,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
+export const EmbeddableSingleMetricViewerContainer: FC<
+  EmbeddableSingleMetricViewerContainerProps
+> = ({
   id,
   embeddableContext,
   embeddableInput,
@@ -69,64 +65,53 @@ export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsCo
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     id
   );
-
   const [chartWidth, setChartWidth] = useState<number>(0);
-  // const [severity, setSeverity] = useState(
-  //   optionValueToThreshold(
-  //     embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
-  //   )
-  // );
-  // const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
-  // const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
-  //   services;
-  // const { timefilter } = dataServices.query.timefilter;
+  const [zoom, setZoom] = useState<AppStateZoom | undefined>();
+  const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
+  const [functionDescription, setFunctionDescription] = useState<string | undefined>();
+  const [detectorIndex, setDetectorIndex] = useState<number>(0);
+  const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
+  const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
 
-  // const mlLocator = useMemo(
-  //   () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
-  //   [share]
-  // );
-
-  // const timeBuckets = useMemo(() => {
-  //   return new TimeBuckets({
-  //     'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-  //     'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-  //     dateFormat: uiSettings.get('dateFormat'),
-  //     'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // const input = useObservable(embeddableInput);
   const isExplorerLoading = false;
-
-  // useEffect(() => {
-  //   onInputChange({
-  //     severityThreshold: severity.val,
-  //   });
-  //   onOutputChange({
-  //     severity: severity.val,
-  //     entityFields: selectedEntities,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [severity, selectedEntities]);
-  const data = useSingleMetricViwerInputResolver(embeddableInput);
-
-  // const {
-  //   chartsData,
-  //   isLoading: isExplorerLoading,
-  //   error,
-  // } = useAnomalyChartsInputResolver(
-  //   embeddableInput,
-  //   onInputChange,
-  //   refresh,
-  //   services,
-  //   chartWidth,
-  //   severity.val,
-  //   { onRenderComplete, onError, onLoading }
-  // );
+  const { mlApiServices, mlTimeSeriesExplorer } = services[2];
+  const { data, bounds, lastRefresh } = useSingleMetricViwerInputResolver(
+    embeddableInput,
+    refresh,
+    services[1].data.query.timefilter.timefilter
+  );
+  const selectedJobId = data?.jobIds[0];
+  const previousRefresh = usePrevious(lastRefresh ?? 0);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
+  const toastNotificationService = useToastNotificationService();
+
+  useEffect(
+    function setUpSelectedJob() {
+      async function fetchSelectedJob() {
+        if (mlApiServices && selectedJobId !== undefined) {
+          const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
+          const job = jobs[0];
+          setSelectedJob(job);
+        }
+      }
+      fetchSelectedJob();
+    },
+    [selectedJobId, mlApiServices]
+  );
+
+  useEffect(
+    function setUpAutoZoom() {
+      let zoomDuration: number | undefined;
+      if (selectedJobId !== undefined && selectedJob !== undefined) {
+        zoomDuration = mlTimeSeriesExplorer.getAutoZoomDuration(selectedJob);
+        setAutoZoomDuration(zoomDuration);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId, selectedJob?.job_id, mlTimeSeriesExplorer]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
@@ -148,47 +133,46 @@ export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsCo
     return isExplorerLoading ? containerHeightRef.current : undefined;
   }, [isExplorerLoading]);
 
-  // if (error) {
-  //   return (
-  //     <EuiCallOut
-  //       title={
-  //         <FormattedMessage
-  //           id="xpack.ml.anomalyChartsEmbeddable.errorMessage"
-  //           defaultMessage="Unable to load the ML anomaly explorer data"
-  //         />
-  //       }
-  //       color="danger"
-  //       iconType="warning"
-  //       style={{ width: '100%' }}
-  //     >
-  //       <p>{error.message}</p>
-  //     </EuiCallOut>
-  //   );
-  // }
+  const appStateHandler = useCallback(
+    (action: string, payload?: any) => {
+      /**
+       * Empty zoom indicates that chart hasn't been rendered yet,
+       * hence any updates prior that should replace the URL state.
+       */
 
-  // const addEntityFieldFilter = (
-  //   fieldName: string,
-  //   fieldValue: string,
-  //   operation: MlEntityFieldOperation
-  // ) => {
-  //   const entity: MlEntityField = {
-  //     fieldName,
-  //     fieldValue,
-  //     operation,
-  //   };
-  //   const uniqueSelectedEntities = [entity];
-  //   setSelectedEntities(uniqueSelectedEntities);
-  //   uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
-  //     embeddable: embeddableContext,
-  //     data: uniqueSelectedEntities,
-  //   });
-  // };
+      switch (action) {
+        case APP_STATE_ACTION.SET_DETECTOR_INDEX:
+          setDetectorIndex(payload);
+          setFunctionDescription(undefined);
+          break;
+
+        case APP_STATE_ACTION.SET_FORECAST_ID:
+          setSelectedForecastId(payload);
+          setZoom(undefined);
+          break;
+
+        case APP_STATE_ACTION.SET_ZOOM:
+          setZoom(payload);
+          break;
+
+        case APP_STATE_ACTION.UNSET_ZOOM:
+          setZoom(undefined);
+          break;
+
+        case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
+          setFunctionDescription(payload);
+          break;
+      }
+    },
+
+    [setZoom, setDetectorIndex, setFunctionDescription, setSelectedForecastId]
+  );
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
         <div
-          id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
+          id={`mlSingleMetricViewerEmbeddableWrapper-${id}`}
           style={{
             width: '100%',
             overflowY: 'auto',
@@ -196,8 +180,9 @@ export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsCo
             padding: '8px',
             height: containerHeight,
           }}
-          data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
+          data-test-subj={`mlSingleMetricViewer_${embeddableContext.id}`}
           ref={resizeRef}
+          className="ml-time-series-explorer"
         >
           {isExplorerLoading && (
             <EuiText
@@ -212,27 +197,30 @@ export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsCo
               <EuiLoadingChart
                 size="xl"
                 mono={true}
-                data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
+                data-test-subj="mlAnomalySingleMetricViewerLoadingIndicator"
               />
             </EuiText>
           )}
-          {data !== undefined && <span>{`${JSON.stringify(data.selectedEntities, null, 2)}`}</span>}
-          {/* {data !== undefined && isLoading === false && (
-            <TimeseriesExplorerChart
-              id={id}
-              showCharts={true}
-              chartsData={chartsData}
-              severity={severity}
-              setSeverity={setSeverity}
-              mlLocator={mlLocator}
-              timeBuckets={timeBuckets}
-              timefilter={timefilter}
-              onSelectEntity={addEntityFieldFilter}
-              showSelectedInterval={false}
-              chartsService={chartsService}
-              timeRange={input?.timeRange}
+          {data !== undefined && autoZoomDuration !== undefined && (
+            <TimeSeriesExplorerEmbeddableChart
+              chartWidth={chartWidth}
+              dataViewsService={services[1].data.dataViews}
+              mlApiServices={mlApiServices}
+              toastNotificationService={toastNotificationService}
+              appStateHandler={appStateHandler}
+              autoZoomDuration={autoZoomDuration}
+              bounds={bounds}
+              lastRefresh={lastRefresh ?? 0}
+              previousRefresh={previousRefresh}
+              selectedJobId={selectedJobId}
+              selectedDetectorIndex={detectorIndex}
+              selectedEntities={data.selectedEntities}
+              selectedForecastId={selectedForecastId}
+              zoom={zoom}
+              functionDescription={functionDescription}
+              selectedJob={selectedJob}
             />
-          )} */}
+          )}
         </div>
       )}
     </EuiResizeObserver>
@@ -242,4 +230,3 @@ export const EmbeddableSingleMetricViewerContainer: FC<EmbeddableAnomalyChartsCo
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
 export default EmbeddableSingleMetricViewerContainer;
-//  withKibana(EmbeddableSingleMetricViewerContainerUI);

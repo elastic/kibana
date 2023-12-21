@@ -51,6 +51,7 @@ import {
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -124,6 +125,8 @@ class TimeseriesChartIntl extends Component {
     zoomToFocusLoaded: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
   };
+
+  static contextType = context;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -279,7 +282,12 @@ class TimeseriesChartIntl extends Component {
     chartElement.selectAll('*').remove();
 
     if (typeof selectedJob !== 'undefined') {
-      this.fieldFormat = mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
+      this.fieldFormat = this.context?.services?.mlServices?.mlFieldFormatService
+        ? this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+            selectedJob.job_id,
+            detectorIndex
+          )
+        : mlFieldFormatService.getFieldFormat(selectedJob.job_id, detectorIndex);
     } else {
       return;
     }
@@ -710,7 +718,9 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
+      ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
+      : getTimeBucketsFromCache(); // TODO - move everything to service
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1096,7 +1106,9 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', brushChartHeight);
 
     // Add x axis.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
+      ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
+      : getTimeBucketsFromCache(); // TODO - move everything to service
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

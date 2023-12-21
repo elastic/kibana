@@ -6,24 +6,38 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
-import {
-  SingleMetricViewerEmbeddableInput,
-  // AnomalyChartsEmbeddableOutput,
-} from '..';
-
-// { "searchSessionId": "37a186b8-1c00-47c5-b1e3-9af04762e909", "refreshConfig": { "pause": true, "value": 0 }, "filters": [], "hidePanelTitles": false, "executionContext": { "type": "dashboard", "description": "[Flights] Global Flight Dashboard" }, "syncTooltips": false, "syncColors": false, "viewMode": "edit", "query": { "language": "kuery", "query": "" }, "id": "86c25295-4331-4b08-a4fb-a345be5581c1", "timeRange": { "from": "now-7d", "to": "now" }, "jobIds": [ "price-by-carrier" ], "title": "ML single metric viewer chart for price-by-carrier", "functionDescription": "", "panelTitle": "ML single metric viewer chart for price-by-carrier", "selectedDetectorIndex": 0, "selectedEntities": { "Carrier": "ES-Air" } }
+import { combineLatest, Observable } from 'rxjs';
+import { startWith } from 'rxjs/operators';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { SingleMetricViewerEmbeddableInput } from '..';
+import type { TimeRangeBounds } from '../../application/util/time_buckets';
 
 export function useSingleMetricViwerInputResolver(
-  embeddableInput: Observable<SingleMetricViewerEmbeddableInput>
+  embeddableInput: Observable<SingleMetricViewerEmbeddableInput>,
+  refresh: Observable<any>,
+  timefilter: TimefilterContract
 ) {
   const [data, setData] = useState<any>();
-  useEffect(function subscribeToEmbeddableInput() {
-    const subscription = embeddableInput.subscribe((input) => {
-      setData(input);
-    });
-    return () => subscription.unsubscribe();
-  });
+  const [bounds, setBounds] = useState<TimeRangeBounds | undefined>();
+  const [lastRefresh, setLastRefresh] = useState<number | undefined>();
 
-  return data;
+  useEffect(function subscribeToEmbeddableInput() {
+    const subscription = combineLatest([embeddableInput, refresh.pipe(startWith(null))]).subscribe(
+      (input) => {
+        if (input !== undefined) {
+          setData(input[0]);
+          if (timefilter !== undefined) {
+            const currentBounds = timefilter.getBounds();
+            setBounds(currentBounds);
+            setLastRefresh(Date.now());
+          }
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { data, bounds, lastRefresh };
 }

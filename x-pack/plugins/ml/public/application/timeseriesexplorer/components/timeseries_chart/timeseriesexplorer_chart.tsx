@@ -15,6 +15,7 @@ import { EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import type { Entity } from '../entity_control/entity_control';
 import {
   type TimeseriesexplorerActionType,
   APP_STATE_ACTION,
@@ -43,8 +44,11 @@ import {
   getFocusData,
 } from '../../timeseriesexplorer_utils';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
-import { getControlsForDetector } from '../../get_controls_for_detector';
+// import { getControlsForDetector } from '../../get_controls_for_detector';
 import { TimeSeriesChartWithTooltips } from './timeseries_chart_with_tooltip';
+import { LoadingIndicator } from '../../../components/loading_indicator/loading_indicator';
+import { TimeseriesexplorerChartDataError } from '../timeseriesexplorer_chart_data_error';
+import { TimeseriesexplorerNoChartData } from '../timeseriesexplorer_no_chart_data';
 
 interface Selection {
   from: Date;
@@ -59,7 +63,6 @@ interface State {
   contextForecastData: any; // TODO: update type
   // Not chartable if e.g. model plot with terms for a varp detector
   dataNotChartable: boolean;
-  loading: boolean;
   focusAggregationInterval: any; // TODO: update type
   focusAnnotationData: any; // TODO: update type
   focusChartData: any; // TODO: update type
@@ -67,12 +70,16 @@ interface State {
   fullRefresh: boolean;
   hasResults: boolean;
   loadCounter: number;
+  loading: boolean;
   modelPlotEnabled: boolean;
-  showModelBounds: boolean;
+  // Toggles display of annotations in the focus chart
   showAnnotations: boolean;
   showAnnotationsCheckbox: boolean;
+  // Toggles display of forecast data in the focus chart
   showForecast: boolean;
   showForecastCheckbox: boolean;
+  // Toggles display of model bounds in the focus chart
+  showModelBounds: boolean;
   showModelBoundsCheckbox: boolean;
   svgWidth: number;
   swimlaneData: any; // TODO: update type
@@ -84,9 +91,12 @@ interface State {
 
 interface Props {
   appStateHandler: (action: TimeseriesexplorerActionType, payload: any) => void;
+  arePartitioningFieldsProvided: boolean;
   autoZoomDuration: number;
   bounds: any; // TODO: update type
+  entityControls: MlEntityField[];
   functionDescription: string;
+  hasJobs: boolean;
   lastRefresh: number;
   loadAnomaliesTableData?: (from: number, to: number) => any; // TODO: update type
   previousRefresh: number;
@@ -147,14 +157,14 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
   /**
    * Subject for listening brush time range selection.
    */
-  contextChart$ = new Subject();
+  contextChart$ = new Subject<Selection>();
 
   contextChartSelectedInitCallDone = false;
   previousSelectedForecastId = '';
   previousChartProps = {};
   previousShowAnnotations = undefined;
-  previousShowForecast = undefined;
-  previousShowModelBounds = undefined;
+  previousShowForecast: boolean | undefined = undefined;
+  previousShowModelBounds: boolean | undefined = undefined;
 
   displayErrorToastMessages = (error, errorMsg) => {
     if (this.props.toastNotificationService) {
@@ -185,8 +195,7 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
       return;
     }
-    const entityControls: MlEntityField[] =
-      this.getControlsForDetector() as unknown as MlEntityField[];
+    const entityControls: MlEntityField[] = this.props.entityControls; // this.getControlsForDetector() as unknown as MlEntityField[];
 
     // Calculate the aggregation interval for the focus chart.
     const bounds = { min: moment(selection.from), max: moment(selection.to) };
@@ -232,10 +241,10 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
    * Updates local state of detector related controls from the global state.
    * @param callback to invoke after a state update.
    */
-  getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
-    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
-  };
+  // getControlsForDetector = () => {
+  //   const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
+  //   return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
+  // };
 
   /**
    * Updates criteria fields for API calls, e.g. getAnomaliesTableData
@@ -258,7 +267,7 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
    * Returns field names that don't have a selection yet.
    */
   getFieldNamesWithEmptyValues = () => {
-    const latestEntityControls = this.getControlsForDetector();
+    const latestEntityControls = this.props.entityControls; //  this.getControlsForDetector();
     return latestEntityControls
       .filter(({ fieldValue }) => fieldValue === null)
       .map(({ fieldName }) => fieldName);
@@ -267,10 +276,10 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
   /**
    * Checks if all entity control dropdowns have a selection.
    */
-  arePartitioningFieldsProvided = () => {
-    const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
-    return fieldNamesWithEmptyValues.length === 0;
-  };
+  // arePartitioningFieldsProvided = () => {
+  //   const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+  //   return fieldNamesWithEmptyValues.length === 0;
+  // };
 
   loadSingleMetricData = (fullRefresh = true) => {
     const {
@@ -302,7 +311,7 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
 
     // Only when `fullRefresh` is true we'll reset all data
     // and show the loading spinner within the page.
-    const entityControls = this.getControlsForDetector();
+    const entityControls = this.props.entityControls; // this.getControlsForDetector();
     this.setState(
       // @ts-ignore
       {
@@ -557,6 +566,7 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
 
   componentDidMount() {
     // Required to redraw the time series chart when the container is resized.
+    console.log('--- GETTING HERE ---');
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker?.on('resize', () => {
       this.resizeHandler();
@@ -701,13 +711,18 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
 
   render() {
     const {
+      chartDataError,
       contextAggregationInterval,
       contextChartData,
       contextForecastData,
+      dataNotChartable,
       focusAggregationInterval,
       focusAnnotationData,
       focusChartData,
       focusForecastData,
+      fullRefresh,
+      hasResults,
+      loading,
       modelPlotEnabled,
       showAnnotations,
       showAnnotationsCheckbox,
@@ -723,8 +738,15 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
       zoomToFocusLoaded,
     } = this.state;
 
-    const { autoZoomDuration, bounds, lastRefresh, selectedDetectorIndex, selectedJobId } =
-      this.props;
+    const {
+      arePartitioningFieldsProvided,
+      autoZoomDuration,
+      bounds,
+      hasJobs,
+      lastRefresh,
+      selectedDetectorIndex,
+      selectedJobId,
+    } = this.props;
 
     const chartProps = {
       modelPlotEnabled,
@@ -745,8 +767,6 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
       autoZoomDuration,
     };
 
-    const selectedJob = mlJobService.getJob(selectedJobId);
-
     let renderFocusChartOnly = true;
 
     if (
@@ -760,8 +780,38 @@ export class TimeSeriesExplorerChart extends Component<Props, State> {
       renderFocusChartOnly = false;
     }
 
+    this.previousChartProps = chartProps;
+    this.previousShowForecast = showForecast;
+    this.previousShowModelBounds = showModelBounds;
+
+    const selectedJob = mlJobService.getJob(selectedJobId);
+    const entityControls = this.props.entityControls; //  this.getControlsForDetector();
+    // const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+    // const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
+    // const detectors = getViewableDetectors(selectedJob);
+
     return (
       <>
+        {fullRefresh && loading === true && (
+          <LoadingIndicator
+            label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
+              defaultMessage: 'Loading',
+            })}
+          />
+        )}
+        {loading === false && chartDataError !== undefined && (
+          <TimeseriesexplorerChartDataError errorMsg={chartDataError} />
+        )}
+        {arePartitioningFieldsProvided &&
+          hasJobs &&
+          (fullRefresh === false || loading === false) &&
+          hasResults === false &&
+          chartDataError === undefined && (
+            <TimeseriesexplorerNoChartData
+              dataNotChartable={dataNotChartable}
+              entities={entityControls as unknown as Entity[]}
+            />
+          )}
         <EuiFlexGroup style={{ float: 'right' }}>
           {showModelBoundsCheckbox && (
             <EuiFlexItem grow={false}>

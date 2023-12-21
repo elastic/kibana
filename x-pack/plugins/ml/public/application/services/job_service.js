@@ -14,14 +14,17 @@ import { parseInterval } from '../../../common/util/parse_interval';
 
 import { isWebUrl } from '../util/url_utils';
 
-import { ml } from './ml_api_service';
+import { ml, mlApiServicesProvider } from './ml_api_service';
 import { getToastNotificationService } from './toast_notification_service';
 
 let jobs = [];
 let datafeedIds = {};
 
-class JobService {
-  constructor() {
+export class JobService {
+  mlApiServices;
+
+  constructor(httpService) {
+    this.mlApiServices = httpService ? mlApiServicesProvider(httpService) : ml;
     // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
@@ -52,12 +55,14 @@ class JobService {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-      ml.getJobs()
+      this.mlApiServices
+        .getJobs()
         .then((resp) => {
           jobs = resp.jobs;
 
           // load jobs stats
-          ml.getJobStats()
+          this.mlApiServices
+            .getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
@@ -127,13 +132,15 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      ml.getJobs({ jobId })
+      this.mlApiServices
+        .getJobs({ jobId })
         .then((resp) => {
           if (resp.jobs && resp.jobs.length) {
             const newJob = resp.jobs[0];
 
             // load jobs stats
-            ml.getJobStats({ jobId })
+            this.mlApiServices
+              .getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
@@ -198,12 +205,14 @@ class JobService {
     return new Promise((resolve, reject) => {
       const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
-      ml.getDatafeeds(sId)
+      this.mlApiServices
+        .getDatafeeds(sId)
         .then((resp) => {
           const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
-          ml.getDatafeedStats()
+          this.mlApiServices
+            .getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
@@ -236,7 +245,8 @@ class JobService {
     return new Promise((resolve, reject) => {
       const datafeedId = this.getDatafeedId(jobId);
 
-      ml.getDatafeedStats({ datafeedId })
+      this.mlApiServices
+        .getDatafeedStats({ datafeedId })
         .then((resp) => {
           // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
@@ -261,7 +271,7 @@ class JobService {
     }
 
     // return the promise chain
-    return ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
+    return this.mlApiServices.addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
   cloneDatafeed(datafeed) {
@@ -285,18 +295,18 @@ class JobService {
   }
 
   openJob(jobId) {
-    return ml.openJob({ jobId });
+    return this.mlApiServices.openJob({ jobId });
   }
 
   closeJob(jobId) {
-    return ml.closeJob({ jobId });
+    return this.mlApiServices.closeJob({ jobId });
   }
 
   saveNewDatafeed(datafeedConfig, jobId) {
     const datafeedId = `datafeed-${jobId}`;
     datafeedConfig.job_id = jobId;
 
-    return ml.addDatafeed({
+    return this.mlApiServices.addDatafeed({
       datafeedId,
       datafeedConfig,
     });
@@ -312,11 +322,12 @@ class JobService {
         end++;
       }
 
-      ml.startDatafeed({
-        datafeedId,
-        start,
-        end,
-      })
+      this.mlApiServices
+        .startDatafeed({
+          datafeedId,
+          start,
+          end,
+        })
         .then((resp) => {
           resolve(resp);
         })
@@ -328,29 +339,30 @@ class JobService {
   }
 
   forceStartDatafeeds(dIds, start, end) {
-    return ml.jobs.forceStartDatafeeds(dIds, start, end);
+    return this.mlApiServices.jobs.forceStartDatafeeds(dIds, start, end);
   }
 
   stopDatafeeds(dIds) {
-    return ml.jobs.stopDatafeeds(dIds);
+    return this.mlApiServices.jobs.stopDatafeeds(dIds);
   }
 
   deleteJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
+    return this.mlApiServices.jobs.deleteJobs(jIds, deleteUserAnnotations);
   }
 
   closeJobs(jIds) {
-    return ml.jobs.closeJobs(jIds);
+    return this.mlApiServices.jobs.closeJobs(jIds);
   }
 
   resetJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.resetJobs(jIds, deleteUserAnnotations);
+    return this.mlApiServices.jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
-        ml.validateDetector({ detector })
+        this.mlApiServices
+          .validateDetector({ detector })
           .then((resp) => {
             resolve(resp);
           })
@@ -402,7 +414,7 @@ class JobService {
 
   async getJobAndGroupIds() {
     try {
-      return await ml.jobs.getAllJobAndGroupIds();
+      return await this.mlApiServices.jobs.getAllJobAndGroupIds();
     } catch (error) {
       return {
         jobIds: [],

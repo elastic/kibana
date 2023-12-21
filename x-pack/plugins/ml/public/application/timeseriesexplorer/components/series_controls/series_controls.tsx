@@ -12,6 +12,7 @@ import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { CombinedJob, Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -70,7 +71,7 @@ interface SeriesControlsProps {
   appStateHandler: Function;
   bounds: any;
   functionDescription: string;
-  job?: CombinedJob; // TODO: might need some type stuff as it's actually an MlJob type
+  job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
   selectedEntities: Record<string, any>;
   selectedJobId: JobId;
@@ -99,7 +100,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const selectedJob: CombinedJob = useMemo(
+  const selectedJob: CombinedJob | MlJob = useMemo(
     () => job ?? mlJobService.getJob(selectedJobId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedJobId]
@@ -114,7 +115,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     index: number;
     detector_description: Detector['detector_description'];
   }> = useMemo(() => {
-    return getViewableDetectors(selectedJob);
+    return getViewableDetectors(selectedJob as CombinedJob);
   }, [selectedJob]);
 
   const entityControls = useMemo(() => {
@@ -122,7 +123,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
       selectedDetectorIndex,
       selectedEntities,
       selectedJobId,
-      selectedJob
+      selectedJob as CombinedJob
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);

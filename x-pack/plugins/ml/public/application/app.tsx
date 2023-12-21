@@ -70,7 +70,7 @@ export interface MlServicesContext {
   mlServices: MlGlobalServices;
 }
 
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices> & { mlUtilsService?: any }; // TODO: update
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
   const pageDeps: PageDependencies = {

@@ -22,13 +22,16 @@ import { AnomalyExplorerChartsService } from '../application/services/anomaly_ex
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  // ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlFieldFormatService } from '../application/services/field_format_service';
+import type { TimeBucketsService } from '../application/util/time_buckets_util';
+import type { TimeSeriesExplorerService } from '../application/util/timeseriesexplorer_utils';
+import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -104,6 +107,11 @@ export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbedd
 
 export interface SingleMetricViewerEmbeddableCustomInput {
   jobIds: JobId[];
+  title: string;
+  functionDescription?: string;
+  panelTitle: string;
+  selectedDetectorIndex: number;
+  selectedEntities: MlEntityField[];
 }
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
@@ -116,11 +124,22 @@ export interface AnomalyChartsServices {
   mlApiServices?: MlApiServices;
 }
 
+export interface SingleMetricViewerServices {
+  anomalyExplorerService: AnomalyExplorerChartsService;
+  anomalyDetectorService: AnomalyDetectorService;
+  mlApiServices: MlApiServices;
+  mlFieldFormatService: MlFieldFormatService;
+  mlResultsService: MlResultsService;
+  mlTimeBuckets: TimeBucketsService;
+  mlTimeSeriesExplorer: TimeSeriesExplorerService;
+  mlTimeSeriesSearchService?: MlTimeSeriesSeachService;
+}
+
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalyChartsServices
+  SingleMetricViewerServices
 ];
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];

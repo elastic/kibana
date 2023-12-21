@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import { AnomalyChartsEmbeddableInput } from '..';
+import type { SingleMetricViewerServices } from '..';
 import { TimeRangeBounds } from '../../application/util/time_buckets';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
@@ -29,10 +29,10 @@ import {
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
-export interface AnomalyChartsInitializerProps {
+export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
   defaultTitle: string;
-  initialInput?: Partial<Pick<AnomalyChartsEmbeddableInput, 'jobIds'>>;
+  initialInput?: SingleMetricViewerServices;
   job: MlJob;
   onCreate: (props: {
     panelTitle: string;
@@ -43,7 +43,7 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const SingleMetricViewerInitializer: FC<AnomalyChartsInitializerProps> = ({
+export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
   bounds,
   defaultTitle,
   initialInput,
@@ -94,7 +94,7 @@ export const SingleMetricViewerInitializer: FC<AnomalyChartsInitializerProps> = 
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.anomalyChartsEmbeddable.panelTitleLabel"
+                id="xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel"
                 defaultMessage="Panel title"
               />
             }
@@ -112,7 +112,6 @@ export const SingleMetricViewerInitializer: FC<AnomalyChartsInitializerProps> = 
 
           <SeriesControls
             selectedJobId={job.job_id}
-            // @ts-ignore
             job={job}
             appStateHandler={handleStateUpdate}
             selectedDetectorIndex={selectedDetectorIndex}
@@ -125,15 +124,18 @@ export const SingleMetricViewerInitializer: FC<AnomalyChartsInitializerProps> = 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
+        <EuiButtonEmpty
+          onClick={onCancel}
+          data-test-subj="mlsingleMetricViewerInitializerCancelButton"
+        >
           <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
+            id="xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
 
         <EuiButton
-          data-test-subj="mlAnomalyChartsInitializerConfirmButton"
+          data-test-subj="mlsingleMetricViewerInitializerConfirmButton"
           isDisabled={!isPanelTitleValid}
           onClick={onCreate.bind(null, {
             functionDescription,
@@ -144,7 +146,7 @@ export const SingleMetricViewerInitializer: FC<AnomalyChartsInitializerProps> = 
           fill
         >
           <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.confirmButtonLabel"
+            id="xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm configurations"
           />
         </EuiButton>

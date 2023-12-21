@@ -55,32 +55,66 @@ export class SingleMetricViewerEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
-    const [coreStart, pluginStart] = await this.getServices();
+    const [coreStart, pluginStart, singleMetricServices] = await this.getServices();
 
     try {
       const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
         './single_metric_viewer_setup_flyout'
       );
-      return await resolveEmbeddableSingleMetricViewerUserInput(coreStart, pluginStart);
+      return await resolveEmbeddableSingleMetricViewerUserInput(
+        coreStart,
+        pluginStart,
+        singleMetricServices
+      );
     } catch (e) {
       return Promise.reject();
     }
   }
 
-  // TODO: Maybe I need to create a single metric viewer chart service to share between the embeddable and the app
   private async getServices(): Promise<SingleMetricViewerEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
 
     const { AnomalyDetectorService } = await import(
       '../../application/services/anomaly_detector_service'
     );
+    const { fieldFormatServiceProvider } = await import(
+      '../../application/services/field_format_service_provider'
+    );
+    const { forecastServiceProvider } = await import(
+      '../../application/services/forecast_service_provider'
+    );
+
+    const { indexUtilsProvider } = await import('../../application/util/index_utils_provider');
     const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
     const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+    const { timeBucketsProvider } = await import('../../application/util/time_buckets_util');
+    const { timeSeriesExplorerProvider } = await import(
+      '../../application/util/timeseriesexplorer_utils'
+    );
+    const { timeSeriesSearchServiceProvider } = await import(
+      '../../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider'
+    );
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
+    const mlTimeBuckets = timeBucketsProvider(coreStart.uiSettings);
+    const mlIndexUtils = indexUtilsProvider(pluginsStart.data.dataViews);
+    const mlTimeSeriesSearchService = timeSeriesSearchServiceProvider(
+      mlResultsService,
+      mlApiServices
+    );
+    const mlForecastService = forecastServiceProvider(mlApiServices);
+    const mlTimeSeriesExplorer = timeSeriesExplorerProvider(
+      coreStart.uiSettings,
+      mlApiServices.annotations,
+      mlApiServices.results,
+      mlResultsService,
+      mlTimeSeriesSearchService,
+      mlForecastService
+    );
+    const mlFieldFormatService = fieldFormatServiceProvider(mlApiServices, mlIndexUtils);
 
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,
@@ -91,7 +125,16 @@ export class SingleMetricViewerEmbeddableFactory
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyExplorerService, mlResultsService, mlApiServices },
+      {
+        anomalyDetectorService,
+        anomalyExplorerService,
+        mlResultsService,
+        mlApiServices,
+        mlTimeBuckets,
+        mlTimeSeriesExplorer,
+        mlTimeSeriesSearchService,
+        mlFieldFormatService,
+      },
     ];
   }
 

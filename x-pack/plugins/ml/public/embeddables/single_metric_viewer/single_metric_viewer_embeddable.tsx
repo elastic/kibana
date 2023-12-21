@@ -7,11 +7,17 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
+import { pick } from 'lodash';
+
+import { Embeddable } from '@kbn/embeddable-plugin/public';
+
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IContainer } from '@kbn/embeddable-plugin/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { EmbeddableSingleMetricViewerContainer } from './embeddable_single_metric_viewer_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -19,10 +25,9 @@ import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
-  AnomalyChartsServices,
+  SingleMetricViewerServices,
 } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
-import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
@@ -32,7 +37,7 @@ export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
 
 export type ISingleMetricViewerEmbeddable = typeof SingleMetricViewerEmbeddable;
 
-export class SingleMetricViewerEmbeddable extends AnomalyDetectionEmbeddable<
+export class SingleMetricViewerEmbeddable extends Embeddable<
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput
 > {
@@ -42,10 +47,11 @@ export class SingleMetricViewerEmbeddable extends AnomalyDetectionEmbeddable<
 
   constructor(
     initialInput: SingleMetricViewerEmbeddableInput,
-    public services: [CoreStart, MlDependencies, AnomalyChartsServices],
+    public services: [CoreStart, MlDependencies, SingleMetricViewerServices],
     parent?: IContainer
   ) {
-    super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+    // super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+    super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
   }
 
   public onLoading() {
@@ -73,24 +79,46 @@ export class SingleMetricViewerEmbeddable extends AnomalyDetectionEmbeddable<
     const I18nContext = this.services[0].i18n.Context;
     const theme$ = this.services[0].theme.theme$;
 
+    const datePickerDeps: DatePickerDependencies = {
+      ...pick(this.services[0], ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+      data: this.services[1].data,
+      uiSettingsKeys: UI_SETTINGS,
+      showFrozenDataTierChoice: false,
+    };
+
+    const mlUtilsService = {
+      mlTimeBuckets: this.services[2].mlTimeBuckets,
+      mlTimeSeriesExplorer: this.services[2].mlTimeSeriesExplorer,
+    };
+
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...this.services[0] }}>
-            <Suspense fallback={<EmbeddableLoading />}>
-              <EmbeddableSingleMetricViewerContainer
-                id={this.input.id}
-                embeddableContext={this}
-                embeddableInput={this.getInput$()}
-                services={this.services}
-                refresh={this.reload$.asObservable()}
-                onInputChange={this.updateInput.bind(this)}
-                onOutputChange={this.updateOutput.bind(this)}
-                onRenderComplete={this.onRenderComplete.bind(this)}
-                onLoading={this.onLoading.bind(this)}
-                onError={this.onError.bind(this)}
-              />
-            </Suspense>
+          <KibanaContextProvider
+            services={{
+              mlServices: {
+                ...this.services[2],
+                mlUtilsService,
+              },
+              ...this.services[0],
+            }}
+          >
+            <DatePickerContextProvider {...datePickerDeps}>
+              <Suspense fallback={<EmbeddableLoading />}>
+                <EmbeddableSingleMetricViewerContainer
+                  id={this.input.id}
+                  embeddableContext={this}
+                  embeddableInput={this.getInput$()}
+                  services={this.services}
+                  refresh={this.reload$.asObservable()}
+                  onInputChange={this.updateInput.bind(this)}
+                  onOutputChange={this.updateOutput.bind(this)}
+                  onRenderComplete={this.onRenderComplete.bind(this)}
+                  onLoading={this.onLoading.bind(this)}
+                  onError={this.onError.bind(this)}
+                />
+              </Suspense>
+            </DatePickerContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>,
