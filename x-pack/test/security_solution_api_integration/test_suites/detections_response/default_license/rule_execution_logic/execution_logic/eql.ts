@@ -41,6 +41,13 @@ import {
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
+/**
+ * Specific AGENT_ID to use for some of the tests. If the archiver changes and you see errors
+ * here, update this to a new value of a chosen auditbeat record and update the tests values.
+ */
+const AGENT_ID = 'a1d7b39c-f898-4dbe-a761-efb61939302d';
+const specificQueryForTests = `configuration where agent.id=="${AGENT_ID}"`;
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -73,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates a correctly formatted alert from EQL non-sequence queries', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
-        query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+        query: specificQueryForTests,
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
@@ -88,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         agent: {
           ephemeral_id: '0010d67a-14f7-41da-be30-489fea735967',
           hostname: 'suricata-zeek-sensor-toronto',
-          id: 'a1d7b39c-f898-4dbe-a761-efb61939302d',
+          id: AGENT_ID,
           type: 'auditbeat',
           version: '8.0.0',
         },
@@ -196,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('uses the provided event_category_override', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
-        query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+        query: `config_change where agent.id=="${AGENT_ID}"`,
         event_category_override: 'auditd.message_type',
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -542,7 +549,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates alerts when an index name contains special characters to encode', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', '<my-index-{now/d}*>']),
-        query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+        query: specificQueryForTests,
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
@@ -607,7 +614,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be enriched with host risk score', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
-          query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          query: specificQueryForTests,
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
@@ -633,7 +640,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be enriched alert with criticality_level', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
-          query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          query: specificQueryForTests,
         };
 
         const { previewId } = await previewRule({ supertest, rule });
