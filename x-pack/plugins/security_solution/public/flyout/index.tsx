@@ -24,8 +24,8 @@ import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { UserDetailsPanelProps } from './entity_details/user_detais_left';
-import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_detais_left';
+import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
