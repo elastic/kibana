@@ -68,6 +68,11 @@ export interface RuleFormConsumerSelectionProps {
   onChange: (consumer: RuleCreationValidConsumer | null) => void;
   errors: IErrorObject;
   selectedConsumer?: RuleCreationValidConsumer | null;
+  /* FUTURE ENGINEER
+   * if this prop is set to null then we wont initialize the value and the user will have to set it
+   * if this prop is set to a valid consumers then we will set it up to what was passed
+   * if this prop is not valid or undefined but the valid consumers has stackAlerts then we will default it to stackAlerts
+   */
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
@@ -124,16 +129,18 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     }, [consumers]);
 
   useEffect(() => {
-    // At initialization, select Stack Alerts, or the first value
+    // At initialization, select initialSelectedConsumer or the first value
     if (!validatedSelectedConsumer) {
-      if (initialSelectedConsumer && consumers.includes(initialSelectedConsumer)) {
+      if (initialSelectedConsumer === null) {
+        return;
+      } else if (initialSelectedConsumer && consumers.includes(initialSelectedConsumer)) {
         onChange(initialSelectedConsumer);
         return;
       } else if (consumers.includes(STACK_ALERTS_FEATURE_ID)) {
         onChange(STACK_ALERTS_FEATURE_ID);
         return;
       }
-      onChange(consumers[0] as RuleCreationValidConsumer);
+      onChange(consumers[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
