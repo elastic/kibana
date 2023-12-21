@@ -4406,6 +4406,10 @@
               },
               {
                 "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {

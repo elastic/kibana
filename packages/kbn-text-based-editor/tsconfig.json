@@ -23,7 +23,8 @@
     "@kbn/data-plugin",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/index-management-plugin"
+    "@kbn/index-management-plugin",
+    "@kbn/visualization-utils"
   ],
   "exclude": [
     "target/**/*",

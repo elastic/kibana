@@ -160,7 +160,6 @@ export interface UsageStats {
   'observability:profilingPervCPUWattArm64': number;
   'observability:profilingCo2PerKWH': number;
   'observability:profilingDatacenterPUE': number;
-  'observability:profilingUseLegacyCo2Calculation': boolean;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
 }

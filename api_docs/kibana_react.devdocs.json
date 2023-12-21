@@ -1536,18 +1536,6 @@
             "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
           },
           {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.tsx"
           },
@@ -2758,11 +2746,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/edit_action_helpers.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/edit_action_helpers.ts"
           },
           {
             "plugin": "security",
