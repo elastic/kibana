@@ -136,7 +136,7 @@ export const NotificationsList: FC = () => {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.notifications.fetchFailedError', {
-          defaultMessage: 'Fetch notifications failed',
+          defaultMessage: 'Error loading list of notifications',
         })
       );
     }
