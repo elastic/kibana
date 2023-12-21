@@ -36,20 +36,18 @@ export interface ModelSelectActions {
   createModelError: CreateModelApiLogicActions['apiError'];
   createModelMakeRequest: CreateModelApiLogicActions['makeRequest'];
   createModelSuccess: CreateModelApiLogicActions['apiSuccess'];
-
   fetchModels: () => void;
   fetchModelsError: CachedFetchModlesApiLogicActions['apiError'];
   fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
   fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
-  startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
-
+  setInferencePipelineConfiguration: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
+  setInferencePipelineConfigurationFromMLInferenceLogic: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
+  setSelectedModelNotPlaceholderFromMLInferenceLogic: MLInferenceProcessorsActions['setSelectedModelNotPlaceholder'];
   startModel: (modelId: string) => { modelId: string };
   startModelError: CreateModelApiLogicActions['apiError'];
   startModelMakeRequest: StartModelApiLogicActions['makeRequest'];
   startModelSuccess: StartModelApiLogicActions['apiSuccess'];
-
-  setInferencePipelineConfiguration: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
-  setInferencePipelineConfigurationFromMLInferenceLogic: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
+  startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
 }
 
 export interface ModelSelectValues {
@@ -96,6 +94,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       MLInferenceLogic,
       [
         'setInferencePipelineConfiguration as setInferencePipelineConfigurationFromMLInferenceLogic',
+        'setSelectedModelNotPlaceholder as setSelectedModelNotPlaceholderFromMLInferenceLogic',
       ],
       StartModelApiLogic,
       [
@@ -126,17 +125,19 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
     createModel: ({ modelId }) => {
       actions.createModelMakeRequest({ modelId });
     },
-    createModelSuccess: () => {
+    createModelSuccess: (response) => {
       actions.startPollingModels();
+      // The create action succeeded, so the model is no longer a placeholder
+      actions.setSelectedModelNotPlaceholderFromMLInferenceLogic(response.modelId);
     },
     fetchModels: () => {
       actions.fetchModelsMakeRequest({});
     },
-    startModel: ({ modelId }) => {
-      actions.startModelMakeRequest({ modelId });
-    },
     setInferencePipelineConfiguration: ({ configuration }) => {
       actions.setInferencePipelineConfigurationFromMLInferenceLogic(configuration);
+    },
+    startModel: ({ modelId }) => {
+      actions.startModelMakeRequest({ modelId });
     },
     startModelSuccess: () => {
       actions.startPollingModels();
