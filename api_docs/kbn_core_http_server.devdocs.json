@@ -4406,6 +4406,10 @@
               },
               {
                 "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
@@ -14694,6 +14698,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

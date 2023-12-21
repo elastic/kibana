@@ -1026,7 +1026,7 @@
         "label": "JsonEditorWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, areaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, euiCodeEditorProps, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
         "deprecated": false,
@@ -1037,7 +1037,7 @@
             "id": "def-public.JsonEditorWithMessageVariables.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  areaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  euiCodeEditorProps = {},\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<Props>"

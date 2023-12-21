@@ -91,13 +91,15 @@ describe('TinesParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="tines-bodyJsonEditor"]').exists()).toBe(false);
 
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-storySelector"]').first().text()).toBe(
-        'Select a Tines story'
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-storySelector"]').first().find('input').props()
+          .placeholder
+      ).toBe('Select a Tines story');
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
-        'Select a story first'
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-webhookSelector"]').first().find('input').props()
+          .placeholder
+      ).toBe('Select a story first');
       expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
       expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
 
@@ -119,13 +121,13 @@ describe('TinesParamsFields renders', () => {
       expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').exists()).toBe(false);
 
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-storySelector"]').first().text()).toBe(
-        'Select a Tines story'
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-storySelector"] input').first().props().placeholder
+      ).toBe('Select a Tines story');
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
-        'Select a story first'
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-webhookSelector"] input').first().props().placeholder
+      ).toBe('Select a story first');
 
       expect(mockEditAction).toHaveBeenCalledWith('subAction', 'test', index);
     });
@@ -223,9 +225,9 @@ describe('TinesParamsFields renders', () => {
       expect(
         wrapper.find('[data-test-subj="tines-webhookSelector"]').first().prop('disabled')
       ).toBe(false);
-      expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
-        'Select a webhook action'
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-webhookSelector"] input').first().props().placeholder
+      ).toBe('Select a webhook action');
       wrapper
         .find(
           '[data-test-subj="tines-webhookSelector"] [data-test-subj="comboBoxToggleListButton"]'
@@ -312,13 +314,13 @@ describe('TinesParamsFields renders', () => {
 
       expect(wrapper.find('[data-test-subj="tines-bodyJsonEditor"]').exists()).toBe(false);
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-storySelector"]').first().text()).toBe(
-        story.name
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-storySelector"] input').first().props().value
+      ).toBe(story.name);
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
-        webhook.name
-      );
+      expect(
+        wrapper.find('[data-test-subj="tines-webhookSelector"] input').first().props().value
+      ).toBe(webhook.name);
 
       expect(wrapper.find('[data-test-subj="tines-fallbackCallout"]').exists()).toBe(false);
       expect(wrapper.find('[data-test-subj="tines-webhookUrlInput"]').exists()).toBe(false);
