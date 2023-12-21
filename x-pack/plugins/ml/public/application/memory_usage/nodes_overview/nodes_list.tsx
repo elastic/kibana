@@ -84,7 +84,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.trainedModels.nodesList.nodesFetchError', {
-          defaultMessage: 'Nodes fetch failed',
+          defaultMessage: 'Error loading overview on machine learning nodes',
         })
       );
       setIsLoading(false);

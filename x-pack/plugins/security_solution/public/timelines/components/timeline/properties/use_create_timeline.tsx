@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';

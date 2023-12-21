@@ -14,9 +14,14 @@ import { useKibanaContextForPlugin } from './use_kibana';
 
 interface Props {
   id: string;
+  /**
+   * Human readable name of log view.
+   * Will be displayed as the page title when navigating to "View in Logs".
+   * */
+  name: string;
   extraFields?: string[];
 }
-export const useLogViewReference = ({ id, extraFields = [] }: Props) => {
+export const useLogViewReference = ({ id, name, extraFields = [] }: Props) => {
   const {
     services: { logsShared },
   } = useKibanaContextForPlugin();
@@ -33,8 +38,8 @@ export const useLogViewReference = ({ id, extraFields = [] }: Props) => {
           type: 'log-view-inline',
           id,
           attributes: {
-            name: 'Hosts Logs View',
-            description: 'Default view for hosts logs tab',
+            name,
+            description: '',
             logIndices: defaultLogView.attributes.logIndices,
             logColumns: [
               {
