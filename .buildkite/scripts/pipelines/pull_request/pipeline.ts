@@ -212,6 +212,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/plugins\/elastic_assistant/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/packages\/kbn-elastic-assistant/,
+        /^x-pack\/packages\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
