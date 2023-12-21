@@ -33,8 +33,17 @@ import {
   transformSettingsPageSearchSizeValidator,
   retentionPolicyMaxAgeValidator,
   stringValidator,
-  type Validator,
 } from '../../../../common/validators';
+
+const validators = {
+  frequencyValidator,
+  integerAboveZeroValidator,
+  transformSettingsNumberOfRetriesValidator,
+  transformSettingsPageSearchSizeValidator,
+  retentionPolicyMaxAgeValidator,
+  stringValidator,
+};
+type ValidatorName = keyof typeof validators;
 
 type DefaultParser = (v: string) => string;
 type NullableNumberParser = (v: string) => number | null;
@@ -44,6 +53,13 @@ type ValueParser = DefaultParser | NullableNumberParser | NumberParser;
 const defaultParser: DefaultParser = (v) => v;
 const nullableNumberParser: NullableNumberParser = (v) => (v === '' ? null : +v);
 const numberParser: NumberParser = (v) => +v;
+
+const valueParsers = {
+  defaultParser,
+  nullableNumberParser,
+  numberParser,
+};
+type ValueParserName = keyof typeof valueParsers;
 
 // This custom hook uses redux-toolkit to provide a generic framework to manage form state
 // and apply it to a final possibly nested configuration object suitable for passing on
@@ -76,9 +92,9 @@ export interface FormField {
   isNullable: boolean;
   isOptional: boolean;
   section?: EditTransformFormSections;
-  validator: Validator;
+  validator: ValidatorName;
   value: string;
-  valueParser: ValueParser;
+  valueParser: ValueParserName;
 }
 
 // Defining these sections is only necessary for options where a reset/deletion of that part of the
@@ -130,9 +146,9 @@ export const initializeFormField = (
     errorMessages: [],
     isNullable: false,
     isOptional: true,
-    validator: stringValidator,
+    validator: 'stringValidator',
     value,
-    valueParser: defaultParser,
+    valueParser: 'defaultParser',
     ...(overloads !== undefined ? { ...overloads } : {}),
   };
 };
@@ -175,7 +191,7 @@ const getUpdateValue = (
 
   const formValue =
     formStateAttribute.value !== ''
-      ? formStateAttribute.valueParser(formStateAttribute.value)
+      ? valueParsers[formStateAttribute.valueParser](formStateAttribute.value)
       : fallbackValue;
 
   const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
@@ -242,7 +258,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     description: initializeFormField('description', 'description', config),
     frequency: initializeFormField('frequency', 'frequency', config, {
       defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
-      validator: frequencyValidator,
+      validator: 'frequencyValidator',
     }),
 
     // dest.*
@@ -264,8 +280,8 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     docsPerSecond: initializeFormField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
       isOptional: true,
-      validator: integerAboveZeroValidator,
-      valueParser: nullableNumberParser,
+      validator: 'integerAboveZeroValidator',
+      valueParser: 'nullableNumberParser',
     }),
     maxPageSearchSize: initializeFormField(
       'maxPageSearchSize',
@@ -275,8 +291,8 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
         isNullable: true,
         isOptional: true,
-        validator: transformSettingsPageSearchSizeValidator,
-        valueParser: numberParser,
+        validator: 'transformSettingsPageSearchSizeValidator',
+        valueParser: 'numberParser',
       }
     ),
     numFailureRetries: initializeFormField(
@@ -287,8 +303,8 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         defaultValue: undefined,
         isNullable: true,
         isOptional: true,
-        validator: transformSettingsNumberOfRetriesValidator,
-        valueParser: numberParser,
+        validator: 'transformSettingsNumberOfRetriesValidator',
+        valueParser: 'numberParser',
       }
     ),
 
@@ -313,7 +329,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: false,
         isOptional: true,
         section: 'retentionPolicy',
-        validator: retentionPolicyMaxAgeValidator,
+        validator: 'retentionPolicyMaxAgeValidator',
       }
     ),
   },
@@ -388,7 +404,7 @@ const editTransformFlyoutSlice = createSlice({
         typeof action.payload.value === 'string' &&
         action.payload.value.length === 0
           ? []
-          : formField.validator(action.payload.value, formField.isOptional);
+          : validators[formField.validator](action.payload.value, formField.isOptional);
       formField.value = action.payload.value;
       state.formFields[action.payload.field] = formField;
 
