@@ -8,8 +8,11 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import { UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  UnifiedSearchPluginSetup,
+  UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -17,7 +20,7 @@ import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import { InputControlPublicConfig } from '../config';
 
-type InputControlVisCoreSetup = CoreSetup<{}, void>;
+type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
 export interface InputControlSettings {
   autocompleteTimeout: number;
@@ -40,8 +43,20 @@ export interface InputControlVisPluginSetupDependencies {
 }
 
 /** @internal */
+export interface InputControlVisPluginStartDependencies {
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+}
+
+/** @internal */
 export class InputControlVisPlugin
-  implements Plugin<void, void, InputControlVisPluginSetupDependencies, {}>
+  implements
+    Plugin<
+      void,
+      void,
+      InputControlVisPluginSetupDependencies,
+      InputControlVisPluginStartDependencies
+    >
 {
   constructor(public initializerContext: PluginInitializerContext<InputControlPublicConfig>) {}
 
