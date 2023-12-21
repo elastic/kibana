@@ -15,10 +15,13 @@ import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
+import { fullJitterBackoffFactory } from './full_jitter_backoff';
 
 jest.mock('./cases_connector_executor');
+jest.mock('./full_jitter_backoff');
 
 const CasesConnectorExecutorMock = CasesConnectorExecutor as jest.Mock;
+const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
 
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
@@ -37,17 +40,26 @@ describe('CasesConnector', () => {
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
+  // 1ms delay before retrying
+  const nextBackOff = jest.fn().mockReturnValue(1);
+
+  const backOffFactory = {
+    create: () => ({ nextBackOff }),
+  };
 
   let connector: CasesConnector;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecute.mockResolvedValue({});
 
     CasesConnectorExecutorMock.mockImplementation(() => {
       return {
         execute: mockExecute,
       };
     });
+
+    fullJitterBackoffFactoryMock.mockReturnValue(backOffFactory);
 
     connector = new CasesConnector({
       casesParams: { getCasesClient },
@@ -155,5 +167,24 @@ describe('CasesConnector', () => {
         reopenClosedCases,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
+  });
+
+  it('retries correctly', async () => {
+    mockExecute
+      .mockRejectedValueOnce(new CasesConnectorError('Conflict error', 409))
+      .mockRejectedValueOnce(new CasesConnectorError('ES Unavailable', 503))
+      .mockResolvedValue({});
+
+    await connector.run({
+      alerts: [],
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      reopenClosedCases,
+    });
+
+    expect(nextBackOff).toBeCalledTimes(2);
+    expect(mockExecute).toBeCalledTimes(3);
   });
 });

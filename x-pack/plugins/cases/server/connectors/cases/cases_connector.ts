@@ -21,6 +21,8 @@ import {
   isCasesConnectorError,
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
+import { CaseConnectorRetryService } from './retry_service';
+import { fullJitterBackoffFactory } from './full_jitter_backoff';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -33,6 +35,7 @@ export class CasesConnector extends SubActionConnector<
 > {
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
+  private readonly retryService: CaseConnectorRetryService;
   private readonly kibanaRequest: KibanaRequest;
   private readonly casesParams: CasesConnectorParams['casesParams'];
 
@@ -50,6 +53,9 @@ export class CasesConnector extends SubActionConnector<
     });
 
     this.casesService = new CasesService();
+
+    const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
+    this.retryService = new CaseConnectorRetryService(backOffFactory);
 
     /**
      * TODO: Get request from the actions framework.
@@ -80,6 +86,14 @@ export class CasesConnector extends SubActionConnector<
   }
 
   public async run(params: CasesConnectorRunParams) {
+    /**
+     * TODO: Tell the task manager to not retry on non
+     * retryable errors
+     */
+    await this.retryService.retryWithBackoff(() => this._run(params));
+  }
+
+  private async _run(params: CasesConnectorRunParams) {
     try {
       const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
 
