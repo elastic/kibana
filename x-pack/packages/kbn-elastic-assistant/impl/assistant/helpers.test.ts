@@ -235,21 +235,6 @@ describe('getBlockBotConversation', () => {
   });
 
   describe('getOptionalRequestParams', () => {
-    it('should return an empty object when ragOnAlerts is false', () => {
-      const params = {
-        isEnabledRAGAlerts: true,
-        alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
-        size: 10,
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({});
-    });
-
     it('should return an empty object when alerts is false', () => {
       const params = {
         isEnabledRAGAlerts: false, // <-- false
