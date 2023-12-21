@@ -68,7 +68,7 @@ const AppRootProvider = memo<{
   coreStart: CoreStart;
   children: ReactNode | ReactNode[];
 }>(({ history, coreStart: { http, notifications, theme, application }, children }) => {
-  const isDarkMode = useMemo(() => theme.getTheme().darkMode, [theme]);
+  const isDarkMode = theme.getTheme().darkMode;
   const services = useMemo(
     () => ({ http, notifications, application }),
     [application, http, notifications]
