@@ -11,17 +11,26 @@ import type {
   GeoContainmentAlertInstanceContext,
 } from '../types';
 
-import { ActionGroupId, OTHER_CATEGORY } from '../constants';
+import {
+  ActionGroupId,
+  OTHER_CATEGORY,
+  FIELD_KEY_ENTITY_ID,
+  FIELD_KEY_ENTITY_TIMESTAMP,
+  FIELD_KEY_ENTITY_LOCATION,
+  FIELD_KEY_DETECTION_TIMESTAMP,
+  FIELD_KEY_BOUNDARY_ID,
+  FIELD_KEY_BOUNDARY_NAME,
+} from '../constants';
 import { getAlertId, getContainedAlertContext } from './alert_context';
 
 export function getEntitiesAndGenerateAlerts(
   prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
   currLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
-  alertFactory: RuleExecutorServices<
+  alertsClient: RuleExecutorServices<
     GeoContainmentAlertInstanceState,
     GeoContainmentAlertInstanceContext,
     typeof ActionGroupId
-  >['alertFactory'],
+  >['alertsClient'],
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date
 ): {
@@ -43,9 +52,20 @@ export function getEntitiesAndGenerateAlerts(
           shapesIdsNamesMap,
           windowEnd,
         });
-        alertFactory
-          .create(getAlertId(entityName, context.containingBoundaryName))
-          .scheduleActions(ActionGroupId, context);
+        alertsClient!.report({
+          id: getAlertId(entityName, context.containingBoundaryName),
+          actionGroup: ActionGroupId,
+          state: containment,
+          context: context,
+          payload: {
+            [FIELD_KEY_ENTITY_ID]: context.entityId,
+            [FIELD_KEY_ENTITY_TIMESTAMP]: context.entityDateTime,
+            [FIELD_KEY_ENTITY_LOCATION]: context.FIELD_KEY_ENTITY_LOCATION,
+            [FIELD_KEY_DETECTION_TIMESTAMP]: context.detectionDateTime,
+            [FIELD_KEY_BOUNDARY_ID]: context.containingBoundaryId,
+            [FIELD_KEY_BOUNDARY_NAME]: context.containingBoundaryName,
+          },
+        });
       }
     });
 

@@ -6,43 +6,14 @@
  */
 
 import _ from 'lodash';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 import { OTHER_CATEGORY } from '../constants';
-import type {
-  GeoContainmentAlertInstanceState,
-  GeoContainmentAlertInstanceContext,
-} from '../types';
-
-const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
-  create: (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertFactory.create<
-      GeoContainmentAlertInstanceState,
-      GeoContainmentAlertInstanceContext
-    >();
-    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
-      (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
-        // Check subset of alert for comparison to expected results
-        // @ts-ignore
-        const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-        testAlertActionArr.push({
-          actionGroupId,
-          instanceId,
-          context: contextSubset,
-        });
-      }
-    );
-    return alertInstance;
-  },
-  alertLimit: {
-    getValue: () => 1000,
-    setLimitReached: () => {},
-  },
-  done: () => ({ getRecoveredAlerts: () => [] }),
-});
 
 describe('getEntitiesAndGenerateAlerts', () => {
   const testAlertActionArr: unknown[] = [];
+  const mockAlertsClient = {
+    report: jest.fn(),
+  } as any;
   beforeEach(() => {
     jest.clearAllMocks();
     testAlertActionArr.length = 0;
@@ -119,7 +90,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'c-789',
     },
   ];
-  const contextKeys = Object.keys(expectedAlertResults[0].context);
   const emptyShapesIdsNamesMap = {};
 
   const currentDateTime = new Date();
@@ -129,7 +99,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -155,7 +125,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithIdenticalEntityEntry,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -195,7 +165,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithNonIdenticalEntityEntry,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -219,7 +189,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -271,7 +241,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithThreeMore,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -311,7 +281,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -346,7 +316,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );

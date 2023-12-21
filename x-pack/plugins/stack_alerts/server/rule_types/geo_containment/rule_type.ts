@@ -16,7 +16,17 @@ import type {
   GeoContainmentRuleParams,
 } from './types';
 import { executor } from './executor';
-import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import {
+  ActionGroupId,
+  RecoveryActionGroupId,
+  GEO_CONTAINMENT_ID,
+  FIELD_KEY_ENTITY_ID,
+  FIELD_KEY_ENTITY_TIMESTAMP,
+  FIELD_KEY_ENTITY_LOCATION,
+  FIELD_KEY_DETECTION_TIMESTAMP,
+  FIELD_KEY_BOUNDARY_ID,
+  FIELD_KEY_BOUNDARY_NAME,
+} from './constants';
 
 const actionVariables = {
   context: [
@@ -200,5 +210,19 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
+    alerts: {
+      context: 'stack.containment', // TODO replace with "stack" once new fields are supported
+      mappings: {
+        fieldMap: {
+          [FIELD_KEY_ENTITY_ID]: { type: 'keyword', array: false, required: true },
+          [FIELD_KEY_ENTITY_TIMESTAMP]: { type: 'date', array: false, required: true },
+          [FIELD_KEY_ENTITY_LOCATION]: { type: 'geo_point', array: false, required: true },
+          [FIELD_KEY_DETECTION_TIMESTAMP]: { type: 'date', array: false, required: true },
+          [FIELD_KEY_BOUNDARY_ID]: { type: 'keyword', array: false, required: false },
+          [FIELD_KEY_BOUNDARY_NAME]: { type: 'keyword', array: false, required: false },
+        },
+      },
+      shouldWrite: true,
+    }
   };
 }

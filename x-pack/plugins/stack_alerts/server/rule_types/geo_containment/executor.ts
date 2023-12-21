@@ -21,7 +21,14 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import {
+  ActionGroupId,
+  GEO_CONTAINMENT_ID,
+  FIELD_KEY_ENTITY_ID,
+  FIELD_KEY_ENTITY_TIMESTAMP,
+  FIELD_KEY_ENTITY_LOCATION,
+  FIELD_KEY_DETECTION_TIMESTAMP,
+} from './constants';
 
 export async function executor({
   previousStartedAt,
@@ -82,7 +89,7 @@ export async function executor({
   const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
     prevLocationMap,
     currLocationMap,
-    services.alertFactory,
+    services.alertsClient,
     shapesIdsNamesMap,
     windowEnd
   );
@@ -98,7 +105,16 @@ export async function executor({
         windowEnd,
       });
       if (context) {
-        recoveredAlert.setContext(context);
+        services.alertsClient?.setAlertData({
+          id: recoveredAlertId,
+          context,
+          payload: {
+            [FIELD_KEY_ENTITY_ID]: context.entityId,
+            [FIELD_KEY_ENTITY_TIMESTAMP]: context.entityDateTime,
+            [FIELD_KEY_ENTITY_LOCATION]: context.FIELD_KEY_ENTITY_LOCATION,
+            [FIELD_KEY_DETECTION_TIMESTAMP]: context.detectionDateTime,
+          },
+        });
       }
     } catch (e) {
       logger.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);
