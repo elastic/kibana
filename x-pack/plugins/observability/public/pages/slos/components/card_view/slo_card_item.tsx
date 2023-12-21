@@ -20,6 +20,10 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import { SloCardBadgesPortal } from './badges_portal';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
@@ -30,7 +34,7 @@ import { SloCardItemActions } from './slo_card_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloCardItemBadges } from './slo_card_item_badges';
-
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<SloRule>> | undefined;
@@ -64,15 +68,17 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-
+  const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
-    slo,
-    setDeleteConfirmationModalOpen,
-    setIsActionsPopoverOpen,
-    setIsAddRuleFlyoutOpen,
-  });
+  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm, handleAttachToDashboardSave } =
+    useSloListActions({
+      slo,
+      setDeleteConfirmationModalOpen,
+      setIsActionsPopoverOpen,
+      setIsAddRuleFlyoutOpen,
+      setDashboardAttachmentReady,
+    });
 
   return (
     <>
@@ -104,6 +110,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
+            setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
         )}
       </EuiPanel>
@@ -128,6 +135,25 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cards
           slo={slo}
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
+        />
+      ) : null}
+      {isDashboardAttachmentReady ? (
+        <SavedObjectSaveModalDashboard
+          objectType={i18n.translate(
+            'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
+            { defaultMessage: 'SLO Overview' }
+          )}
+          documentInfo={{
+            title: i18n.translate(
+              'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
+              { defaultMessage: 'SLO Overview' }
+            ),
+          }}
+          canSaveByReference={false}
+          onClose={() => {
+            setDashboardAttachmentReady(false);
+          }}
+          onSave={handleAttachToDashboardSave}
         />
       ) : null}
     </>
