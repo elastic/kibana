@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { slice } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
@@ -19,6 +20,10 @@ import {
   EuiSpacer,
   EuiPortal,
   EuiPagination,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiContextMenuItemIcon,
   useIsWithinBreakpoints,
   keys,
   EuiText,
@@ -33,6 +38,8 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
+
+const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -73,6 +80,7 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
+  const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopover] = useState<boolean>(false);
   const isLargeScreen = useIsWithinBreakpoints(['l', 'xl']);
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -201,8 +209,14 @@ export function DiscoverGridFlyout({
         defaultMessage: 'Expanded document',
       });
   const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
-
   const flyoutSize = flyoutCustomization?.size ?? 'm';
+  const visibleFlyoutActions = slice(flyoutActions, 0, MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD);
+  const remainingFlyoutActions = slice(
+    flyoutActions,
+    MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD,
+    flyoutActions.length
+  );
+  const showFlyoutIconsOnly = !isLargeScreen || remainingFlyoutActions.length > 0;
 
   return (
     <EuiPortal>
@@ -240,11 +254,20 @@ export function DiscoverGridFlyout({
                     <EuiFlexGroup
                       responsive={false}
                       alignItems="center"
-                      gutterSize={isLargeScreen ? 's' : 'none'}
+                      gutterSize={showFlyoutIconsOnly ? 'none' : 's'}
                     >
-                      {flyoutActions.map((action) => (
+                      {visibleFlyoutActions.map((action) => (
                         <EuiFlexItem key={action.id} grow={false}>
-                          {isLargeScreen ? (
+                          {showFlyoutIconsOnly ? (
+                            <EuiButtonIcon
+                              size="s"
+                              iconType={action.iconType}
+                              title={action.label}
+                              aria-label={action.label}
+                              href={action.href}
+                              onClick={action.onClick}
+                            />
+                          ) : (
                             // eslint-disable-next-line @elastic/eui/href-or-on-click
                             <EuiButtonEmpty
                               size="s"
@@ -257,18 +280,55 @@ export function DiscoverGridFlyout({
                             >
                               {action.label}
                             </EuiButtonEmpty>
-                          ) : (
-                            <EuiButtonIcon
-                              size="s"
-                              iconType={action.iconType}
-                              title={action.label}
-                              aria-label={action.label}
-                              href={action.href}
-                              onClick={action.onClick}
-                            />
                           )}
                         </EuiFlexItem>
                       ))}
+                      {remainingFlyoutActions.length > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiPopover
+                            id="docViewerMoreFlyoutActions"
+                            button={
+                              <EuiButtonIcon
+                                size="s"
+                                iconType="boxesVertical"
+                                title={i18n.translate(
+                                  'discover.grid.tableRow.moreFlyoutActionsButton',
+                                  {
+                                    defaultMessage: 'More actions',
+                                  }
+                                )}
+                                aria-label={i18n.translate(
+                                  'discover.grid.tableRow.moreFlyoutActionsButton',
+                                  {
+                                    defaultMessage: 'More actions',
+                                  }
+                                )}
+                                onClick={() =>
+                                  setIsMoreFlyoutActionsPopover(!isMoreFlyoutActionsPopoverOpen)
+                                }
+                              />
+                            }
+                            isOpen={isMoreFlyoutActionsPopoverOpen}
+                            closePopover={() => setIsMoreFlyoutActionsPopover(false)}
+                            panelPaddingSize="none"
+                            anchorPosition="downLeft"
+                          >
+                            <EuiContextMenuPanel
+                              size="s"
+                              items={remainingFlyoutActions.map((action) => (
+                                <EuiContextMenuItem
+                                  key={action.id}
+                                  icon={action.iconType as EuiContextMenuItemIcon}
+                                  data-test-subj={action.dataTestSubj}
+                                  onClick={action.onClick}
+                                >
+                                  {action.label}
+                                </EuiContextMenuItem>
+                              ))}
+                            />
+                          </EuiPopover>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </>
                 )}
