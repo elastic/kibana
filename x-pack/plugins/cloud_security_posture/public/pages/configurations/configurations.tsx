@@ -8,7 +8,6 @@ import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools/build/lib/devtools';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -34,7 +33,6 @@ export const Configurations = () => {
 
   return (
     <CloudPosturePage query={dataViewQuery}>
-      <ReactQueryDevtools />
       <Routes>
         <Route
           exact
