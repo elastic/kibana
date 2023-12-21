@@ -490,8 +490,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should have a Deployed state');
             await ml.trainedModelsTable.assertModelState(model.id, 'Deployed');
             await ml.trainedModelsTable.stopDeployment(model.id);
-            // await ml.testExecution.logTestStep('should enabled delete button');
-            // await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, true);
           });
 
           it(`deletes the imported model ${model.id}`, async () => {
