@@ -87,6 +87,7 @@ export const createArgsWithLayers = (
   layers: DataLayerConfig | DataLayerConfig[] = sampleLayer
 ): XYProps => ({
   showTooltip: true,
+  minBarHeight: 1,
   legend: {
     type: 'legendConfig',
     isVisible: false,

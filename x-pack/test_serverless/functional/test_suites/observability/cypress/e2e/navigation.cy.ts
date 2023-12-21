@@ -13,7 +13,7 @@ describe.skip('Serverless', () => {
 
   it('contains the side navigation for observabilitity serverless', () => {
     cy.loginAsElasticUser();
-    cy.contains('Log Explorer');
+    cy.contains('Logs Explorer');
     cy.contains('Dashboards');
     cy.contains('Alerts');
     cy.contains('AIOps');
@@ -26,7 +26,7 @@ describe.skip('Serverless', () => {
   it('navigates to discover-dashboard-viz links', () => {
     cy.loginAsElasticUser();
 
-    cy.contains('Log Explorer').click();
+    cy.contains('Logs Explorer').click();
     cy.url().should('include', '/app/observability-log-explorer');
 
     cy.contains('Dashboards').click();

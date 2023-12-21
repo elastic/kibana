@@ -40,7 +40,10 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  ruleDetailsRoute as commonRuleDetailsRoute,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
@@ -1004,6 +1007,7 @@ export const RulesList = ({
               ruleTypeRegistry={ruleTypeRegistry}
               ruleTypeIndex={ruleTypesState.data}
               onSave={refreshRules}
+              initialSelectedConsumer={STACK_ALERTS_FEATURE_ID}
             />
           </Suspense>
         )}

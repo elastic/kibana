@@ -57,7 +57,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -452,6 +452,7 @@ describe('alert actions', () => {
             templateTimelineVersion: null,
             version: null,
             savedSearchId: null,
+            savedSearch: null,
             isDiscoverSavedSearchLoaded: false,
             isDataProviderVisible: false,
           },

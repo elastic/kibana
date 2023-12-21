@@ -43,8 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/172213
-    describe.skip('test', () => {
+    describe('test', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 

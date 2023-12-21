@@ -5,6 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { AlertConsumers } from '../alerts_as_data_rbac';
+import { STACK_ALERTS_FEATURE_ID } from './stack_rules';
 
 export * from './stack_rules';
 export * from './o11y_rules';
+
+export type RuleCreationValidConsumer =
+  | typeof AlertConsumers.LOGS
+  | typeof AlertConsumers.INFRASTRUCTURE
+  | typeof AlertConsumers.OBSERVABILITY
+  | typeof STACK_ALERTS_FEATURE_ID
+  | 'alerts';

@@ -82,6 +82,7 @@ export interface CreateManagementItemArgs {
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
+  hideFromSidebar?: boolean;
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }

@@ -13,7 +13,7 @@ import { UserPanel } from '.';
 import { mockRiskScoreState } from './mocks';
 
 import {
-  mockManagedUser,
+  mockManagedUserData,
   mockObservedUser,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 
@@ -27,28 +27,31 @@ const mockProps: UserPanelProps = {
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
-jest.mock('../../../explore/containers/risk_score', () => ({
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
 }));
 
-const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUser);
+const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
 const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
 
-jest.mock('../../../timelines/components/side_panel/new_user_detail/hooks', () => {
-  const originalModule = jest.requireActual(
-    '../../../timelines/components/side_panel/new_user_detail/hooks'
-  );
-  return {
-    ...originalModule,
+jest.mock(
+  '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user',
+  () => ({
     useManagedUser: () => mockedUseManagedUser(),
+  })
+);
+
+jest.mock(
+  '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user',
+  () => ({
     useObservedUser: () => mockedUseObservedUser(),
-  };
-});
+  })
+);
 
 describe('UserPanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockRiskScoreState);
-    mockedUseManagedUser.mockReturnValue(mockManagedUser);
+    mockedUseManagedUser.mockReturnValue(mockManagedUserData);
     mockedUseObservedUser.mockReturnValue(mockObservedUser);
   });
 
@@ -97,7 +100,7 @@ describe('UserPanel', () => {
 
   it('renders loading state when managed user is loading', () => {
     mockedUseManagedUser.mockReturnValue({
-      ...mockManagedUser,
+      ...mockManagedUserData,
       isLoading: true,
     });
 

@@ -36,6 +36,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
@@ -43,6 +44,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
@@ -229,7 +231,7 @@ export const buildAlert = (
     [ALERT_RULE_NAMESPACE_FIELD]: params.namespace,
     [ALERT_RULE_NOTE]: params.note,
     [ALERT_RULE_REFERENCES]: params.references,
-    [ALERT_RULE_RISK_SCORE_MAPPING]: params.riskScoreMapping,
+    [ALERT_RULE_RISK_SCORE_MAPPING]: requiredOptional(params.riskScoreMapping),
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
@@ -248,6 +250,7 @@ export const buildAlert = (
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
     [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,
