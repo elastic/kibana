@@ -70,6 +70,7 @@ import {
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { addPanelMenuTrigger } from './triggers';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -149,10 +150,22 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      contentManagement,
+      uiActions,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
+
+    // this trigger enables external consumers to register actions for
+    // adding items to the add panel menu
+    uiActions.registerTrigger(addPanelMenuTrigger);
 
     if (share) {
       this.locator = share.url.locators.create(
