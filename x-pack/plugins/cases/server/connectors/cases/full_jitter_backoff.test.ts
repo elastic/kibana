@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { fullJitterBackOffFactory } from './full_jitter_backoff';
+import { fullJitterBackoffFactory } from './full_jitter_backoff';
 
 describe('FullJitterBackoff', () => {
   it('throws if the baseDelay is negative', async () => {
-    expect(() => fullJitterBackOffFactory(-1, 2000).create()).toThrowErrorMatchingInlineSnapshot(
-      `"baseDelay must not be negative"`
-    );
+    expect(() =>
+      fullJitterBackoffFactory({ baseDelay: -1, maxBackoffTime: 2000 }).create()
+    ).toThrowErrorMatchingInlineSnapshot(`"baseDelay must not be negative"`);
   });
 
   it('throws if the maxBackoffTime is negative', async () => {
-    expect(() => fullJitterBackOffFactory(5, -1).create()).toThrowErrorMatchingInlineSnapshot(
-      `"maxBackoffTime must not be negative"`
-    );
+    expect(() =>
+      fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: -1 }).create()
+    ).toThrowErrorMatchingInlineSnapshot(`"maxBackoffTime must not be negative"`);
   });
 
   it('starts with minimum of 1ms', () => {
-    const backoff = fullJitterBackOffFactory(1, 4).create();
+    const backoff = fullJitterBackoffFactory({ baseDelay: 1, maxBackoffTime: 4 }).create();
     expect(backoff.nextBackOff()).toBeGreaterThanOrEqual(1);
   });
 
   it('caps based on the maxBackoffTime', () => {
     const maxBackoffTime = 4;
 
-    const backoff = fullJitterBackOffFactory(1, maxBackoffTime).create();
+    const backoff = fullJitterBackoffFactory({ baseDelay: 1, maxBackoffTime }).create();
 
     for (const _ of Array.from({ length: 1000 })) {
       // maxBackoffTime plus the minimum 1ms
@@ -42,7 +42,7 @@ describe('FullJitterBackoff', () => {
     // The ceiling for the tries is 2^32
     const expectedCappedBackOff = Math.pow(2, 32);
 
-    const backoff = fullJitterBackOffFactory(1, maxBackoffTime).create();
+    const backoff = fullJitterBackoffFactory({ baseDelay: 1, maxBackoffTime }).create();
 
     for (const _ of Array.from({ length: 1000 })) {
       // maxBackoffTime plus the minimum 1ms
@@ -56,7 +56,7 @@ describe('FullJitterBackoff', () => {
     // 2^11 = 2048 < maxBackoffTime
     const totalTries = 11;
 
-    const backoff = fullJitterBackOffFactory(baseDelay, maxBackoffTime).create();
+    const backoff = fullJitterBackoffFactory({ baseDelay, maxBackoffTime }).create();
 
     for (const index of Array.from(Array(totalTries).keys())) {
       const maxExpectedRange = Math.min(maxBackoffTime, baseDelay * Math.pow(2, index));

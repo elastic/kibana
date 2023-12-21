@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BackoffFactory } from './types';
+
 /**
  * Implements the [Full Jitter Backoff algorithm](
  * https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
@@ -28,7 +30,14 @@ const throwIfNegative = (value: number, fieldName: string) => {
   }
 };
 
-export const fullJitterBackOffFactory = (baseDelay: number, maxBackoffTime: number) => {
+// Times are in ms
+export const fullJitterBackoffFactory = ({
+  baseDelay,
+  maxBackoffTime,
+}: {
+  baseDelay: number;
+  maxBackoffTime: number;
+}): BackoffFactory => {
   throwIfNegative(baseDelay, 'baseDelay');
   throwIfNegative(maxBackoffTime, 'maxBackoffTime');
 

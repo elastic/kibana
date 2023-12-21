@@ -67,3 +67,11 @@ export type BulkUpdateOracleRecordRequest = Array<{
   version: string;
   payload: Pick<OracleRecordAttributes, 'counter'>;
 }>;
+
+export interface BackoffStrategy {
+  nextBackOff: () => number;
+}
+
+export interface BackoffFactory {
+  create: () => BackoffStrategy;
+}
