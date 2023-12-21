@@ -41,16 +41,13 @@ interface BenchmarksTableProps
 }
 
 const BenchmarkButtonLink = ({
-  benchmarkName,
-  benchmarkVersion,
   benchmarkId,
+  benchmarkVersion,
 }: {
-  benchmarkName: BenchmarksCisId;
+  benchmarkId: BenchmarksCisId;
   benchmarkVersion: string;
-  benchmarkId: string;
 }) => {
   const { application } = useKibana().services;
-
   return (
     <EuiLink
       href={application?.getUrlForApp('security', {
@@ -60,7 +57,7 @@ const BenchmarkButtonLink = ({
         }),
       })}
     >
-      {getBenchmarkCisName(benchmarkName)}
+      {getBenchmarkCisName(benchmarkId)}
     </EuiLink>
   );
 };
@@ -154,7 +151,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     sortable: true,
     render: (benchmarkId: Benchmark['id'], benchmark: Benchmark) => (
       <BenchmarkButtonLink
-        benchmarkName={benchmarkId || ''}
         benchmarkId={benchmarkId || ''}
         benchmarkVersion={benchmark.version || ''}
       />

@@ -24,8 +24,6 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
-  const [packageInfo] = benchmarksInfo.data?.items || [];
-
   return (
     <CloudPosturePage query={benchmarksInfo}>
       <EuiPageHeader
@@ -68,7 +66,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
       {SpyRoute && (
         <SpyRoute
           pageName={cloudPosturePages.benchmarks.id}
-          state={{ ruleName: packageInfo?.name }}
+          state={{ ruleName: getBenchmarkCisName(params.benchmarkId) }}
         />
       )}
     </CloudPosturePage>

@@ -184,7 +184,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
         <h2>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-            defaultMessage="Detect security misconfiguration in your cloud infrastructure"
+            defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
           />
         </h2>
       }
