@@ -7,3 +7,5 @@
  */
 
 export { RemoteProvider } from './remote';
+export { Browsers } from './browsers';
+export { NETWORK_PROFILES, type NetworkOptions, type NetworkProfile } from './network_profiles';

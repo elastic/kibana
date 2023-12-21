@@ -8,8 +8,8 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export interface TabbedGridData {
   columns: string[];

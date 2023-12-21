@@ -9,8 +9,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import assert from 'assert';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
-import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

@@ -15,7 +15,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
-import { Browsers } from '../../remote/browsers';
+import { Browsers } from '../remote/browsers';
 
 interface TypeOptions {
   charByChar: boolean;

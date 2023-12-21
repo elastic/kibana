@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
 const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN';

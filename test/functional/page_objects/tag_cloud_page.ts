@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class TagCloudPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');

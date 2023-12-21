@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 interface FillTagFormFields {

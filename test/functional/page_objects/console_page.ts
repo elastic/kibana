@@ -8,8 +8,8 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');

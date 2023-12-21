@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from './config';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 const initialPackageMap = {
   apache: 'Apache HTTP Server',

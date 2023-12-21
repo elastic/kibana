@@ -15,14 +15,14 @@ import Url from 'url';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
-import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { Browsers } from '../remote/browsers';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Browsers } from '@kbn/ftr-common-functional-ui-services';
 import {
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-} from '../remote/network_profiles';
+} from '@kbn/ftr-common-functional-ui-services';
+import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
 
 export type Browser = BrowserService;
 

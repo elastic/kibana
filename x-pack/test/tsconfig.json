@@ -165,5 +165,6 @@
     "@kbn/log-explorer-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/typed-react-router-config",
+    "@kbn/ftr-common-functional-ui-services",
   ]
 }

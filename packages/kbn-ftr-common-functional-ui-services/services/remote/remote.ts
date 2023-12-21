@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
 
