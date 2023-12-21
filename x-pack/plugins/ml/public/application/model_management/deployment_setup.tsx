@@ -92,6 +92,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             id,
             label: id,
             value,
+            'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
           };
         }),
     [maxSingleMlNodeProcessors]

@@ -521,14 +521,18 @@ export function TrainedModelsTableProvider(
     public async setPriority(value: 'low' | 'normal') {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalPriority',
-        value.toString()
+        value.toString(),
+        value === 'normal'
+          ? 'mlModelsStartDeploymentModalNormalPriority'
+          : 'mlModelsStartDeploymentModalLowPriority'
       );
     }
 
     public async setThreadsPerAllocation(value: number) {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalThreadsPerAllocation',
-        value.toString()
+        value.toString(),
+        `mlModelsStartDeploymentModalThreadsPerAllocation_${value}`
       );
     }
 
