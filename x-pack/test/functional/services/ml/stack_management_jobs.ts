@@ -142,27 +142,22 @@ export function MachineLearningStackManagementJobsProvider({
       await testSubjects.missingOrFail('share-to-space-flyout', { timeout: 2000 });
     },
 
-    async selectShareToSpacesMode(inputTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId') {
-      // The input element can not be clicked directly.
-      // Instead, we need to click the parent label
-      const getInputLabel = async () => {
-        const input = await testSubjects.find(inputTestSubj, 1000);
-        return await input.findByXpath('./../../..'); // Clicks the parent label 3 levels up
-      };
+    async selectShareToSpacesMode(
+      buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
+    ) {
       await retry.tryForTime(5000, async () => {
-        const labelElement = await getInputLabel();
-        await labelElement.click();
+        const button = await testSubjects.find(buttonTestSubj, 1000);
+        await button.click();
 
-        const checked = await testSubjects.getAttribute(inputTestSubj, 'checked', 1000);
-        expect(checked).to.eql('true', `Input '${inputTestSubj}' should be checked`);
+        const isPressed = await button.getAttribute('aria-pressed');
+        expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
 
-        // sometimes the checked attribute of the input is set but it's not actually
+        // sometimes the aria-pressed attribute of the button is set but it's not actually
         // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await getInputLabel();
-        const labelClasses = await updatedLabelElement.getAttribute('class');
+        const labelClasses = await button.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',
-          `Label for '${inputTestSubj}' should be selected`
+          `Label for '${buttonTestSubj}' should be selected`
         );
       });
     },
