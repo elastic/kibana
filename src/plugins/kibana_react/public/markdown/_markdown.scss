@@ -14,7 +14,7 @@
 $kbnDefaultFontSize: 14px;
 
 @function canvasToEm($size) {
-  @return #{calc($size / $kbnDefaultFontSize)}em;
+  @return #{$size / $kbnDefaultFontSize}em;
 }
 
 .kbnMarkdown__body {
