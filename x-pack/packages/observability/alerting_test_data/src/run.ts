@@ -42,7 +42,7 @@ export async function run() {
     if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
       if (scenario.dataView.shouldCreate) {
         console.log('Creating data view - start - id: ', scenario.dataView.id);
-        await deleteDataView(scenario.dataView);
+        //await deleteDataView(scenario.dataView);
         await createDataView(scenario.dataView);
         console.log('Creating data view - finished - id: ', scenario.dataView.id);
       }
