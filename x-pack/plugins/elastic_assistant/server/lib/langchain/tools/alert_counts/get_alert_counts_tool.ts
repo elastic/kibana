@@ -15,7 +15,7 @@ import { requestHasRequiredAnonymizationParams } from '../../helpers';
 import type { RequestBody } from '../../types';
 
 export const ALERT_COUNTS_TOOL_DESCRIPTION =
-  'Call this for the counts of last 24 hours of open alerts in the environment, grouped by their severity';
+  'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status.';
 
 export const getAlertCountsTool = ({
   alertsIndexPattern,
