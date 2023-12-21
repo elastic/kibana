@@ -42,7 +42,6 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   messages,
   onNewReplacements: jest.fn(),
-  ragOnAlerts: false,
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -91,7 +90,6 @@ describe('API tests', () => {
         alertsIndexPattern: '.alerts-security.alerts-default',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        ragOnAlerts: true,
         replacements: { auuid: 'real.hostname' },
         size: 30,
       };
