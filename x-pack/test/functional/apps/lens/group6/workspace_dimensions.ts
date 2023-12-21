@@ -43,10 +43,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const assertWorkspaceDimensions = async (expectedWidth: string, expectedHeight: string) => {
-      const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+      await retry.try(() => {
+        const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
 
-      expect(width).to.be(expectedWidth);
-      expect(height).to.be(expectedHeight);
+        expect(width).to.be(expectedWidth);
+        expect(height).to.be(expectedHeight);
+      });
     };
 
     it('adjusts dimension for various chart types', async () => {
@@ -132,9 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
       await testSubjects.setValue('lnsMetric_max_cols', '2');
 
-      retry.try(async () => {
-        await assertWorkspaceDimensions('400px', '600px');
-      });
+      await assertWorkspaceDimensions('400px', '600px');
     });
   });
 }
