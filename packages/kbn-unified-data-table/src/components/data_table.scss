@@ -40,6 +40,13 @@
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell--controlColumn:hover::after,
+  .euiDataGridRowCell--controlColumn:focus::after,
+  .euiDataGridRowCell--controlColumn.euiDataGridRowCell--open::after {
+    border-color: transparent;
+  }
+
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding-left: 0;
@@ -113,7 +120,7 @@
 
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
-  margin-top: -3px;
+  margin-top: -$euiSizeXS;
   .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
   }
