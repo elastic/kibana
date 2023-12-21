@@ -21,13 +21,23 @@ export const convertRuleTagsToKQL = (tags: string[]): string => {
 /*
  * Returns an array of CspFinding tags that can be used to search and filter a detection rule
  */
-export const getFindingsDetectionRuleSearchTags = (cspBenchmarkRule: CspBenchmarkRuleMetadata) => {
+export const getFindingsDetectionRuleSearchTags = (
+  cspBenchmarkRule: CspBenchmarkRuleMetadata
+): string[] => {
+  if (!cspBenchmarkRule.benchmark || !cspBenchmarkRule.benchmark.id) {
+    // Return an empty array if benchmark ID is undefined
+    return [];
+  }
+
   // ex: cis_gcp to ['CIS', 'GCP']
   const benchmarkIdTags = cspBenchmarkRule.benchmark.id.split('_').map((tag) => tag.toUpperCase());
+
   // ex: 'CIS GCP 1.1'
-  const benchmarkRuleNumberTag = `${cspBenchmarkRule.benchmark.id
-    .replace('_', ' ')
-    .toUpperCase()} ${cspBenchmarkRule.benchmark.rule_number}`;
+  const benchmarkRuleNumberTag = cspBenchmarkRule.benchmark.rule_number
+    ? `${cspBenchmarkRule.benchmark.id.replace('_', ' ').toUpperCase()} ${
+        cspBenchmarkRule.benchmark.rule_number
+      }`
+    : cspBenchmarkRule.benchmark.id.replace('_', ' ').toUpperCase();
 
   return benchmarkIdTags.concat([benchmarkRuleNumberTag]);
 };

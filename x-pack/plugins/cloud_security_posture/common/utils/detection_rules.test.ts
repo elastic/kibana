@@ -23,8 +23,16 @@ describe('Tests detection rules utils', () => {
     expect(result).toBe(expectedKQL);
   });
 
+  it('should convert tags to KQL format', () => {
+    const inputTags = [] as string[];
+
+    const result = convertRuleTagsToKQL(inputTags);
+
+    const expectedKQL = 'alert.attributes.tags:()';
+    expect(result).toBe(expectedKQL);
+  });
+
   it('should generate search tags for a CSP benchmark rule', () => {
-    // Arrange: Create a sample CSP benchmark rule
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',
@@ -38,7 +46,25 @@ describe('Tests detection rules utils', () => {
     expect(result).toEqual(expectedTags);
   });
 
-  it('should generate tags for a CSP benchmark rule', () => {
+  it('should handle undefined benchmark object gracefully', () => {
+    const cspBenchmarkRule = { benchmark: {} } as any;
+    const expectedTags: string[] = [];
+    const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
+    expect(result).toEqual(expectedTags);
+  });
+
+  it('should handle undefined rule number gracefully', () => {
+    const cspBenchmarkRule = {
+      benchmark: {
+        id: 'cis_gcp',
+      },
+    } as unknown as CspBenchmarkRuleMetadata;
+    const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
+    const expectedTags = ['CIS', 'GCP', 'CIS GCP'];
+    expect(result).toEqual(expectedTags);
+  });
+
+  it('should generate tags for a CSPM benchmark rule', () => {
     const cspBenchmarkRule = {
       benchmark: {
         id: 'cis_gcp',
@@ -58,6 +84,30 @@ describe('Tests detection rules utils', () => {
       'CSPM',
       'Data Source: CSPM',
       'Domain: Cloud',
+    ];
+    expect(result).toEqual(expectedTags);
+  });
+
+  it('should generate tags for a KSPM benchmark rule', () => {
+    const cspBenchmarkRule = {
+      benchmark: {
+        id: 'cis_gcp',
+        rule_number: '1.1',
+        posture_type: 'kspm',
+      },
+    } as unknown as CspBenchmarkRuleMetadata;
+
+    const result = generateBenchmarkRuleTags(cspBenchmarkRule);
+
+    const expectedTags = [
+      'Cloud Security',
+      'Use Case: Configuration Audit',
+      'CIS',
+      'GCP',
+      'CIS GCP 1.1',
+      'KSPM',
+      'Data Source: KSPM',
+      'Domain: Container',
     ];
     expect(result).toEqual(expectedTags);
   });
