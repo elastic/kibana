@@ -25,6 +25,8 @@ const Template: ComponentStory<typeof Component> = (props: FunctionListPopover) 
 const defaultProps: FunctionListPopover = {
   onSelectFunction: () => {},
   disabled: false,
+  mode: 'prompt',
+  selectedFunctionName: 'foo',
 };
 
 export const ConversationList = Template.bind({});
