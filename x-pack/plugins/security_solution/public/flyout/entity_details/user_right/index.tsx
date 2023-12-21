@@ -99,8 +99,6 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
 
-  const a = managedUser.data?.[ManagedUserDatasetKey.OKTA];
-
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
