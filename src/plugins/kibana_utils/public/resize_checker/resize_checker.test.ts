@@ -9,6 +9,11 @@
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
+// If you want to know why these mocks are created,
+// please check: https://github.com/elastic/kibana/pull/44750
+jest.mock('@juggle/resize-observer');
+import { ResizeObserver } from '@juggle/resize-observer';
+
 class MockElement {
   public clientWidth: number;
   public clientHeight: number;
