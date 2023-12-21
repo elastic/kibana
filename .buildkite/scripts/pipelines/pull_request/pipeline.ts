@@ -211,6 +211,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
+        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/usage_collection\/public/,
         /^x-pack\/plugins\/elastic_assistant/,
         /^x-pack\/packages\/security-solution/,
