@@ -20,7 +20,7 @@ import {
   setData,
   setDataViews,
   setInjectedVars,
-  setThemeStart,
+  setThemeService,
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
@@ -102,7 +102,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
-    setThemeStart(core.theme);
+    setThemeService(core.theme);
     setUsageCollectionStart(usageCollection);
   }
 }

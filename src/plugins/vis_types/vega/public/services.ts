@@ -35,5 +35,5 @@ export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('doc
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection');
 
-export const [getThemeStart, setThemeStart] =
+export const [getThemeService, setThemeService] =
   createGetterSetter<ThemeServiceStart>('ThemeServiceStart');
