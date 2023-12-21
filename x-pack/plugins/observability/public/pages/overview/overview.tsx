@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -33,6 +33,7 @@ import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
+import { MultiPaneFlyout } from './multipane_flyout';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
@@ -50,6 +51,10 @@ export function OverviewPage() {
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
+
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [useTwoItems, setUseTwoItems] = useState(false);
+  const [direction, setDirection] = useState<'row' | 'column'>('row');
 
   useBreadcrumbs([
     {
@@ -162,6 +167,34 @@ export function OverviewPage() {
 
       <ObservabilityOnboardingCallout />
 
+      <EuiButton
+        data-test-subj="o11yOverviewPageShowFlyoutButton"
+        onClick={() => setIsFlyoutVisible(true)}
+      >
+        {i18n.translate('xpack.observability.overviewPage.showFlyoutButtonLabel', {
+          defaultMessage: 'Show Flyout',
+        })}
+      </EuiButton>
+
+      <EuiButton
+        onClick={() => setUseTwoItems(!useTwoItems)}
+        fill={useTwoItems}
+        data-test-subj="o11yOverviewPageUseTwoItemsButton"
+      >
+        {i18n.translate('xpack.observability.overviewPage.useTwoItemsButtonLabel', {
+          defaultMessage: 'Use two items',
+        })}
+      </EuiButton>
+
+      <EuiButton
+        onClick={() => setDirection(direction === 'row' ? 'column' : 'row')}
+        data-test-subj="o11yOverviewPageSwitchHorizontalVerticalButton"
+      >
+        {i18n.translate('xpack.observability.overviewPage.switchHorizontalVerticalButtonLabel', {
+          defaultMessage: 'Switch horizontal  vertical',
+        })}
+      </EuiButton>
+
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="obltOverviewAlerts">
         <EuiFlexItem>
           <SectionContainer
@@ -222,6 +255,38 @@ export function OverviewPage() {
 
       {isDataAssistantFlyoutVisible ? (
         <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
+      ) : null}
+
+      {isFlyoutVisible ? (
+        <MultiPaneFlyout
+          isSwitchable
+          flexDirection={direction}
+          slotOne={{
+            title: 'Main content',
+            content: (
+              <div>
+                {i18n.translate('xpack.observability.overviewPage.div.heyHowsItGoingLabel', {
+                  defaultMessage: 'Hey hows it going',
+                })}
+              </div>
+            ),
+          }}
+          slotTwo={
+            useTwoItems
+              ? {
+                  title: 'Another column',
+                  content: (
+                    <div>
+                      {i18n.translate('xpack.observability.overviewPage.div.heyHowsItGoingLabel', {
+                        defaultMessage: 'Hey hows it going',
+                      })}
+                    </div>
+                  ),
+                }
+              : undefined
+          }
+          onClose={() => setIsFlyoutVisible(false)}
+        />
       ) : null}
     </ObservabilityPageTemplate>
   );
