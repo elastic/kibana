@@ -284,7 +284,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   disabled: caseAttachmentButtonDisabled,
                   ...(caseAttachmentButtonDisabled
                     ? {
-                        toolTipPosition: 'left' as const,
+                        toolTipProps: { position: 'left' as const },
                         toolTipContent: i18n.translate(
                           'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
                           {

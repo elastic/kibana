@@ -141,7 +141,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
             defaultMessage="Download the data in table format"
           />
         }
-        toolTipPosition="left"
+        toolTipProps={{ position: 'left' }}
       >
         <FormattedMessage
           id="data.inspector.table.formattedCSVButtonLabel"
@@ -157,7 +157,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
             defaultMessage="Download the data as provided, for example, dates as timestamps"
           />
         }
-        toolTipPosition="left"
+        toolTipProps={{ position: 'left' }}
       >
         <FormattedMessage id="data.inspector.table.rawCSVButtonLabel" defaultMessage="Raw CSV" />
       </EuiContextMenuItem>,
