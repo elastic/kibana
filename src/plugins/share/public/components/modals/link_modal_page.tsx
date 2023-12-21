@@ -82,15 +82,15 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     };
   }
 
-  const makeUrlEmbeddable = (tempUrl: string): string => {
+  const makeUrlEmbeddable = (url: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+    const urlHasQueryString = url.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return setUrl(tempUrl.replace('?', `${embedParam}&`));
+      return url.replace('?', `${embedParam}&`);
     }
 
-    return setUrl(`${tempUrl}${embedParam}`);
+    return `${url}${embedParam}`;
   };
 
   const makeIframeTag = (url?: string) => {

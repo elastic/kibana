@@ -198,9 +198,9 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       return;
     }
 
-    const url = getSnapshotUrl(true);
+    const tempUrl = getSnapshotUrl(true);
 
-    const parsedUrl = parseUrl(url);
+    const parsedUrl = parseUrl(tempUrl);
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }
@@ -240,7 +240,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const setUrlHelper = () => {
-    let tempUrl: string = '';
+    let tempUrl: string | undefined = '';
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       tempUrl = getSavedObjectUrl();
@@ -258,7 +258,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       tempUrl = makeIframeTag(url);
     }
 
-    setUrl(tempUrl);
+    if (tempUrl !== undefined) setUrl(tempUrl);
   };
 
   const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
