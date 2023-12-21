@@ -20,13 +20,15 @@ query
     ;
 
 sourceCommand
-    : fromCommand
+    : explainCommand
+    | fromCommand
     | rowCommand
     | showCommand
     ;
 
 processingCommand
     : evalCommand
+    | inlinestatsCommand
     | limitCommand
     | keepCommand
     | sortCommand
@@ -96,12 +98,13 @@ field
     ;
 
 fromCommand
-    : FROM sourceIdentifier (COMMA sourceIdentifier)* metadata?
+    : FROM fromIdentifier (COMMA fromIdentifier)* metadata?
     ;
 
 metadata
-    : OPENING_BRACKET METADATA sourceIdentifier (COMMA sourceIdentifier)* CLOSING_BRACKET
+    : OPENING_BRACKET METADATA fromIdentifier (COMMA fromIdentifier)* CLOSING_BRACKET
     ;
+
 
 evalCommand
     : EVAL fields
@@ -111,21 +114,34 @@ statsCommand
     : STATS fields? (BY grouping)?
     ;
 
+inlinestatsCommand
+    : INLINESTATS fields (BY grouping)?
+    ;
+
 grouping
     : qualifiedName (COMMA qualifiedName)*
     ;
 
-sourceIdentifier
-    : SRC_UNQUOTED_IDENTIFIER
-    | SRC_QUOTED_IDENTIFIER
+fromIdentifier
+    : FROM_UNQUOTED_IDENTIFIER
+    | QUOTED_IDENTIFIER
     ;
 
 qualifiedName
     : identifier (DOT identifier)*
     ;
 
+qualifiedNamePattern
+    : identifierPattern (DOT identifierPattern)*
+    ;
+
 identifier
     : UNQUOTED_IDENTIFIER
+    | QUOTED_IDENTIFIER
+    ;
+
+identifierPattern
+    : PROJECT_UNQUOTED_IDENTIFIER
     | QUOTED_IDENTIFIER
     ;
 
@@ -155,12 +171,12 @@ orderExpression
     ;
 
 keepCommand
-    :  KEEP sourceIdentifier (COMMA sourceIdentifier)*
-    |  PROJECT sourceIdentifier (COMMA sourceIdentifier)*
+    :  KEEP qualifiedNamePattern (COMMA qualifiedNamePattern)*
+    |  PROJECT qualifiedNamePattern (COMMA qualifiedNamePattern)*
     ;
 
 dropCommand
-    : DROP sourceIdentifier (COMMA sourceIdentifier)*
+    : DROP qualifiedNamePattern (COMMA qualifiedNamePattern)*
     ;
 
 renameCommand
@@ -168,7 +184,7 @@ renameCommand
     ;
 
 renameClause:
-    oldName=sourceIdentifier AS newName=sourceIdentifier
+    oldName=qualifiedNamePattern AS newName=qualifiedNamePattern
     ;
 
 dissectCommand
@@ -180,7 +196,7 @@ grokCommand
     ;
 
 mvExpandCommand
-    : MV_EXPAND sourceIdentifier
+    : MV_EXPAND qualifiedName
     ;
 
 commandOptions
@@ -216,15 +232,23 @@ comparisonOperator
     : EQ | NEQ | LT | LTE | GT | GTE
     ;
 
+explainCommand
+    : EXPLAIN subqueryExpression
+    ;
+
+subqueryExpression
+    : OPENING_BRACKET query CLOSING_BRACKET
+    ;
+
 showCommand
     : SHOW INFO                                                           #showInfo
     | SHOW FUNCTIONS                                                      #showFunctions
     ;
 
 enrichCommand
-    : ENRICH policyName=sourceIdentifier (ON matchField=sourceIdentifier)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
+    : ENRICH policyName=fromIdentifier (ON matchField=qualifiedNamePattern)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
     ;
 
 enrichWithClause
-    : (newName=sourceIdentifier ASSIGN)? enrichField=sourceIdentifier
+    : (newName=qualifiedNamePattern ASSIGN)? enrichField=qualifiedNamePattern
     ;

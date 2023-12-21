@@ -25,3 +25,15 @@ export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
   [RiskSeverity.high]: SEVERITY_COLOR.high,
   [RiskSeverity.critical]: SEVERITY_COLOR.critical,
 };
+
+export enum UserRiskScoreQueryId {
+  USERS_BY_RISK = 'UsersByRisk',
+  USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
+}
+
+export enum HostRiskScoreQueryId {
+  DEFAULT = 'HostRiskScore',
+  HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
+  OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
+  HOSTS_BY_RISK = 'HostsByRisk',
+}
