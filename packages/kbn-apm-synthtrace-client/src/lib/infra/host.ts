@@ -14,6 +14,7 @@ import { pod } from './pod';
 
 interface HostDocument extends Fields {
   'host.hostname': string;
+  'host.name': string;
 }
 
 class Host extends Entity<HostDocument> {
@@ -47,5 +48,6 @@ class HostMetrics extends Serializable<HostMetricsDocument> {}
 export function host(name: string): Host {
   return new Host({
     'host.hostname': name,
+    'host.name': name,
   });
 }
