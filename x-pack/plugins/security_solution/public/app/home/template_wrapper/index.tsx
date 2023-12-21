@@ -15,10 +15,10 @@ import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
-import { SecuritySolutionBottomBar } from './bottom_bar';
+import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../types';
@@ -90,7 +90,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           {isTimelineBottomBarVisible && (
             <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
               <EuiThemeProvider colorMode={globalColorMode}>
-                <SecuritySolutionBottomBar />
+                <Timeline />
               </EuiThemeProvider>
             </KibanaPageTemplate.BottomBar>
           )}
