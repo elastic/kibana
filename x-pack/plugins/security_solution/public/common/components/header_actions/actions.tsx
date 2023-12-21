@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { NOTES_BUTTON_CLASS_NAME } from '../../../timelines/components/timeline/properties/helpers';
-import type { NotesMap } from '../../../timelines/components/timeline/unified_components/render_custom_body';
-import { TimelineDataTableContext } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import {
   eventHasNotes,
   getEventType,
@@ -82,8 +79,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
-  const { notesMap, setNotesMap } = useContext(TimelineDataTableContext);
-  const trGroupRef = useRef<HTMLDivElement | null>(null);
 
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -123,27 +118,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
       setCellProps({ style: undefined });
     }
   }, [eventId, expandedDoc, setCellProps]);
-
-  const toggleShowNotesEvent = useCallback(() => {
-    setNotesMap((prevShowNotes: NotesMap) => {
-      const row = notesMap[eventId];
-      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
-
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
-      return {
-        ...prevShowNotes,
-        [eventId]: { ...row, isAddingNote: true },
-      };
-    });
-  }, [eventId, notesMap, setNotesMap]);
 
   const handlePinClicked = useCallback(
     () =>
@@ -342,13 +316,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && (
+        {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotesEvent}
+              toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
             />
             <PinEventAction

@@ -11,7 +11,7 @@ import {
   type EuiDataGridCustomBodyProps,
   type EuiDataGridProps,
 } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -64,6 +64,7 @@ import CustomGridBodyControls, { TimelineDataTableContext } from './render_custo
 import RowDetails from './row_details';
 import { timelineDefaults } from '../../../store/defaults';
 import { timelineActions } from '../../../store';
+import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -164,6 +165,10 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     }),
     [columns]
   );
+  const [notesMap, setNotesMap] = useState<NotesMap>({});
+  const trGroupRef = useRef<HTMLDivElement | null>(null);
+
+  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
 
   const {
     timeline: {
@@ -299,6 +304,30 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [discoverGridRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
   );
 
+  const toggleShowNotesEvent = useCallback(
+    (eventId: string) => {
+      setNotesMap((prevShowNotes: NotesMap) => {
+        const row = notesMap[eventId];
+        if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
+
+        if (prevShowNotes[eventId]) {
+          // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+          setTimeout(() => {
+            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+              `.${NOTES_BUTTON_CLASS_NAME}`
+            );
+            notesButtonElement?.focus();
+          }, 0);
+        }
+        return {
+          ...prevShowNotes,
+          [eventId]: { ...row, isAddingNote: true },
+        };
+      });
+    },
+    [notesMap, setNotesMap]
+  );
+
   const leadingControlColumns = useMemo(() => {
     return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((column) => {
       return {
@@ -333,7 +362,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               showCheckboxes={column.showCheckboxes ?? false}
               // showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
               timelineId={timelineId}
-              // toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
+              toggleShowNotes={() => toggleShowNotesEvent(discoverGridRows[cveProps.rowIndex].id)}
               refetch={refetch}
               setEventsLoading={setEventsLoading}
               isUnifiedDataTable={true}
@@ -356,6 +385,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     refetch,
     setEventsLoading,
     expandedDoc,
+    toggleShowNotesEvent,
   ]);
 
   // Sorting
@@ -532,10 +562,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
     [timelineId, updatedAt]
   );
-
-  const [notesMap, setNotesMap] = useState<NotesMap>({});
-
-  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
 
   const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
 
