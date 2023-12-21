@@ -49,7 +49,7 @@ export function InspectorContextProvider({ children }: { children: ReactNode }) 
         const requestParams = { id, name };
 
         const requestResponder = inspectorAdapters.requests.start(
-          id,
+          name,
           requestParams,
           operation.startTime
         );

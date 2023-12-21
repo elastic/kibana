@@ -7,49 +7,34 @@
 
 import { useEuiFontSize } from '@elastic/eui';
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { UserDetailsLeftPanelTab } from '../../../../flyout/entity_details/user_detais_left/tabs';
 import { ExpandablePanel } from '../../../../flyout/shared/components/expandable_panel';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { ONE_WEEK_IN_HOURS } from './constants';
-import { AssetDocumentLeftPanelKey } from '../../../../flyout/entity_details/asset_document_left';
-import type { UserAssetTableType } from '../../../../explore/users/store/model';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
 interface ManagedUserAccordionProps {
   children: React.ReactNode;
   title: string;
   managedUser: ManagedUserFields;
-  indexName: string;
-  eventId: string;
   tableType: UserAssetTableType;
+  openDetailsPanel: (tab: UserDetailsLeftPanelTab) => void;
 }
 
 export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
   children,
   title,
   managedUser,
-  indexName,
-  eventId,
   tableType,
+  openDetailsPanel,
 }) => {
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const timestamp = get('@timestamp[0]', managedUser) as unknown as string | undefined;
-
-  const { openLeftPanel } = useExpandableFlyoutContext();
-  const toggleDetails = useCallback(() => {
-    openLeftPanel({
-      id: AssetDocumentLeftPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId: tableType,
-      },
-    });
-  }, [openLeftPanel, eventId, indexName, tableType]);
 
   return (
     <ExpandablePanel
@@ -78,7 +63,12 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
           </span>
         ),
         link: {
-          callback: toggleDetails,
+          callback: () =>
+            openDetailsPanel(
+              tableType === UserAssetTableType.assetOkta
+                ? UserDetailsLeftPanelTab.OKTA
+                : UserDetailsLeftPanelTab.ENTRA
+            ),
           tooltip: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.showAssetDocument"

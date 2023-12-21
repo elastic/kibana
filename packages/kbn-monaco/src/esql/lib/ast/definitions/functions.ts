@@ -38,6 +38,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'ceil',
+    description: i18n.translate('monaco.esql.definitions.ceilDoc', {
+      defaultMessage: 'Round a number up to the nearest integer.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'number',
+        examples: [`from index | eval ceil_value = ceil(field)`],
+      },
+    ],
+  },
+  {
     name: 'log10',
     description: i18n.translate('monaco.esql.definitions.log10Doc', {
       defaultMessage: 'Returns the log base 10.',
@@ -206,6 +219,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'any' }],
         returnType: 'boolean',
         examples: [`from index" | EVAL bool = to_boolean(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_cartesianpoint',
+    description: i18n.translate('monaco.esql.definitions.toCartesianPointDoc', {
+      defaultMessage: 'Converts an input value to a `point` value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'cartesian_point',
+        examples: [`from index | EVAL point = to_cartesianpoint(field)`],
       },
     ],
   },
@@ -642,6 +668,22 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         infiniteParams: true,
         returnType: 'number',
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
+      },
+    ],
+  },
+  {
+    name: 'least',
+    description: i18n.translate('monaco.esql.definitions.leastDoc', {
+      defaultMessage: 'Returns the minimum value from many columns.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'first', type: 'number' },
+          { name: 'rest', type: 'number' },
+        ],
+        returnType: 'number',
+        examples: ['from index | eval l = least(a, b)'],
       },
     ],
   },
