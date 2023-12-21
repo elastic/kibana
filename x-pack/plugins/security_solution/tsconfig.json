@@ -185,6 +185,7 @@
     "@kbn/core-http-common",
     "@kbn/search-errors",
     "@kbn/stack-connectors-plugin",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/lens-embeddable-utils"
   ]
 }
