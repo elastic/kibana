@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   allOrAnyString,
   apmTransactionDurationIndicatorSchema,
@@ -19,6 +20,7 @@ import {
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  timesliceMetricIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
   previewDataSchema,
@@ -28,6 +30,9 @@ import {
   tagsSchema,
   timeWindowSchema,
   timeWindowTypeSchema,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -56,6 +61,10 @@ const createSLOResponseSchema = t.type({
 const getPreviewDataParamsSchema = t.type({
   body: t.type({
     indicator: indicatorSchema,
+    range: t.type({
+      start: t.number,
+      end: t.number,
+    }),
   }),
 });
 
@@ -101,6 +110,7 @@ const sloResponseSchema = t.intersection([
     groupBy: allOrAnyString,
     createdAt: dateType,
     updatedAt: dateType,
+    version: t.number,
   }),
   t.partial({
     instanceId: allOrAnyString,
@@ -149,6 +159,12 @@ const manageSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
 
+const resetSLOParamsSchema = t.type({
+  path: t.type({ id: sloIdSchema }),
+});
+
+const resetSLOResponseSchema = sloResponseSchema;
+
 const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
@@ -174,23 +190,21 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
-/**
- * The query params schema for /internal/observability/slo/_definitions
- *
- * @private
- */
-const findSloDefinitionsParamsSchema = t.type({
-  query: t.type({
+const findSloDefinitionsParamsSchema = t.partial({
+  query: t.partial({
     search: t.string,
+    includeOutdatedOnly: toBooleanRt,
+    page: t.string,
+    perPage: t.string,
   }),
 });
 
-/**
- * The response schema for /internal/observability/slo/_definitions
- *
- * @private
- */
-const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
+const findSloDefinitionsResponseSchema = t.type({
+  page: t.number,
+  perPage: t.number,
+  total: t.number,
+  results: t.array(sloResponseSchema),
+});
 
 const getSLOBurnRatesResponseSchema = t.type({
   burnRates: t.array(
@@ -236,6 +250,9 @@ type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
+type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
+type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
+
 type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
@@ -250,12 +267,8 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
-/**
- * The response type for /internal/observability/slo/_definitions
- *
- * @private
- */
-type FindSloDefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
+type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
@@ -270,6 +283,10 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type TimesliceMetricIndicator = t.OutputOf<typeof timesliceMetricIndicatorSchema>;
+type TimesliceMetricBasicMetricWithField = t.OutputOf<typeof timesliceMetricBasicMetricWithField>;
+type TimesliceMetricDocCountMetric = t.OutputOf<typeof timesliceMetricDocCountMetric>;
+type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercentileMetric>;
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
@@ -288,6 +305,8 @@ export {
   findSloDefinitionsParamsSchema,
   findSloDefinitionsResponseSchema,
   manageSLOParamsSchema,
+  resetSLOParamsSchema,
+  resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -313,8 +332,11 @@ export type {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
-  FindSloDefinitionsResponse,
+  FindSLODefinitionsParams,
+  FindSLODefinitionsResponse,
   ManageSLOParams,
+  ResetSLOParams,
+  ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,
@@ -327,6 +349,10 @@ export type {
   IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  TimesliceMetricIndicator,
+  TimesliceMetricBasicMetricWithField,
+  TimesclieMetricPercentileMetric,
+  TimesliceMetricDocCountMetric,
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,

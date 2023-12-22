@@ -128,6 +128,8 @@ $ curl -X POST api/data_views/data_view
 
 To create {data-sources} based on {ref}/xpack-rollup.html[rollup indices], use the `data_view.type` and `data_view.typeMeta` properties :
 
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
+
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/data_views/data_view

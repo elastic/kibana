@@ -129,7 +129,7 @@ export type UpdateArgsToSoUpdateOptions<Types extends CMCrudTypes> = (
   params: Types['UpdateOptions']
 ) => SavedObjectsUpdateOptions<Types['Attributes']>;
 
-export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
+export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   savedObjectType: string;
   cmServicesDefinition: ServicesDefinitionSet;
   // this is necessary since unexpected saved object attributes could cause schema validation to fail
@@ -137,6 +137,12 @@ export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
   createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
+  /**
+   * MSearch is a feature that allows searching across multiple content types
+   * (for example, could be used in a general content finder or the like)
+   *
+   * defaults to false
+   */
   enableMSearch?: boolean;
   mSearchAdditionalSearchFields?: string[];
 
@@ -163,7 +169,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     mSearchAdditionalSearchFields,
     logger,
     throwOnResultValidationError,
-  }: SOContentStorageConstrutorParams<Types>) {
+  }: SOContentStorageConstructorParams<Types>) {
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
     this.savedObjectType = savedObjectType;
@@ -219,8 +225,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
   private throwOnResultValidationError: boolean;
   private logger: Logger;
-  private savedObjectType: SOContentStorageConstrutorParams<Types>['savedObjectType'];
-  private cmServicesDefinition: SOContentStorageConstrutorParams<Types>['cmServicesDefinition'];
+  private savedObjectType: SOContentStorageConstructorParams<Types>['savedObjectType'];
+  private cmServicesDefinition: SOContentStorageConstructorParams<Types>['cmServicesDefinition'];
   private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
   private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
   private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;

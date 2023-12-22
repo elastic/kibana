@@ -48,6 +48,7 @@ describe('GET privileges', () => {
         isSecurityEnabled: () => true,
         isLegacyTemplatesEnabled: true,
         isIndexStatsEnabled: true,
+        isDataStreamsStorageColumnEnabled: true,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -116,6 +117,7 @@ describe('GET privileges', () => {
           isSecurityEnabled: () => false,
           isLegacyTemplatesEnabled: true,
           isIndexStatsEnabled: true,
+          isDataStreamsStorageColumnEnabled: true,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {

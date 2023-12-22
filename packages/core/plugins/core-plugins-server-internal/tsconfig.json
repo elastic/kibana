@@ -38,6 +38,8 @@
     "@kbn/core-node-server-internal",
     "@kbn/core-plugins-base-server-internal",
     "@kbn/repo-packages",
+    "@kbn/utility-types",
+    "@kbn/core-plugins-contracts-server",
   ],
   "exclude": [
     "target/**/*",

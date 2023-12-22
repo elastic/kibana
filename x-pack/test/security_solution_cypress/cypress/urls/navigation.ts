@@ -10,10 +10,13 @@ export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 export const LOGOUT_URL = '/logout';
 
 // Common
+export const GET_STARTED_URL = '/app/security/get_started';
 export const MANAGE_URL = '/app/security/manage';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 
+export const ASSETS_URL = '/app/security/assets';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
+export const CLOUD_DEFEND_URL = '/app/security/cloud_defend';
 export const POLICIES_URL = '/app/security/administration/policy';
 export const USERS_URL = '/app/security/users/allUsers';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
@@ -22,6 +25,9 @@ export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/vulnerabilities';
+
+export const RULES_LANDING_URL = '/app/security/rules/landing';
+export const RULES_COVERAGE_URL = '/app/security/rules_coverage_overview';
 
 export const NETWORK_URL = '/app/security/network/flows';
 export const OVERVIEW_URL = '/app/security/overview';
@@ -34,6 +40,7 @@ export const EXPLORE_URL = '/app/security/explore';
 export const userDetailsUrl = (userName: string) =>
   `/app/security/users/name/${userName}/authentications`;
 
+export const INVESTIGATIONS_URL = '/app/security/investigations';
 export const TIMELINES_URL = '/app/security/timelines/default';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';
 export const CASES_URL = '/app/security/cases';
@@ -49,6 +56,8 @@ export const DISCOVER_WITH_PINNED_FILTER_URL =
 export const hostDetailsUrl = (hostName: string) =>
   `/app/security/hosts/${hostName}/authentications`;
 
+export const MACHINE_LEARNING_LANDING_URL = '/app/security/ml';
+
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
 export const ALERTS_URL = '/app/security/alerts';
@@ -58,3 +67,8 @@ export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_m
 
 export const exceptionsListDetailsUrl = (listId: string) =>
   `/app/security/exceptions/details/${listId}`;
+
+// External (serverless)
+export const DISCOVER_URL = '/app/discover';
+export const OSQUERY_URL = '/app/osquery';
+export const FLEET_URL = '/app/fleet';

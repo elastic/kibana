@@ -42,6 +42,12 @@ describe('mapNodesVersionCompatibility', () => {
     return { nodes: { 'node-without-http': { version, ip: 'ip' } } } as any;
   }
 
+  it('returns isCompatible=false with a single node with non-SemVer-compliant version', async () => {
+    const nodesInfo = createNodes('615c621a8416c444941dc97b142a0122d5c878d0');
+    const result = await mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+  });
+
   it('returns isCompatible=true with a single node that matches', async () => {
     const nodesInfo = createNodes('5.1.0');
     const result = await mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);

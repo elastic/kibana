@@ -58,6 +58,23 @@ describe('MountPointPortal', () => {
     expect(setMountPoint).toHaveBeenCalledTimes(1);
   });
 
+  it('calls the provided `setMountPoint` with undefined during unmount', async () => {
+    dom = mount(
+      <MountPointPortal setMountPoint={setMountPoint}>
+        <span>portal content</span>
+      </MountPointPortal>
+    );
+
+    await refresh();
+
+    dom.unmount();
+
+    await refresh();
+
+    expect(setMountPoint).toHaveBeenCalledTimes(2);
+    expect(setMountPoint).toHaveBeenLastCalledWith(undefined);
+  });
+
   it('renders the portal content when calling the mountPoint ', async () => {
     dom = mount(
       <MountPointPortal setMountPoint={setMountPoint}>
@@ -127,7 +144,7 @@ describe('MountPointPortal', () => {
 
   it('updates the content of the portal element when the content of MountPointPortal changes', async () => {
     const Wrapper: FC<{
-      setMount: (mountPoint: MountPoint<HTMLElement>) => void;
+      setMount: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
       portalContent: string;
     }> = ({ setMount, portalContent }) => {
       return (

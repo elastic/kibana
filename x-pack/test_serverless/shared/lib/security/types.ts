@@ -6,6 +6,8 @@
  */
 
 export enum ServerlessRoleName {
+  VIEWER = 'viewer',
+  EDITOR = 'editor',
   T1_ANALYST = 't1_analyst',
   T2_ANALYST = 't2_analyst',
   T3_ANALYST = 't3_analyst',

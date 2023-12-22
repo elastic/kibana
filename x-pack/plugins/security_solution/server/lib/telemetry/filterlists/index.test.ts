@@ -278,5 +278,80 @@ describe('Security Telemetry filters', () => {
         },
       });
     });
+
+    it('copies over github integration fields', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        github: {
+          org: 'elastic',
+          repo: 'kibana',
+          team: 'elastic/security-data-analytics',
+          sensitive: 'i contain sensitive data',
+        },
+      };
+      expect(copyAllowlistedFields(prebuiltRuleAllowlistFields, event)).toStrictEqual({
+        github: {
+          org: 'elastic',
+          repo: 'kibana',
+          team: 'elastic/security-data-analytics',
+        },
+      });
+    });
+
+    it('copies over process/parent fields', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        process: {
+          code_signature: {
+            status: 'test',
+            exists: false,
+          },
+          Ext: {
+            api: {
+              parameters: {
+                desired_access: 'test',
+                desired_access_numeric: 'test',
+                text_block: 'i should not be here',
+              },
+            },
+            relative_file_creation_time: 'test',
+          },
+          parent: {
+            code_signature: {
+              subject_name: 'test',
+              status: 'test',
+              text_block: 'i should not be here',
+              exists: false,
+              trusted: false,
+            },
+          },
+        },
+      };
+      expect(copyAllowlistedFields(prebuiltRuleAllowlistFields, event)).toStrictEqual({
+        process: {
+          code_signature: {
+            status: 'test',
+            exists: false,
+          },
+          Ext: {
+            api: {
+              parameters: {
+                desired_access: 'test',
+                desired_access_numeric: 'test',
+              },
+            },
+            relative_file_creation_time: 'test',
+          },
+          parent: {
+            code_signature: {
+              subject_name: 'test',
+              status: 'test',
+              exists: false,
+              trusted: false,
+            },
+          },
+        },
+      });
+    });
   });
 });

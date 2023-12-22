@@ -64,8 +64,11 @@ export const TsLib = require('tslib');
 export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnEsQuery = require('@kbn/es-query');
+export const KbnSearchErrors = require('@kbn/search-errors');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@kbn/safer-lodash-set');
+
+export const KbnSharedUxErrorBoundary = require('@kbn/shared-ux-error-boundary');
 export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');

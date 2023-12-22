@@ -42,6 +42,10 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
    * Optionally replace the auto-generated page title (h1)
    */
   pageTitle?: string;
+  /**
+   * Optionally replace the auto-generated page description
+   */
+  pageDescription?: string;
 }
 
 /**

@@ -86,6 +86,10 @@ export const searchConfigSchema = schema.object({
 
 export const configSchema = schema.object({
   search: searchConfigSchema,
+  /**
+   * Turns on/off limit validations for the registered uiSettings.
+   */
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

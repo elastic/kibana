@@ -23,16 +23,16 @@ import {
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
-  useUiSetting$,
+  useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
+
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
@@ -66,10 +66,9 @@ export const uxRoutes: RouteDefinition[] = [
 ];
 
 function UxApp() {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();
+  const darkMode = useDarkMode(false);
 
   useBreadcrumbs([
     {
@@ -118,11 +117,13 @@ export function UXAppRoot({
     dataViews,
     lens,
   },
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   corePlugins: ApmPluginStartDeps;
+  isDev: boolean;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -131,25 +132,27 @@ export function UXAppRoot({
   createCallApmApi(core);
 
   return (
-    <RedirectAppLinks
-      className={APP_WRAPPER_CLASS}
-      application={core.application}
-    >
-      <KibanaContextProvider
-        services={{
-          ...core,
-          ...plugins,
-          inspector,
-          observability,
-          observabilityShared,
-          embeddable,
-          exploratoryView,
-          data,
-          dataViews,
-          lens,
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
         }}
       >
-        <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            inspector,
+            observability,
+            observabilityShared,
+            observabilityAIAssistant,
+            embeddable,
+            exploratoryView,
+            data,
+            dataViews,
+            lens,
+          }}
+        >
           <KibanaThemeProvider
             theme$={appMountParameters.theme$}
             modify={{
@@ -176,7 +179,10 @@ export function UXAppRoot({
                             <UxApp />
                           </CsmSharedContextProvider>
                         </EuiErrorBoundary>
-                        <UXActionMenu appMountParameters={appMountParameters} />
+                        <UXActionMenu
+                          appMountParameters={appMountParameters}
+                          isDev={isDev}
+                        />
                       </UrlParamsProvider>
                     </InspectorContextProvider>
                   </DatePickerContextProvider>
@@ -184,9 +190,9 @@ export function UXAppRoot({
               </i18nCore.Context>
             </PluginContext.Provider>
           </KibanaThemeProvider>
-        </ObservabilityAIAssistantProvider>
-      </KibanaContextProvider>
-    </RedirectAppLinks>
+        </KibanaContextProvider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 
@@ -199,11 +205,13 @@ export const renderApp = ({
   deps,
   appMountParameters,
   corePlugins,
+  isDev,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ApmPluginStartDeps;
+  isDev: boolean;
 }) => {
   const { element } = appMountParameters;
 
@@ -221,6 +229,7 @@ export const renderApp = ({
       core={core}
       deps={deps}
       corePlugins={corePlugins}
+      isDev={isDev}
     />,
     element
   );

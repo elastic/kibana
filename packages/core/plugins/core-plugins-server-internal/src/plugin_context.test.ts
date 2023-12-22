@@ -40,6 +40,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: {
@@ -237,7 +238,7 @@ describe('createPluginPrebootSetupContext', () => {
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
-    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+    const prebootSetupContext = createPluginPrebootSetupContext({ deps: corePreboot, plugin });
 
     const holdSetupPromise = Promise.resolve(undefined);
     prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);

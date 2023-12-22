@@ -18,18 +18,24 @@ export const RuleStatusDropdownSandbox = ({ triggersActionsUi }: SandboxProps) =
   const [isSnoozedUntil, setIsSnoozedUntil] = useState<Date | null>(null);
   const [muteAll, setMuteAll] = useState(false);
 
+  const onEnableRule: any = async () => {
+    setEnabled(true);
+    setMuteAll(false);
+    setIsSnoozedUntil(null);
+  };
+
+  const onDisableRule: any = async () => {
+    setEnabled(false);
+  };
+
   return triggersActionsUi.getRuleStatusDropdown({
     rule: {
       enabled,
       isSnoozedUntil,
       muteAll,
     },
-    enableRule: async () => {
-      setEnabled(true);
-      setMuteAll(false);
-      setIsSnoozedUntil(null);
-    },
-    disableRule: async () => setEnabled(false),
+    enableRule: onEnableRule,
+    disableRule: onDisableRule,
     snoozeRule: async (schedule) => {
       if (schedule.duration === -1) {
         setIsSnoozedUntil(null);

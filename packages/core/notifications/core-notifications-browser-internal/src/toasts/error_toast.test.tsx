@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { ErrorToast } from './error_toast';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -21,6 +22,7 @@ interface ErrorToastProps {
 }
 
 let openModal: jest.Mock;
+const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 const mockTheme = themeServiceMock.createStartContract();
 const mockI18n = i18nServiceMock.createStartContract();
 
@@ -33,6 +35,7 @@ function render(props: ErrorToastProps = {}) {
       error={props.error || new Error('error message')}
       title={props.title || 'An error occured'}
       toastMessage={props.toastMessage || 'This is the toast message'}
+      analytics={mockAnalytics}
       i18n={mockI18n}
       theme={mockTheme}
     />

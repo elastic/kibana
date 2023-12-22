@@ -16,6 +16,7 @@ export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
 export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';
 export const PROMPT_CONTEXT_DETECTION_RULES_CATEGORY = 'detection-rules';
 export const DATA_QUALITY_DASHBOARD_CATEGORY = 'data-quality-dashboard';
+export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
 /**
  * Global list of PromptContexts intended to be used throughout Security Solution.

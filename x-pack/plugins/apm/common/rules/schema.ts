@@ -7,7 +7,8 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { AggregationType, ApmRuleType } from './apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { AggregationType } from './apm_rule_types';
 
 export const searchConfigurationSchema = schema.object({
   query: schema.object({

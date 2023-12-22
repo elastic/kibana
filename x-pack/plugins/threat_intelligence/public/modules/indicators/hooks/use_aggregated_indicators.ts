@@ -80,7 +80,9 @@ export const useAggregatedIndicators = ({
   const userTimeZone = useTimeZone();
   const userFormat = useDateFormat();
 
-  const { selectedPatterns } = useSourcererDataView();
+  const {
+    sourcererDataView: { selectedPatterns },
+  } = useSourcererDataView();
 
   const { inspectorAdapters } = useInspector();
 

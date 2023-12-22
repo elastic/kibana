@@ -12,8 +12,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const toasts = getService('toasts');
   const log = getService('log');
-  const dataStreams = getService('dataStreams');
   const browser = getService('browser');
+  const es = getService('es');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
@@ -23,15 +23,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Creating required data stream');
       try {
-        await dataStreams.createDataStream(
-          TEST_DS_NAME,
-          {
-            '@timestamp': {
-              type: 'date',
+        await es.indices.putIndexTemplate({
+          name: `${TEST_DS_NAME}_index_template`,
+          index_patterns: [TEST_DS_NAME],
+          data_stream: {},
+          _meta: {
+            description: `Template for ${TEST_DS_NAME} testing index`,
+          },
+          template: {
+            settings: { mode: undefined },
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
+            lifecycle: {
+              // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
+              enabled: true,
             },
           },
-          false
-        );
+        });
+
+        await es.indices.createDataStream({
+          name: TEST_DS_NAME,
+        });
       } catch (e) {
         log.debug('[Setup error] Error creating test data stream');
         throw e;
@@ -49,7 +66,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Cleaning up created data stream');
 
       try {
-        await dataStreams.deleteDataStream(TEST_DS_NAME);
+        await es.indices.deleteDataStream({ name: TEST_DS_NAME });
+        await es.indices.deleteIndexTemplate({
+          name: `${TEST_DS_NAME}_index_template`,
+        });
       } catch (e) {
         log.debug('[Teardown error] Error deleting test data stream');
         throw e;
@@ -88,6 +108,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Expect to see a success toast
       const successToast = await toasts.getToastElement(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+    });
+
+    it('allows to disable data retention', async () => {
+      // Open details flyout
+      await pageObjects.indexManagement.clickDataStreamAt(0);
+      // Open the edit retention dialog
+      await testSubjects.click('manageDataStreamButton');
+      await testSubjects.click('editDataRetentionButton');
+
+      // Disable infinite retention
+      await testSubjects.click('dataRetentionEnabledField > input');
+
+      // Submit the form
+      await testSubjects.click('saveButton');
+
+      // Expect to see a success toast
+      const successToast = await toasts.getToastElement(1);
+      expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
     });
   });
 };

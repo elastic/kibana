@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
-import { ResponseBody } from '../types';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
+import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { ResponseBody } from '../types';
 import { callAgentExecutor } from '.';
-import { loggerMock } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -32,6 +33,13 @@ const mockCall = jest.fn();
 jest.mock('langchain/agents', () => ({
   initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
     call: mockCall,
+  })),
+}));
+
+jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
+  ElasticsearchStore: jest.fn().mockImplementation(() => ({
+    asRetriever: jest.fn(),
+    isModelInstalled: jest.fn().mockResolvedValue(true),
   })),
 }));
 
@@ -61,11 +69,14 @@ describe('callAgentExecutor', () => {
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(ActionsClientLlm).toHaveBeenCalledWith({
@@ -79,16 +90,23 @@ describe('callAgentExecutor', () => {
   it('kicks off the chain with (only) the last message', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: '\n\nDo you know my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: '\n\nDo you know my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
@@ -96,26 +114,36 @@ describe('callAgentExecutor', () => {
 
     await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages: onlyOneMessage,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: 'What is my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: 'What is my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('returns the expected response body', async () => {
     const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
+      assistantLangChain: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
+      kbResource: ESQL_RESOURCE,
     });
 
     expect(result).toEqual({

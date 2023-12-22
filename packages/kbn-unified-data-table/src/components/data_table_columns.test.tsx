@@ -7,8 +7,14 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getEuiGridColumns, getVisibleColumns } from './data_table_columns';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  getEuiGridColumns,
+  getVisibleColumns,
+  hasSourceTimeFieldValue,
+} from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 
@@ -110,6 +116,133 @@ describe('Data table columns', function () {
     });
   });
 
+  describe('hasSourceTimeFieldValue', () => {
+    function buildColumnTypes(dataView: DataView) {
+      const columnTypes: Record<string, string> = {};
+      for (const field of dataView.fields) {
+        columnTypes[field.name] = '';
+      }
+      return columnTypes;
+    }
+
+    describe('dataView with timeField', () => {
+      it('should forward showTimeCol if no _source columns is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['extension', 'message'],
+              dataViewWithTimefieldMock,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should forward showTimeCol if no _source columns is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['extension', 'message'],
+              dataViewWithTimefieldMock,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should forward showTimeCol if _source column is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['_source'],
+              dataViewWithTimefieldMock,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should return true if _source column is passed, text-based datasource', () => {
+        // ... | DROP @timestamp test case
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['_source'],
+              dataViewWithTimefieldMock,
+              buildColumnTypes(dataViewWithTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(true);
+        }
+      });
+    });
+
+    describe('dataView without timeField', () => {
+      it('should forward showTimeCol if no _source columns is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['extension', 'message'],
+              dataViewWithoutTimefieldMock,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should forward showTimeCol if no _source columns is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['extension', 'message'],
+              dataViewWithoutTimefieldMock,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should forward showTimeCol if _source column is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['_source'],
+              dataViewWithoutTimefieldMock,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              false
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should return false if _source column is passed, text-based datasource', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            hasSourceTimeFieldValue(
+              ['_source'],
+              dataViewWithoutTimefieldMock,
+              buildColumnTypes(dataViewWithoutTimefieldMock),
+              showTimeCol,
+              true
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+    });
+  });
+
   describe('column tokens', () => {
     it('returns eui grid columns with tokens', async () => {
       const actual = getEuiGridColumns({
@@ -157,6 +290,66 @@ describe('Data table columns', function () {
         onFilter: () => {},
       });
       expect(actual).toMatchSnapshot();
+    });
+  });
+
+  describe('Textbased languages grid columns', () => {
+    it('returns eui grid with in memory sorting for text based languages and columns on the dataview', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['extension'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('string');
+    });
+
+    it('returns eui grid with in memory sorting for text based languages and columns not on the columnTypes', async () => {
+      const columnsNotInDataview = getVisibleColumns(
+        ['var_test'],
+        dataViewWithTimefieldMock,
+        true
+      ) as string[];
+      const gridColumns = getEuiGridColumns({
+        columns: columnsNotInDataview,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        columnTypes: {
+          var_test: 'number',
+        },
+      });
+      expect(gridColumns[1].schema).toBe('numeric');
     });
   });
 });

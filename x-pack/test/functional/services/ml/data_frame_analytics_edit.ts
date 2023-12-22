@@ -18,7 +18,7 @@ import { MlCustomUrls } from './custom_urls';
 
 export interface DiscoverUrlConfig {
   label: string;
-  indexPattern: string;
+  indexName: string;
   queryEntityFieldNames: string[];
   timeRange: TimeRangeType;
   timeRangeInterval?: string;
@@ -98,7 +98,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       );
       await mlCommonUI.selectSelectValueByVisibleText(
         'mlJobCustomUrlDiscoverIndexPatternInput',
-        customUrl.indexPattern
+        customUrl.indexName
       );
       await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
       if (addTimerange) {

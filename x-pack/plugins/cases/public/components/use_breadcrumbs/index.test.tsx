@@ -119,4 +119,27 @@ describe('useCasesBreadcrumbs', () => {
       expect(mockSetServerlessBreadcrumbs).not.toHaveBeenCalled();
     });
   });
+
+  describe('set settings breadcrumbs', () => {
+    it('call setBreadcrumbs with all items', () => {
+      renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure), { wrapper });
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+        { href: '/test', onClick: expect.any(Function), text: 'Test' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { text: 'Settings' },
+      ]);
+      expect(mockSetServerlessBreadcrumbs).toHaveBeenCalledWith([]);
+    });
+
+    it('should set the cases title', () => {
+      renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure), { wrapper });
+      expect(mockSetTitle).toHaveBeenCalledWith(['Settings', 'Cases', 'Test']);
+    });
+
+    it('should not set serverless breadcrumbs in ess', () => {
+      mockGetKibanaServices.mockReturnValueOnce({ serverless: undefined });
+      renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure), { wrapper });
+      expect(mockSetServerlessBreadcrumbs).not.toHaveBeenCalled();
+    });
+  });
 });

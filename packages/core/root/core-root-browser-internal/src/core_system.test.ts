@@ -478,6 +478,7 @@ describe('#start()', () => {
     await startCore();
     expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
     expect(MockRenderingService.start).toHaveBeenCalledWith({
+      analytics: expect.any(Object),
       application: expect.any(Object),
       chrome: expect.any(Object),
       overlays: expect.any(Object),

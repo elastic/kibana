@@ -54,6 +54,14 @@ properties:
         type: number
       loadbalance:
         type: boolean
+  secrets:
+      type: object
+      properties:
+        ssl:
+          type: object
+          properties:
+            key:
+              type: string
 required:
   - name
   - hosts

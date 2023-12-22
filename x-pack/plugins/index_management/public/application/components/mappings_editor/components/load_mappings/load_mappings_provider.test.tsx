@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

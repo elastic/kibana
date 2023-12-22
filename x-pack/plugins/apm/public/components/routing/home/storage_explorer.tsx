@@ -28,6 +28,7 @@ export const storageExplorer = {
         href="/storage-explorer"
       >
         <ApmMainTemplate
+          environmentFilter={false}
           pageHeader={{
             alignItems: 'center',
             pageTitle: i18n.translate('xpack.apm.views.storageExplorer.title', {

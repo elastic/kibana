@@ -17,10 +17,23 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { ObservabilityAIAssistantService } from './service';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-export interface ObservabilityAIAssistantPluginStart {}
-export interface ObservabilityAIAssistantPluginSetup {}
+export interface ObservabilityAIAssistantPluginSetup {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
+  service: ObservabilityAIAssistantService;
+}
+
+export interface ObservabilityAIAssistantPluginStart {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
+  service: ObservabilityAIAssistantService;
+}
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;
@@ -32,4 +45,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
+  dataViews: DataViewsServerPluginStart;
 }

@@ -58,7 +58,7 @@ import type {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
@@ -451,6 +451,7 @@ const createThresholdTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -608,6 +609,7 @@ const createNewTermsTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -773,6 +775,7 @@ const createSuppressedTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });

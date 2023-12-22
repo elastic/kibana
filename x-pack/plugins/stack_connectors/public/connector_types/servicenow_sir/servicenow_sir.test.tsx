@@ -8,13 +8,15 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const SERVICENOW_SIR_CONNECTOR_TYPE_ID = '.servicenow-sir';
 let connectorTypeRegistry: TypeRegistry<ConnectorTypeModel>;
 
 beforeAll(() => {
   connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
 });
 

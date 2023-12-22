@@ -171,4 +171,9 @@ export interface ChromeStart {
    * Get an observable of the current style type of the chrome.
    */
   getChromeStyle$(): Observable<ChromeStyle>;
+
+  /**
+   * Get an observable of the current collapsed state of the side nav.
+   */
+  getIsSideNavCollapsed$(): Observable<boolean>;
 }

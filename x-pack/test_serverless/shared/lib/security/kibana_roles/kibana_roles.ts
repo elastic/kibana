@@ -16,16 +16,17 @@ const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_r
 
 const ROLE_NAMES = Object.values(ServerlessRoleName);
 
+interface IApplication {
+  application: string;
+  privileges: string[];
+  resources: string;
+}
 export type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
     cluster: string[] | null;
     indices: RoleIndexPrivilege[];
-    applications: Array<{
-      application: string;
-      privileges: string[];
-      resources: string;
-    }>;
+    applications: IApplication[];
   }
 >;
 
@@ -48,6 +49,34 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
         `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`
       );
     }
+    const mapApplicationToKibanaFeaturePrivileges = (
+      application: IApplication
+    ): FeaturesPrivileges => {
+      if (application.resources !== '*') {
+        throw new Error(
+          `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
+        );
+      }
+
+      const features: FeaturesPrivileges = {};
+
+      application.privileges.forEach((value) => {
+        const [feature, permission] = value.split('.');
+        const featureKey = feature.split('_')[1];
+
+        if (!features[featureKey]) {
+          features[featureKey] = [];
+        }
+
+        if (permission) {
+          features[featureKey].push(permission);
+        }
+      });
+
+      return features;
+    };
+
+    const feature = mapApplicationToKibanaFeaturePrivileges(definition.applications[0]);
 
     const kibanaRole: Role = {
       name: roleName,
@@ -60,16 +89,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
         {
           base: [],
           spaces: ['*'],
-          feature: definition.applications.reduce((features, application) => {
-            if (application.resources !== '*') {
-              throw new Error(
-                `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
-              );
-            }
-
-            features[application.application] = application.privileges;
-            return features;
-          }, {} as FeaturesPrivileges),
+          feature,
         },
       ],
     };

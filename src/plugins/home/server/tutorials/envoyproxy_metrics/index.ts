@@ -38,7 +38,7 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-envoyproxy.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/envoyproxy.svg'),
     artifacts: {
       dashboards: [],
       exportedFields: {

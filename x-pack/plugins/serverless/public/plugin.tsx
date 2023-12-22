@@ -69,6 +69,9 @@ export class ServerlessPlugin
     if (dependencies.cloud.serverless.projectName) {
       project.setProjectName(dependencies.cloud.serverless.projectName);
     }
+    if (dependencies.cloud.deploymentUrl) {
+      project.setProjectUrl(dependencies.cloud.deploymentUrl);
+    }
 
     return {
       setSideNavComponent: (sideNavigationComponent) =>

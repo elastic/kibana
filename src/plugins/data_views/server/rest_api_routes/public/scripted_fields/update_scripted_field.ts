@@ -104,10 +104,10 @@ export const registerUpdateScriptedFieldRoute = (
 
           const oldSpec = fieldObject.toSpec();
 
-          indexPattern.fields.remove(fieldObject);
-          indexPattern.fields.add({
+          indexPattern.upsertScriptedField({
             ...oldSpec,
             ...field,
+            name: field.name,
           });
 
           await indexPatternsService.updateSavedObject(indexPattern);

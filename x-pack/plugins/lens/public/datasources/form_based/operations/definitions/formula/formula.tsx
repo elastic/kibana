@@ -52,7 +52,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
   {
     type: 'formula',
     displayName: defaultLabel,
-    getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
+    getDefaultLabel: (column) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
     filterable: {

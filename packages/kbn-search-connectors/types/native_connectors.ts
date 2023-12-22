@@ -85,6 +85,10 @@ const DATABASE_LABEL = i18n.translate('searchConnectors.nativeConnectors.databas
   defaultMessage: 'Database',
 });
 
+const SCHEMA_LABEL = i18n.translate('searchConnectors.nativeConnectors.schemaLabel', {
+  defaultMessage: 'Schema',
+});
+
 const PORT_LABEL = i18n.translate('searchConnectors.nativeConnectors.portLabel', {
   defaultMessage: 'Port',
 });
@@ -444,6 +448,26 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 50,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'confluence_cloud',
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
@@ -464,6 +488,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.confluence.name', {
@@ -730,7 +757,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: 3,
-        display_value: 3,
       },
       use_text_extraction_service: {
         default_value: null,
@@ -743,7 +769,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -753,6 +779,64 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     features: {},
     serviceType: 'github',
+  },
+  google_cloud_storage: {
+    features: {},
+    configuration: {
+      service_account_credentials: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate('searchConnectors.nativeConnectors.googleCloudStorage.label', {
+          defaultMessage: 'Google Cloud service account JSON',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.googleCloudStorage.retry.label', {
+          defaultMessage: 'Maximum retries for failed requests',
+        }),
+        options: [],
+        order: 2,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
+      defaultMessage: 'Google Cloud Storage',
+    }),
+    serviceType: 'google_cloud_storage',
   },
   google_drive: {
     configuration: {
@@ -776,13 +860,111 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_domain_wide_delegation_for_sync: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.label',
+          {
+            defaultMessage: 'Use domain-wide delegation for data sync',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.useDomainWideDelegation.tooltip',
+          {
+            defaultMessage:
+              'Enable domain-wide delegation to automatically sync content from all shared and personal drives in the Google workspace. This eliminates the need to manually share Google Drive data with your service account, though it may increase sync time. If disabled, only items and folders manually shared with the service account will be synced. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      google_workspace_admin_email_for_data_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.label',
+          {
+            defaultMessage: 'Google Workspace admin email',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceAdminEmailDataSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the admin email to be used with domain-wide delegation for data sync. This email enables the connector to utilize the Admin Directory API for listing organization users. Please refer to the connector documentation to ensure domain-wide delegation is correctly configured and has the appropriate scopes.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
+      google_workspace_email_for_shared_drives_sync: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: true,
+          },
+        ],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.label',
+          {
+            defaultMessage: 'Google Workspace email for syncing shared drives',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.gdrive.workspaceEmailSharedDrivesSync.tooltip',
+          {
+            defaultMessage:
+              'Provide the Google Workspace user email for discovery and syncing of shared drives. Only the shared drives this user has access to will be synced.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [
+          {
+            type: 'regex',
+            constraint: '^\\S+@\\S+\\.\\S+$',
+          },
+        ],
+        value: '',
+      },
       use_document_level_security: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 2,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
@@ -798,6 +980,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             field: 'use_document_level_security',
             value: true,
           },
+          {
+            field: 'use_domain_wide_delegation_for_sync',
+            value: false,
+          },
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
@@ -805,7 +991,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           { defaultMessage: 'Google Workspace admin email' }
         ),
         options: [],
-        order: 3,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -833,7 +1019,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Maximum concurrent HTTP requests',
         }),
         options: [],
-        order: 4,
+        order: 7,
         required: false,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.tooltip', {
@@ -856,12 +1042,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 5,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -1102,6 +1288,26 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         value: 100,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'jira_cloud',
+          },
+        ],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: false,
         depends_on: [],
@@ -1122,6 +1328,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
       },
     },
     name: i18n.translate('searchConnectors.nativeConnectors.jira.name', {
@@ -1230,6 +1439,84 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         tooltip: '',
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_enabled: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledLabel',
+          {
+            defaultMessage: 'SSL/TLS Connection',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslEnabledTooltip',
+          {
+            defaultMessage:
+              'This option establishes a secure connection to the MongoDB server using SSL/TLS encryption. Ensure that your MongoDB deployment supports SSL/TLS connections. Enable if MongoDB cluster uses DNS SRV records.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      ssl_ca: {
+        default_value: '',
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaLabel',
+          {
+            defaultMessage: 'Certificate Authority (.pem)',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.sslCaTooltip',
+          {
+            defaultMessage:
+              'Specifies the root certificate from the Certificate Authority. The value of the certificate is used to validate the certificate presented by the MongoDB instance.',
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tls_insecure: {
+        default_value: false,
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureLabel',
+          {
+            defaultMessage: 'Skip certificate verification',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.tlsInsecureTooltip',
+          {
+            defaultMessage:
+              "This option skips certificate validation for TLS/SSL connections to your MongoDB server. We strongly recommend setting this option to 'disable'.",
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -1743,6 +2030,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
@@ -1880,6 +2182,243 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     serviceType: 'onedrive',
   },
+  oracle: {
+    configuration: {
+      host: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.hostLabel', {
+          defaultMessage: 'Host',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      port: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.nativeConnectors.oracle.configuration.portLabel', {
+          defaultMessage: 'Port',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      username: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.usernameLabel',
+          {
+            defaultMessage: 'Username',
+          }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      password: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.passwordLabel',
+          {
+            defaultMessage: 'Password',
+          }
+        ),
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: true,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      database: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.databaseLabel',
+          {
+            defaultMessage: 'Database',
+          }
+        ),
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      tables: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.tablesLabel',
+          {
+            defaultMessage: 'Comma-separated list of tables',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      fetch_size: {
+        default_value: 50,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.fetch_sizeLabel',
+          {
+            defaultMessage: 'Rows fetched per request',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 50,
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.retry_countLabel',
+          {
+            defaultMessage: 'Retries per request',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
+      },
+      oracle_protocol: {
+        default_value: 'TCP',
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_protocolLabel',
+          {
+            defaultMessage: 'Oracle connection protocol',
+          }
+        ),
+        options: [
+          {
+            label: 'TCP',
+            value: 'TCP',
+          },
+          {
+            label: 'TCPS',
+            value: 'TCPS',
+          },
+        ],
+        order: 9,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'TCP',
+      },
+      oracle_home: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.oracle_homeLabel',
+          {
+            defaultMessage: 'Path to Oracle Home',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      wallet_configuration_path: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.oracle.configuration.wallet_configuration_pathLabel',
+          {
+            defaultMessage: 'Path to SSL Wallet configuration files',
+          }
+        ),
+        options: [],
+        order: 11,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+    },
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+    },
+    name: i18n.translate('searchConnectors.nativeConnectors.oracle.name', {
+      defaultMessage: 'Oracle',
+    }),
+    serviceType: 'oracle',
+  },
   postgresql: {
     configuration: {
       host: {
@@ -1962,6 +2501,21 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      schema: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: SCHEMA_LABEL,
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
       tables: {
         default_value: '',
         depends_on: [],
@@ -1973,7 +2527,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -1988,7 +2542,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -2003,7 +2557,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -2023,7 +2577,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 8,
         required: false,
         sensitive: false,
         tooltip: '',
@@ -2043,7 +2597,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 8,
+        order: 9,
         required: false,
         sensitive: false,
         tooltip: '',
@@ -2064,13 +2618,258 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'postgresql',
   },
+  s3: {
+    configuration: {
+      buckets: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.buckets.label', {
+          defaultMessage: 'AWS Buckets',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate('searchConnectors.content.nativeConnectors.s3.buckets.tooltip', {
+          defaultMessage: 'AWS Buckets are ignored when Advanced Sync Rules are used.',
+        }),
+        type: FieldType.LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      aws_access_key_id: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.accessKey.label', {
+          defaultMessage: 'AWS Access Key Id',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      aws_secret_access_key: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.secretKey.label', {
+          defaultMessage: 'AWS Secret Key',
+        }),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      read_timeout: {
+        default_value: 90,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.readTimeout.label', {
+          defaultMessage: 'Read timeout',
+        }),
+        options: [],
+        order: 4,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      connect_timeout: {
+        default_value: 90,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.connectTimeout.label', {
+          defaultMessage: 'Connection timeout',
+        }),
+        options: [],
+        order: 5,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      max_attempts: {
+        default_value: 5,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.maxAttempts.label', {
+          defaultMessage: 'Maximum retry attempts',
+        }),
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      page_size: {
+        default_value: 100,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.s3.maxPageSize.label', {
+          defaultMessage: 'Maximum size of page',
+        }),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.INTEGER,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    features: {},
+    name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
+      defaultMessage: 'S3',
+    }),
+    serviceType: 's3',
+  },
+  salesforce: {
+    features: {},
+    configuration: {
+      domain: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.domain.label', {
+          defaultMessage: 'Domain',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.domain.tooltip',
+          {
+            defaultMessage:
+              "The domain for your Salesforce instance. If your Salesforce URL is, the domain would be 'foo'.",
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      client_id: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientId.label',
+          {
+            defaultMessage: 'Client ID',
+          }
+        ),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: true,
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientId.tooltip',
+          {
+            defaultMessage:
+              "The client id for your OAuth2-enabled connected app. Also called 'consumer key'",
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      client_secret: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientSecret.label',
+          { defaultMessage: 'Client Secret' }
+        ),
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: i18n.translate(
+          'searchConnectors.content.nativeConnectors.salesforce.clientSecret.tooltip',
+          {
+            defaultMessage:
+              "The client secret for your OAuth2-enabled connected app. Also called 'consumer secret'",
+          }
+        ),
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      use_text_extraction_service: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
+    },
+    name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
+      defaultMessage: 'Salesforce',
+    }),
+    serviceType: 'salesforce',
+  },
   servicenow: {
     configuration: {
       url: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Service URL',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.url.label', {
+          defaultMessage: 'Service URL',
+        }),
         options: [],
         order: 1,
         required: true,
@@ -2085,7 +2884,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTAREA,
-        label: 'Username',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.username.label', {
+          defaultMessage: 'Username',
+        }),
         options: [],
         order: 2,
         required: true,
@@ -2100,7 +2901,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [],
         display: DisplayType.TEXTBOX,
-        label: 'Password',
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.password.label', {
+          defaultMessage: 'Password',
+        }),
         options: [],
         order: 3,
         required: true,
@@ -2114,13 +2917,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       services: {
         default_value: null,
         depends_on: [],
+        label: i18n.translate('searchConnectors.nativeConnectors.servicenow.services.label', {
+          defaultMessage: 'Comma-separated list of services',
+        }),
         display: DisplayType.TEXTAREA,
-        label: 'Comma-separated list of services',
         options: [],
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: 'List of services is ignored when Advanced Sync Rules are used.',
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.servicenow.services.tooltip', {
+          defaultMessage: 'List of services is ignored when Advanced Sync Rules are used.',
+        }),
         type: FieldType.LIST,
         ui_restrictions: [],
         validations: [],
@@ -2130,7 +2937,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 3,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Retries per request',
+        label: RETRIES_PER_REQUEST_LABEL,
         options: [],
         order: 5,
         required: false,
@@ -2145,7 +2952,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: 10,
         depends_on: [],
         display: DisplayType.NUMERIC,
-        label: 'Maximum concurrent downloads',
+        label: MAX_CONCURRENT_DOWNLOADS_LABEL,
         options: [],
         order: 6,
         required: false,
@@ -2450,6 +3257,56 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Enable this option to fetch unique list item permissions. This setting can increase sync time. If this setting is disabled a list item will inherit permissions from its parent site.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      enumerate_all_sites: {
+        default_value: true,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesLabel',
+          { defaultMessage: 'Enumerate all sites?' }
+        ),
+        options: [],
+        order: 6,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.enumerateAllSitesTooltip',
+          {
+            defaultMessage:
+              'If enabled, sites will be fetched in bulk, then filtered down to the configured list of sites. This is efficient when syncing many sites. If disabled, each configured site will be fetched with an individual request. This is efficient when syncing fewer sites.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: true,
+      },
+      fetch_subsites: {
+        default_value: false,
+        depends_on: [{ field: 'enumerate_all_sites', value: false }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesLabel',
+          {
+            defaultMessage: 'Fetch sub-sites of configured sites?',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: false,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_online.configuration.fetchSubsitesTooltip',
+          {
+            defaultMessage:
+              'Whether subsites of the configured site(s) should be automatically fetched.',
           }
         ),
         type: FieldType.BOOLEAN,

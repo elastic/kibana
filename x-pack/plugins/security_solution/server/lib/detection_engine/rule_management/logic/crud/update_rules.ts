@@ -30,7 +30,8 @@ export const updateRules = async ({
     return null;
   }
 
-  const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);

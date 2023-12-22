@@ -22,12 +22,8 @@ export function getFilteredSearchPackages() {
 }
 
 export function getFilteredInstallPackages() {
-  const shouldFilterFleetServer = appContextService.getConfig()?.internal?.fleetServerStandalone;
   const filtered: string[] = [];
-  // Do not allow to install Fleet server integration if configured to use standalone fleet server
-  if (shouldFilterFleetServer) {
-    filtered.push(FLEET_SERVER_PACKAGE);
-  }
+
   const excludePackages = appContextService.getConfig()?.internal?.registry?.excludePackages ?? [];
 
   return filtered.concat(excludePackages);

@@ -94,7 +94,11 @@ export const PageHeader: FC = () => {
 
   return (
     <EuiPageHeader
-      pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
+      pageTitle={
+        <div data-test-subj={'mlDataDriftPageDataViewTitle'} css={dataViewTitleHeader}>
+          {dataView.getName()}
+        </div>
+      }
       rightSideItems={[
         <EuiFlexGroup gutterSize="s" data-test-subj="dataComparisonTimeRangeSelectorSection">
           {hasValidTimeField ? (
@@ -355,7 +359,6 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}
-                brushSelectionUpdateHandler={brushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}

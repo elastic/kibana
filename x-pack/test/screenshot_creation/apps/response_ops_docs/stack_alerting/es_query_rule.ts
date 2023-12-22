@@ -31,26 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     },
   });
-  const invalidQueryJson = JSON.stringify({
-    query: {
-      bool: {
-        filter: [
-          {
-            error_clause: {
-              'host.keyword': 'www.elastic.co',
-            },
-          },
-        ],
-      },
-    },
-  });
 
   describe('elasticsearch query rule', function () {
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.scrollIntoView('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.click('queryFormType_esQuery');
@@ -60,11 +46,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await testSubjects.click('closePopover');
+      await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
+      await testSubjects.scrollIntoView('ruleNameInput');
       await commonScreenshots.takeScreenshot(
         'rule-types-es-query-conditions',
         screenshotDirectories,
         1400,
-        1500
+        1900
       );
       // Test a valid query
       await testSubjects.setValue('queryJsonEditor', '', {
@@ -83,23 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.scrollIntoView('ruleNameInput');
       await commonScreenshots.takeScreenshot(
         'rule-types-es-query-valid',
-        screenshotDirectories,
-        1400,
-        1500
-      );
-      // Test an invalid query
-      await testSubjects.setValue('queryJsonEditor', '', {
-        clearWithKeyboard: true,
-      });
-      await queryJsonEditor.clearValue();
-      await testSubjects.setValue('queryJsonEditor', invalidQueryJson, {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('testQuery');
-      await testSubjects.scrollIntoView('ruleNameInput');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot(
-        'rule-types-es-query-invalid',
         screenshotDirectories,
         1400,
         1500

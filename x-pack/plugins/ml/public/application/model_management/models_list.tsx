@@ -35,6 +35,7 @@ import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
+  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
@@ -44,6 +45,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
+import { AddModelFlyout } from './add_model_flyout';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -67,7 +69,8 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { TestTrainedModelFlyout } from './test_models';
+import { TestModelAndPipelineCreationFlyout } from './test_models';
+import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { useEnabledFeatures } from '../contexts/ml';
 
@@ -77,10 +80,19 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
+  origin_job_exists?: boolean;
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;
   recommended?: boolean;
+  /**
+   * Model name, e.g. elser
+   */
+  modelName?: string;
+  os?: string;
+  arch?: string;
+  softwareLicense?: string;
+  licenseUrl?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -150,7 +162,7 @@ export const ModelsList: FC<Props> = ({
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const { displayErrorToast } = useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -162,6 +174,8 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
+  const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
+  const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -250,21 +264,26 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ name, hidden, recommended }) => {
-            if (recommended && idMap.has(name)) {
-              idMap.get(name)!.recommended = true;
+          .filter(({ model_id: modelId, hidden, recommended }) => {
+            if (recommended && idMap.has(modelId)) {
+              idMap.get(modelId)!.recommended = true;
             }
-            return !idMap.has(name) && !hidden;
+            return !idMap.has(modelId) && !hidden;
           })
           .map<ModelItem>((modelDefinition) => {
             return {
-              model_id: modelDefinition.name,
-              type: [ELASTIC_MODEL_TYPE],
-              tags: [ELASTIC_MODEL_TAG],
+              model_id: modelDefinition.model_id,
+              type: modelDefinition.type,
+              tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
               putModelConfig: modelDefinition.config,
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,
               recommended: !!modelDefinition.recommended,
+              modelName: modelDefinition.modelName,
+              os: modelDefinition.os,
+              arch: modelDefinition.arch,
+              softwareLicense: modelDefinition.license,
+              licenseUrl: modelDefinition.licenseUrl,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -286,7 +305,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-          defaultMessage: 'Models fetch failed',
+          defaultMessage: 'Error loading trained models',
         })
       );
     }
@@ -349,7 +368,7 @@ export const ModelsList: FC<Props> = ({
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
-            if (model.state === MODEL_STATE.STARTED) {
+            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
               // no need to check for the download status if the model has been deployed
               continue;
             }
@@ -364,7 +383,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
-          defaultMessage: 'Fetch model stats failed',
+          defaultMessage: 'Error loading trained models statistics',
         })
       );
       return false;
@@ -402,6 +421,33 @@ export const ModelsList: FC<Props> = ({
     [existingModels]
   );
 
+  const onModelDownloadRequest = useCallback(
+    async (modelId: string) => {
+      try {
+        setIsLoading(true);
+        await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
+        displaySuccessToast(
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+            defaultMessage: '"{modelId}" model download has been started successfully.',
+            values: { modelId },
+          })
+        );
+        // Need to fetch model state updates
+        await fetchModelsData();
+      } catch (e) {
+        displayErrorToast(
+          e,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+            defaultMessage: 'Failed to download "{modelId}"',
+            values: { modelId },
+          })
+        );
+        setIsLoading(true);
+      }
+    },
+    [displayErrorToast, displaySuccessToast, fetchModelsData, trainedModelsApiService]
+  );
+
   /**
    * Table actions
    */
@@ -409,10 +455,12 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
+    onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
+    onModelDownloadRequest,
   });
 
   const toggleDetails = async (item: ModelItem) => {
@@ -490,7 +538,7 @@ export const ModelsList: FC<Props> = ({
             content={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                defaultMessage="Recommended model version for your cluster's hardware configuration"
               />
             }
           >
@@ -684,13 +732,24 @@ export const ModelsList: FC<Props> = ({
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
       <EuiFlexGroup justifyContent="spaceBetween">
-        {modelsStats && (
-          <>
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-            </EuiFlexItem>
-          </>
-        )}
+        {modelsStats ? (
+          <EuiFlexItem grow={false}>
+            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType={'plusInCircle'}
+            color={'primary'}
+            onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+          >
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
+              defaultMessage="Add trained model"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
@@ -760,12 +819,33 @@ export const ModelsList: FC<Props> = ({
         />
       )}
       {modelToTest === null ? null : (
-        <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+        <TestModelAndPipelineCreationFlyout
+          model={modelToTest}
+          onClose={(refreshList?: boolean) => {
+            setModelToTest(null);
+            if (refreshList) {
+              fetchModelsData();
+            }
+          }}
+        />
+      )}
+      {dfaModelToTest === null ? null : (
+        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
       )}
       {modelToDeploy !== undefined ? (
         <AddInferencePipelineFlyout
           onClose={setModelToDeploy.bind(null, undefined)}
           model={modelToDeploy}
+        />
+      ) : null}
+      {isAddModelFlyoutVisible ? (
+        <AddModelFlyout
+          modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
+          onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+          onSubmit={(modelId) => {
+            onModelDownloadRequest(modelId);
+            setIsAddModelFlyoutVisible(false);
+          }}
         />
       ) : null}
     </>

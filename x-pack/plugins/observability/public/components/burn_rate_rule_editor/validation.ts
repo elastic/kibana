@@ -46,7 +46,7 @@ export function validateBurnRateRule(
       const result = { longWindow: new Array<string>(), burnRateThreshold: new Array<string>() };
       if (burnRateThreshold === undefined || maxBurnRateThreshold === undefined) {
         result.burnRateThreshold.push(BURN_RATE_THRESHOLD_REQUIRED);
-      } else if (sloId && (burnRateThreshold < 1 || burnRateThreshold > maxBurnRateThreshold)) {
+      } else if (sloId && (burnRateThreshold < 0.01 || burnRateThreshold > maxBurnRateThreshold)) {
         result.burnRateThreshold.push(getInvalidThresholdValueError(maxBurnRateThreshold));
       }
       if (longWindow === undefined) {
@@ -89,6 +89,6 @@ const BURN_RATE_THRESHOLD_REQUIRED = i18n.translate(
 
 const getInvalidThresholdValueError = (maxBurnRate: number) =>
   i18n.translate('xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue', {
-    defaultMessage: 'Burn rate threshold must be between 1 and {maxBurnRate}.',
+    defaultMessage: 'Burn rate threshold must be between 0.01 and {maxBurnRate}.',
     values: { maxBurnRate },
   });

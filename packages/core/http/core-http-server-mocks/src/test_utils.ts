@@ -107,6 +107,19 @@ export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreCon
 /**
  * Creates a concrete HttpServer with a mocked context.
  */
-export const createHttpServer = (overrides: Partial<CoreContext> = {}): HttpService => {
-  return new HttpService(createCoreContext(overrides));
+export const createHttpServer = ({
+  buildNum,
+  ...overrides
+}: Partial<CoreContext & { buildNum: number }> = {}): HttpService => {
+  const ctx = createCoreContext(overrides);
+  if (buildNum !== undefined) {
+    ctx.env = {
+      ...ctx.env,
+      packageInfo: {
+        ...ctx.env.packageInfo,
+        buildNum,
+      },
+    };
+  }
+  return new HttpService(ctx);
 };

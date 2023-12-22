@@ -15,11 +15,13 @@ import { ProductCard } from '../product_card';
 export interface WorkplaceSearchProductCardProps {
   hasBorder: boolean;
   hasShadow: boolean;
+  isWorkplaceSearchAdmin: boolean;
 }
 
 export const WorkplaceSearchProductCard: React.FC<WorkplaceSearchProductCardProps> = ({
   hasBorder = true,
   hasShadow = true,
+  isWorkplaceSearchAdmin,
 }) => (
   <ProductCard
     hasBorder={hasBorder}
@@ -35,6 +37,8 @@ export const WorkplaceSearchProductCard: React.FC<WorkplaceSearchProductCardProp
     icon="logoWorkplaceSearch"
     name={WORKPLACE_SEARCH_PLUGIN.NAME}
     productId={WORKPLACE_SEARCH_PLUGIN.ID}
-    url={WORKPLACE_SEARCH_PLUGIN.URL}
+    url={
+      isWorkplaceSearchAdmin ? WORKPLACE_SEARCH_PLUGIN.URL : WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL
+    }
   />
 );

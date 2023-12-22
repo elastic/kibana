@@ -7,15 +7,16 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import type { DocLinks } from './types';
+import type { DocLinks, BuildFlavor } from './types';
 import { getDocLinksMeta } from './get_doc_meta';
 
 export interface GetDocLinkOptions {
   kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
-export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
-  const meta = getDocLinksMeta({ kibanaBranch });
+export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): DocLinks => {
+  const meta = getDocLinksMeta({ kibanaBranch, buildFlavor });
 
   const DOC_LINK_VERSION = meta.version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
@@ -38,6 +39,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
   const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
+  const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
@@ -65,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}canvas.html`,
     },
     cloud: {
+      beatsAndLogstashConfiguration: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-cloud-id.html`,
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
@@ -167,7 +170,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsSlack: `${ENTERPRISE_SEARCH_DOCS}connectors-slack.html`,
       connectorsTeams: `${ENTERPRISE_SEARCH_DOCS}connectors-teams.html`,
-      connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}workplace-search-connectors.html`,
       connectorsZoom: `${ENTERPRISE_SEARCH_DOCS}connectors-zoom.html`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -187,7 +189,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ELASTICSEARCH_DOCS}nlp-example.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ELASTICSEARCH_DOCS}ingest-pipeline-search-inference.html`,
-      mlDocumentEnrichmentUpdateMappings: `${ELASTICSEARCH_DOCS}ingest-pipeline-search-inference.html#ingest-pipeline-search-inference-update-mapping`,
       searchApplicationsTemplates: `${ELASTICSEARCH_DOCS}search-application-api.html`,
       searchApplicationsSearchApi: `${ELASTICSEARCH_DOCS}search-application-security.html`,
       searchApplications: `${ELASTICSEARCH_DOCS}search-application-overview.html`,
@@ -217,6 +218,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
       externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
       externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
+      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
       gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
       gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
       gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
@@ -315,7 +317,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
     },
     indexPatterns: {
-      introduction: `${KIBANA_DOCS}data-views.html`,
+      introduction: isServerless ? `${SERVERLESS_DOCS}data-views` : `${KIBANA_DOCS}data-views.html`,
       fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
       fieldFormattersString: `${KIBANA_DOCS}managing-data-views.html#string-field-formatters`,
       runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
@@ -457,6 +459,14 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
+      createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
+      entityAnalytics: {
+        riskScorePrerequisites: `${SECURITY_SOLUTION_DOCS}ers-requirements.html`,
+        hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
+        userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
+        entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
+      },
+      detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -465,6 +475,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
       percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
       queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+      queryESQL: `${ELASTICSEARCH_DOCS}esql.html`,
     },
     search: {
       sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -476,7 +487,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     management: {
       dashboardSettings: `${KIBANA_DOCS}advanced-options.html#kibana-dashboard-settings`,
-      indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
+      indexManagement: isServerless
+        ? `${SERVERLESS_DOCS}index-management`
+        : `${ELASTICSEARCH_DOCS}index-mgmt.html`,
       kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
       discoverSettings: `${KIBANA_DOCS}advanced-options.html#kibana-discover-settings`,
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
@@ -515,9 +528,11 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
+      nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
     },
     transforms: {
-      guide: `${ELASTICSEARCH_DOCS}transforms.html`,
+      guide: isServerless ? `${SERVERLESS_DOCS}transforms` : `${ELASTICSEARCH_DOCS}transforms.html`,
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
@@ -533,7 +548,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       infrastructureThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
       logsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
       metricsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
-      threshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/threshold-alert.html`,
+      customThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/custom-threshold-alert.html`,
       monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
       monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
       tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -550,8 +565,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       sloBurnRateRule: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/slo-burn-rate-alert.html`,
     },
     alerting: {
-      guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
-      actionTypes: `${KIBANA_DOCS}action-types.html`,
+      guide: isServerless
+        ? `${SERVERLESS_DOCS}rules`
+        : `${KIBANA_DOCS}create-and-manage-rules.html`,
+      actionTypes: isServerless
+        ? `${SERVERLESS_DOCS}action-connectors`
+        : `${KIBANA_DOCS}action-types.html`,
       apmRules: `${KIBANA_DOCS}apm-alerts.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
@@ -561,7 +580,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       indexAction: `${KIBANA_DOCS}index-action-type.html`,
       esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
       indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
-      maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
+      maintenanceWindows: isServerless
+        ? `${SERVERLESS_DOCS}maintenance-windows`
+        : `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
       preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
@@ -578,7 +599,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     maps: {
       connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
-      guide: `${KIBANA_DOCS}maps.html`,
+      guide: isServerless ? `${SERVERLESS_DOCS}maps` : `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
       termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
@@ -608,6 +629,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
       clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
+      definingRoles: `${ELASTICSEARCH_DOCS}defining-roles.html`,
       elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
       elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
       elasticsearchEnableApiKeys: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
@@ -649,6 +671,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
       executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
       indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
+      inferTrainedModel: `${ELASTICSEARCH_DOCS}infer-trained-model.html`,
       multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
       openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
       putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
@@ -717,7 +740,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       kv: `${ELASTICSEARCH_DOCS}kv-processor.html`,
       lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
       pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
-      pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
+      pipelines: isServerless
+        ? `${SERVERLESS_DOCS}ingest-pipelines`
+        : `${ELASTICSEARCH_DOCS}ingest.html`,
       csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${DOC_LINK_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
       processors: `${ELASTICSEARCH_DOCS}processors.html`,
@@ -757,7 +782,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
-      apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
+      apiKeysLearnMore: isServerless ? `${SERVERLESS_DOCS}api-keys` : `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
       packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
@@ -765,6 +790,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       api: `${FLEET_DOCS}fleet-api-docs.html`,
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
+      elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
+      policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
+      remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
+      performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -807,12 +836,16 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       rubyOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/ruby-api/${DOC_LINK_VERSION}/ruby_client.html`,
       rustGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/index.html`,
       rustOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/overview.html`,
+      eland: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/eland/current/index.html`,
     },
     endpoints: {
       troubleshooting: `${SECURITY_SOLUTION_DOCS}ts-management.html#ts-endpoints`,
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
+      generalPrivacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+      termsOfService: `${ELASTIC_WEBSITE_URL}legal/elastic-cloud-account-terms`,
+      dataUse: `${ELASTIC_WEBSITE_URL}legal/privacy-statement#how-we-use-the-information`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
@@ -830,33 +863,30 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-client-getting-started`,
       httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
       httpApiReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
-      jsApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-getting-started`,
-      jsGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-getting-started`,
-      phpApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-getting-started`,
-      phpGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-getting-started`,
-      pythonApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
-      pythonGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
-      pythonReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
-      rubyApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
-      rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
+      jsApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-client-getting-started`,
+      jsGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-client-getting-started`,
+      phpApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}php-client-getting-started`,
+      phpGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}php-client-getting-started`,
+      pythonApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}python-client-getting-started`,
+      pythonGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}python-client-getting-started`,
+      pythonReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}python-client-getting-started`,
+      rubyApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-client-getting-started`,
+      rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-client-getting-started`,
     },
     serverlessSearch: {
       integrations: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-your-data`,
-      integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-logstash`,
-      integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
-      integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
-      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#explore`,
-      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#ingest`,
-      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started#search`,
+      integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-logstash`,
+      integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-beats`,
+      integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-your-data`,
+      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,
+      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,
+      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,
     },
     serverlessSecurity: {
       apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys#restrict-privileges`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
-    },
-    esql: {
-      statsBy: `${ELASTICSEARCH_DOCS}esql-stats-by.html`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,

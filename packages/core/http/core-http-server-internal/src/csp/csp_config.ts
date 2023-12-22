@@ -7,7 +7,7 @@
  */
 
 import type { ICspConfig } from '@kbn/core-http-server';
-import { cspConfig, CspConfigType } from './config';
+import { CspAdditionalConfig, cspConfig, CspConfigType } from './config';
 import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));
@@ -30,8 +30,8 @@ export class CspConfig implements ICspConfig {
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: CspConfigType) {
-    this.#directives = CspDirectives.fromConfig(rawCspConfig);
+  constructor(rawCspConfig: CspConfigType, ...moreConfigs: CspAdditionalConfig[]) {
+    this.#directives = CspDirectives.fromConfig(rawCspConfig, ...moreConfigs);
     if (rawCspConfig.disableEmbedding) {
       this.#directives.clearDirectiveValues('frame-ancestors');
       this.#directives.addDirectiveValue('frame-ancestors', `'self'`);

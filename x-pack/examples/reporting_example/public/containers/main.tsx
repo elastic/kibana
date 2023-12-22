@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { parsePath } from 'history';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import * as Rx from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
+
 import {
   EuiButton,
   EuiCard,
@@ -18,27 +24,20 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { parsePath } from 'history';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
-import * as Rx from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type {
-  JobAppParamsPDF,
-  JobParamsPDFV2,
-  JobParamsPNGV2,
-} from '@kbn/reporting-plugin/common/types';
+import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
@@ -81,12 +80,14 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       });
   });
 
-  const getPDFJobParamsDefault = (): JobAppParamsPDF => {
+  const getPDFJobParamsDefault = (): JobParamsPDFDeprecated => {
     return {
       layout: { id: 'preserve_layout' },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      browserTimezone: 'UTC',
+      version: '1',
     };
   };
 

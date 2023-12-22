@@ -22,6 +22,7 @@ import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   FlattenedBucket,
   getLayersMultiDimensional,
@@ -158,6 +159,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
               showLegend={false}
               theme={[treemapTheme, theme]}
               onElementClick={onElementClick}
+              locale={i18n.getLocale()}
             />
             <Partition
               data={flattenedBuckets}

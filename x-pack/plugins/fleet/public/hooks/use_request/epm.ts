@@ -26,6 +26,8 @@ import type {
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
+  GetInputsTemplatesRequest,
+  GetInputsTemplatesResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
@@ -80,15 +82,21 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   });
 };
 
-export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
-  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query], () =>
-    sendRequestForRq<GetPackagesResponse>({
-      path: epmRouteService.getListPath(),
-      method: 'get',
-      version: API_VERSIONS.public.v1,
-      query,
-    })
-  );
+export const useGetPackagesQuery = (
+  query: GetPackagesRequest['query'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetPackagesResponse, RequestError>({
+    queryKey: ['get-packages', query],
+    queryFn: () =>
+      sendRequestForRq<GetPackagesResponse>({
+        path: epmRouteService.getListPath(),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    enabled: options?.enabled,
+  });
 };
 
 export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {
@@ -120,6 +128,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
   }
@@ -141,7 +150,7 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled }
+    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount }
   );
 
   const confirm = async () => {
@@ -313,3 +322,19 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
     body,
   });
 };
+
+export function useGetInputsTemplatesQuery(
+  { pkgName, pkgVersion }: GetInputsTemplatesRequest['params'],
+  query: GetInputsTemplatesRequest['query']
+) {
+  return useQuery<GetInputsTemplatesResponse, RequestError>(
+    ['inputsTemplates', pkgName, pkgVersion, query],
+    () =>
+      sendRequestForRq<GetInputsTemplatesResponse>({
+        path: epmRouteService.getInputsTemplatesPath(pkgName, pkgVersion),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      })
+  );
+}

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -45,6 +45,8 @@ export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pag
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
+  'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
 export type CloudPostureIntegrations = Record<
@@ -63,6 +65,7 @@ export interface CloudPostureIntegrationProps {
     icon?: string;
     tooltip?: string;
     isBeta?: boolean;
+    testId?: string;
   }>;
 }
 
@@ -85,6 +88,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
+        testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -95,8 +99,8 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
+        testId: 'cisGcpTestId',
       },
-      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -105,9 +109,8 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: false,
-        isBeta: true,
         icon: 'logoAzure',
+        testId: 'cisAzureTestId',
       },
     ],
   },

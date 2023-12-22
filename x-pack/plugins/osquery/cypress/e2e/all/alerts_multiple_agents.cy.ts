@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
   inputQuery,
@@ -24,6 +25,7 @@ describe(
     let ruleName: string;
 
     before(() => {
+      initializeDataViews();
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -47,7 +49,7 @@ describe(
       // This is probably due to the tokenization of the fields when it's inactive
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click();
       cy.getBySel('flyout-body-osquery').contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.getBySel('flyout-body-osquery').contains('host.os.platform');
+      cy.getBySel('flyout-body-osquery').find('input[value="host.os.platform"]').should('exist');
       cy.getBySel('flyout-body-osquery').contains('platform');
     });
 

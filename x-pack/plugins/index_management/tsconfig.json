@@ -40,6 +40,8 @@
     "@kbn/core-http-browser",
     "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
+    "@kbn/ui-theme",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",

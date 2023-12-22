@@ -19,7 +19,7 @@ interface CommonRenderConfiguration {
 
 interface TimestampColumnRenderConfiguration {
   timestampColumn: CommonRenderConfiguration & {
-    render?: (timestamp: number) => ReactNode;
+    render?: (time: string) => ReactNode;
   };
 }
 

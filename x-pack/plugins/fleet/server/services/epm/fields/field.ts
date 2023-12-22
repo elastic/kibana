@@ -40,6 +40,7 @@ export interface Field {
   dimension?: boolean;
   default_field?: boolean;
   runtime?: boolean | string;
+  subobjects?: boolean;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
@@ -284,7 +285,7 @@ export function processFields(fields: Fields): Fields {
   return validateFields(dedupedFields, dedupedFields);
 }
 
-const isFields = (path: string) => {
+export const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 

@@ -46,28 +46,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('inventory-hostsView-link-badge');
     },
 
-    // Splash screen
-
-    async getHostsLandingPageDisabled() {
-      const container = await testSubjects.find('hostView-no-enable-access');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
-    async getHostsLandingPageDocsLink() {
-      const container = await testSubjects.find('hostsView-docs-link');
-      const containerText = await container.getAttribute('href');
-      return containerText;
-    },
-
-    async getHostsLandingPageEnableButton() {
-      return testSubjects.find('hostsView-enable-feature-button');
-    },
-
-    async clickEnableHostViewButton() {
-      return testSubjects.click('hostsView-enable-feature-button');
-    },
-
     // Table
 
     async getHostsTable() {
@@ -130,7 +108,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
     },
 
-    async clickAndValidateMetriChartActionOptions() {
+    async clickAndValidateMetricChartActionOptions() {
       const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');

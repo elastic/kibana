@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './config';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Observability Log Explorer', function () {
@@ -14,6 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dataset_selection_state'));
     loadTestFile(require.resolve('./dataset_selector'));
     loadTestFile(require.resolve('./filter_controls'));
+    loadTestFile(require.resolve('./flyout'));
     loadTestFile(require.resolve('./header_menu'));
+    loadTestFile(require.resolve('./flyout_highlights.ts'));
   });
 }

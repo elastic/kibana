@@ -27,7 +27,6 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
-    parallelism: 4
     retry:
       automatic:
         - exit_status: '-1'
@@ -41,7 +40,6 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
-    parallelism: 4
     retry:
       automatic:
         - exit_status: '-1'
@@ -61,5 +59,29 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      queue: n2-4-virt
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 10
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    agents:
+      queue: n2-4-virt
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
         - exit_status: '*'
           limit: 1

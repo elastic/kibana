@@ -212,7 +212,7 @@ describe('index table', () => {
     perPageButton.simulate('click');
     rendered.update();
 
-    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
+    const fiftyButton = rendered.find('button.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  RequestHandlerContext,
+  RouteValidationError,
+  RouteValidationResultFactory,
+} from '@kbn/core/server';
+import { AssetFilters, assetFiltersSingleKindRT } from '../../common/types_api';
 
 export async function getClientsFromContext<T extends RequestHandlerContext>(context: T) {
   const coreContext = await context.core;
@@ -15,4 +20,27 @@ export async function getClientsFromContext<T extends RequestHandlerContext>(con
     elasticsearchClient: coreContext.elasticsearch.client.asCurrentUser,
     savedObjectsClient: coreContext.savedObjects.client,
   };
+}
+
+type ValidateStringAssetFiltersReturn =
+  | [{ error: RouteValidationError }]
+  | [null, AssetFilters | undefined];
+
+export function validateStringAssetFilters(
+  q: any,
+  res: RouteValidationResultFactory
+): ValidateStringAssetFiltersReturn {
+  if (typeof q.stringFilters === 'string') {
+    try {
+      const parsedFilters = JSON.parse(q.stringFilters);
+      if (assetFiltersSingleKindRT.is(parsedFilters)) {
+        return [null, parsedFilters];
+      } else {
+        return [res.badRequest(new Error(`Invalid asset filters - ${q.filters}`))];
+      }
+    } catch (err: any) {
+      return [res.badRequest(err)];
+    }
+  }
+  return [null, undefined];
 }

@@ -32,14 +32,11 @@ export const data = dataPluginMock.createStartContract();
 const defaultConfig: ConfigSchema = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
       observability: { enabled: false },
     },
-    thresholdRule: { enabled: false },
   },
-  compositeSlo: { enabled: false },
 };
 
 const queryClient = new QueryClient({
@@ -65,6 +62,7 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
           exploratoryView: {
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
+            // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
             ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
           },
         }}

@@ -53,7 +53,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps, this.experimentalFeatures);
+    setupNavigation(core, setupDeps);
     return {};
   }
 
@@ -69,11 +69,11 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
-      getStarted: getSecurityGetStartedComponent(services, productTypes),
-      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+      GetStarted: getSecurityGetStartedComponent(services, productTypes),
+      DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
 
-    startNavigation(services, this.config);
+    startNavigation(services);
     setRoutes(services);
 
     return {};

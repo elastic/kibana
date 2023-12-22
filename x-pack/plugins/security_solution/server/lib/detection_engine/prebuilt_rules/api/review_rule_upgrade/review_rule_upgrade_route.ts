@@ -15,7 +15,7 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { invariant } from '../../../../../../common/utils/invariant';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
@@ -100,6 +100,11 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const targetRule: RuleResponse = {
       ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
       id: installedCurrentVersion.id,
+      revision: installedCurrentVersion.revision + 1,
+      created_at: installedCurrentVersion.created_at,
+      created_by: installedCurrentVersion.created_by,
+      updated_at: new Date().toISOString(),
+      updated_by: installedCurrentVersion.updated_by,
     };
 
     return {

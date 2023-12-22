@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { useController, useFormContext, useWatch, useFieldArray } from 'react-hook-form';
 
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
@@ -84,6 +85,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               draft.id = updatedQuery.id;
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
+              draft.timeout = updatedQuery.timeout;
 
               if (updatedQuery.platform?.length) {
                 draft.platform = updatedQuery.platform;
@@ -137,6 +139,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
             {
               id: newQueryId,
               interval: newQuery.interval ?? parsedContent.interval ?? '3600',
+              timeout: newQuery.timeout ?? parsedContent.timeout ?? QUERY_TIMEOUT.DEFAULT,
               query: newQuery.query,
               version: newQuery.version ?? parsedContent.version,
               snapshot: newQuery.snapshot ?? parsedContent.snapshot,
@@ -163,7 +166,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {!tableSelectedItems.length ? (
-                <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+                <EuiButton
+                  data-test-subj="add-query-button"
+                  fill
+                  onClick={handleShowAddFlyout}
+                  iconType="plusInCircle"
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
                     defaultMessage="Add query"

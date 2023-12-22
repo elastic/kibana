@@ -38,7 +38,7 @@ For the most up-to-date API details, refer to the
 ==== Request body
 
 `type`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`.
 
 `id`::
   (Optional, string) Specifies an ID instead of using a randomly generated ID.

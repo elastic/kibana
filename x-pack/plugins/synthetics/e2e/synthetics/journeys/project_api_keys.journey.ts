@@ -20,7 +20,7 @@ journey('ProjectAPIKeys', async ({ page }) => {
     page.on('request', (evt) => {
       if (
         evt.resourceType() === 'fetch' &&
-        evt.url().includes(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY)
+        evt.url().includes(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY)
       ) {
         evt
           .response()

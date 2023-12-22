@@ -172,7 +172,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
   return (
     <EuiInMemoryTable
       data-test-subj="infraAssetDetailsMetadataTable"
-      tableLayout={'fixed'}
+      tableLayout="fixed"
       responsive={false}
       columns={columns}
       items={fieldsWithPins}

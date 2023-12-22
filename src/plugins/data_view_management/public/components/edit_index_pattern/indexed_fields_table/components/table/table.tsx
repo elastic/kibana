@@ -369,6 +369,7 @@ const getConflictBtn = (
 
   return (
     <span>
+      {' '}
       <EuiBadge
         color="warning"
         iconType="warning"

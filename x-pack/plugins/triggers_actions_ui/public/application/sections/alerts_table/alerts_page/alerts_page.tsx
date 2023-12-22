@@ -28,7 +28,6 @@ const AlertsPage: React.FunctionComponent = () => {
     id: `internal-alerts-page`,
     featureIds: consumers,
     query: { bool: { must: [] } },
-    showExpandToDetails: true,
   };
 
   return (

@@ -16,6 +16,10 @@ properties:
       enum:
         - metrics
         - logs
+  keep_monitoring_alive:
+    description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
+    type: boolean
+    nullable: true
   data_output_id:
     type: string
     nullable: true
@@ -29,9 +33,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   package_policies:
     description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
     type: array

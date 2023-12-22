@@ -47,6 +47,7 @@ describe('#start()', () => {
     expect(mockReactDomRender).not.toHaveBeenCalled();
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
+      analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
       targetDomElement,
@@ -65,6 +66,7 @@ describe('#start()', () => {
     ).toBeInstanceOf(ToastsApi);
     expect(
       toasts.start({
+        analytics: mockAnalytics,
         i18n: mockI18n,
         theme: mockTheme,
         targetDomElement,
@@ -83,6 +85,7 @@ describe('#stop()', () => {
 
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
+      analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
       targetDomElement,
@@ -108,6 +111,7 @@ describe('#stop()', () => {
 
     toasts.setup({ uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.start({
+      analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
       targetDomElement,

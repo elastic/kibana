@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { ThreatRuleParams } from '../../rule_schema';
-import { threatRuleParams } from '../../rule_schema';
+import { ThreatRuleParams } from '../../rule_schema';
 import { indicatorMatchExecutor } from './indicator_match';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
@@ -28,14 +26,7 @@ export const createIndicatorMatchAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, threatRuleParams);
-          if (errors != null) {
-            throw new Error(errors);
-          }
-          if (validated == null) {
-            throw new Error('Validation of rule params failed');
-          }
-          return validated;
+          return ThreatRuleParams.parse(object);
         },
         /**
          * validate rule params when rule is bulk edited (update and created in future as well)

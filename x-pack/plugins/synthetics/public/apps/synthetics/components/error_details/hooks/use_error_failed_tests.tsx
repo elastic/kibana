@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
-  FINAL_SUMMARY_FILTER,
+  SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -24,7 +24,7 @@ export function useErrorFailedTests() {
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -32,7 +32,7 @@ export function useErrorFailedTests() {
         query: {
           bool: {
             filter: [
-              FINAL_SUMMARY_FILTER,
+              SUMMARY_FILTER,
               EXCLUDE_RUN_ONCE_FILTER,
               {
                 term: {

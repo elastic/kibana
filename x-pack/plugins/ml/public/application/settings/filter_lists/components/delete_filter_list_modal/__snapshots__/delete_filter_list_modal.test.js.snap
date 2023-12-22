@@ -9,7 +9,6 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
     isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Delete"
@@ -29,7 +28,6 @@ exports[`DeleteFilterListModal renders as delete button after opening and closin
     isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Delete"
@@ -49,7 +47,6 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
     isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Delete"
@@ -69,7 +66,6 @@ exports[`DeleteFilterListModal renders as enabled delete button when a list is s
     isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Delete"
@@ -89,7 +85,6 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
     isDisabled={false}
     key="delete_filter_list"
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Delete"

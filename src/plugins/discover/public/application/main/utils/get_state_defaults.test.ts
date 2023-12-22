@@ -36,6 +36,7 @@ describe('getStateDefaults', () => {
         "query": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [
           Array [
@@ -70,6 +71,7 @@ describe('getStateDefaults', () => {
         "query": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [],
         "viewMode": undefined,

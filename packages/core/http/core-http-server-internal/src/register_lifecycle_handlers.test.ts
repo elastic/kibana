@@ -11,6 +11,9 @@ jest.mock('./lifecycle_handlers', () => {
   return {
     ...actual,
     createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
+    createBuildNrMismatchLoggerPreResponseHandler: jest.fn(
+      actual.createBuildNrMismatchLoggerPreResponseHandler
+    ),
   };
 });
 
@@ -18,7 +21,11 @@ import { createTestEnv } from '@kbn/config-mocks';
 import type { HttpConfig } from './http_config';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 
-import { createVersionCheckPostAuthHandler } from './lifecycle_handlers';
+import {
+  createVersionCheckPostAuthHandler,
+  createBuildNrMismatchLoggerPreResponseHandler,
+} from './lifecycle_handlers';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('registerCoreHandlers', () => {
   it('will not register client version checking if disabled via config', () => {
@@ -39,11 +46,15 @@ describe('registerCoreHandlers', () => {
       },
     } as unknown as HttpConfig;
 
-    registerCoreHandlers(registrarMock, config, createTestEnv());
+    const logger = loggerMock.create();
+
+    registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
     expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(0);
+    expect(createBuildNrMismatchLoggerPreResponseHandler).toHaveBeenCalledTimes(1); // we do expect to register a logger
 
     config.versioned.strictClientVersionCheck = true;
-    registerCoreHandlers(registrarMock, config, createTestEnv());
+    registerCoreHandlers(registrarMock, config, createTestEnv(), logger);
     expect(createVersionCheckPostAuthHandler).toHaveBeenCalledTimes(1);
+    expect(createBuildNrMismatchLoggerPreResponseHandler).toHaveBeenCalledTimes(1); // logger registration should not be called again
   });
 });

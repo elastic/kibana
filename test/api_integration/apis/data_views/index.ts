@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('index_patterns', () => {
     loadTestFile(require.resolve('./es_errors'));
+    loadTestFile(require.resolve('./existing_indices_route'));
     loadTestFile(require.resolve('./fields_for_wildcard_route'));
     loadTestFile(require.resolve('./data_views_crud'));
     loadTestFile(require.resolve('./scripted_fields_crud'));

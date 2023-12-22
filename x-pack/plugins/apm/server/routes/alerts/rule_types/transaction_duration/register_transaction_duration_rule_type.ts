@@ -24,6 +24,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -38,7 +39,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
   RULE_TYPES_CONFIG,
@@ -87,9 +87,9 @@ export const transactionDurationActionVariables = [
 
 export function registerTransactionDurationRuleType({
   alerting,
+  apmConfig,
   ruleDataClient,
   getApmIndices,
-  apmConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
@@ -111,7 +111,12 @@ export function registerTransactionDurationRuleType({
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async ({ params: ruleParams, services, spaceId }) => {
+    executor: async ({
+      params: ruleParams,
+      services,
+      spaceId,
+      getTimeRange,
+    }) => {
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
         ruleParams.groupBy
@@ -152,6 +157,10 @@ export function registerTransactionDurationRuleType({
           ]
         : [];
 
+      const { dateStart } = getTimeRange(
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+      );
+
       const searchParams = {
         index,
         body: {
@@ -163,7 +172,7 @@ export function registerTransactionDurationRuleType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                      gte: dateStart,
                     },
                   },
                 },

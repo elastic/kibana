@@ -31,7 +31,11 @@ export function ProfilingEmbeddable<T>({
   useEffect(() => {
     async function createEmbeddable() {
       const factory = embeddablePlugin?.getEmbeddableFactory(embeddableFactoryId);
-      const input = { id: 'embeddable_profiling', data, isLoading };
+      const input = {
+        id: 'embeddable_profiling',
+        data,
+        isLoading,
+      };
       const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
     }
@@ -47,7 +51,11 @@ export function ProfilingEmbeddable<T>({
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({ data, isLoading, ...props });
+      embeddable.updateInput({
+        data,
+        isLoading,
+        ...props,
+      });
       embeddable.reload();
     }
   }, [data, embeddable, isLoading, props]);

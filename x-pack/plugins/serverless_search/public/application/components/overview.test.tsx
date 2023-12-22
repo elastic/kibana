@@ -5,8 +5,14 @@
  * 2.0.
  */
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { render, core } from '../../test/test_utils';
 import { ElasticsearchOverview as Overview } from './overview';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 describe('<Overview />', () => {
   beforeEach(() => {
@@ -29,6 +35,10 @@ describe('<Overview />', () => {
         }
       });
     });
+    const pathname = '/app/elasticsearch';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+      pathname,
+    }));
   });
 
   test('renders without throwing an error', () => {
@@ -51,7 +61,7 @@ describe('<Overview />', () => {
   });
   test('api key', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { level: 2, name: 'Prepare an API Key' })).toBeDefined();
+    expect(getByRole('heading', { level: 2, name: 'API Key' })).toBeDefined();
   });
   test('cloud id', () => {
     const { getByRole } = render(<Overview />);
@@ -72,6 +82,10 @@ describe('<Overview />', () => {
   test('build query', () => {
     const { getByRole } = render(<Overview />);
     expect(getByRole('heading', { name: 'Build your first search query' })).toBeDefined();
+  });
+  test('transform data', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Transform and enrich your data' })).toBeDefined();
   });
   test("what's next?", () => {
     const { getByRole } = render(<Overview />);

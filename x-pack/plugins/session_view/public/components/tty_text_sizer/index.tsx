@@ -28,7 +28,7 @@ export interface TTYTextSizerDeps {
 const commonButtonProps: Partial<EuiButtonIconProps> = {
   display: 'empty',
   size: 's',
-  color: 'ghost',
+  color: 'text',
 };
 
 const LINE_HEIGHT_SCALE_RATIO = 1.3;
@@ -95,7 +95,7 @@ export const TTYTextSizer = ({
             iconType={fit ? 'expand' : 'minimize'}
             onClick={onToggleFit}
             size="s"
-            color="ghost"
+            color="text"
           />
         </EuiToolTip>
       </EuiFlexItem>

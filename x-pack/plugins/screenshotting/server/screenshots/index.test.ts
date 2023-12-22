@@ -68,6 +68,7 @@ describe('Screenshot Observable Pipeline', () => {
       urls: ['/welcome/home/start/index.htm'],
     };
     config = {
+      enabled: true,
       poolSize: 1,
       capture: {
         timeouts: {

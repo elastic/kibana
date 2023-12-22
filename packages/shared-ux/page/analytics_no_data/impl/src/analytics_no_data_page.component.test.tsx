@@ -147,5 +147,25 @@ describe('AnalyticsNoDataPageComponent', () => {
         await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
       });
     });
+
+    describe('serverless_observability flavor', () => {
+      it('renders getting started card', async () => {
+        render(
+          <I18nProvider>
+            <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+              <AnalyticsNoDataPage
+                pageFlavor={'serverless_observability'}
+                onDataViewCreated={onDataViewCreated}
+                kibanaGuideDocLink={'http://www.test.com'}
+                showPlainSpinner={false}
+                prependBasePath={(path: string) => path}
+              />
+            </AnalyticsNoDataPageProvider>
+          </I18nProvider>
+        );
+
+        await screen.findByTestId('kbnObservabilityNoData');
+      });
+    });
   });
 });

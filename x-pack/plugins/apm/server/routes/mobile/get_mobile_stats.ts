@@ -10,16 +10,19 @@ import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getMobileSessions } from './get_mobile_sessions';
 import { getMobileHttpRequests } from './get_mobile_http_requests';
 import { getMobileCrashRate } from './get_mobile_crash_rate';
+import { getMobileAvgLaunchTime } from './get_mobile_average_launch_time';
 import { Maybe } from '../../../typings/common';
 
 export interface Timeseries {
   x: number;
   y: number;
 }
+
 interface MobileStats {
   sessions: { timeseries: Timeseries[]; value: Maybe<number> };
   requests: { timeseries: Timeseries[]; value: Maybe<number> };
   crashRate: { timeseries: Timeseries[]; value: Maybe<number> };
+  launchTimes: { timeseries: Timeseries[]; value: Maybe<number> };
 }
 
 export interface MobilePeriodStats {
@@ -62,10 +65,11 @@ async function getMobileStats({
     offset,
   };
 
-  const [sessions, httpRequests, crashes] = await Promise.all([
+  const [sessions, httpRequests, crashes, launchTimeAvg] = await Promise.all([
     getMobileSessions({ ...commonProps }),
     getMobileHttpRequests({ ...commonProps }),
     getMobileCrashRate({ ...commonProps }),
+    getMobileAvgLaunchTime({ ...commonProps }),
   ]);
 
   return {
@@ -88,6 +92,10 @@ async function getMobileStats({
           y: sessionValue ? (bucket.y ?? 0) / sessionValue : 0,
         };
       }) as Timeseries[],
+    },
+    launchTimes: {
+      value: launchTimeAvg.currentPeriod.value,
+      timeseries: launchTimeAvg.currentPeriod.timeseries as Timeseries[],
     },
   };
 }
@@ -123,6 +131,7 @@ export async function getMobileStatsPeriods({
         sessions: { timeseries: [], value: null },
         requests: { timeseries: [], value: null },
         crashRate: { timeseries: [], value: null },
+        launchTimes: { timeseries: [], value: null },
       };
 
   const [currentPeriod, previousPeriod] = await Promise.all([

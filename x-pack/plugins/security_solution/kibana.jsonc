@@ -28,7 +28,6 @@
       "eventLog",
       "features",
       "fieldFormats",
-      "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
       "lens",
@@ -53,7 +52,8 @@
       "discover",
       "notifications",
       "savedObjects",
-      "savedSearch"
+      "savedSearch",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -68,7 +68,8 @@
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "esUiShared",

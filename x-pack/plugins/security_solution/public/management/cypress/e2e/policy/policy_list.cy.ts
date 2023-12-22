@@ -16,8 +16,19 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe(
   'Policy List',
   {
+    // Not supported in serverless!
+    // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+    // `internal/kibana/settings` is not accessible in serverless
     tags: ['@ess', '@serverless', '@brokenInServerless'],
-    env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'protectionUpdatesEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     // Today API wont let us create a policy with a manifest version before October 1st 2023

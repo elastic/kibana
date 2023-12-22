@@ -22,6 +22,16 @@ test('is required by default', () => {
   );
 });
 
+test('reject numeric values if `coerceFromNumber` is unspecified', () => {
+  expect(() => schema.string({}).validate(1234)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [number]"`
+  );
+});
+
+test('coerce numeric values if `coerceFromNumber` is `true`', () => {
+  expect(schema.string({ coerceFromNumber: true }).validate(1234)).toBe('1234');
+});
+
 test('includes namespace in failure', () => {
   expect(() =>
     schema.string().validate(undefined, {}, 'foo-namespace')

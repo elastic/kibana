@@ -26,6 +26,7 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
 
 interface DataViewEditorProps {
+  id: string;
   label: ReactNode;
   dataViewEditorService: DataViewEditorService;
   indexPattern: string;
@@ -42,6 +43,7 @@ const mustMatchError = i18n.translate(
 );
 
 export function DataViewEditor({
+  id,
   label,
   dataViewEditorService,
   indexPattern,
@@ -131,6 +133,7 @@ export function DataViewEditor({
           isInvalid={errorMessage !== undefined}
           fullWidth
           helpText={helpText}
+          data-test-subj={`mlDataDriftIndexPatternFormRow-${id ?? ''}`}
         >
           <EuiFieldText
             value={indexPattern}
@@ -149,7 +152,7 @@ export function DataViewEditor({
               setIndexPattern(query);
             }}
             fullWidth
-            data-test-subj="createIndexPatternTitleInput"
+            data-test-subj={`mlDataDriftIndexPatternTitleInput-${id ?? ''}`}
             placeholder="example-pattern*"
           />
         </EuiFormRow>
@@ -183,6 +186,12 @@ export function DataViewEditor({
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          data-test-subject={`mlDataDriftIndexPatternTable-${id ?? ''}`}
+          rowProps={(item) => {
+            return {
+              'data-test-subj': `mlDataDriftIndexPatternTableRow row-${id}`,
+            };
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGrid>

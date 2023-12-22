@@ -32,7 +32,7 @@ export function SloDetailsAlerts({ slo }: Props) {
             configurationId={AlertConsumers.OBSERVABILITY}
             id={ALERTS_TABLE_ID}
             data-test-subj="alertTable"
-            featureIds={[AlertConsumers.SLO]}
+            featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
             query={{
               bool: {
                 filter: [
@@ -41,7 +41,6 @@ export function SloDetailsAlerts({ slo }: Props) {
                 ],
               },
             }}
-            showExpandToDetails={false}
             showAlertStatusWithFlapping
             pageSize={100}
           />

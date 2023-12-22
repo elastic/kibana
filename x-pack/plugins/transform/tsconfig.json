@@ -69,7 +69,9 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/core-plugins-server",
-    "@kbn/data-view-editor-plugin"
+    "@kbn/data-view-editor-plugin",
+    "@kbn/ml-data-view-utils",
+    "@kbn/ml-creation-wizard-utils"
   ],
   "exclude": [
     "target/**/*",

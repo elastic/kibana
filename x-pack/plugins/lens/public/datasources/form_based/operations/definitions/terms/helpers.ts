@@ -17,7 +17,7 @@ import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { LastValueIndexPatternColumn } from '../last_value';
@@ -126,7 +126,7 @@ export function getDisallowedTermsMessage(
       newState: async (
         data: DataPublicPluginStart,
         core: CoreStart,
-        frame: FrameDatasourceAPI,
+        frame: FramePublicAPI,
         layerId: string
       ) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;

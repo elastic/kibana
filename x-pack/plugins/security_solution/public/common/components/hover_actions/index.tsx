@@ -217,13 +217,12 @@ export const HoverActions: React.FC<Props> = React.memo(
 
     const isCaseView = scopeId === TimelineId.casePage;
     const isTimelineView = scopeId === TimelineId.active;
-    const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
     // TODO Provide a list of disabled/enabled actions as props
     const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
 
     const hideFilters = useMemo(
-      () => (isAlertDetailsView || isEntityAnalyticsPage) && !isTimelineView,
-      [isTimelineView, isAlertDetailsView, isEntityAnalyticsPage]
+      () => isEntityAnalyticsPage && !isTimelineView,
+      [isTimelineView, isEntityAnalyticsPage]
     );
 
     const hiddenActionsCount = useMemo(() => {

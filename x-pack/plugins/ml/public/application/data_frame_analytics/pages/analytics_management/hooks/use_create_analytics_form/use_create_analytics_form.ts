@@ -18,7 +18,6 @@ import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
-import { createKibanaDataView } from '../../../../../components/ml_inference/retry_create_data_view';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
@@ -59,8 +58,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, jobId } = form;
-  let { destinationIndex } = form;
+  const { createDataView, jobId } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -73,8 +71,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
 
-  const setIndexPatternTitles = (payload: { indexPatternsMap: SourceIndexMap }) =>
-    dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
+  const setDataViewTitles = (payload: { dataViewsMap: SourceIndexMap }) =>
+    dispatch({ type: ACTION.SET_DATA_VIEW_TITLES, payload });
 
   const setIsJobCreated = (isJobCreated: boolean) =>
     dispatch({ type: ACTION.SET_IS_JOB_CREATED, isJobCreated });
@@ -94,12 +92,13 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
     ) as DataFrameAnalyticsConfig;
 
-    if (isAdvancedEditorEnabled) {
-      destinationIndex = analyticsJobConfig.dest.index;
-    }
-
     try {
-      await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
+      await ml.dataFrameAnalytics.createDataFrameAnalytics(
+        jobId,
+        analyticsJobConfig,
+        createDataView,
+        form.timeFieldName
+      );
       addRequestMessage({
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
@@ -110,9 +109,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobCreated(true);
-      if (createIndexPattern) {
-        createKibanaDataView(destinationIndex, dataViews, form.timeFieldName, addRequestMessage);
-      }
       refresh();
       return true;
     } catch (e) {
@@ -132,17 +128,17 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const prepareFormValidation = async () => {
     try {
       // Set the existing data view names.
-      const indexPatternsMap: SourceIndexMap = {};
+      const dataViewsMap: SourceIndexMap = {};
       const savedObjects = (await dataViews.getCache()) || [];
       savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';
-          indexPatternsMap[title] = { label: title, value: id };
+          dataViewsMap[title] = { label: title, value: id };
         }
       });
-      setIndexPatternTitles({
-        indexPatternsMap,
+      setDataViewTitles({
+        dataViewsMap,
       });
     } catch (e) {
       addRequestMessage({

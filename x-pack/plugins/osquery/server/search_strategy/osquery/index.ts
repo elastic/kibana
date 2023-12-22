@@ -45,6 +45,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('pagination' in request ? { pagination: request.pagination } : {}),
             ...('sort' in request ? { sort: request.sort } : {}),
             ...('actionId' in request ? { actionId: request.actionId } : {}),
+            ...('startDate' in request ? { startDate: request.startDate } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
           } as StrategyRequestType<T>;
 

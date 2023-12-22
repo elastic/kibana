@@ -92,6 +92,29 @@ export default function (providerContext: FtrProviderContext) {
       return agentPolicyId;
     };
 
+    const createOutputWithSecret = async () => {
+      const res = await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Kafka Output With Password Secret',
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          auth_type: 'user_pass',
+          username: 'user',
+          topics: [{ topic: 'topic1' }],
+          config_yaml: 'shipper: {}',
+          shipper: {
+            disk_queue_enabled: true,
+            disk_queue_path: 'path/to/disk/queue',
+            disk_queue_encryption_enabled: true,
+          },
+          secrets: { password: 'pass' },
+        });
+
+      return res.body.item;
+    };
+
     const createPolicyWithSecrets = async () => {
       return supertest
         .post(`/api/fleet/package_policies`)
@@ -437,6 +460,37 @@ export default function (providerContext: FtrProviderContext) {
       expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(streamVarId);
     });
 
+    it('Should return output secrets if policy uses output with secrets', async () => {
+      const outputWithSecret = await createOutputWithSecret();
+
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `Test policy ${uuidv4()}`,
+          namespace: 'default',
+          data_output_id: outputWithSecret.id,
+          monitoring_output_id: outputWithSecret.id,
+        })
+        .expect(200);
+
+      const fullAgentPolicy = await getFullAgentPolicyById(agentPolicyResponse.item.id);
+
+      const passwordSecretId = outputWithSecret!.secrets?.password?.id;
+
+      expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
+
+      const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+      // @ts-expect-error
+      expect(output.secrets.password.id).to.eql(passwordSecretId);
+
+      // delete output with secret
+      await supertest
+        .delete(`/api/fleet/outputs/${outputWithSecret.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
     it('should have correctly created the secrets', async () => {
       const searchRes = await getSecrets([packageVarId, inputVarId, streamVarId]);
 
@@ -465,6 +519,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should allow secret values to be updated (single policy update API)', async () => {
       const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
       updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
+
       const updateRes = await supertest
         .put(`/api/fleet/package_policies/${createdPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')

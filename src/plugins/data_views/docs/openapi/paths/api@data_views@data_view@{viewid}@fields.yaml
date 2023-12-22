@@ -1,8 +1,8 @@
 post:
-  summary: Update fields presentation metadata such as count, customLabel and format. 
+  summary: Update fields presentation metadata such as count, customLabel and format.
   operationId: updateFieldsMetadata
   description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
   tags:
     - data views
   parameters:
@@ -22,7 +22,7 @@ post:
               type: object
         examples:
           updateFieldsMetadataRequest:
-            $ref: '../components/examples/update_field_metadata_request.yaml'           
+            $ref: '../components/examples/update_field_metadata_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -39,8 +39,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
-  servers:
-    - url: https://localhost:5601
-
-servers:
-  - url: https://localhost:5601

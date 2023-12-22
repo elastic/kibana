@@ -203,10 +203,10 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             { abortSignal, strategy: SQL_SEARCH_STRATEGY }
           ).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = error.err.attributes;
+                const { type, reason } = error.attributes;
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
                 } else {
@@ -217,7 +217,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, took }) {
+              next({ rawResponse, requestParams, took }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
@@ -245,10 +245,12 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: rawResponse });
+                  .ok({ json: rawResponse, requestParams });
               },
               error(error) {
-                logInspectorRequest().error({ json: error });
+                logInspectorRequest().error({
+                  json: 'attributes' in error ? error.attributes : { message: error.message },
+                });
               },
             })
           );

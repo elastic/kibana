@@ -7,11 +7,7 @@
 
 import { getTimeline } from '../../../objects/timeline';
 
-import {
-  TIMELINE_DESCRIPTION,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
-} from '../../../screens/timeline';
+import { TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
   TIMELINES_PINNED_EVENT_COUNT,
@@ -21,8 +17,6 @@ import {
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -36,13 +30,11 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
+describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   describe('Open timeline modal', () => {
     before(function () {
-      cleanKibana();
       login();
       visit(TIMELINES_URL);
-
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
@@ -63,14 +55,9 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
         });
     });
 
-    beforeEach(function () {
-      login();
-      visit(TIMELINES_URL);
+    it('should display timeline info', function () {
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
-    });
-
-    it('should display timeline info', () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(getTimeline().title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);
@@ -78,7 +65,6 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
       cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
       cy.get(TIMELINES_FAVORITE).last().should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     });
   });
 });

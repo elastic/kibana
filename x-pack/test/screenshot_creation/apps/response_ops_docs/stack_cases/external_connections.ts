@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('cases configure screenshot', async () => {
       await cases.navigation.navigateToApp();
       await cases.navigation.navigateToConfigurationPage();
-      await commonScreenshots.takeScreenshot('cases-connectors', screenshotDirectories, 1400, 1024);
+      await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
     });
   });
 }

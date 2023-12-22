@@ -10,8 +10,8 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
@@ -100,7 +100,9 @@ export const validateBulkEditRule = async ({
  */
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
   return edit.every(({ type }) =>
-    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
+    [BulkActionEditTypeEnum.set_rule_actions, BulkActionEditTypeEnum.add_rule_actions].includes(
+      type
+    )
   );
 };
 

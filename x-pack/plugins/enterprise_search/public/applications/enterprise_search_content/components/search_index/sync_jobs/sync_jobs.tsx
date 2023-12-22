@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { useValues } from 'kea';
+import { type } from 'io-ts';
+import { useActions, useValues } from 'kea';
 
 import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { SyncJobsTable } from '@kbn/search-connectors';
+
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { IndexViewLogic } from '../index_view_logic';
 
-import { SyncJobsHistoryTable } from './sync_jobs_history_table';
+import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
 export const SyncJobs: React.FC = () => {
   const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
@@ -25,6 +28,19 @@ export const SyncJobs: React.FC = () => {
   const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
   const shouldShowAccessSyncs =
     productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
+  const { connectorId, syncJobsPagination: pagination, syncJobs } = useValues(SyncJobsViewLogic);
+  const { fetchSyncJobs } = useActions(SyncJobsViewLogic);
+
+  useEffect(() => {
+    if (connectorId) {
+      fetchSyncJobs({
+        connectorId,
+        from: pagination.pageIndex * (pagination.pageSize || 0),
+        size: pagination.pageSize ?? 10,
+        type: selectedSyncJobCategory as 'access_control' | 'content',
+      });
+    }
+  }, [connectorId, selectedSyncJobCategory, type]);
 
   return (
     <>
@@ -62,9 +78,37 @@ export const SyncJobs: React.FC = () => {
         />
       )}
       {selectedSyncJobCategory === 'content' ? (
-        <SyncJobsHistoryTable type="content" />
+        <SyncJobsTable
+          onPaginate={({ page: { index, size } }) => {
+            if (connectorId) {
+              fetchSyncJobs({
+                connectorId,
+                from: index * size,
+                size,
+                type: selectedSyncJobCategory,
+              });
+            }
+          }}
+          pagination={pagination}
+          syncJobs={syncJobs}
+          type="content"
+        />
       ) : (
-        <SyncJobsHistoryTable type="access_control" />
+        <SyncJobsTable
+          onPaginate={({ page: { index, size } }) => {
+            if (connectorId) {
+              fetchSyncJobs({
+                connectorId,
+                from: index * size,
+                size,
+                type: 'access_control',
+              });
+            }
+          }}
+          pagination={pagination}
+          syncJobs={syncJobs}
+          type="access_control"
+        />
       )}
     </>
   );

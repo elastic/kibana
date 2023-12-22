@@ -12,9 +12,10 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { UnifiedDocViewerServices, UnifiedDocViewerStart } from '../types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 export const mockUnifiedDocViewer: jest.Mocked<UnifiedDocViewerStart> = {
-  getDocViews: jest.fn().mockReturnValue([]),
+  registry: new DocViewsRegistry(),
 };
 
 export const mockUnifiedDocViewerServices: jest.Mocked<UnifiedDocViewerServices> = {
