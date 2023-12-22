@@ -22,9 +22,9 @@ import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
-} from '../../../detections/components/rules/step_about_rule/schema';
-import { schema as scheduleRuleSchema } from '../../../detections/components/rules/step_schedule_rule/schema';
-import { getSchema as getActionsRuleSchema } from '../../../detections/components/rules/step_rule_actions/get_schema';
+} from '../components/step_about_rule/schema';
+import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
+import { getSchema as getActionsRuleSchema } from '../components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
 
 export interface UseRuleFormsProps {

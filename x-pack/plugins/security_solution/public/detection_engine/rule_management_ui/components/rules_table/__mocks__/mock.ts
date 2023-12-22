@@ -16,7 +16,7 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';

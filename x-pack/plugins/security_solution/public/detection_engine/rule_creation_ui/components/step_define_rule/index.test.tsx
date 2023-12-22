@@ -16,7 +16,7 @@ import { useRuleFromTimeline } from '../../../../detections/containers/detection
 import { fireEvent, render, within } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
-import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
+import { stepActionsDefaultValue } from '../step_rule_actions';
 import {
   defaultSchedule,
   stepAboutDefaultValue,

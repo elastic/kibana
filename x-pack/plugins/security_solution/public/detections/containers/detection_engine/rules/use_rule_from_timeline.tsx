@@ -15,7 +15,7 @@ import { updateIsLoading } from '../../../../timelines/store/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import {
   dispatchUpdateTimeline,

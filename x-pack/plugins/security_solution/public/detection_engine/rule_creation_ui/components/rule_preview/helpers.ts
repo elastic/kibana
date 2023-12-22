@@ -12,7 +12,7 @@ import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-t
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import type { ChartSeriesConfigs } from '../../../../common/components/charts/common';
-import type { FieldValueQueryBar } from '../../../../detections/components/rules/query_bar';
+import type { FieldValueQueryBar } from '../query_bar';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';

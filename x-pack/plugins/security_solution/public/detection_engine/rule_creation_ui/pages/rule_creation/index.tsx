@@ -42,19 +42,13 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { AccordionTitle } from '../../components/accordion_title';
 import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
-import {
-  StepAboutRule,
-  StepAboutRuleReadOnly,
-} from '../../../../detections/components/rules/step_about_rule';
-import {
-  StepScheduleRule,
-  StepScheduleRuleReadOnly,
-} from '../../../../detections/components/rules/step_schedule_rule';
+import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
+import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
 import {
   stepActionsDefaultValue,
   StepRuleActions,
   StepRuleActionsReadOnly,
-} from '../../../../detections/components/rules/step_rule_actions';
+} from '../../components/step_rule_actions';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import {
   redirectToDetections,
@@ -84,7 +78,7 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { NextStep } from '../../../../detections/components/rules/next_step';
+import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 

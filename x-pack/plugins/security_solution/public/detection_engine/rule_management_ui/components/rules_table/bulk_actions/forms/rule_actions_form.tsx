@@ -33,7 +33,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
-import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
+import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
 import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
