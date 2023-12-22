@@ -19,6 +19,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
+import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -113,7 +114,7 @@ export class ObservabilityAIAssistantPlugin
         const [_, pluginsStart] = await core.getStartServices();
 
         // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-        await pluginsStart.licensing.refresh();
+        await firstValueFrom(pluginsStart.licensing.license$);
 
         const elserModelDefinition = await plugins.ml
           .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
