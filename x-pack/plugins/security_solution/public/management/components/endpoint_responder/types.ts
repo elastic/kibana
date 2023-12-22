@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
 import type { ManagedConsoleExtensionComponentProps } from '../console';
 import type {
-  HostMetadata,
   EndpointActionDataParameterTypes,
+  HostMetadata,
 } from '../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../console/types';
 
@@ -17,8 +18,17 @@ export interface EndpointCommandDefinitionMeta {
   endpointId: string;
 }
 
+// TODO: sentinel one agent info
+// undecided yet
+interface SentinelOneAgentInfo {
+  agentId: string;
+  name: string;
+  last_seen: string;
+  os: string;
+}
+
 export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{
-  endpoint: HostMetadata;
+  [K in ResponseActionAgentType]?: K extends 'endpoint' ? HostMetadata : SentinelOneAgentInfo;
 }>;
 
 export type ActionRequestComponentProps<
