@@ -22,14 +22,23 @@ export const journey = new Journey({
       generateHostsData({
         from: new Date(start).toISOString(),
         to: new Date().toISOString(),
-        count: 500,
+        count: 1000,
       })
     );
   },
-}).step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`app/metrics/hosts`));
-  await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
-});
+})
+  .step('Navigate to Hosts view and load 100 hosts (default)', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`app/metrics/hosts`));
+    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  })
+  .step('Load 500 hosts', async ({ page, kbnUrl }) => {
+    await page.click('[data-test-subj="hostsViewLimitSelection500Button"]');
+    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  })
+  .step('Load 50 hosts', async ({ page, kbnUrl }) => {
+    await page.click('[data-test-subj="hostsViewLimitSelection50Button"]');
+    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  });
 
 export function generateHostsData({
   from,
@@ -47,8 +56,8 @@ export function generateHostsData({
     .map((_, idx) => infra.host(`my-host-${idx}`));
 
   return range
-    .interval('1m')
-    .rate(1)
+    .interval('30s')
+    .rate(5)
     .generator((timestamp, index) =>
       hosts.flatMap((host) => [
         host.cpu().timestamp(timestamp),
