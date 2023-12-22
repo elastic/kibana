@@ -22,10 +22,18 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
 
   const endpointInfo = useMemo(
     () => ({
-      hostname: props.meta.endpoint ? props.meta.endpoint.host.hostname : '',
-      agentId: props.meta.endpoint ? props.meta.endpoint.agent.id : '',
+      hostname: props.meta.endpoint
+        ? props.meta.endpoint.host.hostname
+        : props.meta.sentinel_one
+        ? props.meta.sentinel_one.host.name
+        : '',
+      agentId: props.meta.endpoint
+        ? props.meta.endpoint.agent.id
+        : props.meta.sentinel_one
+        ? props.meta.sentinel_one.agent.id
+        : '',
     }),
-    [props.meta.endpoint]
+    [props.meta]
   );
 
   return (

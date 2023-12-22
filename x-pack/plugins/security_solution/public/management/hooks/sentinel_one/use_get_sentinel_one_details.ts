@@ -18,7 +18,10 @@ interface HttpResponse {
 
 // TODO: Update once we have API and data model for SentinelOne
 // This is a placeholder for now
-interface SentinelOneInfo {
+export interface SentinelOneAgentInfo {
+  agent: {
+    id: string;
+  };
   host: {
     name: string;
   };
@@ -31,16 +34,16 @@ interface SentinelOneInfo {
 // TODO: Update once we have API and data model for SentinelOne
 export const useGetSentinelOneDetails = (
   endpointId: string,
-  options: UseQueryOptions<SentinelOneInfo, IHttpFetchError<HttpResponse>> = {}
-): UseQueryResult<SentinelOneInfo, IHttpFetchError<HttpResponse>> => {
+  options: UseQueryOptions<SentinelOneAgentInfo, IHttpFetchError<HttpResponse>> = {}
+): UseQueryResult<SentinelOneAgentInfo, IHttpFetchError<HttpResponse>> => {
   const http = useHttp();
 
-  return useQuery<SentinelOneInfo, IHttpFetchError<HttpResponse>>({
+  return useQuery<SentinelOneAgentInfo, IHttpFetchError<HttpResponse>>({
     queryKey: ['get-third-party-host-info', endpointId],
     ...options,
     queryFn: () => {
       // TODO: Update once we have API and data model for SentinelOne
-      return http.get<SentinelOneInfo>(
+      return http.get<SentinelOneAgentInfo>(
         // TODO: Update API PATH once we have API and data model for SentinelOne
         resolvePathVariables(`/api/thirdPartyHost/metadata/{id}`, {
           id: endpointId.trim() || 'undefined',
