@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `"project": {"key": "ROC"},\n` +
     `"issueType": {"id": "10024"}\n` +
     `}`;
+  const createCommentJson = `{\n` + `"body": {{{case.comment}}}\n`;
 
   describe('webhook case management connector', function () {
     beforeEach(async () => {
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'webhookCreateUrlText',
         'https://testing-jira.atlassian.net/rest/api/2/issue'
       );
-      await testSubjects.setValue('actionJsonEditor', createCaseJson);
+      await testSubjects.setValue('webhookCreateIncidentJson', createCaseJson);
       await testSubjects.setValue('createIncidentResponseKeyText', 'id');
       await commonScreenshots.takeScreenshot(
         'cases-webhook-connector-create-case',
@@ -62,6 +63,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await commonScreenshots.takeScreenshot(
         'cases-webhook-connector-get-case',
+        screenshotDirectories,
+        1920,
+        1400
+      );
+      await testSubjects.click('casesWebhookNext');
+      await testSubjects.setValue(
+        'updateIncidentUrlInput',
+        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+      );
+      await testSubjects.setValue('webhookUpdateIncidentJson', createCaseJson);
+      await testSubjects.setValue('webhookCreateCommentMethodSelect', 'post');
+      await testSubjects.setValue(
+        'createCommentUrlInput',
+        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+      );
+      await testSubjects.setValue('webhookCreateCommentJson', createCommentJson);
+      await commonScreenshots.takeScreenshot(
+        'cases-webhook-connector-comments',
         screenshotDirectories,
         1920,
         1400
