@@ -128,7 +128,6 @@
     "@hapi/inert": "^6.0.4",
     "@hapi/wreck": "^17.1.0",
     "@hello-pangea/dnd": "16.2.0",
-    "@juggle/resize-observer": "^3.4.0",
     "@kbn/aad-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/aad",
     "@kbn/ace": "link:packages/kbn-ace",
     "@kbn/actions-plugin": "link:x-pack/plugins/actions",
