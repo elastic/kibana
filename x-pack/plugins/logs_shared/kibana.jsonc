@@ -14,7 +14,8 @@
       "usageCollection",
       "observabilityShared",
       "observabilityAIAssistant",
-      "share"
+      "share",
+      "metricsDataAccess"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]

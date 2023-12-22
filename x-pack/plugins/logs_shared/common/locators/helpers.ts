@@ -6,25 +6,33 @@
  */
 
 import moment, { DurationInputObject } from 'moment';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
 
-export type NodeType = 'host' | 'pod' | 'container' | 'awsEC2' | 'awsS3' | 'awsSQS' | 'awsRDS';
+export const getLogsQuery = (params: LogsLocatorParams) => {
+  const { filter } = params;
 
-const NodeTypeMapping: Record<NodeType, string> = {
-  host: 'host.name',
-  container: 'container.id',
-  pod: 'kubernetes.pod.uid',
-  awsEC2: 'awsEC2',
-  awsS3: 'awsS3',
-  awsSQS: 'awsSQS',
-  awsRDS: 'awsRDS',
+  return filter ? { language: 'kuery', query: filter } : undefined;
 };
 
-export const getNodeQuery = (type: NodeType, id: string) => {
-  return { language: 'kuery', query: `${NodeTypeMapping[type]}: ${id}` };
+export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
+  const { nodeType, nodeId, filter } = params;
+
+  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
+  return filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 };
 
-export const getTraceQuery = (traceId: string) => {
-  return { language: 'kuery', query: `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")` };
+export const getNodeQuery = (params: NodeLogsLocatorParams) => {
+  return { language: 'kuery', query: createNodeLogsQuery(params) };
+};
+
+export const getTraceQuery = (params: TraceLogsLocatorParams) => {
+  const { traceId, filter } = params;
+
+  const traceFilter = `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`;
+  const query = filter ? `(${traceFilter}) and (${filter})` : traceFilter;
+
+  return { language: 'kuery', query };
 };
 
 const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };

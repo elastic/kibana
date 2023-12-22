@@ -21,20 +21,19 @@ export class TraceLogsLocatorDefinition implements LocatorDefinition<TraceLogsLo
   constructor(private readonly locators: LocatorClient) {}
 
   public readonly getLocation = async (params: TraceLogsLocatorParams) => {
-    const { traceId, time } = params;
-
     const infraLogsLocator = this.locators.get<LogsLocatorParams>(INFRA_LOGS_LOCATOR_ID);
     if (infraLogsLocator) {
       return infraLogsLocator.getLocation({
         ...params,
-        filter: getTraceQuery(traceId).query,
+        filter: getTraceQuery(params).query,
       });
     }
 
+    const { time } = params;
     const allDatasetsLocator =
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
     return allDatasetsLocator.getLocation({
-      query: getTraceQuery(traceId),
+      query: getTraceQuery(params),
       ...(time
         ? {
             timeRange: {

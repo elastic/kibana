@@ -11,7 +11,7 @@ import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 
 import { INFRA_LOGS_LOCATOR_ID } from './infra';
 import { LogsLocatorParams } from './types';
-import { getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
+import { getLogsQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
 
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -30,6 +30,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
     const { time } = params;
     return allDatasetsLocator.getLocation({
+      query: getLogsQuery(params),
       ...(time
         ? {
             timeRange: {

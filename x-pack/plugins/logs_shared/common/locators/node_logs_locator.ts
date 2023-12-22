@@ -33,9 +33,9 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
 
     const allDatasetsLocator =
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-    const { nodeId, nodeType, time } = params;
+    const { time } = params;
     return allDatasetsLocator.getLocation({
-      query: getNodeQuery(nodeType, nodeId),
+      query: getNodeQuery(params),
       ...(time
         ? {
             timeRange: {
