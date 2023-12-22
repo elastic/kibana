@@ -282,7 +282,10 @@ export class ObservabilityAIAssistantService {
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       namespace: spaceId,
-      esClient: coreStart.elasticsearch.client.asInternalUser,
+      esClient: {
+        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
+        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      },
       resources: this.resourceNames,
       logger: this.logger,
       user: {
