@@ -13,7 +13,7 @@ import type {
   ScheduleStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { ScheduleItem } from '../schedule_item_form';
+import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';

@@ -41,7 +41,7 @@ import {
 import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepPanel } from '../../components/step_panel';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
 import { StepAboutRule } from '../../components/step_about_rule';
 import { StepDefineRule } from '../../components/step_define_rule';
 import { StepScheduleRule } from '../../components/step_schedule_rule';

@@ -78,7 +78,7 @@ import { ThreatMatchInput } from '../threatmatch_input';
 import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../schedule_item_form';
+import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';

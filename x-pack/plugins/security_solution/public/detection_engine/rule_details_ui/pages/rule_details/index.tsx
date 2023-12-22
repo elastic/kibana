@@ -71,7 +71,7 @@ import {
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { StepPanel } from '../../../rule_creation_ui/components/step_panel';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
   getStepsData,
