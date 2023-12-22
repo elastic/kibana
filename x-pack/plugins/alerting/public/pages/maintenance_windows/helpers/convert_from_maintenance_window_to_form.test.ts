@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { MaintenanceWindow } from '../../../../common';
 
 import { Frequency } from '@kbn/rrule';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
@@ -27,7 +28,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         freq: Frequency.YEARLY,
         count: 1,
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -50,7 +51,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE'],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -82,7 +83,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: ['WE'],
         until,
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -113,7 +114,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: ['WE'],
         count: 3,
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -143,7 +144,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE'],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -172,7 +173,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['+4WE'],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -202,7 +203,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: [3],
         bymonthday: [22],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -229,7 +230,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         freq: Frequency.DAILY,
         interval: 1,
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -258,7 +259,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         byweekday: ['WE', 'TH'],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -288,7 +289,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 1,
         bymonthday: [22],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,
@@ -319,7 +320,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: [3],
         bymonthday: [22],
       },
-    });
+    } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
       title,

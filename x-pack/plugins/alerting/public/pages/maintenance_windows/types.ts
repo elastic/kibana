@@ -6,10 +6,7 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import {
-  MaintenanceWindow as MaintenanceWindowServerSide,
-  MaintenanceWindowModificationMetadata,
-} from '../../../common';
+import { MaintenanceWindow } from '../../../common';
 
 export const RRuleFrequencyMap = {
   '0': Frequency.YEARLY,
@@ -18,15 +15,10 @@ export const RRuleFrequencyMap = {
   '3': Frequency.DAILY,
 };
 
-export type MaintenanceWindow = Pick<
-  MaintenanceWindowServerSide,
-  'title' | 'duration' | 'rRule' | 'categoryIds' | 'scopedQuery'
->;
-
-export type MaintenanceWindowFindResponse = MaintenanceWindowServerSide &
-  MaintenanceWindowModificationMetadata & {
-    total: number;
-  };
+export interface MaintenanceWindowFindResponse {
+  data: MaintenanceWindow[];
+  total: number;
+}
 
 export enum SortDirection {
   asc = 'asc',

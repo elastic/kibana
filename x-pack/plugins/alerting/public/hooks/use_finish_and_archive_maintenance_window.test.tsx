@@ -7,7 +7,6 @@
 import { act, renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useFinishAndArchiveMaintenanceWindow } from './use_finish_and_archive_maintenance_window';
 
@@ -41,7 +40,7 @@ const { archiveMaintenanceWindow } = jest.requireMock(
   '../services/maintenance_windows_api/archive'
 );
 
-const maintenanceWindow: MaintenanceWindow = {
+const maintenanceWindow = {
   title: 'test',
   duration: 1,
   rRule: {
