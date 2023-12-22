@@ -15,7 +15,9 @@ import type { TelemetryEventTypeWithPayload } from '../../analytics';
 interface Props {
   editing: boolean;
   loading: boolean;
-  message: Message;
+  role: Message['message']['role'];
+  content: Message['message']['content'];
+  functionCall: Message['message']['function_call'];
   onActionClick: ChatActionClickHandler;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
@@ -23,23 +25,23 @@ interface Props {
 export function ChatItemContentInlinePromptEditor({
   editing,
   loading,
-  message,
+  functionCall,
+  content,
+  role,
   onActionClick,
   onSendTelemetry,
   onSubmit,
 }: Props) {
   return !editing ? (
-    <MessageText
-      content={message.message.content || ''}
-      loading={loading}
-      onActionClick={onActionClick}
-    />
+    <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
   ) : (
     <ChatPromptEditor
       disabled={false}
       hidden={false}
       loading={false}
-      initialMessage={message}
+      initialFunctionCall={functionCall}
+      initialContent={content}
+      initialRole={role}
       onChangeHeight={() => {}}
       onSubmit={onSubmit}
       onSendTelemetry={onSendTelemetry}

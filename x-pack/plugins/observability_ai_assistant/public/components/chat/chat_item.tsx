@@ -27,7 +27,7 @@ import type { Feedback } from '../feedback_buttons';
 import type { ChatActionClickHandler } from './types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
-export interface ChatItemProps extends ChatTimelineItem {
+export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
@@ -74,12 +74,13 @@ const noPanelMessageClassName = css`
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   content,
+  function_call: functionCall,
+  role,
   currentUser,
   display: { collapsed },
   element,
   error,
   loading,
-  message,
   title,
   onActionClick,
   onEditSubmit,
@@ -132,7 +133,9 @@ export function ChatItem({
       <ChatItemContentInlinePromptEditor
         editing={editing}
         loading={loading}
-        message={message}
+        functionCall={functionCall}
+        content={content}
+        role={role}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
         onSendTelemetry={onSendTelemetry}
@@ -155,10 +158,8 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={
-        <ChatItemAvatar loading={loading} currentUser={currentUser} role={message.message.role} />
-      }
-      username={getRoleTranslation(message.message.role)}
+      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
+      username={getRoleTranslation(role)}
       event={title}
       actions={
         <ChatItemActions
