@@ -106,6 +106,26 @@ describe('CasesConnectorExecutor', () => {
     },
   ];
 
+  const createdOracleRecord = {
+    ...oracleRecords[0],
+    id: groupedAlertsWithOracleKey[2].oracleKey,
+    grouping: groupedAlertsWithOracleKey[2].grouping,
+    version: 'so-version-2',
+    createdAt: '2023-11-13T10:23:42.769Z',
+    updatedAt: '2023-11-13T10:23:42.769Z',
+  };
+
+  const updatedCounterOracleRecord = {
+    ...oracleRecords[0],
+    // another node increased the counter
+    counter: 2,
+    id: groupedAlertsWithOracleKey[0].oracleKey,
+    grouping: groupedAlertsWithOracleKey[0].grouping,
+    version: 'so-version-3',
+    createdAt: '2023-11-13T10:23:42.769Z',
+    updatedAt: '2023-11-13T10:23:42.769Z',
+  };
+
   const cases: Cases = mockCases.map((so) => ({
     ...so.attributes,
     id: so.id,
@@ -116,7 +136,7 @@ describe('CasesConnectorExecutor', () => {
 
   const mockGetRecordId = jest.fn();
   const mockBulkGetRecords = jest.fn();
-  const mockBulkCreateRecord = jest.fn();
+  const mockBulkCreateRecords = jest.fn();
   const mockBulkUpdateRecord = jest.fn();
   const mockGetCaseId = jest.fn();
 
@@ -124,60 +144,349 @@ describe('CasesConnectorExecutor', () => {
   const casesClientMock = createCasesClientMock();
 
   let connectorExecutor: CasesConnectorExecutor;
+  let oracleIdCounter = 0;
+  let caseIdCounter = 0;
 
-  describe('With grouping', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+  const resetCounters = () => {
+    oracleIdCounter = 0;
+    caseIdCounter = 0;
+  };
 
-      // @ts-expect-error: other properties are not required
-      CasesOracleServiceMock.mockImplementation(() => {
-        let oracleIdCounter = 0;
+  const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = () => {
+    expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-        return {
-          getRecordId: mockGetRecordId.mockImplementation(
-            () => `so-oracle-record-${oracleIdCounter++}`
-          ),
-          bulkGetRecords: mockBulkGetRecords.mockResolvedValue(oracleRecords),
-          bulkCreateRecord: mockBulkCreateRecord.mockResolvedValue([
-            {
-              ...oracleRecords[0],
-              id: groupedAlertsWithOracleKey[2].oracleKey,
-              grouping: groupedAlertsWithOracleKey[2].grouping,
-              version: 'so-version-2',
-              createdAt: '2023-11-13T10:23:42.769Z',
-              updatedAt: '2023-11-13T10:23:42.769Z',
-            },
-          ]),
-          bulkUpdateRecord: mockBulkUpdateRecord.mockResolvedValue([]),
-        };
-      });
-
-      // @ts-expect-error: other properties are not required
-      CasesServiceMock.mockImplementation(() => {
-        let caseIdCounter = 0;
-
-        return {
-          getCaseId: mockGetCaseId.mockImplementation(() => `mock-id-${++caseIdCounter}`),
-        };
-      });
-
-      casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
-      casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
-      casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
-      casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
-
-      getCasesClient.mockReturnValue(casesClientMock);
-
-      connectorExecutor = new CasesConnectorExecutor({
-        casesOracleService: new CasesOracleServiceMock(),
-        casesService: new CasesServiceMock(),
-        casesClient: casesClientMock,
-      });
-
-      dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      caseId: 'mock-id-1',
+      attachments: [
+        {
+          alertId: 'alert-id-0',
+          index: 'alert-index-0',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+        {
+          alertId: 'alert-id-2',
+          index: 'alert-index-2',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
     });
 
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      caseId: 'mock-id-2',
+      attachments: [
+        {
+          alertId: 'alert-id-1',
+          index: 'alert-index-1',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
+    });
+
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      caseId: 'mock-id-3',
+      attachments: [
+        {
+          alertId: 'alert-id-3',
+          index: 'alert-index-3',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
+    });
+  };
+
+  const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter = () => {
+    expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      caseId: 'mock-id-1',
+      attachments: [
+        {
+          alertId: 'alert-id-1',
+          index: 'alert-index-1',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
+    });
+
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      caseId: 'mock-id-2',
+      attachments: [
+        {
+          alertId: 'alert-id-3',
+          index: 'alert-index-3',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
+    });
+
+    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      caseId: 'mock-id-4',
+      attachments: [
+        {
+          alertId: 'alert-id-0',
+          index: 'alert-index-0',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+        {
+          alertId: 'alert-id-2',
+          index: 'alert-index-2',
+          owner: 'securitySolution',
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
+          type: 'alert',
+        },
+      ],
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetCounters();
+
+    // @ts-expect-error: other properties are not required
+    CasesOracleServiceMock.mockImplementation(() => {
+      return {
+        getRecordId: mockGetRecordId.mockImplementation(
+          () => `so-oracle-record-${oracleIdCounter++}`
+        ),
+        bulkGetRecords: mockBulkGetRecords.mockResolvedValue(oracleRecords),
+        bulkCreateRecord: mockBulkCreateRecords.mockResolvedValue([createdOracleRecord]),
+        bulkUpdateRecord: mockBulkUpdateRecord.mockResolvedValue([]),
+      };
+    });
+
+    // @ts-expect-error: other properties are not required
+    CasesServiceMock.mockImplementation(() => {
+      return {
+        getCaseId: mockGetCaseId.mockImplementation(() => `mock-id-${++caseIdCounter}`),
+      };
+    });
+
+    casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
+    casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
+    casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
+    casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+
+    getCasesClient.mockReturnValue(casesClientMock);
+
+    connectorExecutor = new CasesConnectorExecutor({
+      casesOracleService: new CasesOracleServiceMock(),
+      casesService: new CasesServiceMock(),
+      casesClient: casesClientMock,
+    });
+
+    dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
+  });
+
+  describe('With grouping', () => {
     describe('run', () => {
+      describe('Initial state', () => {
+        beforeEach(() => {
+          mockBulkGetRecords.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[0].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+            {
+              id: groupedAlertsWithOracleKey[1].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_ORACLE_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+          ]);
+
+          mockBulkCreateRecords.mockResolvedValue([
+            oracleRecords[0],
+            oracleRecords[1],
+            createdOracleRecord,
+          ]);
+
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-2',
+              },
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-3',
+              },
+            ],
+          });
+
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases });
+        });
+
+        it('attach the alerts correctly when the rule runs for the first time', async () => {
+          await connectorExecutor.execute({
+            alerts,
+            groupingBy,
+            owner,
+            rule,
+            timeWindow,
+            reopenClosedCases,
+          });
+
+          expect(mockBulkGetRecords).toHaveBeenCalledTimes(1);
+          expect(mockBulkGetRecords).toHaveBeenCalledWith([
+            groupedAlertsWithOracleKey[0].oracleKey,
+            groupedAlertsWithOracleKey[1].oracleKey,
+            groupedAlertsWithOracleKey[2].oracleKey,
+          ]);
+
+          expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
+          expect(mockBulkCreateRecords).toHaveBeenCalledWith([
+            {
+              recordId: groupedAlertsWithOracleKey[0].oracleKey,
+              payload: {
+                cases: [],
+                grouping: groupedAlertsWithOracleKey[0].grouping,
+                rules: [],
+              },
+            },
+            {
+              recordId: groupedAlertsWithOracleKey[1].oracleKey,
+              payload: {
+                cases: [],
+                grouping: groupedAlertsWithOracleKey[1].grouping,
+                rules: [],
+              },
+            },
+            {
+              recordId: groupedAlertsWithOracleKey[2].oracleKey,
+              payload: {
+                cases: [],
+                grouping: groupedAlertsWithOracleKey[2].grouping,
+                rules: [],
+              },
+            },
+          ]);
+
+          expect(casesClientMock.cases.bulkGet).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
+            ids: ['mock-id-1', 'mock-id-2', 'mock-id-3'],
+          });
+
+          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+            cases: [
+              {
+                id: 'mock-id-1',
+                title: 'Test rule (Auto-created)',
+                description:
+                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
+                owner: 'cases',
+                settings: {
+                  syncAlerts: false,
+                },
+                tags: ['auto-generated', ...rule.tags],
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+              },
+              {
+                id: 'mock-id-2',
+                title: 'Test rule (Auto-created)',
+                description:
+                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.1`',
+                owner: 'cases',
+                settings: {
+                  syncAlerts: false,
+                },
+                tags: ['auto-generated', ...rule.tags],
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+              },
+              {
+                id: 'mock-id-3',
+                title: 'Test rule (Auto-created)',
+                description:
+                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
+                owner: 'cases',
+                settings: {
+                  syncAlerts: false,
+                },
+                tags: ['auto-generated', ...rule.tags],
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+              },
+            ],
+          });
+
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+        });
+      });
+
       describe('Oracle records', () => {
         it('generates the oracle keys correctly with grouping by one field', async () => {
           await connectorExecutor.execute({
@@ -255,7 +564,7 @@ describe('CasesConnectorExecutor', () => {
             reopenClosedCases,
           });
 
-          expect(mockBulkCreateRecord).toHaveBeenCalledWith([
+          expect(mockBulkCreateRecords).toHaveBeenCalledWith([
             {
               recordId: groupedAlertsWithOracleKey[2].oracleKey,
               payload: {
@@ -279,21 +588,12 @@ describe('CasesConnectorExecutor', () => {
             reopenClosedCases,
           });
 
-          expect(mockBulkCreateRecord).not.toHaveBeenCalled();
+          expect(mockBulkCreateRecords).not.toHaveBeenCalled();
         });
 
         it('run correctly with all records: valid, counter increased, counter did not increased, created', async () => {
           dateMathMock.parse.mockImplementation(() => moment('2023-10-11T10:23:42.769Z'));
-          mockBulkCreateRecord.mockResolvedValue([
-            {
-              ...oracleRecords[0],
-              id: groupedAlertsWithOracleKey[2].oracleKey,
-              grouping: groupedAlertsWithOracleKey[2].grouping,
-              version: 'so-version-2',
-              createdAt: '2023-11-13T10:23:42.769Z',
-              updatedAt: '2023-11-13T10:23:42.769Z',
-            },
-          ]);
+          mockBulkCreateRecords.mockResolvedValue([createdOracleRecord]);
 
           mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
@@ -314,7 +614,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           // 2. Create the non found records
-          expect(mockBulkCreateRecord).toHaveBeenCalledWith([
+          expect(mockBulkCreateRecords).toHaveBeenCalledWith([
             {
               recordId: groupedAlertsWithOracleKey[2].oracleKey,
               payload: {
@@ -597,65 +897,7 @@ describe('CasesConnectorExecutor', () => {
             reopenClosedCases,
           });
 
-          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
-
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
-            caseId: 'mock-id-1',
-            attachments: [
-              {
-                alertId: 'alert-id-0',
-                index: 'alert-index-0',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-              {
-                alertId: 'alert-id-2',
-                index: 'alert-index-2',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-            ],
-          });
-
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
-            caseId: 'mock-id-2',
-            attachments: [
-              {
-                alertId: 'alert-id-1',
-                index: 'alert-index-1',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-            ],
-          });
-
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
-            caseId: 'mock-id-3',
-            attachments: [
-              {
-                alertId: 'alert-id-3',
-                index: 'alert-index-3',
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
-                },
-                type: 'alert',
-              },
-            ],
-          });
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
         });
 
         it('attaches alerts to reopened cases', async () => {
@@ -850,15 +1092,15 @@ describe('CasesConnectorExecutor', () => {
             `"Conflict: getting records: mockBulkGetRecords error"`
           );
 
-          expect(mockBulkCreateRecord).not.toHaveBeenCalled();
+          expect(mockBulkCreateRecords).not.toHaveBeenCalled();
         });
 
         it('throws an error when bulk creating non found records and there is an error', async () => {
-          mockBulkCreateRecord.mockResolvedValue([
+          mockBulkCreateRecords.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
               type: CASE_ORACLE_SAVED_OBJECT,
-              message: 'creating records: mockBulkCreateRecord error',
+              message: 'creating records: mockBulkCreateRecords error',
               statusCode: 400,
               error: 'Bad request',
             },
@@ -881,7 +1123,7 @@ describe('CasesConnectorExecutor', () => {
               reopenClosedCases,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Bad request: creating records: mockBulkCreateRecord error"`
+            `"Bad request: creating records: mockBulkCreateRecords error"`
           );
 
           expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
@@ -1113,21 +1355,17 @@ describe('CasesConnectorExecutor', () => {
 
       // @ts-expect-error: other properties are not required
       CasesOracleServiceMock.mockImplementation(() => {
-        let oracleIdCounter = 0;
-
         return {
           getRecordId: mockGetRecordId.mockImplementation(
             () => `so-oracle-record-${oracleIdCounter++}`
           ),
           bulkGetRecords: mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]),
-          bulkCreateRecord: mockBulkCreateRecord.mockResolvedValue([]),
+          bulkCreateRecord: mockBulkCreateRecords.mockResolvedValue([]),
         };
       });
 
       // @ts-expect-error: other properties are not required
       CasesServiceMock.mockImplementation(() => {
-        let caseIdCounter = 0;
-
         return {
           getCaseId: mockGetCaseId.mockImplementation(() => `mock-id-${++caseIdCounter}`),
         };
@@ -1228,6 +1466,7 @@ describe('CasesConnectorExecutor', () => {
           timeWindow,
           reopenClosedCases,
         });
+
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
@@ -1243,6 +1482,820 @@ describe('CasesConnectorExecutor', () => {
             type: 'alert',
           })),
         });
+      });
+    });
+  });
+
+  describe('Retries', () => {
+    it('attaches the alerts correctly when bulkGetRecords fails', async () => {
+      mockBulkGetRecords
+        .mockResolvedValueOnce([
+          {
+            id: groupedAlertsWithOracleKey[2].oracleKey,
+            type: CASE_ORACLE_SAVED_OBJECT,
+            message: 'getting records: mockBulkGetRecords error',
+            statusCode: 409,
+            error: 'Conflict',
+          },
+        ])
+        .mockResolvedValueOnce(oracleRecords);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: getting records: mockBulkGetRecords error"`
+      );
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+    });
+
+    it('attaches the alerts correctly when bulkCreateRecord fails', async () => {
+      mockBulkCreateRecords
+        .mockResolvedValueOnce([
+          {
+            id: groupedAlertsWithOracleKey[2].oracleKey,
+            type: CASE_ORACLE_SAVED_OBJECT,
+            message: 'creating records: bulkCreateRecord error',
+            statusCode: 409,
+            error: 'Conflict',
+          },
+        ])
+        .mockResolvedValueOnce([createdOracleRecord]);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: creating records: bulkCreateRecord error"`
+      );
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+    });
+
+    it('attaches the alerts correctly while creating a record and another node has already created it', async () => {
+      // the last record in oracleRecords is a 404
+      mockBulkGetRecords
+        .mockResolvedValueOnce(oracleRecords)
+        .mockResolvedValueOnce([oracleRecords[0], oracleRecords[1], createdOracleRecord]);
+
+      mockBulkCreateRecords.mockResolvedValueOnce([
+        {
+          id: groupedAlertsWithOracleKey[2].oracleKey,
+          type: CASE_ORACLE_SAVED_OBJECT,
+          message: 'creating records: bulkCreateRecord error',
+          statusCode: 409,
+          error: 'Conflict',
+        },
+      ]);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: creating records: bulkCreateRecord error"`
+      );
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      // called only once when the conflict occurs
+      expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+    });
+
+    it('attaches the alerts correctly when increasing the counter (time window) fails', async () => {
+      dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
+
+      mockBulkUpdateRecord
+        .mockResolvedValueOnce([
+          {
+            id: groupedAlertsWithOracleKey[2].oracleKey,
+            type: CASE_ORACLE_SAVED_OBJECT,
+            message: 'updating records: mockBulkUpdateRecord error',
+            statusCode: 409,
+            error: 'Conflict',
+          },
+        ])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }]);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: updating records: mockBulkUpdateRecord error"`
+      );
+
+      resetCounters();
+
+      mockGetCaseId
+        .mockReturnValueOnce('mock-id-4')
+        .mockReturnValueOnce('mock-id-1')
+        .mockReturnValueOnce('mock-id-2');
+
+      casesClientMock.cases.bulkGet.mockResolvedValue({
+        cases: [cases[0], cases[1]],
+        errors: [
+          {
+            error: 'Not found',
+            message: 'Not found',
+            status: 404,
+            caseId: 'mock-id-4',
+          },
+        ],
+      });
+
+      casesClientMock.cases.bulkCreate.mockResolvedValue({
+        cases: [{ ...cases[0], id: 'mock-id-4' }],
+      });
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter();
+    });
+
+    it('attaches the alerts correctly when increasing the counter (time window) and another node has already increased it', async () => {
+      dateMathMock.parse.mockImplementation(() => moment('2023-10-11T10:23:42.769Z'));
+
+      mockBulkGetRecords
+        // counter is 1
+        .mockResolvedValueOnce([oracleRecords[0], oracleRecords[1]])
+        .mockResolvedValueOnce([
+          {
+            ...createdOracleRecord,
+            // another node increased the counter
+            counter: 2,
+            id: groupedAlertsWithOracleKey[0].oracleKey,
+            grouping: groupedAlertsWithOracleKey[0].grouping,
+            version: 'so-version-3',
+            createdAt: '2023-11-13T10:23:42.769Z',
+            updatedAt: '2023-11-13T10:23:42.769Z',
+          },
+          oracleRecords[1],
+        ]);
+
+      // conflict error. Another node had updated the record.
+      mockBulkUpdateRecord.mockResolvedValueOnce([
+        {
+          id: groupedAlertsWithOracleKey[0].oracleKey,
+          type: CASE_ORACLE_SAVED_OBJECT,
+          message: 'updating records: mockBulkUpdateRecord error',
+          statusCode: 409,
+          error: 'Conflict',
+        },
+      ]);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: updating records: mockBulkUpdateRecord error"`
+      );
+
+      resetCounters();
+
+      mockGetCaseId.mockReturnValueOnce('mock-id-4').mockReturnValueOnce('mock-id-2');
+
+      casesClientMock.cases.bulkGet.mockResolvedValue({
+        cases: [cases[1]],
+        errors: [
+          {
+            error: 'Not found',
+            message: 'Not found',
+            status: 404,
+            caseId: 'mock-id-4',
+          },
+        ],
+      });
+
+      casesClientMock.cases.bulkCreate.mockResolvedValue({
+        cases: [{ ...cases[0], id: 'mock-id-4' }],
+      });
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expect(mockGetCaseId).toHaveBeenCalledTimes(2);
+      // case ID is constructed with the new counter and the correct grouping
+      expect(mockGetCaseId).nthCalledWith(1, {
+        ruleId: rule.id,
+        grouping: groupedAlertsWithOracleKey[0].grouping,
+        owner,
+        spaceId: 'default',
+        counter: 2,
+      });
+
+      expect(mockGetCaseId).nthCalledWith(2, {
+        ruleId: rule.id,
+        grouping: groupedAlertsWithOracleKey[1].grouping,
+        owner,
+        spaceId: 'default',
+        counter: 1,
+      });
+
+      // called only once when the conflict occurs
+      expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-4',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    it('attaches the alerts correctly when creating a case and another node has already created', async () => {
+      mockBulkGetRecords.mockResolvedValueOnce([
+        oracleRecords[0],
+        oracleRecords[1],
+        createdOracleRecord,
+      ]);
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [cases[0], cases[1]],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: 'mock-id-3',
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          cases,
+          errors: [],
+        });
+
+      casesClientMock.cases.bulkCreate.mockRejectedValue(
+        new CaseError('creating non found cases: bulkCreate error')
+      );
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"creating non found cases: bulkCreate error"`);
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      // called only once when the conflict occurs
+      expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+    });
+
+    it('attaches the alerts correctly when reopening a case and another node has already reopened it', async () => {
+      mockBulkGetRecords.mockResolvedValueOnce([oracleRecords[0], oracleRecords[1]]);
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [cases[0], cases[1]],
+          errors: [],
+        });
+
+      casesClientMock.cases.bulkUpdate.mockRejectedValue(
+        new CaseError('reopening closed cases: bulkUpdate error')
+      );
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases: true,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"reopening closed cases: bulkUpdate error"`);
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases: true,
+      });
+
+      // called only once when the conflict occurs
+      expect(casesClientMock.cases.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    it('attaches the alerts correctly when increasing the counter (closed case) and another node has already increased it', async () => {
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0], oracleRecords[1]])
+        .mockResolvedValueOnce([updatedCounterOracleRecord, oracleRecords[1]]);
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [{ ...cases[0], id: 'mock-id-4' }, cases[1]],
+          errors: [],
+        });
+
+      // conflict error. Another node had updated the record.
+      mockBulkUpdateRecord.mockResolvedValueOnce([
+        {
+          id: groupedAlertsWithOracleKey[0].oracleKey,
+          type: CASE_ORACLE_SAVED_OBJECT,
+          message: 'updating records: mockBulkUpdateRecord error',
+          statusCode: 409,
+          error: 'Conflict',
+        },
+      ]);
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Conflict: updating records: mockBulkUpdateRecord error"`
+      );
+
+      resetCounters();
+
+      mockGetCaseId.mockReturnValueOnce('mock-id-4').mockReturnValueOnce('mock-id-2');
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases: false,
+      });
+
+      // called only once when the conflict occurs
+      expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-4',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    it('attaches the alerts correctly when creating a case for a closed and another node has already created it', async () => {
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0], oracleRecords[1]])
+        .mockResolvedValueOnce([updatedCounterOracleRecord, oracleRecords[1]]);
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [{ ...cases[0], id: 'mock-id-4' }, cases[1]],
+          errors: [],
+        });
+
+      mockBulkUpdateRecord.mockResolvedValueOnce([updatedCounterOracleRecord]);
+
+      casesClientMock.cases.bulkCreate.mockRejectedValue(
+        new CaseError('creating non found cases: bulkCreate error')
+      );
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"creating non found cases: bulkCreate error"`);
+
+      resetCounters();
+
+      mockGetCaseId.mockReturnValueOnce('mock-id-4').mockReturnValueOnce('mock-id-2');
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases: false,
+      });
+
+      // called only once when the conflict occurs
+      expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-4',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+    });
+
+    it('attach the alerts correctly when attaching the alerts fail', async () => {
+      casesClientMock.attachments.bulkCreate.mockRejectedValueOnce(
+        new CaseError('attaching alerts: bulkCreate error')
+      );
+
+      await expect(() =>
+        connectorExecutor.execute({
+          alerts,
+          groupingBy,
+          owner,
+          rule,
+          timeWindow,
+          reopenClosedCases: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
+
+      resetCounters();
+
+      // retry
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases: false,
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(6);
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(4, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            alertId: 'alert-id-0',
+            index: 'alert-index-0',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+          {
+            alertId: 'alert-id-2',
+            index: 'alert-index-2',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(5, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            alertId: 'alert-id-3',
+            index: 'alert-index-3',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(6, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            alertId: 'alert-id-3',
+            index: 'alert-index-3',
+            owner: 'securitySolution',
+            rule: {
+              id: 'rule-test-id',
+              name: 'Test rule',
+            },
+            type: 'alert',
+          },
+        ],
       });
     });
   });
