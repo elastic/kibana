@@ -40,7 +40,6 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
         panelProps={{
           css: css`
             max-width: ${euiTheme.base * 20}px;
-            padding-bottom: ${euiTheme.size.s};
           `,
         }}
         button={
