@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
@@ -225,8 +225,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onSupportedFieldFilter:
         stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
       onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
-      getNewFieldsBySpec: (fieldSpecArr) =>
-        fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec)),
+      getNewFieldsBySpec,
     });
 
   useEffect(() => {
@@ -460,4 +459,8 @@ function calculateMultiFields(
     map.set(parent, value);
   });
   return map;
+}
+
+function getNewFieldsBySpec(fieldSpecArr: FieldSpec[]): DataViewField[] {
+  return fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec));
 }

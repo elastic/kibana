@@ -120,7 +120,7 @@ export const useExistingFieldsFetcher = (
 
       setActiveRequests((value) => value + 1);
 
-      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
+      const hasRestrictions = Boolean(dataView?.getAggregationRestrictions?.());
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
@@ -254,12 +254,7 @@ export const useExistingFieldsFetcher = (
   );
 };
 
-export const useExistingFieldsReader: () => {
-  getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
-  isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
-  getNewFields: (dataViewId: string) => FieldSpec[];
-  hasFieldData: (dataViewId: string, fieldName: string) => boolean;
-} = () => {
+export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   const mountedRef = useRef<boolean>(true);
   const [existingFieldsByDataViewMap, setExistingFieldsByDataViewMap] =
     useState<ExistingFieldsByDataViewMap>(globalMap$.getValue());
