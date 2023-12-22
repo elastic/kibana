@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { format } from 'url';
-import { pick } from 'lodash';
+import { pick, pickBy } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
@@ -67,21 +67,34 @@ export function registerKibanaFunction({
       resources.logger.info(JSON.stringify(request.url));
       resources.logger.info(JSON.stringify(request.headers, null));
 
+      const copiedHeaderNames = [
+        'accept-encoding',
+        'accept-language',
+        'accept',
+        'content-type',
+        'cookie',
+        'kbn-build-number',
+        'kbn-version',
+        'origin',
+        'referer',
+        'user-agent',
+        'x-elastic-internal-origin',
+        'x-kbn-context',
+      ];
+
+      const headers = pickBy(request.headers, (value, key) => {
+        return (
+          copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
+        );
+      });
+
+      resources.logger.info('Next URL');
+      resources.logger.info(JSON.stringify(nextUrl));
+      resources.logger.info(JSON.stringify(headers, null));
+
       return axios({
         method,
-        headers: pick(
-          request.headers,
-          'kbn-version',
-          'user-agent',
-          'content-type',
-          'kbn-build-number',
-          'x-kbn-context',
-          'referer',
-          'cookie',
-          'authorization',
-          'origin',
-          'sec-ch-ua'
-        ),
+        headers,
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,
