@@ -27,17 +27,29 @@ export const journey = new Journey({
     );
   },
 })
-  .step('Navigate to Hosts view and load 100 hosts (default)', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`app/metrics/hosts`));
-    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  .step('Navigate to Hosts view and load 50 hosts', async ({ page, kbnUrl }) => {
+    await page.goto(
+      kbnUrl.get(
+        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:50,panelFilters:!(),query:(language:kuery,query:''))`
+      )
+    );
+    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
   })
-  .step('Load 500 hosts', async ({ page, kbnUrl }) => {
-    await page.click('[data-test-subj="hostsViewLimitSelection500Button"]');
-    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  .step('Navigate to Hosts view and load 100 hosts', async ({ page, kbnUrl }) => {
+    await page.goto(
+      kbnUrl.get(
+        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:100,panelFilters:!(),query:(language:kuery,query:''))`
+      )
+    );
+    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
   })
-  .step('Load 50 hosts', async ({ page, kbnUrl }) => {
-    await page.click('[data-test-subj="hostsViewLimitSelection50Button"]');
-    await page.waitForSelector(`[data-test-subj="hostsView-tableRow"]`);
+  .step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl }) => {
+    await page.goto(
+      kbnUrl.get(
+        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
+      )
+    );
+    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
   });
 
 export function generateHostsData({
