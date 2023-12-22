@@ -19,11 +19,17 @@ export interface FieldDescriptionProps {
   };
   color?: EuiTextProps['color'];
   size?: EuiTextProps['size'];
+  truncate?: boolean;
 }
 
-export const FieldDescription: React.FC<FieldDescriptionProps> = ({ field, color, size = 's' }) => {
+export const FieldDescription: React.FC<FieldDescriptionProps> = ({
+  field,
+  color,
+  size = 's',
+  truncate = true,
+}) => {
   const customDescription = (field?.customDescription || '').trim();
-  const isTooLong = customDescription.length > MAX_VISIBLE_LENGTH;
+  const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
 
   if (!customDescription) {

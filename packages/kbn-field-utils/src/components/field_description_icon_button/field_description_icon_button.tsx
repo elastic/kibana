@@ -53,7 +53,7 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
           />
         }
       >
-        <FieldDescription field={field} />
+        <FieldDescription field={field} truncate={false} />
       </EuiPopover>
     </span>
   );
