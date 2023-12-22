@@ -22,10 +22,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
   const { core } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
 
-  const searchErrorDisplay = renderSearchError({
-    error,
-    application: core.application,
-  });
+  const searchErrorDisplay = renderSearchError(error);
 
   return (
     <EuiEmptyPrompt

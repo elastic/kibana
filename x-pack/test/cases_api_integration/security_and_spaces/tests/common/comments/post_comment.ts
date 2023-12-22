@@ -1123,6 +1123,36 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('partial updates', () => {
+      it('should not result to a version conflict (409) when adding a comment to an updated case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        /**
+         * Updating the status of the case will
+         * change the version of the case
+         */
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+      });
+    });
+
     describe('rbac', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);

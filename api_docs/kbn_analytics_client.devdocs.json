@@ -731,16 +731,12 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/components/chat/chat_body.tsx"
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/utils/storybook_decorator.tsx"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_ai_assistant/public/components/insight/insight.tsx"
+                "path": "x-pack/plugins/observability_ai_assistant/public/analytics/index.ts"
               },
               {
                 "plugin": "apm",

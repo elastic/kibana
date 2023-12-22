@@ -406,6 +406,9 @@ export class ObservabilityAIAssistantClient {
       function_call: functionCall ? { name: functionCall } : undefined,
     };
 
+    this.dependencies.logger.debug(`Sending conversation to connector`);
+    this.dependencies.logger.debug(JSON.stringify(request, null, 2));
+
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {

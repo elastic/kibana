@@ -70,12 +70,6 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
       <EuiSpacer size="xs" />
 
       <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <span>{i18n.ASK_QUESTIONS_ABOUT}</span>
-          </EuiText>
-        </EuiFlexItem>
-
         <EuiFlexItem
           css={css`
             width: ${RANGE_CONTAINER_WIDTH}px;
@@ -106,7 +100,19 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
 
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
-            <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS}</span>
+            <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(knowledgeBase.latestAlerts)}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.YOUR_ANONYMIZATION_SETTINGS}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.SELECT_FEWER_ALERTS}</span>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

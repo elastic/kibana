@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
+import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
@@ -128,4 +128,44 @@ export interface FindCspBenchmarkRuleResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export const cspBenchmarkRules = schema.arrayOf(
+  schema.object({
+    rule_id: schema.string(),
+  })
+);
+
+export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
+  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
+  rules: cspBenchmarkRules,
+});
+
+export type CspBenchmarkRules = TypeOf<typeof cspBenchmarkRules>;
+
+export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
+  typeof cspBenchmarkRulesBulkActionRequestSchema
+>;
+
+const rulesStates = schema.recordOf(
+  schema.string(),
+  schema.object({
+    muted: schema.boolean(),
+    benchmark_id: schema.string(),
+    benchmark_version: schema.string(),
+    rule_number: schema.string(),
+    rule_id: schema.string(),
+  })
+);
+
+export const cspSettingsSchema = schema.object({
+  rules: rulesStates,
+});
+
+export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
+export type CspSettings = TypeOf<typeof cspSettingsSchema>;
+
+export interface BulkActionBenchmarkRulesResponse {
+  newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
+  disabledRulesCounter: number;
 }
