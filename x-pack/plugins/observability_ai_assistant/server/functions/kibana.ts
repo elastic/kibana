@@ -67,9 +67,6 @@ export function registerKibanaFunction({
         query,
       };
 
-      resources.logger.info(JSON.stringify(request.url));
-      resources.logger.info(JSON.stringify(request.headers, null));
-
       const copiedHeaderNames = [
         'accept-encoding',
         'accept-language',
@@ -90,10 +87,6 @@ export function registerKibanaFunction({
           copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
         );
       });
-
-      resources.logger.info('Next URL');
-      resources.logger.info(JSON.stringify(nextUrl));
-      resources.logger.info(JSON.stringify(headers, null));
 
       return axios({
         method,
