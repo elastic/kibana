@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { from } from 'rxjs';
+
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { ThemeService } from '@kbn/charts-plugin/public/services';
 
 const theme = new ThemeService();
-theme.init({
-  theme$: from([{ darkMode: false }]),
-});
+theme.init(themeServiceMock.createSetupContract({ darkMode: false }));
 
 export { theme };
