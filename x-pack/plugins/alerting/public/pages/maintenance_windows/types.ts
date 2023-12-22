@@ -6,7 +6,6 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import { MaintenanceWindow } from '../../../common';
 
 export const RRuleFrequencyMap = {
   '0': Frequency.YEARLY,
@@ -14,11 +13,6 @@ export const RRuleFrequencyMap = {
   '2': Frequency.WEEKLY,
   '3': Frequency.DAILY,
 };
-
-export interface MaintenanceWindowFindResponse {
-  data: MaintenanceWindow[];
-  total: number;
-}
 
 export enum SortDirection {
   asc = 'asc',
