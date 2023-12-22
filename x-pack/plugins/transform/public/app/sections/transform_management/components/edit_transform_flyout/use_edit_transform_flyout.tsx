@@ -90,6 +90,7 @@ export interface FormField {
   errorMessages: string[];
   isNullable: boolean;
   isOptional: boolean;
+  isOptionalInSection?: boolean;
   section?: EditTransformFormSections;
   validator: ValidatorName;
   value: string;
@@ -316,6 +317,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         dependsOn: ['retentionPolicyMaxAge'],
         isNullable: false,
         isOptional: true,
+        isOptionalInSection: false,
         section: 'retentionPolicy',
       }
     ),
@@ -328,6 +330,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: false,
         isOptional: true,
         section: 'retentionPolicy',
+        isOptionalInSection: false,
         validator: 'retentionPolicyMaxAgeValidator',
       }
     ),
@@ -376,6 +379,30 @@ const isFormTouched = (config: TransformConfigUnion, currentState: EditTransform
 export type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
   EditTransformFlyoutFormState;
 
+function isFormFieldOptional(state: EditTransformFlyoutState, field: EditTransformFormFields) {
+  const formField = state.formFields[field];
+
+  let isOptional = formField.isOptional;
+  if (formField.section) {
+    const section = state.formSections[formField.section];
+    if (section.enabled && formField.isOptionalInSection === false) {
+      isOptional = false;
+    }
+  }
+
+  return isOptional;
+}
+
+function getFormFieldErrorMessages(
+  value: string,
+  isOptional: boolean,
+  validatorName: ValidatorName
+) {
+  return isOptional && typeof value === 'string' && value.length === 0
+    ? []
+    : validators[validatorName](value, isOptional);
+}
+
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
   initialState: undefined as EditTransformFlyoutState | undefined,
@@ -401,14 +428,15 @@ const editTransformFlyoutSlice = createSlice({
     ) => {
       if (state) {
         const formField = state.formFields[action.payload.field];
-        formField.errorMessages =
-          formField.isOptional &&
-          typeof action.payload.value === 'string' &&
-          action.payload.value.length === 0
-            ? []
-            : validators[formField.validator](action.payload.value, formField.isOptional);
+        const isOptional = isFormFieldOptional(state, action.payload.field);
+
+        formField.errorMessages = getFormFieldErrorMessages(
+          action.payload.value,
+          isOptional,
+          formField.validator
+        );
+
         formField.value = action.payload.value;
-        state.formFields[action.payload.field] = formField;
 
         state.isFormTouched = isFormTouched(state.config, state);
         state.isFormValid = isFormValid(state.formFields);
@@ -421,6 +449,19 @@ const editTransformFlyoutSlice = createSlice({
     ) => {
       if (state) {
         state.formSections[action.payload.section].enabled = action.payload.enabled;
+
+        // After a section change we re-evaluate all form fields, since if a field
+        // is optional could change if a section got toggled.
+        Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
+          const isOptional = isFormFieldOptional(state, formFieldName as EditTransformFormFields);
+
+          formField.errorMessages = getFormFieldErrorMessages(
+            formField.value,
+            isOptional,
+            formField.validator
+          );
+        });
+
         state.isFormTouched = isFormTouched(state.config, state);
         state.isFormValid = isFormValid(state.formFields);
       }
@@ -439,7 +480,8 @@ export const EditTransformFlyoutProvider: FC<
     []
   );
 
-  // initialize redux state
+  // Initialize redux state. The store's `initialState` is `undefined` since
+  // we only get the transform config and data view id during runtime.
   useEffect(() => {
     store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
     // eslint-disable-next-line react-hooks/exhaustive-deps
