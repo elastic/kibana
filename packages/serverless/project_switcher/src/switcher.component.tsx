@@ -67,6 +67,7 @@ export const ProjectSwitcher = ({
       <EuiPopoverTitle>Switch Project Type</EuiPopoverTitle>
       <EuiKeyPadMenu css={switcherCSS} data-test-subj={TEST_ID_ITEM_GROUP}>
         {items}
+        <p>hello!</p>
       </EuiKeyPadMenu>
     </EuiPopover>
   );

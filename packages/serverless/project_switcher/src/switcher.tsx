@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { ProjectType } from '@kbn/serverless-types';
+import { useRootSubscription } from '@kbn/shared-ux-cloud-ui-bridge';
 import { ProjectSwitcher as Component } from './switcher.component';
 
 import { useServices } from './services';
@@ -16,6 +17,9 @@ import type { ProjectSwitcherProps } from './types';
 export const ProjectSwitcher = (props: ProjectSwitcherProps) => {
   const { setProjectType } = useServices();
   const onProjectChange = (projectType: ProjectType) => setProjectType(projectType);
+  const people = useRootSubscription('people');
+
+  console.log('people value from remote:: %o \n', people);
 
   return <Component {...{ onProjectChange, ...props }} />;
 };
