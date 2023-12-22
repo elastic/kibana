@@ -86,5 +86,5 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       isInstalling,
       installError,
     };
-  }, [status, isInstalling, installError, service, toasts]);
+  }, [status, isInstalling, installError, service, ml.mlApi?.savedObjects, toasts]);
 }
