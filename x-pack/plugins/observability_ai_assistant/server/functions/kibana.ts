@@ -6,8 +6,8 @@
  */
 
 import axios from 'axios';
-import { format } from 'url';
-import { pick, pickBy } from 'lodash';
+import { format, parse } from 'url';
+import { castArray, first, pick, pickBy } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
@@ -54,9 +54,12 @@ export function registerKibanaFunction({
 
       const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
 
+      const origin = first(castArray(request.headers.origin));
+
       const nextUrl = {
         host,
         protocol,
+        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
         pathname: pathnameFromRequest.replace(
           '/internal/observability_ai_assistant/chat/complete',
           pathname
