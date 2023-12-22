@@ -197,9 +197,7 @@ export const createStartServicesMock = (
       locator,
     },
     telemetry: {},
-    theme: {
-      theme$: themeServiceMock.createTheme$(),
-    },
+    theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
