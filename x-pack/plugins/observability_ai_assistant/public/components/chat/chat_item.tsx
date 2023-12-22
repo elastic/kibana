@@ -12,7 +12,6 @@ import {
   EuiComment,
   EuiErrorBoundary,
   EuiPanel,
-  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ChatItemActions } from './chat_item_actions';
@@ -36,14 +35,18 @@ export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onStopGeneratingClick: () => void;
 }
 
-const normalMessageClassName = css`
-  .euiCommentEvent__body {
-    padding: 0;
-  }
-
+const moreCompactHeaderClassName = css`
   .euiCommentEvent__header > .euiPanel {
     padding-top: 4px;
     padding-bottom: 4px;
+  }
+`;
+
+const normalMessageClassName = css`
+  ${moreCompactHeaderClassName}
+
+  .euiCommentEvent__body {
+    padding: 0;
   }
 
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
@@ -97,10 +100,13 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
+    ${moreCompactHeaderClassName}
+
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};
       overflow: hidden;
+      border: none;
     }
   `;
 
@@ -150,7 +156,6 @@ export function ChatItem({
         forceState={expanded ? 'open' : 'closed'}
         onToggle={handleToggleExpand}
       >
-        <EuiSpacer size="s" />
         {contentElement}
       </EuiAccordion>
     );
