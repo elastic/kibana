@@ -80,8 +80,17 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
     [stateTransferService, dashboard, search.session, trackUiMetric]
   );
 
+  /**
+   * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
+   * initialInput: Optional, use it in case you want to pass your own input to the factory
+   * dismissNotification: Optional, if not passed a toast will appear in the dashboard
+   */
   const createNewEmbeddable = useCallback(
-    async (embeddableFactory: EmbeddableFactory) => {
+    async (
+      embeddableFactory: EmbeddableFactory,
+      initialInput?: Partial<EmbeddableInput>,
+      dismissNotification?: boolean
+    ) => {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
@@ -89,12 +98,19 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       let explicitInput: Partial<EmbeddableInput>;
       let attributes: unknown;
       try {
-        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, dashboard);
-        if (isExplicitInputWithAttributes(explicitInputReturn)) {
-          explicitInput = explicitInputReturn.newInput;
-          attributes = explicitInputReturn.attributes;
+        if (initialInput) {
+          explicitInput = initialInput;
         } else {
-          explicitInput = explicitInputReturn;
+          const explicitInputReturn = await embeddableFactory.getExplicitInput(
+            undefined,
+            dashboard
+          );
+          if (isExplicitInputWithAttributes(explicitInputReturn)) {
+            explicitInput = explicitInputReturn.newInput;
+            attributes = explicitInputReturn.attributes;
+          } else {
+            explicitInput = explicitInputReturn;
+          }
         }
       } catch (e) {
         // error likely means user canceled embeddable creation
@@ -110,19 +126,31 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       if (newEmbeddable) {
         dashboard.setScrollToPanelId(newEmbeddable.id);
         dashboard.setHighlightPanelId(newEmbeddable.id);
-        toasts.addSuccess({
-          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
-        });
+
+        if (!dismissNotification) {
+          toasts.addSuccess({
+            title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
+            'data-test-subj': 'addEmbeddableToDashboardSuccess',
+          });
+        }
       }
+      return newEmbeddable;
     },
     [trackUiMetric, dashboard, toasts]
+  );
+
+  const deleteEmbeddable = useCallback(
+    (embeddableId: string) => {
+      dashboard.removeEmbeddable(embeddableId);
+    },
+    [dashboard]
   );
 
   const extraButtons = [
     <EditorMenu
       createNewVisType={createNewVisType}
       createNewEmbeddable={createNewEmbeddable}
+      deleteEmbeddable={deleteEmbeddable}
       isDisabled={isDisabled}
     />,
     <AddFromLibraryButton

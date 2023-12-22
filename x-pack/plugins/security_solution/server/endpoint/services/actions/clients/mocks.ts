@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import type { DeepPartial } from 'utility-types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { merge } from 'lodash';
+import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
+import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
+import {
+  createActionRequestsEsSearchResultsMock,
+  createActionResponsesEsSearchResultsMock,
+} from '../mocks';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../common/endpoint/constants';
+import type { DeepMutable } from '../../../../../common/endpoint/types/utility_types';
+import { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+} from '../../../mocks';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
+import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
+import { ACTION_RESPONSE_INDICES } from '../constants';
+
+export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
+  esClient: ElasticsearchClientMock;
+  casesClient?: CasesClientMock;
+}
+
+const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const casesClient = createCasesClientMock();
+  const endpointService = new EndpointAppContextService();
+
+  esClient.index.mockImplementation((async (payload) => {
+    switch (payload.index) {
+      case ENDPOINT_ACTIONS_INDEX:
+      case ENDPOINT_ACTION_RESPONSES_INDEX:
+        return createEsIndexTransportResponseMock({ body: { _index: payload.index } });
+      default:
+        throw new Error(`no esClient.index() mock defined for index ${payload.index}`);
+    }
+  }) as typeof esClient.index);
+
+  esClient.search.mockImplementation(async (payload) => {
+    if (payload) {
+      switch (payload.index) {
+        case ENDPOINT_ACTIONS_INDEX:
+          return createActionRequestsEsSearchResultsMock();
+        case ACTION_RESPONSE_INDICES:
+          return createActionResponsesEsSearchResultsMock();
+      }
+    }
+
+    return BaseDataGenerator.toEsSearchResponse([]);
+  });
+
+  (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(
+    (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
+  );
+
+  endpointService.setup(createMockEndpointAppContextServiceSetupContract());
+  endpointService.start(createMockEndpointAppContextServiceStartContract());
+
+  return {
+    esClient,
+    casesClient,
+    endpointService,
+    username: 'foo',
+  };
+};
+
+const createEsIndexTransportResponseMock = (
+  overrides: DeepPartial<TransportResult<esTypes.IndexResponse, unknown>> = {}
+): TransportResult<esTypes.IndexResponse, unknown> => {
+  const responseDoc: TransportResult<esTypes.IndexResponse, unknown> = {
+    body: {
+      _id: 'indexed-1-2-3',
+      _index: 'some-index',
+      _primary_term: 1,
+      result: 'created',
+      _seq_no: 1,
+      _shards: {
+        failed: 0,
+        successful: 1,
+        total: 1,
+      },
+      _version: 1,
+    },
+    statusCode: 201,
+    headers: {},
+    warnings: null,
+    meta: {
+      context: {},
+      name: 'foo',
+      request: {
+        params: {
+          method: 'GET',
+          path: 'some/path',
+        },
+        options: {},
+        id: 'some-id',
+      },
+      connection: null,
+      attempts: 1,
+      aborted: false,
+    },
+  };
+
+  return merge(responseDoc, overrides);
+};
+
+const createIsolateOptionsMock = (
+  overrides: Partial<IsolationRouteRequestBody> = {}
+): DeepMutable<IsolationRouteRequestBody> => {
+  const isolateOptions: IsolationRouteRequestBody = {
+    agent_type: 'endpoint',
+    endpoint_ids: ['1-2-3'],
+    comment: 'test comment',
+  };
+
+  return merge(isolateOptions, overrides);
+};
+
+const createConnectorActionsClientMock = (): ActionsClientMock => {
+  const client = actionsClientMock.create();
+
+  // Mock result of retrieving list of connectors
+  (client.getAll as jest.Mock).mockImplementation(async () => {
+    const result: ConnectorWithExtraFindData[] = [
+      // SentinelOne connector
+      createConnectorMock({
+        actionTypeId: SENTINELONE_CONNECTOR_ID,
+        id: 's1-connector-instance-id',
+      }),
+    ];
+
+    return result;
+  });
+
+  (client.execute as jest.Mock).mockImplementation(async () => {
+    return createConnectorAcitonExecuteResponseMock();
+  });
+
+  return client;
+};
+
+const createConnectorMock = (
+  overrides: DeepPartial<ConnectorWithExtraFindData> = {}
+): ConnectorWithExtraFindData => {
+  return merge(
+    {
+      id: 'connector-mock-id-1',
+      actionTypeId: '.some-type',
+      name: 'some mock name',
+      isMissingSecrets: false,
+      config: {},
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+      referencedByCount: 0,
+    },
+    overrides
+  );
+};
+
+const createConnectorAcitonExecuteResponseMock = (
+  overrides: DeepPartial<ActionTypeExecutorResult<{}>> = {}
+): ActionTypeExecutorResult<{}> => {
+  const result: ActionTypeExecutorResult<{}> = {
+    actionId: 'execute-response-mock-1',
+    data: undefined,
+    message: 'some mock message',
+    serviceMessage: 'some mock service message',
+    retry: true,
+    status: 'ok',
+  };
+
+  return merge(result, overrides);
+};
+
+export const responseActionsClientMock = Object.freeze({
+  createConstructorOptions: createConstructorOptionsMock,
+  createIsolateOptions: createIsolateOptionsMock,
+  createReleaseOptions: createIsolateOptionsMock,
+  // TODO:PT add more methods to get option mocks for other class methods
+
+  createIndexedResponse: createEsIndexTransportResponseMock,
+
+  createConnectorActionsClient: createConnectorActionsClientMock,
+  createConnector: createConnectorMock,
+  createConnectorActionExecuteResponse: createConnectorAcitonExecuteResponseMock,
+});
