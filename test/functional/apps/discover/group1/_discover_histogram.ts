@@ -33,8 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173586
-  describe.skip('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -295,7 +294,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // now remove the query
       await queryBar.clearQuery();
-      await queryBar.submitQuery();
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // check no error state
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
