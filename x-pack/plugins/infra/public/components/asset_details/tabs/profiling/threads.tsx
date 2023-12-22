@@ -11,11 +11,16 @@ import { TopNType } from '@kbn/profiling-utils';
 import { HOST_FIELD } from '../../../../../common/constants';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export function Threads() {
-  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { services } = useKibanaContextForPlugin();
+  const { getDateRangeInTimestamp, dateRange } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
   const { asset } = useAssetDetailsRenderPropsContext();
+
+  const stacktracesProfilingLinkLocator =
+    services.observabilityShared.locators.profiling.stacktracesLocator;
 
   return (
     <EmbeddableStackTraces
@@ -23,6 +28,14 @@ export function Threads() {
       rangeFrom={from}
       rangeTo={to}
       kuery={`${HOST_FIELD}:"${asset.name}"`}
+      onClick={(category) => {
+        stacktracesProfilingLinkLocator.navigate({
+          type: TopNType.Traces,
+          rangeFrom: dateRange.from,
+          rangeTo: dateRange.to,
+          kuery: `(${HOST_FIELD}:"${asset.name}" ) AND process.thread.name:"${category}"`,
+        });
+      }}
     />
   );
 }

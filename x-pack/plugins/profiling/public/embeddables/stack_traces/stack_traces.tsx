@@ -17,9 +17,10 @@ interface Props {
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  onClick: (category: string) => void;
 }
 
-export function StackTraces({ type, kuery, rangeFrom, rangeTo }: Props) {
+export function StackTraces({ type, kuery, rangeFrom, rangeTo, onClick }: Props) {
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
@@ -51,7 +52,7 @@ export function StackTraces({ type, kuery, rangeFrom, rangeTo }: Props) {
       onChangeDisplayOption={setDisplayOption}
       onStackedBarChartBrushEnd={() => {}}
       onShowMoreClick={setLimit}
-      disableChartClick
+      onChartClick={onClick}
     />
   );
 }

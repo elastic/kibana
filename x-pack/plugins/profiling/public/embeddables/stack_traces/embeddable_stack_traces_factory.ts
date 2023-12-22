@@ -18,6 +18,7 @@ interface EmbeddableStackTracesInput {
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  onClick: (category: string) => void;
 }
 
 export type EmbeddableStackTracesEmbeddableInput = EmbeddableStackTracesInput & EmbeddableInput;

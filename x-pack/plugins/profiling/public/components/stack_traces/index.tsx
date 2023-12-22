@@ -28,10 +28,9 @@ interface Props {
   displayOption: StackTracesDisplayOption;
   onChangeDisplayOption: (nextOption: StackTracesDisplayOption) => void;
   onStackedBarChartBrushEnd: StackedBarChartProps['onBrushEnd'];
-  onChartClick?: (category: string) => void;
+  onChartClick: (category: string) => void;
   limit: number;
   onShowMoreClick: (newLimit: number) => void;
-  disableChartClick?: boolean;
 }
 
 const displayOptions = [
@@ -60,7 +59,6 @@ export function StackTraces({
   limit,
   onShowMoreClick,
   onChartClick,
-  disableChartClick = false,
 }: Props) {
   const charts = state.data?.charts ?? [];
   const isTracesType = type === TopNType.Traces;
@@ -71,7 +69,7 @@ export function StackTraces({
     if (type === TopNType.Traces) {
       setSelectedSubchart(selectedChart);
     } else {
-      onChartClick?.(selectedChart.Category);
+      onChartClick(selectedChart.Category);
     }
   }
 
@@ -102,7 +100,7 @@ export function StackTraces({
                     asPercentages={displayOption === StackTracesDisplayOption.Percentage}
                     onBrushEnd={onStackedBarChartBrushEnd}
                     showFrames={isTracesType}
-                    onClick={disableChartClick ? undefined : handleChartClick}
+                    onClick={handleChartClick}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
@@ -115,7 +113,7 @@ export function StackTraces({
               charts={charts}
               limit={limit}
               showFrames={isTracesType}
-              onChartClick={disableChartClick ? undefined : handleChartClick}
+              onChartClick={handleChartClick}
             />
           </AsyncComponent>
         </EuiFlexItem>

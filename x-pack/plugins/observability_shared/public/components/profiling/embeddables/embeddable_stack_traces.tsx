@@ -15,6 +15,7 @@ interface Props {
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  onClick: (category: string) => void;
 }
 
 export function EmbeddableStackTraces(props: Props) {
