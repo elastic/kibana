@@ -335,6 +335,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
             onKeyDown={[Function]}
             options={
               Object {
+                "bracketPairColorization.enabled": false,
                 "fontFamily": "Roboto Mono",
                 "fontSize": 12,
                 "lineHeight": 21,

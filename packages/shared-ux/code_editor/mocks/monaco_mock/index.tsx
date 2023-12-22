@@ -102,7 +102,8 @@ export const MockedMonacoEditor = ({
   onChange,
   value,
   ...rest
-}: MonacoEditorProps & {
+}: Omit<MonacoEditorProps, 'className'> & {
+  className?: string;
   ['data-test-subj']?: string;
 }) => {
   editorWillMount?.(monaco);

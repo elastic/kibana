@@ -616,7 +616,11 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
+
+      await this.monacoEditor.typeCodeEditorValue(
+        roleObj.elasticsearch.indices[0].query,
+        'kibanaCodeEditor'
+      );
     }
 
     await this.testSubjects.click('addSpacePrivilegeButton');
