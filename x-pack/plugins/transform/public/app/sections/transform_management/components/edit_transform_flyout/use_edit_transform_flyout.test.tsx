@@ -13,7 +13,8 @@ import { TransformPivotConfig } from '../../../../../../common/types/transform';
 import {
   applyFormStateToTransformConfig,
   getDefaultState,
-  useEditTransformFlyout,
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutSelector,
   EditTransformFlyoutProvider,
 } from './use_edit_transform_flyout';
 
@@ -218,7 +219,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   });
 });
 
-describe('Transform: useEditTransformFlyout()', () => {
+describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
   it('field updates should trigger form validation', () => {
     const transformConfigMock = getTransformConfigMock();
     const wrapper: FC = ({ children }) => (
@@ -226,38 +227,46 @@ describe('Transform: useEditTransformFlyout()', () => {
         {children}
       </EditTransformFlyoutProvider>
     );
-    const { result } = renderHook(() => useEditTransformFlyout(), { wrapper });
+    const { result } = renderHook(
+      () => {
+        return {
+          actions: useEditTransformFlyoutActions(),
+          state: useEditTransformFlyoutSelector((d) => d),
+        };
+      },
+      { wrapper }
+    );
 
     act(() => {
-      result.current.setFormField({
+      result.current.actions.setFormField({
         field: 'description',
         value: 'the-updated-description',
       });
     });
 
-    expect(result.current.isFormTouched).toBe(true);
-    expect(result.current.isFormValid).toBe(true);
+    expect(result.current.state.isFormTouched).toBe(true);
+    expect(result.current.state.isFormValid).toBe(true);
 
     act(() => {
-      result.current.setFormField({
+      result.current.actions.setFormField({
         field: 'description',
         value: transformConfigMock.description as string,
       });
     });
 
-    expect(result.current.isFormTouched).toBe(false);
-    expect(result.current.isFormValid).toBe(true);
+    expect(result.current.state.isFormTouched).toBe(false);
+    expect(result.current.state.isFormValid).toBe(true);
 
     act(() => {
-      result.current.setFormField({
+      result.current.actions.setFormField({
         field: 'frequency',
         value: 'the-invalid-value',
       });
     });
 
-    expect(result.current.isFormTouched).toBe(true);
-    expect(result.current.isFormValid).toBe(false);
-    expect(result.current.formFields.frequency.errorMessages).toStrictEqual([
+    expect(result.current.state.isFormTouched).toBe(true);
+    expect(result.current.state.isFormValid).toBe(false);
+    expect(result.current.state.formFields.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
   });
