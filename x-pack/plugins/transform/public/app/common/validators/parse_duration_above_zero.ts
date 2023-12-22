@@ -9,6 +9,8 @@ import { frequencyNotValidErrorMessage, stringNotValidErrorMessage } from './mes
 
 import type { ParsedDuration } from './types';
 
+const TIME_UNITS = ['nanos', 'micros', 'ms', 's', 'm', 'h', 'd'];
+
 export function parseDurationAboveZero(arg: unknown): ParsedDuration | string[] {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
@@ -27,6 +29,10 @@ export function parseDurationAboveZero(arg: unknown): ParsedDuration | string[] 
 
   // only valid if number is an integer above 0
   if (isNaN(number) || !Number.isInteger(number) || number === 0) {
+    return [frequencyNotValidErrorMessage];
+  }
+
+  if (!TIME_UNITS.includes(timeUnit)) {
     return [frequencyNotValidErrorMessage];
   }
 
