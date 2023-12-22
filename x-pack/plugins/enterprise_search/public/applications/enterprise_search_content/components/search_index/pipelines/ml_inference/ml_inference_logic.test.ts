@@ -573,6 +573,32 @@ describe('MlInferenceLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('clearModelPlaceholderFlag', () => {
+      it('sets placeholder flag false for selected model', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          isModelPlaceholderSelected: true,
+        });
+        MLInferenceLogic.actions.clearModelPlaceholderFlag('unit-test-model');
+
+        expect(
+          MLInferenceLogic.values.addInferencePipelineModal.configuration.isModelPlaceholderSelected
+        ).toBe(false);
+      });
+      it('leaves placeholder flag unmodified if another model was selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          isModelPlaceholderSelected: true,
+        });
+        MLInferenceLogic.actions.clearModelPlaceholderFlag('some-other-model-id');
+
+        expect(
+          MLInferenceLogic.values.addInferencePipelineModal.configuration.isModelPlaceholderSelected
+        ).toBe(true);
+      });
+    });
     describe('createPipeline', () => {
       const mockModelConfiguration = {
         ...DEFAULT_VALUES.addInferencePipelineModal,

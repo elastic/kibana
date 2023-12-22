@@ -133,6 +133,7 @@ export interface MLInferenceProcessorsActions {
   >['apiSuccess'];
   attachPipeline: () => void;
   clearFetchedPipeline: FetchPipelineApiLogicActions['apiReset'];
+  clearModelPlaceholderFlag: (modelId: string) => { modelId: string };
   createApiError: Actions<
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
@@ -222,13 +223,13 @@ export const MLInferenceLogic = kea<
     }),
     attachPipeline: true,
     clearFormErrors: true,
+    clearModelPlaceholderFlag: (modelId: string) => ({ modelId }),
     createPipeline: true,
     onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => ({ step }),
     removeFieldFromMapping: (fieldName: string) => ({ fieldName }),
     selectExistingPipeline: (pipelineName: string) => ({ pipelineName }),
     selectFields: (fieldNames: string[]) => ({ fieldNames }),
     setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
-    setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => ({ inputErrors }),
     setIndexName: (indexName: string) => ({ indexName }),
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
       configuration,
@@ -297,6 +298,19 @@ export const MLInferenceLogic = kea<
       actions.makeAttachPipelineRequest({
         indexName,
         pipelineName,
+      });
+    },
+    clearModelPlaceholderFlag: ({ modelId }) => {
+      const {
+        addInferencePipelineModal: { configuration },
+      } = values;
+
+      // Don't change the flag if the user clicked away from the selected model
+      if (modelId !== configuration.modelID) return;
+
+      actions.setInferencePipelineConfiguration({
+        ...configuration,
+        isModelPlaceholderSelected: false,
       });
     },
     createPipeline: () => {
