@@ -30,5 +30,5 @@ if (!global.hasOwnProperty('TextEncoder')) {
 global.Blob = require('blob-polyfill').Blob;
 
 if (!global.hasOwnProperty('ResizeObserver')) {
-  global.ResizeObserver = require('@juggle/resize-observer').ResizeObserver;
+  global.ResizeObserver = require('resize-observer-polyfill');
 }
