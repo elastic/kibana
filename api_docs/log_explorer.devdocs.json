@@ -142,11 +142,11 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/unified-data-table",
+            "pluginId": "savedSearch",
             "scope": "common",
-            "docId": "kibKbnUnifiedDataTablePluginApi",
-            "section": "def-common.UnifiedDataTableSettings",
-            "text": "UnifiedDataTableSettings"
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettings",
+            "text": "DiscoverGridSettings"
           },
           " | undefined"
         ],

@@ -42,7 +42,6 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   http: mockHttp,
   messages,
   onNewReplacements: jest.fn(),
-  ragOnAlerts: false,
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -91,7 +90,6 @@ describe('API tests', () => {
         alertsIndexPattern: '.alerts-security.alerts-default',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        ragOnAlerts: true,
         replacements: { auuid: 'real.hostname' },
         size: 30,
       };
@@ -116,6 +114,28 @@ describe('API tests', () => {
         ...fetchConnectorArgs,
         assistantLangChain: false,
         assistantStreamingEnabled: false,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when assistantLangChain is false and alerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        assistantLangChain: false,
+        alerts: true,
       };
 
       await fetchConnectorExecuteAction(testProps);

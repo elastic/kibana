@@ -29,7 +29,6 @@ export interface FetchConnectorExecuteAction {
   http: HttpSetup;
   messages: Message[];
   onNewReplacements: (newReplacements: Record<string, string>) => void;
-  ragOnAlerts: boolean;
   replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -55,7 +54,6 @@ export const fetchConnectorExecuteAction = async ({
   http,
   messages,
   onNewReplacements,
-  ragOnAlerts,
   replacements,
   apiConfig,
   signal,
@@ -84,13 +82,12 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !assistantLangChain;
+  const isStream = assistantStreamingEnabled && !assistantLangChain && !alerts;
   const optionalRequestParams = getOptionalRequestParams({
     alerts,
     alertsIndexPattern,
     allow,
     allowReplacement,
-    ragOnAlerts,
     replacements,
     size,
   });
@@ -192,7 +189,6 @@ export const fetchConnectorExecuteAction = async ({
       response: hasParsableResponse({
         alerts,
         assistantLangChain,
-        ragOnAlerts,
       })
         ? getFormattedMessageContent(response.data)
         : response.data,
