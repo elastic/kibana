@@ -23,7 +23,6 @@ import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { HelpText } from './help_text';
 
 import * as i18n from './translations';
@@ -135,7 +134,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
                 isLoading={loading}
                 onChange={handleJobSelect}
                 options={jobOptions}
-                placeholder={ML_JOB_SELECT_PLACEHOLDER_TEXT}
+                placeholder={i18n.ML_JOB_SELECT_PLACEHOLDER_TEXT}
                 renderOption={renderJobOption}
                 rowHeight={50}
                 selectedOptions={selectedJobOptions}

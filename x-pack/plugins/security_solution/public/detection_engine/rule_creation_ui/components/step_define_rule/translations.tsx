@@ -59,13 +59,6 @@ export const IMPORT_TIMELINE_QUERY = i18n.translate(
   }
 );
 
-export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText',
-  {
-    defaultMessage: 'Select a job',
-  }
-);
-
 export const QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
   {
