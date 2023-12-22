@@ -362,7 +362,7 @@
     {
       "groupName": "scss",
       "packageNames": [
-        "sass-embedded"
+        "node-sass"
       ],
       "reviewers": [
         "team:kibana-operations"

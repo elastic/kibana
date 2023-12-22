@@ -2574,6 +2574,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ML_ALERT_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "ML_ALERT_TYPES",
+        "description": [],
+        "signature": [
+          "{ readonly ANOMALY_DETECTION: \"xpack.ml.anomaly_detection_alert\"; readonly AD_JOBS_HEALTH: \"xpack.ml.anomaly_detection_jobs_health\"; }"
+        ],
+        "path": "x-pack/plugins/ml/common/constants/alerts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
