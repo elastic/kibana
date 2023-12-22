@@ -417,8 +417,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       fieldObject.customDescription = newCustomDescription;
     }
 
-    // todo
-    this.setFieldAttrs(fieldName, 'customDescription', newCustomDescription);
+    this.setFieldCustomDescriptionInternal(fieldName, customDescription);
   }
 
   /**
