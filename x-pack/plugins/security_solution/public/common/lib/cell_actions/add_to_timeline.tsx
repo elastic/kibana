@@ -20,7 +20,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { EmptyComponent, useKibanaServices } from './helpers';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 
 export const getAddToTimelineCellAction = ({
   data,

@@ -31,7 +31,7 @@ import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
@@ -44,7 +44,7 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
-import { initializeTimelineSettings } from '../../../store/timeline/actions';
+import { initializeTimelineSettings } from '../../../store/actions';
 import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
@@ -182,9 +182,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {isEsqlSettingEnabled && (
+        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
-            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />

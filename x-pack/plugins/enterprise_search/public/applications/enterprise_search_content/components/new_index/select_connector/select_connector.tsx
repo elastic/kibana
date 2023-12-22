@@ -225,7 +225,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.areAvailableDirectlyWithinLabel',
                       {
                         defaultMessage:
-                          'Are available directly within Elastic Cloud deployments No additional infrastructure is required You can also convert them as self hosted Connectors client at any moment',
+                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert native connectors to self-hosted connector clients.',
                       }
                     )}
                   </p>
@@ -259,7 +259,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.deployConnectorsOnYourLabel',
                       {
                         defaultMessage:
-                          'Deploy connectors on your own infrastructure You can also customize existing Connector clients or build your own using our connector framework',
+                          'Deploy connectors on your own infrastructure. You can also customize existing connector clients, or build your own using our connector framework.',
                       }
                     )}
                   </p>

@@ -30,6 +30,7 @@ interface Props {
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
+  setDashboardAttachmentReady?: (value: boolean) => void;
   btnProps?: Partial<EuiButtonIconProps>;
 }
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -59,6 +60,7 @@ export function SloItemActions({
   setIsActionsPopoverOpen,
   setIsAddRuleFlyoutOpen,
   setDeleteConfirmationModalOpen,
+  setDashboardAttachmentReady,
   btnProps,
 }: Props) {
   const {
@@ -108,6 +110,13 @@ export function SloItemActions({
   const handleCreateRule = () => {
     setIsActionsPopoverOpen(false);
     setIsAddRuleFlyoutOpen(true);
+  };
+
+  const handleAttachToDashboard = () => {
+    setIsActionsPopoverOpen(false);
+    if (setDashboardAttachmentReady) {
+      setDashboardAttachmentReady(true);
+    }
   };
 
   const btn = (
@@ -200,6 +209,16 @@ export function SloItemActions({
           >
             {i18n.translate('xpack.observability.slo.item.actions.delete', {
               defaultMessage: 'Delete',
+            })}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="dashboardApp"
+            key="attachToDashboard"
+            onClick={handleAttachToDashboard}
+            data-test-subj="sloActinsAttachToDashboard"
+          >
+            {i18n.translate('xpack.observability.slo.item.actions.attachToDashboard', {
+              defaultMessage: 'Attach to Dashboard',
             })}
           </EuiContextMenuItem>,
         ]}
