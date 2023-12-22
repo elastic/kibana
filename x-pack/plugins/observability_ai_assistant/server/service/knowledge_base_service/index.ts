@@ -473,10 +473,12 @@ export class KnowledgeBaseService {
 
     const returnedEntries: RecalledEntry[] = [];
 
-    let entry: RecalledEntry | undefined;
-    while ((entry = sortedEntries.shift()) && tokenCount <= MAX_TOKENS) {
+    for (const entry of sortedEntries) {
       returnedEntries.push(entry);
       tokenCount += encode(entry.text).length;
+      if (tokenCount >= MAX_TOKENS) {
+        break;
+      }
     }
 
     if (returnedEntries.length <= sortedEntries.length) {
