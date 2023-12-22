@@ -8,9 +8,19 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as I18n from './translations';
+
+import {
+  RISK_COLOR_LOW,
+  RISK_COLOR_MEDIUM,
+  RISK_COLOR_HIGH,
+  RISK_COLOR_CRITICAL,
+  RISK_SCORE_LOW,
+  RISK_SCORE_MEDIUM,
+  RISK_SCORE_HIGH,
+  RISK_SCORE_CRITICAL,
+} from '../../../../common/constants';
 
 export interface SeverityOptionItem {
   value: Severity;
@@ -20,16 +30,6 @@ export interface SeverityOptionItem {
 const StyledEuiHealth = styled(EuiHealth)`
   line-height: inherit;
 `;
-
-export const RISK_COLOR_LOW = euiLightVars.euiColorVis0;
-export const RISK_COLOR_MEDIUM = euiLightVars.euiColorVis5;
-export const RISK_COLOR_HIGH = euiLightVars.euiColorVis7;
-export const RISK_COLOR_CRITICAL = euiLightVars.euiColorVis9;
-
-export const RISK_SCORE_LOW = 21;
-export const RISK_SCORE_MEDIUM = 47;
-export const RISK_SCORE_HIGH = 73;
-export const RISK_SCORE_CRITICAL = 99;
 
 export const severityOptions: SeverityOptionItem[] = [
   {
