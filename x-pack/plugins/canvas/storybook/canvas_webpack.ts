@@ -38,7 +38,7 @@ export const canvasWebpack = {
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('sass-embedded'),
+              implementation: require('node-sass'),
             },
           },
         ],

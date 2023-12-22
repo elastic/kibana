@@ -68,7 +68,6 @@ import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
-  wrapErrorAndRejectPromise,
 } from '../../../common/endpoint/data_loaders/utils';
 import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
@@ -777,13 +776,13 @@ export const getOrCreateDefaultAgentPolicy = async ({
   });
 
   if (existingPolicy.items[0]) {
-    log.info(`Re-using existing Fleet test agent policy`);
+    log.info(`Re-using existing Fleet test agent policy: [${existingPolicy.items[0].name}]`);
     log.verbose(existingPolicy.items[0]);
 
     return existingPolicy.items[0];
   }
 
-  log.info(`Creating new default test/dev Fleet agent policy`);
+  log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
     name: policyName,
@@ -802,7 +801,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
       body: newAgentPolicyData,
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 
   log.verbose(newAgentPolicy);
 
@@ -828,7 +827,7 @@ export const createIntegrationPolicy = async (
       },
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -847,7 +846,7 @@ export const fetchPackageInfo = async (
       method: 'GET',
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 interface AddSentinelOneIntegrationToAgentPolicyOptions {
