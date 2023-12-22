@@ -13,10 +13,6 @@ import { ExistingFieldsReader, type FieldListItem, GroupedFieldsParams } from '.
 /**
  * This hook is used to get the new fields of previous fields for wildcards request, and merges those
  * with the existing fields.
- * @param dataView
- * @param allFields
- * @param getNewFieldsBySpec
- * @param fieldsExistenceReader
  */
 export function useNewFields<T extends FieldListItem = DataViewField>({
   dataView,
@@ -45,7 +41,7 @@ export function useNewFields<T extends FieldListItem = DataViewField>({
         : allFields;
 
     return newFields ? [...allFieldsExlNew, ...newFields] : allFields;
-  }, [newFields, allFields]);
+  }, [newFields, allFields, dataView]);
 
   return { allFieldsModified, hasNewFields };
 }
