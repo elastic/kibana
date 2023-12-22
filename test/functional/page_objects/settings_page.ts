@@ -572,13 +572,15 @@ export class SettingsPageObject extends FtrService {
 
     await this.retry.try(async () => {
       await this.setIndexPatternField(indexPatternName);
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
+      if (timefield) {
+        await this.selectTimeFieldOption(timefield);
+      }
+      await this.getSaveDataViewButtonActive();
     });
-    if (dataViewName) {
-      await this.setNameField(dataViewName);
-    }
-    if (timefield) {
-      await this.selectTimeFieldOption(timefield);
-    }
+
     await (await this.getSaveIndexPatternButton()).click();
 
     if (errorCheck) {
