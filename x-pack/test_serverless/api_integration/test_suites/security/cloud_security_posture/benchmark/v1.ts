@@ -117,10 +117,10 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
+    it(`Should return all benchmarks if user has CSP integrations`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=2`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`Should return empty array when we set page to be above the last page number`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=3`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'xxx')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);

@@ -14,10 +14,13 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { generatePath } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
@@ -25,6 +28,7 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -36,46 +40,71 @@ interface BenchmarksTableProps
   'data-test-subj'?: string;
 }
 
+const IntegrationButtonLink = ({
+  packageName,
+  benchmarkVersion,
+  benchmarkId,
+}: {
+  packageName: string;
+  benchmarkVersion: string;
+  benchmarkId: string;
+}) => {
+  const { application } = useKibana().services;
+
+  return (
+    <EuiLink
+      href={application?.getUrlForApp('security', {
+        path: generatePath(benchmarksNavigation.rules.path, {
+          benchmarkVersion,
+          benchmarkId,
+        }),
+      })}
+    >
+      {packageName}
+    </EuiLink>
+  );
+};
+
 export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkK8sAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
+          defaultMessage="{ruleCount, plural, one {# cluster} other {# clusters}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
         />
       );
     case 'cis_azure':
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAzureAccountPlural"
-          defaultMessage="{accountCount, plural, one {# subscription} other {# subscriptions}}"
-          values={{ accountCount: accountEvaluation || 0 }}
+          defaultMessage="{ruleCount, plural, one {# subscription} other {# subscriptions}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
         />
       );
     case 'cis_aws':
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAwsAccountPlural"
-          defaultMessage="{accountCount, plural, one {# account} other {# accounts}}"
-          values={{ accountCount: accountEvaluation || 0 }}
+          defaultMessage="{ruleCount, plural, one {# account} other {# accounts}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
         />
       );
     case 'cis_eks':
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkEksAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
+          defaultMessage="{ruleCount, plural, one {# cluster} other {# clusters}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
         />
       );
     case 'cis_gcp':
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkGcpAccountPlural"
-          defaultMessage="{accountCount, plural, one {# project} other {# projects}}"
-          values={{ accountCount: accountEvaluation || 0 }}
+          defaultMessage="{ruleCount, plural, one {# project} other {# projects}}"
+          values={{ ruleCount: accountEvaluation || 0 }}
         />
       );
   }
@@ -123,9 +152,13 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     width: '17.5%',
     sortable: true,
-    render: (benchmarkId: BenchmarksCisId) => {
-      return getBenchmarkCisName(benchmarkId);
-    },
+    render: (complianceScore: Benchmark['id'], benchmarkId) => (
+      <IntegrationButtonLink
+        packageName={getBenchmarkCisName(benchmarkId.id) || ''}
+        benchmarkId={benchmarkId.id || ''}
+        benchmarkVersion={benchmarkId.version || ''}
+      />
+    ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
   },
   {

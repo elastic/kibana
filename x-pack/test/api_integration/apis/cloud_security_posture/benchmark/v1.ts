@@ -114,46 +114,56 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
+    it(`Should return all benchmarks if user has CSP integrations`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       expect(res.items.length).equal(3);
+    });
+
+    it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
+        .get(`/internal/cloud_security_posture/benchmarks`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(res.items_policies_information.length).equal(3);
       expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(2);
+      expect(res.items_policies_information.length).equal(2);
       expect(res.total).equal(3);
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=2`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(1);
+      expect(res.items_policies_information.length).equal(1);
       expect(res.total).equal(3);
     });
 
     it(`Should return empty array when we set page to be above the last page number`, async () => {
       const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=3`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(0);
+      expect(res.items_policies_information.length).equal(0);
       expect(res.total).equal(3);
     });
   });
