@@ -32,7 +32,7 @@ image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow co
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 
-{sn-itsm} connectors have a name and the following configuration properties:
+{sn-itsm} connectors have the following configuration properties:
 
 Client ID::
 The client identifier assigned to your OAuth application.
