@@ -156,7 +156,6 @@ describe('getJourneySteps request module', () => {
         Object {
           "terms": Object {
             "synthetics.type": Array [
-              "cmd/status",
               "journey/browserconsole",
               "step/end",
               "step/screenshot",
