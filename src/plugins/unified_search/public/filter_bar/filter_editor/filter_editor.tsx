@@ -186,9 +186,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       if (!dataViewId) {
         this.setState({ isLoadingDataView: false });
       } else {
-        this.props.dataViews
-          .get(dataViewId)
-          .then((dataView) => {
+        try {
+          this.props.dataViews.get(dataViewId).then((dataView) => {
             this.setState({
               selectedDataView: dataView,
               isLoadingDataView: false,
@@ -196,12 +195,12 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               localFilter: merge({}, this.props.filter),
               queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
             });
-          })
-          .catch(() => {
-            this.setState({
-              isLoadingDataView: false,
-            });
           });
+        } catch (e) {
+          this.setState({
+            isLoadingDataView: false,
+          });
+        }
       }
     }
   }
