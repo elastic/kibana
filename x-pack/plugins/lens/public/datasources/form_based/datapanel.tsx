@@ -263,15 +263,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       onSupportedFieldFilter,
       onSelectedFieldFilter,
       onOverrideFieldGroupDetails,
-      getNewFieldsBySpec: (spec, dataView) => {
-        return spec.reduce((result: IndexPatternField[], fieldSpec: FieldSpec) => {
-          const field = new DataViewField(fieldSpec);
-          if (isFieldLensCompatible(field)) {
-            result.push(buildIndexPatternField(field, dataView));
-          }
-          return result;
-        }, []);
-      },
+      getNewFieldsBySpec,
     });
 
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -427,5 +419,15 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     </FieldList>
   );
 };
+
+function getNewFieldsBySpec(spec: FieldSpec[], dataView: DataView | null) {
+  return spec.reduce((result: IndexPatternField[], fieldSpec: FieldSpec) => {
+    const field = new DataViewField(fieldSpec);
+    if (isFieldLensCompatible(field)) {
+      result.push(buildIndexPatternField(field, dataView));
+    }
+    return result;
+  }, []);
+}
 
 export const MemoizedDataPanel = memo(InnerFormBasedDataPanel);
