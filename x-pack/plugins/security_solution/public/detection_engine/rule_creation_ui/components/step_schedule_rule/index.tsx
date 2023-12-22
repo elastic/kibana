@@ -8,7 +8,10 @@
 import type { FC } from 'react';
 import styled from 'styled-components';
 import React, { memo } from 'react';
-import type { RuleStepProps, ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  RuleStepProps,
+  ScheduleStepRule,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';

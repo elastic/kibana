@@ -20,7 +20,10 @@ import type { RuleObjectId } from '../../../../../common/api/detection_engine/mo
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
-import type { RuleStepProps, ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  RuleStepProps,
+  ActionsStepRule,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';

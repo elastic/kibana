@@ -17,8 +17,14 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import type { AboutStepRule, DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType, GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  AboutStepRule,
+  DefineStepRule,
+} from '../../../../detections/pages/detection_engine/rules/types';
+import {
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
