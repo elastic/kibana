@@ -37,9 +37,7 @@ Client ID::
 The client ID assigned to your OAuth application.
 Client Secret::
 The client secret assigned to your OAuth application.
-Is OAuth::
-By default, basic authentication is used instead of open authorization (OAuth).
-JWT key ID::
+JWT verifier key ID::
 The key identifier assigned to the JWT verifier map of your OAuth application.
 Password::
 The password for HTTP basic authentication.
@@ -48,8 +46,10 @@ The RSA private key that you created for use in {sn}.
 Private key password::
 The password for the RSA private key.
 This value is required if you set a password for your private key.
-URL::
+{sn} instance URL::
 The full {sn} instance URL.
+Use OAuth authentication::
+By default, basic authentication is used instead of open authorization (OAuth).
 User identifier::
 The identifier to use for OAuth type authentication.
 This identifier should be the user field you selected during setup.
