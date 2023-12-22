@@ -85,6 +85,9 @@ export const useKibana = jest.fn().mockReturnValue({
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const useDarkMode = jest
+  .fn()
+  .mockImplementation((defaultValue?: boolean) => defaultValue ?? false);
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
