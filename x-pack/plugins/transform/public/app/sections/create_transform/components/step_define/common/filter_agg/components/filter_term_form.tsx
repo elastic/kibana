@@ -6,7 +6,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
-import { CreateTransformWizardContext } from '../../../../wizard/wizard';
+import { useCreateTransformWizardSelector } from '../../../../../create_transform_store';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 import { FilterAggConfigTerm } from '../types';
@@ -31,7 +31,8 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   onChange,
   selectedField,
 }) => {
-  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const dataView = useCreateTransformWizardSelector((d) => d.wizard.dataView);
+  const runtimeMappings = useCreateTransformWizardSelector((d) => d.wizard.runtimeMappings);
   const toastNotifications = useToastNotifications();
 
   const [searchValue, setSearchValue] = useState('');
