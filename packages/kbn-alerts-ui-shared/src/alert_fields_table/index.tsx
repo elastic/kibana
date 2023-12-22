@@ -28,6 +28,23 @@ export const search = {
   },
 };
 
+const columns = [
+  {
+    field: 'key',
+    name: i18n.translate('alertsUIShared.alertFieldsTable.field', {
+      defaultMessage: 'Field',
+    }),
+    width: '30%',
+  },
+  {
+    field: 'value',
+    name: i18n.translate('alertsUIShared.alertFieldsTable.value', {
+      defaultMessage: 'Value',
+    }),
+    width: '70%',
+  },
+];
+
 export const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
   <EuiTabbedContent
     css={css`
@@ -69,28 +86,20 @@ const useFieldBrowserPagination = () => {
   };
 };
 
-export const FieldsTable = memo(({ alert }: { alert: Alert }) => {
+export interface AlertFieldsTableProps {
+  alert: Alert;
+}
+
+export const AlertFieldsTable = memo(({ alert }: AlertFieldsTableProps) => {
   const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
   return (
     <EuiInMemoryTable
-      items={Object.entries(alert).map(([key, value]) => ({ key, value: value?.[0] }))}
+      items={Object.entries(alert).map(([key, value]) => ({
+        key,
+        value: Array.isArray(value) ? value?.[0] : value,
+      }))}
       itemId="key"
-      columns={[
-        {
-          field: 'key',
-          name: i18n.translate('alertsUIShared.alertFieldsTable.field', {
-            defaultMessage: 'Field',
-          }),
-          width: '30%',
-        },
-        {
-          field: 'value',
-          name: i18n.translate('alertsUIShared.alertFieldsTable.value', {
-            defaultMessage: 'Value',
-          }),
-          width: '70%',
-        },
-      ]}
+      columns={columns}
       onTableChange={onTableChange}
       pagination={paginationTableProp}
       search={search}

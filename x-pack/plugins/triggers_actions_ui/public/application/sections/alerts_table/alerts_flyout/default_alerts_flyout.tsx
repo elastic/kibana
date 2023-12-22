@@ -16,7 +16,7 @@ import {
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ScrollableFlyoutTabbedContent, FieldsTable } from '@kbn/alerts-ui-shared';
+import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { RegisterFormatter } from '../cells/render_cell_value';
 import { AlertsTableFlyoutBaseProps, AlertTableFlyoutComponent } from '../../../..';
 
@@ -37,6 +37,7 @@ export const getDefaultAlertFlyout =
       const overviewTab = useMemo(
         () => ({
           id: 'overview',
+          'data-test-subj': 'overviewTab',
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.overview',
             {
@@ -44,7 +45,7 @@ export const getDefaultAlertFlyout =
             }
           ),
           content: (
-            <EuiPanel hasShadow={false}>
+            <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
               <EuiDescriptionList
                 listItems={columns.map((column) => {
                   const value = get(alert, column.id)?.[0];
@@ -66,12 +67,13 @@ export const getDefaultAlertFlyout =
       const tableTab = useMemo(
         () => ({
           id: 'table',
+          'data-test-subj': 'tableTab',
           name: i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.table', {
             defaultMessage: 'Table',
           }),
           content: (
-            <EuiPanel hasShadow={false}>
-              <FieldsTable alert={alert} />
+            <EuiPanel hasShadow={false} data-test-subj="tableTabPanel">
+              <AlertFieldsTable alert={alert} />
             </EuiPanel>
           ),
         }),
@@ -96,6 +98,7 @@ export const getDefaultAlertFlyout =
           selectedTab={selectedTab}
           onTabClick={handleTabClick}
           expand
+          data-test-subj="defaultAlertFlyoutTabs"
         />
       );
     };
