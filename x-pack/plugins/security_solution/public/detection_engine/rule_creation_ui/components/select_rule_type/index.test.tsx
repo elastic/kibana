@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 
 import { SelectRuleType } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
-import { useIsEsqlRuleTypeEnabled } from '../../../rule_creation/hooks';
+import { useIsEsqlRuleTypeEnabled } from '../../../../common/components/hooks';
 
 jest.mock('../../../rule_creation/hooks', () => ({
   useIsEsqlRuleTypeEnabled: jest.fn().mockReturnValue(true),

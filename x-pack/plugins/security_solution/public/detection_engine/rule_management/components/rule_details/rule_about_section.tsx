@@ -27,7 +27,7 @@ import type {
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SeverityBadge } from '../../../rule_creation/components/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';

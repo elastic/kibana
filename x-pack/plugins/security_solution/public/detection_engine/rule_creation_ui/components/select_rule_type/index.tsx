@@ -22,7 +22,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
-import { useIsEsqlRuleTypeEnabled } from '../../../rule_creation/hooks';
+import { useIsEsqlRuleTypeEnabled } from '../../../../common/components/hooks';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];

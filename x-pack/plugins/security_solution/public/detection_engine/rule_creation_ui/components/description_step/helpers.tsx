@@ -41,7 +41,7 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, ListItems } from './types';
-import { SeverityBadge } from '../../../rule_creation/components/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,

@@ -15,7 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../mock';
-import { SeverityBadge } from '../../../../detection_engine/rule_creation/components/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';

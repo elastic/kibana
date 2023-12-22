@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useKibana } from '../../lib/kibana';
 
 export const useIsEsqlRuleTypeEnabled = (): boolean => {
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;

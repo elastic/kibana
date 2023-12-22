@@ -14,7 +14,7 @@ import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { SeverityBadge } from '../../../rule_creation/components/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 import * as i18n from './translations';
 import {
