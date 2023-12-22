@@ -19,7 +19,7 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import type { ObservedEntityData } from '../shared/observed_entity/types';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface UserPanelHeaderProps {
   userName: string;

@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { XOR } from '../../../../../common/utility_types';
+import type { XOR } from '../../../../../../common/utility_types';
 
 export type EntityTableRow<T extends BasicEntityData> = XOR<
   {

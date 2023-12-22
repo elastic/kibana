@@ -14,9 +14,9 @@ import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
-} from '../shared/left_panel/left_panel_header';
-import { LeftPanelHeader } from '../shared/left_panel/left_panel_header';
-import { LeftPanelContent } from '../shared/left_panel/left_panel_content';
+} from '../shared/components/left_panel/left_panel_header';
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
+import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
 interface RiskInputsParam {
   alertIds: string[];

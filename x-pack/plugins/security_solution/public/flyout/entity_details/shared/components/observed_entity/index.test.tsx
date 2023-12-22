@@ -8,8 +8,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { ObservedEntity } from '.';
-import { TestProviders } from '../../../../common/mock';
-import { mockObservedHostData } from '../../../../timelines/components/side_panel/new_host_detail/__mocks__';
+import { TestProviders } from '../../../../../common/mock';
+import { mockObservedHostData } from '../../../mocks';
 
 describe('ObservedHost', () => {
   const mockProps = {
@@ -28,7 +28,7 @@ describe('ObservedHost', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('observedEntity-data')).toBeInTheDocument();
+    expect(getByTestId('observedEntity-accordion')).toBeInTheDocument();
   });
 
   it('renders the formatted date', () => {
@@ -38,16 +38,6 @@ describe('ObservedHost', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('observedEntity-data')).toHaveTextContent('Updated Feb 23, 2023');
-  });
-
-  it('renders anomaly score', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ObservedEntity {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('anomaly-score')).toHaveTextContent('17');
+    expect(getByTestId('observedEntity-accordion')).toHaveTextContent('Updated Feb 23, 2023');
   });
 });

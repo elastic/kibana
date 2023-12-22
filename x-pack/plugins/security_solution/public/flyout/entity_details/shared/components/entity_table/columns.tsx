@@ -8,10 +8,10 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { euiLightVars } from '@kbn/ui-theme';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import * as i18n from '../../../../timelines/components/side_panel/new_host_detail/translations';
-import { getSourcererScopeId } from '../../../../helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
+import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import { getSourcererScopeId } from '../../../../../helpers';
 import type { BasicEntityData, EntityTableColumns } from './types';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
@@ -21,7 +21,12 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
   data: T
 ): EntityTableColumns<T> => [
   {
-    name: i18n.FIELD_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.fieldColumnTitle"
+        defaultMessage="Field"
+      />
+    ),
     field: 'label',
     render: (label: string, { field }) => (
       <span
@@ -35,7 +40,12 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
     ),
   },
   {
-    name: i18n.VALUES_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.valuesColumnTitle"
+        defaultMessage="Values"
+      />
+    ),
     field: 'field',
     render: (field: string | undefined, { getValues, render, renderField }) => {
       const values = getValues && getValues(data);

@@ -8,9 +8,9 @@
 import { useMemo } from 'react';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import type { HostItem } from '../../../../../common/search_strategy';
-import { getAnomaliesFields } from '../../../../timelines/components/side_panel/common';
-import type { EntityTableRows } from '../../shared/entity_table/types';
-import type { ObservedEntityData } from '../../shared/observed_entity/types';
+import { getAnomaliesFields } from '../../shared/common';
+import type { EntityTableRows } from '../../shared/components/entity_table/types';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { policyFields } from '../fields/endpoint_policy_fields';
 import { basicHostFields } from '../fields/basic_host_fields';
 import { cloudFields } from '../fields/cloud_fields';

@@ -6,8 +6,8 @@
  */
 
 import type { HostItem } from '../../../../../common/search_strategy';
-import type { EntityTableRows } from '../../shared/entity_table/types';
-import type { ObservedEntityData } from '../../shared/observed_entity/types';
+import type { EntityTableRows } from '../../shared/components/entity_table/types';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import * as i18n from './translations';
 
 export const cloudFields: EntityTableRows<ObservedEntityData<HostItem>> = [

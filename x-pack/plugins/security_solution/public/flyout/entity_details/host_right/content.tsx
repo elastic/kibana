@@ -11,9 +11,9 @@ import React from 'react';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { HostItem, RiskScoreEntity } from '../../../../common/search_strategy';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ObservedEntity } from '../shared/observed_entity';
+import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '.';
-import type { ObservedEntityData } from '../shared/observed_entity/types';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
 
 interface HostPanelContentProps {

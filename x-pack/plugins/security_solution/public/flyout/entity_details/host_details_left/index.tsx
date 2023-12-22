@@ -8,8 +8,11 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
-import { EntityDetailsLeftPanelTab, LeftPanelHeader } from '../shared/left_panel/left_panel_header';
-import { LeftPanelContent } from '../shared/left_panel/left_panel_content';
+import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import {
+  EntityDetailsLeftPanelTab,
+  LeftPanelHeader,
+} from '../shared/components/left_panel/left_panel_header';
 
 interface RiskInputsParam {
   alertIds: string[];

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import type { ObservedEntityData } from '../../shared/observed_entity/types';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import type { UserItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';

@@ -11,7 +11,7 @@ import { mockObservedUser } from '../mocks';
 import { useObservedUserItems } from './use_observed_user_items';
 
 describe('useManagedUserItems', () => {
-  it('returns managed user items for Entra user', () => {
+  it('returns observed user fields', () => {
     const { result } = renderHook(() => useObservedUserItems(mockObservedUser), {
       wrapper: TestProviders,
     });
@@ -20,43 +20,58 @@ describe('useManagedUserItems', () => {
       {
         field: 'user.id',
         label: 'User ID',
-        values: ['1234', '321'],
+        getValues: expect.any(Function),
       },
       {
         field: 'user.domain',
         label: 'Domain',
-        values: ['test domain', 'another test domain'],
-      },
-      {
-        field: 'anomalies',
-        label: 'Max anomaly score by job',
-        values: mockObservedUser.anomalies,
+        getValues: expect.any(Function),
       },
       {
         field: '@timestamp',
         label: 'First seen',
-        values: ['2023-02-23T20:03:17.489Z'],
+        getValues: expect.any(Function),
       },
       {
         field: '@timestamp',
         label: 'Last seen',
-        values: ['2023-02-23T20:03:17.489Z'],
+        getValues: expect.any(Function),
       },
       {
         field: 'host.os.name',
         label: 'Operating system',
-        values: ['testOs'],
+        getValues: expect.any(Function),
       },
       {
         field: 'host.os.family',
         label: 'Family',
-        values: ['testFamily'],
+
+        getValues: expect.any(Function),
       },
       {
         field: 'host.ip',
         label: 'IP addresses',
-        values: ['10.0.0.1', '127.0.0.1'],
+
+        getValues: expect.any(Function),
+      },
+      {
+        label: 'Max anomaly score by job',
+        isVisible: expect.any(Function),
+        render: expect.any(Function),
       },
     ]);
+
+    expect(result.current.map(({ getValues }) => getValues && getValues(mockObservedUser))).toEqual(
+      [
+        ['1234', '321'], // id
+        ['test domain', 'another test domain'], // domain
+        ['2023-02-23T20:03:17.489Z'], // First seen
+        ['2023-02-23T20:03:17.489Z'], // Last seen
+        ['testOs'], // OS name
+        ['testFamily'], // os family
+        ['10.0.0.1', '127.0.0.1'], // IP addresses
+        undefined, // Max anomaly score by job doesn't implement getValues
+      ]
+    );
   });
 });

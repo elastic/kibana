@@ -8,10 +8,10 @@
 import { useMemo } from 'react';
 import type { UserItem } from '../../../../../common/search_strategy';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { getAnomaliesFields } from '../../../../timelines/components/side_panel/common';
+import { getAnomaliesFields } from '../../shared/common';
 import * as i18n from './translations';
-import type { ObservedEntityData } from '../../shared/observed_entity/types';
-import type { EntityTableRows } from '../../shared/entity_table/types';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { EntityTableRows } from '../../shared/components/entity_table/types';
 
 const basicUserFields: EntityTableRows<ObservedEntityData<UserItem>> = [
   {

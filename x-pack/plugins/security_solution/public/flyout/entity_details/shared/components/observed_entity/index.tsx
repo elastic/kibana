@@ -11,11 +11,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityTable } from '../entity_table';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import * as i18n from './translations';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import type { EntityTableRows } from '../entity_table/types';
-import { ONE_WEEK_IN_HOURS } from '../constants';
+import { ONE_WEEK_IN_HOURS } from '../../constants';
 import type { ObservedEntityData } from './types';
 
 export const ObservedEntity = <T,>({
@@ -52,7 +51,12 @@ export const ObservedEntity = <T,>({
           }}
           buttonContent={
             <EuiTitle size="xs">
-              <h3>{i18n.OBSERVED_DATA_TITLE}</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.observedDataTitle"
+                  defaultMessage="Observed data"
+                />
+              </h3>
             </EuiTitle>
           }
           extraAction={
@@ -62,7 +66,15 @@ export const ObservedEntity = <T,>({
                   margin-right: ${euiTheme.size.s};
                 `}
               >
-                <InspectButton queryId={queryId} title={i18n.OBSERVED_DATA_TITLE} />
+                <InspectButton
+                  queryId={queryId}
+                  title={
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.observedDataInspectTitle"
+                      defaultMessage="Observed data"
+                    />
+                  }
+                />
               </span>
               {observedData.lastSeen.date && (
                 <span

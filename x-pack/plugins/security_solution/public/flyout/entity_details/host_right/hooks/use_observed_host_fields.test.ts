@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockObservedHostData } from '../../../../timelines/components/side_panel/new_host_detail/__mocks__';
 import { renderHook } from '@testing-library/react-hooks';
 import { useObservedHostFields } from './use_observed_host_fields';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { mockObservedHostData } from '../../mocks';
 
 describe('useManagedUserItems', () => {
   it('returns managed user items for Entra user', () => {
@@ -16,42 +16,128 @@ describe('useManagedUserItems', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current).toEqual([
-      {
-        field: 'user.id',
-        label: 'User ID',
-        values: ['1234', '321'],
-      },
-      {
-        field: 'user.domain',
-        label: 'Domain',
-        values: ['test domain', 'another test domain'],
-      },
-      {
-        field: '@timestamp',
-        label: 'First seen',
-        values: ['2023-02-23T20:03:17.489Z'],
-      },
-      {
-        field: '@timestamp',
-        label: 'Last seen',
-        values: ['2023-02-23T20:03:17.489Z'],
-      },
-      {
-        field: 'host.os.name',
-        label: 'Operating system',
-        values: ['testOs'],
-      },
-      {
-        field: 'host.os.family',
-        label: 'Family',
-        values: ['testFamily'],
-      },
-      {
-        field: 'host.ip',
-        label: 'IP addresses',
-        values: ['10.0.0.1', '127.0.0.1'],
-      },
+    expect(result.current).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "field": "host.id",
+          "getValues": [Function],
+          "label": "Host ID",
+        },
+        Object {
+          "label": "First seen",
+          "render": [Function],
+        },
+        Object {
+          "label": "Last seen",
+          "render": [Function],
+        },
+        Object {
+          "field": "host.ip",
+          "getValues": [Function],
+          "label": "IP addresses",
+          "renderField": [Function],
+        },
+        Object {
+          "field": "host.mac",
+          "getValues": [Function],
+          "label": "MAC addresses",
+        },
+        Object {
+          "field": "host.os.platform",
+          "getValues": [Function],
+          "label": "Platform",
+        },
+        Object {
+          "field": "host.os.name",
+          "getValues": [Function],
+          "label": "Operating system",
+        },
+        Object {
+          "field": "host.os.family",
+          "getValues": [Function],
+          "label": "Family",
+        },
+        Object {
+          "field": "host.os.version",
+          "getValues": [Function],
+          "label": "Version",
+        },
+        Object {
+          "field": "host.architecture",
+          "getValues": [Function],
+          "label": "Architecture",
+        },
+        Object {
+          "isVisible": [Function],
+          "label": "Max anomaly score by job",
+          "render": [Function],
+        },
+        Object {
+          "field": "cloud.provider",
+          "getValues": [Function],
+          "label": "Cloud provider",
+        },
+        Object {
+          "field": "cloud.region",
+          "getValues": [Function],
+          "label": "Region",
+        },
+        Object {
+          "field": "cloud.instance.id",
+          "getValues": [Function],
+          "label": "Instance ID",
+        },
+        Object {
+          "field": "cloud.machine.type",
+          "getValues": [Function],
+          "label": "Machine type",
+        },
+        Object {
+          "isVisible": [Function],
+          "label": "Endpoint integration policy",
+          "render": [Function],
+        },
+        Object {
+          "isVisible": [Function],
+          "label": "Policy Status",
+          "render": [Function],
+        },
+        Object {
+          "field": "agent.version",
+          "getValues": [Function],
+          "isVisible": [Function],
+          "label": "Endpoint version",
+        },
+        Object {
+          "isVisible": [Function],
+          "label": "Agent status",
+          "render": [Function],
+        },
+      ]
+    `);
+
+    expect(
+      result.current.map(({ getValues }) => getValues && getValues(mockObservedHostData))
+    ).toEqual([
+      ['host-id'],
+      undefined, // First seen doesn't implement getValues
+      undefined, // Last seen doesn't implement getValues
+      ['host-ip'],
+      ['host-mac'],
+      ['host-platform'],
+      ['os-name'],
+      ['host-family'],
+      ['host-version'],
+      ['host-architecture'],
+      undefined, // Max anomaly score by job doesn't implement getValues
+      ['cloud-provider'],
+      ['cloud-region'],
+      ['cloud-instance-id'],
+      ['cloud-machine-type'],
+      undefined, // Endpoint integration policy doesn't implement getValues
+      undefined, // Policy Status doesn't implement getValues
+      ['endpoint-agent-version'],
+      undefined, // Agent status doesn't implement getValues
     ]);
   });
 });

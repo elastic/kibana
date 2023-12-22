@@ -24,7 +24,7 @@ import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { EntityDetailsLeftPanelTab } from '../shared/left_panel/left_panel_header';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;

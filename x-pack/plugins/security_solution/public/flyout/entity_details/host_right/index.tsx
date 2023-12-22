@@ -20,7 +20,7 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import type { ObservedEntityData } from '../shared/observed_entity/types';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
 
@@ -83,22 +83,22 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
     });
   }, [openLeftPanel, hostRiskData?.host.risk.inputs]);
 
-  const useObserved = useObservedHost(hostName);
+  const observedHost = useObservedHost(hostName);
 
-  if (riskScoreState.loading || useObserved.isLoading) {
+  if (riskScoreState.loading || observedHost.isLoading) {
     return <FlyoutLoading />;
   }
 
   return (
     <AnomalyTableProvider
-      criteriaFields={hostToCriteria(useObserved.details)}
+      criteriaFields={hostToCriteria(observedHost.details)}
       startDate={from}
       endDate={to}
       skip={isInitializing}
     >
       {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => {
         const observedHostWithAnomalies: ObservedEntityData<HostItem> = {
-          ...useObserved,
+          ...observedHost,
           anomalies: {
             isLoading: isLoadingAnomaliesData,
             anomalies: anomaliesData,

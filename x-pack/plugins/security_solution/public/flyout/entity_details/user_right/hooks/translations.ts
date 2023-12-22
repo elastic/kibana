@@ -7,44 +7,47 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const USER_ID = i18n.translate('xpack.securitySolution.timeline.userDetails.userIdLabel', {
+export const USER_ID = i18n.translate('xpack.securitySolution.flyout.entityDetails.user.idLabel', {
   defaultMessage: 'User ID',
 });
 
 export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.maxAnomalyScoreByJobLabel',
+  'xpack.securitySolution.flyout.entityDetails.user.maxAnomalyScoreByJobLabel',
   {
     defaultMessage: 'Max anomaly score by job',
   }
 );
 
 export const FIRST_SEEN = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.firstSeenLabel',
+  'xpack.securitySolution.flyout.entityDetails.user.firstSeenLabel',
   {
     defaultMessage: 'First seen',
   }
 );
 
 export const LAST_SEEN = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.lastSeenLabel',
+  'xpack.securitySolution.flyout.entityDetails.user.lastSeenLabel',
   {
     defaultMessage: 'Last seen',
   }
 );
 
 export const OPERATING_SYSTEM_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hostOsNameLabel',
+  'xpack.securitySolution.flyout.entityDetails.user.hostOsNameLabel',
   {
     defaultMessage: 'Operating system',
   }
 );
 
-export const FAMILY = i18n.translate('xpack.securitySolution.timeline.userDetails.familyLabel', {
-  defaultMessage: 'Family',
-});
+export const FAMILY = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.user.familyLabel',
+  {
+    defaultMessage: 'Family',
+  }
+);
 
 export const IP_ADDRESSES = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.ipAddressesLabel',
+  'xpack.securitySolution.flyout.entityDetails.user.ipAddressesLabel',
   {
     defaultMessage: 'IP addresses',
   }

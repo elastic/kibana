@@ -16,10 +16,10 @@ import type { ManagedUserData } from '../../../timelines/components/side_panel/n
 import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ObservedEntity } from '../shared/observed_entity';
-import type { ObservedEntityData } from '../shared/observed_entity/types';
+import { ObservedEntity } from '../shared/components/observed_entity';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
-import type { EntityDetailsLeftPanelTab } from '../shared/left_panel/left_panel_header';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface UserPanelContentProps {
   observedUser: ObservedEntityData<UserItem>;

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
+import { BasicTable } from '../../../../../common/components/ml/tables/basic_table';
 import { getEntityTableColumns } from './columns';
 import type { BasicEntityData, EntityTableRows } from './types';
 

@@ -8,100 +8,74 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockRiskScoreState } from '../mocks';
+import { mockHostRiskScoreState, mockObservedHostData } from '../mocks';
 
-import { mockManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import type { UserPanelProps } from '../user_right';
-import { UserPanel } from '../user_right';
-import { mockObservedUser } from '../user_right/mocks';
+import type { HostPanelProps } from '.';
+import { HostPanel } from '.';
 
-const mockProps: UserPanelProps = {
-  userName: 'test',
-  contextID: 'test-user-panel',
+const mockProps: HostPanelProps = {
+  hostName: 'test',
+  contextID: 'test-host -panel',
   scopeId: 'test-scope-id',
   isDraggable: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
+const mockedHostRiskScore = jest.fn().mockReturnValue(mockHostRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUseRiskScore(),
+  useRiskScore: () => mockedHostRiskScore(),
 }));
 
-const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
-const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
-
-jest.mock(
-  '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user',
-  () => ({
-    useManagedUser: () => mockedUseManagedUser(),
-  })
-);
+const mockedUseObservedHost = jest.fn().mockReturnValue(mockObservedHostData);
 
 jest.mock('./hooks/use_observed_host', () => ({
-  useObservedUser: () => mockedUseObservedUser(),
+  useObservedHost: () => mockedUseObservedHost(),
 }));
 
-describe('UserPanel', () => {
+describe('HostPanel', () => {
   beforeEach(() => {
-    mockedUseRiskScore.mockReturnValue(mockRiskScoreState);
-    mockedUseManagedUser.mockReturnValue(mockManagedUserData);
-    mockedUseObservedUser.mockReturnValue(mockObservedUser);
+    mockedHostRiskScore.mockReturnValue(mockHostRiskScoreState);
+    mockedUseObservedHost.mockReturnValue(mockObservedHostData);
   });
 
   it('renders', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <UserPanel {...mockProps} />
+        <HostPanel {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('user-panel-header')).toBeInTheDocument();
+    expect(getByTestId('host-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
   });
 
   it('renders loading state when risk score is loading', () => {
-    mockedUseRiskScore.mockReturnValue({
-      ...mockRiskScoreState,
+    mockedHostRiskScore.mockReturnValue({
+      ...mockHostRiskScoreState,
       data: undefined,
       loading: true,
     });
 
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanel {...mockProps} />
+        <HostPanel {...mockProps} />
       </TestProviders>
     );
 
     expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
   });
 
-  it('renders loading state when observed user is loading', () => {
-    mockedUseObservedUser.mockReturnValue({
-      ...mockObservedUser,
+  it('renders loading state when observed host is loading', () => {
+    mockedUseObservedHost.mockReturnValue({
+      ...mockObservedHostData,
       isLoading: true,
     });
 
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
-  });
-
-  it('renders loading state when managed user is loading', () => {
-    mockedUseManagedUser.mockReturnValue({
-      ...mockManagedUserData,
-      isLoading: true,
-    });
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanel {...mockProps} />
+        <HostPanel {...mockProps} />
       </TestProviders>
     );
 

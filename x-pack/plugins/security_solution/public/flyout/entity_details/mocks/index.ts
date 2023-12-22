@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import type { HostMetadataInterface } from '../../../../common/endpoint/types';
+import { EndpointStatus, HostStatus } from '../../../../common/endpoint/types';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { RiskScoreEntity, UserRiskScore } from '../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import type {
+  HostItem,
+  HostRiskScore,
+  RiskScoreEntity,
+  UserRiskScore,
+} from '../../../../common/search_strategy';
+import { HostPolicyResponseActionStatus, RiskSeverity } from '../../../../common/search_strategy';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 const userRiskScore: UserRiskScore = {
   '@timestamp': '626569200000',
@@ -35,7 +43,32 @@ const userRiskScore: UserRiskScore = {
   oldestAlertTimestamp: '626569200000',
 };
 
-export const mockRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
+const hostRiskScore: HostRiskScore = {
+  '@timestamp': '626569200000',
+  host: {
+    name: 'test',
+    risk: {
+      rule_risks: [],
+      calculated_score_norm: 70,
+      multipliers: [],
+      calculated_level: RiskSeverity.high,
+      inputs: [
+        {
+          id: '_id',
+          index: '_index',
+          category: RiskCategories.category_1,
+          description: 'Alert from Rule: My rule',
+          risk_score: 30,
+          timestamp: '2021-08-19T18:55:59.000Z',
+        },
+      ],
+    },
+  },
+  alertsCount: 0,
+  oldestAlertTimestamp: '626569200000',
+};
+
+export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   data: [userRiskScore],
   inspect: {
     dsl: [],
@@ -48,4 +81,103 @@ export const mockRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+};
+
+export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
+  data: [hostRiskScore],
+  inspect: {
+    dsl: [],
+    response: [],
+  },
+  isInspected: false,
+  refetch: () => {},
+  totalCount: 0,
+  isModuleEnabled: true,
+  isAuthorized: true,
+  isDeprecated: false,
+  loading: false,
+};
+
+export const mockRiskScoreState = {
+  data: [hostRiskScore],
+  inspect: {
+    dsl: [],
+    response: [],
+  },
+  isInspected: false,
+  refetch: () => {},
+  totalCount: 0,
+  isModuleEnabled: true,
+  isAuthorized: true,
+  isDeprecated: false,
+  loading: false,
+};
+
+const hostMetadata: HostMetadataInterface = {
+  '@timestamp': 1036358673463478,
+
+  agent: {
+    id: 'endpoint-agent-id',
+    version: 'endpoint-agent-version',
+    type: 'endpoint-agent-type',
+  },
+  Endpoint: {
+    status: EndpointStatus.enrolled,
+    policy: {
+      applied: {
+        name: 'With Eventing',
+        id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+        endpoint_policy_version: 3,
+        version: 5,
+        status: HostPolicyResponseActionStatus.failure,
+      },
+    },
+  },
+} as HostMetadataInterface;
+
+export const mockObservedHost: HostItem = {
+  host: {
+    id: ['host-id'],
+    mac: ['host-mac'],
+    architecture: ['host-architecture'],
+    os: {
+      platform: ['host-platform'],
+      name: ['os-name'],
+      version: ['host-version'],
+      family: ['host-family'],
+    },
+    ip: ['host-ip'],
+    name: ['host-name'],
+  },
+  cloud: {
+    instance: {
+      id: ['cloud-instance-id'],
+    },
+    provider: ['cloud-provider'],
+    region: ['cloud-region'],
+    machine: {
+      type: ['cloud-machine-type'],
+    },
+  },
+  endpoint: {
+    hostInfo: {
+      metadata: hostMetadata,
+      host_status: HostStatus.HEALTHY,
+      last_checkin: 'host-last-checkin',
+    },
+  },
+};
+
+export const mockObservedHostData: ObservedEntityData<HostItem> = {
+  details: mockObservedHost,
+  isLoading: false,
+  firstSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
+  },
+  lastSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
+  },
+  anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
 };
