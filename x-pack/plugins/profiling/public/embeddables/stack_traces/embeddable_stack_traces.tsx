@@ -5,26 +5,26 @@
  * 2.0.
  */
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { EMBEDDABLE_THREADS } from '@kbn/observability-shared-plugin/public';
+import { EMBEDDABLE_STACK_TRACES } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
-import { EmbeddableThreadsEmbeddableInput } from './embeddable_threads_factory';
+import { EmbeddableStackTracesEmbeddableInput } from './embeddable_stack_traces_factory';
+import { StackTraces } from './stack_traces';
 
-export class EmbeddableThreads extends Embeddable<
-  EmbeddableThreadsEmbeddableInput,
+export class EmbeddableStackTraces extends Embeddable<
+  EmbeddableStackTracesEmbeddableInput,
   EmbeddableOutput
 > {
-  readonly type = EMBEDDABLE_THREADS;
+  readonly type = EMBEDDABLE_STACK_TRACES;
   private _domNode?: HTMLElement;
 
   constructor(
     private deps: ProfilingEmbeddablesDependencies,
-    initialInput: EmbeddableThreadsEmbeddableInput,
+    initialInput: EmbeddableStackTracesEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
@@ -32,12 +32,11 @@ export class EmbeddableThreads extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { rangeFrom, rangeTo, kuery } = this.input;
-    console.log('### caue  render:', { rangeFrom, rangeTo, kuery });
+    const { rangeFrom, rangeTo, kuery, type } = this.input;
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <div style={{ width: '100%' }}>
-          {i18n.translate('xpack.profiling..div.caueLabel', { defaultMessage: 'caue' })}
+          <StackTraces type={type} rangeFrom={rangeFrom} rangeTo={rangeTo} kuery={kuery} />
         </div>
       </ProfilingEmbeddableProvider>,
       domNode

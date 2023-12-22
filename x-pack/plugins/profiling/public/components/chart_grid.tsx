@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiFlyout, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { take } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { take } from 'lodash';
+import React, { useMemo } from 'react';
 import { TopNSubchart } from '../../common/topn';
 import { SubChart } from './subchart';
 
@@ -16,16 +16,15 @@ export interface ChartGridProps {
   limit: number;
   charts: TopNSubchart[];
   showFrames: boolean;
+  onChartClick?: (selectedChart: TopNSubchart) => void;
 }
 
-export function ChartGrid({ limit, charts, showFrames }: ChartGridProps) {
+export function ChartGrid({ limit, charts, showFrames, onChartClick }: ChartGridProps) {
   const maximum = Math.min(limit, charts.length ?? 0);
   const ncharts = Math.min(maximum, charts.length);
 
-  const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
-
   const subCharts = useMemo(() => {
-    return take(charts, ncharts).map((subchart, i) => (
+    return take(charts, ncharts).map((subchart) => (
       <EuiFlexItem key={subchart.Category}>
         <EuiPanel paddingSize="none">
           <SubChart
@@ -39,16 +38,20 @@ export function ChartGrid({ limit, charts, showFrames }: ChartGridProps) {
             data={subchart.Series}
             sample={null}
             showAxes
-            onShowMoreClick={() => {
-              setSelectedSubchart(subchart);
-            }}
+            onClick={
+              onChartClick
+                ? () => {
+                    onChartClick(subchart);
+                  }
+                : undefined
+            }
             showFrames={showFrames}
             padTitle
           />
         </EuiPanel>
       </EuiFlexItem>
     ));
-  }, [charts, ncharts, showFrames]);
+  }, [charts, ncharts, onChartClick, showFrames]);
 
   return (
     <>
@@ -65,29 +68,6 @@ export function ChartGrid({ limit, charts, showFrames }: ChartGridProps) {
       <EuiFlexGrid columns={2} gutterSize="m">
         {subCharts}
       </EuiFlexGrid>
-      {selectedSubchart && (
-        <EuiFlyout
-          onClose={() => {
-            setSelectedSubchart(undefined);
-          }}
-        >
-          <SubChart
-            style={{ overflow: 'auto' }}
-            index={selectedSubchart.Index}
-            color={selectedSubchart.Color}
-            category={selectedSubchart.Category}
-            label={selectedSubchart.Label}
-            percentage={selectedSubchart.Percentage}
-            metadata={selectedSubchart.Metadata}
-            height={200}
-            data={selectedSubchart.Series}
-            sample={null}
-            showAxes
-            showFrames={showFrames}
-            padTitle
-          />
-        </EuiFlyout>
-      )}
     </>
   );
 }

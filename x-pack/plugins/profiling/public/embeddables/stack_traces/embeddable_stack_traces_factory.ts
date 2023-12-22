@@ -9,21 +9,23 @@ import {
   EmbeddableInput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { EMBEDDABLE_THREADS } from '@kbn/observability-shared-plugin/public';
+import { EMBEDDABLE_STACK_TRACES } from '@kbn/observability-shared-plugin/public';
+import { TopNType } from '@kbn/profiling-utils';
 import { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
-interface EmbeddableThreadsInput {
+interface EmbeddableStackTracesInput {
+  type: TopNType;
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
 }
 
-export type EmbeddableThreadsEmbeddableInput = EmbeddableThreadsInput & EmbeddableInput;
+export type EmbeddableStackTracesEmbeddableInput = EmbeddableStackTracesInput & EmbeddableInput;
 
-export class EmbeddableThreadsFactory
-  implements EmbeddableFactoryDefinition<EmbeddableThreadsEmbeddableInput>
+export class EmbeddableStackTracesFactory
+  implements EmbeddableFactoryDefinition<EmbeddableStackTracesEmbeddableInput>
 {
-  readonly type = EMBEDDABLE_THREADS;
+  readonly type = EMBEDDABLE_STACK_TRACES;
 
   constructor(private getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies) {}
 
@@ -31,10 +33,10 @@ export class EmbeddableThreadsFactory
     return false;
   }
 
-  async create(input: EmbeddableThreadsEmbeddableInput, parent?: IContainer) {
-    const { EmbeddableThreads } = await import('./embeddable_threads');
+  async create(input: EmbeddableStackTracesEmbeddableInput, parent?: IContainer) {
+    const { EmbeddableStackTraces } = await import('./embeddable_stack_traces');
     const deps = await this.getProfilingEmbeddableDependencies();
-    return new EmbeddableThreads(deps, input, parent);
+    return new EmbeddableStackTraces(deps, input, parent);
   }
 
   getDisplayName() {

@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { EMBEDDABLE_THREADS } from '.';
+import { TopNType } from '@kbn/profiling-utils';
+import { EMBEDDABLE_STACK_TRACES } from '.';
 import { ProfilingEmbeddable } from './profiling_embeddable';
 
 interface Props {
+  type: TopNType;
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
 }
 
-export function EmbeddableThreads(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_THREADS} />;
+export function EmbeddableStackTraces(props: Props) {
+  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_STACK_TRACES} />;
 }

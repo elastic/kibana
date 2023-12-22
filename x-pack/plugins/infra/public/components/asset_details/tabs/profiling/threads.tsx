@@ -5,9 +5,24 @@
  * 2.0.
  */
 
-import { EmbeddableThreads } from '@kbn/observability-shared-plugin/public';
+import { EmbeddableStackTraces } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { TopNType } from '@kbn/profiling-utils';
+import { HOST_FIELD } from '../../../../../common/constants';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
 
 export function Threads() {
-  return <EmbeddableThreads kuery="" rangeFrom={0} rangeTo={1} />;
+  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { from, to } = getDateRangeInTimestamp();
+  const { asset } = useAssetDetailsRenderPropsContext();
+
+  return (
+    <EmbeddableStackTraces
+      type={TopNType.Threads}
+      rangeFrom={from}
+      rangeTo={to}
+      kuery={`${HOST_FIELD}:"${asset.name}"`}
+    />
+  );
 }
