@@ -25,10 +25,12 @@ export function useNewFields<T extends FieldListItem = DataViewField>({
   getNewFieldsBySpec: GroupedFieldsParams<T>['getNewFieldsBySpec'];
   fieldsExistenceReader: ExistingFieldsReader;
 }) {
-  const newFields =
-    allFields && dataView?.id && getNewFieldsBySpec
+  const newFields = useMemo(() => {
+    return allFields && dataView?.id && getNewFieldsBySpec
       ? getNewFieldsBySpec(fieldsExistenceReader.getNewFields(dataView?.id), dataView)
       : null;
+  }, [allFields, dataView, fieldsExistenceReader, getNewFieldsBySpec]);
+
   const hasNewFields = Boolean(allFields && newFields && newFields.length > 0);
 
   const allFieldsModified = useMemo(() => {
