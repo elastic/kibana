@@ -42,6 +42,13 @@ export interface TaskRunResult {
   error_code?: string;
 }
 
+export interface ExecutionError {
+  name: string;
+  message: string;
+  stack: string;
+  cause: string;
+}
+
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
@@ -136,6 +143,7 @@ export interface ReportSource {
    * `output` is only populated if the report job is completed or failed.
    */
   output: ReportOutput | null;
+  error?: ExecutionError | unknown;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after

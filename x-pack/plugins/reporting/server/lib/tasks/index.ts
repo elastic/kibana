@@ -10,6 +10,8 @@ import { BasePayload, ReportSource } from '@kbn/reporting-common/types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
 
+export const TIME_BETWEEN_ATTEMPTS = 10 * 1000; // 10 seconds
+
 export { ExecuteReportTask } from './execute_report';
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {

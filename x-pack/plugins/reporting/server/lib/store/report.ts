@@ -45,6 +45,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly kibana_name: ReportSource['kibana_name'];
   public readonly kibana_id: ReportSource['kibana_id'];
   public readonly output: ReportSource['output'];
+  public readonly error: ReportSource['error'];
   public readonly started_at: ReportSource['started_at'];
   public readonly completed_at: ReportSource['completed_at'];
   public readonly timeout: ReportSource['timeout'];
@@ -95,6 +96,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
+    this.error = opts.error;
 
     this.queue_time_ms = fields?.queue_time_ms;
     this.execution_time_ms = fields?.execution_time_ms;

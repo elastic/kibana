@@ -22,7 +22,12 @@ import {
   durationToNumber,
   numberToDuration,
 } from '@kbn/reporting-common';
-import type { ReportDocument, ReportOutput, TaskRunResult } from '@kbn/reporting-common/types';
+import type {
+  ExecutionError,
+  ReportDocument,
+  ReportOutput,
+  TaskRunResult,
+} from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type {
   RunContext,
@@ -31,10 +36,19 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
-import { REPORTING_EXECUTE_TYPE, ReportTaskParams, ReportingTask, ReportingTaskStatus } from '.';
+import {
+  REPORTING_EXECUTE_TYPE,
+  TIME_BETWEEN_ATTEMPTS,
+  ReportTaskParams,
+  ReportingTask,
+  ReportingTaskStatus,
+} from '.';
 import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
+import {
+  mapToReportingError,
+  isExecutionError,
+} from '../../../common/errors/map_to_reporting_error';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
@@ -67,6 +81,18 @@ async function finishedWithNoPendingCallbacks(stream: Writable) {
       await pendingCallbacks(delay < 32 ? delay * 2 : delay);
     }
   })();
+}
+
+function parseError(error: unknown): ExecutionError | unknown {
+  if (error instanceof Error) {
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause,
+    };
+  }
+  return error;
 }
 
 export class ExecuteReportTask implements ReportingTask {
@@ -147,9 +173,18 @@ export class ExecuteReportTask implements ReportingTask {
     // check if job has exceeded the configured maxAttempts
     const maxAttempts = this.getMaxAttempts();
     if (report.attempts >= maxAttempts) {
-      const err = new QueueTimeoutError(
-        `Max attempts reached (${maxAttempts}). Queue timeout reached.`
-      );
+      let err: ReportingError;
+      if (report.error && isExecutionError(report.error)) {
+        // We have an error stored from a previous attempts, so we'll use that
+        // error to fail the job and return it to the user.
+        const { error } = report;
+        err = mapToReportingError(error);
+        err.stack = error.stack;
+      } else {
+        err = new QueueTimeoutError(
+          `Max attempts reached (${maxAttempts}). Queue timeout reached.`
+        );
+      }
       await this._failJob(report, err);
       throw err;
     }
@@ -214,8 +249,35 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
+  private async _saveExecutionError(
+    report: SavedReport,
+    failedToExecuteErr: any
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
+    const errorParsed = parseError(failedToExecuteErr);
+    // log the error
+    errorLogger(this.logger, message, failedToExecuteErr);
+
+    // update the report in the store
+    const store = await this.getStore();
+    const completedTime = moment().toISOString();
+    const doc: ReportFailedFields = {
+      completed_at: completedTime,
+      output: null,
+      error: errorParsed,
+    };
+
+    // We don't want to mark the report status as failed just yet... we just want to save the error
+    const markReportAsFailed = false;
+    return await store.setReportFailed(report, doc, markReportAsFailed);
+  }
+
   private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
-    const docOutput = {} as ReportOutput;
+    const docOutput: ReportOutput = {
+      content: '',
+      size: 0,
+      content_type: null,
+    };
     const unknownMime = null;
 
     if (isOutput(output)) {
@@ -232,6 +294,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;
+      docOutput.size = typeof docOutput.content === 'string' ? docOutput.content.length : 0;
     }
 
     return docOutput;
@@ -297,7 +360,6 @@ export class ExecuteReportTask implements ReportingTask {
     return ({ taskInstance }: RunContext) => {
       let jobId: string;
       const cancellationToken = new CancellationToken();
-      const isLastAttempt = taskInstance.attempts === this.getMaxAttempts();
 
       return {
         /*
@@ -309,6 +371,7 @@ export class ExecuteReportTask implements ReportingTask {
          */
         run: async () => {
           let report: SavedReport | undefined;
+          const isLastAttempt = taskInstance.attempts >= this.getMaxAttempts();
 
           // find the job in the store and set status to processing
           const task = taskInstance.params as ReportTaskParams;
@@ -333,14 +396,17 @@ export class ExecuteReportTask implements ReportingTask {
 
           if (!report) {
             this.reporting.untrackReport(jobId);
+
+            if (isLastAttempt) {
+              errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
+              return;
+            }
+
             const errorMessage = `Job ${jobId} could not be claimed. Exiting... Is last attempt: ${isLastAttempt}`;
             errorLogger(this.logger, errorMessage);
 
-            if (!isLastAttempt) {
-              // Throw so Task manager can reschedule
-              throw new Error(errorMessage);
-            }
-            return;
+            // Throw so Task manager can reschedule
+            throw new Error(errorMessage);
           }
 
           const { jobtype: jobType, attempts } = report;
@@ -400,12 +466,21 @@ export class ExecuteReportTask implements ReportingTask {
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
+            await this._saveExecutionError(report, failedToExecuteErr).catch(
+              (failedToSaveError) => {
+                errorLogger(
+                  this.logger,
+                  `Error in saving execution error ${jobId}`,
+                  failedToSaveError
+                );
+              }
+            );
+
             cancellationToken.cancel();
 
             const error = mapToReportingError(failedToExecuteErr);
 
-            const timeBetweenAttempts = 10 * 1000; // 10 seconds
-            throwRetryableError(error, new Date(Date.now() + timeBetweenAttempts));
+            throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.reporting.untrackReport(jobId);
             this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);

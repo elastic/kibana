@@ -8,7 +8,12 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
-import { ReportDocument, ReportOutput, ReportSource } from '@kbn/reporting-common/types';
+import type {
+  ExecutionError,
+  ReportDocument,
+  ReportOutput,
+  ReportSource,
+} from '@kbn/reporting-common/types';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
@@ -38,7 +43,9 @@ export type ReportProcessingFields = Required<{
 export type ReportFailedFields = Required<{
   completed_at: Report['completed_at'];
   output: ReportOutput | null;
-}>;
+}> & {
+  error?: ExecutionError | unknown;
+};
 
 export type ReportCompletedFields = Required<{
   completed_at: Report['completed_at'];
@@ -261,6 +268,7 @@ export class ReportingStore {
         meta: document._source?.meta,
         metrics: document._source?.metrics,
         payload: document._source?.payload,
+        error: document._source?.error,
         process_expiration: document._source?.process_expiration,
         status: document._source?.status,
         timeout: document._source?.timeout,
@@ -317,11 +325,12 @@ export class ReportingStore {
 
   public async setReportFailed(
     report: SavedReport,
-    failedInfo: ReportFailedFields
+    failedInfo: ReportFailedFields,
+    setFailStatus = true
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...failedInfo,
-      status: JOB_STATUS.FAILED,
+      status: setFailStatus ? JOB_STATUS.FAILED : JOB_STATUS.PROCESSING,
     });
 
     let body: UpdateResponse<ReportDocument>;
