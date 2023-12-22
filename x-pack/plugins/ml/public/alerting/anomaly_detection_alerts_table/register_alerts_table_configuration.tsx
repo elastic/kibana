@@ -24,7 +24,7 @@ import {
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
+import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { getAlertFlyout } from './use_alerts_flyout';
 import {
@@ -122,7 +122,12 @@ export function registerAlertsTableConfiguration(
 
   const config: AlertsTableConfigurationRegistry = {
     id: ML_ALERTS_CONFIG_ID,
-    cases: { appId: MANAGEMENT_APP_ID, featureId: CASE_APP_ID, owner: [CASE_APP_ID] },
+    cases: {
+      appId: MANAGEMENT_APP_ID,
+      featureId: CASE_GENERAL_ID,
+      owner: [CASE_APP_ID],
+      syncAlerts: false,
+    },
     columns,
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
     getRenderCellValue: getRenderCellValue(fieldFormats),
