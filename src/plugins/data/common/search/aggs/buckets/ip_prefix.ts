@@ -19,11 +19,14 @@ const ipPrefixTitle = i18n.translate('data.search.aggs.buckets.ipPrefixTitle', {
   defaultMessage: 'IP Prefix',
 });
 
+export interface IpPrefixAggKey {
+  prefixLength: string;
+  isIpv6: boolean;
+}
+
 export interface AggParamsIpPrefix extends BaseAggParams {
   field: string;
-  prefixLength?: number;
-  prefixLength64?: number;
-  isIpv6?: boolean;
+  ipPrefix?: IpPrefixAggKey;
 }
 
 export const getIpPrefixBucketAgg = () =>
@@ -55,32 +58,15 @@ export const getIpPrefixBucketAgg = () =>
         filterFieldTypes: KBN_FIELD_TYPES.IP,
       },
       {
-        name: 'prefixLength',
-        default: '0',
-        type: 'number',
-        shouldShow: (agg) => !agg.getParam('isIpv6'),
-        write: (aggConfig, output) => {
-          if (!aggConfig.params.isIpv6) {
-            output.params.prefix_length = aggConfig.params.prefixLength;
-          }
+        name: 'ipPrefix',
+        default: {
+          prefixLength: 1,
+          isIpv6: false,
         },
-      },
-      {
-        name: 'prefixLength64',
-        default: '0',
-        type: 'number',
-        shouldShow: (agg) => agg.getParam('isIpv6'),
         write: (aggConfig, output) => {
-          if (aggConfig.params.isIpv6) {
-            output.params.prefix_length = aggConfig.params.prefixLength64;
-          }
-        },
-      },
-      {
-        name: 'isIpv6',
-        default: false,
-        write: (aggConfig, output) => {
-          output.params.is_ipv6 = aggConfig.params.isIpv6;
+	  console.log(aggConfig);
+          output.params.prefix_length = aggConfig.params.ipPrefix.prefixLength;
+          output.params.is_ipv6 = aggConfig.params.ipPrefix.isIpv6;
         },
       },
     ],

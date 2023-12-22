@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEmpty, isNil, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
@@ -58,23 +59,10 @@ export const aggIpPrefix = (): FunctionDefinition => ({
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    prefixLength: {
-      types: ['number'],
-      help: i18n.translate('data.search.aggs.buckets.ipPrefix.prefixLength.help', {
+    ipPrefix: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.ipPrefix.help', {
         defaultMessage: 'Length of the network prefix',
-      }),
-    },
-    prefixLength64: {
-      types: ['number'],
-      help: i18n.translate('data.search.aggs.buckets.ipPrefix.prefixLength64.help', {
-        defaultMessage: 'Length of the network prefix',
-      }),
-    },
-    isIpv6: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('data.search.aggs.buckets.ipPrefix.isIpv6.help', {
-        defaultMessage: 'Defines whether the prefix applies to IPv6 addresses',
       }),
     },
     json: {
@@ -90,7 +78,10 @@ export const aggIpPrefix = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, { id, enabled, schema, ...params }) => {
+  fn: (input, { id, enabled, schema, ipPrefix, ...params }) => {
+    console.log(ipPrefix);
+    omit(ipPrefix, 'type');
+    console.log(ipPrefix);
     return {
       type: 'agg_type',
       value: {
@@ -100,6 +91,7 @@ export const aggIpPrefix = (): FunctionDefinition => ({
         type: BUCKET_TYPES.IP_PREFIX,
         params: {
           ...params,
+	  ipPrefix,
         },
       },
     };
