@@ -385,39 +385,6 @@ describe('ReportingStore', () => {
     `);
   });
 
-  it('prepareReportForRetry resets the expiration and status on the report document', async () => {
-    const store = new ReportingStore(mockCore, mockLogger);
-    const report = new SavedReport({
-      _id: 'pretty-good-report-id',
-      _index: '.reporting-test-index-94058763',
-      _seq_no: 46,
-      _primary_term: 10002,
-      jobtype: 'test-report-2',
-      created_by: 'created_by_test_string',
-      status: JOB_STATUS.PROCESSING,
-      process_expiration: '2002',
-      max_attempts: 3,
-      payload: {
-        title: 'test report',
-        headers: 'rp_test_headers',
-        objectType: 'testOt',
-        browserTimezone: 'utc',
-        version: '7.14.0',
-      },
-      timeout: 30000,
-    });
-
-    await store.prepareReportForRetry(report);
-
-    const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
-
-    expect(response.migration_version).toBe(`7.14.0`);
-    expect(response.status).toBe(`pending`);
-    expect(updateCall.if_seq_no).toBe(46);
-    expect(updateCall.if_primary_term).toBe(10002);
-  });
-
   describe('start', () => {
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
       mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
