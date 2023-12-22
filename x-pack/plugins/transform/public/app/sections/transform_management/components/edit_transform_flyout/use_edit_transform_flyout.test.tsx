@@ -227,6 +227,10 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
         {children}
       </EditTransformFlyoutProvider>
     );
+
+    // As we want to test how actions affect the state,
+    // we set up this custom hook that combines both the hooks for
+    // actions and state selection, so they react to the same redux store.
     const { result } = renderHook(
       () => {
         return {
