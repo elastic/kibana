@@ -36,7 +36,7 @@ export function useNewFields<T extends FieldListItem = DataViewField>({
   const hasNewFields = Boolean(allFields && newFields && newFields.length > 0);
 
   const allFieldsModified = useMemo(() => {
-    if (!allFields || !newFields?.length) return allFields;
+    if (!allFields || !newFields?.length || !dataView) return allFields;
     // Filtering out fields that e.g. Discover provides with fields that were provided by the previous fieldsForWildcards request
     // These can be replaced by the new fields, which are mapped correctly, and therefore can be used in the right way
     const allFieldsExlNew =
