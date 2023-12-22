@@ -25,7 +25,6 @@ import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { FieldListMultiField } from '../unified_field_list_item/field_list_item';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
@@ -171,6 +170,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
   );
+  const [multiFieldsMap, setMultiFieldsMap] = useState<
+    Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
+  >(undefined);
 
   useEffect(() => {
     const result = getSelectedFields({
@@ -227,16 +229,26 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec)),
     });
 
-  const useMultiFields =
-    searchMode === 'documents' &&
-    useNewFieldsApi &&
-    !stateService.creationOptions.disableMultiFieldsGroupingByParent;
-
-  const getMultiFieldsByField = useCallback(
-    (field: DataViewField) =>
-      getMultiFieldsByParent(field, allFieldsModified, selectedFieldsState.selectedFieldsMap),
-    [allFieldsModified, selectedFieldsState.selectedFieldsMap]
-  );
+  useEffect(() => {
+    if (
+      searchMode !== 'documents' ||
+      !useNewFieldsApi ||
+      stateService.creationOptions.disableMultiFieldsGroupingByParent
+    ) {
+      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
+    } else {
+      setMultiFieldsMap(
+        calculateMultiFields(allFieldsModified, selectedFieldsState.selectedFieldsMap)
+      );
+    }
+  }, [
+    stateService.creationOptions.disableMultiFieldsGroupingByParent,
+    selectedFieldsState.selectedFieldsMap,
+    allFieldsModified,
+    useNewFieldsApi,
+    setMultiFieldsMap,
+    searchMode,
+  ]);
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
@@ -254,7 +266,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
           onAddFilter={onAddFilter}
           trackUiMetric={trackUiMetric}
-          getMultiFields={useMultiFields ? getMultiFieldsByField : undefined}
+          multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
           onEditField={onEditField}
           onDeleteField={onDeleteField}
           workspaceSelectedFieldNames={workspaceSelectedFieldNames}
@@ -279,8 +291,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onRemoveFieldFromWorkspace,
       onAddFilter,
       trackUiMetric,
-      useMultiFields,
-      getMultiFieldsByField,
+      multiFieldsMap,
       onEditField,
       onDeleteField,
       workspaceSelectedFieldNames,
@@ -426,26 +437,27 @@ export const UnifiedFieldListSidebar = memo(UnifiedFieldListSidebarComponent);
 // eslint-disable-next-line import/no-default-export
 export default UnifiedFieldListSidebar;
 
-export function getMultiFieldsByParent(
-  parentField: DataViewField,
+function calculateMultiFields(
   allFields: DataViewField[] | null,
   selectedFieldsMap: SelectedFieldsResult['selectedFieldsMap'] | undefined
 ) {
-  if (!allFields || !parentField) {
+  if (!allFields) {
     return undefined;
   }
-  const result: FieldListMultiField[] = [];
+  const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
   allFields.forEach((field) => {
     const subTypeMulti = getDataViewFieldSubtypeMulti(field);
     const parent = subTypeMulti?.multi.parent;
-    if (!parent || parent !== parentField.name) {
+    if (!parent) {
       return;
     }
     const multiField = {
       field,
       isSelected: Boolean(selectedFieldsMap?.[field.name]),
     };
-    result.push(multiField);
+    const value = map.get(parent) ?? [];
+    value.push(multiField);
+    map.set(parent, value);
   });
-  return result.length ? result : undefined;
+  return map;
 }
