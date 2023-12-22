@@ -33,6 +33,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
+    "@kbn/core-analytics-server",
   ],
   "exclude": [
     "target/**/*",
