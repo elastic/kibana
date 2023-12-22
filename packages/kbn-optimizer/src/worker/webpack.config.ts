@@ -24,7 +24,7 @@ import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
+// const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
 export function getWebpackConfig(
@@ -216,11 +216,9 @@ export function getWebpackConfig(
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET],
+              // envName: worker.dist ? 'production' : 'development',
             },
           },
         },
