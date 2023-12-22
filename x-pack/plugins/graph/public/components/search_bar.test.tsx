@@ -32,8 +32,6 @@ import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
-const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
-
 function getServiceMocks() {
   return {
     uiSettings: {
