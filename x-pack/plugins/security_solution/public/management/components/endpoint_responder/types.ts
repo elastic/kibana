@@ -28,7 +28,11 @@ interface SentinelOneAgentInfo {
 }
 
 export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{
-  [K in ResponseActionAgentType]?: K extends 'endpoint' ? HostMetadata : SentinelOneAgentInfo;
+  [K in ResponseActionAgentType]?: K extends 'endpoint'
+    ? HostMetadata
+    : K extends 'sentinel_one'
+    ? SentinelOneAgentInfo
+    : never;
 }>;
 
 export type ActionRequestComponentProps<

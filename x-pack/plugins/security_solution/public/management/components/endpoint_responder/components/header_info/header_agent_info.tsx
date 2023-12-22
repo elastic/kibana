@@ -11,8 +11,6 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/react-kibana-context-styled';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
-import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
-import type { HostInfo } from '../../../../../../common/endpoint/types';
 
 const IconContainer = euiStyled.div`
   height: 100%;
@@ -25,19 +23,16 @@ interface HeaderAgentInfoProps {
   platform: Platform;
   hostName: string;
   lastCheckin: string;
-  endpointDetails: HostInfo;
+  children: React.ReactNode;
 }
 
 export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
-  ({ platform, hostName, lastCheckin, endpointDetails }) => {
+  ({ platform, hostName, lastCheckin, children }) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <IconContainer>
-            <PlatformIcon
-              data-test-subj="responderHeaderEndpointPlatformIcon"
-              platform={platform}
-            />
+            <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
           </IconContainer>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -46,18 +41,12 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem grow={false} className="eui-textTruncate">
                   <EuiToolTip content={hostName} anchorClassName="eui-textTruncate">
-                    <EuiText size="s" data-test-subj="responderHeaderEndpointName">
+                    <EuiText size="s" data-test-subj="responderHeaderHostName">
                       <h6 className="eui-textTruncate">{hostName}</h6>
                     </EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {/* TODO refactor to use other than endpoint metadata HostInfo*/}
-                  <EndpointAgentStatus
-                    endpointHostInfo={endpointDetails}
-                    data-test-subj="responderHeaderEndpointAgentIsolationStatus"
-                  />
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{children}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

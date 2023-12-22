@@ -7,18 +7,11 @@
 
 import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EndpointAgentStatus } from '../../../../../../common/components/endpoint/endpoint_agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
 import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from '../platforms';
-
-const IconContainer = euiStyled.div`
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
@@ -28,6 +21,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
   const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId, {
     refetchInterval: 10000,
   });
+  // fetch pending actions using the agent id and action status API
   const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
     refetchInterval: 10000,
   });
@@ -42,11 +36,15 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
 
   return (
     <HeaderAgentInfo
-      endpointDetails={endpointDetails}
       platform={endpointDetails.metadata.host.os.name.toLowerCase() as Platform}
       hostName={endpointDetails.metadata.host.name}
       lastCheckin={endpointDetails.last_checkin}
-    />
+    >
+      <EndpointAgentStatus
+        endpointHostInfo={endpointDetails}
+        data-test-subj="responderHeaderEndpointAgentIsolationStatus"
+      />
+    </HeaderAgentInfo>
   );
 });
 

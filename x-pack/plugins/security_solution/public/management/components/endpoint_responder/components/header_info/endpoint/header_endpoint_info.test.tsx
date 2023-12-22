@@ -49,7 +49,7 @@ describe('Responder header endpoint info', () => {
     jest.clearAllMocks();
   });
   it('should show endpoint name', async () => {
-    const name = await renderResult.findByTestId('responderHeaderEndpointName');
+    const name = await renderResult.findByTestId('responderHeaderHostName');
     expect(name.textContent).toBe(`${endpointDetails.metadata.host.name}`);
   });
   it('should show agent and isolation status', async () => {
@@ -63,7 +63,7 @@ describe('Responder header endpoint info', () => {
     expect(lastUpdated).toBeTruthy();
   });
   it('should show platform icon', async () => {
-    const platformIcon = await renderResult.findByTestId('responderHeaderEndpointPlatformIcon');
+    const platformIcon = await renderResult.findByTestId('responderHeaderHostPlatformIcon');
     expect(platformIcon).toBeTruthy();
   });
 });
