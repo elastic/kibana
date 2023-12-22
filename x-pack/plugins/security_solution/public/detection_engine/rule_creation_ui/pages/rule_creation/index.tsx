@@ -40,11 +40,8 @@ import {
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { AccordionTitle } from '../../../../detections/components/rules/accordion_title';
-import {
-  StepDefineRule,
-  StepDefineRuleReadOnly,
-} from '../../../../detections/components/rules/step_define_rule';
+import { AccordionTitle } from '../../components/accordion_title';
+import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
 import {
   StepAboutRule,
   StepAboutRuleReadOnly,
@@ -84,8 +81,8 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../../../detections/components/rules/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';

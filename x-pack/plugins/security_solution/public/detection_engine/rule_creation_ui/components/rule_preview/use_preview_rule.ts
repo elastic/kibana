@@ -10,9 +10,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { PreviewResponse, RuleCreateProps } from '../../../../../common/api/detection_engine';
 
-import { previewRule } from '../../../../detection_engine/rule_management/api/api';
-import { transformOutput } from '../../../containers/detection_engine/rules/transforms';
-import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { previewRule } from '../../../rule_management/api/api';
+import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
+import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
 

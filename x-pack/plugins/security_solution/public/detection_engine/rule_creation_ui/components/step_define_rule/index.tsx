@@ -33,29 +33,32 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
-import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
+import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
+import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
+import type {
+  DefineStepRule,
+  RuleStepProps,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import {
-  filterRuleFieldsForType,
-  getStepDataDataSource,
-} from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
-import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
-import { DataSourceType, GroupByOptions } from '../../../pages/detection_engine/rules/types';
-import { StepRuleDescription } from '../description_step';
-import type { QueryBarDefineRuleProps } from '../query_bar';
-import { QueryBarDefineRule } from '../query_bar';
-import { SelectRuleType } from '../select_rule_type';
-import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
-import { MlJobSelect } from '../ml_job_select';
-import { PickTimeline } from '../pick_timeline';
-import { StepContentWrapper } from '../step_content_wrapper';
-import { ThresholdInput } from '../threshold_input';
-import { SuppressionInfoIcon } from '../suppression_info_icon';
-import { EsqlInfoIcon } from '../../../../detection_engine/rule_creation/components/esql_info_icon';
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../detections/pages/detection_engine/rules/types';
+import { StepRuleDescription } from '../../../../detections/components/rules/description_step';
+import type { QueryBarDefineRuleProps } from '../../../../detections/components/rules/query_bar';
+import { QueryBarDefineRule } from '../../../../detections/components/rules/query_bar';
+import { SelectRuleType } from '../../../../detections/components/rules/select_rule_type';
+import { AnomalyThresholdSlider } from '../../../../detections/components/rules/anomaly_threshold_slider';
+import { MlJobSelect } from '../../../../detections/components/rules/ml_job_select';
+import { PickTimeline } from '../../../../detections/components/rules/pick_timeline';
+import { StepContentWrapper } from '../../../../detections/components/rules/step_content_wrapper';
+import { ThresholdInput } from '../../../../detections/components/rules/threshold_input';
+import { SuppressionInfoIcon } from '../../../../detections/components/rules/suppression_info_icon';
+import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
@@ -69,19 +72,19 @@ import {
   isQueryRule,
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
-import { EqlQueryBar } from '../eql_query_bar';
-import { DataViewSelector } from '../data_view_selector';
-import { ThreatMatchInput } from '../threatmatch_input';
+import { EqlQueryBar } from '../../../../detections/components/rules/eql_query_bar';
+import { DataViewSelector } from '../../../../detections/components/rules/data_view_selector';
+import { ThreatMatchInput } from '../../../../detections/components/rules/threatmatch_input';
 import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../schedule_item_form';
+import { NewTermsFields } from '../../../../detections/components/rules/new_terms_fields';
+import { ScheduleItem } from '../../../../detections/components/rules/schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
-import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
+import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
+import { MultiSelectFieldsAutocomplete } from '../../../../detections/components/rules/multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DurationInput } from '../duration_input';
+import { DurationInput } from '../../../../detections/components/rules/duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 

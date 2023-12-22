@@ -12,18 +12,18 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { StepDefineRule, aggregatableFields } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
+import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { fireEvent, render, within } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
-import { stepActionsDefaultValue } from '../step_rule_actions';
+import { useRuleForms } from '../../pages/form';
+import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 import {
   defaultSchedule,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../pages/detection_engine/rules/utils';
+} from '../../../../detections/pages/detection_engine/rules/utils';
 import type { FormHook } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/components/query_bar', () => {
   return {
@@ -228,7 +228,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../containers/detection_engine/rules/use_rule_from_timeline');
+jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
 
 test('aggregatableFields', function () {
   expect(

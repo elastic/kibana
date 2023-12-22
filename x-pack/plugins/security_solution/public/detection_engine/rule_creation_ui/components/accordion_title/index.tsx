@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import type { RuleStatusIconProps } from '../status_icon';
-import { RuleStatusIcon } from '../status_icon';
+import type { RuleStatusIconProps } from '../../../../detections/components/rules/status_icon';
+import { RuleStatusIcon } from '../../../../detections/components/rules/status_icon';
 
 interface AccordionTitleProps extends RuleStatusIconProps {
   title: string;

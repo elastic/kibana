@@ -15,7 +15,7 @@ import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types'
 
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { RuleStepProps, AboutStepRule } from '../../../pages/detection_engine/rules/types';
-import { AddItem } from '../add_item_form';
+import { AddItem } from '../../../../detection_engine/rule_creation_ui/components/add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';

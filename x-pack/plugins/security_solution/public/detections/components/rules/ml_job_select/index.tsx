@@ -23,7 +23,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../step_define_rule/translations';
+import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/translations';
 import { HelpText } from './help_text';
 
 import * as i18n from './translations';

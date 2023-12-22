@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
-import { MyAddItemButton } from '../add_item_form';
+import { MyAddItemButton } from '../../../../detection_engine/rule_creation_ui/components/add_item_form';
 import * as i18n from './translations';
 import type { MitreSubTechnique } from '../../../mitre/types';
 

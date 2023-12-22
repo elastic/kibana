@@ -34,7 +34,7 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
   TimeframePreviewOptions,
-} from '../../../pages/detection_engine/rules/types';
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;

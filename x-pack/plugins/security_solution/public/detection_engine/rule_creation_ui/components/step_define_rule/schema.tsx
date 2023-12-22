@@ -25,13 +25,16 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../../../../detections/components/rules/query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../pages/detection_engine/rules/types';
-import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
-import { esqlValidator } from '../../../../detection_engine/rule_creation/logic/esql_validator';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import {
+  debounceAsync,
+  eqlValidator,
+} from '../../../../detections/components/rules/eql_query_bar/validators';
+import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
 import {
   CUSTOM_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,

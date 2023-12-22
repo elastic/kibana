@@ -24,8 +24,8 @@ import { useParams } from 'react-router-dom';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
-import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -43,7 +43,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepPanel } from '../../../../detections/components/rules/step_panel';
 import { StepAboutRule } from '../../../../detections/components/rules/step_about_rule';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
+import { StepDefineRule } from '../../components/step_define_rule';
 import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../detections/components/rules/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';

@@ -19,10 +19,10 @@ import {
   getFieldValidityAndErrorMessage,
 } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
-import { schema } from '../step_define_rule/schema';
+import { schema } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
-import * as i18n from '../step_define_rule/translations';
-import { MyLabelButton } from '../step_define_rule';
+import * as i18n from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/translations';
+import { MyLabelButton } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule';
 
 const CommonUseField = getUseField({ component: Field });
 

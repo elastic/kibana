@@ -8,14 +8,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { usePreviewRule } from './use_preview_rule';
-import { formatPreviewRule } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import { formatPreviewRule } from '../../pages/rule_creation/helpers';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import type {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
   TimeframePreviewOptions,
-} from '../../../pages/detection_engine/rules/types';
+} from '../../../../detections/pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
   defineRuleData?: DefineStepRule;
