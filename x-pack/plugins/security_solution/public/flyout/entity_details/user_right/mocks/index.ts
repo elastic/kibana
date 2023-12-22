@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreEntity, UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskCategories } from '../../../../../common/entity_analytics/risk_engine';

@@ -14,6 +14,7 @@ import {
   EuiStat,
   EuiText,
   EuiTextColor,
+  EuiTextProps,
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
@@ -30,11 +31,13 @@ interface Props {
   comparisonIcon?: string;
   comparisonColor?: string;
   titleHint?: string;
+  hasBorder?: boolean;
+  compressed?: boolean;
 }
 
-function Title({ title }: { title: string }) {
+function Title({ title, size }: { title: string; size?: EuiTextProps['size'] }) {
   return (
-    <EuiText style={{ fontWeight: 'bold' }} textAlign="left">
+    <EuiText style={{ fontWeight: 'bold' }} textAlign="left" size={size}>
       {title}
     </EuiText>
   );
@@ -83,18 +86,21 @@ export function SummaryItem({
   comparisonColor,
   comparisonIcon,
   titleHint,
+  hasBorder = false,
+  compressed = false,
 }: Props) {
+  const textSize = compressed ? 's' : 'm';
   return (
-    <EuiPanel hasShadow={false}>
+    <EuiPanel hasShadow={false} hasBorder={hasBorder}>
       <EuiStat
         title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
-        titleSize="m"
+        titleSize={textSize}
         description={
           <>
             {titleHint ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <Title title={title} />
+                  <Title title={title} size={textSize} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={titleHint}>
@@ -103,7 +109,7 @@ export function SummaryItem({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <Title title={title} />
+              <Title title={title} size={textSize} />
             )}
             <EuiSpacer />
           </>
@@ -112,7 +118,7 @@ export function SummaryItem({
         isLoading={isLoading}
       >
         {!isLoading && comparisonValue ? (
-          <EuiText color={comparisonColor}>
+          <EuiText color={comparisonColor} size={textSize}>
             {comparisonIcon ? (
               <EuiIcon
                 data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}
