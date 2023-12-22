@@ -329,8 +329,8 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         dependsOn: ['retentionPolicyField'],
         isNullable: false,
         isOptional: true,
-        section: 'retentionPolicy',
         isOptionalInSection: false,
+        section: 'retentionPolicy',
         validator: 'retentionPolicyMaxAgeValidator',
       }
     ),
@@ -367,11 +367,12 @@ interface EditTransformFlyoutFormState {
 
 const isFormTouched = (config: TransformConfigUnion, currentState: EditTransformFlyoutState) => {
   const defaultState = getDefaultState(config);
-  const defaultFieldValues = getFieldValues(defaultState.formFields);
-  const defaultSectionValues = getSectionValues(defaultState.formSections);
   return (
-    !isEqual(defaultFieldValues, getFieldValues(currentState.formFields)) ||
-    !isEqual(defaultSectionValues, getSectionValues(currentState.formSections))
+    !isEqual(getFieldValues(defaultState.formFields), getFieldValues(currentState.formFields)) ||
+    !isEqual(
+      getSectionValues(defaultState.formSections),
+      getSectionValues(currentState.formSections)
+    )
   );
 };
 
@@ -416,9 +417,8 @@ const editTransformFlyoutSlice = createSlice({
       };
     },
     setApiError: (state, action: PayloadAction<string | undefined>) => {
-      if (state) {
-        state.apiErrorMessage = action.payload;
-      }
+      if (!state) return;
+      state.apiErrorMessage = action.payload;
     },
     // Updates a form field with its new value, runs validation and
     // populates `errorMessages` if any errors occur.
@@ -426,45 +426,45 @@ const editTransformFlyoutSlice = createSlice({
       state,
       action: PayloadAction<{ field: EditTransformFormFields; value: string }>
     ) => {
-      if (state) {
-        const formField = state.formFields[action.payload.field];
-        const isOptional = isFormFieldOptional(state, action.payload.field);
+      if (!state) return;
 
-        formField.errorMessages = getFormFieldErrorMessages(
-          action.payload.value,
-          isOptional,
-          formField.validator
-        );
+      const formField = state.formFields[action.payload.field];
+      const isOptional = isFormFieldOptional(state, action.payload.field);
 
-        formField.value = action.payload.value;
+      formField.errorMessages = getFormFieldErrorMessages(
+        action.payload.value,
+        isOptional,
+        formField.validator
+      );
 
-        state.isFormTouched = isFormTouched(state.config, state);
-        state.isFormValid = isFormValid(state.formFields);
-      }
+      formField.value = action.payload.value;
+
+      state.isFormTouched = isFormTouched(state.config, state);
+      state.isFormValid = isFormValid(state.formFields);
     },
     // Updates a form section.
     setFormSection: (
       state,
       action: PayloadAction<{ section: EditTransformFormSections; enabled: boolean }>
     ) => {
-      if (state) {
-        state.formSections[action.payload.section].enabled = action.payload.enabled;
+      if (!state) return;
 
-        // After a section change we re-evaluate all form fields, since if a field
-        // is optional could change if a section got toggled.
-        Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
-          const isOptional = isFormFieldOptional(state, formFieldName as EditTransformFormFields);
+      state.formSections[action.payload.section].enabled = action.payload.enabled;
 
-          formField.errorMessages = getFormFieldErrorMessages(
-            formField.value,
-            isOptional,
-            formField.validator
-          );
-        });
+      // After a section change we re-evaluate all form fields, since optionality
+      // of a field could change if a section got toggled.
+      Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
+        const isOptional = isFormFieldOptional(state, formFieldName as EditTransformFormFields);
 
-        state.isFormTouched = isFormTouched(state.config, state);
-        state.isFormValid = isFormValid(state.formFields);
-      }
+        formField.errorMessages = getFormFieldErrorMessages(
+          formField.value,
+          isOptional,
+          formField.validator
+        );
+      });
+
+      state.isFormTouched = isFormTouched(state.config, state);
+      state.isFormValid = isFormValid(state.formFields);
     },
   },
 });
