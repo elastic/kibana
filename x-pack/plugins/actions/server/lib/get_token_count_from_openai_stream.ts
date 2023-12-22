@@ -9,7 +9,7 @@ import { encode } from 'gpt-tokenizer';
 import { isEmpty, omitBy } from 'lodash';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
-import { CreateChatCompletionRequest } from 'openai';
+import type OpenAI from 'openai';
 import { Logger } from '@kbn/logging';
 
 export async function getTokenCountFromOpenAIStream({
@@ -25,7 +25,7 @@ export async function getTokenCountFromOpenAIStream({
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = JSON.parse(body) as CreateChatCompletionRequest;
+  const chatCompletionRequest = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
@@ -33,10 +33,14 @@ export async function getTokenCountFromOpenAIStream({
       .map(
         (msg) =>
           `<|start|>${msg.role}\n${msg.content}\n${
+            // @ts-expect-error
             msg.name
-              ? msg.name
-              : msg.function_call
-              ? msg.function_call.name + '\n' + msg.function_call.arguments
+              ? // @ts-expect-error
+                msg.name
+              : // @ts-expect-error
+              msg.function_call
+              ? // @ts-expect-error
+                msg.function_call.name + '\n' + msg.function_call.arguments
               : ''
           }<|end|>`
       )

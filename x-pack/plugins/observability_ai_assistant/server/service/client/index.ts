@@ -11,11 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
-import type {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai';
+import type OpenAI from 'openai';
 import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
@@ -380,8 +376,9 @@ export class ObservabilityAIAssistantClient {
     functionCall?: string;
     stream?: TStream;
     signal: AbortSignal;
-  }): Promise<TStream extends false ? CreateChatCompletionResponse : Readable> => {
-    const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
+  }): Promise<TStream extends false ? OpenAI.ChatCompletion : Readable> => {
+    // @ts-expect-error
+    const messagesForOpenAI: OpenAI.ChatCompletionMessageParam[] = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
         .map((message) => {
@@ -401,7 +398,7 @@ export class ObservabilityAIAssistantClient {
 
     const functionsForOpenAI = functions;
 
-    const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
+    const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
       ...(stream ? { stream: true } : {}),
       ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
@@ -429,7 +426,7 @@ export class ObservabilityAIAssistantClient {
 
     const response = stream
       ? (executeResult.data as Readable)
-      : (executeResult.data as CreateChatCompletionResponse);
+      : (executeResult.data as OpenAI.ChatCompletion);
 
     if (response instanceof Readable) {
       signal.addEventListener('abort', () => response.destroy());
