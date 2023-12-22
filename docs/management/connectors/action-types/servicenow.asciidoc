@@ -135,34 +135,40 @@ from the {sn} store.
 ==== Assign cross-scope privileges
 
 The Elastic for ITSM app requires specific cross-scope privilege records to run successfully.
-In particular, you must have a privilege record for the `Elastic for ITSM` application and source scope with a `global` target scope for each of the following targets:
+In particular, you must have a privilege record for the `Elastic for ITSM` application with the status set to `Allowed` for each of the following targets:
 
 |===
-|Target name, type|Operation|Status
+|Target scope|Name|Type|Operation
 
-|GlideRecord.insert, Scriptable
+|Global
+|GlideRecord.insert
+|Scriptable
 |Execute API
-|Allowed
 
-|GlideRecord.setValue, Scriptable
+|Global
+|GlideRecord.setValue
+|Scriptable
 |Execute API
-|Allowed
 
-|GlideRecordSecure.getValue, Scriptable
+|Global
+|GlideRecordSecure.getValue
+|Scriptable
 |Execute API
-|Allowed
 
-|Incident, Table
+|Global
+|Incident
+|Table
 |Read
-|Allowed
 
-|ScriptableServiceResultBuilder.setBody, Scriptable
+|Global
+|ScriptableServiceResultBuilder.setBody
+|Scriptable
 |Execute API
-|Allowed
 
-|ScopedGlideElement, Scriptable
+|Global
+|ScopedGlideElement
+|Scriptable
 |Execute API
-|Allowed
 |===
 
 To access the cross scope privileges table:

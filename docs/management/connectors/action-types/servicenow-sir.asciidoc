@@ -85,11 +85,101 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-sir} connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
 . Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
+. <<servicenow-sir-connector-privileges,Assign cross-scope privileges for the Elastic for Security Operations app>>.
 . <<servicenow-sir-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
 . <<servicenow-sir-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
 . If you use open authorization (OAuth), you must also:
 .. <<servicenow-sir-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
 .. <<servicenow-sir-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
+
+[float]
+[[servicenow-sir-connector-privileges]]
+==== Assign cross-scope privileges
+
+The Elastic for Security Operations app requires specific cross-scope privilege records to run successfully.
+In particular, you must have a privilege record for the `Elastic for Security Operations` application with the status set to `Allowed` for each of the following targets:
+
+|===
+|Target scope|Name|Type|Operation
+
+|Global
+|Glide API: string utilities
+|Scriptable
+|Execute API
+
+|Global
+|GlideRecord.insert
+|Scriptable
+|Execute API
+
+|Global
+|GlideRecord.setValue
+|Scriptable
+|Execute API
+
+|Global
+|GlideRecordSecure.getValue
+|Scriptable
+|Execute API
+
+|Global
+|RESTAPIRequest
+|Scriptable
+|Execute API 
+
+|Global
+|RESTAPIRequestBody
+|Scriptable
+|Execute API
+
+|Global
+|ScopedGlideElement
+|Scriptable
+|Execute API
+
+|Global
+|ScriptableServiceResultBuilder.setBody
+|Scriptable
+|Execute API
+
+|Security incident response
+|sn_si_incident
+|Table
+|Read
+
+|Threat intelligence support common
+|sn_ti_m2m_task_observable
+|Table
+|Create
+
+|Threat intelligence support common
+|sn_ti_m2m_task_observable
+|Table
+|Read
+
+|Threat intelligence support common
+|sn_ti_observable
+|Table
+|Create
+
+|Threat intelligence support common
+|sn_ti_observable
+|Table
+|Read
+
+|Threat intelligence support common
+|sn_ti_observable_type
+|Table
+|Read
+|===
+
+To access the cross scope privileges table:
+
+1. Log into {sn} and set your application scope to Elastic for Security Operations.
+2. Click *All* and search for `sys_scope_privilege`.
+
+For more details, refer to the https://docs.servicenow.com/[{sn} product documentation].
+
 
 [float]
 [[servicenow-sir-connector-prerequisites-integration-user]]
