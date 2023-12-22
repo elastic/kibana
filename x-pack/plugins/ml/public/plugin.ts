@@ -69,7 +69,7 @@ import {
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 import { ElasticModels } from './application/services/elastic_models_service';
-import { MlApiServices } from './application/services/ml_api_service';
+import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
   cases?: CasesUiStart;
