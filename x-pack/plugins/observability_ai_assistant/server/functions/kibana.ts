@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { format } from 'url';
-import { pick, pickBy } from 'lodash';
+import { pickBy } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
