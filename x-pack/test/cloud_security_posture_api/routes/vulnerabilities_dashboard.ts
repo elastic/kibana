@@ -19,7 +19,7 @@ export interface CnvmStatistics {
   highCount?: number;
   mediumCount?: number;
   resourcesScanned?: number;
-  cloudRegions?: number;
+  cloudAccounts?: number;
 }
 
 export interface AccountVulnStats {
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           highCount: 1,
           mediumCount: 1,
           resourcesScanned: 2,
-          cloudRegions: 1,
+          cloudAccounts: 1,
         },
         vulnTrends: [
           {

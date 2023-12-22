@@ -10,7 +10,7 @@ import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/
 import type { bodySchema } from '@kbn/actions-plugin/server/routes/create';
 import type { TypeOf } from '@kbn/config-schema';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 
 /**
  * Retrieve list of configured Connectors
