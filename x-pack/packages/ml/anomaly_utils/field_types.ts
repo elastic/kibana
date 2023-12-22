@@ -44,4 +44,12 @@ export const _DOC_COUNT = '_doc_count';
 /**
  * List of system fields we don't want to display.
  */
-export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+export const OMIT_FIELDS: string[] = [
+  '_source',
+  '_type',
+  '_index',
+  '_id',
+  '_version',
+  '_score',
+  '_tier',
+];

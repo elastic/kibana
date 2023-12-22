@@ -6,19 +6,29 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingFlamegraphData } from '../../hooks/use_profiling_flamegraph_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
+import { ProfilingLinks } from './profiling_links';
 
 export function Flamegraph() {
+  const { services } = useKibanaContextForPlugin();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { activeTabId } = useTabSwitcherContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { dateRange, getDateRangeInTimestamp } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
+
+  const profilingLinkLocator = services.observabilityShared.locators.profiling.flamegraphLocator;
+  const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppFlamegraphLink', {
+    defaultMessage: 'Go to Universal Profiling Flamegraph',
+  });
 
   const params = useMemo(
     () => ({
@@ -37,5 +47,17 @@ export function Flamegraph() {
     return <ErrorPrompt />;
   }
 
-  return <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />;
+  return (
+    <>
+      <ProfilingLinks
+        hostname={asset.name}
+        from={dateRange.from}
+        to={dateRange.to}
+        profilingLinkLocator={profilingLinkLocator}
+        profilingLinkLabel={profilingLinkLabel}
+      />
+      <EuiSpacer />
+      <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />
+    </>
+  );
 }

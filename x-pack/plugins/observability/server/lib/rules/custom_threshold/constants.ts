@@ -28,3 +28,12 @@ export const NO_DATA_ACTION = {
     }
   ),
 };
+
+export const CUSTOM_THRESHOLD_AAD_FIELDS = [
+  'cloud.*',
+  'host.*',
+  'orchestrator.*',
+  'container.*',
+  'labels.*',
+  'tags',
+];

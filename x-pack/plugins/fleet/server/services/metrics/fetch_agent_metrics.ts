@@ -42,6 +42,23 @@ export const fetchAgentMetrics = async (
   if (!soClient || !esClient) {
     return;
   }
+
+  const fleetAgentsIndexExists = await esClient.indices
+    .get({
+      index: AGENTS_INDEX,
+    })
+    .catch((error) => {
+      if (error.statusCode === 404) {
+        return;
+      }
+
+      throw error;
+    });
+
+  if (!fleetAgentsIndexExists) {
+    return;
+  }
+
   const usage = {
     agents: await getAgentUsage(soClient, esClient),
     agents_per_version: await getAgentsPerVersion(esClient, abortController),

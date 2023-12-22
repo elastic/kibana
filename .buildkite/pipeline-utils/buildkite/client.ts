@@ -339,12 +339,18 @@ export class BuildkiteClient {
   setAnnotation = (
     context: string,
     style: 'info' | 'success' | 'warning' | 'error',
-    value: string
+    value: string,
+    append: boolean = false
   ) => {
-    this.exec(`buildkite-agent annotate --context '${context}' --style '${style}'`, {
-      input: value,
-      stdio: ['pipe', 'inherit', 'inherit'],
-    });
+    this.exec(
+      `buildkite-agent annotate --context '${context}' --style '${style}' ${
+        append ? '--append' : ''
+      }`,
+      {
+        input: value,
+        stdio: ['pipe', 'inherit', 'inherit'],
+      }
+    );
   };
 
   uploadArtifacts = (pattern: string) => {

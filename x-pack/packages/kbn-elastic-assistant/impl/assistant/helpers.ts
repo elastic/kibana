@@ -87,3 +87,54 @@ export const getFormattedMessageContent = (content: string): string => {
 
   return content;
 };
+
+interface OptionalRequestParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  replacements?: Record<string, string>;
+  size?: number;
+}
+
+export const getOptionalRequestParams = ({
+  alerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  replacements,
+  size,
+}: {
+  alerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  replacements?: Record<string, string>;
+  size?: number;
+}): OptionalRequestParams => {
+  const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
+  const optionalAllow = allow ? { allow } : undefined;
+  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
+  const optionalReplacements = replacements ? { replacements } : undefined;
+  const optionalSize = size ? { size } : undefined;
+
+  // the settings toggle must be enabled:
+  if (!alerts) {
+    return {}; // don't send any optional params
+  }
+
+  return {
+    ...optionalAlertsIndexPattern,
+    ...optionalAllow,
+    ...optionalAllowReplacement,
+    ...optionalReplacements,
+    ...optionalSize,
+  };
+};
+
+export const hasParsableResponse = ({
+  alerts,
+  assistantLangChain,
+}: {
+  alerts: boolean;
+  assistantLangChain: boolean;
+}): boolean => assistantLangChain || alerts;

@@ -7,7 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -16,7 +16,7 @@ import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../store/timeline');
+jest.mock('../../../store');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {

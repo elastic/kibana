@@ -47,6 +47,7 @@ const ALERT_SUPPRESSION_DOCS_COUNT = `${ALERT_SUPPRESSION_META}.docs_count` as c
 const ALERT_SYSTEM_STATUS = `${ALERT_NAMESPACE}.system_status` as const;
 const ALERT_WORKFLOW_REASON = `${ALERT_NAMESPACE}.workflow_reason` as const;
 const ALERT_WORKFLOW_USER = `${ALERT_NAMESPACE}.workflow_user` as const;
+const ALERT_WORKFLOW_STATUS_UPDATED_AT = `${ALERT_NAMESPACE}.workflow_status_updated_at` as const;
 
 export {
   ALERT_RISK_SCORE,
@@ -77,6 +78,7 @@ export {
   ALERT_SYSTEM_STATUS,
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_USER,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,

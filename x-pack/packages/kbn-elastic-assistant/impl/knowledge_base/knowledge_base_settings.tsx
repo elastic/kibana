@@ -23,16 +23,16 @@ import {
   EuiToolTip,
   EuiSwitch,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import * as i18n from './translations';
+
+import { AlertsSettings } from '../alerts/settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
+import type { KnowledgeBaseConfig } from '../assistant/types';
+import * as i18n from './translations';
 import { useDeleteKnowledgeBase } from './use_delete_knowledge_base';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
-
-import type { KnowledgeBaseConfig } from '../assistant/types';
 
 const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-kb';
@@ -300,6 +300,13 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
             </span>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <AlertsSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+        />
       </>
     );
   }

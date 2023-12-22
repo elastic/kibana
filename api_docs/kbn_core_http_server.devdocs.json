@@ -3414,6 +3414,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/anonymous_access/get_capabilities.ts"
               },
               {
@@ -3719,6 +3723,10 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
               },
               {
                 "plugin": "assetManager",
@@ -4078,7 +4086,15 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -4394,7 +4410,7 @@
               },
               {
                 "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4407,6 +4423,14 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/mapping_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -5506,6 +5530,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authentication/index.test.ts"
               },
               {
@@ -6520,6 +6548,14 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
@@ -6589,10 +6625,6 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/create_api_key.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -6804,6 +6836,10 @@
               },
               {
                 "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
@@ -6917,10 +6953,6 @@
               {
                 "plugin": "console",
                 "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/plugins/console/server/routes/api/console/spec_definitions/index.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -13363,7 +13395,7 @@
               },
               {
                 "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/find/find.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -13664,6 +13696,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14670,6 +14706,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

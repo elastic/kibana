@@ -52,7 +52,6 @@ import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
-import type { LicenseService } from '../../../../../common/license';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -569,11 +568,7 @@ export const buildRequiredFieldsDescription = (
   ];
 };
 
-export const buildAlertSuppressionDescription = (
-  label: string,
-  values: string[],
-  license: LicenseService
-): ListItems[] => {
+export const buildAlertSuppressionDescription = (label: string, values: string[]): ListItems[] => {
   if (isEmpty(values)) {
     return [];
   }
@@ -591,7 +586,7 @@ export const buildAlertSuppressionDescription = (
     </EuiFlexGroup>
   );
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
   return [
     {
       title,
@@ -603,7 +598,6 @@ export const buildAlertSuppressionDescription = (
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  license: LicenseService,
   groupByRadioSelection: GroupByOptions
 ): ListItems[] => {
   const description =
@@ -611,7 +605,7 @@ export const buildAlertSuppressionWindowDescription = (
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
   return [
     {
       title,
@@ -622,8 +616,7 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy,
-  license: LicenseService
+  value: AlertSuppressionMissingFieldsStrategy
 ): ListItems[] => {
   if (isEmpty(value)) {
     return [];
@@ -634,7 +627,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} license={license} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
   return [
     {
       title,

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { SLOWithSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts } from '../../../../hooks/slo/active_alerts';
 import type { UseFetchRulesForSloResponse } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
 import { SloCardItem } from './slo_card_item';
@@ -68,27 +68,29 @@ export function SloListCardView({
   }
 
   return (
-    <EuiFlexGrid columns={columns}>
-      {sloList.map((slo) => (
-        <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
-          <SloCardItem
-            slo={slo}
-            loading={loading}
-            error={error}
-            activeAlerts={activeAlertsBySlo.get(slo)}
-            rules={rulesBySlo?.[slo.id]}
-            historicalSummary={
-              historicalSummaries.find(
-                (historicalSummary) =>
-                  historicalSummary.sloId === slo.id &&
-                  historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-              )?.data
-            }
-            historicalSummaryLoading={historicalSummaryLoading}
-            cardsPerRow={Number(cardsPerRow)}
-          />
-        </EuiFlexItem>
-      ))}
+    <EuiFlexGrid columns={columns} gutterSize="m">
+      {sloList
+        .filter((slo) => slo.summary)
+        .map((slo) => (
+          <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
+            <SloCardItem
+              slo={slo}
+              loading={loading}
+              error={error}
+              activeAlerts={activeAlertsBySlo.get(slo)}
+              rules={rulesBySlo?.[slo.id]}
+              historicalSummary={
+                historicalSummaries.find(
+                  (historicalSummary) =>
+                    historicalSummary.sloId === slo.id &&
+                    historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+                )?.data
+              }
+              historicalSummaryLoading={historicalSummaryLoading}
+              cardsPerRow={Number(cardsPerRow)}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGrid>
   );
 }

@@ -230,7 +230,13 @@
           "; basePath?: string | undefined; releasePhase?: ",
           "ReleasePhase",
           " | undefined; hiddenStatuses?: ",
-          "CaseStatusWithAllStatus",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
           "[] | undefined; onRowClick?: ((theCase?: ",
           {
             "pluginId": "cases",
@@ -482,7 +488,15 @@
               "section": "def-common.CaseStatuses",
               "text": "CaseStatuses"
             },
-            " | undefined; severity?: ",
+            " | ",
+            {
+              "pluginId": "@kbn/cases-components",
+              "scope": "common",
+              "docId": "kibKbnCasesComponentsPluginApi",
+              "section": "def-common.CaseStatuses",
+              "text": "CaseStatuses"
+            },
+            "[] | undefined; severity?: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -490,7 +504,15 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            " | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"description\" | \"title\" | (\"description\" | \"title\")[] | undefined; sortField?: \"category\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            " | ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.CaseSeverity",
+              "text": "CaseSeverity"
+            },
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"description\" | \"title\" | (\"description\" | \"title\")[] | undefined; sortField?: \"category\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {
@@ -3153,21 +3175,6 @@
           "{ alerts?: { count?: number | undefined; hosts?: { total: number; values: { name: string | undefined; id: string; count: number; }[]; } | undefined; users?: { total: number; values: { name: string; count: number; }[]; } | undefined; } | undefined; connectors?: { total: number; } | undefined; actions?: { isolateHost?: { isolate: { total: number; }; unisolate: { total: number; }; } | undefined; } | undefined; lifespan?: { creationDate: string; closeDate: string | null; statusInfo: { openDuration: number; inProgressDuration: number; reopenDates: string[]; }; } | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.StatusAll",
-        "type": "string",
-        "tags": [],
-        "label": "StatusAll",
-        "description": [],
-        "signature": [
-          "\"all\""
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

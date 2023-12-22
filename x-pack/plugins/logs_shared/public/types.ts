@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,7 +13,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { LogsSharedLocators } from '../common/locators';
-import { LogAIAssistantComponent } from './components/log_ai_assistant';
+import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views';
 
@@ -32,7 +25,7 @@ export interface LogsSharedClientSetupExports {
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
-  LogAIAssistant: LogAIAssistantComponent;
+  LogAIAssistant: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
 }
 
 export interface LogsSharedClientSetupDeps {
