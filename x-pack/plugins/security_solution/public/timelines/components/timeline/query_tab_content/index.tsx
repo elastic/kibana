@@ -391,7 +391,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? (
+          <EventsCountBadge data-test-subj="query_tab_events_count_badge">
+            {totalCount}
+          </EventsCountBadge>
+        ) : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}

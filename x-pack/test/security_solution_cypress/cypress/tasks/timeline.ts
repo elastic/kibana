@@ -34,7 +34,6 @@ import {
   SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SELECT_CASE,
-  SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
   TIMELINE_DESCRIPTION_INPUT,
   TIMELINE_FIELDS_BUTTON,
@@ -84,6 +83,11 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_EVENTS_COUNT_TAB,
+  NOTES_ADD_BTN,
+  NOTES_PREVIEWS,
+  DELETE_NOTE,
+  DELETE_NOTE_CONFIRM_BTN,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -408,7 +412,7 @@ export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+  cy.get(TIMELINE_EVENTS_COUNT_TAB.QUERY).should('not.have.text', '0');
 };
 
 const clickTimestampHoverActionOverflowButton = () => {
@@ -496,4 +500,24 @@ export const selectKqlSearchMode = () => {
   showDataProviderQueryBuilder();
   cy.get(TIMELINE_SEARCH_OR_FILTER).click();
   cy.get(TIMELINE_KQLMODE_SEARCH).click();
+};
+
+export const waitForTimelineToSave = () => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.disabled');
+  cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.enabled');
+};
+
+export const addNotesToEvents = (eventIdx: number, noteText: string) => {
+  cy.get(NOTES_ADD_BTN).eq(eventIdx).click();
+
+  cy.get(NOTES_TEXT_AREA).should('be.enabled').type(noteText);
+  cy.get(ADD_NOTE_BUTTON).click();
+
+  waitForTimelineToSave();
+  cy.get(NOTES_PREVIEWS).last().should('contain.text', noteText);
+};
+
+export const deleteNote = (noteIdx: number) => {
+  cy.get(DELETE_NOTE).eq(noteIdx).click();
+  cy.get(DELETE_NOTE_CONFIRM_BTN).eq(noteIdx).click();
 };

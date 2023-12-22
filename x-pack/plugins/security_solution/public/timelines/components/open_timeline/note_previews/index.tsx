@@ -16,25 +16,22 @@ import {
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useMutation } from '@tanstack/react-query';
 
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store';
-import { appActions } from '../../../../common/store/app';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineDataTableContext } from '../../timeline/unified_components/render_custom_body';
+import { useDeleteNote } from './hooks/use_delete_note';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -100,50 +97,25 @@ const DeleteNoteConfirm = React.memo<{
 
 DeleteNoteConfirm.displayName = 'DeleteNoteConfirm';
 
-function useDeleteNote(noteId: string | null | undefined, eventId: string | null | undefined) {
-  const {
-    services: { http },
-  } = useKibana();
-  const dispatch = useDispatch();
-  const { addError } = useAppToasts();
-  return useMutation({
-    mutationFn: (id: string | null | undefined) => {
-      return http.fetch('/api/note', {
-        method: 'DELETE',
-        body: JSON.stringify({ noteId: id }),
-        version: '2023-10-31',
-      });
-    },
-    onSuccess: () => {
-      if (noteId) {
-        dispatch(
-          appActions.deleteNote({
-            id: noteId,
-          })
-        );
-      }
-    },
-    onError: (err: string) => {
-      addError(err, { title: i18n.DELETE_NOTE_ERROR(err) });
-    },
-  });
-}
-
 const DeleteNoteButton = React.memo<{ noteId?: string | null; eventId?: string | null }>(
   ({ noteId, eventId }) => {
     const { confirmingNoteId, setConfirmingNoteId } = useContext(TimelineDataTableContext);
+    const [showModal, setShowModal] = useState(false);
     const { mutate, isLoading } = useDeleteNote(noteId, eventId);
 
-    const handleOpenDeleteModal = useCallback(async () => {
+    const handleOpenDeleteModal = useCallback(() => {
+      setShowModal(true);
       setConfirmingNoteId(noteId);
     }, [noteId, setConfirmingNoteId]);
 
     const handleCancelDelete = useCallback(() => {
+      setShowModal(false);
       setConfirmingNoteId(null);
     }, [setConfirmingNoteId]);
 
     const handleConfirmDelete = useCallback(() => {
       mutate(noteId);
+      setShowModal(false);
       setConfirmingNoteId(null);
     }, [mutate, noteId, setConfirmingNoteId]);
 
@@ -162,10 +134,16 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; eventId?: string |
           onClick={handleOpenDeleteModal}
           disabled={disableDelete}
         />
-        <span>{confirmingNoteId}</span>
-        {confirmingNoteId && (
-          <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
-        )}
+        {
+          /* modal cannot depend only on confirmingNoteId as confirmingNoteId is part of context and once that is populated all delete
+             button modals show up with the last delete button's modal on the top. There should be a local state such as `showModal` handling that.
+
+             Why do we need global context holding confirmingNoteId? Revisit this design
+           */
+          confirmingNoteId && showModal ? (
+            <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+          ) : null
+        }
       </>
     );
   }
@@ -278,12 +256,12 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
       [eventIdToNoteIds, notes, timelineId]
     );
 
-    return (
-      <EuiCommentList
-        data-test-subj="note-comment-list"
-        comments={[...descriptionList, ...notesList]}
-      />
+    const commentList = useMemo(
+      () => [...descriptionList, ...notesList],
+      [descriptionList, notesList]
     );
+
+    return <EuiCommentList data-test-subj="note-comment-list" comments={commentList} />;
   }
 );
 

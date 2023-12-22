@@ -6,7 +6,7 @@
  */
 
 import type { TimelineFilter } from '../objects/timeline';
-import { getDataTestSubjectSelector } from '../helpers/common';
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -304,3 +304,13 @@ export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('save-timelin
 export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector('save-timeline-btn-tooltip');
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
+
+export const NOTES_ADD_BTN = getDataTestSubjectSelector('timeline-notes-button-small');
+
+export const NOTES_PREVIEWS = getDataTestSubjectSelectorStartWith('note-preview');
+
+export const TIMELINE_EVENTS_COUNT_TAB = {
+  QUERY: getDataTestSubjectSelector('query_tab_events_count_badge'),
+};
+
+export const DELETE_NOTE_CONFIRM_BTN = getDataTestSubjectSelector('confirmModalConfirmButton');
