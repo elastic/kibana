@@ -28,7 +28,7 @@ import {
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
-import { stepActionsDefaultValue } from '../step_rule_actions';
+import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import {
   defaultSchedule,
   stepDefineDefaultValue,

@@ -27,7 +27,7 @@ import type {
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { RuleActionsField } from '../../../rule_creation/components/rule_actions_field';
+import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFetchConnectorsQuery } from '../../../rule_management/api/hooks/use_fetch_connectors_query';
 import { useFetchConnectorTypesQuery } from '../../../rule_management/api/hooks/use_fetch_connector_types_query';

@@ -16,7 +16,7 @@ import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
-import { StepContentWrapper } from '../step_content_wrapper';
+import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { schema } from './schema';
 
 const StyledForm = styled(Form)`

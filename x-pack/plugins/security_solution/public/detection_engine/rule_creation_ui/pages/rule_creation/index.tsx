@@ -48,7 +48,7 @@ import {
   stepActionsDefaultValue,
   StepRuleActions,
   StepRuleActionsReadOnly,
-} from '../../components/step_rule_actions';
+} from '../../../rule_creation/components/step_rule_actions';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import {
   redirectToDetections,

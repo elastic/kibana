@@ -17,7 +17,7 @@ import {
   stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
-import { useRuleForms } from '../../pages/form';
+import { useRuleForms } from '../../../rule_creation_ui/pages/form';
 import type { FormHook } from '../../../../shared_imports';
 import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { FrequencyDescription } from './notification_action';

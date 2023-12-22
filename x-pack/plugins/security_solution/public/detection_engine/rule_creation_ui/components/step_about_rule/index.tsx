@@ -28,7 +28,7 @@ import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
-import { StepContentWrapper } from '../step_content_wrapper';
+import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';

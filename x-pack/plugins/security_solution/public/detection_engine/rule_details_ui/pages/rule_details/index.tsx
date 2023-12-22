@@ -63,7 +63,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../rule_creation_ui/components/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepRuleActionsReadOnly } from '../../../rule_creation_ui/components/step_rule_actions';
+import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
