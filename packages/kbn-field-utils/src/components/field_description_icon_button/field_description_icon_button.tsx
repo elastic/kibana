@@ -10,11 +10,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverProps, useEuiTheme } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldDescription } from '../field_description';
+import { FieldDescription, FieldDescriptionProps } from '../field_description';
 
 export type FieldDescriptionIconButtonProps = Pick<EuiPopoverProps, 'css'> & {
-  field: DataViewField;
+  field: FieldDescriptionProps['field'];
 };
 
 export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProps> = ({

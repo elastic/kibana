@@ -8,7 +8,7 @@
 
 import React, { PureComponent } from 'react';
 import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
-
+import { FieldDescription } from '@kbn/field-utils';
 import {
   EuiIcon,
   EuiInMemoryTable,
@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiBasicTable,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -164,11 +165,6 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
-const fieldDescription = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.customDescriptionTooltip',
-  { defaultMessage: 'A custom description for the field.' }
-);
-
 function runtimeIconTipTitle(fld: IndexedFieldItem) {
   // composite runtime fields
   if (fld.runtimeField?.type === 'composite') {
@@ -272,11 +268,8 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
     ) : null}
     {field.customDescription ? (
       <div>
-        <EuiToolTip content={fieldDescription}>
-          <EuiText color="subdued" size="xs">
-            {field.customDescription}
-          </EuiText>
-        </EuiToolTip>
+        <EuiSpacer size="xs" />
+        <FieldDescription field={field} color="subdued" size="xs" />
       </div>
     ) : null}
   </span>

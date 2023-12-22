@@ -8,16 +8,20 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiText, EuiTextProps, EuiButtonEmpty } from '@elastic/eui';
 
 const MAX_VISIBLE_LENGTH = 140;
 
 export interface FieldDescriptionProps {
-  field: DataViewField;
+  field: {
+    name: string;
+    customDescription?: string;
+  };
+  color?: EuiTextProps['color'];
+  size?: EuiTextProps['size'];
 }
 
-export const FieldDescription: React.FC<FieldDescriptionProps> = ({ field }) => {
+export const FieldDescription: React.FC<FieldDescriptionProps> = ({ field, color, size = 's' }) => {
   const customDescription = (field?.customDescription || '').trim();
   const isTooLong = customDescription.length > MAX_VISIBLE_LENGTH;
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
@@ -30,7 +34,8 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({ field }) => 
     <div>
       <EuiText
         data-test-subj={`fieldDescription-${field.name}`}
-        size="s"
+        color={color}
+        size={size}
         className="eui-textBreakWord"
       >
         {isTruncated
