@@ -55,7 +55,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -74,7 +74,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"isEnabledKnowledgeBase":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -99,7 +99,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"replacements":{"auuid":"real.hostname"},"size":30}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"replacements":{"auuid":"real.hostname"},"size":30}',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -121,7 +121,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -131,11 +131,11 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when assistantLangChain is false and alerts is true', async () => {
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
-        alerts: true,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: true,
       };
 
       await fetchConnectorExecuteAction(testProps);
@@ -143,7 +143,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
