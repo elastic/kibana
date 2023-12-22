@@ -6,35 +6,56 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiPopover, EuiPopoverProps, useEuiTheme } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldDescription } from '../field_description';
 
-export interface FieldDescriptionIconButtonProps {
-  customDescription: string | undefined;
-  margin?: 'left' | 'right';
-}
+export type FieldDescriptionIconButtonProps = Pick<EuiPopoverProps, 'css'> & {
+  field: DataViewField;
+};
 
 export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProps> = ({
-  customDescription,
-  margin,
+  field,
+  ...otherProps
 }) => {
   const { euiTheme } = useEuiTheme();
-  if (!customDescription) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
+  if (!field?.customDescription) {
     return null;
   }
+
+  const buttonTitle = i18n.translate('fieldUtils.fieldDescriptionIconButtonTitle', {
+    defaultMessage: 'View field description',
+  });
+
   return (
-    <span css={margin ? css`margin-${margin}:${euiTheme.size.xs}` : undefined}>
-      <EuiToolTip content={customDescription} data-test-subj="fieldDescriptionIconButton">
-        <EuiIcon
-          type="iInCircle"
-          aria-label={i18n.translate('fieldUtils.fieldDescriptionIconButtonTitle', {
-            defaultMessage: 'Custom field description',
-          })}
-          size="m"
-        />
-      </EuiToolTip>
+    <span>
+      <EuiPopover
+        {...otherProps}
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelProps={{
+          css: css`
+            max-width: ${euiTheme.base * 20}px;
+            padding-bottom: ${euiTheme.size.s};
+          `,
+        }}
+        button={
+          <EuiButtonIcon
+            iconType="iInCircle"
+            title={buttonTitle}
+            aria-label={buttonTitle}
+            size="xs"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          />
+        }
+      >
+        <FieldDescription field={field} />
+      </EuiPopover>
     </span>
   );
 };

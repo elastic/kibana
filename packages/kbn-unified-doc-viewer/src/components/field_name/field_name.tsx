@@ -46,7 +46,7 @@ export function FieldName({
         <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
-      <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart" direction="row">
         <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
           <EuiToolTip
             position="top"
@@ -59,7 +59,9 @@ export function FieldName({
         </EuiFlexItem>
 
         {fieldMapping?.customDescription ? (
-          <FieldDescriptionIconButton customDescription={fieldMapping.customDescription} />
+          <EuiFlexItem grow={false}>
+            <FieldDescriptionIconButton field={fieldMapping} />
+          </EuiFlexItem>
         ) : null}
 
         {isMultiField && (
