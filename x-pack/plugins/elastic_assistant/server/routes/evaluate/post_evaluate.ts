@@ -114,7 +114,8 @@ export const postEvaluateRoute = (
         // Default ELSER model
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-        // Skeleton request to satisfy `subActionParams` spread in `ActionsClientLlm`
+        // Skeleton request from route to pass to the agents
+        // params will be passed to the actions executor
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
@@ -130,6 +131,7 @@ export const postEvaluateRoute = (
             replacements: {},
             size: DEFAULT_SIZE,
             isEnabledKnowledgeBase: true,
+            isEnabledRAGAlerts: true,
           },
         };
 
