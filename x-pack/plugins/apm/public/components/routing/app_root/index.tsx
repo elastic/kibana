@@ -8,7 +8,7 @@
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
-  useUiSetting$,
+  useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -132,7 +132,7 @@ function MountApmHeaderActionMenu() {
 }
 
 export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const darkMode = useDarkMode(false);
 
   return (
     <ThemeProvider

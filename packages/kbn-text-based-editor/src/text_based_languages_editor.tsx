@@ -22,6 +22,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,
   LanguageDocumentationPopover,
@@ -172,7 +173,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isWordWrapped, setIsWordWrapped] = useState(false);
 
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -478,15 +478,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
-  useEffect(() => {
-    if (isCodeEditorExpanded && !isWordWrapped) {
-      const pipes = code?.split('|');
-      const pipesWithNewLine = code?.split('\n|');
-      if (pipes?.length === pipesWithNewLine?.length) {
-        setIsWordWrapped(true);
-      }
-    }
-  }, [code, isCodeEditorExpanded, isWordWrapped]);
+  const linesBreaksButtonsStatus = useMemo(() => {
+    const pipes = code?.split('|');
+    const pipesWithNewLine = code?.split('\n|');
+    return {
+      addLineBreaksDisabled: pipes?.length === pipesWithNewLine?.length,
+      removeLineBreaksDisabled: pipesWithNewLine?.length === 1,
+    };
+  }, [code]);
 
   const onResize = ({ width }: { width: number }) => {
     setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
@@ -499,7 +498,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
-      setIsWordWrapped(false);
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
@@ -561,58 +559,72 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={
-                isWordWrapped
-                  ? i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                      {
-                        defaultMessage: 'Disable wrap with pipes',
-                      }
-                    )
-                  : i18n.translate(
+            <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <TooltipWrapper
+                  tooltipContent={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                    {
+                      defaultMessage: 'Add line breaks on pipes',
+                    }
+                  )}
+                  condition={!linesBreaksButtonsStatus.addLineBreaksDisabled}
+                >
+                  <EuiButtonIcon
+                    iconType="pipeBreaks"
+                    color="text"
+                    size="s"
+                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
+                    aria-label={i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
                       {
-                        defaultMessage: 'Wrap with pipes',
+                        defaultMessage: 'Add line breaks on pipes',
                       }
-                    )
-              }
-            >
-              <EuiButtonIcon
-                iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
-                color="text"
-                size="s"
-                data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                aria-label={
-                  isWordWrapped
-                    ? i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                        {
-                          defaultMessage: 'Disable wrap with pipes',
-                        }
-                      )
-                    : i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                        {
-                          defaultMessage: 'Wrap with pipes',
-                        }
-                      )
-                }
-                isSelected={!isWordWrapped}
-                onClick={() => {
-                  editor1.current?.updateOptions({
-                    wordWrap: isWordWrapped ? 'off' : 'on',
-                  });
-                  setIsWordWrapped(!isWordWrapped);
-                  const updatedCode = getWrappedInPipesCode(code, isWordWrapped);
-                  if (code !== updatedCode) {
-                    setCode(updatedCode);
-                    onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
-                  }
-                }}
-              />
-            </EuiToolTip>
+                    )}
+                    isDisabled={linesBreaksButtonsStatus.addLineBreaksDisabled}
+                    onClick={() => {
+                      const updatedCode = getWrappedInPipesCode(code, false);
+                      if (code !== updatedCode) {
+                        setCode(updatedCode);
+                        onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
+                      }
+                    }}
+                  />
+                </TooltipWrapper>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TooltipWrapper
+                  tooltipContent={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                    {
+                      defaultMessage: 'Remove line breaks on pipes',
+                    }
+                  )}
+                  condition={!linesBreaksButtonsStatus.removeLineBreaksDisabled}
+                >
+                  <EuiButtonIcon
+                    iconType="pipeNoBreaks"
+                    color="text"
+                    size="s"
+                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
+                    aria-label={i18n.translate(
+                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                      {
+                        defaultMessage: 'Remove line breaks on pipes',
+                      }
+                    )}
+                    isDisabled={linesBreaksButtonsStatus.removeLineBreaksDisabled}
+                    onClick={() => {
+                      const updatedCode = getWrappedInPipesCode(code, true);
+                      if (code !== updatedCode) {
+                        setCode(updatedCode);
+                        onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
+                      }
+                    }}
+                  />
+                </TooltipWrapper>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
