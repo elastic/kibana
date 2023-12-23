@@ -107,7 +107,6 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
   const minRef = useRef(min);
   const maxRef = useRef(max);
   const snapTimestampsRef = useRef(snapTimestamps);
-  const prevBaselinedWidth = useRef();
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
 
@@ -139,69 +138,69 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           const baselineBrush = d3.select('#aiops-brush-baseline');
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          // const deviationBrush = d3.select('#aiops-brush-deviation');
-          // const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
+          const deviationBrush = d3.select('#aiops-brush-deviation');
+          const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
-          if (!isBrushXSelection(baselineSelection)) {
+          if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
             return;
           }
-          // @TODO: remove
-          console.log(`--@@brushend`, baselineSelection);
 
           const baselineOverlay = baselineBrush.selectAll('.overlay');
-          // const deviationOverlay = deviationBrush.selectAll('.overlay');
+          const deviationOverlay = deviationBrush.selectAll('.overlay');
 
           let baselineWidth;
           let deviationWidth;
           baselineOverlay.each((d, i, n) => {
             baselineWidth = d3.select(n[i]).attr('width');
           });
-          // deviationOverlay.each((d, i, n) => {
-          //   deviationWidth = d3.select(n[i]).attr('width');
-          // });
+          deviationOverlay.each((d, i, n) => {
+            deviationWidth = d3.select(n[i]).attr('width');
+          });
 
-          // if (baselineWidth !== deviationWidth) {
-          //   return;
-          // }
+          if (baselineWidth !== deviationWidth) {
+            return;
+          }
 
           const newWindowParameters = {
             baselineMin: px2ts(baselineSelection[0]),
             baselineMax: px2ts(baselineSelection[1]),
-            // deviationMin: px2ts(0),
-            // deviationMax: px2ts(0),
+            deviationMin: px2ts(deviationSelection[0]),
+            deviationMax: px2ts(deviationSelection[1]),
           };
 
           if (
             id === 'deviation' &&
-            // deviationSelection &&
-            baselineSelection
-            //  &&
-            // deviationSelection[0] - minExtentPx < baselineSelection[1]
+            deviationSelection &&
+            baselineSelection &&
+            deviationSelection[0] - minExtentPx < baselineSelection[1]
           ) {
-            // const newDeviationMin = baselineSelection[1] + minExtentPx;
-            // const newDeviationMax = Math.max(deviationSelection[1], newDeviationMin + minExtentPx);
-            // newWindowParameters.deviationMin = px2ts(newDeviationMin);
-            // newWindowParameters.deviationMax = px2ts(newDeviationMax);
+            const newDeviationMin = baselineSelection[1] + minExtentPx;
+            const newDeviationMax = Math.max(deviationSelection[1], newDeviationMin + minExtentPx);
+
+            newWindowParameters.deviationMin = px2ts(newDeviationMin);
+            newWindowParameters.deviationMax = px2ts(newDeviationMax);
           } else if (
             id === 'baseline' &&
-            // deviationSelection &&
-            baselineSelection
-            // &&
-            // deviationSelection[0] < baselineSelection[1] + minExtentPx
+            deviationSelection &&
+            baselineSelection &&
+            deviationSelection[0] < baselineSelection[1] + minExtentPx
           ) {
-            const newBaselineMax = baselineSelection[1] + minExtentPx;
+            const newBaselineMax = deviationSelection[0] - minExtentPx;
             const newBaselineMin = Math.min(baselineSelection[0], newBaselineMax - minExtentPx);
-            // newWindowParameters.baselineMin = px2ts(newBaselineMin);
-            // newWindowParameters.baselineMax = px2ts(newBaselineMax);
+
+            newWindowParameters.baselineMin = px2ts(newBaselineMin);
+            newWindowParameters.baselineMax = px2ts(newBaselineMax);
           }
 
-          const snappedWindowParameters = newWindowParameters;
+          const snappedWindowParameters = snapTimestampsRef.current
+            ? getSnappedWindowParameters(newWindowParameters, snapTimestampsRef.current)
+            : newWindowParameters;
 
           const newBrushPx = {
             baselineMin: x(snappedWindowParameters.baselineMin) ?? 0,
             baselineMax: x(snappedWindowParameters.baselineMax) ?? 0,
-            // deviationMin: x(snappedWindowParameters.deviationMin) ?? 0,
-            // deviationMax: x(snappedWindowParameters.deviationMax) ?? 0,
+            deviationMin: x(snappedWindowParameters.deviationMin) ?? 0,
+            deviationMax: x(snappedWindowParameters.deviationMax) ?? 0,
           };
 
           if (
@@ -219,29 +218,27 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
               ]);
           }
 
-          // if (
-          //   id === 'deviation' &&
-          //   (deviationSelection[0] !== newBrushPx.deviationMin ||
-          //     deviationSelection[1] !== newBrushPx.deviationMax)
-          // ) {
-          //   d3.select(this)
-          //     .transition()
-          //     .duration(200)
-          //     // @ts-expect-error call doesn't allow the brush move function
-          //     .call(brushes.current[1].brush.move, [
-          //       newBrushPx.deviationMin,
-          //       newBrushPx.deviationMax,
-          //     ]);
-          // }
+          if (
+            id === 'deviation' &&
+            (deviationSelection[0] !== newBrushPx.deviationMin ||
+              deviationSelection[1] !== newBrushPx.deviationMax)
+          ) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              // @ts-expect-error call doesn't allow the brush move function
+              .call(brushes.current[1].brush.move, [
+                newBrushPx.deviationMin,
+                newBrushPx.deviationMax,
+              ]);
+          }
 
           brushes.current[0].start = snappedWindowParameters.baselineMin;
           brushes.current[0].end = snappedWindowParameters.baselineMax;
-          // brushes.current[1].start = snappedWindowParameters.deviationMin;
-          // brushes.current[1].end = snappedWindowParameters.deviationMax;
+          brushes.current[1].start = snappedWindowParameters.deviationMin;
+          brushes.current[1].end = snappedWindowParameters.deviationMax;
 
           if (onChange) {
-            // @TODO: remove
-            console.log(`--@@ onChange snappedWindowParameters`, snappedWindowParameters);
             onChange(snappedWindowParameters, newBrushPx);
           }
           drawBrushes();
@@ -315,25 +312,22 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
         });
       }
 
-      // @TODO: remove
-      console.log(`--@@brushes.current`, brushes.current);
-      if (brushes.current.length !== 1) {
+      if (brushes.current.length !== 2) {
         widthRef.current = width;
         newBrush('baseline', baselineMin, baselineMax);
-        // newBrush('deviation', deviationMin, deviationMax);
+        newBrush('deviation', deviationMin, deviationMax);
+      } else if (
+        widthRef.current !== width ||
+        minRef.current !== min ||
+        maxRef.current !== max ||
+        !isEqual(snapTimestampsRef.current, snapTimestamps)
+      ) {
+        widthRef.current = width;
+        minRef.current = min;
+        maxRef.current = max;
+        snapTimestampsRef.current = snapTimestamps;
+        updateBrushes();
       }
-      // else if (
-      //   widthRef.current !== width ||
-      //   minRef.current !== min ||
-      //   maxRef.current !== max ||
-      //   !isEqual(snapTimestampsRef.current, snapTimestamps)
-      // ) {
-      //   widthRef.current = width;
-      //   minRef.current = min;
-      //   maxRef.current = max;
-      //   snapTimestampsRef.current = snapTimestamps;
-      //   updateBrushes();
-      // }
 
       drawBrushes();
     }
@@ -343,8 +337,8 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
     width,
     baselineMin,
     baselineMax,
-    // deviationMin,
-    // deviationMax,
+    deviationMin,
+    deviationMax,
     snapTimestamps,
     onChange,
   ]);
