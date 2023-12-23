@@ -51,7 +51,7 @@ import { DataDriftView } from './data_drift_view';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
-import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
+import { DocumentCountWithBrush } from './document_count_with_brush';
 
 const dataViewTitleHeader = css({
   minWidth: '300px',
@@ -317,7 +317,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DocumentCountWithDualBrush
+              <DocumentCountWithBrush
                 id={REFERENCE_LABEL}
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
@@ -354,7 +354,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 stateManager={referenceStateManager}
               />
               <EuiHorizontalRule />
-              <DocumentCountWithDualBrush
+              <DocumentCountWithBrush
                 id={COMPARISON_LABEL}
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}

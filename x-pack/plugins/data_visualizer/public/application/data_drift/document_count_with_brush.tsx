@@ -54,7 +54,7 @@ export interface DocumentCountContentProps
   id?: string;
 }
 
-export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
+export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
   id,
   randomSampler,
   reload,
