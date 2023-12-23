@@ -8,17 +8,27 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 /**
+ * Time range definition for baseline.
+ *
+ * @export
+ * @interface BaselineWindowParameters
+ * @typedef {BaselineWindowParameters}
+ */
+export interface BaselineWindowParameters {
+  /** Baseline minimum value */
+  baselineMin: number;
+  /** Baseline maximum value */
+  baselineMax: number;
+}
+
+/**
  * Time range definition for baseline and deviation to be used by log rate analysis.
  *
  * @export
  * @interface WindowParameters
  * @typedef {WindowParameters}
  */
-export interface WindowParameters {
-  /** Baseline minimum value */
-  baselineMin: number;
-  /** Baseline maximum value */
-  baselineMax: number;
+export interface WindowParameters extends BaselineWindowParameters {
   /** Deviation minimum value */
   deviationMin: number;
   /** Deviation maximum value */
@@ -32,7 +42,7 @@ export interface WindowParameters {
  * @returns {arg is WindowParameters}
  */
 export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
-  isPopulatedObject(arg, ['baselineMin', 'baselineMax', 'deviationMin', 'deviationMax']) &&
+  isPopulatedObject(arg, ['baselineMin', 'baselineMax']) &&
   Object.values(arg).every((d) => typeof d === 'number');
 
 /**

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import React, { useEffect, useRef, type FC } from 'react';
 
 import * as d3Brush from 'd3-brush';
@@ -16,7 +15,7 @@ import * as d3Transition from 'd3-transition';
 import { getSnappedWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
-import './dual_brush.scss';
+import '../dual_brush/dual_brush.scss';
 
 const { brush, brushSelection, brushX } = d3Brush;
 const { scaleLinear } = d3Scale;
@@ -42,9 +41,9 @@ const isBrushXSelection = (arg: unknown): arg is [number, number] => {
   );
 };
 
-interface DualBrush {
+interface SingleBrush {
   id: string;
-  brush: d3Brush.BrushBehavior<DualBrush>;
+  brush: d3Brush.BrushBehavior<SingleBrush>;
   start: number;
   end: number;
 }
@@ -55,9 +54,9 @@ const BRUSH_HANDLE_SIZE = 4;
 const BRUSH_HANDLE_ROUNDED_CORNER = 2;
 
 /**
- * Props for the DualBrush React Component
+ * Props for the SingleBrush React Component
  */
-interface DualBrushProps {
+interface SingleBrushProps {
   /**
    * Min and max numeric timestamps for the two brushes
    */
@@ -89,16 +88,16 @@ interface DualBrushProps {
 }
 
 /**
- * DualBrush React Component
+ * SingleBrush React Component
  * Dual brush component that overlays the document count chart
  *
- * @param props DualBrushProps component props
- * @returns The DualBrush component.
+ * @param props SingleBrushProps component props
+ * @returns The SingleBrush component.
  */
-export const DualBrush: FC<DualBrushProps> = (props) => {
+export const SingleBrush: FC<SingleBrushProps> = (props) => {
   const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
   const d3BrushContainer = useRef(null);
-  const brushes = useRef<DualBrush[]>([]);
+  const brushes = useRef<SingleBrush[]>([]);
 
   // We need to pass props to refs here because the d3-brush code doesn't consider
   // native React prop changes. The brush code does its own check whether these props changed then.
@@ -118,7 +117,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       function newBrush(id: string, start: number, end: number) {
         brushes.current.push({
           id,
-          brush: d3.brushX<DualBrush>().handleSize(BRUSH_HANDLE_SIZE).on('end', brushend),
+          brush: d3.brushX<SingleBrush>().handleSize(BRUSH_HANDLE_SIZE).on('end', brushend),
           start,
           end,
         });
@@ -189,13 +188,15 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
             // &&
             // deviationSelection[0] < baselineSelection[1] + minExtentPx
           ) {
-            const newBaselineMax = baselineSelection[1] + minExtentPx;
+            const newBaselineMax = baselineSelection[1];
             const newBaselineMin = Math.min(baselineSelection[0], newBaselineMax - minExtentPx);
-            // newWindowParameters.baselineMin = px2ts(newBaselineMin);
-            // newWindowParameters.baselineMax = px2ts(newBaselineMax);
+            newWindowParameters.baselineMin = px2ts(newBaselineMin);
+            newWindowParameters.baselineMax = px2ts(newBaselineMax);
           }
 
-          const snappedWindowParameters = newWindowParameters;
+          const snappedWindowParameters = snapTimestampsRef.current
+            ? getSnappedWindowParameters(newWindowParameters, snapTimestampsRef.current)
+            : newWindowParameters;
 
           const newBrushPx = {
             baselineMin: x(snappedWindowParameters.baselineMin) ?? 0,
@@ -242,7 +243,13 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           if (onChange) {
             // @TODO: remove
             console.log(`--@@ onChange snappedWindowParameters`, snappedWindowParameters);
-            onChange(snappedWindowParameters, newBrushPx);
+            onChange(
+              {
+                baselineMin: snappedWindowParameters.baselineMin,
+                baselineMax: snappedWindowParameters.baselineMax,
+              },
+              newBrushPx
+            );
           }
           drawBrushes();
         }
@@ -251,21 +258,21 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       function drawBrushes() {
         const mlBrushSelection = gBrushes
           .selectAll('.brush')
-          .data<DualBrush>(brushes.current, (d) => (d as DualBrush).id);
+          .data<SingleBrush>(brushes.current, (d) => (d as SingleBrush).id);
 
         // Set up new brushes
         mlBrushSelection
           .enter()
           .insert('g', '.brush')
           .attr('class', 'brush')
-          .attr('id', (b: DualBrush) => {
+          .attr('id', (b: SingleBrush) => {
             return 'aiops-brush-' + b.id;
           })
-          .attr('data-test-subj', (b: DualBrush) => {
+          .attr('data-test-subj', (b: SingleBrush) => {
             // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
             return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
-          .each((brushObject: DualBrush, i, n) => {
+          .each((brushObject: SingleBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
             // Ensure brush style is applied
             brushObject.brush.extent([
@@ -297,7 +304,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       function updateBrushes() {
         const mlBrushSelection = gBrushes
           .selectAll('.brush')
-          .data<DualBrush>(brushes.current, (d) => (d as DualBrush).id);
+          .data<SingleBrush>(brushes.current, (d) => (d as SingleBrush).id);
 
         mlBrushSelection.each(function (brushObject, i, n) {
           const x = d3
@@ -354,7 +361,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       {width > 0 && (
         <svg
           className="aiops-dual-brush"
-          data-test-subj="aiopsDualBrush"
+          data-test-subj="aiopsSingleBrush"
           width={width}
           height={BRUSH_HEIGHT}
           style={{ marginLeft }}

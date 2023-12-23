@@ -12,4 +12,5 @@ export {
   getSnappedWindowParameters,
   getWindowParameters,
   type WindowParameters,
+  type BaselineWindowParameters,
 } from './window_parameters';

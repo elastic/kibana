@@ -8,6 +8,7 @@
 export { DualBrush, DualBrushAnnotation } from './src/dual_brush';
 export { ProgressControls } from './src/progress_controls';
 export {
+  DocumentCountChartSingular,
   DocumentCountChart,
   type BrushSettings,
   type BrushSelectionUpdateHandler,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { DocumentCountChartSingular } from './document_count_chart_singular';
 export { DocumentCountChart } from './document_count_chart';
 export type {
   BrushSelectionUpdateHandler,

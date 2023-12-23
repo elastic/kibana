@@ -7,7 +7,7 @@
 
 import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
-import { DocumentCountChart } from '@kbn/aiops-components';
+import { DocumentCountChartSingular } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
@@ -194,7 +194,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
 
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
-          <DocumentCountChart
+          <DocumentCountChartSingular
             dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
