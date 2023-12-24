@@ -58,6 +58,11 @@ const BRUSH_HANDLE_ROUNDED_CORNER = 2;
  */
 interface SingleBrushProps {
   /**
+   * Unique id for the brush, as it's possible to have multiple instances
+   */
+
+  id?: string;
+  /**
    * Min and max numeric timestamps for the two brushes
    */
   windowParameters: WindowParameters;
@@ -95,7 +100,16 @@ interface SingleBrushProps {
  * @returns The SingleBrush component.
  */
 export const SingleBrush: FC<SingleBrushProps> = (props) => {
-  const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
+  const {
+    id: brushId = '',
+    windowParameters,
+    min,
+    max,
+    onChange,
+    marginLeft,
+    snapTimestamps,
+    width,
+  } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<SingleBrush[]>([]);
 
@@ -106,8 +120,9 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
   const minRef = useRef(min);
   const maxRef = useRef(max);
   const snapTimestampsRef = useRef(snapTimestamps);
-  const prevBaselinedWidth = useRef();
 
+  // @TODO: remove
+  console.log(`--@@SingleBrush`, brushId);
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
 
   useEffect(() => {
@@ -135,7 +150,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select('#aiops-brush-baseline');
+          const baselineBrush = d3.select(`#aiops-brush-${brushId}-baseline`);
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
           // const deviationBrush = d3.select('#aiops-brush-deviation');
@@ -145,7 +160,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
             return;
           }
           // @TODO: remove
-          console.log(`--@@brushend`, baselineSelection);
+          console.log(`--@@brushend ${brushId}`, baselineSelection);
 
           const baselineOverlay = baselineBrush.selectAll('.overlay');
           // const deviationOverlay = deviationBrush.selectAll('.overlay');
@@ -171,18 +186,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           };
 
           if (
-            id === 'deviation' &&
-            // deviationSelection &&
-            baselineSelection
-            //  &&
-            // deviationSelection[0] - minExtentPx < baselineSelection[1]
-          ) {
-            // const newDeviationMin = baselineSelection[1] + minExtentPx;
-            // const newDeviationMax = Math.max(deviationSelection[1], newDeviationMin + minExtentPx);
-            // newWindowParameters.deviationMin = px2ts(newDeviationMin);
-            // newWindowParameters.deviationMax = px2ts(newDeviationMax);
-          } else if (
-            id === 'baseline' &&
+            id === `${brushId}-baseline` &&
             // deviationSelection &&
             baselineSelection
             // &&
@@ -206,7 +210,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           };
 
           if (
-            id === 'baseline' &&
+            id === `${brushId}-baseline` &&
             (baselineSelection[0] !== newBrushPx.baselineMin ||
               baselineSelection[1] !== newBrushPx.baselineMax)
           ) {
@@ -323,10 +327,10 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
       }
 
       // @TODO: remove
-      console.log(`--@@brushes.current`, brushes.current);
+      console.log(`--@@brushes.current ${brushId}`, brushes.current);
       if (brushes.current.length !== 1) {
         widthRef.current = width;
-        newBrush('baseline', baselineMin, baselineMax);
+        newBrush(`${brushId}-baseline`, baselineMin, baselineMax);
         // newBrush('deviation', deviationMin, deviationMax);
       }
       // else if (
@@ -354,6 +358,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
     // deviationMax,
     snapTimestamps,
     onChange,
+    brushId,
   ]);
 
   return (

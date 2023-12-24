@@ -136,6 +136,9 @@ interface Props {
   initialSettings: InitialSettings;
 }
 
+const isBarBetween = (start: number, end: number, min: number, max: number) => {
+  return start >= min && end <= max;
+};
 export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService },
@@ -251,14 +254,36 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   };
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
   >();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
+  console.log(`--@@windowParameters`, windowParameters);
+
+  function referenceBrushSelectionUpdate(d: WindowParameters, force: boolean) {
     if (!isBrushCleared || force) {
-      setWindowParameters(d);
+      // @TODO: remove
+      console.log(`--@@referenceBrushSelectionUpdate`, d);
+      setWindowParameters({
+        ...windowParameters,
+        baselineMax: d.baselineMax,
+        baselineMin: d.baselineMin,
+      });
+    }
+    if (force) {
+      setIsBrushCleared(false);
+    }
+  }
+
+  function comparisonBrushSelectionUpdate(d: WindowParameters, force: boolean) {
+    if (!isBrushCleared || force) {
+      setWindowParameters({
+        ...windowParameters,
+        deviationMin: d.baselineMin,
+        deviationMax: d.baselineMax,
+      });
     }
     if (force) {
       setIsBrushCleared(false);
@@ -280,12 +305,46 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
         (documentCountStats?.interval ?? 0);
 
-      if (start >= windowParameters.baselineMin && end <= windowParameters.baselineMax) {
-        return colors.referenceColor;
-      }
-      if (start >= windowParameters.deviationMin && end <= windowParameters.deviationMax) {
-        return colors.comparisonColor;
-      }
+      const isBetweenReference = isBarBetween(
+        start,
+        end,
+        windowParameters.baselineMin,
+        windowParameters.baselineMax
+      );
+      const isBetweenDeviation = isBarBetween(
+        start,
+        end,
+        windowParameters.deviationMin,
+        windowParameters.deviationMax
+      );
+      if (isBetweenReference && isBetweenDeviation) return 'red';
+      if (isBetweenReference) return colors.referenceColor;
+      if (isBetweenDeviation) return colors.comparisonColor;
+      // if (
+      //   start >= windowParameters.baselineMin &&
+      //   end <= windowParameters.baselineMax &&
+      //   !isBetweenTwo
+      // ) {
+      //   return colors.referenceColor;
+      // }
+
+      // // @TODO: remove
+      // // console.log(
+      // //   windowParameters,
+      // //   `--@@start >= windowParameters.deviationMin && end <= windowParameters.deviationMax`,
+      // //   start >= windowParameters.deviationMin && end <= windowParameters.deviationMax
+      // // );
+      // if (
+      //   start >= windowParameters.deviationMin &&
+      //   end <= windowParameters.deviationMax &&
+      //   !isBetweenTwo
+      // ) {
+      //   return colors.comparisonColor;
+      // }
+
+      // if (isBetweenTwo) {
+      //   return 'red';
+      // }
 
       return null;
     },
@@ -322,7 +381,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 label={referenceIndexPatternLabel}
                 randomSampler={randomSampler}
                 reload={forceRefresh}
-                brushSelectionUpdateHandler={brushSelectionUpdate}
+                brushSelectionUpdateHandler={referenceBrushSelectionUpdate}
                 documentCountStats={documentCountStats}
                 documentCountStatsSplit={documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}
@@ -341,16 +400,6 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                   },
                   badgeWidth: 80,
                 }}
-                deviationBrush={{
-                  label: COMPARISON_LABEL,
-                  annotationStyle: {
-                    strokeWidth: 0,
-                    stroke: colors.comparisonColor,
-                    fill: colors.comparisonColor,
-                    opacity: 0.5,
-                  },
-                  badgeWidth: 90,
-                }}
                 stateManager={referenceStateManager}
               />
               <EuiHorizontalRule />
@@ -359,6 +408,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}
+                brushSelectionUpdateHandler={comparisonBrushSelectionUpdate}
                 documentCountStats={documentStatsProd.documentCountStats}
                 documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
                 isBrushCleared={isBrushCleared}
@@ -367,26 +417,17 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 sampleProbability={documentStatsProd.sampleProbability}
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
-                baselineBrush={{
-                  label: REFERENCE_LABEL,
-                  annotationStyle: {
-                    strokeWidth: 0,
-                    stroke: colors.referenceColor,
-                    fill: colors.referenceColor,
-                    opacity: 0.5,
-                  },
-                  badgeWidth: 80,
-                }}
-                deviationBrush={{
-                  label: COMPARISON_LABEL,
-                  annotationStyle: {
-                    strokeWidth: 0,
-                    stroke: colors.comparisonColor,
-                    fill: colors.comparisonColor,
-                    opacity: 0.5,
-                  },
-                  badgeWidth: 90,
-                }}
+                // @TODO: rename baselineBrush -> to brush
+                // baselineBrush={{
+                //   label: COMPARISON_LABEL,
+                //   annotationStyle: {
+                //     strokeWidth: 0,
+                //     stroke: colors.comparisonColor,
+                //     fill: colors.comparisonColor,
+                //     opacity: 0.5,
+                //   },
+                //   badgeWidth: 90,
+                // }}
                 stateManager={comparisonStateManager}
               />
             </EuiPanel>

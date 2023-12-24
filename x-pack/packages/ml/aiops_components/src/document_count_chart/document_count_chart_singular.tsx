@@ -94,6 +94,7 @@ export type BrushSelectionUpdateHandler = (
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
+  id?: string;
   /** List of Kibana services that are required as dependencies */
   dependencies: {
     data: DataPublicPluginStart;
@@ -169,6 +170,7 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) => {
   const {
+    id,
     dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
@@ -324,6 +326,8 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
 
+          // @TODO: remove
+          console.log(`--@@wpSnap`, wpSnap);
           if (brushSelectionUpdateHandler !== undefined) {
             brushSelectionUpdateHandler(
               wpSnap,
@@ -376,7 +380,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
 
   function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
     // @TODO: remove
-    console.log(`--@@onWindowParametersChange`, wp, `--@@wpPx`, wpPx);
+    console.log(`--@@onWindowParametersChang ${id}`, wp, `--@@wpPx`, wpPx);
     if (brushSelectionUpdateHandler === undefined) {
       return;
     }
@@ -448,6 +452,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
             }}
           >
             <SingleBrush
+              id={id}
               windowParameters={originalWindowParameters}
               min={timeRangeEarliest}
               max={timeRangeLatest + interval}

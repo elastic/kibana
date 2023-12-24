@@ -195,6 +195,7 @@ export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
           <DocumentCountChartSingular
+            id={id}
             dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
