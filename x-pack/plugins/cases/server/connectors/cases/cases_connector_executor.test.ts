@@ -27,6 +27,10 @@ import {
   reopenClosedCases,
   updatedCounterOracleRecord,
 } from './index.mock';
+import {
+  expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
+  expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
+} from './helpers.test';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -53,130 +57,6 @@ describe('CasesConnectorExecutor', () => {
   const resetCounters = () => {
     oracleIdCounter = 0;
     caseIdCounter = 0;
-  };
-
-  const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = () => {
-    expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
-      caseId: 'mock-id-1',
-      attachments: [
-        {
-          alertId: 'alert-id-0',
-          index: 'alert-index-0',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-        {
-          alertId: 'alert-id-2',
-          index: 'alert-index-2',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
-      caseId: 'mock-id-2',
-      attachments: [
-        {
-          alertId: 'alert-id-1',
-          index: 'alert-index-1',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
-      caseId: 'mock-id-3',
-      attachments: [
-        {
-          alertId: 'alert-id-3',
-          index: 'alert-index-3',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
-  };
-
-  const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter = () => {
-    expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
-      caseId: 'mock-id-1',
-      attachments: [
-        {
-          alertId: 'alert-id-1',
-          index: 'alert-index-1',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
-      caseId: 'mock-id-2',
-      attachments: [
-        {
-          alertId: 'alert-id-3',
-          index: 'alert-index-3',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
-
-    expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
-      caseId: 'mock-id-4',
-      attachments: [
-        {
-          alertId: 'alert-id-0',
-          index: 'alert-index-0',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-        {
-          alertId: 'alert-id-2',
-          index: 'alert-index-2',
-          owner: 'securitySolution',
-          rule: {
-            id: 'rule-test-id',
-            name: 'Test rule',
-          },
-          type: 'alert',
-        },
-      ],
-    });
   };
 
   beforeEach(() => {
@@ -386,7 +266,7 @@ describe('CasesConnectorExecutor', () => {
             ],
           });
 
-          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
       });
 
@@ -800,7 +680,7 @@ describe('CasesConnectorExecutor', () => {
             reopenClosedCases,
           });
 
-          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
 
         it('attaches alerts to reopened cases', async () => {
@@ -1428,7 +1308,7 @@ describe('CasesConnectorExecutor', () => {
         reopenClosedCases,
       });
 
-      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
 
     it('attaches the alerts correctly when bulkCreateRecord fails', async () => {
@@ -1469,7 +1349,7 @@ describe('CasesConnectorExecutor', () => {
         reopenClosedCases,
       });
 
-      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
 
     it('attaches the alerts correctly while creating a record and another node has already created it', async () => {
@@ -1515,7 +1395,7 @@ describe('CasesConnectorExecutor', () => {
 
       // called only once when the conflict occurs
       expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
-      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
 
     it('attaches the alerts correctly when increasing the counter (time window) fails', async () => {
@@ -1579,7 +1459,7 @@ describe('CasesConnectorExecutor', () => {
         reopenClosedCases,
       });
 
-      expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter();
+      expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter(casesClientMock);
     });
 
     it('attaches the alerts correctly when increasing the counter (time window) and another node has already increased it', async () => {
@@ -1775,7 +1655,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping();
+      expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
 
     it('attaches the alerts correctly when reopening a case and another node has already reopened it', async () => {
