@@ -12,10 +12,21 @@ import { CASE_ORACLE_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../common/c
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { createCasesClientMock } from '../../client/mocks';
-import { mockCases } from '../../mocks';
-import type { Cases } from '../../../common';
 import { CaseStatuses } from '@kbn/cases-components';
 import { CaseError } from '../../common/error';
+import {
+  alerts,
+  cases,
+  createdOracleRecord,
+  groupedAlertsWithOracleKey,
+  groupingBy,
+  oracleRecords,
+  rule,
+  owner,
+  timeWindow,
+  reopenClosedCases,
+  updatedCounterOracleRecord,
+} from './index.mock';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -26,114 +37,6 @@ const CasesServiceMock = CasesService as jest.Mock<CasesService>;
 const dateMathMock = dateMath as jest.Mocked<typeof dateMath>;
 
 describe('CasesConnectorExecutor', () => {
-  const alerts = [
-    {
-      _id: 'alert-id-0',
-      _index: 'alert-index-0',
-      'host.name': 'A',
-      'dest.ip': '0.0.0.1',
-      'source.ip': '0.0.0.2',
-    },
-    {
-      _id: 'alert-id-1',
-      _index: 'alert-index-1',
-      'host.name': 'B',
-      'dest.ip': '0.0.0.1',
-      'file.hash': '12345',
-    },
-    { _id: 'alert-id-2', _index: 'alert-index-2', 'host.name': 'A', 'dest.ip': '0.0.0.1' },
-    { _id: 'alert-id-3', _index: 'alert-index-3', 'host.name': 'B', 'dest.ip': '0.0.0.3' },
-    { _id: 'alert-id-4', _index: 'alert-index-4', 'host.name': 'A', 'source.ip': '0.0.0.5' },
-  ];
-
-  const groupingBy = ['host.name', 'dest.ip'];
-  const rule = {
-    id: 'rule-test-id',
-    name: 'Test rule',
-    tags: ['rule', 'test'],
-    ruleUrl: 'https://example.com/rules/rule-test-id',
-  };
-
-  const owner = 'cases';
-  const timeWindow = '7d';
-  const reopenClosedCases = false;
-
-  const groupedAlertsWithOracleKey = [
-    {
-      alerts: [alerts[0], alerts[2]],
-      grouping: { 'host.name': 'A', 'dest.ip': '0.0.0.1' },
-      oracleKey: 'so-oracle-record-0',
-    },
-    {
-      alerts: [alerts[1]],
-      grouping: { 'host.name': 'B', 'dest.ip': '0.0.0.1' },
-      oracleKey: 'so-oracle-record-1',
-    },
-    {
-      alerts: [alerts[3]],
-      grouping: { 'host.name': 'B', 'dest.ip': '0.0.0.3' },
-      oracleKey: 'so-oracle-record-2',
-    },
-  ];
-
-  const oracleRecords = [
-    {
-      id: groupedAlertsWithOracleKey[0].oracleKey,
-      version: 'so-version-0',
-      counter: 1,
-      cases: [],
-      rules: [],
-      grouping: groupedAlertsWithOracleKey[0].grouping,
-      createdAt: '2023-10-10T10:23:42.769Z',
-      updatedAt: '2023-10-10T10:23:42.769Z',
-    },
-    {
-      id: groupedAlertsWithOracleKey[1].oracleKey,
-      version: 'so-version-1',
-      counter: 1,
-      cases: [],
-      rules: [],
-      grouping: groupedAlertsWithOracleKey[1].grouping,
-      createdAt: '2023-10-12T10:23:42.769Z',
-      updatedAt: '2023-10-12T10:23:42.769Z',
-    },
-    {
-      id: groupedAlertsWithOracleKey[2].oracleKey,
-      type: CASE_ORACLE_SAVED_OBJECT,
-      message: 'Not found',
-      statusCode: 404,
-      error: 'Not found',
-    },
-  ];
-
-  const createdOracleRecord = {
-    ...oracleRecords[0],
-    id: groupedAlertsWithOracleKey[2].oracleKey,
-    grouping: groupedAlertsWithOracleKey[2].grouping,
-    version: 'so-version-2',
-    createdAt: '2023-11-13T10:23:42.769Z',
-    updatedAt: '2023-11-13T10:23:42.769Z',
-  };
-
-  const updatedCounterOracleRecord = {
-    ...oracleRecords[0],
-    // another node increased the counter
-    counter: 2,
-    id: groupedAlertsWithOracleKey[0].oracleKey,
-    grouping: groupedAlertsWithOracleKey[0].grouping,
-    version: 'so-version-3',
-    createdAt: '2023-11-13T10:23:42.769Z',
-    updatedAt: '2023-11-13T10:23:42.769Z',
-  };
-
-  const cases: Cases = mockCases.map((so) => ({
-    ...so.attributes,
-    id: so.id,
-    version: so.version ?? '',
-    totalComment: 0,
-    totalAlerts: 0,
-  }));
-
   const mockGetRecordId = jest.fn();
   const mockBulkGetRecords = jest.fn();
   const mockBulkCreateRecords = jest.fn();
