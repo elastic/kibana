@@ -9,9 +9,8 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
-import { PassThrough, Transform } from 'stream';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { PassThrough } from 'stream';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -28,7 +27,12 @@ import type {
   StreamActionParams,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import { StreamingResponse } from '../../../common/bedrock/types';
+import {
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
+} from '../../../common/bedrock/types';
+import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 
 interface SignedRequest {
   host: string;
@@ -55,6 +59,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.RUN,
       method: 'runApi',
       schema: RunActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.DASHBOARD,
+      method: 'getDashboard',
+      schema: DashboardActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -122,6 +132,42 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
+  public async getDashboard({
+    dashboardId,
+  }: DashboardActionParams): Promise<DashboardActionResponse> {
+    const privilege = (await this.esClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: ['.kibana-event-log-*'],
+            allow_restricted_indices: true,
+            privileges: ['read'],
+          },
+        ],
+      },
+    })) as { has_all_requested: boolean };
+
+    if (!privilege?.has_all_requested) {
+      return { available: false };
+    }
+
+    const response = await initDashboard({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      dashboardId,
+      genAIProvider: 'Bedrock',
+    });
+
+    return { available: response.success };
+  }
+
+  /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
@@ -178,19 +224,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<Transform> {
+  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages })),
       model,
     })) as unknown as IncomingMessage;
-    return res.pipe(transformToString());
+    return res;
   }
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * TODO: remove once streaming work is implemented in langchain mode for security solution
    * tracked here: https://github.com/elastic/security-team/issues/7363
-   * No token tracking implemented for this method
    */
   public async invokeAI({
     messages,
@@ -222,25 +267,3 @@ const formatBedrockBody = ({
     stop_sequences: ['\n\nHuman:'],
   };
 };
-
-/**
- * Takes in a readable stream of data and returns a Transform stream that
- * uses the AWS proprietary codec to parse the proprietary bedrock response into
- * a string of the response text alone, returning the response string to the stream
- */
-const transformToString = () =>
-  new Transform({
-    transform(chunk, encoding, callback) {
-      const encoder = new TextEncoder();
-      const decoder = new EventStreamCodec(toUtf8, fromUtf8);
-      const event = decoder.decode(chunk);
-      const body = JSON.parse(
-        Buffer.from(
-          JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,
-          'base64'
-        ).toString()
-      );
-      const newChunk = encoder.encode(body.completion);
-      callback(null, newChunk);
-    },
-  });

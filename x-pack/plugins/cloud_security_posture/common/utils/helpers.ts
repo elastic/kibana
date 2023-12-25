@@ -17,7 +17,7 @@ import {
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
@@ -30,7 +30,8 @@ import type {
   GcpCredentialsType,
   AzureCredentialsType,
   RuleSection,
-} from '../types';
+} from '../types_old';
+import type { BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
@@ -50,9 +51,9 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
 };
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+  `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
     section
-      ? ` AND ${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
       : ''
   }`;
 
@@ -124,7 +125,7 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   const azureCredentialType: AzureCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['azure.credentials.type']?.value;
 
-  if (awsCredentialType || gcpCredentialType) {
+  if (awsCredentialType || gcpCredentialType || azureCredentialType) {
     let credsToKeep: string[] = [' '];
     let credFields: string[] = [' '];
     if (awsCredentialType) {
@@ -171,4 +172,36 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
 
   // nothing to do, return unmutated policy
   return packagePolicy;
+};
+
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'CIS Kubernetes';
+    case 'cis_azure':
+      return 'CIS Azure';
+    case 'cis_aws':
+      return 'CIS AWS';
+    case 'cis_eks':
+      return 'CIS EKS';
+    case 'cis_gcp':
+      return 'CIS GCP';
+  }
+  return null;
+};
+
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'Kubernetes';
+    case 'cis_azure':
+      return 'Microsoft Azure';
+    case 'cis_aws':
+      return 'Amazon Web Services';
+    case 'cis_eks':
+      return 'Amazon Elastic Kubernetes Service';
+    case 'cis_gcp':
+      return 'Google Cloud Provider';
+  }
+  return null;
 };

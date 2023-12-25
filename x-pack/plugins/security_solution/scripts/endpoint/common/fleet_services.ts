@@ -9,20 +9,20 @@ import { map, memoize, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
+  AgentPolicy,
   AgentStatus,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+  CreatePackagePolicyRequest,
+  CreatePackagePolicyResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentsResponse,
-  GetPackagePoliciesRequest,
-  GetPackagePoliciesResponse,
-  CreateAgentPolicyRequest,
-  AgentPolicy,
-  CreateAgentPolicyResponse,
-  CreatePackagePolicyResponse,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
   GetInfoResponse,
   GetOneAgentPolicyResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  PackagePolicy,
   PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
 import {
@@ -47,12 +47,13 @@ import {
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
+  DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
+  GenerateServiceTokenResponse,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
-  PostAgentUnenrollResponse,
-  GenerateServiceTokenResponse,
   GetOutputsResponse,
+  PostAgentUnenrollResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
@@ -67,10 +68,9 @@ import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
-  wrapErrorAndRejectPromise,
 } from '../../../common/endpoint/data_loaders/utils';
 import { fetchKibanaStatus } from './stack_services';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -160,12 +160,14 @@ export const fetchFleetAgents = async (
  * @param log
  * @param hostname
  * @param timeoutMs
+ * @param esClient
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   log: ToolingLog,
   hostname: string,
-  timeoutMs: number = 30000
+  timeoutMs: number = 30000,
+  esClient: Client | undefined = undefined
 ): Promise<Agent> => {
   log.info(`Waiting for host [${hostname}] to enroll with fleet`);
 
@@ -210,6 +212,12 @@ export const waitForHostToEnroll = async (
 
   log.debug(`Host [${hostname}] has been enrolled with fleet`);
   log.verbose(found);
+
+  // Workaround for united metadata sometimes being unable to find docs in .fleet-agents index. This
+  // seems to be a timing issue with the index refresh.
+  await esClient?.search({
+    index: AGENTS_INDEX,
+  });
 
   return found;
 };
@@ -323,6 +331,28 @@ export const fetchAgentPolicy = async (
 };
 
 /**
+ * Delete a single Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const deleteAgentPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<DeleteAgentPolicyResponse> => {
+  return kbnClient
+    .request<DeleteAgentPolicyResponse>({
+      method: 'POST',
+      path: agentPolicyRouteService.getDeletePath(),
+      body: {
+        agentPolicyId,
+      },
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Retrieves a list of Fleet Integration policies
  * @param kbnClient
  * @param options
@@ -373,6 +403,14 @@ export const getAgentVersionMatchingCurrentStack = async (
   return version;
 };
 
+// Generates a file name using system arch and an agent version.
+export const getAgentFileName = (agentVersion: string): string => {
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  return `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+};
+
 interface ElasticArtifactSearchResponse {
   manifest: {
     'last-update-time': string;
@@ -414,11 +452,9 @@ export const getAgentDownloadUrl = async (
   log?: ToolingLog
 ): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
-    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const fileNameNoExtension = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
-  const agentFile = `${fileNameNoExtension}.tar.gz`;
+
+  const fileNameWithoutExtension = getAgentFileName(agentVersion);
+  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -444,7 +480,7 @@ export const getAgentDownloadUrl = async (
   return {
     url: searchResult.packages[agentFile].url,
     fileName: agentFile,
-    dirName: fileNameNoExtension,
+    dirName: fileNameWithoutExtension,
   };
 };
 
@@ -525,6 +561,32 @@ export const unEnrollFleetAgent = async (
   return data;
 };
 
+/**
+ * Un-enrolls a Fleet agent
+ *
+ * @param kbnClient
+ * @param policyId
+ */
+export const getAgentPolicyEnrollmentKey = async (
+  kbnClient: KbnClient,
+  policyId: string
+): Promise<string> => {
+  const { data } = await kbnClient
+    .request<GetEnrollmentAPIKeysResponse>({
+      method: 'GET',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      query: {
+        policy_id: policyId,
+      },
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+
+  return data.items?.[0]?.api_key;
+};
+
 export const generateFleetServiceToken = async (
   kbnClient: KbnClient,
   logger: ToolingLog
@@ -597,7 +659,7 @@ interface EnrollHostVmWithFleetOptions {
 /**
  * Installs the Elastic agent on the provided Host VM and enrolls with it Fleet.
  *
- * NOTE: this method assumes that FLeet-Server is already setup and running.
+ * NOTE: this method assumes that Fleet-Server is already setup and running.
  *
  * @param hostVm
  * @param kbnClient
@@ -714,13 +776,13 @@ export const getOrCreateDefaultAgentPolicy = async ({
   });
 
   if (existingPolicy.items[0]) {
-    log.info(`Re-using existing Fleet test agent policy`);
+    log.info(`Re-using existing Fleet test agent policy: [${existingPolicy.items[0].name}]`);
     log.verbose(existingPolicy.items[0]);
 
     return existingPolicy.items[0];
   }
 
-  log.info(`Creating new default test/dev Fleet agent policy`);
+  log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
     name: policyName,
@@ -739,7 +801,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
       body: newAgentPolicyData,
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 
   log.verbose(newAgentPolicy);
 
@@ -765,7 +827,7 @@ export const createIntegrationPolicy = async (
       },
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -784,7 +846,7 @@ export const fetchPackageInfo = async (
       method: 'GET',
     })
     .then((response) => response.data.item)
-    .catch(wrapErrorAndRejectPromise);
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 interface AddSentinelOneIntegrationToAgentPolicyOptions {

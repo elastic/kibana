@@ -49,6 +49,7 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.OVERVIEW),
   rt.literal(ContentTabIds.METADATA),
   rt.literal(ContentTabIds.PROCESSES),
+  rt.literal(ContentTabIds.PROFILING),
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),

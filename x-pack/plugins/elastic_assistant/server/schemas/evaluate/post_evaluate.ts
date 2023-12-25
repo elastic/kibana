@@ -26,16 +26,21 @@ const outputIndex = new t.Type<string, string, unknown>(
 /** Validates the URL path of a POST request to the `/evaluate` endpoint */
 export const PostEvaluatePathQuery = t.type({
   agents: t.string,
-  evaluationType: t.string,
-  evalModel: t.string,
-  outputIndex,
+  datasetName: t.union([t.string, t.undefined]),
+  evaluationType: t.union([t.string, t.undefined]),
+  evalModel: t.union([t.string, t.undefined]),
   models: t.string,
+  outputIndex,
+  projectName: t.union([t.string, t.undefined]),
+  runName: t.union([t.string, t.undefined]),
 });
 
 export type DatasetItem = t.TypeOf<typeof DatasetItem>;
 export const DatasetItem = t.type({
+  id: t.union([t.string, t.undefined]),
   input: t.string,
   reference: t.string,
+  tags: t.union([t.array(t.string), t.undefined]),
   prediction: t.union([t.string, t.undefined]),
 });
 
@@ -44,7 +49,7 @@ export const Dataset = t.array(DatasetItem);
 
 /** Validates the body of a POST request to the `/evaluate` endpoint */
 export const PostEvaluateBody = t.type({
-  dataset: Dataset,
+  dataset: t.union([Dataset, t.undefined]),
   evalPrompt: t.union([t.string, t.undefined]),
 });
 

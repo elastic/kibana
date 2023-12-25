@@ -9,12 +9,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import { Comparator, Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { MetricExpression } from '../../types';
-import { PreviewChart } from './preview_chart';
+import { getBufferThreshold, PreviewChart } from './preview_chart';
 
 jest.mock('../../../../utils/kibana_react');
 
@@ -55,7 +54,6 @@ describe('Preview chart', () => {
 
   it('should display no data message', async () => {
     const expression: MetricExpression = {
-      aggType: CUSTOM_AGGREGATOR,
       metrics: [
         {
           name: 'A',
@@ -70,5 +68,20 @@ describe('Preview chart', () => {
     };
     const { wrapper } = await setup(expression);
     expect(wrapper.find('[data-test-subj="thresholdRuleNoChartData"]').exists()).toBeTruthy();
+  });
+});
+
+describe('getBufferThreshold', () => {
+  const testData = [
+    { threshold: undefined, buffer: '0.00' },
+    { threshold: 0.1, buffer: '0.12' },
+    { threshold: 0.01, buffer: '0.02' },
+    { threshold: 0.001, buffer: '0.01' },
+    { threshold: 0.00098, buffer: '0.01' },
+    { threshold: 130, buffer: '143.00' },
+  ];
+
+  it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ threshold, buffer }) => {
+    expect(getBufferThreshold(threshold)).toBe(buffer);
   });
 });

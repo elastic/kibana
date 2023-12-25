@@ -69,7 +69,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
       {!isEditing ? (
         <>
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="serverlessSearchConnectorName">
               <h1>{connector.name || CONNECTOR_LABEL}</h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -80,6 +80,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
             `}
           >
             <EuiButtonIcon
+              data-test-subj="serverlessSearchEditNameButton"
               color="text"
               iconType="pencil"
               aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
@@ -97,7 +98,11 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
                 defaultMessage: 'Name',
               })}
             </EuiFormLabel>
-            <EuiFieldText onChange={(event) => setNewName(event.target.value)} value={newName} />
+            <EuiFieldText
+              data-test-subj="serverlessSearchEditNameFieldText"
+              onChange={(event) => setNewName(event.target.value)}
+              value={newName}
+            />
           </EuiFlexItem>
           <EuiSpacer />
           <EuiFlexGroup direction="row" justifyContent="center" alignItems="center">
@@ -108,6 +113,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
+                data-test-subj="serverlessSearchSaveNameButton"
                 color="primary"
                 fill
                 type="submit"
@@ -125,6 +131,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
+                data-test-subj="serverlessSearchCancelNameButton"
                 size="s"
                 isLoading={isLoading}
                 onClick={() => {

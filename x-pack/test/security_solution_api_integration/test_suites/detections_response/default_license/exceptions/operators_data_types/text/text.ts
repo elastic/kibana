@@ -13,7 +13,7 @@ import {
   deleteListsIndex,
   importFile,
   importTextFile,
-} from '../../../../../../../lists_api_integration/utils';
+} from '../../../../../lists_and_exception_lists/utils';
 import {
   createRule,
   createRuleWithExceptionEntries,

@@ -151,9 +151,7 @@ export class UserProfileService {
   private static buildRequiredPrivileges(owners: string[], security: SecurityPluginStart) {
     const privileges: string[] = [];
     for (const owner of owners) {
-      for (const operation of [Operations.updateCase.name, Operations.getCase.name]) {
-        privileges.push(security.authz.actions.cases.get(owner, operation));
-      }
+      privileges.push(security.authz.actions.cases.get(owner, Operations.getCase.name));
     }
 
     return privileges;

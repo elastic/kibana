@@ -31,7 +31,7 @@ import {
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
 import { waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';

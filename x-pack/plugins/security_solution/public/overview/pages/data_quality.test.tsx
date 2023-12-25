@@ -30,14 +30,6 @@ jest.mock('../../common/lib/kibana', () => {
   return {
     ...original,
     KibanaServices: mockKibanaServices,
-    useGetUserCasesPermissions: () => ({
-      all: false,
-      create: false,
-      read: true,
-      update: false,
-      delete: false,
-      push: false,
-    }),
     useKibana: jest.fn(),
     useUiSetting$: () => ['0,0.[000]'],
   };
@@ -79,6 +71,16 @@ describe('DataQuality', () => {
           },
           hooks: {
             useCasesAddToNewCaseFlyout: jest.fn(),
+          },
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: false,
+              create: false,
+              read: true,
+              update: false,
+              delete: false,
+              push: false,
+            }),
           },
         },
         configSettings: { ILMEnabled: true },
@@ -306,6 +308,16 @@ describe('DataQuality', () => {
             },
             hooks: {
               useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: false,
+                create: false,
+                read: true,
+                update: false,
+                delete: false,
+                push: false,
+              }),
             },
           },
           configSettings: { ILMEnabled: false },

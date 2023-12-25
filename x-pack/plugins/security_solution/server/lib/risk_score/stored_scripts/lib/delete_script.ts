@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { DeleteStoredScriptRequestBody } from '../../../../../common/api/risk_score';
+import type { DeleteStoredScriptRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const deleteStoredScript = async ({
   client,

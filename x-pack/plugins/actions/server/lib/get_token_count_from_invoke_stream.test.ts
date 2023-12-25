@@ -7,20 +7,15 @@
 import { Transform } from 'stream';
 import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
 import { loggerMock } from '@kbn/logging-mocks';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 
-interface StreamMock {
-  write: (data: string) => void;
-  fail: () => void;
-  complete: () => void;
-  transform: Transform;
-}
-
-function createStreamMock(): StreamMock {
+function createStreamMock() {
   const transform: Transform = new Transform({});
 
   return {
-    write: (data: string) => {
-      transform.push(`${data}\n`);
+    write: (data: unknown) => {
+      transform.push(data);
     },
     fail: () => {
       transform.emit('error', new Error('Stream failed'));
@@ -34,7 +29,10 @@ function createStreamMock(): StreamMock {
 }
 const logger = loggerMock.create();
 describe('getTokenCountFromInvokeStream', () => {
-  let stream: StreamMock;
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+  let stream: ReturnType<typeof createStreamMock>;
   const body = {
     messages: [
       {
@@ -48,36 +46,79 @@ describe('getTokenCountFromInvokeStream', () => {
     ],
   };
 
+  const chunk = {
+    object: 'chat.completion.chunk',
+    choices: [
+      {
+        delta: {
+          content: 'Single.',
+        },
+      },
+    ],
+  };
+
   const PROMPT_TOKEN_COUNT = 34;
   const COMPLETION_TOKEN_COUNT = 2;
-
-  beforeEach(() => {
-    stream = createStreamMock();
-    stream.write('Single');
-  });
-
-  describe('when a stream completes', () => {
-    beforeEach(async () => {
-      stream.complete();
+  describe('OpenAI stream', () => {
+    beforeEach(() => {
+      stream = createStreamMock();
+      stream.write(`data: ${JSON.stringify(chunk)}`);
     });
-    it('counts the prompt tokens', async () => {
+
+    it('counts the prompt + completion tokens for OpenAI response', async () => {
+      stream.complete();
       const tokens = await getTokenCountFromInvokeStream({
         responseStream: stream.transform,
         body,
         logger,
+        actionTypeId: '.gen-ai',
       });
       expect(tokens.prompt).toBe(PROMPT_TOKEN_COUNT);
       expect(tokens.completion).toBe(COMPLETION_TOKEN_COUNT);
       expect(tokens.total).toBe(PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT);
     });
-  });
-
-  describe('when a stream fails', () => {
     it('resolves the promise with the correct prompt tokens', async () => {
       const tokenPromise = getTokenCountFromInvokeStream({
         responseStream: stream.transform,
         body,
         logger,
+        actionTypeId: '.gen-ai',
+      });
+
+      stream.fail();
+
+      await expect(tokenPromise).resolves.toEqual({
+        prompt: PROMPT_TOKEN_COUNT,
+        total: PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT,
+        completion: COMPLETION_TOKEN_COUNT,
+      });
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+  describe('Bedrock stream', () => {
+    beforeEach(() => {
+      stream = createStreamMock();
+      stream.write(encodeBedrockResponse('Simple.'));
+    });
+
+    it('counts the prompt + completion tokens for OpenAI response', async () => {
+      stream.complete();
+      const tokens = await getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body,
+        logger,
+        actionTypeId: '.bedrock',
+      });
+      expect(tokens.prompt).toBe(PROMPT_TOKEN_COUNT);
+      expect(tokens.completion).toBe(COMPLETION_TOKEN_COUNT);
+      expect(tokens.total).toBe(PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT);
+    });
+    it('resolves the promise with the correct prompt tokens', async () => {
+      const tokenPromise = getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body,
+        logger,
+        actionTypeId: '.bedrock',
       });
 
       stream.fail();
@@ -91,3 +132,16 @@ describe('getTokenCountFromInvokeStream', () => {
     });
   });
 });
+
+function encodeBedrockResponse(completion: string) {
+  return new EventStreamCodec(toUtf8, fromUtf8).encode({
+    headers: {},
+    body: Uint8Array.from(
+      Buffer.from(
+        JSON.stringify({
+          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+        })
+      )
+    ),
+  });
+}

@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
   const browser = getService('browser');
 
@@ -40,8 +41,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
+            await kibanaServer.uiSettings.update({
+              'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
+            });
             await PageObjects.home.launchSampleDashboard(name);
-            await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
             await PageObjects.header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
             const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -49,9 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
         it('should render visualizations', async () => {
+          await kibanaServer.uiSettings.update({
+            'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
+          });
           await PageObjects.home.launchSampleDashboard('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);

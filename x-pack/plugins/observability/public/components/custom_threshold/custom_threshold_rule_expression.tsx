@@ -37,7 +37,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { CUSTOM_AGGREGATOR } from '../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
@@ -53,7 +52,6 @@ type Props = Omit<
 >;
 
 export const defaultExpression: MetricExpression = {
-  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {
@@ -61,7 +59,7 @@ export const defaultExpression: MetricExpression = {
       aggType: Aggregators.COUNT,
     },
   ],
-  threshold: [1000],
+  threshold: [100],
   timeSize: 1,
   timeUnit: 'm',
 };
@@ -98,14 +96,24 @@ export default function Expressions(props: Props) {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
       if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
-        const newSearchSource = data.search.searchSource.createEmpty();
-        newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-        if (defaultDataView) {
-          newSearchSource.setField('index', defaultDataView);
-          setDataView(defaultDataView);
+        if (metadata?.currentOptions?.searchConfiguration) {
+          initialSearchConfiguration = {
+            ...metadata.currentOptions.searchConfiguration,
+            query: {
+              query: ruleParams.searchConfiguration?.query ?? '',
+              language: 'kuery',
+            },
+          };
+        } else {
+          const newSearchSource = data.search.searchSource.createEmpty();
+          newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
+          const defaultDataView = await data.dataViews.getDefaultDataView();
+          if (defaultDataView) {
+            newSearchSource.setField('index', defaultDataView);
+            setDataView(defaultDataView);
+          }
+          initialSearchConfiguration = newSearchSource.getSerializedFields();
         }
-        initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
 
       try {
@@ -153,7 +161,15 @@ export default function Expressions(props: Props) {
       setTimeSize(ruleParams.criteria[0].timeSize);
       setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
-      setRuleParams('criteria', [defaultExpression]);
+      preFillCriteria();
+    }
+
+    if (!ruleParams.filterQuery) {
+      preFillFilterQuery();
+    }
+
+    if (!ruleParams.groupBy) {
+      preFillGroupBy();
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
@@ -260,6 +276,42 @@ export default function Expressions(props: Props) {
     },
     [ruleParams.criteria, setRuleParams]
   );
+
+  const preFillFilterQuery = useCallback(() => {
+    const md = metadata;
+
+    if (md && md.currentOptions?.filterQuery) {
+      setRuleParams('searchConfiguration', {
+        ...ruleParams.searchConfiguration,
+        query: {
+          query: md.currentOptions.filterQuery,
+          language: 'kuery',
+        },
+      });
+    }
+  }, [metadata, setRuleParams, ruleParams.searchConfiguration]);
+
+  const preFillCriteria = useCallback(() => {
+    const md = metadata;
+    if (md?.currentOptions?.criteria?.length) {
+      setRuleParams(
+        'criteria',
+        md.currentOptions.criteria.map((criterion) => ({
+          ...defaultExpression,
+          ...criterion,
+        }))
+      );
+    } else {
+      setRuleParams('criteria', [defaultExpression]);
+    }
+  }, [metadata, setRuleParams]);
+
+  const preFillGroupBy = useCallback(() => {
+    const md = metadata;
+    if (md && md.currentOptions?.groupBy) {
+      setRuleParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [metadata, setRuleParams]);
 
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,

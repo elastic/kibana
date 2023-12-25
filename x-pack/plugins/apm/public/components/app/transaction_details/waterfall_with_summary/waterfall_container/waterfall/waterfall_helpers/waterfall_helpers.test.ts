@@ -16,7 +16,7 @@ import {
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
-  getHasOrphanTraceItems,
+  getOrphanTraceItemsCount,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
@@ -719,7 +719,7 @@ describe('waterfall_helpers', () => {
     });
   });
 
-  describe('getHasOrphanTraceItems', () => {
+  describe('getOrphanTraceItemsCount', () => {
     const myTransactionItem = {
       processor: { event: 'transaction' },
       trace: { id: 'myTrace' },
@@ -728,7 +728,7 @@ describe('waterfall_helpers', () => {
       },
     } as WaterfallTransaction;
 
-    it('should return false if there are no orphan items', () => {
+    it('should return missing items count: 0 if there are no orphan items', () => {
       const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
         myTransactionItem,
         {
@@ -741,10 +741,10 @@ describe('waterfall_helpers', () => {
           },
         } as WaterfallSpan,
       ];
-      expect(getHasOrphanTraceItems(traceItems)).toBe(false);
+      expect(getOrphanTraceItemsCount(traceItems)).toBe(0);
     });
 
-    it('should return true if there are orphan items', () => {
+    it('should return missing items count if there are orphan items', () => {
       const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
         myTransactionItem,
         {
@@ -757,7 +757,7 @@ describe('waterfall_helpers', () => {
           },
         } as WaterfallSpan,
       ];
-      expect(getHasOrphanTraceItems(traceItems)).toBe(true);
+      expect(getOrphanTraceItemsCount(traceItems)).toBe(1);
     });
   });
 });

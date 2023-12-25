@@ -26,8 +26,9 @@ case $KIBANA_DOCKER_CONTEXT in
   ubi8)
     DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
-  ubi9)
-    DOCKER_CONTEXT_FILE="kibana-ubi9-$FULL_VERSION-docker-build-context.tar.gz"
+  ubi)
+    # Currently ubi9.  After ubi8 we're moving to a version agnostic filename
+    DOCKER_CONTEXT_FILE="kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
   ironbank)
     DOCKER_CONTEXT_FILE="kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"

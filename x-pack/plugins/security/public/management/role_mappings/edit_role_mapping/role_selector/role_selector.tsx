@@ -14,7 +14,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
-import type { Role, RoleMapping } from '../../../../../common/model';
+import type { Role, RoleMapping } from '../../../../../common';
 import { isRoleDeprecated } from '../../../../../common/model';
 import { RoleComboBox } from '../../../role_combo_box';
 import type { RolesAPIClient } from '../../../roles';
