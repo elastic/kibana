@@ -12,6 +12,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PersistenceAPI } from '../types';
+import { DataViewLazy } from './data_view_lazy';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -433,6 +434,19 @@ export class DataViewsService {
       name: obj?.attributes?.name,
     }));
   };
+
+  /*
+
+  getAllDataViewAsync = async (refresh: boolean = false) => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+    return this.savedObjectsCache.map((obj) => new DataViewAsync(obj));
+  };
+  */
 
   /**
    * Clear index pattern saved objects cache.
@@ -880,6 +894,23 @@ export class DataViewsService {
     }
 
     return spec;
+  };
+
+  getDataViewLazy = async (id: string) => {
+    // todo add cache
+    const savedObject = await this.savedObjectsClient.get(id);
+    const spec = this.savedObjectToSpec(savedObject);
+    // todo make shared code
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+    return new DataViewLazy({
+      spec,
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+      apiClient: this.apiClient,
+    });
   };
 
   /**

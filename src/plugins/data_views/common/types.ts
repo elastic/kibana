@@ -306,7 +306,8 @@ export interface PersistenceAPI {
 export interface GetFieldsOptions {
   pattern: string;
   type?: string;
-  lookBack?: boolean;
+  // lookBack?: boolean;
+  // todo, these shouldn't be passed.
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
