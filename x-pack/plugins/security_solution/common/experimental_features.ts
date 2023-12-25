@@ -94,11 +94,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -124,11 +119,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
 
   /**
    * Disables the timeline save tour.
@@ -162,7 +152,7 @@ export const allowedExperimentalValues = Object.freeze({
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
