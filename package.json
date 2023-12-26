@@ -1138,7 +1138,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@babel/register": "^7.22.15",
     "@babel/traverse": "^7.23.6",
-    "@babel/types": "^7.23.6",
+    "@babel/types": "^7.21.2",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
     "@cypress/code-coverage": "^3.10.0",
