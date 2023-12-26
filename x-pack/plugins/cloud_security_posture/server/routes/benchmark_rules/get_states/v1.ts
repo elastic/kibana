@@ -49,3 +49,17 @@ export const getCspBenchmarkRulesStatesHandler = async (
     );
   }
 };
+
+export const getMuteBenchmarkRulesIds = async (
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
+): Promise<string[]> => {
+  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+
+  const mutedRuleIds = [];
+  for (const [_, rule] of Object.entries(rulesStates)) {
+    if (rule.muted) {
+      mutedRuleIds.push(rule.rule_id);
+    }
+  }
+  return mutedRuleIds;
+};
