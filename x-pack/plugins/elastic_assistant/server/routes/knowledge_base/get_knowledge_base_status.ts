@@ -41,7 +41,9 @@ export const getKnowledgeBaseStatusRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
         // Get a scoped esClient for finding the status of the Knowledge Base index, pipeline, and documents
@@ -52,6 +54,7 @@ export const getKnowledgeBaseStatusRoute = (
           esClient,
           KNOWLEDGE_BASE_INDEX_PATTERN,
           logger,
+          telemetry,
           elserId,
           kbResource
         );
