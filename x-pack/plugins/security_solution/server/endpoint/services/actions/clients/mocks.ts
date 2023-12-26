@@ -154,10 +154,6 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
     return result;
   });
 
-  (client.execute as jest.Mock).mockImplementation(async () => {
-    return createConnectorAcitonExecuteResponseMock();
-  });
-
   return client;
 };
 
@@ -180,10 +176,10 @@ const createConnectorMock = (
   );
 };
 
-const createConnectorAcitonExecuteResponseMock = (
-  overrides: DeepPartial<ActionTypeExecutorResult<{}>> = {}
+const createConnectorActionExecuteResponseMock = <TData>(
+  overrides: DeepPartial<ActionTypeExecutorResult<TData>> = {}
 ): ActionTypeExecutorResult<{}> => {
-  const result: ActionTypeExecutorResult<{}> = {
+  const result: ActionTypeExecutorResult<TData> = {
     actionId: 'execute-response-mock-1',
     data: undefined,
     message: 'some mock message',
@@ -199,11 +195,13 @@ export const responseActionsClientMock = Object.freeze({
   createConstructorOptions: createConstructorOptionsMock,
   createIsolateOptions: createIsolateOptionsMock,
   createReleaseOptions: createIsolateOptionsMock,
+
   // TODO:PT add more methods to get option mocks for other class methods
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 
+  // Some common mocks when working with connector actions
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConnector: createConnectorMock,
-  createConnectorActionExecuteResponse: createConnectorAcitonExecuteResponseMock,
+  createConnectorActionExecuteResponse: createConnectorActionExecuteResponseMock,
 });

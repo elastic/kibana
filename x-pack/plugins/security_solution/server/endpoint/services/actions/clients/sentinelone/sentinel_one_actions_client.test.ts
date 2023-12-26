@@ -7,11 +7,12 @@
 
 import type { ResponseActionsClient } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
-import type { SentinelOneActionsClientOptions } from '../../..';
-import { SentinelOneActionsClient } from '../../..';
+import { SentinelOneActionsClient } from './sentinel_one_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import type { SentinelOneActionsClientOptionsMock } from './mock';
+import { sentinelOneMock } from './mock';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -25,7 +26,7 @@ jest.mock('../../action_details_by_id', () => {
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 
 describe('SentinelOneActionsClient class', () => {
-  let classConstructorOptions: SentinelOneActionsClientOptions;
+  let classConstructorOptions: SentinelOneActionsClientOptionsMock;
   let s1ActionsClient: ResponseActionsClient;
   let connectorActionsMock: ActionsClientMock;
 
@@ -33,19 +34,12 @@ describe('SentinelOneActionsClient class', () => {
     responseActionsClientMock.createIsolateOptions({ agent_type: 'sentinel_one' });
 
   beforeEach(() => {
-    connectorActionsMock = responseActionsClientMock.createConnectorActionsClient();
-
-    connectorActionsMock.getAll();
-
-    classConstructorOptions = {
-      ...responseActionsClientMock.createConstructorOptions(),
-      connectorActions: connectorActionsMock,
-    };
+    classConstructorOptions = sentinelOneMock.createConstructorOptions();
+    connectorActionsMock = classConstructorOptions.connectorActions;
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
   });
 
   it.each([
-    'release',
     'killProcess',
     'suspendProcess',
     'runningProcesses',
@@ -163,5 +157,54 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
     });
+  });
+
+  describe('#release()', () => {
+    // it('should send action to sentinelone', async () => {
+    //   await s1ActionsClient.isolate(createS1IsolateOptions());
+    //
+    //   expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+    //     actionId: 's1-connector-instance-id',
+    //     params: {
+    //       subAction: 'isolateHost',
+    //       subActionParams: {
+    //         uuid: '1-2-3',
+    //       },
+    //     },
+    //   });
+    // });
+    //
+    // it('should write action request and response to endpoint indexes', async () => {
+    //   await s1ActionsClient.isolate(createS1IsolateOptions());
+    //
+    //   expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
+    //   // FIXME:PT once we start writing the Response, check above should be removed and new assertion added for it
+    //   expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
+    //     1,
+    //     {
+    //       document: {
+    //         '@timestamp': expect.any(String),
+    //         EndpointActions: {
+    //           action_id: expect.any(String),
+    //           data: { command: 'isolate', comment: 'test comment', parameters: undefined },
+    //           expiration: expect.any(String),
+    //           input_type: 'sentinel_one',
+    //           type: 'INPUT_ACTION',
+    //         },
+    //         agent: { id: ['1-2-3'] },
+    //         user: { id: 'foo' },
+    //       },
+    //       index: '.logs-endpoint.actions-default',
+    //       refresh: 'wait_for',
+    //     },
+    //     { meta: true }
+    //   );
+    // });
+    //
+    // it('should return action details', async () => {
+    //   await s1ActionsClient.isolate(createS1IsolateOptions());
+    //
+    //   expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    // });
   });
 });
