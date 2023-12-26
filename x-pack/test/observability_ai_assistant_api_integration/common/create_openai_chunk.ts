@@ -19,6 +19,7 @@ export function createOpenAiChunk(
     created: 0,
     model: 'gpt-4',
     choices: [
+      // @ts-expect-error
       {
         delta: msg,
       },
