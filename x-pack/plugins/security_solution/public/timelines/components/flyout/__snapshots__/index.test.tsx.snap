@@ -25,10 +25,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   white-space: nowrap;
 }
 
-.c5 {
-  white-space: nowrap;
-}
-
 .c1 {
   overflow-x: auto;
 }
@@ -69,26 +65,22 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiPopover emotion-euiPopover"
+                  class="euiPopover emotion-euiPopover-inline-block"
                   id="timelineSettingsPopover"
                 >
-                  <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                  <button
+                    aria-label="Add new timeline or template"
+                    class="euiButtonIcon add-timeline-button emotion-euiButtonIcon-xs-empty-primary"
+                    data-test-subj="timeline-create-open-control"
+                    type="button"
                   >
-                    <button
-                      aria-label="Add new timeline or template"
-                      class="euiButtonIcon add-timeline-button emotion-euiButtonIcon-xs-empty-primary"
-                      data-test-subj="timeline-create-open-control"
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="plusInCircle"
-                      />
-                    </button>
-                  </div>
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="plusInCircle"
+                    />
+                  </button>
                 </div>
               </div>
             </div>
@@ -155,8 +147,8 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText c5 emotion-euiText-xs"
-                data-test-subj="timeline-status"
+                class="euiText emotion-euiText-xs"
+                data-test-subj="timeline-save-status"
               >
                 <span
                   class="euiBadge emotion-euiBadge-warning"

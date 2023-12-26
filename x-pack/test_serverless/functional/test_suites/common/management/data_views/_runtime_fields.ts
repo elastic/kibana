@@ -16,7 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
-  describe('runtime fields', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/173580
+  // FLAKY: https://github.com/elastic/kibana/issues/173558
+  // FLAKY: https://github.com/elastic/kibana/issues/173572
+  describe.skip('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
