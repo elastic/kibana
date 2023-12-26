@@ -279,7 +279,8 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
 
 const getFindingsScoresDocIndexingPromises = (
   esClient: ElasticsearchClient,
-  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets']
+  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets'],
+  isCustomScore: boolean
 ) =>
   scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
     // creating score per cluster id objects
@@ -329,6 +330,7 @@ const getFindingsScoresDocIndexingPromises = (
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
         score_by_benchmark_id: benchmarkStats,
+        custom_score: isCustomScore,
       },
     });
   });
@@ -414,12 +416,14 @@ export const aggregateLatestFindings = async (
     // iterating over the buckets and return promises which will index a modified document into the scores index
     const findingsCustomScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
       esClient,
-      customScoresByPolicyTemplatesBuckets
+      customScoresByPolicyTemplatesBuckets,
+      true
     );
 
     const findingsFullScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
       esClient,
-      customScoresByPolicyTemplatesBuckets
+      fullScoresByPolicyTemplatesBuckets,
+      false
     );
 
     const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
@@ -431,9 +435,11 @@ export const aggregateLatestFindings = async (
 
     // executing indexing commands
     await Promise.all(
-      [...findingsCustomScoresDocIndexingPromises, vulnStatsTrendDocIndexingPromises].filter(
-        Boolean
-      )
+      [
+        ...findingsCustomScoresDocIndexingPromises,
+        findingsFullScoresDocIndexingPromises,
+        vulnStatsTrendDocIndexingPromises,
+      ].filter(Boolean)
     );
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);

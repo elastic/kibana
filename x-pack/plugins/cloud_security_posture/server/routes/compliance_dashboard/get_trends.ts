@@ -61,6 +61,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
             lte: 'now',
           },
         },
+        // term: { custom_score: true },
       },
     },
   },
