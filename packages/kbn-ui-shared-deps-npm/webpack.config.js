@@ -36,11 +36,6 @@ module.exports = (_, argv) => {
         'core-js/stable',
         'whatwg-fetch',
         'symbol-observable',
-        // Parts of node-libs-browser that are used in many places across Kibana
-        'buffer',
-        'punycode',
-        'util',
-
         /**
          * babel runtime helpers referenced from entry chunks
          * determined by running:
