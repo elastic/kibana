@@ -18,8 +18,8 @@ const mockedGetArchiveEntry = getArchiveEntry as jest.MockedFunction<typeof getA
 describe('Install pipeline tests', () => {
   describe('prepareToInstallPipelines', () => {
     it('should work with datastream without ingest pipeline define in the package', async () => {
-      const res = prepareToInstallPipelines(
-        {
+      const res = prepareToInstallPipelines({
+        packageInfo: {
           version: '1.0.0',
           data_streams: [
             {
@@ -29,9 +29,10 @@ describe('Install pipeline tests', () => {
               path: '/datasettest',
             },
           ],
-        } as any,
-        []
-      );
+        },
+        paths: [],
+        assetsMap: new Map(),
+      } as any);
 
       expect(res.assetsToAdd).toEqual([{ id: 'logs-datasettest-1.0.0', type: 'ingest_pipeline' }]);
       const esClient = elasticsearchClientMock.createInternalClient();
@@ -50,8 +51,8 @@ describe('Install pipeline tests', () => {
     });
 
     it('should work with datastream with ingest pipelines define in the package', async () => {
-      const res = prepareToInstallPipelines(
-        {
+      const res = prepareToInstallPipelines({
+        packageInfo: {
           version: '1.0.0',
           data_streams: [
             {
@@ -62,12 +63,22 @@ describe('Install pipeline tests', () => {
               ingest_pipeline: 'default',
             },
           ],
-        } as any,
-        [
+        },
+        paths: [
           'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/default.yml',
           'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/standard.yml',
-        ]
-      );
+        ],
+        assetsMap: new Map([
+          [
+            'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/default.yml',
+            Buffer.from('description: test'),
+          ],
+          [
+            'packagetest-1.0.0/data_stream/datasettest/elasticsearch/ingest_pipeline/standard.yml',
+            Buffer.from('description: test'),
+          ],
+        ]),
+      } as any);
       expect(res.assetsToAdd).toEqual([
         { id: 'logs-datasettest-1.0.0', type: 'ingest_pipeline' },
         { id: 'logs-datasettest-1.0.0-standard', type: 'ingest_pipeline' },

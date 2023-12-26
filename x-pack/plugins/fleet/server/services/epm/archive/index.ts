@@ -34,6 +34,32 @@ export interface ArchiveEntry {
   buffer?: Buffer;
 }
 
+export async function unpackBufferToAssetsMap({
+  name,
+  version,
+  contentType,
+  archiveBuffer,
+}: {
+  name: string;
+  version: string;
+  contentType: string;
+  archiveBuffer: Buffer;
+}): Promise<{ paths: string[]; assetsMap: Map<string, Buffer | undefined> }> {
+  const assetsMap = new Map<string, Buffer | undefined>();
+  const paths: string[] = [];
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+
+  entries.forEach((entry) => {
+    const { path, buffer } = entry;
+    if (buffer) {
+      assetsMap.set(path, buffer);
+      paths.push(path);
+    }
+  });
+
+  return { assetsMap, paths };
+}
+
 export async function unpackBufferToCache({
   name,
   version,
@@ -153,6 +179,13 @@ export function getPathParts(path: string): AssetParts {
 
 export function getAsset(key: string) {
   const buffer = getArchiveEntry(key);
+  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
+
+  return buffer;
+}
+
+export function getAssetFromAssetsMap(assetsMap: Map<string, Buffer | undefined>, key: string) {
+  const buffer = assetsMap.get(key);
   if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 
   return buffer;

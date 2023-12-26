@@ -125,6 +125,12 @@ export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
+export interface PackageInstallContext {
+  packageInfo: InstallablePackage;
+  assetsMap: Map<string, Buffer | undefined>;
+  paths: string[];
+}
+
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
   Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;

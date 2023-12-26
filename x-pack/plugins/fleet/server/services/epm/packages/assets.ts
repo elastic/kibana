@@ -6,7 +6,7 @@
  */
 
 import type { PackageInfo } from '../../../types';
-import { getArchiveFilelist, getAsset } from '../archive';
+import { getArchiveFilelist, getAsset, getAssetFromAssetsMap } from '../archive';
 import type { ArchiveEntry } from '../archive';
 
 const maybeFilterByDataset =
@@ -44,6 +44,42 @@ export function getAssets(
   }
 
   return assets.filter(filter);
+}
+
+export function getAssetsFromAssetsMap(
+  packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+  assetsMap: Map<string, Buffer | undefined>,
+  filter = (path: string): boolean => true,
+  datasetName?: string
+): string[] {
+  const paths = [...assetsMap.keys()];
+
+  if (!paths || paths.length === 0) return [];
+
+  // filter out directories
+  let assets: string[] = paths.filter((path) => !path.endsWith('/'));
+
+  if (datasetName) {
+    assets = paths.filter(maybeFilterByDataset(packageInfo, datasetName));
+  }
+
+  return assets.filter(filter);
+}
+
+export function getAssetsDataFromAssetsMap(
+  packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+  assetsMap: Map<string, Buffer | undefined>,
+  filter = (path: string): boolean => true,
+  datasetName?: string
+) {
+  const assets = getAssetsFromAssetsMap(packageInfo, assetsMap, filter, datasetName);
+  const entries: ArchiveEntry[] = assets.map((path) => {
+    const buffer = getAssetFromAssetsMap(assetsMap, path);
+
+    return { path, buffer };
+  });
+
+  return entries;
 }
 
 export function getAssetsData(

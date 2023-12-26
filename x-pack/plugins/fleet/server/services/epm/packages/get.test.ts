@@ -783,6 +783,7 @@ test: invalid manifest
       } as RegistryPackage);
       MockRegistry.getPackage.mockResolvedValue({
         paths: [],
+        assetsMap: new Map(),
         packageInfo: {
           name: 'my-package',
           version: '1.0.0',

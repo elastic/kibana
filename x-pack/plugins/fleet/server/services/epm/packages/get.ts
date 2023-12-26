@@ -665,6 +665,37 @@ export async function getInstallation(options: {
   return savedObject?.attributes;
 }
 
+/**
+ * Return an installed package with his related assets
+ */
+export async function getInstalledPackageWithAssets(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  logger?: Logger;
+}) {
+  const installation = await getInstallation(options);
+  if (!installation) {
+    return;
+  }
+  const esPackage = await getEsPackage(
+    installation.name,
+    installation.version,
+    installation.package_assets ?? [],
+    options.savedObjectsClient
+  );
+
+  if (!esPackage) {
+    return;
+  }
+
+  return {
+    installation,
+    assetsMap: esPackage.assetsMap,
+    packageInfo: esPackage.packageInfo,
+    paths: esPackage.paths,
+  };
+}
+
 export async function getInstallationsByName(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgNames: string[];
