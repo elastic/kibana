@@ -97,10 +97,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
       return {
         field: dateField.name,
-        format:
-          dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-            ? 'strict_date_time'
-            : 'date_time',
+        format: 'strict_date_time',
       };
     });
 
