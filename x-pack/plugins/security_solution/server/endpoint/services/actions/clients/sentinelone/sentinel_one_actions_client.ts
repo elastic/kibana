@@ -218,6 +218,5 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-    //
   }
 }

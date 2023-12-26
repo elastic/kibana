@@ -16,6 +16,7 @@ import type {
   ActionDetails,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -491,6 +492,8 @@ describe('ResponseActionsClientImpl base class', () => {
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
+  protected readonly agentType = 'endpoint';
+
   public async updateCases(options: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     return super.updateCases(options);
   }
@@ -507,7 +510,9 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionRequestToEndpointIndex(actionRequest);
   }
 
-  public async writeActionResponseToEndpointIndex<TOutputContent extends object = object>(
+  public async writeActionResponseToEndpointIndex<
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);

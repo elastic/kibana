@@ -45,6 +45,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -85,7 +86,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
     Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends object = {}
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -281,7 +282,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @param options
    * @protected
    */
-  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = {}>({
+  protected async writeActionResponseToEndpointIndex<
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >({
     actionId,
     error,
     agentId,
@@ -308,7 +311,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     this.log.debug(`Writing response action response:\n${dump(doc)}`);
 
     await this.options.esClient
-      .index<LogsEndpointActionResponse>({
+      .index<LogsEndpointActionResponse<TOutputContent>>({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
         refresh: 'wait_for',

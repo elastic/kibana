@@ -13,6 +13,7 @@ import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   HostMetadata,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import { getActionDetailsById } from '..';
@@ -26,7 +27,7 @@ export const actionCreateService = (
   endpointContext: EndpointAppContext
 ): ActionCreateService => {
   const createAction = async <
-    TOutputContent extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,

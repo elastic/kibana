@@ -23,7 +23,9 @@ import type {
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-export interface ActionResponseOutput<TOutputContent extends object = object> {
+export interface ActionResponseOutput<
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+> {
   type: 'json' | 'text';
   content: TOutputContent;
 }
@@ -96,7 +98,7 @@ export const ActivityLogItemTypes = {
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
 > {
   action_id: string;
   data: EndpointActionData<TParameters, TOutputContent>;
@@ -146,7 +148,9 @@ export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
+export interface LogsEndpointActionResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
@@ -190,9 +194,19 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters;
 
+/** Output content of the different response actions */
+export type EndpointActionResponseDataOutput =
+  | Record<string, never> // Empty object
+  | ResponseActionExecuteOutputContent
+  | ResponseActionGetFileOutputContent
+  | ResponseActionUploadOutputContent
+  | GetProcessesActionOutputContent
+  | SuspendProcessActionOutputContent
+  | KillProcessActionOutputContent;
+
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
@@ -307,9 +321,11 @@ export interface HostIsolationResponse {
 }
 
 export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-export interface ResponseActionApiResponse<TOutput extends object = object> {
+export interface ResponseActionApiResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+> {
   action?: string;
-  data: ActionDetails<TOutput>;
+  data: ActionDetails<TOutputContent>;
 }
 
 export interface EndpointPendingActions {
@@ -335,7 +351,7 @@ export interface ActionDetailsAgentState {
 }
 
 export interface ActionDetails<
-  TOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   /**
@@ -401,10 +417,10 @@ export interface ActionDetails<
 }
 
 export interface ActionDetailsApiResponse<
-  TOutputType extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
-  data: ActionDetails<TOutputType, TParameters>;
+  data: ActionDetails<TOutputContent, TParameters>;
 }
 
 /** Action Details normally returned by Action List API response  */

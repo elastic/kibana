@@ -26,6 +26,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  EndpointActionResponseDataOutput,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import {
@@ -75,9 +76,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   /** Generates an endpoint action response */
-  generateResponse(
-    overrides: DeepPartial<LogsEndpointActionResponse> = {}
-  ): LogsEndpointActionResponse {
+  generateResponse<TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>>(
+    overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
+  ): LogsEndpointActionResponse<TOutputContent> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     const startedAtTimes: number[] = [];
@@ -91,7 +92,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
     let output: ActionResponseOutput<
       ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
-    > = overrides?.EndpointActions?.data?.output as ActionResponseOutput<
+    > = overrides?.EndpointActions?.data?.output as unknown as ActionResponseOutput<
       ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
     >;
 
@@ -168,7 +169,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         error: undefined,
       },
       overrides
-    );
+    ) as LogsEndpointActionResponse<TOutputContent>;
   }
 
   generateResponseEsHit(
@@ -180,11 +181,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActionDetails<
-    TOutputType extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
-    overrides: DeepPartial<ActionDetails<TOutputType, TParameters>> = {}
-  ): ActionDetails<TOutputType, TParameters> {
+    overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
+  ): ActionDetails<TOutputContent, TParameters> {
     const details: ActionDetails = {
       agents: ['agent-a'],
       agentType: 'endpoint',
@@ -217,7 +218,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     if (command === 'get-file') {
       if (!details.parameters) {
         (
-          details as ActionDetails<
+          details as unknown as ActionDetails<
             ResponseActionGetFileOutputContent,
             ResponseActionGetFileParameters
           >
@@ -227,14 +228,26 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
-        details.outputs = {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >
+        ).outputs = {
           [details.agents[0]]: {
             type: 'json',
             content: {
               code: 'ra_get-file_success',
-              path: '/some/file/txt',
-              size: 1234,
               zip_size: 123,
+              contents: [
+                {
+                  path: '/some/file/txt',
+                  sha256: '1254',
+                  size: 1234,
+                  file_name: 'some-file.txt',
+                  type: 'file',
+                },
+              ],
             },
           },
         };
@@ -244,7 +257,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     if (command === 'execute') {
       if (!details.parameters) {
         (
-          details as ActionDetails<
+          details as unknown as ActionDetails<
             ResponseActionExecuteOutputContent,
             ResponseActionsExecuteParameters
           >
@@ -257,7 +270,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
-        details.outputs = {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >
+        ).outputs = {
           [details.agents[0]]: this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
@@ -269,7 +287,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     if (command === 'upload') {
-      const uploadActionDetails = details as ActionDetails<
+      const uploadActionDetails = details as unknown as ActionDetails<
         ResponseActionUploadOutputContent,
         ResponseActionUploadParameters
       >;
@@ -294,7 +312,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
-      TOutputType,
+      TOutputContent,
       TParameters
     >;
   }
@@ -360,7 +378,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateExecuteActionResponseOutput(
-    overrides?: Partial<ActionResponseOutput<Partial<ResponseActionExecuteOutputContent>>>
+    overrides?: DeepPartial<ActionResponseOutput<ResponseActionExecuteOutputContent>>
   ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
     return merge(
       {
