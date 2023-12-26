@@ -11,14 +11,22 @@ import {
   GetHostsOptionsPublic,
   GetServicesOptionsPublic,
   GetPodsOptionsPublic,
+  GetAssetsOptionsPublic,
 } from '../../common/types_client';
 import {
   GetContainerAssetsResponse,
   GetHostAssetsResponse,
   GetServiceAssetsResponse,
   GetPodAssetsResponse,
+  GetAssetsResponse,
 } from '../../common/types_api';
-import { GET_CONTAINERS, GET_HOSTS, GET_SERVICES, GET_PODS } from '../../common/constants_routes';
+import {
+  GET_CONTAINERS,
+  GET_HOSTS,
+  GET_SERVICES,
+  GET_PODS,
+  GET_ASSETS,
+} from '../../common/constants_routes';
 import { IPublicAssetsClient } from '../types';
 
 export class PublicAssetsClient implements IPublicAssetsClient {
@@ -63,6 +71,18 @@ export class PublicAssetsClient implements IPublicAssetsClient {
   async getPods(options: GetPodsOptionsPublic) {
     const { filters, ...otherOptions } = options;
     const results = await this.http.get<GetPodAssetsResponse>(GET_PODS, {
+      query: {
+        stringFilters: JSON.stringify(filters),
+        ...otherOptions,
+      },
+    });
+
+    return results;
+  }
+
+  async getAssets(options: GetAssetsOptionsPublic) {
+    const { filters, ...otherOptions } = options;
+    const results = await this.http.get<GetAssetsResponse>(GET_ASSETS, {
       query: {
         stringFilters: JSON.stringify(filters),
         ...otherOptions,

@@ -7,29 +7,11 @@
 import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
-import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
-
-const timeoutFieldValidations = {
-  min: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
-      defaultMessage: 'Timeout value must be greater than {than} seconds.',
-      values: { than: QUERY_TIMEOUT.DEFAULT },
-    }),
-    value: QUERY_TIMEOUT.DEFAULT,
-  },
-  max: {
-    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
-      defaultMessage: 'Timeout value must be lower than {than} seconds.',
-      values: { than: QUERY_TIMEOUT.MAX },
-    }),
-    value: QUERY_TIMEOUT.MAX,
-  },
-};
 
 interface TimeoutFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -43,12 +25,26 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     name: 'timeout',
     defaultValue: QUERY_TIMEOUT.DEFAULT,
     rules: {
-      ...timeoutFieldValidations,
+      validate: (currentValue: number) => {
+        if (currentValue < QUERY_TIMEOUT.DEFAULT || isNaN(currentValue)) {
+          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
+            defaultMessage: 'Timeout value must be greater than {than} seconds.',
+            values: { than: QUERY_TIMEOUT.DEFAULT },
+          });
+        }
+
+        if (currentValue > QUERY_TIMEOUT.MAX) {
+          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
+            defaultMessage: 'Timeout value must be lower than {than} seconds.',
+            values: { than: QUERY_TIMEOUT.MAX },
+          });
+        }
+      },
     },
   });
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const numberValue = e.target.valueAsNumber ? e.target.valueAsNumber : 0;
+      const numberValue = parseInt(e.target.value, 10);
       onChange(numberValue);
     },
     [onChange]
@@ -77,7 +73,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     >
       <EuiFieldNumber
         isInvalid={hasError}
-        value={value as EuiFieldNumberProps['value']}
+        value={value}
         onChange={handleChange}
         fullWidth
         type="number"

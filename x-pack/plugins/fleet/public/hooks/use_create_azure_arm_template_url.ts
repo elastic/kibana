@@ -11,6 +11,8 @@ import type { AzureArmTemplateProps } from '../components/agent_enrollment_flyou
 
 import { useGetSettings } from './use_request';
 
+const ARM_TEMPLATE_DEFAULT_ACCOUNT_TYPE = 'single-account';
+
 export const useCreateAzureArmTemplateUrl = ({
   enrollmentAPIKey,
   azureArmTemplateProps,
@@ -40,7 +42,14 @@ export const useCreateAzureArmTemplateUrl = ({
     });
   }
 
-  const azureArmTemplateUrl = azureArmTemplateProps?.templateUrl;
+  let azureArmTemplateUrl = azureArmTemplateProps?.templateUrl;
+
+  if (azureArmTemplateUrl?.includes('ACCOUNT_TYPE')) {
+    azureArmTemplateUrl = azureArmTemplateUrl.replace(
+      'ACCOUNT_TYPE',
+      azureArmTemplateProps?.azureAccountType || ARM_TEMPLATE_DEFAULT_ACCOUNT_TYPE
+    );
+  }
 
   return {
     isLoading,

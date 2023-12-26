@@ -10,4 +10,9 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/observability_ai_assistant'],
   setupFiles: ['<rootDir>/x-pack/plugins/observability_ai_assistant/.storybook/jest_setup.js'],
+  collectCoverage: true,
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/observability_ai_assistant/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
+  coverageReporters: ['html'],
 };

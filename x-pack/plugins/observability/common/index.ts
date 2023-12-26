@@ -32,6 +32,7 @@ export {
   apmTraceExplorerTab,
   apmLabsButton,
   enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
@@ -41,10 +42,12 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
-  profilingUseLegacyFlamegraphAPI,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
+  profilingPervCPUWattArm64,
+  profilingAWSCostDiscountRate,
+  profilingCostPervCPUPerHour,
 } from './ui_settings_keys';
 
 export {

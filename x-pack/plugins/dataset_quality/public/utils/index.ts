@@ -6,3 +6,4 @@
  */
 
 export * from './use_kibana';
+export * from './default_timerange';

@@ -37,7 +37,10 @@ import { getUserPrivilegesMockDefaultValue } from '../../../common/components/us
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
-import { ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE } from '../../../common/components/toolbar/bulk_actions/translations';
+import {
+  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+} from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -56,6 +59,10 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
   }),
+}));
+
+jest.mock('../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
 }));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
@@ -252,6 +259,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
         ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
+    test('should render "Assign alert"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
+        ).toEqual(ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE);
       });
     });
   });

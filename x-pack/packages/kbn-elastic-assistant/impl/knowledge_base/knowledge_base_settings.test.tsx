@@ -7,14 +7,40 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+
+import { DEFAULT_LATEST_ALERTS } from '../assistant_context/constants';
 import { KnowledgeBaseSettings } from './knowledge_base_settings';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
+import { mockSystemPrompts } from '../mock/system_prompt';
+
+const mockUseAssistantContext = {
+  allSystemPrompts: mockSystemPrompts,
+  conversations: {},
+  http: {
+    basePath: {
+      prepend: jest.fn(),
+    },
+  },
+  setAllSystemPrompts: jest.fn(),
+  setConversations: jest.fn(),
+};
+
+jest.mock('../assistant_context', () => {
+  const original = jest.requireActual('../assistant_context');
+  return {
+    ...original,
+
+    useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
+  };
+});
 
 const setUpdatedKnowledgeBaseSettings = jest.fn();
 const defaultProps = {
   knowledgeBase: {
-    assistantLangChain: true,
+    isEnabledKnowledgeBase: true,
+    isEnabledRAGAlerts: false,
+    latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setUpdatedKnowledgeBaseSettings,
 };
@@ -91,15 +117,17 @@ describe('Knowledge base settings', () => {
     fireEvent.click(getByTestId('esqlEnableButton'));
     expect(mockSetup).toHaveBeenCalledWith('esql');
   });
-  it('On disable lang chain, set assistantLangChain to false', () => {
+  it('On disable lang chain, set isEnabledKnowledgeBase to false', () => {
     const { getByTestId } = render(
       <TestProviders>
         <KnowledgeBaseSettings {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('assistantLangChainSwitch'));
+    fireEvent.click(getByTestId('isEnabledKnowledgeBaseSwitch'));
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      assistantLangChain: false,
+      isEnabledRAGAlerts: false,
+      isEnabledKnowledgeBase: false,
+      latestAlerts: DEFAULT_LATEST_ALERTS,
     });
 
     expect(mockSetup).not.toHaveBeenCalled();
@@ -110,14 +138,18 @@ describe('Knowledge base settings', () => {
         <KnowledgeBaseSettings
           {...defaultProps}
           knowledgeBase={{
-            assistantLangChain: false,
+            isEnabledKnowledgeBase: false,
+            isEnabledRAGAlerts: false,
+            latestAlerts: DEFAULT_LATEST_ALERTS,
           }}
         />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('assistantLangChainSwitch'));
+    fireEvent.click(getByTestId('isEnabledKnowledgeBaseSwitch'));
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      assistantLangChain: true,
+      isEnabledKnowledgeBase: true,
+      isEnabledRAGAlerts: false,
+      latestAlerts: DEFAULT_LATEST_ALERTS,
     });
 
     expect(mockSetup).toHaveBeenCalledWith('esql');
@@ -175,5 +207,15 @@ describe('Knowledge base settings', () => {
       </TestProviders>
     );
     expect(queryByTestId('knowledgeBaseActionButton')).not.toBeInTheDocument();
+  });
+
+  it('renders the alerts settings', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <KnowledgeBaseSettings {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('alertsSwitch')).toBeInTheDocument();
   });
 });

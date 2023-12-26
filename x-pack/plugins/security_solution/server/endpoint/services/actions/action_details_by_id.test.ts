@@ -127,11 +127,7 @@ describe('When using `getActionDetailsById()', () => {
         body: {
           query: {
             bool: {
-              filter: [
-                { term: { action_id: '123' } },
-                { term: { input_type: 'endpoint' } },
-                { term: { type: 'INPUT_ACTION' } },
-              ],
+              filter: [{ term: { action_id: '123' } }],
             },
           },
         },

@@ -9,7 +9,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { RiskCategories } from '../../../../common/risk_engine';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresResponse,

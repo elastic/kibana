@@ -1,0 +1,15 @@
+SHOW
+
+Syntax
+SHOW item
+Parameters
+item
+Can be INFO or FUNCTIONS.
+DescriptionThe SHOW source command returns information about the deployment and
+its capabilities:
+Use SHOW INFO to return the deployment’s version, build date and hash.
+Use SHOW FUNCTIONS to return a list of all supported functions and a
+synopsis of each function.
+Examples
+SHOW functions
+| WHERE STARTS_WITH(name, "is_")

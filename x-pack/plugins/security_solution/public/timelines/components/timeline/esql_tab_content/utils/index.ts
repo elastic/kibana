@@ -29,7 +29,6 @@ export const savedSearchComparator = (
     'sort',
     'timeRange',
     'fields.filter',
-    'fields.index.id',
     'fields.query',
     'title',
     'description',

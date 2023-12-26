@@ -506,6 +506,11 @@ export const getSignalsMigrationStatusRequest = () =>
     query: getSignalsMigrationStatusSchemaMock(),
   });
 
+export const getMockUserProfiles = () => [
+  { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
+  { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
+];
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */

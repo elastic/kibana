@@ -27,8 +27,12 @@ import {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
+import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
+jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
+  getViewInAppUrl: jest.fn().mockReturnValue('mockedViewInApp'),
+}));
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -64,6 +68,7 @@ const logger = {
 
 const STARTED_AT_MOCK_DATE = new Date();
 
+const mockQuery = 'mockQuery';
 const mockOptions = {
   executionId: '',
   startedAt: STARTED_AT_MOCK_DATE,
@@ -71,7 +76,7 @@ const mockOptions = {
   params: {
     searchConfiguration: {
       query: {
-        query: '',
+        query: mockQuery,
         language: 'kuery',
       },
     },
@@ -134,7 +139,7 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-describe('The metric threshold alert type', () => {
+describe('The custom threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1055,6 +1060,7 @@ describe('The metric threshold alert type', () => {
       );
     });
   });
+
   describe('querying with the count aggregator', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1193,6 +1199,63 @@ describe('The metric threshold alert type', () => {
       });
     });
   });
+
+  describe('querying recovered alert with a count aggregator', () => {
+    afterAll(() => clearInstances());
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          ...mockOptions.params,
+          sourceId,
+          criteria: [
+            {
+              ...customThresholdCountCriterion,
+              comparator,
+              threshold,
+            },
+          ],
+        },
+      });
+    test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...customThresholdCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.9],
+            currentValue: 1,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+        },
+      ]);
+      const mockedSetContext = jest.fn();
+      services.alertFactory.done.mockImplementation(() => {
+        return {
+          getRecoveredAlerts: jest.fn().mockReturnValue([
+            {
+              setContext: mockedSetContext,
+              getId: jest.fn().mockReturnValue('mockedId'),
+            },
+          ]),
+        };
+      });
+      await execute(Comparator.GT, [0.9]);
+      const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+      expect(getViewInAppUrl).toBeCalledWith({
+        dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+        filter: mockQuery,
+        logExplorerLocator: undefined,
+        metrics: customThresholdCountCriterion.metrics,
+        startedAt: expect.stringMatching(ISO_DATE_REGEX),
+      });
+    });
+  });
+
   describe("querying a metric that hasn't reported data", () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1339,6 +1402,7 @@ describe('The metric threshold alert type', () => {
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
         tags: [],
+        viewInAppUrl: 'mockedViewInApp',
       });
       expect(recentAction).toBeNoDataAction();
     });
@@ -1765,6 +1829,7 @@ const mockLibs: any = {
       groupByPageSize: 10_000,
     },
   },
+  locators: {},
 };
 
 const executor = createCustomThresholdExecutor(mockLibs);
@@ -1780,6 +1845,7 @@ const mockedIndex = {
 };
 const mockedDataView = {
   getIndexPattern: () => 'mockedIndexPattern',
+  getName: () => 'mockedDataViewName',
   ...mockedIndex,
 };
 const mockedSearchSource = {
@@ -1895,12 +1961,14 @@ const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
   threshold: [0],
 };
 
+const mockedCountFilter = 'mockedCountFilter';
 const customThresholdCountCriterion: CustomMetricExpressionParams = {
   comparator: Comparator.GT,
   metrics: [
     {
       aggType: Aggregators.COUNT,
       name: 'A',
+      filter: mockedCountFilter,
     },
   ],
   timeSize: 1,

@@ -8,6 +8,8 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
 
 import { PackagePolicyRestrictionRelatedError, FleetUnauthorizedError } from '../errors';
 import type {
@@ -105,8 +107,13 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
-
+let mockedLogger: jest.Mocked<Logger>;
 describe('agent policy', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -671,7 +678,9 @@ describe('agent policy', () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        checkTokenValidityForPolicy: jest.fn().mockRejectedValueOnce(new Error('reason')),
+        checkTokenValidityForPolicy: jest
+          .fn()
+          .mockResolvedValueOnce({ error: new Error('reason') }),
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
