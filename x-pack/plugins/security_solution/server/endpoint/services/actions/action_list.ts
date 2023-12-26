@@ -7,12 +7,13 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchActionResponses } from './fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 
-import { getActions, getActionResponses } from '../../utils/action_list_helpers';
+import { getActions } from '../../utils/action_list_helpers';
 
 import {
   formatEndpointActionResults,
@@ -236,11 +237,8 @@ const getActionDetailsList = async ({
     // get all responses for given action Ids and agent Ids
     // and get host metadata info with queried agents
     [actionResponses, agentsHostInfo] = await Promise.all([
-      getActionResponses({
-        actionIds: actionReqIds,
-        elasticAgentIds,
-        esClient,
-      }),
+      fetchActionResponses({ esClient, agentIds: elasticAgentIds, actionIds: actionReqIds }),
+
       await getAgentHostNamesWithIds({
         esClient,
         metadataService,
@@ -261,7 +259,7 @@ const getActionDetailsList = async ({
 
   // categorize responses as fleet and endpoint responses
   const categorizedResponses = categorizeResponseResults({
-    results: actionResponses?.body?.hits?.hits,
+    results: actionResponses.data,
   });
 
   // compute action details list for each action id

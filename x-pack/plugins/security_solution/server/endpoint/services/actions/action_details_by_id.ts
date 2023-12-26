@@ -7,12 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-  ENDPOINT_ACTIONS_INDEX,
-} from '../../../../common/endpoint/constants';
+import { fetchActionResponses } from './fetch_action_responses';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
   formatEndpointActionResults,
   categorizeResponseResults,
@@ -23,18 +19,21 @@ import {
 import type {
   ActionDetails,
   ActivityLogActionResponse,
-  EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
-  LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 import type { EndpointMetadataService } from '../metadata';
 
+/**
+ * Get Action Details for a single action id
+ * @param esClient
+ * @param metadataService
+ * @param actionId
+ */
 export const getActionDetailsById = async <T extends ActionDetails = ActionDetails>(
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
@@ -67,55 +66,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         )
         .catch(catchAndWrapError),
 
-      // Get the Action Response(s) from both the Fleet action response index and the Endpoint
-      // action response index.
-      // We query both indexes separately in order to ensure they are both queried - example if the
-      // Fleet actions responses index does not exist yet, ES would generate a `404` and would
-      // never actually query the Endpoint Actions index.
-      Promise.all([
-        // Responses in Fleet index
-        esClient
-          .search<EndpointActionResponse | LogsEndpointActionResponse>(
-            {
-              index: AGENT_ACTIONS_RESULTS_INDEX,
-              size: ACTIONS_SEARCH_PAGE_SIZE,
-              body: {
-                query: {
-                  bool: {
-                    filter: [{ term: { action_id: actionId } }],
-                  },
-                },
-              },
-            },
-            { ignore: [404] }
-          )
-          .catch(catchAndWrapError),
-
-        // Response in Endpoint index
-        esClient
-          .search<EndpointActionResponse | LogsEndpointActionResponse>(
-            {
-              index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-              size: ACTIONS_SEARCH_PAGE_SIZE,
-              body: {
-                query: {
-                  bool: {
-                    filter: [{ term: { action_id: actionId } }],
-                  },
-                },
-              },
-            },
-            { ignore: [404] }
-          )
-          .catch(catchAndWrapError),
-      ]).then(([fleetResponses, endpointResponses]) => {
-        // Combine the hists and return
-        const allResponses: Array<
-          estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
-        > = [...(fleetResponses?.hits?.hits ?? []), ...(endpointResponses?.hits?.hits ?? [])];
-
-        return allResponses;
-      }),
+      fetchActionResponses({ esClient, actionIds: [actionId] }).then((response) => response.data),
     ]);
 
     actionRequestsLogEntries = formatEndpointActionResults(
