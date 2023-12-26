@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
 import {
@@ -12,8 +15,10 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
 
-export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
-  return soClient.create<CspSettings>(
+export const createCspSettingObject = async (
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
+) => {
+  return encryptedSoClient.create<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     {
       rules: {},
@@ -23,13 +28,14 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
 };
 
 export const getCspBenchmarkRulesStatesHandler = async (
-  encryptedSoClient: SavedObjectsClientContract
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<CspBenchmarkRulesStates> => {
   try {
     const getSoResponse = await encryptedSoClient.get<CspSettings>(
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
     );
+
     return getSoResponse.attributes.rules;
   } catch (err) {
     const error = transformError(err);

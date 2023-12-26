@@ -77,10 +77,12 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         }
         const cspContext = await context.csp;
         const esClient = cspContext.esClient.asCurrentUser;
+
         try {
           const cspBenchmarks = await getBenchmarksV2(
             esClient,
             cspContext.soClient,
+            cspContext.encryptedSavedObjects,
             cspContext.logger
           );
           return response.ok({
