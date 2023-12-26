@@ -182,17 +182,28 @@ export class AuthenticationService {
     });
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      // if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
-      //   return toolkit.next();
-      // }
-
       if (
-        (preResponse.statusCode !== 401 &&
-          !request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)) ||
-        canRedirectRequest(request)
+        preResponse.statusCode === 500 &&
+        request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
       ) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: true,
+        });
+        return toolkit.render({
+          body: renderUnauthenticatedPage({
+            buildNumber,
+            basePath: http.basePath,
+            originalURL: '/',
+            customBranding: customBrandingValue,
+          }),
+          headers: { 'Content-Security-Policy': http.csp.header },
+        });
+      }
+
+      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
         return toolkit.next();
       }
+
       if (!this.authenticator) {
         // Core doesn't allow returning error here.
         this.logger.error('Authentication sub-system is not fully initialized yet.');
