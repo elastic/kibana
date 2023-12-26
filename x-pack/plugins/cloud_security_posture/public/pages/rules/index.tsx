@@ -43,7 +43,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false} style={{ marginBottom: `6px` }}>
+                <EuiFlexItem grow={false} style={{ marginBottom: 6 }}>
                   <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
                 </EuiFlexItem>
                 <EuiFlexItem>
