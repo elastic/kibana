@@ -6,9 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { buildRangeFilter } from '@kbn/es-query';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { IpPrefixKey } from '../lib/ip_prefix';
 
-export const createFilterIpPrefix = (aggConfig: IBucketAggConfig) => {
-  return buildRangeFilter(aggConfig.params.field, aggConfig.getIndexPattern());
+export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixKey) => {
+  let range: RangeFilterParams;
+
+  range = new CidrMask(key.address + "/" + key.prefix_length).getRange();
+
+  return buildRangeFilter(
+    aggConfig.params.field,
+    { gte: range.from, lte: range.to },
+    aggConfig.getIndexPattern()
+  );
 };

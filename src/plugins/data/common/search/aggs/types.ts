@@ -125,6 +125,7 @@ export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
 export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpPrefixKey } from './buckets/lib/ip_range';
 export type { IpRangeKey } from './buckets/lib/ip_range';
 export type { OptionedValueProp } from './param_types/optioned';
 

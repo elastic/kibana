@@ -12,6 +12,7 @@ import { IpPrefix, ipPrefixToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpPrefix } from './create_filter/ip_prefix';
+import { IpPrefixKey, IpPrefixAggKey } from './lib/ip_prefix';
 import { aggIpPrefixFnName } from './ip_prefix_fn';
 import { KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
@@ -31,6 +32,9 @@ export const getIpPrefixBucketAgg = () =>
     expressionName: aggIpPrefixFnName,
     title: ipPrefixTitle,
     createFilter: createFilterIpPrefix,
+    getKey(bucket, key, agg): IpPrefixKey {
+      return { type: 'ip_prefix', address: key, prefix_length: bucket.prefix_length };
+    },
     getSerializedFormat(agg) {
       return {
         id: 'ip_prefix',
