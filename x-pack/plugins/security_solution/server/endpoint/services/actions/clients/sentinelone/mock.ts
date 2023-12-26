@@ -129,7 +129,9 @@ const createSentinelOneGetAgentsApiResponseMock = (): SentinelOneGetAgentsRespon
   };
 };
 
-const applyConnectorActionsMocks = (client: ActionsClientMock): void => {
+const createConnectorActionsClientMock = (): ActionsClientMock => {
+  const client = responseActionsClientMock.createConnectorActionsClient();
+
   (client.getAll as jest.Mock).mockImplementation(async () => {
     const result: ConnectorWithExtraFindData[] = [
       // SentinelOne connector
@@ -157,20 +159,19 @@ const applyConnectorActionsMocks = (client: ActionsClientMock): void => {
       }
     }
   );
+
+  return client;
 };
 
 const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => {
-  const connectorActionsMock = responseActionsClientMock.createConnectorActionsClient();
-
-  applyConnectorActionsMocks(connectorActionsMock);
-
   return {
     ...responseActionsClientMock.createConstructorOptions(),
-    connectorActions: connectorActionsMock,
+    connectorActions: createConnectorActionsClientMock(),
   };
 };
 
 export const sentinelOneMock = {
   createGetAgentsResponse: createSentinelOneGetAgentsApiResponseMock,
+  createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
 };
