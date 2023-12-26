@@ -961,6 +961,7 @@ describe('Observability AI Assistant service', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
@@ -1011,6 +1012,7 @@ describe('Observability AI Assistant service', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
