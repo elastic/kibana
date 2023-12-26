@@ -89,13 +89,6 @@ class Host extends Entity<HostDocument> {
     });
   }
 
-  metrics() {
-    return new HostMetrics({
-      ...this.fields,
-      'system.cpu.total.norm.pct': 46,
-    });
-  }
-
   asset() {
     return new HostAsset({
       'asset.kind': 'host',
