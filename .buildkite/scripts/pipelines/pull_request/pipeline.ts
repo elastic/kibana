@@ -176,7 +176,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml')
+      );
     }
 
     if (
@@ -189,7 +191,53 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/plugins\/data_views\/common/,
+        /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/security_solution_ess/,
+        /^x-pack\/plugins\/security_solution_serverless/,
+        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
+        /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/bedrock/,
+        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/plugins\/elastic_assistant/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/packages\/kbn-elastic-assistant/,
+        /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
+      );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

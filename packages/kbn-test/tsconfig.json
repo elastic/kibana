@@ -33,5 +33,6 @@
     "@kbn/repo-packages",
     "@kbn/core-saved-objects-api-server",
     "@kbn/mock-idp-plugin",
+    "@kbn/code-owners",
   ]
 }

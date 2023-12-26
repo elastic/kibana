@@ -182,9 +182,9 @@ describe('AutocompleteFieldListsComponent', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] EuiComboBoxPill`)
+        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
         .at(0)
-        .text()
+        .props().value
     ).toEqual('some name');
   });
 
