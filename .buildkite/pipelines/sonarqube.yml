@@ -1,4 +1,6 @@
-
-steps:
-  - label: Placeholder
-    command: echo "Hello!"
+  - label: ":sonarqube: Continuous Code Inspection"
+    env:
+      VAULT_SONAR_TOKEN_PATH: "secret/ci/elastic-kibana/sonarqube"
+    agents:
+      image: "docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest"
+    command: /scan-source-code.sh

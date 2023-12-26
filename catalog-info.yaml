@@ -200,7 +200,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana-bot / sonarqube
+      name: kibana / sonarqube
     spec:
       repository: elastic/kibana
       provider_settings:
