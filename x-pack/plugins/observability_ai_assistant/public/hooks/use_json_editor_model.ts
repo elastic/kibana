@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useEffect, useMemo, useState } from 'react';
 import { monaco } from '@kbn/monaco';
-import { useMemo } from 'react';
 import { createInitializedObject } from '../utils/create_initialized_object';
 import { useObservabilityAIAssistantChatService } from './use_observability_ai_assistant_chat_service';
+import { safeJsonParse } from '../utils/safe_json_parse';
 
 const { editor, languages, Uri } = monaco;
 
@@ -25,6 +26,13 @@ export const useJsonEditorModel = ({
 
   const functionDefinition = chatService.getFunctions().find((func) => func.name === functionName);
 
+  const [initialJsonValue, setInitialJsonValue] = useState<string | undefined>(initialJson);
+
+  useEffect(() => {
+    setInitialJsonValue(initialJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [functionName]);
+
   return useMemo(() => {
     if (!functionDefinition) {
       return {};
@@ -32,8 +40,8 @@ export const useJsonEditorModel = ({
 
     const schema = { ...functionDefinition.parameters };
 
-    const initialJsonString = initialJson
-      ? initialJson
+    const initialJsonString = initialJsonValue
+      ? JSON.stringify(safeJsonParse(initialJsonValue), null, 4) // prettify the json
       : functionDefinition.parameters.properties
       ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
       : '';
@@ -58,5 +66,5 @@ export const useJsonEditorModel = ({
     }
 
     return { model, initialJsonString };
-  }, [functionDefinition, initialJson]);
+  }, [functionDefinition, initialJsonValue]);
 };
