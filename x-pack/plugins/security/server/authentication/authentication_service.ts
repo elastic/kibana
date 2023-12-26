@@ -193,7 +193,7 @@ export class AuthenticationService {
           body: renderUnauthenticatedPage({
             buildNumber,
             basePath: http.basePath,
-            originalURL: '/',
+            originalURL: `${http.basePath.get(request)}/`,
             customBranding: customBrandingValue,
           }),
           headers: { 'Content-Security-Policy': http.csp.header },
