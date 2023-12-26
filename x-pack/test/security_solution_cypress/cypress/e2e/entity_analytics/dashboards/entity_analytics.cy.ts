@@ -225,7 +225,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe('With user risk data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/173846
+    describe.skip('With user risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_users' });
       });

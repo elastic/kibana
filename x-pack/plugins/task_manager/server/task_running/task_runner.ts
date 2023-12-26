@@ -795,7 +795,7 @@ export class TaskManagerRunner implements TaskRunner {
               asErr({
                 ...processedResult,
                 isExpired: taskHasExpired,
-                error: new Error(`Alerting task failed to run.`),
+                error: taskRunError,
               }),
               taskTiming
             )
