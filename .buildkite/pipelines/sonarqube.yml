@@ -1,4 +1,5 @@
   - label: ":sonarqube: Continuous Code Inspection"
     agents:
-      image: "docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest"
+      image: docker.elastic.co/cloud-ci/sonarqube/buildkite-scanner:latest
+      memory: 8G
     command: /scan-source-code.sh
