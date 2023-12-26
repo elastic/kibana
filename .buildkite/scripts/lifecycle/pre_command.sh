@@ -142,6 +142,9 @@ export SYNTHETICS_REMOTE_KIBANA_URL
 DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
 export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
+SONAR_LOGIN="$(vault_get sonarqube token)"
+export SONAR_LOGIN
+
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
