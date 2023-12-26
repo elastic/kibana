@@ -3,8 +3,11 @@
 exports[`transaction queries fetches a transaction 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "transaction",
+    "sources": Array [
+      Object {
+        "documentType": "transactionEvent",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {

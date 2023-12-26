@@ -125,8 +125,6 @@ export class LinksFactoryDefinition
     initialInput: LinksInput,
     parent?: DashboardContainer
   ): Promise<LinksEditorFlyoutReturn> {
-    if (!parent) return { newInput: {} };
-
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
     const { newInput, attributes } = await openEditorFlyout(

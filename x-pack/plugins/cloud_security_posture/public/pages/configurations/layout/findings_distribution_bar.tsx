@@ -17,18 +17,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import numeral from '@elastic/numeral';
+import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { statusColors } from '../../../common/constants';
-import type { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types_old';
 
 interface Props {
   passed: number;
   failed: number;
   distributionOnClick: (evaluation: Evaluation) => void;
 }
-
-const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
 
 export const CurrentPageOfTotal = ({
   pageEnd,
@@ -48,7 +46,7 @@ export const CurrentPageOfTotal = ({
       values={{
         pageStart: <b>{pageStart}</b>,
         pageEnd: <b>{pageEnd}</b>,
-        total: <b>{formatNumber(total)}</b>,
+        total: <b>{getAbbreviatedNumber(total)}</b>,
         type,
       }}
     />
@@ -113,7 +111,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
       gutterSize="none"
       css={css`
         height: 8px;
-        background: ${euiTheme.colors.subduedText};
+        background: ${euiTheme.colors.lightestShade};
       `}
     >
       <DistributionBarPart
@@ -164,7 +162,7 @@ const Counter = ({ label, value, color }: { label: string; value: number; color:
       <EuiHealth color={color}>{label}</EuiHealth>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiBadge>{formatNumber(value)}</EuiBadge>
+      <EuiBadge>{getAbbreviatedNumber(value)}</EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

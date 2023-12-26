@@ -8,15 +8,14 @@
 import * as t from 'io-ts';
 import { tEnum } from '../../utils/t_enum';
 
-export enum DataStream {
+export enum MonitorTypeEnum {
   HTTP = 'http',
   TCP = 'tcp',
   ICMP = 'icmp',
   BROWSER = 'browser',
 }
 
-export const DataStreamCodec = tEnum<DataStream>('DataStream', DataStream);
-export type DataStreamType = t.TypeOf<typeof DataStreamCodec>;
+export const MonitorTypeCodec = tEnum<MonitorTypeEnum>('MonitorType', MonitorTypeEnum);
 
 export enum HTTPMethod {
   GET = 'GET',
@@ -25,9 +24,6 @@ export enum HTTPMethod {
   DELETE = 'DELETE',
   HEAD = 'HEAD',
 }
-
-export const HTTPMethodCodec = tEnum<HTTPMethod>('HTTPMethod', HTTPMethod);
-export type HTTPMethodType = t.TypeOf<typeof HTTPMethodCodec>;
 
 export enum ResponseBodyIndexPolicy {
   ALWAYS = 'always',
@@ -39,7 +35,6 @@ export const ResponseBodyIndexPolicyCodec = tEnum<ResponseBodyIndexPolicy>(
   'ResponseBodyIndexPolicy',
   ResponseBodyIndexPolicy
 );
-export type ResponseBodyIndexPolicyType = t.TypeOf<typeof ResponseBodyIndexPolicyCodec>;
 
 export enum MonacoEditorLangId {
   JSON = 'xjson',
@@ -47,12 +42,6 @@ export enum MonacoEditorLangId {
   XML = 'xml',
   JAVASCRIPT = 'javascript',
 }
-
-export const MonacoEditorLangIdCodec = tEnum<MonacoEditorLangId>(
-  'MonacoEditorLangId',
-  MonacoEditorLangId
-);
-export type MonacoEditorLangIdType = t.TypeOf<typeof MonacoEditorLangIdCodec>;
 
 export enum CodeEditorMode {
   FORM = 'form',
@@ -62,7 +51,6 @@ export enum CodeEditorMode {
 }
 
 export const CodeEditorModeCodec = tEnum<CodeEditorMode>('CodeEditorMode', CodeEditorMode);
-export type CodeEditorModeType = t.TypeOf<typeof CodeEditorModeCodec>;
 
 export enum ContentType {
   JSON = 'application/json',
@@ -71,16 +59,12 @@ export enum ContentType {
   FORM = 'application/x-www-form-urlencoded',
 }
 
-export const ContentTypeCodec = tEnum<ContentType>('ContentType', ContentType);
-export type ContentTypeType = t.TypeOf<typeof ContentTypeCodec>;
-
 export enum ScheduleUnit {
   MINUTES = 'm',
   SECONDS = 's',
 }
 
 export const ScheduleUnitCodec = tEnum<ScheduleUnit>('ScheduleUnit', ScheduleUnit);
-export type ScheduleUnitType = t.TypeOf<typeof ScheduleUnitCodec>;
 
 export enum VerificationMode {
   CERTIFICATE = 'certificate',
@@ -90,7 +74,6 @@ export enum VerificationMode {
 }
 
 export const VerificationModeCodec = tEnum<VerificationMode>('VerificationMode', VerificationMode);
-export type VerificationModeType = t.TypeOf<typeof VerificationModeCodec>;
 
 export enum TLSVersion {
   ONE_ZERO = 'TLSv1.0',
@@ -100,7 +83,6 @@ export enum TLSVersion {
 }
 
 export const TLSVersionCodec = tEnum<TLSVersion>('TLSVersion', TLSVersion);
-export type TLSVersionType = t.TypeOf<typeof TLSVersionCodec>;
 
 export enum ScreenshotOption {
   ON = 'on',
@@ -109,7 +91,6 @@ export enum ScreenshotOption {
 }
 
 export const ScreenshotOptionCodec = tEnum<ScreenshotOption>('ScreenshotOption', ScreenshotOption);
-export type ScreenshotOptionType = t.TypeOf<typeof ScreenshotOptionCodec>;
 
 export enum SourceType {
   UI = 'ui',
@@ -133,7 +114,6 @@ export enum Mode {
   ALL = 'all',
 }
 export const ModeCodec = tEnum<Mode>('Mode', Mode);
-export type ModeType = t.TypeOf<typeof ModeCodec>;
 
 export const ResponseCheckJSONCodec = t.interface({
   description: t.string,

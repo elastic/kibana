@@ -12,13 +12,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
-import { getQueryWithParams } from './get_query_with_params';
-import { getRequestBase } from './get_request_base';
+import { getRandomDocsRequest } from './get_random_docs_request';
+import { getTotalDocCountRequest } from './get_total_doc_count_request';
 
 // TODO Consolidate with duplicate `fetchPValues` in
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
-
-const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -28,30 +26,12 @@ const SUPPORTED_ES_FIELD_TYPES = [
 
 const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
-export const getRandomDocsRequest = (
-  params: AiopsLogRateAnalysisSchema
-): estypes.SearchRequest => ({
-  ...getRequestBase(params),
-  body: {
-    fields: ['*'],
-    _source: false,
-    query: {
-      function_score: {
-        query: getQueryWithParams({ params }),
-        // @ts-ignore
-        random_score: {},
-      },
-    },
-    size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
-    // Used to determine sample probability for follow up queries
-    track_total_hits: true,
-  },
-});
-
 interface IndexInfo {
   fieldCandidates: string[];
   textFieldCandidates: string[];
-  totalDocCount: number;
+  baselineTotalDocCount: number;
+  deviationTotalDocCount: number;
+  zeroDocsFallback: boolean;
 }
 
 export const fetchIndexInfo = async (
@@ -95,15 +75,24 @@ export const fetchIndexInfo = async (
     allFieldNames.push(key);
   });
 
+  // Get the total doc count for the baseline time range
+  const respBaselineTotalDocCount = await esClient.search(
+    getTotalDocCountRequest({ ...params, start: params.baselineMin, end: params.baselineMax }),
+    {
+      signal: abortSignal,
+      maxRetries: 0,
+    }
+  );
+
   // Only the deviation window will be used to identify field candidates and sample probability based on total doc count.
-  const resp = await esClient.search(
+  const respDeviationRandomDocs = await esClient.search(
     getRandomDocsRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
     {
       signal: abortSignal,
       maxRetries: 0,
     }
   );
-  const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
+  const sampledDocs = respDeviationRandomDocs.hits.hits.map((d) => d.fields ?? {});
 
   const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
     (d) => `${d}.keyword`
@@ -127,11 +116,16 @@ export const fetchIndexInfo = async (
     }
   });
 
-  const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
+  const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
+    .value;
+  const deviationTotalDocCount = (respDeviationRandomDocs.hits.total as estypes.SearchTotalHits)
+    .value;
 
   return {
     fieldCandidates: [...finalFieldCandidates],
     textFieldCandidates: [...finalTextFieldCandidates],
-    totalDocCount,
+    baselineTotalDocCount,
+    deviationTotalDocCount,
+    zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,
   };
 };

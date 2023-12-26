@@ -15,7 +15,7 @@ import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
-import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
+import { updateProviders, setFilters } from '../../../../timelines/store/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import type { DataProvider } from '../../../../../common/types';

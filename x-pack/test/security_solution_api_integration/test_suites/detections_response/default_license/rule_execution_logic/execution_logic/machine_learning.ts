@@ -15,6 +15,7 @@ import {
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -31,7 +32,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createRule,
   deleteAllRules,
@@ -125,6 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
           [ALERT_WORKFLOW_TAGS]: [],
+          [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',
@@ -269,6 +271,26 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(fullAlert?.host?.risk?.calculated_level).toBe('Low');
         expect(fullAlert?.host?.risk?.calculated_score_norm).toBe(1);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(1);
+        const fullAlert = previewAlerts[0]._source;
+
+        expect(fullAlert?.['kibana.alert.host.criticality_level']).toBe('normal');
+        expect(fullAlert?.['kibana.alert.user.criticality_level']).toBe('very_important');
       });
     });
   });

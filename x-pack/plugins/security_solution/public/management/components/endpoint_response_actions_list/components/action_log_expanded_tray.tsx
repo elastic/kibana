@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
+import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
@@ -96,7 +96,8 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+    const { command: _command, isCompleted, isExpired, wasSuccessful, errors } = action;
+    const command = getUiCommand(_command);
 
     if (errors?.length) {
       return (

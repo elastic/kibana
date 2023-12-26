@@ -23,8 +23,8 @@ import {
   WithOutputs,
 } from '../model/schema/common.gen';
 
-export type ListRequestQuery = z.infer<typeof ListRequestQuery>;
-export const ListRequestQuery = z.object({
+export type EndpointActionListRequestQuery = z.infer<typeof EndpointActionListRequestQuery>;
+export const EndpointActionListRequestQuery = z.object({
   agentIds: AgentIds.optional(),
   commands: Commands.optional(),
   page: Page.optional(),

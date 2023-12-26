@@ -44,6 +44,9 @@ const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
   return aggType;
 };
 
+export const getBufferThreshold = (threshold?: number): string =>
+  (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
+
 export function PreviewChart({
   metricExpression,
   dataView,
@@ -147,7 +150,7 @@ export function PreviewChart({
       const bufferRefLine = new XYReferenceLinesLayer({
         data: [
           {
-            value: Math.round((threshold[0] || 0) * 1.1).toString(),
+            value: getBufferThreshold(threshold[0]),
             color: 'transparent',
             fill,
             format,
@@ -218,12 +221,7 @@ export function PreviewChart({
           decimals: isPercent ? 0 : 2,
         },
       },
-      filter: {
-        language: 'kuery',
-        query: filterQuery || '',
-      },
     };
-
     const xYDataLayerOptions: XYLayerOptions = {
       buckets: {
         type: 'date_histogram',
@@ -252,7 +250,6 @@ export function PreviewChart({
         value: layer.value,
         label: layer.label,
         format: layer.format,
-        filter: layer.filter,
       })),
       options: xYDataLayerOptions,
     });
@@ -333,6 +330,10 @@ export function PreviewChart({
         timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
         attributes={attributes}
         disableTriggers={true}
+        query={{
+          language: 'kuery',
+          query: filterQuery || '',
+        }}
       />
     </div>
   );

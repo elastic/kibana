@@ -310,7 +310,7 @@
           },
           "[]][], [], unknown>; atPath: jest.MockInstance<",
           "Observable",
-          "<unknown>, [path: ",
+          "<unknown>, [",
           {
             "pluginId": "@kbn/config",
             "scope": "common",
@@ -318,7 +318,7 @@
             "section": "def-common.ConfigPath",
             "text": "ConfigPath"
           },
-          "], unknown>; atPathSync: jest.MockInstance<unknown, [path: ",
+          ", ({ ignoreUnchanged?: boolean | undefined; } | undefined)?], unknown>; atPathSync: jest.MockInstance<unknown, [path: ",
           {
             "pluginId": "@kbn/config",
             "scope": "common",

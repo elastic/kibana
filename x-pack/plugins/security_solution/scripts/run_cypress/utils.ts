@@ -11,7 +11,6 @@ import * as parser from '@babel/parser';
 import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { getExperimentalAllowedValues } from '../../common/experimental_features';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -68,9 +67,10 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
     plugins: ['typescript'],
   });
 
-  const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-    | ExpressionStatement
-    | undefined;
+  const expressionStatement = _.find(ast.program.body, {
+    type: 'ExpressionStatement',
+    expression: { callee: { name: 'describe' } },
+  }) as ExpressionStatement | undefined;
 
   const callExpression = expressionStatement?.expression;
   // @ts-expect-error
@@ -114,21 +114,7 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
 const TestFileFtrConfigSchema = schema.object(
   {
     license: schema.maybe(schema.string()),
-    enableExperimental: schema.maybe(
-      schema.arrayOf(
-        schema.string({
-          validate: (value) => {
-            const allowedValues = getExperimentalAllowedValues();
-
-            if (!allowedValues.includes(value)) {
-              return `Invalid [enableExperimental] value {${value}.\nValid values are: [${allowedValues.join(
-                ', '
-              )}]`;
-            }
-          },
-        })
-      )
-    ),
+    kbnServerArgs: schema.maybe(schema.arrayOf(schema.string())),
     productTypes: schema.maybe(
       // TODO:PT write validate function to ensure that only the correct combinations are used
       schema.arrayOf(

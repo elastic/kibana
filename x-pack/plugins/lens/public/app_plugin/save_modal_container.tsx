@@ -10,15 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
+import { redirectToDashboard } from './save_modal_container_helpers';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -58,6 +60,7 @@ export function SaveModalContainer({
   let title = '';
   let description;
   let savedObjectId;
+  const [initializing, setInitializing] = useState(true);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
@@ -92,9 +95,15 @@ export function SaveModalContainer({
       getPersisted({
         initialInput,
         lensServices,
-      }).then((persisted) => {
-        if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
-      });
+      })
+        .then((persisted) => {
+          if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
+        })
+        .finally(() => {
+          setInitializing(false);
+        });
+    } else {
+      setInitializing(false);
     }
 
     return () => {
@@ -135,6 +144,10 @@ export function SaveModalContainer({
     }
   };
 
+  if (initializing) {
+    return <EuiLoadingSpinner />;
+  }
+
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
   return (
@@ -158,40 +171,6 @@ export function SaveModalContainer({
     />
   );
 }
-
-const redirectToDashboard = ({
-  embeddableInput,
-  dashboardFeatureFlag,
-  dashboardId,
-  originatingApp,
-  getOriginatingPath,
-  stateTransfer,
-}: {
-  embeddableInput: LensEmbeddableInput;
-  dashboardId: string;
-  dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
-  originatingApp?: string;
-  getOriginatingPath?: (dashboardId: string) => string | undefined;
-  stateTransfer: LensAppServices['stateTransfer'];
-}) => {
-  if (!dashboardFeatureFlag.allowByValueEmbeddables) {
-    throw new Error('redirectToDashboard called with by-value embeddables disabled');
-  }
-
-  const state = {
-    input: embeddableInput,
-    type: LENS_EMBEDDABLE_TYPE,
-  };
-
-  const path =
-    getOriginatingPath?.(dashboardId) ??
-    (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
-  const appId = originatingApp ?? 'dashboards';
-  stateTransfer.navigateToWithEmbeddablePackage(appId, {
-    state,
-    path,
-  });
-};
 
 const getDocToSave = (
   lastKnownDoc: Document,

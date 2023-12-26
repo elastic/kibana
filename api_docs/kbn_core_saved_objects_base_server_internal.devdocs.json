@@ -654,6 +654,99 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getFieldListFromTypeMapping",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldListFromTypeMapping",
+        "description": [
+          "\nReturn the list of fields present in the provided mappings.\nNote that fields only containing properties are still considered fields by this function.\n"
+        ],
+        "signature": [
+          "(typeMappings: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsTypeMappingDefinition",
+            "text": "SavedObjectsTypeMappingDefinition"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getFieldListFromTypeMapping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMappings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsTypeMappingDefinition",
+                "text": "SavedObjectsTypeMappingDefinition"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getFieldListMapFromMappingDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldListMapFromMappingDefinitions",
+        "description": [
+          "\nReturn the list of fields present in each individual type mappings present in the definition."
+        ],
+        "signature": [
+          "(mappings: ",
+          "SavedObjectsTypeMappingDefinitions",
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.FieldListMap",
+            "text": "FieldListMap"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getFieldListMapFromMappingDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "SavedObjectsTypeMappingDefinitions"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.getIndexForType",
         "type": "Function",
         "tags": [],
@@ -1064,6 +1157,111 @@
               "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getVersionAddedFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getVersionAddedFields",
+        "description": [
+          "\nReturn the list of fields, sorted, that were introduced in the given version."
+        ],
+        "signature": [
+          "(version: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelVersion",
+            "text": "SavedObjectsModelVersion"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getVersionAddedFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelVersion",
+                "text": "SavedObjectsModelVersion"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getVersionAddedMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "getVersionAddedMappings",
+        "description": [
+          "\nReturn the mappings that were introduced in the given version.\nIf multiple 'mappings_addition' changes are present for the version,\nthey will be deep-merged."
+        ],
+        "signature": [
+          "(version: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelVersion",
+            "text": "SavedObjectsModelVersion"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsMappingProperties",
+            "text": "SavedObjectsMappingProperties"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getVersionAddedMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelVersion",
+                "text": "SavedObjectsModelVersion"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1508,6 +1706,21 @@
           "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.FieldListMap",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldListMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

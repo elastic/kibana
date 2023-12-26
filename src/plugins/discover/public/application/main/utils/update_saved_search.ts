@@ -52,7 +52,7 @@ export function updateSavedSearch({
 
     savedSearch.searchSource
       .setField('query', state.query ?? undefined)
-      .setField('filter', [...appFilters, ...globalFilters]);
+      .setField('filter', [...globalFilters, ...appFilters]);
   }
   if (state) {
     savedSearch.columns = state.columns || [];

@@ -55,3 +55,11 @@ export const MARK_AS_UNTRACKED = i18n.translate(
     defaultMessage: 'Mark as untracked',
   }
 );
+
+export const MUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.mute', {
+  defaultMessage: 'Mute',
+});
+
+export const UNMUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.unmute', {
+  defaultMessage: 'Unmute',
+});

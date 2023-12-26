@@ -22,11 +22,8 @@ import {
 } from '@elastic/eui';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import {
-  AlertAnnotation,
-  getPaddedAlertTimeRange,
-  AlertActiveTimeRangeAnnotation,
-} from '@kbn/observability-alert-details';
+import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
@@ -66,7 +63,6 @@ export default function AlertDetailsAppSection({
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
-    theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -134,7 +130,7 @@ export default function AlertDetailsAppSection({
         <EuiFlexItem key={`criterion-${index}`}>
           <EuiPanel hasBorder hasShadow={false}>
             <EuiTitle size="xs">
-              <h4>{criterion.aggType.toUpperCase()} </h4>
+              <h4>{criterion.label || 'CUSTOM'} </h4>
             </EuiTitle>
             <EuiText size="s" color="subdued">
               <FormattedMessage

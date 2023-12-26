@@ -20,7 +20,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { SLO } from '../../../domain/models';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
 

@@ -12,12 +12,13 @@ import { useDispatch } from 'react-redux';
 
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
 import { useCreateTimelineButton } from './use_create_timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
@@ -27,9 +28,13 @@ NotesCountBadge.displayName = 'NotesCountBadge';
 
 interface AddToFavoritesButtonProps {
   timelineId: string;
+  compact?: boolean;
 }
 
-const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
+  timelineId,
+  compact,
+}) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -48,16 +53,33 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
     [dispatch, timelineId, isFavorite]
   );
 
-  return (
+  const label = isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES;
+
+  return compact ? (
+    <EuiButtonIcon
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      iconSize="m"
+      isSelected={isFavorite}
+      onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      disabled={disableFavoriteButton}
+      aria-label={label}
+      title={label}
+    />
+  ) : (
     <EuiButton
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ADD_TO_FAVORITES}
       isSelected={isFavorite}
       fill={isFavorite}
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
+      aria-label={label}
+      title={label}
     >
-      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
+      {label}
     </EuiButton>
   );
 };
@@ -66,18 +88,18 @@ AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 export interface NewTimelineProps {
-  closeGearMenu?: () => void;
+  onClick?: () => void;
   outline?: boolean;
   timelineId: string;
   title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+  ({ onClick, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
-      closeGearMenu,
+      onClick,
     });
     const button = getButton({ outline, title });
 

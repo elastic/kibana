@@ -70,7 +70,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
 export interface GetCasesColumn {
-  filterStatus: string;
+  filterStatus: string[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   selectedColumns: CasesColumnSelection[];
@@ -137,7 +137,6 @@ export const useCasesColumns = ({
         render: (assignees: CaseUI['assignees']) => (
           <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
         ),
-        width: '180px',
       },
       tags: {
         field: casesColumnsConfig.tags.field,
@@ -184,7 +183,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '15%',
+        width: '12%',
       },
       totalAlerts: {
         field: casesColumnsConfig.totalAlerts.field,
@@ -204,6 +203,7 @@ export const useCasesColumns = ({
           totalComment != null
             ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
             : getEmptyCellValue(),
+        width: '90px',
       },
       category: {
         field: casesColumnsConfig.category.field,
@@ -217,7 +217,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '100px',
+        width: '120px',
       },
       closedAt: {
         field: casesColumnsConfig.closedAt.field,
@@ -273,7 +273,6 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: isSelectorView ? '80px' : undefined,
       },
       status: {
         field: casesColumnsConfig.status.field,
@@ -286,6 +285,7 @@ export const useCasesColumns = ({
 
           return getEmptyCellValue();
         },
+        width: '110px',
       },
       severity: {
         field: casesColumnsConfig.severity.field,

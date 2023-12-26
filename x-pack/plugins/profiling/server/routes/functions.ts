@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
@@ -32,14 +32,17 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
-      options: { tags: ['access:profiling'] },
+      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: { query: querySchema },
     },
     async (context, request, response) => {
       try {
+        const core = await context.core;
+
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
         const esClient = await getClient(context);
         const topNFunctions = await profilingDataAccess.services.fetchFunction({
+          core,
           esClient,
           rangeFromMs: timeFrom,
           rangeToMs: timeTo,

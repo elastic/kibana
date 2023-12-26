@@ -26,7 +26,7 @@ import {
   removeRandomValuedPropertiesFromAlert,
   patchRule,
 } from '../../../utils';
-import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -151,6 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.updated_by': 'elastic',
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
+        'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
       });
@@ -855,6 +856,45 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_level', 'Low');
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_score_norm', 1);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { host: { name: 'host-0' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | where host.name=="host-0"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toBe(1);
+
+        expect(previewAlerts[0]?._source?.['kibana.alert.host.criticality_level']).toBe(
+          'very_important'
+        );
       });
     });
 

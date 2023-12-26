@@ -9,7 +9,6 @@ import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/const
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { hostsUrl } from '../urls/navigation';
 import { openTimelineUsingToggle } from './security_main';
-import { rootRequest } from './common';
 import { visitWithTimeRange } from './navigation';
 
 export const openSourcerer = (sourcererScope?: string) => {
@@ -129,15 +128,4 @@ export const refreshUntilAlertsIndexExists = async () => {
     },
     { interval: 500, timeout: 12000 }
   );
-};
-
-export const deleteRuntimeField = (dataView: string, fieldName: string) => {
-  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
-
-  rootRequest({
-    url: deleteRuntimeFieldPath,
-    method: 'DELETE',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-    failOnStatusCode: false,
-  });
 };

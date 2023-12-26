@@ -119,7 +119,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
-    if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+    if ('visConfig' in visType && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -143,10 +143,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     let params;
-    if ('aliasPath' in visType) {
-      params = visType.aliasPath;
-      this.props.onClose();
-      this.navigate(visType.aliasApp, visType.aliasPath);
+    if ('alias' in visType) {
+      if (visType.alias && 'path' in visType.alias) {
+        params = visType.alias.path;
+        this.props.onClose();
+        this.navigate(visType.alias.app, visType.alias.path);
+      }
       return;
     }
 

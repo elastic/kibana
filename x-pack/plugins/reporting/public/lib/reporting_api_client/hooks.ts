@@ -13,5 +13,6 @@ export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusRes
   const {
     services: { http },
   } = useKibana();
+
   return useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' });
 };
