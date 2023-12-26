@@ -58,6 +58,8 @@ function getRoutingTransform() {
         document._index = 'metrics-system.load-default';
       } else if (metricset === 'filesystem') {
         document._index = 'metrics-system.filesystem-default';
+      } else if (metricset === 'diskio') {
+        document._index = 'metrics-system.diskio-default';
       } else if ('container.id' in document) {
         document._index = 'metrics-kubernetes.container-default';
       } else if ('kubernetes.pod.uid' in document) {
