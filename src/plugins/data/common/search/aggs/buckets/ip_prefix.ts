@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IpPrefix, ipPrefixToAst } from '../../expressions';
 
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -19,14 +20,9 @@ const ipPrefixTitle = i18n.translate('data.search.aggs.buckets.ipPrefixTitle', {
   defaultMessage: 'IP Prefix',
 });
 
-export interface IpPrefixAggKey {
-  prefixLength: string;
-  isIpv6: boolean;
-}
-
 export interface AggParamsIpPrefix extends BaseAggParams {
   field: string;
-  ipPrefix?: IpPrefixAggKey;
+  ipPrefix?: IpPrefix; 
 }
 
 export const getIpPrefixBucketAgg = () =>
@@ -60,14 +56,14 @@ export const getIpPrefixBucketAgg = () =>
       {
         name: 'ipPrefix',
         default: {
-          prefixLength: 1,
+          prefixLength: 0,
           isIpv6: false,
         },
         write: (aggConfig, output) => {
-	  console.log(aggConfig);
           output.params.prefix_length = aggConfig.params.ipPrefix.prefixLength;
           output.params.is_ipv6 = aggConfig.params.ipPrefix.isIpv6;
         },
+        toExpressionAst: ipPrefixToAst,
       },
     ],
   });

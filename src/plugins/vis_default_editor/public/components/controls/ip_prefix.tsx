@@ -19,17 +19,27 @@ import {
   EuiSwitchProps,
 } from '@elastic/eui';
 import { AggParamEditorProps } from '../agg_param_props';
+import { useValidation } from './utils';
 import { i18n } from '@kbn/i18n';
 
-type IpPrefixInfo = {
+export interface IpPrefix {
   prefixLength: number;
   isIpv6: boolean;
 };
 
-let ipPrefixObject: IpPrefixInfo = {
-  prefixLength: 0,
-  isIpv6: false
-};
+function isPrefixValid({ prefixLength, isIpv6 }: IpPrefix): boolean {
+  if (prefixLength < 0) {
+    return false;
+  }
+  else if (prefixLength > 32 && !isIpv6) {
+    return false;
+  }
+  else if (prefixLength > 128 && isIpv6) {
+    return false;
+  }
+
+  return true;
+}
 
 const prefixLengthLabel = i18n.translate('visDefaultEditor.controls.IpPrefix.prefixLength', {
   defaultMessage: 'Prefix Length',
@@ -41,57 +51,65 @@ const isIpv6Label = i18n.translate('visDefaultEditor.controls.IpPrefix.isIpv6', 
 
 function IpPrefixParamEditor({
   agg,
-  value,
+  value = {} as IpPrefix,
   setTouched,
   setValue,
   setValidity,
   showValidation,
 }: AggParamEditorProps<IpPrefix>) {
 
+  const isValid = isPrefixValid(value);
+  let error;
+
+  if (!isValid) {
+    error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessage', {
+      defaultMessage: 'Prefix Length must be between 0 and 32 for IPv4 Addresses and 0 and 128 for IPv6 Addresses.',
+    });
+  }
+
+  useValidation(setValidity, isValid);
+
   const onPrefixLengthChange: EuiFieldNumberProps['onChange'] = useCallback(
     (e) => {
-      console.log(e);
       if(e.target.dataset.testSubj === "visEditorIpPrefixPrefixLength") {
-        ipPrefixObject.prefixLength = e.target.valueAsNumber;
-        setValue(ipPrefixObject);
+        setValue({...value, prefixLength: e.target.valueAsNumber});
       }
     }, 
-    [setValue]
+    [setValue, value]
   );
 
   const onIsIpv6Change: EuiSwitchProps['onChange'] = useCallback(
     (e) => {
-      console.log(e);
       if(e.target.dataset.testSubj === "visEditorIpPrefixIsIpv6") {
-        ipPrefixObject.isIpv6 = e.target.checked;
-        setValue(ipPrefixObject);
+        setValue({...value, isIpv6: e.target.checked});
       }
     },
-    [setValue]
+    [setValue, value]
   );
 
   return (
     <EuiFormRow
       fullWidth={true}
       display="rowCompressed"
-      label={prefixLengthLabel} 
+      label={prefixLengthLabel}
+      isInvalid={showValidation ? !isValid : false}
     >
-      <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
+      <EuiFlexGroup gutterSize="m" responsive={false} direction={'column'}>
         <EuiFlexItem> 
           <EuiFieldNumber
-            value={ipPrefixObject.prefixLength}
+            value={value.prefixLength}
             onChange={onPrefixLengthChange}
             fullWidth={true}
             compressed
             onBlur={setTouched}
             min={0}
-            max={128}
+            max={value.isIpv6 ? 128 : 32}
             data-test-subj={`visEditorIpPrefixPrefixLength`}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            checked={ipPrefixObject.isIpv6}
+            checked={value.isIpv6}
             label={isIpv6Label}
             onChange={onIsIpv6Change}
             compressed

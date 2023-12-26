@@ -60,6 +60,7 @@ import {
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  ipPrefixFunction,
   ipRangeFunction,
   ISearchOptions,
   kibana,
@@ -225,6 +226,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(geoBoundingBoxFunction);
     expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(ipPrefixFunction);
     expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
