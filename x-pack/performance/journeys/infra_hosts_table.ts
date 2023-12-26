@@ -6,19 +6,35 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import { createLogger, InfraSynthtraceEsClient, LogLevel } from '@kbn/apm-synthtrace';
+import {
+  createLogger,
+  InfraSynthtraceEsClient,
+  LogLevel,
+  InfraSynthtraceKibanaClient,
+} from '@kbn/apm-synthtrace';
 import { infra, timerange } from '@kbn/apm-synthtrace-client';
 
 export const journey = new Journey({
-  beforeSteps: async ({ kbnUrl, log, auth, es }) => {
-    const synthClient = new InfraSynthtraceEsClient({
-      logger: createLogger(LogLevel.info),
+  beforeSteps: async ({ kbnUrl, auth, es }) => {
+    const logger = createLogger(LogLevel.debug);
+    const synthKibanaClient = new InfraSynthtraceKibanaClient({
+      logger,
+      target: kbnUrl.get(),
+      username: auth.getUsername(),
+      password: auth.getPassword(),
+    });
+
+    const pkgVersion = await synthKibanaClient.fetchLatestSystemPackageVersion();
+    await synthKibanaClient.installSystemPackage(pkgVersion);
+
+    const synthEsClient = new InfraSynthtraceEsClient({
+      logger,
       client: es,
       refreshAfterIndex: true,
     });
 
     const start = Date.now() - 1000 * 60 * 10;
-    await synthClient.index(
+    await synthEsClient.index(
       generateHostsData({
         from: new Date(start).toISOString(),
         to: new Date().toISOString(),
@@ -26,31 +42,14 @@ export const journey = new Journey({
       })
     );
   },
-})
-  .step('Navigate to Hosts view and load 50 hosts', async ({ page, kbnUrl }) => {
-    await page.goto(
-      kbnUrl.get(
-        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:50,panelFilters:!(),query:(language:kuery,query:''))`
-      )
-    );
-    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
-  })
-  .step('Navigate to Hosts view and load 100 hosts', async ({ page, kbnUrl }) => {
-    await page.goto(
-      kbnUrl.get(
-        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:100,panelFilters:!(),query:(language:kuery,query:''))`
-      )
-    );
-    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
-  })
-  .step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl }) => {
-    await page.goto(
-      kbnUrl.get(
-        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
-      )
-    );
-    await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
-  });
+}).step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl }) => {
+  await page.goto(
+    kbnUrl.get(
+      `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
+    )
+  );
+  await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
+});
 
 export function generateHostsData({
   from,
@@ -69,14 +68,15 @@ export function generateHostsData({
 
   return range
     .interval('30s')
-    .rate(5)
+    .rate(1)
     .generator((timestamp, index) =>
       hosts.flatMap((host) => [
         host.cpu().timestamp(timestamp),
-        host.memory().timestamp(timestamp),
-        host.network().timestamp(timestamp),
-        host.load().timestamp(timestamp),
-        host.filesystem().timestamp(timestamp),
+        host.memory().timestamp(timestamp + 1),
+        host.network().timestamp(timestamp + 2),
+        host.load().timestamp(timestamp + 3),
+        host.filesystem().timestamp(timestamp + 4),
+        host.diskio().timestamp(timestamp + 5),
       ])
     );
 }
