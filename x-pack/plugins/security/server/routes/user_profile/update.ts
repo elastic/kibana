@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
+import { IMAGE_FILE_TYPES } from '../../../common/constants';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { flattenObject } from '../../lib';
 import { getPrintableSessionId } from '../../session_management';
@@ -47,7 +48,20 @@ export function defineUpdateUserProfileDataRoute({
       }
 
       const currentUser = getAuthenticationService().getCurrentUser(request);
+
       const userProfileData = request.body;
+      const imageDataUrl = userProfileData.avatar.imageUrl;
+      const matches = imageDataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return response.forbidden();
+      }
+
+      const [, mimeType] = matches;
+
+      if (!IMAGE_FILE_TYPES.includes(mimeType)) {
+        return response.forbidden();
+      }
+
       const keysToUpdate = Object.keys(flattenObject(userProfileData));
 
       if (currentUser?.elastic_cloud_user) {
