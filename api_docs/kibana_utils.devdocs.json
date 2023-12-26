@@ -3350,8 +3350,8 @@
             "pluginId": "@kbn/core-theme-browser",
             "scope": "common",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           "; }) => (error: ",
           {
@@ -3568,8 +3568,8 @@
                     "pluginId": "@kbn/core-theme-browser",
                     "scope": "common",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
+                    "section": "def-common.ThemeServiceSetup",
+                    "text": "ThemeServiceSetup"
                   }
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -6943,10 +6943,10 @@
     ],
     "setup": {
       "parentPluginId": "kibanaUtils",
-      "id": "def-public.KibanaUtilsSetup",
+      "id": "def-public.KibanaUtilsPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "KibanaUtilsSetup",
+      "label": "KibanaUtilsPublicSetup",
       "description": [],
       "path": "src/plugins/kibana_utils/public/plugin.ts",
       "deprecated": false,
@@ -6954,7 +6954,7 @@
       "children": [
         {
           "parentPluginId": "kibanaUtils",
-          "id": "def-public.KibanaUtilsSetup.setVersion",
+          "id": "def-public.KibanaUtilsPublicSetup.setVersion",
           "type": "Function",
           "tags": [],
           "label": "setVersion",
@@ -6970,7 +6970,7 @@
           "children": [
             {
               "parentPluginId": "kibanaUtils",
-              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
+              "id": "def-public.KibanaUtilsPublicSetup.setVersion.$1",
               "type": "Object",
               "tags": [],
               "label": "history",
@@ -6990,6 +6990,22 @@
         }
       ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "kibanaUtils",
+      "id": "def-public.KibanaUtilsPublicStart",
+      "type": "Type",
+      "tags": [],
+      "label": "KibanaUtilsPublicStart",
+      "description": [],
+      "signature": [
+        "undefined"
+      ],
+      "path": "src/plugins/kibana_utils/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },

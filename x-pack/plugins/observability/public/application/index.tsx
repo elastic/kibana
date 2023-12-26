@@ -19,7 +19,6 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
@@ -68,7 +67,7 @@ export const renderApp = ({
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
@@ -85,23 +84,24 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
+  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
-    <EuiErrorBoundary>
-      <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
-          <CloudProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage: new Storage(localStorage),
-                isDev,
-                kibanaVersion,
-                isServerless,
-              }}
-            >
-              <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant.service}>
+    <PresentationContextProvider>
+      <EuiErrorBoundary>
+        <ApplicationUsageTrackingProvider>
+          <KibanaThemeProvider {...{ theme: { theme$ } }}>
+            <CloudProvider>
+              <KibanaContextProvider
+                services={{
+                  ...core,
+                  ...plugins,
+                  storage: new Storage(localStorage),
+                  isDev,
+                  kibanaVersion,
+                  isServerless,
+                }}
+              >
                 <PluginContext.Provider
                   value={{
                     config,
@@ -126,12 +126,12 @@ export const renderApp = ({
                     </EuiThemeProvider>
                   </Router>
                 </PluginContext.Provider>
-              </ObservabilityAIAssistantProvider>
-            </KibanaContextProvider>
-          </CloudProvider>
-        </KibanaThemeProvider>
-      </ApplicationUsageTrackingProvider>
-    </EuiErrorBoundary>,
+              </KibanaContextProvider>
+            </CloudProvider>
+          </KibanaThemeProvider>
+        </ApplicationUsageTrackingProvider>
+      </EuiErrorBoundary>
+    </PresentationContextProvider>,
     element
   );
   return () => {

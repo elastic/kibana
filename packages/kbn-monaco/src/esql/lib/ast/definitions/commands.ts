@@ -56,7 +56,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'functions', type: 'string', values: ['functions', 'info'] }],
+      params: [{ name: 'functions', type: 'function' }],
     },
   },
   {
