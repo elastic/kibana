@@ -199,6 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `);
 
         const contentLength = parseInt(res.get('content-length'), 10);
+        expect(contentLength).to.be(20725);
         expect(contentLength >= 20725 && contentLength <= 20726).to.be(true); // contentLength can be between 20725 and 20726
       });
 
