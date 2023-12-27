@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  describe.only('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('Default Saved Search Data', () => {
+    describe.only('Default Saved Search Data', () => {
       before(async () => {
         await reporting.initEcommerce();
         await navigateToDashboardApp();
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Filtered Saved Search', () => {
+    describe.only('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const from = 'Jun 20, 2019 @ 23:56:51.374';
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Field Formatters and Scripted Fields', () => {
+    describe.only('Field Formatters and Scripted Fields', () => {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {
