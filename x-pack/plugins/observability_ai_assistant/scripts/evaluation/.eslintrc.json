@@ -1,0 +1,15 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.ts"
+      ],
+      "rules": {
+        "@kbn/imports/require_import": [
+          "error",
+          "mocha"
+        ]
+      }
+    }
+  ]
+}
