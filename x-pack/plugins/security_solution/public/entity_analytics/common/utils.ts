@@ -49,3 +49,15 @@ export type SnakeToCamelCase<T> = T extends Record<string, unknown>
   : T extends unknown[]
   ? SnakeToCamelCaseArray<T>
   : T;
+
+export enum UserRiskScoreQueryId {
+  USERS_BY_RISK = 'UsersByRisk',
+  USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
+}
+
+export enum HostRiskScoreQueryId {
+  DEFAULT = 'HostRiskScore',
+  HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
+  OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
+  HOSTS_BY_RISK = 'HostsByRisk',
+}

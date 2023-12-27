@@ -22,8 +22,7 @@ import {
 import { createStore } from '../../store';
 import type { State } from '../../store';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { getRiskScoreDonutAttributes } from './lens_attributes/common/risk_scores/risk_score_donut';
-import { TOTAL_LABEL } from '../../../overview/components/entity_analytics/common/translations';
+import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session', () => ({
@@ -183,7 +182,7 @@ describe('VisualizationEmbeddable', () => {
             getLensAttributes={getRiskScoreDonutAttributes}
             id="testId"
             isDonut={true}
-            label={TOTAL_LABEL}
+            label={'Total'}
             timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
           />
         </TestProviders>
