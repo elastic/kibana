@@ -12,6 +12,7 @@ import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
@@ -87,17 +88,17 @@ export const getSections = ({
 
   // Logs hrefs
   const podLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeType: 'pod',
+    nodeField: findInventoryFields('pod').id,
     nodeId: podId!,
     time,
   });
   const containerLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeType: 'container',
+    nodeField: findInventoryFields('container').id,
     nodeId: containerId!,
     time,
   });
   const hostLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
-    nodeType: 'host',
+    nodeField: findInventoryFields('host').id,
     nodeId: hostName!,
     time,
   });

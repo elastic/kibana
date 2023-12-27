@@ -6,7 +6,6 @@
  */
 
 import moment, { DurationInputObject } from 'moment';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
 
 export const getLogsQuery = (params: LogsLocatorParams) => {
@@ -16,9 +15,9 @@ export const getLogsQuery = (params: LogsLocatorParams) => {
 };
 
 export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
-  const { nodeType, nodeId, filter } = params;
+  const { nodeField, nodeId, filter } = params;
 
-  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
+  const nodeFilter = `${nodeField}: ${nodeId}`;
   return filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 };
 

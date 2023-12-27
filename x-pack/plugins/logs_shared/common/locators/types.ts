@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { SerializableRecord } from '@kbn/utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LogViewReference } from '../log_views/types';
@@ -26,21 +25,9 @@ export interface TraceLogsLocatorParams extends LogsLocatorParams {
   traceId: string;
 }
 
-export const ItemTypeRT = rt.keyof({
-  host: null,
-  pod: null,
-  container: null,
-  awsEC2: null,
-  awsS3: null,
-  awsSQS: null,
-  awsRDS: null,
-});
-
-export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
-
 export interface NodeLogsLocatorParams extends LogsLocatorParams {
+  nodeField: string;
   nodeId: string;
-  nodeType: InventoryItemType;
 }
 
 export interface LogsSharedLocators {

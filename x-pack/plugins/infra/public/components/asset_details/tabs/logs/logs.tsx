@@ -82,7 +82,7 @@ export const Logs = () => {
 
   const logsUrl = useMemo(() => {
     return nodeLogsLocator.getRedirectUrl({
-      nodeType: asset.type,
+      nodeField: findInventoryFields(asset.type).id,
       nodeId: asset.name,
       time: state.startTimestamp,
       filter: textQueryDebounced,

@@ -112,7 +112,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
       href: nodeLogsLocator.getRedirectUrl({
-        nodeType,
+        nodeField: findInventoryFields(nodeType).id,
         nodeId: node.id,
         time: currentTime,
       }),
