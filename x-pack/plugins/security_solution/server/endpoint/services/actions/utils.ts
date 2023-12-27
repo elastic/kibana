@@ -29,6 +29,7 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
@@ -47,12 +48,12 @@ export const isLogsEndpointAction = (
  * @param item
  */
 export const isLogsEndpointActionResponse = (
-  item: EndpointActionResponse | LogsEndpointActionResponse
-): item is LogsEndpointActionResponse => {
+  item: EndpointActionResponse | LogsEndpointActionResponse<EndpointActionResponseDataOutput>
+): item is LogsEndpointActionResponse<EndpointActionResponseDataOutput> => {
   return 'EndpointActions' in item && 'agent' in item;
 };
 
-interface NormalizedActionRequest {
+export interface NormalizedActionRequest {
   id: string;
   type: 'ACTION_REQUEST';
   agentType: ResponseActionAgentType;
@@ -124,11 +125,15 @@ type ActionCompletionInfo = Pick<
   'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
 >;
 
-export const getActionCompletionInfo = (
+export const getActionCompletionInfo = <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
   /** The normalized action request */
   action: NormalizedActionRequest,
   /** List of action Log responses received for the action */
-  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+  actionResponses: Array<
+    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
+  >
 ): ActionCompletionInfo => {
   const agentIds = action.agents;
   const completedInfo: ActionCompletionInfo = {
@@ -245,13 +250,15 @@ export const getActionStatus = ({
   return { isExpired, status };
 };
 
-interface NormalizedAgentActionResponse {
+interface NormalizedAgentActionResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> {
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
   errors: undefined | string[];
   fleetResponse: undefined | ActivityLogActionResponse;
-  endpointResponse: undefined | EndpointActivityLogActionResponse;
+  endpointResponse: undefined | EndpointActivityLogActionResponse<TOutputContent>;
 }
 
 type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
@@ -261,8 +268,12 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  * value is a object having information about the action responses associated with that agent id
  * @param actionResponses
  */
-const mapActionResponsesByAgentId = (
-  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+const mapActionResponsesByAgentId = <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
+  actionResponses: Array<
+    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
+  >
 ): ActionResponseByAgentId => {
   const response: ActionResponseByAgentId = {};
 
@@ -347,7 +358,9 @@ const mapActionResponsesByAgentId = (
  * @param actionResponse
  */
 const getAgentIdFromActionResponse = (
-  actionResponse: ActivityLogActionResponse | EndpointActivityLogActionResponse
+  actionResponse:
+    | ActivityLogActionResponse
+    | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
 ): string => {
   const responseData = actionResponse.item.data;
 
