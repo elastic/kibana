@@ -78,7 +78,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         )}
         {searchItems !== undefined && (
           <Provider store={createTransformStore}>
-            <Wizard searchItems={searchItems} />{' '}
+            <Wizard searchItems={searchItems} />
           </Provider>
         )}
       </EuiPageTemplate.Section>

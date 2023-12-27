@@ -12,6 +12,8 @@ import { bindActionCreators } from 'redux';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import type { StepDefineExposedState } from './components/step_define';
+
 export enum WIZARD_STEPS {
   DEFINE,
   DETAILS,
@@ -31,7 +33,7 @@ const createTransformWizardAppContextSlice = createSlice({
     currentStep: WIZARD_STEPS.DEFINE,
   } as CreateTransformWizardAppContextState,
   reducers: {
-    initialize: (
+    initializeAppContext: (
       state,
       action: PayloadAction<
         Pick<CreateTransformWizardAppContextState, 'dataView' | 'runtimeMappings'>
@@ -46,19 +48,32 @@ const createTransformWizardAppContextSlice = createSlice({
   },
 });
 
+const stepDefineSlice = createSlice({
+  name: 'stepDefine',
+  initialState: null as StepDefineExposedState | null,
+  reducers: {
+    setStepDefineState: (_, action: PayloadAction<StepDefineExposedState>) => action.payload,
+  },
+});
+
 export const createTransformStore = configureStore({
   reducer: {
     wizard: createTransformWizardAppContextSlice.reducer,
+    stepDefine: stepDefineSlice.reducer,
   },
 });
 
 interface StoreState {
   wizard: CreateTransformWizardAppContextState;
+  stepDefine: StepDefineExposedState | null;
 }
 
 export function useCreateTransformWizardActions() {
   const dispatch = useDispatch();
-  return bindActionCreators(createTransformWizardAppContextSlice.actions, dispatch);
+  return bindActionCreators(
+    { ...createTransformWizardAppContextSlice.actions, ...stepDefineSlice.actions },
+    dispatch
+  );
 }
 
 export function useCreateTransformWizardSelector<T>(selector: (s: StoreState) => T) {

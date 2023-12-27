@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useRef, useState, useMemo } from 'react';
+import React, { type FC, useEffect, useState, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
@@ -34,7 +34,6 @@ import {
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-  StepDefineExposedState,
   StepDefineForm,
   StepDefineSummary,
 } from '../step_define';
@@ -52,27 +51,19 @@ import { TRANSFORM_STORAGE_KEYS } from './storage';
 const localStorage = new Storage(window.localStorage);
 
 interface DefinePivotStepProps {
-  stepDefineState: StepDefineExposedState;
-  setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
   searchItems: SearchItems;
 }
 
-const StepDefine: FC<DefinePivotStepProps> = ({
-  stepDefineState,
-  setStepDefineState,
-  searchItems,
-}) => {
+const StepDefine: FC<DefinePivotStepProps> = ({ searchItems }) => {
+  const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
   const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
-  const { setCurrentStep } = useCreateTransformWizardActions();
-
-  const definePivotRef = useRef(null);
+  const { setCurrentStep, setStepDefineState } = useCreateTransformWizardActions();
 
   const isCurrentStep = currentStep === WIZARD_STEPS.DEFINE;
 
   return (
     <>
-      <div ref={definePivotRef} />
-      {isCurrentStep && (
+      {isCurrentStep && stepDefineState && (
         <>
           <StepDefineForm
             onChange={setStepDefineState}
@@ -85,7 +76,7 @@ const StepDefine: FC<DefinePivotStepProps> = ({
           />
         </>
       )}
-      {!isCurrentStep && (
+      {!isCurrentStep && stepDefineState && (
         <StepDefineSummary formState={{ ...stepDefineState }} searchItems={searchItems} />
       )}
     </>
@@ -110,12 +101,23 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const { dataView } = searchItems;
 
   const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
-  const { initialize, setCurrentStep } = useCreateTransformWizardActions();
+  const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
+  const { initializeAppContext, setCurrentStep, setStepDefineState } =
+    useCreateTransformWizardActions();
 
-  // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig, dataView)
-  );
+  useEffect(() => {
+    const initialStepDefineState = applyTransformConfigToDefineState(
+      getDefaultStepDefineState(searchItems),
+      cloneConfig,
+      dataView
+    );
+    initializeAppContext({
+      dataView,
+      runtimeMappings: initialStepDefineState.runtimeMappings,
+    });
+    setStepDefineState(initialStepDefineState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(
@@ -125,26 +127,14 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
-  const transformConfig = getCreateTransformRequestBody(
-    dataView,
-    stepDefineState,
-    stepDetailsState
-  );
-
   const stepDefine = useMemo(() => {
     return {
       title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
         defaultMessage: 'Configuration',
       }),
-      children: (
-        <StepDefine
-          stepDefineState={stepDefineState}
-          setStepDefineState={setStepDefineState}
-          searchItems={searchItems}
-        />
-      ),
+      children: <StepDefine searchItems={searchItems} />,
     };
-  }, [stepDefineState, setStepDefineState, searchItems]);
+  }, [searchItems]);
 
   const stepDetails = useMemo(() => {
     return {
@@ -153,7 +143,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       }),
       children: (
         <>
-          {currentStep === WIZARD_STEPS.DETAILS ? (
+          {currentStep === WIZARD_STEPS.DETAILS && stepDefineState ? (
             <StepDetailsForm
               onChange={setStepDetailsState}
               overrides={stepDetailsState}
@@ -192,11 +182,15 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       }),
       children: (
         <>
-          {currentStep === WIZARD_STEPS.CREATE ? (
+          {currentStep === WIZARD_STEPS.CREATE && stepDefineState ? (
             <StepCreateForm
               createDataView={stepDetailsState.createDataView}
               transformId={stepDetailsState.transformId}
-              transformConfig={transformConfig}
+              transformConfig={getCreateTransformRequestBody(
+                dataView,
+                stepDefineState,
+                stepDetailsState
+              )}
               onChange={setStepCreateState}
               overrides={stepCreateState}
               timeFieldName={stepDetailsState.dataViewTimeField}
@@ -212,14 +206,13 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
     };
   }, [
+    dataView,
     currentStep,
     setCurrentStep,
-    stepDetailsState.createDataView,
-    stepDetailsState.transformId,
-    transformConfig,
     setStepCreateState,
+    stepDetailsState,
     stepCreateState,
-    stepDetailsState.dataViewTimeField,
+    stepDefineState,
   ]);
 
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
@@ -241,20 +234,16 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     [uiSettings, data, fieldFormats, charts]
   );
 
-  useEffect(() => {
-    initialize({
-      dataView,
-      runtimeMappings: stepDefineState.runtimeMappings,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  if (!stepDefineState) return null;
 
   return (
     <FieldStatsFlyoutProvider
       dataView={dataView}
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={stepDefineState.timeRangeMs}
-      dslQuery={transformConfig.source.query}
+      dslQuery={
+        getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState).source.query
+      }
     >
       <UrlStateProvider>
         <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
