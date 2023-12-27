@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await updateRule(supertest, ruleToUpdate);
 
-        const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        const status = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
         expect(status.rules_not_installed).toBe(0);
       });
 

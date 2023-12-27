@@ -10,6 +10,8 @@ import {
   GetPrebuiltRulesStatusResponseBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 /**
  * Helper to retrieve the prebuilt rules status
@@ -17,6 +19,7 @@ import type SuperTest from 'supertest';
  * @param supertest The supertest deps
  */
 export const getPrebuiltRulesStatus = async (
+  es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<GetPrebuiltRulesStatusResponseBody> => {
   const response = await supertest
@@ -26,6 +29,8 @@ export const getPrebuiltRulesStatus = async (
     .set('x-elastic-internal-origin', 'foo')
     .send()
     .expect(200);
+
+  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
 
   return response.body;
 };

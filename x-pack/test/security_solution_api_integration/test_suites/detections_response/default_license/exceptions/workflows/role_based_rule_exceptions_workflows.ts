@@ -526,7 +526,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const status = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(status.rules_not_installed).toEqual(0);
         });
       });

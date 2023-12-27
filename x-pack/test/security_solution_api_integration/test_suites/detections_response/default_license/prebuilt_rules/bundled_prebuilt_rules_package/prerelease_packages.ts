@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should install latest stable version and ignore prerelease packages', async () => {
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(prebuiltRulesFleetPackage.status).toBe(200);
 
       // Get status of our prebuilt rules (nothing should be instaled yet)
-      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(1); // 1 rule in package 99.0.0
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRules(es, supertest);
 
       // Verify that status is updated after package installation
-      const statusAfterRulesInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterRulesInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(1); // 1 rule in package 99.0.0
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);

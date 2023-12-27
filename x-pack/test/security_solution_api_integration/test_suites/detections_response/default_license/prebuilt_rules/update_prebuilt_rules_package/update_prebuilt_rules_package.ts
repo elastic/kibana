@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // PART 1: Install prebuilt rules from the previous minor version as the current version
 
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(installPreviousPackageResponse.items.length).toBeGreaterThan(0);
 
       // Verify that status is updated after the installation of package "N-1"
-      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBeGreaterThan(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 
       // Verify status after intallation of the latest package
-      const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_installed
       ).toBeGreaterThan(0);
