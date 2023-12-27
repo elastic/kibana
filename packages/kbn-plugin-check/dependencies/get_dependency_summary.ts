@@ -7,9 +7,9 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { PluginInfo, DependencyState, PluginStatuses } from './types';
+import { PluginInfo, DependencyState, PluginStatuses } from '../types';
 
-import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from './const';
+import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from '../const';
 
 /**
  * Prepares a summary of the plugin's dependencies, based on its manifest and plugin classes.

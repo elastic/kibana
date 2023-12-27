@@ -7,11 +7,9 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { Project } from 'ts-morph';
-import { findTeamPlugins } from '@kbn/docs-utils';
-
-import { getPlugin } from './get_plugin';
-import { displayDependencyCheck } from './display_dependency_check';
+import { checkDependencies } from './dependencies';
+import { rankDependencies } from './rank';
+import { findDependents } from './dependents';
 
 /**
  * A CLI for checking the consistency of a plugin's declared and implicit dependencies.
@@ -19,39 +17,30 @@ import { displayDependencyCheck } from './display_dependency_check';
 export const runPluginCheckCli = () => {
   run(
     async ({ log, flags }) => {
-      const checkPlugin = (name: string) => {
-        const plugin = getPlugin(name, log);
+      if (
+        (flags.dependencies && flags.rank) ||
+        (flags.dependencies && flags.dependents) ||
+        (flags.rank && flags.dependents)
+      ) {
+        throw new Error('Only one of --dependencies, --rank, or --dependents may be specified.');
+      }
 
-        if (!plugin) {
-          log.error(`Cannot find plugin ${name}`);
-          return;
+      if (flags.dependencies) {
+        if ((!flags.plugin && !flags.team) || (flags.plugin && flags.team)) {
+          throw new Error(
+            'Either --plugin or --team must or may be specified when checking dependencies.'
+          );
         }
 
-        const project = new Project({
-          tsConfigFilePath: `${plugin.directory}/tsconfig.json`,
-        });
-
-        displayDependencyCheck(project, plugin, log);
-      };
-
-      const pluginName = flags.plugin && typeof flags.plugin === 'string' ? flags.plugin : null;
-      const teamName = flags.team && typeof flags.team === 'string' ? flags.team : null;
-
-      if ((!pluginName && !teamName) || (pluginName && teamName)) {
-        log.error(`Must specify plugin or team name.`);
-        return;
+        checkDependencies(flags, log);
       }
 
-      if (pluginName) {
-        checkPlugin(pluginName);
+      if (flags.rank) {
+        rankDependencies(log);
       }
 
-      if (teamName) {
-        const plugins = findTeamPlugins(teamName);
-
-        plugins.forEach((plugin) => {
-          checkPlugin(plugin.manifest.id);
-        });
+      if (flags.dependents && typeof flags.dependents === 'string') {
+        findDependents(flags.dependents, log);
       }
     },
     {
@@ -59,10 +48,14 @@ export const runPluginCheckCli = () => {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['plugin', 'team'],
+        boolean: ['dependencies', 'rank'],
+        string: ['plugin', 'team', 'dependents'],
         help: `
-          --plugin   The plugin to check.
-          --team     Check all plugins owned by a given team.
+          --rank                  Display plugins as a ranked list of usage.
+          --dependents [plugin]   Display plugins that depend on a given plugin.
+          --dependencies          Check plugin dependencies.
+            --plugin [plugin]       The plugin to check.
+            --team [team]           Check all plugins owned by a given team.
         `,
       },
     }
