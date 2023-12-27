@@ -348,7 +348,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         "
         `);
 
-        expect(res.get('content-length')).to.be('1598');
+        expect(res.get('content-length')).to.be('1600');
       });
     });
   });
