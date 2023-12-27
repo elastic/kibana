@@ -24,7 +24,6 @@ import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, EDIT_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
-import { useShowErrorToast } from '../../hooks/use_error_toast';
 
 interface EditDescriptionProps {
   connector: Connector;
@@ -34,7 +33,6 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
   const [isEditing, setIsEditing] = useState(false);
   const [newDescription, setNewDescription] = useState(connector.description || '');
   const { http } = useKibanaServices();
-  const showErrorToast = useShowErrorToast();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
@@ -48,13 +46,6 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
       });
       return inputDescription;
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorDescription', {
-          defaultMessage: 'Error updating description',
-        })
-      ),
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
         connector: { ...connector, description: successData },
