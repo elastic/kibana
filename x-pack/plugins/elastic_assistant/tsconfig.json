@@ -13,6 +13,7 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/analytics-client",
     "@kbn/core",
     "@kbn/core-http-server",
     "@kbn/licensing-plugin",
@@ -32,6 +33,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
+    "@kbn/core-analytics-server",
   ],
   "exclude": [
     "target/**/*",
