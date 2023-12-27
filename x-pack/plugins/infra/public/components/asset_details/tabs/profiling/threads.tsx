@@ -8,34 +8,51 @@
 import { EmbeddableStackTraces } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { TopNType } from '@kbn/profiling-utils';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { HOST_FIELD } from '../../../../../common/constants';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ProfilingLinks } from './profiling_links';
 
 export function Threads() {
   const { services } = useKibanaContextForPlugin();
-  const { getDateRangeInTimestamp, dateRange } = useDatePickerContext();
+  const { getDateRangeInTimestamp, dateRange, setDateRange } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
   const { asset } = useAssetDetailsRenderPropsContext();
-
   const stacktracesProfilingLinkLocator =
     services.observabilityShared.locators.profiling.stacktracesLocator;
 
   return (
-    <EmbeddableStackTraces
-      type={TopNType.Threads}
-      rangeFrom={from}
-      rangeTo={to}
-      kuery={`${HOST_FIELD}:"${asset.name}"`}
-      onClick={(category) => {
-        stacktracesProfilingLinkLocator.navigate({
-          type: TopNType.Traces,
-          rangeFrom: dateRange.from,
-          rangeTo: dateRange.to,
-          kuery: `(${HOST_FIELD}:"${asset.name}" ) AND process.thread.name:"${category}"`,
-        });
-      }}
-    />
+    <>
+      <ProfilingLinks
+        hostname={asset.name}
+        from={dateRange.from}
+        to={dateRange.to}
+        profilingLinkLocator={stacktracesProfilingLinkLocator}
+        profilingLinkLabel={i18n.translate('xpack.infra.flamegraph.profilingAppThreadsLink', {
+          defaultMessage: 'Go to Universal Profiling Threads',
+        })}
+      />
+      <EuiSpacer />
+      <EmbeddableStackTraces
+        type={TopNType.Threads}
+        rangeFrom={from}
+        rangeTo={to}
+        kuery={`${HOST_FIELD}:"${asset.name}"`}
+        onClick={(category) => {
+          stacktracesProfilingLinkLocator.navigate({
+            type: TopNType.Traces,
+            rangeFrom: dateRange.from,
+            rangeTo: dateRange.to,
+            kuery: `(${HOST_FIELD}:"${asset.name}" ) AND process.thread.name:"${category}"`,
+          });
+        }}
+        onChartBrushEnd={(range) => {
+          setDateRange({ from: range.rangeFrom, to: range.rangeTo });
+        }}
+      />
+    </>
   );
 }

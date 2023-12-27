@@ -32,17 +32,11 @@ export class EmbeddableStackTraces extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { rangeFrom, rangeTo, kuery, type, onClick } = this.input;
+    const props = this.input;
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <div style={{ width: '100%' }}>
-          <StackTraces
-            type={type}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            kuery={kuery}
-            onClick={onClick}
-          />
+          <StackTraces {...props} />
         </div>
       </ProfilingEmbeddableProvider>,
       domNode

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { take } from 'lodash';
 import React, { useMemo } from 'react';
 import { TopNSubchart } from '../../common/topn';
@@ -38,13 +37,7 @@ export function ChartGrid({ limit, charts, showFrames, onChartClick }: ChartGrid
             data={subchart.Series}
             sample={null}
             showAxes
-            onClick={
-              onChartClick
-                ? () => {
-                    onChartClick(subchart);
-                  }
-                : undefined
-            }
+            onClick={onChartClick ? () => onChartClick(subchart) : undefined}
             showFrames={showFrames}
             padTitle
           />
@@ -55,15 +48,6 @@ export function ChartGrid({ limit, charts, showFrames, onChartClick }: ChartGrid
 
   return (
     <>
-      <EuiSpacer />
-      <EuiTitle size="s">
-        <h1>
-          {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', {
-            defaultMessage: 'Top {size}',
-            values: { size: charts.length },
-          })}
-        </h1>
-      </EuiTitle>
       <EuiSpacer />
       <EuiFlexGrid columns={2} gutterSize="m">
         {subCharts}

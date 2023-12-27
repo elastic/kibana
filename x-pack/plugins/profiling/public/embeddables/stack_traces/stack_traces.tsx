@@ -18,13 +18,13 @@ interface Props {
   rangeFrom: number;
   rangeTo: number;
   onClick: (category: string) => void;
+  onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }
 
-export function StackTraces({ type, kuery, rangeFrom, rangeTo, onClick }: Props) {
+export function StackTraces({ type, kuery, rangeFrom, rangeTo, onClick, onChartBrushEnd }: Props) {
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
-  const [limit, setLimit] = useState(10);
   const [displayOption, setDisplayOption] = useState(StackTracesDisplayOption.StackTraces);
 
   const rangeFromSec = rangeFrom / 1000;
@@ -48,10 +48,9 @@ export function StackTraces({ type, kuery, rangeFrom, rangeTo, onClick }: Props)
       type={type}
       state={state}
       displayOption={displayOption}
-      limit={limit}
+      limit={10}
       onChangeDisplayOption={setDisplayOption}
-      onStackedBarChartBrushEnd={() => {}}
-      onShowMoreClick={setLimit}
+      onStackedBarChartBrushEnd={onChartBrushEnd}
       onChartClick={onClick}
     />
   );

@@ -11,6 +11,8 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -30,7 +32,7 @@ interface Props {
   onStackedBarChartBrushEnd: StackedBarChartProps['onBrushEnd'];
   onChartClick: (category: string) => void;
   limit: number;
-  onShowMoreClick: (newLimit: number) => void;
+  onShowMoreClick?: (newLimit: number) => void;
 }
 
 const displayOptions = [
@@ -109,15 +111,28 @@ export function StackTraces({
         </EuiFlexItem>
         <EuiFlexItem grow>
           <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
-            <ChartGrid
-              charts={charts}
-              limit={limit}
-              showFrames={isTracesType}
-              onChartClick={handleChartClick}
-            />
+            <>
+              <EuiSpacer />
+              <EuiTitle size="s">
+                <h1>
+                  {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', {
+                    defaultMessage: 'Top {size}',
+                    values: {
+                      size: onShowMoreClick ? charts.length : Math.min(limit, charts.length),
+                    },
+                  })}
+                </h1>
+              </EuiTitle>
+              <ChartGrid
+                charts={charts}
+                limit={limit}
+                showFrames={isTracesType}
+                onChartClick={handleChartClick}
+              />
+            </>
           </AsyncComponent>
         </EuiFlexItem>
-        {charts.length > limit && (
+        {onShowMoreClick && charts.length > limit ? (
           <EuiFlexItem>
             <EuiButton
               data-test-subj="profilingStackTracesViewShowMoreButton"
@@ -128,7 +143,7 @@ export function StackTraces({
               })}
             </EuiButton>
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       {selectedSubchart && (
         <EuiFlyout

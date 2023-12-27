@@ -16,6 +16,7 @@ interface Props {
   rangeFrom: number;
   rangeTo: number;
   onClick: (category: string) => void;
+  onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }
 
 export function EmbeddableStackTraces(props: Props) {
