@@ -43,6 +43,84 @@ export const getBenchmarkScoreMockData = (postureType: string) => [
   },
 ];
 
+export const getCustomBenchmarkScoreMockData = (postureType: string) => [
+  {
+    total_findings: 1,
+    policy_template: postureType,
+    is_custom_score: true,
+    '@timestamp': '2023-11-22T16:10:55.229268215Z',
+    score_by_cluster_id: {
+      'Another Upper case account id': {
+        total_findings: 1,
+        passed_findings: 1,
+        failed_findings: 0,
+      },
+      'Upper case cluster id': {
+        total_findings: 1,
+        passed_findings: 1,
+        failed_findings: 0,
+      },
+    },
+    score_by_benchmark_id: {
+      cis_aws: {
+        v1_5_0: {
+          total_findings: 1,
+          passed_findings: 1,
+          failed_findings: 0,
+        },
+      },
+      cis_k8s: {
+        v1_0_0: {
+          total_findings: 1,
+          passed_findings: 1,
+          failed_findings: 0,
+        },
+      },
+    },
+    passed_findings: 1,
+    failed_findings: 0,
+  },
+];
+
+export const getFullBenchmarkScoreMockData = (postureType: string) => [
+  {
+    total_findings: 2,
+    policy_template: postureType,
+    is_custom_score: true,
+    '@timestamp': '2023-11-22T16:10:55.229268215Z',
+    score_by_cluster_id: {
+      'Another Upper case account id': {
+        total_findings: 1,
+        passed_findings: 1,
+        failed_findings: 0,
+      },
+      'Upper case cluster id': {
+        total_findings: 1,
+        passed_findings: 1,
+        failed_findings: 0,
+      },
+    },
+    score_by_benchmark_id: {
+      cis_aws: {
+        v1_5_0: {
+          total_findings: 1,
+          passed_findings: 1,
+          failed_findings: 0,
+        },
+      },
+      cis_gcp: {
+        v1_0_0: {
+          total_findings: 1,
+          passed_findings: 1,
+          failed_findings: 0,
+        },
+      },
+    },
+    passed_findings: 2,
+    failed_findings: 0,
+  },
+];
+
 export const cspmComplianceDashboardDataMockV1 = {
   stats: {
     totalFailed: 0,

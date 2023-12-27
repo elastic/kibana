@@ -20,6 +20,7 @@ export const findingsMockData = [
     },
     result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
     rule: {
+      id: chance.guid(),
       name: 'Upper case rule name',
       section: 'Upper case section',
       benchmark: {
@@ -43,12 +44,37 @@ export const findingsMockData = [
     },
     result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
     rule: {
+      id: chance.guid(),
       name: 'lower case rule name',
       section: 'Another upper case section',
       benchmark: {
         id: 'cis_aws',
         posture_type: 'cspm',
         name: 'CIS AWS2',
+        version: 'v1.5.0',
+      },
+    },
+    cloud: {
+      account: { id: 'Another Upper case account id' },
+    },
+  },
+  {
+    '@timestamp': '2023-06-29T02:08:44.993Z',
+    resource: {
+      id: chance.guid(),
+      name: `Pod`,
+      sub_type: 'Upper case sub type',
+      type: 'cloud_resource_type',
+    },
+    result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+    rule: {
+      id: chance.guid(),
+      name: 'lower case rule name',
+      section: 'Another upper case section',
+      benchmark: {
+        id: 'cis_gcp',
+        posture_type: 'cspm',
+        name: 'CIS GCP2',
         version: 'v1.5.0',
       },
     },
