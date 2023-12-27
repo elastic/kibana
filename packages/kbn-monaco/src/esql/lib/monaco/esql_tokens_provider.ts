@@ -57,7 +57,12 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
           const tokenTypeName = lexer.vocabulary.getSymbolicName(token.type);
 
           if (tokenTypeName) {
-            const myToken = new ESQLToken(tokenTypeName, token.startIndex, token.stopIndex);
+            const indexOffset = cleanedLine === line ? 0 : line.length - cleanedLine.length;
+            const myToken = new ESQLToken(
+              tokenTypeName,
+              token.startIndex + indexOffset,
+              token.stopIndex + indexOffset
+            );
             myTokens.push(myToken);
           }
         }
