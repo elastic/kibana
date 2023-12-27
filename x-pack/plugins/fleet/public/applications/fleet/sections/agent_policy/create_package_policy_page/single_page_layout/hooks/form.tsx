@@ -305,9 +305,9 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const isAgentlessForceInstallAllowed =
+      const shouldForceInstallOnAgentless =
         agentPolicyIdToSave === AGENTLESS_POLICY_ID && isServerless && isAgentlessEnabled;
-      const forceInstall = force || isAgentlessForceInstallAllowed;
+      const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
