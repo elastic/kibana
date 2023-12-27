@@ -140,6 +140,22 @@ function toJsonHelper(value: any) {
 }
 handlebars.registerHelper('to_json', toJsonHelper);
 
+// urlEncodeHelper returns a string encoded as a URI component.
+function urlEncodeHelper(input: string) {
+  let encodedString = encodeURIComponent(input);
+  // encodeURIComponent does not encode the characters -.!~*'(), known as "unreserved marks",
+  // which do not have a reserved purpose but are allowed in a URI "as is". So, these have are
+  // explicitly encoded. The following creates the sequences %27 %28 %29 %2A. Since the valid
+  // encoding of "*" is %2A, it is necessary to call toUpperCase() to properly encode.
+  encodedString = encodedString.replace(
+    /[!'()*]/g,
+    (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
+  );
+
+  return encodedString;
+}
+handlebars.registerHelper('url_encode', urlEncodeHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;

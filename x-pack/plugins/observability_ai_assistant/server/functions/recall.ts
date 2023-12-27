@@ -11,20 +11,18 @@ import dedent from 'dedent';
 import * as t from 'io-ts';
 import { last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
 import { processOpenAiStream } from '../../common/utils/process_openai_stream';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import type { RegisterFunction } from '../service/types';
 import { streamIntoObservable } from '../service/util/stream_into_observable';
 
 export function registerRecallFunction({
   client,
   registerFunction,
-}: {
-  client: ObservabilityAIAssistantClient;
-  registerFunction: RegisterFunction;
-}) {
+  resources,
+}: FunctionRegistrationParameters) {
   registerFunction(
     {
       name: 'recall',
@@ -99,6 +97,10 @@ export function registerRecallFunction({
         queries,
       });
 
+      resources.logger.debug(`Received ${suggestions.length} suggestions`);
+
+      resources.logger.debug(JSON.stringify(suggestions, null, 2));
+
       if (suggestions.length === 0) {
         return {
           content: [] as unknown as Serializable,
@@ -114,6 +116,9 @@ export function registerRecallFunction({
         connectorId,
         signal,
       });
+
+      resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
+      resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
         content: relevantDocuments as unknown as Serializable,
@@ -254,7 +259,6 @@ async function scoreSuggestions({
       })
     ).pipe(processOpenAiStream(), concatenateOpenAiChunks())
   );
-
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
     scoreFunctionRequest.message.function_call.arguments
