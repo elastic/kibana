@@ -810,6 +810,7 @@
   "attributes": {
     "columns": [
       "category",
+      "order_id",
       "customer_full_name",
       "taxful_total_price",
       "currency"
@@ -823,6 +824,10 @@
     "sort": [
       [
         "order_date",
+        "desc"
+      ],
+      [
+        "order_id",
         "desc"
       ]
     ],

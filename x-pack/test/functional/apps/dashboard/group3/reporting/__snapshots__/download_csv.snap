@@ -714,32 +714,32 @@ exports[`dashboard Reporting Download CSV Field Formatters and Scripted Fields D
 `;
 
 exports[`dashboard Reporting Download CSV Filtered Saved Search Downloads filtered Discover saved search report 1`] = `
-"\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories\\",\\"Betty Reese\\",\\"22.984\\",EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",\\"Betty Brewer\\",\\"28.984\\",EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",\\"Betty Bryant\\",68,EUR
-\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Perkins\\",\\"61.969\\",EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Betty Rivera\\",102,EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",\\"Betty Stokes\\",86,EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Jackson\\",\\"60.969\\",EUR
-\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",\\"Betty Farmer\\",\\"34.969\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",\\"Betty Graham\\",\\"24.984\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",\\"Betty Allison\\",87,EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Gilbert\\",\\"49.969\\",EUR
-\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty King\\",84,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Betty Swanson\\",100,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Jimenez\\",\\"53.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Fletcher\\",\\"57.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Mccarthy\\",112,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",\\"Betty Bryant\\",\\"49.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Maldonado\\",\\"29.984\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Ruiz\\",\\"61.969\\",EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Morrison\\",175,EUR
-\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",\\"Betty Cross\\",94,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",\\"Betty Bryan\\",77,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Betty Thompson\\",\\"58.969\\",EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Betty Ramsey\\",103,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",\\"Betty Webb\\",84,EUR
-\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",\\"Betty Massey\\",66,EUR
+"\\"order_date\\",category,\\"order_id\\",\\"customer_full_name\\",\\"taxful_total_price\\",currency
+\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",569144,\\"Betty Perkins\\",\\"61.969\\",EUR
+\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",568503,\\"Betty Bryant\\",68,EUR
+\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories\\",568229,\\"Betty Reese\\",\\"22.984\\",EUR
+\\"Jun 25, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",568023,\\"Betty Brewer\\",\\"28.984\\",EUR
+\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",567524,\\"Betty Stokes\\",86,EUR
+\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",567403,\\"Betty Rivera\\",102,EUR
+\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Clothing\\",566942,\\"Betty Farmer\\",\\"34.969\\",EUR
+\\"Jun 24, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",566831,\\"Betty Jackson\\",\\"60.969\\",EUR
+\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",566622,\\"Betty Gilbert\\",\\"49.969\\",EUR
+\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",565945,\\"Betty King\\",84,EUR
+\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",565381,\\"Betty Graham\\",\\"24.984\\",EUR
+\\"Jun 23, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",565334,\\"Betty Allison\\",87,EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",565002,\\"Betty Morrison\\",175,EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564710,\\"Betty Jimenez\\",\\"53.969\\",EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Accessories, Women's Shoes\\",564446,\\"Betty Cross\\",94,EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564398,\\"Betty Mccarthy\\",112,EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564315,\\"Betty Maldonado\\",\\"29.984\\",EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",564221,\\"Betty Swanson\\",100,EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564215,\\"Betty Fletcher\\",\\"57.969\\",EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",564207,\\"Betty Ruiz\\",\\"61.969\\",EUR
+\\"Jun 22, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",564009,\\"Betty Bryant\\",\\"49.969\\",EUR
+\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",563860,\\"Betty Massey\\",66,EUR
+\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",563554,\\"Betty Ramsey\\",103,EUR
+\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Accessories\\",563060,\\"Betty Webb\\",84,EUR
+\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing, Women's Shoes\\",562762,\\"Betty Bryan\\",77,EUR
+\\"Jun 21, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",562668,\\"Betty Thompson\\",\\"58.969\\",EUR
 "
 `;
