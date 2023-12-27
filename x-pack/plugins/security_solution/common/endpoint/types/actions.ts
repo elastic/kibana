@@ -38,6 +38,7 @@ export interface ProcessesEntry {
 }
 
 export interface GetProcessesActionOutputContent {
+  code: string;
   entries: ProcessesEntry[];
 }
 

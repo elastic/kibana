@@ -143,6 +143,7 @@ export const writeActionToIndices = async ({
               completed_at: moment().toISOString(),
               started_at: moment().toISOString(),
               data: doc.EndpointActions.data,
+              input_type: 'endpoint',
             },
           },
           logger,
