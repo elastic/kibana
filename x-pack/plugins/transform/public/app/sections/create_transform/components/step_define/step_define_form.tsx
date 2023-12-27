@@ -59,8 +59,9 @@ import { useDocumentationLinks } from '../../../../hooks/use_documentation_links
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
+
+import { useWizardContext } from '../wizard/wizard';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
@@ -94,12 +95,11 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
-  searchItems: SearchItems;
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const { searchItems } = props;
+  const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<

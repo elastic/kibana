@@ -23,7 +23,7 @@ import { useSearchItems } from '../../hooks/use_search_items';
 import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
-import { Wizard } from '../create_transform/components/wizard';
+import { Wizard, WizardContext } from '../create_transform/components/wizard';
 import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
@@ -151,7 +151,9 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         ) : null}
 
         {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
-          <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
+          <WizardContext.Provider value={{ cloneConfig: transformConfig, searchItems }}>
+            <Wizard />
+          </WizardContext.Provider>
         )}
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>

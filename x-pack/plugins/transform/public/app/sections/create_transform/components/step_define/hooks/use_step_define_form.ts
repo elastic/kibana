@@ -19,12 +19,14 @@ import { useDatePicker } from './use_date_picker';
 import { usePivotConfig } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
+import { useWizardContext } from '../../wizard/wizard';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
-export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefineFormProps) => {
+export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) => {
+  const { searchItems } = useWizardContext();
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
   const { dataView } = searchItems;
 

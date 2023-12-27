@@ -15,6 +15,8 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+
 import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
@@ -24,18 +26,17 @@ import {
   isMatchAllQuery,
 } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
+
+import { useWizardContext } from '../wizard/wizard';
 
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
 import { StepDefineExposedState } from './common';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { isLatestPartialRequest } from './common/types';
 
 interface Props {
   formState: StepDefineExposedState;
-  searchItems: SearchItems;
 }
 
 export const StepDefineSummary: FC<Props> = ({
@@ -51,8 +52,8 @@ export const StepDefineSummary: FC<Props> = ({
     previewRequest: partialPreviewRequest,
     validationStatus,
   },
-  searchItems,
 }) => {
+  const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);

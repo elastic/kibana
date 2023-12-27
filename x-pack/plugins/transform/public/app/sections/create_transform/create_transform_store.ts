@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { bindActionCreators } from 'redux';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type { StepDefineExposedState } from './components/step_define';
@@ -21,25 +20,21 @@ export enum WIZARD_STEPS {
 }
 
 interface CreateTransformWizardAppContextState {
-  dataView: DataView | null;
   runtimeMappings: RuntimeMappings | undefined;
   currentStep: WIZARD_STEPS;
 }
 const createTransformWizardAppContextSlice = createSlice({
   name: 'createTransformWizardAppContext',
   initialState: {
-    dataView: null,
+    searchItems: undefined,
     runtimeMappings: undefined,
     currentStep: WIZARD_STEPS.DEFINE,
   } as CreateTransformWizardAppContextState,
   reducers: {
     initializeAppContext: (
       state,
-      action: PayloadAction<
-        Pick<CreateTransformWizardAppContextState, 'dataView' | 'runtimeMappings'>
-      >
+      action: PayloadAction<Pick<CreateTransformWizardAppContextState, 'runtimeMappings'>>
     ) => {
-      state.dataView = action.payload.dataView;
       state.runtimeMappings = action.payload.runtimeMappings;
     },
     setCurrentStep: (state, action: PayloadAction<WIZARD_STEPS>) => {

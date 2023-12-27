@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,7 +17,7 @@ import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
-import { Wizard } from './components/wizard';
+import { Wizard, WizardContext } from './components/wizard';
 import { createTransformStore } from './create_transform_store';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
@@ -77,9 +77,15 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
           </>
         )}
         {searchItems !== undefined && (
-          <Provider store={createTransformStore}>
-            <Wizard searchItems={searchItems} />
-          </Provider>
+          <WizardContext.Provider
+            value={{
+              searchItems,
+            }}
+          >
+            <ReduxProvider store={createTransformStore}>
+              <Wizard />
+            </ReduxProvider>
+          </WizardContext.Provider>
         )}
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useState, useMemo } from 'react';
+import React, { type FC, createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
@@ -22,7 +22,7 @@ import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 import {
@@ -50,45 +50,25 @@ import { TRANSFORM_STORAGE_KEYS } from './storage';
 
 const localStorage = new Storage(window.localStorage);
 
-interface DefinePivotStepProps {
+interface WizardContextValue {
   searchItems: SearchItems;
+  cloneConfig?: TransformConfigUnion;
 }
 
-const StepDefine: FC<DefinePivotStepProps> = ({ searchItems }) => {
-  const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
-  const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
-  const { setCurrentStep, setStepDefineState } = useCreateTransformWizardActions();
+export const WizardContext = createContext<WizardContextValue | null>(null);
 
-  const isCurrentStep = currentStep === WIZARD_STEPS.DEFINE;
+export const useWizardContext = () => {
+  const value = useContext(WizardContext);
 
-  return (
-    <>
-      {isCurrentStep && stepDefineState && (
-        <>
-          <StepDefineForm
-            onChange={setStepDefineState}
-            overrides={{ ...stepDefineState }}
-            searchItems={searchItems}
-          />
-          <WizardNav
-            next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
-            nextActive={stepDefineState.valid}
-          />
-        </>
-      )}
-      {!isCurrentStep && stepDefineState && (
-        <StepDefineSummary formState={{ ...stepDefineState }} searchItems={searchItems} />
-      )}
-    </>
-  );
+  if (value === null) {
+    throw new Error('Wizard Context not set');
+  }
+
+  return value;
 };
 
-interface WizardProps {
-  cloneConfig?: TransformConfigUnion;
-  searchItems: SearchItems;
-}
-
-export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+export const Wizard: FC = React.memo(() => {
+  const { searchItems, cloneConfig } = useWizardContext();
   const { showNodeInfo } = useEnabledFeatures();
   const appDependencies = useAppDependencies();
   const {
@@ -112,7 +92,6 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       dataView
     );
     initializeAppContext({
-      dataView,
       runtimeMappings: initialStepDefineState.runtimeMappings,
     });
     setStepDefineState(initialStepDefineState);
@@ -127,14 +106,30 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
-  const stepDefine = useMemo(() => {
-    return {
+  const stepDefine = useMemo(
+    () => ({
       title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
         defaultMessage: 'Configuration',
       }),
-      children: <StepDefine searchItems={searchItems} />,
-    };
-  }, [searchItems]);
+      children: (
+        <>
+          {currentStep === WIZARD_STEPS.DEFINE && stepDefineState && (
+            <>
+              <StepDefineForm onChange={setStepDefineState} overrides={{ ...stepDefineState }} />
+              <WizardNav
+                next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
+                nextActive={stepDefineState.valid}
+              />
+            </>
+          )}
+          {currentStep !== WIZARD_STEPS.DEFINE && stepDefineState && (
+            <StepDefineSummary formState={{ ...stepDefineState }} />
+          )}
+        </>
+      ),
+    }),
+    [currentStep, setCurrentStep, setStepDefineState, stepDefineState]
+  );
 
   const stepDetails = useMemo(() => {
     return {

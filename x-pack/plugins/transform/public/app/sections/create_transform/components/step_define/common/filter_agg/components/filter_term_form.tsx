@@ -20,6 +20,7 @@ import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
 import { useCreateTransformWizardSelector } from '../../../../../create_transform_store';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
+import { useWizardContext } from '../../../../wizard/wizard';
 
 import { FilterAggConfigTerm } from '../types';
 
@@ -31,7 +32,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   onChange,
   selectedField,
 }) => {
-  const dataView = useCreateTransformWizardSelector((d) => d.wizard.dataView);
+  const { searchItems } = useWizardContext();
   const runtimeMappings = useCreateTransformWizardSelector((d) => d.wizard.runtimeMappings);
   const toastNotifications = useToastNotifications();
 
@@ -64,7 +65,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 
   const { data, isError, isLoading } = useDataSearch(
     {
-      index: dataView!.title,
+      index: searchItems.dataView.title,
       body: {
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         query: {
