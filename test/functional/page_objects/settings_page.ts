@@ -192,7 +192,7 @@ export class SettingsPageObject extends FtrService {
 
   async setNameField(dataViewName: string) {
     const field = await this.getNameField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
     await field.type(dataViewName);
   }
 
@@ -656,6 +656,11 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
+    const isValidating = await field.getAttribute('data-is-validating');
+    this.log.debug(`validation set to ${isValidating}`);
+    await this.retry.waitFor('validating the given index pattern should be finished', async () => {
+      return (await field.getAttribute('data-is-validating')) === '0';
+    });
   }
 
   async getCreateIndexPatternGoToStep2Button() {
