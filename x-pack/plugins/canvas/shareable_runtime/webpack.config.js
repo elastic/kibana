@@ -141,14 +141,13 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              // additionalData(content, loaderContext) {
-              //   return `@import ${stringifyRequest(
-              //     loaderContext,
-              //     path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
-              //   )};\n${content}`;
-              // },
+              additionalData(content, loaderContext) {
+                return `@import ${stringifyRequest(
+                  loaderContext,
+                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                )};\n${content}`;
+              },
               implementation: require('sass-embedded'),
-              webpackImporter: false,
               sassOptions: {
                 outputStyle: 'expanded',
                 includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
