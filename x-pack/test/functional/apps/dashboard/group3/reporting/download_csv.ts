@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe.only('Download CSV', () => {
+  describe('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe.only('Default Saved Search Data', () => {
+    describe('Default Saved Search Data', () => {
       before(async () => {
         await reporting.initEcommerce();
         await navigateToDashboardApp();
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('Filtered Saved Search', () => {
+    describe('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const from = 'Jun 20, 2019 @ 23:56:51.374';
@@ -172,19 +172,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('Field Formatters and Scripted Fields', () => {
+    describe('Field Formatters and Scripted Fields', () => {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {
         await reporting.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
-
+        const from = 'Nov 26, 1981 @ 21:54:15.526';
+        const to = 'Mar 5, 1982 @ 18:17:44.821';
+        await PageObjects.common.setTime({ from, to });
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Nov 26, 1981 @ 21:54:15.526',
-          'Mar 5, 1982 @ 18:17:44.821'
-        );
 
         await PageObjects.common.sleep(1000);
         await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
