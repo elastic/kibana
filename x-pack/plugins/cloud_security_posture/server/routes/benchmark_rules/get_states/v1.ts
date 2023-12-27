@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
 import {
@@ -42,4 +45,18 @@ export const getCspBenchmarkRulesStatesHandler = async (
       `An error occurred while trying to fetch csp settings: ${error.message}, ${error.statusCode}`
     );
   }
+};
+
+export const getMuteBenchmarkRulesIds = async (
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
+): Promise<string[]> => {
+  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+
+  const mutedRuleIds = [];
+  for (const [_, rule] of Object.entries(rulesStates)) {
+    if (rule.muted) {
+      mutedRuleIds.push(rule.rule_id);
+    }
+  }
+  return mutedRuleIds;
 };
