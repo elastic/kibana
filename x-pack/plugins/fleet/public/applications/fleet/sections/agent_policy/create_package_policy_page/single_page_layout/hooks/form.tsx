@@ -27,6 +27,7 @@ import {
   sendGetPackagePolicies,
 } from '../../../../../hooks';
 import {
+  ExperimentalFeaturesService,
   getCloudShellUrlFromPackagePolicy,
   isVerificationError,
   packageToPackagePolicy,
@@ -46,6 +47,7 @@ import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+
 import { AGENTLESS_POLICY_ID } from './setup_technology';
 
 async function createAgentPolicy({
@@ -107,7 +109,7 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
 }) {
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -129,6 +131,9 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+
+  const isServerless = cloud?.isServerlessEnabled ?? false;
+  const { agentless: isAgentlessEnabled } = ExperimentalFeaturesService.get();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -300,7 +305,9 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const forceInstall = force || agentPolicyIdToSave === AGENTLESS_POLICY_ID;
+      const isAgentlessForceInstallAllowed =
+        agentPolicyIdToSave === AGENTLESS_POLICY_ID && isServerless && isAgentlessEnabled;
+      const forceInstall = force || isAgentlessForceInstallAllowed;
 
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
@@ -399,14 +406,16 @@ export function useOnSubmit({
       agentCount,
       selectedPolicyTab,
       packagePolicy,
+      isServerless,
+      isAgentlessEnabled,
+      withSysMonitoring,
+      newAgentPolicy,
+      updatePackagePolicy,
+      packageInfo,
       notifications.toasts,
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
-      newAgentPolicy,
-      updatePackagePolicy,
-      withSysMonitoring,
-      packageInfo,
     ]
   );
 
