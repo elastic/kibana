@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         endobj
         6 0 obj
         <<
-        /Length 45
+        /Length 47
         /Filter /FlateDecode
         >>
         "
