@@ -13,7 +13,7 @@ export {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  GenerativeAIConnectorFeatureId,
+  GenerativeAIForSecuritySolutionConnectorFeatureId,
 } from './connector_feature_config';
 export interface ActionType {
   id: string;
