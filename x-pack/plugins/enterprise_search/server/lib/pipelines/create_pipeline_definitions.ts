@@ -142,7 +142,6 @@ export const createIndexPipelineDefinitions = async (
                 },
               },
             ],
-            // Commenting for code review
             pattern: '�',
             replacement: '',
             tag: 'remove_replacement_chars',
