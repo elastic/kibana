@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_PREVIEW_URL,
@@ -13,6 +14,7 @@ import {
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
+  RISK_SCORE_INDEX_STATUS_API_URL,
 } from '../../../common/constants';
 
 import type {
@@ -101,6 +103,27 @@ export const useEntityAnalyticsRoutes = () => {
       method: 'GET',
     });
 
+  const getRiskScoreIndexStatus = ({
+    query,
+    signal,
+  }: {
+    query: {
+      indexName: string;
+      entity: RiskScoreEntity;
+    };
+    signal?: AbortSignal;
+  }): Promise<{
+    isDeprecated: boolean;
+    isEnabled: boolean;
+  }> =>
+    http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(RISK_SCORE_INDEX_STATUS_API_URL, {
+      version: '1',
+      method: 'GET',
+      query,
+      asSystemRequest: true,
+      signal,
+    });
+
   return {
     fetchRiskScorePreview,
     fetchRiskEngineStatus,
@@ -109,5 +132,6 @@ export const useEntityAnalyticsRoutes = () => {
     disableRiskEngine,
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
+    getRiskScoreIndexStatus,
   };
 };
