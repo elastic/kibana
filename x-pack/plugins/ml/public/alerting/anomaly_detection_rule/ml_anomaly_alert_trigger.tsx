@@ -12,25 +12,25 @@ import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import { JobSelectorControl } from './job_selector';
-import { useMlKibana } from '../application/contexts/kibana';
-import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
-import { HttpService } from '../application/services/http_service';
-import { useToastNotificationService } from '../application/services/toast_notification_service';
-import { SeverityControl } from '../application/components/severity_control';
+import { JobSelectorControl } from '../job_selector';
+import { useMlKibana } from '../../application/contexts/kibana';
+import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
+import { HttpService } from '../../application/services/http_service';
+import { useToastNotificationService } from '../../application/services/toast_notification_service';
+import { SeverityControl } from '../../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
-import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
+import { alertingApiProvider } from '../../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 import {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
-} from '../../common/types/alerts';
+} from '../../../common/types/alerts';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
-import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
+import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
-import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
-import { parseInterval } from '../../common/util/parse_interval';
+import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
@@ -159,6 +159,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <JobSelectorControl
+        allowCreateNew
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         // eslint-disable-next-line react-hooks/exhaustive-deps

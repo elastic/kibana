@@ -33,6 +33,8 @@ export interface JobSelectorControlProps {
    * Allows selecting all jobs, even those created afterward.
    */
   allowSelectAll?: boolean;
+  /** Adds an option to create a new anomaly detection job */
+  allowCreateNew?: boolean;
   /**
    * Available options to select. By default suggest all existing jobs.
    */
@@ -47,6 +49,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   multiSelect = false,
   label,
   allowSelectAll = false,
+  allowCreateNew = false,
   options: defaultOptions,
 }) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -69,6 +72,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       jobIdOptions.forEach((v) => {
         jobIds.add(v);
       });
+
       groupIdOptions.forEach((v) => {
         groupIds.add(v);
       });
@@ -91,11 +95,24 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
               },
             ]
           : []),
+
         {
           label: i18n.translate('xpack.ml.jobSelector.jobOptionsLabel', {
             defaultMessage: 'Jobs',
           }),
-          options: jobIdOptions.map((v) => ({ label: v })),
+          options: [
+            ...(allowCreateNew
+              ? [
+                  {
+                    label: i18n.translate('xpack.ml.jobSelector.createNewLabel', {
+                      defaultMessage: '---Create new---',
+                    }),
+                    value: 'createNew',
+                  },
+                ]
+              : []),
+            ...jobIdOptions.map((v) => ({ label: v })),
+          ],
         },
         ...(multiSelect
           ? [
@@ -120,6 +137,10 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
         onChange({ jobIds: [ALL_JOBS_SELECTION] });
         return;
+      }
+
+      if (selectionUpdate.some((selectedOption) => selectedOption.value === 'createNew')) {
+        // Redirect to the job wizard page
       }
 
       const selectedJobIds: JobId[] = [];
