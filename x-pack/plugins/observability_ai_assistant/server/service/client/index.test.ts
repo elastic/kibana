@@ -77,10 +77,21 @@ describe('Observability AI Assistant service', () => {
     execute: jest.fn(),
   } as any;
 
-  const esClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
+  const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
     search: jest.fn(),
     index: jest.fn(),
     update: jest.fn(),
+  } as any;
+
+  const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
+    search: jest.fn().mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    }),
+    fieldCaps: jest.fn().mockResolvedValue({
+      fields: [],
+    }),
   } as any;
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
@@ -91,6 +102,7 @@ describe('Observability AI Assistant service', () => {
     log: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
+    trace: jest.fn(),
   } as any;
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
@@ -108,7 +120,10 @@ describe('Observability AI Assistant service', () => {
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
-      esClient: esClientMock,
+      esClient: {
+        asInternalUser: internalUserEsClientMock,
+        asCurrentUser: currentUserEsClientMock,
+      },
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
       namespace: 'default',
@@ -334,7 +349,7 @@ describe('Observability AI Assistant service', () => {
             type: StreamingChatResponseEventType.ConversationCreate,
           });
 
-          expect(esClientMock.index).toHaveBeenCalledWith({
+          expect(internalUserEsClientMock.index).toHaveBeenCalledWith({
             index: '.kibana-observability-ai-assistant-conversations',
             refresh: true,
             document: {
@@ -386,7 +401,7 @@ describe('Observability AI Assistant service', () => {
     });
   });
 
-  describe('when completig a conversation with an initial conversation id', () => {
+  describe('when completing a conversation with an initial conversation id', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
@@ -402,7 +417,7 @@ describe('Observability AI Assistant service', () => {
         };
       });
 
-      esClientMock.search.mockImplementation(async () => {
+      internalUserEsClientMock.search.mockImplementation(async () => {
         return {
           hits: {
             hits: [
@@ -430,7 +445,7 @@ describe('Observability AI Assistant service', () => {
         } as any;
       });
 
-      esClientMock.update.mockImplementationOnce(async () => {
+      internalUserEsClientMock.update.mockImplementationOnce(async () => {
         return {} as any;
       });
 
@@ -464,7 +479,7 @@ describe('Observability AI Assistant service', () => {
         type: StreamingChatResponseEventType.ConversationUpdate,
       });
 
-      expect(esClientMock.update).toHaveBeenCalledWith({
+      expect(internalUserEsClientMock.update).toHaveBeenCalledWith({
         refresh: true,
         index: '.kibana-observability-ai-assistant-conversations',
         id: 'my-es-document-id',
@@ -573,8 +588,8 @@ describe('Observability AI Assistant service', () => {
     });
 
     it('does not create or update the conversation', async () => {
-      expect(esClientMock.index).not.toHaveBeenCalled();
-      expect(esClientMock.update).not.toHaveBeenCalled();
+      expect(internalUserEsClientMock.index).not.toHaveBeenCalled();
+      expect(internalUserEsClientMock.update).not.toHaveBeenCalled();
     });
   });
 
@@ -816,9 +831,11 @@ describe('Observability AI Assistant service', () => {
             },
           });
 
-          expect(esClientMock.index).toHaveBeenCalled();
+          expect(internalUserEsClientMock.index).toHaveBeenCalled();
 
-          expect((esClientMock.index.mock.lastCall![0] as any).document.messages).toEqual([
+          expect(
+            (internalUserEsClientMock.index.mock.lastCall![0] as any).document.messages
+          ).toEqual([
             {
               '@timestamp': expect.any(String),
               message: {
