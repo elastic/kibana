@@ -530,11 +530,11 @@ export class SettingsPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
 
     await this.retry.try(async () => {
-      await this.setIndexPatternField(indexPatternName);
-      await this.header.waitUntilLoadingHasFinished();
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
+      await this.setIndexPatternField(indexPatternName);
+      await this.header.waitUntilLoadingHasFinished();
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
