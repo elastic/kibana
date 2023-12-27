@@ -26826,10 +26826,10 @@ sass-embedded@^1.69.5:
     sass-embedded-win32-ia32 "1.69.5"
     sass-embedded-win32-x64 "1.69.5"
 
-sass-loader@^10.5.0:
-  version "10.5.0"
-  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.5.0.tgz#011c92ea529029e296aea37508e034b94f7dd2dc"
-  integrity sha512-VsU71W7VR6SChMJZUqtrfLeMSA8ns7QTHbnA7cfevtjb3c392mX93lr0Dmr4uU1ch5uIbEmfmHjdrDYcXXkQ7w==
+sass-loader@^10.5.1:
+  version "10.5.1"
+  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-10.5.1.tgz#4cfb9cd17e09afc7d8787fdb57d665254c3aadcb"
+  integrity sha512-P8BGIW6OxYLJWaWG8DROibc98Uw/B90oHPYOjPQ5/tF572OTTwkhxSxpaQzD5lYam36zQd0cxjh24b4rcdNIZQ==
   dependencies:
     klona "^2.0.4"
     loader-utils "^2.0.0"
