@@ -9,7 +9,7 @@ import { existsSync } from 'fs';
 import del from 'del';
 import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
-import { md5 } from './checksum';
+import { sha256 } from './checksum';
 import { fetch } from './fetch';
 
 type ValidChecksum = string;
@@ -40,7 +40,7 @@ export async function download(
   }
 
   const resolvedPath = paths.resolvePath(pkg);
-  const foundChecksum = await md5(resolvedPath).catch(() => 'MISSING');
+  const foundChecksum = await sha256(resolvedPath).catch(() => 'MISSING');
 
   const pathExists = existsSync(resolvedPath);
   if (pathExists && foundChecksum === archiveChecksum) {

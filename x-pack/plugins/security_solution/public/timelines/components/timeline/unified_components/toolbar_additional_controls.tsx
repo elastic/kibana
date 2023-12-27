@@ -79,7 +79,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
                 : i18n.FULL_SCREEN
             }
             className={`${fullScreen ? EXIT_FULL_SCREEN_CLASS_NAME : ''}`}
-            color={fullScreen ? 'ghost' : 'primary'}
+            color={fullScreen ? 'text' : 'primary'}
             data-test-subj={
               // a full screen button gets created for timeline and for the host page
               // this sets the data-test-subj for each case so that tests can differentiate between them

@@ -182,6 +182,10 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    * the Navigation.Item component when React components are used to declare the navigation tree.
    */
   renderItem?: () => React.ReactNode;
+  /**
+   * Flag to indicate if the node is an "external" cloud link
+   */
+  isElasticInternalLink?: boolean;
 }
 
 /** @public */

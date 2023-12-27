@@ -22,11 +22,7 @@ export const getRowRenderer = ({
   data: Ecs;
   rowRenderers: RowRenderer[];
 }): RowRenderer | null => {
-  const renderer =
-    rowRenderers.find((rowRenderer) => {
-      // console.log(rowRenderer.isInstance(data), data, rowRenderer);
-      return rowRenderer.isInstance(data);
-    }) ?? null;
+  const renderer = rowRenderers.find((rowRenderer) => rowRenderer.isInstance(data)) ?? null;
 
   if (alertRenderer.isInstance(data)) {
     if (renderer != null) {

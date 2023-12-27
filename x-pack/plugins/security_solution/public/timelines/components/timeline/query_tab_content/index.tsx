@@ -26,14 +26,15 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
@@ -52,20 +53,19 @@ import { EventDetailsWidthProvider } from '../../../../common/components/events_
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import type { TimelineModel } from '../../../store/timeline/model';
-import { activeTimeline } from '../../../containers/active_timeline_context';
+import type { TimelineModel } from '../../../store/model';
 import { DetailsPanel } from '../../side_panel';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { UnifiedTimelineComponent } from '../unified_components';
-import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import { StyledTableFlexGroup, StyledTableFlexItem } from '../unified_components/styles';
+import { activeTimeline } from '../../../containers/active_timeline_context';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -82,10 +82,6 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
-
-  &.euiFlyoutHeader {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
-  }
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -188,9 +184,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
 }) => {
   const dispatch = useDispatch();
-  const [useDiscoverComponentsInTimeline] = useUiSetting$<boolean>(
-    USE_DISCOVER_COMPONENTS_IN_TIMELINE
+  const useDiscoverComponentsInTimeline = useIsExperimentalFeatureEnabled(
+    'useDiscoverComponentsInTimeline'
   );
+
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
   const rows = useMemo(() => pageRows.flat(), [pageRows]);
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -386,10 +383,19 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [activeTab, filterManager, show, showCallOutUnauthorizedMsg, status, timelineId]
   );
 
+  // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
+  // the previous page from the timeline), yet we still see total count. This is because the timeline
+  // is not getting refreshed when using browser navigation.
+  const showEventsCountBadge = !isBlankTimeline && totalCount >= 0;
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? (
+          <EventsCountBadge data-test-subj="query_tab_events_count_badge">
+            {totalCount}
+          </EventsCountBadge>
+        ) : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
@@ -427,7 +433,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </StyledTableFlexItem>
         </StyledTableFlexGroup>
       ) : (
-        <FullWidthFlexGroup gutterSize="none">
+        <FullWidthFlexGroup direction="column" gutterSize="s">
           <ScrollableFlexItem grow={2}>
             {header}
             <EventDetailsWidthProvider>

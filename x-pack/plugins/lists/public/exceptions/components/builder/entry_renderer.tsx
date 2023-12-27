@@ -360,7 +360,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   };
 
   // show this when wildcard with matches operator
-  const getWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
+  const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -437,7 +437,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             value: wildcardValue,
           });
           actualWarning =
-            warning === WILDCARD_WARNING ? warning && getWildcardWarningInfo(warning) : warning;
+            warning === WILDCARD_WARNING && listType === 'endpoint_events'
+              ? getEventFilterWildcardWarningInfo(warning)
+              : warning;
         }
 
         return (

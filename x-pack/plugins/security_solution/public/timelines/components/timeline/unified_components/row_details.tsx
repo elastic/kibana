@@ -12,16 +12,16 @@ import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
-import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { EventsTrSupplement } from '../styles';
 import { NoteCards } from '../../notes/note_cards';
 import { eventIsPinned } from '../body/helpers';
 import type { TimelineResultNote } from '../../open_timeline/types';
 import { timelineBodySelector } from '../body/selectors';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { TimelineDataTableContext } from './render_custom_body';
+import { timelineDefaults } from '../../../store/defaults';
+import { timelineActions } from '../../../store';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;

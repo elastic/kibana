@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { NOTES_BUTTON_CLASS_NAME } from '../../../timelines/components/timeline/properties/helpers';
-import type { NotesMap } from '../../../timelines/components/timeline/unified_components/render_custom_body';
-import { TimelineDataTableContext } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import {
   eventHasNotes,
   getEventType,
@@ -22,19 +19,19 @@ import {
   isEventBuildingBlockType,
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
-import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import { useStartTransaction } from '../../lib/apm/use_start_transaction';
 import { useLicense } from '../../hooks/use_license';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
-import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions';
+import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
@@ -82,8 +79,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
-  const { notesMap, setNotesMap } = useContext(TimelineDataTableContext);
-  const trGroupRef = useRef<HTMLDivElement | null>(null);
 
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -124,27 +119,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [eventId, expandedDoc, setCellProps]);
 
-  const toggleShowNotesEvent = useCallback(() => {
-    setNotesMap((prevShowNotes: NotesMap) => {
-      const row = notesMap[eventId];
-      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
-
-      if (prevShowNotes[eventId]) {
-        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-        setTimeout(() => {
-          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-            `.${NOTES_BUTTON_CLASS_NAME}`
-          );
-          notesButtonElement?.focus();
-        }, 0);
-      }
-      return {
-        ...prevShowNotes,
-        [eventId]: { ...row, isAddingNote: true },
-      };
-    });
-  }, [eventId, notesMap, setNotesMap]);
-
   const handlePinClicked = useCallback(
     () =>
       getPinOnClick({
@@ -165,7 +139,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
-  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
   const scopedActions = getScopedActions(timelineId);
@@ -342,13 +316,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && (
+        {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotesEvent}
+              toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
             />
             <PinEventAction

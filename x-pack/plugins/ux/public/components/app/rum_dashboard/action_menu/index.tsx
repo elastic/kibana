@@ -14,7 +14,6 @@ import {
   createExploratoryViewUrl,
 } from '@kbn/exploratory-view-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';
@@ -34,10 +33,17 @@ const ANALYZE_MESSAGE = i18n.translate(
 
 export function UXActionMenu({
   appMountParameters,
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
+  isDev: boolean;
 }) {
-  const { http, application } = useKibanaServices();
+  const {
+    http,
+    application,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaServices();
+
   const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
 
@@ -85,8 +91,10 @@ export function UXActionMenu({
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
-        <UxInspectorHeaderLink />
-        <ObservabilityAIAssistantActionMenuItem />
+        <UxInspectorHeaderLink isDev={isDev} />
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <ObservabilityAIAssistantActionMenuItem />
+        ) : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

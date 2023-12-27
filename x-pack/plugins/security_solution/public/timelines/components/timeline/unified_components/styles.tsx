@@ -6,8 +6,7 @@
  */
 
 import styled from 'styled-components';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
@@ -19,14 +18,6 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
 
   .dscPageBody__contents {
     overflow: hidden;
-    height: 100%;
-  }
-
-  .test {
-    width: 100%;
-    height: 100%;
-  }
-  .test-gr {
     height: 100%;
   }
 `;
@@ -44,7 +35,7 @@ export const StyledSplitFlexItem = styled(EuiFlexItem).attrs(({ className = '' }
   border-right: ${euiThemeVars.euiBorderThin};
 `;
 
-export const progressStyle = css`
+export const StyledEuiProgress = styled(EuiProgress)`
   z-index: 2;
 `;
 

@@ -88,9 +88,8 @@ export const useAlertBulkActions = ({
       });
     }
   }, [bulkActions, data]);
-  const alertBulkActions = useMemo(() => {
-    console.log('new bulk actions');
-    return (
+  const alertBulkActions = useMemo(
+    () => (
       <>
         {showBulkActions && (
           <Suspense fallback={<EuiLoadingSpinner />}>
@@ -108,17 +107,18 @@ export const useAlertBulkActions = ({
           </Suspense>
         )}
       </>
-    );
-  }, [
-    additionalBulkActions,
-    filterQuery,
-    filterStatus,
-    onAlertStatusActionFailure,
-    onAlertStatusActionSuccess,
-    showAlertStatusActions,
-    showBulkActions,
-    tableId,
-    totalItems,
-  ]);
+    ),
+    [
+      additionalBulkActions,
+      filterQuery,
+      filterStatus,
+      onAlertStatusActionFailure,
+      onAlertStatusActionSuccess,
+      showAlertStatusActions,
+      showBulkActions,
+      tableId,
+      totalItems,
+    ]
+  );
   return alertBulkActions;
 };

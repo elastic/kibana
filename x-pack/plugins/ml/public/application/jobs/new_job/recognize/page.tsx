@@ -30,11 +30,12 @@ import {
   JobOverride,
   JobResponse,
   KibanaObject,
+  KibanaObjects,
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
 import { CreateResultCallout } from './components/create_result_callout';
-import { KibanaObjects } from './components/kibana_objects';
+import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
@@ -49,10 +50,6 @@ export interface ModuleJobUI extends ModuleJob {
 }
 
 export type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
-
-export interface KibanaObjects {
-  [objectType: string]: KibanaObjectUi[];
-}
 
 interface PageProps {
   moduleId: string;
@@ -111,6 +108,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
+      setKibanaObjects(response.kibana);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
 
@@ -365,7 +363,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <EuiPanel grow={false} hasShadow={false} hasBorder>
                 {Object.keys(kibanaObjects).map((objectType, i) => (
                   <Fragment key={objectType}>
-                    <KibanaObjects
+                    <KibanaObjectList
                       objectType={objectType}
                       kibanaObjects={kibanaObjects[objectType]}
                       isSaving={saveState === SAVE_STATE.SAVING}
