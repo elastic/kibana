@@ -70,7 +70,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
               });
             });
             `,
-          output: fmt`// / <reference types="mocha"/>
+          output: fmt`/// <reference types="mocha"/>
 
             describe(( ) => {
               before(( ) => {

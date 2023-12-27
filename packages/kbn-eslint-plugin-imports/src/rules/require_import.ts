@@ -92,7 +92,7 @@ export const RequireImportRule: Rule.RuleModule = {
                   fix(fixer) {
                     return fixer.insertTextBefore(
                       node.body[0],
-                      `// / <reference types="${option.module}"/>\n\n`
+                      `/// <reference types="${option.module}"/>\n\n`
                     );
                   },
                 });
