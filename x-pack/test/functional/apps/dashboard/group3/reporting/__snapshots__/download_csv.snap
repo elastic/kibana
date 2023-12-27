@@ -709,7 +709,7 @@ exports[`dashboard Reporting Download CSV Default Saved Search Data Downloads a 
 
 exports[`dashboard Reporting Download CSV Field Formatters and Scripted Fields Download CSV export of a saved search panel 1`] = `
 "date,\\"_id\\",name,gender,value,year,\\"years_ago\\",\\"date_informal\\"
-\\"Jan 1, 1982 @ 01:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Jan 1st 82\\"
+\\"Jan 1, 1982 @ 00:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Jan 1st 82\\"
 "
 `;
 
