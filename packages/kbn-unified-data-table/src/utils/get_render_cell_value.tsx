@@ -171,6 +171,7 @@ export function SourceDocument({
   maxEntries,
   isPlainRecord,
   fieldFormats,
+  dataTestSubj = 'discoverCellDescriptionList',
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -180,6 +181,7 @@ export function SourceDocument({
   maxEntries: number;
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
+  dataTestSubj?: string;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -193,6 +195,7 @@ export function SourceDocument({
       type="inline"
       compressed
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
+      data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
@@ -277,7 +280,12 @@ function renderPopoverContent({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="none"
+      direction="row"
+      responsive={false}
+      data-test-subj="dataTableExpandCellActionPopover"
+    >
       <EuiFlexItem>
         <span
           className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
@@ -304,11 +312,13 @@ export const SourcePopoverContent = ({
   columnId,
   row,
   useTopLevelObjectColumns,
+  dataTestSubj = 'dataTableExpandCellActionJsonPopover',
 }: {
   closeButton: JSX.Element;
   columnId: string;
   row: DataTableRecord;
   useTopLevelObjectColumns: boolean;
+  dataTestSubj?: string;
 }) => {
   return (
     <EuiFlexGroup
@@ -316,6 +326,7 @@ export const SourcePopoverContent = ({
       direction="column"
       justifyContent="flexEnd"
       className="unifiedDataTable__cellPopover"
+      data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>

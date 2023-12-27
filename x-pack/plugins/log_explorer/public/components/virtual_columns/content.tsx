@@ -119,6 +119,7 @@ const Content = ({
             fieldFormats={fieldFormats}
             shouldShowFieldHandler={shouldShowFieldHandler}
             maxEntries={50}
+            dataTestSubj="logExplorerCellDescriptionList"
           />
         )}
       </EuiFlexItem>
