@@ -330,7 +330,7 @@ const getFindingsScoresDocIndexingPromises = (
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
         score_by_benchmark_id: benchmarkStats,
-        custom_score: isCustomScore,
+        is_custom_score: isCustomScore,
       },
     });
   });
