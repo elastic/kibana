@@ -19,7 +19,7 @@ import { createBucketSelector } from './create_bucket_selector';
 import { wrapInCurrentPeriod } from './wrap_in_period';
 import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
-export const calculateCurrentTimeframe = (
+export const calculateCurrentTimeFrame = (
   metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number }
 ) => ({
@@ -64,7 +64,7 @@ export const getElasticsearchMetricQuery = (
   // We need to make a timeframe that represents the current timeframe as opposed
   // to the total timeframe (which includes the last period).
   const currentTimeframe = {
-    ...calculateCurrentTimeframe(metricParams, timeframe),
+    ...calculateCurrentTimeFrame(metricParams, timeframe),
     timeFieldName,
   };
 

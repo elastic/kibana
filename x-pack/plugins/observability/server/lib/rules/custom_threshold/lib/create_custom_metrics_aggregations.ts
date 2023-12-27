@@ -7,7 +7,10 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  CustomThresholdExpressionMetric,
+} from '../../../../../common/custom_threshold_rule/types';
 
 export const createCustomMetricsAggregations = (
   id: string,
@@ -16,7 +19,7 @@ export const createCustomMetricsAggregations = (
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
-    const key = `${id}_${metric.name}`;
+    const key: string = `${id}_${metric.name}`;
     const aggregation = metric.aggType;
 
     if (aggregation === 'count') {
@@ -27,6 +30,19 @@ export const createCustomMetricsAggregations = (
           filter: metric.filter
             ? toElasticsearchQuery(fromKueryExpression(metric.filter))
             : { match_all: {} },
+        },
+      };
+    }
+    if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        [key]: {
+          percentiles: {
+            field: metric.field,
+            percents: [aggregation === Aggregators.P95 ? 95 : 99],
+            keyed: true,
+          },
         },
       };
     }

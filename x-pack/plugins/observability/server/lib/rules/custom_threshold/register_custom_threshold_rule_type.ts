@@ -18,7 +18,7 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -85,7 +85,7 @@ export function thresholdRuleType(
       schema.oneOf([
         schema.object({
           name: schema.string(),
-          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          aggType: oneOfLiterals(Object.values(Aggregators)),
           field: schema.string(),
           filter: schema.never(),
         }),
