@@ -61,6 +61,8 @@ export function LensEditConfigurationFlyout({
   navigateToLensEditor,
   displayFlyoutHeader,
   canEditTextBasedQuery,
+  isNewPanel,
+  deletePanel,
   hidesSuggestions,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
@@ -165,18 +167,23 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
+    // for a newly created chart, I want cancelling to also remove the panel
+    if (isNewPanel && deletePanel) {
+      deletePanel();
+    }
     closeFlyout?.();
   }, [
-    previousAttributes,
     attributesChanged,
+    isNewPanel,
+    deletePanel,
     closeFlyout,
+    visualization.activeId,
+    savedObjectId,
     datasourceMap,
     datasourceId,
     updatePanelState,
     updateSuggestion,
-    savedObjectId,
     updateByRefInput,
-    visualization,
   ]);
 
   const onApply = useCallback(() => {
@@ -279,6 +286,7 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isScrollable={true}
         attributesChanged={attributesChanged}
+        isNewPanel={isNewPanel}
       >
         <LayerConfiguration
           getUserMessages={getUserMessages}
@@ -307,6 +315,7 @@ export function LensEditConfigurationFlyout({
         attributesChanged={attributesChanged}
         language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
         isScrollable={false}
+        isNewPanel={isNewPanel}
       >
         <EuiFlexGroup
           css={css`
