@@ -1633,6 +1633,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ML_ANOMALY_DETECTION_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_DETECTION_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.ml.anomaly_detection_alert\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.OBSERVABILITY_THRESHOLD_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1654,7 +1669,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
+          "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,
