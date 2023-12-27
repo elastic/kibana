@@ -41,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
-
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   textBasedLanguagedEditorStyles,
   EDITOR_INITIAL_HEIGHT,
@@ -61,8 +61,11 @@ import {
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
+import { Chat } from './ai_chat';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { useAbortableAsync } from './hooks/use_abortable_async';
+import { AssistantAvatar } from './assistant_avatar';
 
 import './overwrite.scss';
 
@@ -110,6 +113,7 @@ interface TextBasedEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -161,7 +165,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
+  const {
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    application,
+    observabilityAIAssistant,
+  } = kibana.services;
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return observabilityAIAssistant?.service?.start({ signal });
+    },
+    [observabilityAIAssistant]
+  );
+
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -173,6 +190,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
+
+  const [isChatVisible, setIsChatVisible] = useState(false);
 
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -503,6 +522,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
+  const onHumanLanguageRun = useCallback(
+    (predictedQueryString: string) => {
+      setCode(predictedQueryString);
+      setIsChatVisible(false);
+      onTextLangQueryChange({ [language]: predictedQueryString } as AggregateQuery);
+      editor1.current?.setValue(predictedQueryString);
+      setTimeout(() => {
+        onTextLangQuerySubmit({ [language]: predictedQueryString } as AggregateQuery);
+      }, 1000);
+    },
+    [onTextLangQueryChange, language, onTextLangQuerySubmit]
+  );
+
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections(language);
@@ -623,6 +655,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     }}
                   />
                 </TooltipWrapper>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={!isChatVisible ? AssistantAvatar : 'esqlVis'}
+                  color="text"
+                  size="xs"
+                  isDisabled={!observabilityAIAssistant}
+                  onClick={() => {
+                    setIsChatVisible(!isChatVisible);
+                  }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -758,68 +801,78 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           {editorMessages.warnings.length}
                         </EuiBadge>
                       )}
-                    <CodeEditor
-                      languageId={languageId(language)}
-                      value={codeOneLiner || code}
-                      options={codeEditorOptions}
-                      width="100%"
-                      suggestionProvider={suggestionProvider}
-                      hoverProvider={{
-                        provideHover: (model, position, token) => {
-                          if (isCompactFocused || !hoverProvider?.provideHover) {
-                            return { contents: [] };
+                    {!isChatVisible && (
+                      <CodeEditor
+                        languageId={languageId(language)}
+                        value={codeOneLiner || code}
+                        options={codeEditorOptions}
+                        width="100%"
+                        suggestionProvider={suggestionProvider}
+                        hoverProvider={{
+                          provideHover: (model, position, token) => {
+                            if (isCompactFocused || !hoverProvider?.provideHover) {
+                              return { contents: [] };
+                            }
+                            return hoverProvider?.provideHover(model, position, token);
+                          },
+                        }}
+                        onChange={onQueryUpdate}
+                        editorDidMount={(editor) => {
+                          editor1.current = editor;
+                          const model = editor.getModel();
+                          if (model) {
+                            editorModel.current = model;
                           }
-                          return hoverProvider?.provideHover(model, position, token);
-                        },
-                      }}
-                      onChange={onQueryUpdate}
-                      editorDidMount={(editor) => {
-                        editor1.current = editor;
-                        const model = editor.getModel();
-                        if (model) {
-                          editorModel.current = model;
-                        }
-                        if (isCodeEditorExpanded) {
-                          lines = model?.getLineCount() || 1;
-                        }
-
-                        editor.onDidChangeModelContent((e) => {
-                          if (updateLinesFromModel) {
+                          if (isCodeEditorExpanded) {
                             lines = model?.getLineCount() || 1;
                           }
-                          const currentPosition = editor.getPosition();
-                          const content = editorModel.current?.getValueInRange({
-                            startLineNumber: 0,
-                            startColumn: 0,
-                            endLineNumber: currentPosition?.lineNumber ?? 1,
-                            endColumn: currentPosition?.column ?? 1,
+
+                          editor.onDidChangeModelContent((e) => {
+                            if (updateLinesFromModel) {
+                              lines = model?.getLineCount() || 1;
+                            }
+                            const currentPosition = editor.getPosition();
+                            const content = editorModel.current?.getValueInRange({
+                              startLineNumber: 0,
+                              startColumn: 0,
+                              endLineNumber: currentPosition?.lineNumber ?? 1,
+                              endColumn: currentPosition?.column ?? 1,
+                            });
+                            if (content) {
+                              codeRef.current = content || editor.getValue();
+                            }
                           });
-                          if (content) {
-                            codeRef.current = content || editor.getValue();
+
+                          editor.onDidFocusEditorText(() => {
+                            onEditorFocus();
+                          });
+
+                          editor.onKeyDown(() => {
+                            onEditorFocus();
+                          });
+
+                          // on CMD/CTRL + Enter submit the query
+                          editor.addCommand(
+                            // eslint-disable-next-line no-bitwise
+                            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                            onQuerySubmit
+                          );
+                          if (!isCodeEditorExpanded) {
+                            editor.onDidContentSizeChange((e) => {
+                              updateHeight(editor);
+                            });
                           }
-                        });
-
-                        editor.onDidFocusEditorText(() => {
-                          onEditorFocus();
-                        });
-
-                        editor.onKeyDown(() => {
-                          onEditorFocus();
-                        });
-
-                        // on CMD/CTRL + Enter submit the query
-                        editor.addCommand(
-                          // eslint-disable-next-line no-bitwise
-                          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                          onQuerySubmit
-                        );
-                        if (!isCodeEditorExpanded) {
-                          editor.onDidContentSizeChange((e) => {
-                            updateHeight(editor);
-                          });
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                    )}
+                    {isChatVisible && observabilityAIAssistant && chatService.value && (
+                      <Chat
+                        chatService={chatService.value}
+                        observabilityAIAssistant={observabilityAIAssistant}
+                        height={editorHeight}
+                        onHumanLanguageRun={onHumanLanguageRun}
+                      />
+                    )}
                     {isCompactFocused && !isCodeEditorExpanded && (
                       <EditorFooter
                         lines={lines}
@@ -834,8 +887,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
-                        hideRunQueryText={hideRunQueryText}
+                        hideRunQueryText={hideRunQueryText || isChatVisible}
                         isSpaceReduced={isSpaceReduced}
+                        isAiChatVisible={isChatVisible}
                       />
                     )}
                   </div>
@@ -921,11 +975,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           runQuery={onQuerySubmit}
           detectTimestamp={detectTimestamp}
-          hideRunQueryText={hideRunQueryText}
+          hideRunQueryText={hideRunQueryText || isChatVisible}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
           {...editorMessages}
+          isAiChatVisible={isChatVisible}
         />
       )}
       {isCodeEditorExpanded && (

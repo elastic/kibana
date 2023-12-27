@@ -7,4 +7,4 @@
 
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
 export { KnowledgeBaseEntryRole } from './types';
-export { MessageRole } from './types';
+export { MessageRole, ChatState } from './types';

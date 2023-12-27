@@ -13,16 +13,18 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ConfigSchema,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantChatService,
 } from './types';
 
 export type {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantChatService,
 };
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
-export { MessageRole, KnowledgeBaseEntryRole } from '../common';
+export { MessageRole, KnowledgeBaseEntryRole, ChatState } from '../common';
 
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,

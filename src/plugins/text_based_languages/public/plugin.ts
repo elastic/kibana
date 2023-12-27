@@ -10,11 +10,13 @@ import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { setKibanaServices } from './kibana_services';
 
 interface TextBasedLanguagesPluginStart {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 interface TextBasedLanguagesPluginSetup {
@@ -29,8 +31,11 @@ export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
     return {};
   }
 
-  public start(core: CoreStart, { dataViews, expressions }: TextBasedLanguagesPluginStart): void {
-    setKibanaServices(core, dataViews, expressions, this.indexManagement);
+  public start(
+    core: CoreStart,
+    { dataViews, expressions, observabilityAIAssistant }: TextBasedLanguagesPluginStart
+  ): void {
+    setKibanaServices(core, dataViews, expressions, this.indexManagement, observabilityAIAssistant);
   }
 
   public stop() {}

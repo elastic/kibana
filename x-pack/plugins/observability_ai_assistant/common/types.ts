@@ -34,6 +34,13 @@ export enum KnowledgeBaseEntryRole {
   Elastic = 'elastic',
 }
 
+export enum ChatState {
+  Ready = 'ready',
+  Loading = 'loading',
+  Error = 'error',
+  Aborted = 'aborted',
+}
+
 export interface PendingMessage {
   message: Message['message'];
   aborted?: boolean;
