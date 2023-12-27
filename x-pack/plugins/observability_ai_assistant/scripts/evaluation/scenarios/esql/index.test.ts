@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// / <reference types="mocha"/>
+/// <reference types="@kbn/ambient-ftr-types"/>
 
 import { last } from 'lodash';
 import moment from 'moment';
