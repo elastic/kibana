@@ -86,7 +86,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
     Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -283,6 +283,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @protected
    */
   protected async writeActionResponseToEndpointIndex<
+    // Default type purposely set to empty object in order to ensure proper types are used when calling the method
     TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
   >({
     actionId,

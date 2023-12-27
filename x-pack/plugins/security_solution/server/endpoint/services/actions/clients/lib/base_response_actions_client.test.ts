@@ -532,7 +532,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   }
 
   public async writeActionResponseToEndpointIndex<
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {

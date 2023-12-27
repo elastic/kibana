@@ -31,7 +31,7 @@ export interface CreateActionMetadata {
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload, agents: string[]) => Promise<ActionDetails>;
   createAction: <
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,

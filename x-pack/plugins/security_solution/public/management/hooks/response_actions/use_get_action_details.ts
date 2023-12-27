@@ -18,7 +18,7 @@ import type {
 } from '../../../../common/endpoint/types';
 
 export const useGetActionDetails = <
-  TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 >(
   actionId: string,

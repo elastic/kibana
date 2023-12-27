@@ -27,7 +27,7 @@ export const actionCreateService = (
   endpointContext: EndpointAppContext
 ): ActionCreateService => {
   const createAction = async <
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,

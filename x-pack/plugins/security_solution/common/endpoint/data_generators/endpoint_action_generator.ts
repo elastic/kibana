@@ -76,7 +76,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   /** Generates an endpoint action response */
-  generateResponse<TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>>(
+  generateResponse<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  >(
     overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
   ): LogsEndpointActionResponse<TOutputContent> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
@@ -181,7 +183,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActionDetails<
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
@@ -347,9 +349,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     );
   }
 
-  generateActivityLogActionResponse(
-    overrides: DeepPartial<EndpointActivityLogActionResponse>
-  ): EndpointActivityLogActionResponse {
+  generateActivityLogActionResponse<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  >(
+    overrides: DeepPartial<EndpointActivityLogActionResponse<TOutputContent>>
+  ): EndpointActivityLogActionResponse<TOutputContent> {
     return merge(
       {
         type: ActivityLogItemTypes.RESPONSE,
