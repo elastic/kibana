@@ -253,23 +253,28 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     comparisonColor: euiTheme.euiColorVis1,
   };
 
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [brushRanges, _setWindowParameters] = useState<WindowParameters | undefined>();
 
+  console.log(`--@@brushRanges`, brushRanges);
+
+  const setBrushRanges = useCallback(
+    (changes) => {
+      // @TODO: remove
+      console.log(`--@@setWindowParameters brushRanges`, brushRanges);
+      _setWindowParameters({ ...brushRanges, ...changes });
+    },
+    [brushRanges]
+  );
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
   >();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
-  console.log(`--@@windowParameters`, windowParameters);
-
   function referenceBrushSelectionUpdate(d: WindowParameters, force: boolean) {
     if (!isBrushCleared || force) {
-      // @TODO: remove
-      console.log(`--@@referenceBrushSelectionUpdate`, d);
-      setWindowParameters({
-        ...windowParameters,
-        baselineMax: d.baselineMax,
-        baselineMin: d.baselineMin,
+      setBrushRanges({
+        baselineMin: d.min,
+        baselineMax: d.max,
       });
     }
     if (force) {
@@ -279,10 +284,9 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   function comparisonBrushSelectionUpdate(d: WindowParameters, force: boolean) {
     if (!isBrushCleared || force) {
-      setWindowParameters({
-        ...windowParameters,
-        deviationMin: d.baselineMin,
-        deviationMax: d.baselineMax,
+      setBrushRanges({
+        deviationMin: d.min,
+        deviationMax: d.max,
       });
     }
     if (force) {
@@ -291,14 +295,14 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   }
 
   function clearSelection() {
-    setWindowParameters(undefined);
+    // _setWindowParameters(undefined);
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
   }
 
   const barStyleAccessor = useCallback(
     (datum: DataSeriesDatum) => {
-      if (!windowParameters) return null;
+      if (!brushRanges) return null;
 
       const start = datum.x;
       const end =
@@ -308,14 +312,14 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
       const isBetweenReference = isBarBetween(
         start,
         end,
-        windowParameters.baselineMin,
-        windowParameters.baselineMax
+        brushRanges.baselineMin,
+        brushRanges.baselineMax
       );
       const isBetweenDeviation = isBarBetween(
         start,
         end,
-        windowParameters.deviationMin,
-        windowParameters.deviationMax
+        brushRanges.deviationMin,
+        brushRanges.deviationMax
       );
       if (isBetweenReference && isBetweenDeviation) return 'red';
       if (isBetweenReference) return colors.referenceColor;
@@ -349,7 +353,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
       return null;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify({ windowParameters, colors })]
+    [JSON.stringify({ brushRanges, colors })]
   );
 
   const referenceIndexPatternLabel = initialSettings?.reference
@@ -390,7 +394,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 sampleProbability={sampleProbability}
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
-                baselineBrush={{
+                brush={{
                   label: REFERENCE_LABEL,
                   annotationStyle: {
                     strokeWidth: 0,
@@ -418,16 +422,16 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
                 // @TODO: rename baselineBrush -> to brush
-                // baselineBrush={{
-                //   label: COMPARISON_LABEL,
-                //   annotationStyle: {
-                //     strokeWidth: 0,
-                //     stroke: colors.comparisonColor,
-                //     fill: colors.comparisonColor,
-                //     opacity: 0.5,
-                //   },
-                //   badgeWidth: 90,
-                // }}
+                brush={{
+                  label: COMPARISON_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.comparisonColor,
+                    fill: colors.comparisonColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 90,
+                }}
                 stateManager={comparisonStateManager}
               />
             </EuiPanel>
@@ -435,17 +439,17 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DataDriftView
+              {/* <DataDriftView
                 initialSettings={initialSettings}
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}
-                windowParameters={windowParameters}
+                windowParameters={brushRanges}
                 dataView={dataView}
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
                 onRefresh={forceRefresh}
-              />
+              /> */}
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

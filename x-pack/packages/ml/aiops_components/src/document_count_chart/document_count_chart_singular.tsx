@@ -33,7 +33,7 @@ import {
   getWindowParameters,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
-  type WindowParameters,
+  type SingleBrushWindowParameters,
 } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -85,7 +85,7 @@ export interface BrushSettings {
  * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
  */
 export type BrushSelectionUpdateHandler = (
-  windowParameters: WindowParameters,
+  windowParameters: SingleBrushWindowParameters,
   force: boolean,
   logRateAnalysisType: LogRateAnalysisType
 ) => void;
@@ -123,17 +123,15 @@ export interface DocumentCountChartProps {
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
   /** Timestamp for start of initial analysis */
-  autoAnalysisStart?: number | WindowParameters;
+  autoAnalysisStart?: number | SingleBrushWindowParameters;
   /** Optional style to override bar chart  */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Optional settings override for the 'deviation' brush */
-  deviationBrush?: BrushSettings;
-  /** Optional settings override for the 'baseline' brush */
-  baselineBrush?: BrushSettings;
+  /** Optional settings override for the 'brush' brush */
+  brush?: BrushSettings;
   /** Optional data-test-subject */
   dataTestSubj?: string;
 }
@@ -149,7 +147,7 @@ enum VIEW_MODE {
 }
 
 function getBaselineBadgeOverflow(
-  windowParametersAsPixels: WindowParameters,
+  windowParametersAsPixels: SingleBrushWindowParameters,
   baselineBadgeWidth: number
 ) {
   const { baselineMin, baselineMax, deviationMin } = windowParametersAsPixels;
@@ -159,6 +157,13 @@ function getBaselineBadgeOverflow(
   return deviationMin < baselineBadgeActualMax
     ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
     : 0;
+}
+
+export interface SingleBrushWindowParameters {
+  /** Time range minimum value */
+  min: number;
+  /** Time range maximum value */
+  max: number;
 }
 
 /**
@@ -187,8 +192,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     barColorOverride,
     barStyleAccessor,
     barHighlightColorOverride,
-    deviationBrush = {},
-    baselineBrush = {},
+    brush = {},
   } = props;
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
@@ -292,15 +296,17 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
   const timeZone = getTimeZone(uiSettings);
 
   const [originalWindowParameters, setOriginalWindowParameters] = useState<
-    WindowParameters | undefined
+    SingleBrushWindowParameters | undefined
   >();
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [windowParameters, setWindowParameters] = useState<
+    SingleBrushWindowParameters | undefined
+  >();
   const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
-    WindowParameters | undefined
+    SingleBrushWindowParameters | undefined
   >();
 
   const triggerAnalysis = useCallback(
-    (startRange: number | WindowParameters) => {
+    (startRange: number | SingleBrushWindowParameters) => {
       if (viewMode === VIEW_MODE.ZOOM && typeof startRange === 'number') {
         const range: TimeFilterRange = {
           from: startRange,
@@ -326,8 +332,6 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
 
-          // @TODO: remove
-          console.log(`--@@wpSnap`, wpSnap);
           if (brushSelectionUpdateHandler !== undefined) {
             brushSelectionUpdateHandler(
               wpSnap,
@@ -378,9 +382,10 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     }
   }, [isBrushCleared, originalWindowParameters]);
 
-  function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
-    // @TODO: remove
-    console.log(`--@@onWindowParametersChang ${id}`, wp, `--@@wpPx`, wpPx);
+  function onWindowParametersChange(
+    wp: SingleBrushWindowParameters,
+    wpPx: SingleBrushWindowParameters
+  ) {
     if (brushSelectionUpdateHandler === undefined) {
       return;
     }
@@ -423,7 +428,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={
-                baselineBrush.label ??
+                brush.label ??
                 i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
                   defaultMessage: 'Baseline',
                 })
@@ -431,7 +436,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
-              width={baselineBrush.badgeWidth ?? BADGE_WIDTH}
+              width={brush.badgeWidth ?? BADGE_WIDTH}
             />
             {/* <BrushBadge
               label={
@@ -532,16 +537,10 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
             <>
               <DualBrushAnnotation
                 id="aiopsBaseline"
-                min={windowParameters.baselineMin}
-                max={windowParameters.baselineMax}
-                style={baselineBrush.annotationStyle}
+                min={windowParameters.min}
+                max={windowParameters.max}
+                style={brush.annotationStyle}
               />
-              {/* <DualBrushAnnotation
-                id="aiopsDeviation"
-                min={windowParameters.deviationMin}
-                max={windowParameters.deviationMax}
-                style={deviationBrush.annotationStyle}
-              /> */}
             </>
           )}
         </Chart>

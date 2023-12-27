@@ -13,7 +13,6 @@ import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
 import { getSnappedWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
 
 import '../dual_brush/dual_brush.scss';
 
@@ -22,6 +21,13 @@ const { scaleLinear } = d3Scale;
 const { select: d3Select } = d3Selection;
 // Import fix to apply correct types for the use of d3.select(this).transition()
 d3Select.prototype.transition = d3Transition.transition;
+
+export interface SingleBrushWindowParameters {
+  /** Time range minimum value */
+  min: number;
+  /** Time range maximum value */
+  max: number;
+}
 
 const d3 = {
   brush,
@@ -123,7 +129,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
 
   // @TODO: remove
   console.log(`--@@SingleBrush`, brushId);
-  const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
+  const { min: baselineMin, max: baselineMax } = windowParameters;
 
   useEffect(() => {
     if (d3BrushContainer.current && width > 0) {
@@ -249,10 +255,10 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
             console.log(`--@@ onChange snappedWindowParameters`, snappedWindowParameters);
             onChange(
               {
-                baselineMin: snappedWindowParameters.baselineMin,
-                baselineMax: snappedWindowParameters.baselineMax,
+                min: snappedWindowParameters.baselineMin,
+                max: snappedWindowParameters.baselineMax,
               },
-              newBrushPx
+              { min: newBrushPx.baselineMin, max: newBrushPx.baselineMax }
             );
           }
           drawBrushes();
