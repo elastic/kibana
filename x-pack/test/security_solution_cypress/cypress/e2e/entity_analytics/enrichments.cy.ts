@@ -36,7 +36,6 @@ import { enableRiskEngine } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169154
 describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'risk_scores_new');
