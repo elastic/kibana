@@ -74,11 +74,9 @@ export class KibanaClient {
   createChatClient({
     connectorId,
     persist,
-    title,
   }: {
     connectorId: string;
     persist: boolean;
-    title?: string;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -181,7 +179,6 @@ export class KibanaClient {
                 messages,
                 connectorId,
                 persist,
-                title,
               },
               { responseType: 'stream' }
             )

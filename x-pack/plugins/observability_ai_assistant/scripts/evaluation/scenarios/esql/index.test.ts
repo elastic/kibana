@@ -11,7 +11,7 @@ import { last } from 'lodash';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { MessageRole } from '../../../../common';
-import { chatClient, synthtraceEsClients } from '../../services';
+import { chatClient, esClient, synthtraceEsClients } from '../../services';
 import expect from '@kbn/expect';
 
 function extractEsqlQuery(response: string) {
@@ -68,37 +68,102 @@ async function evaluateEsqlQuery({
 
 describe('ES|QL query generation', () => {
   describe('other queries', () => {
-    it('packetbeat', async () => {
-      await evaluateEsqlQuery({
-        question:
-          'For standard Elastic ECS compliant packetbeat data view, create an ES|QL query that shows the top 10 unique domains by doc count',
-        expected: `FROM packetbeat-*
-        | STATS doc_count = COUNT(destination.domain) BY destination.domain
-        | SORT doc_count DESC
-        | LIMIT 10`,
+    describe('with packetbeat data', () => {
+      before(async () => {
+        await esClient.indices.create({
+          index: 'packetbeat-8.11.3',
+          mappings: {
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              destination: {
+                type: 'object',
+                properties: {
+                  domain: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              url: {
+                type: 'object',
+                properties: {
+                  domain: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('top 10 unique domains', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'For standard Elastic ECS compliant packetbeat data view, create an ES|QL query that shows the top 10 unique domains by doc count',
+          expected: `FROM packetbeat-*
+          | STATS doc_count = COUNT(destination.domain) BY destination.domain
+          | SORT doc_count DESC
+          | LIMIT 10`,
+        });
+      });
+
+      after(async () => {
+        await esClient.indices.delete({
+          index: 'packetbeat-8.11.3',
+          allow_no_indices: true,
+        });
       });
     });
 
-    it('five earliest employees', async () => {
-      await evaluateEsqlQuery({
-        question:
-          'From employees, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the date as e.g. "September 2019".',
-        expected: `FROM employees
-        | EVAL hire_date_formatted = DATE_FORMAT(hire_date, ""MMMM yyyy"")
-        | SORT hire_date
-        | KEEP emp_no, hire_date_formatted
-        | LIMIT 5`,
-        execute: false,
+    describe('with employees data', () => {
+      before(async () => {
+        await esClient.indices.create({
+          index: 'employees',
+          mappings: {
+            properties: {
+              hire_date: {
+                type: 'date',
+              },
+              emp_no: {
+                type: 'integer',
+              },
+              salary: {
+                type: 'integer',
+              },
+            },
+          },
+        });
       });
-    });
 
-    it('employees with pagination', async () => {
-      await evaluateEsqlQuery({
-        question:
-          'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page',
-        criteria: [
-          'The assistant should mention that pagination is currently not supported in ES|QL',
-        ],
+      it('five earliest employees', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'From employees, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the date as e.g. "September 2019".',
+          expected: `FROM employees
+          | EVAL hire_date_formatted = DATE_FORMAT(hire_date, ""MMMM yyyy"")
+          | SORT hire_date
+          | KEEP emp_no, hire_date_formatted
+          | LIMIT 5`,
+          execute: false,
+        });
+      });
+
+      it('employees with pagination', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page',
+          criteria: [
+            'The assistant should mention that pagination is currently not supported in ES|QL',
+          ],
+        });
+      });
+
+      after(async () => {
+        await esClient.indices.delete({
+          index: 'employees',
+        });
       });
     });
 

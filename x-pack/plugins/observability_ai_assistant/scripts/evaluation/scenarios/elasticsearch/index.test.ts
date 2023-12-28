@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// / <reference types="mocha"/>
+/// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
 import { chatClient } from '../../services';
