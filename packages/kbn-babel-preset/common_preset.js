@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
+module.exports = () => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
@@ -59,4 +59,4 @@ module.exports = {
       },
     ],
   ],
-};
+});
