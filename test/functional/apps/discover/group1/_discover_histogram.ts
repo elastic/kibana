@@ -299,6 +299,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reset all histogram state when resetting the saved search', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       const savedSearch = 'histogram state';
       await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.discover.chooseBreakdownField('extension.keyword');
