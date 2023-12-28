@@ -94,7 +94,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   }, [selectedTabId, tabs]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlyout'}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={'addTrainedModelFlyout'}
+      data-test-subj={'addTrainedModelFlyout'}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={'addTrainedModelFlyout'}>
@@ -387,7 +392,12 @@ const ManualDownloadTabContent: FC = () => {
                   </EuiText>
                 </p>
                 <p>
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandPipInstallCodeBlock'}
+                  >
                     $ python -m pip install eland
                   </EuiCodeBlock>
                 </p>
@@ -412,7 +422,12 @@ const ManualDownloadTabContent: FC = () => {
                   </EuiText>
                 </p>
                 <p>
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandCondaInstallCodeBlock'}
+                  >
                     $ conda install -c conda-forge eland
                   </EuiCodeBlock>
                 </p>
@@ -442,7 +457,12 @@ const ManualDownloadTabContent: FC = () => {
                     />
                   </b>
 
-                  <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                  <EuiCodeBlock
+                    isCopyable
+                    language="shell"
+                    fontSize={'m'}
+                    data-test-subj={'mlElandExampleImportCodeBlock'}
+                  >
                     eland_import_hub_model <br />
                     --cloud-id &lt;cloud-id&gt; \ <br />
                     -u &lt;username&gt; -p &lt;password&gt; \ <br />

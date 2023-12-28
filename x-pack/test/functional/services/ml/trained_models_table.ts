@@ -670,5 +670,17 @@ export function TrainedModelsTableProvider(
         await testSubjects.existOrFail('mlDataDriftTable');
       });
     }
+
+    public async assertSpaceAwareWarningCopy(): Promise<void> {
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+
+      const spaceAwareWarningCopy = await testSubjects.getVisibleText(
+        'mlDeleteSpaceAwareItemCheckModalOverlay'
+      );
+
+      expect(spaceAwareWarningCopy).to.match(
+        /cannot be deleted and cannot be removed from the current space\. This model is assigned to the \* space and you do not have access to all spaces/
+      );
+    }
   })();
 }

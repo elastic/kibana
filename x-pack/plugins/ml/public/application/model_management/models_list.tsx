@@ -743,6 +743,7 @@ export const ModelsList: FC<Props> = ({
             iconType={'plusInCircle'}
             color={'primary'}
             onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+            data-test-subj="mlModelsAddTrainedModelButton"
           >
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"

@@ -11,12 +11,23 @@ import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
+  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const trainedModels = Object.values(SUPPORTED_TRAINED_MODELS).map((model) => ({
     ...model,
     id: model.name,
   }));
 
+  async function maybeClearSearchInput() {
+    await ml.testExecution.logTestStep('"Maybe" clear search input box');
+    try {
+      const searchBarInput = await ml.trainedModelsTable.getModelsSearchInput();
+      await searchBarInput.clearValue();
+    } catch (e) {
+      // This is where the "maybe" comes into play.
+    }
+  }
   describe('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
@@ -117,9 +128,10 @@ export default function ({ getService }: FtrProviderContext) {
         modelWithPipelineAndDestIndexExpectedValues.dataViewTitle
       );
       // Delete pipelines from deploy DFA model tests
-      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false, false);
       await ml.api.deleteIngestPipeline(
         modelWithoutPipelineDataExpectedValues.duplicateName,
+        false,
         false
       );
     });
@@ -144,6 +156,26 @@ export default function ({ getService }: FtrProviderContext) {
           { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
         ]);
       });
+
+      describe('Add trained model flyout', () => {
+        it('should display elements on Manual Download tab correctly', async () => {
+          await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+          await maybeClearSearchInput();
+          await ml.trainedModelsFlyout.assertFlyoutOpen();
+
+          await ml.testExecution.logTestStep('Assert the Click to Download tab exists');
+          await ml.trainedModelsFlyout.assertTabsDifferPerUser('viewer');
+
+          await ml.testExecution.logTestStep(
+            'Assert all eland code blocks exist within the flyout'
+          );
+          await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();
+
+          await maybeClearSearchInput();
+          await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+          await ml.trainedModelsFlyout.assertClosed();
+        });
+      });
     });
 
     describe('for ML power user', () => {
@@ -155,6 +187,57 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.securityUI.logout();
+      });
+
+      describe('Add trained model flyout', () => {
+        before(async () => {
+          await maybeClearSearchInput();
+          await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+          await ml.trainedModelsFlyout.assertFlyoutOpen();
+        });
+
+        after(async () => {
+          await maybeClearSearchInput();
+          await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+          await ml.trainedModelsFlyout.assertClosed();
+        });
+
+        it('should contain a Click to Download and a Manual Download tab', async () => {
+          await ml.testExecution.logTestStep(
+            'Assert the "Click to Download" and "Manual Download" tabs exists'
+          );
+          await ml.trainedModelsFlyout.assertTabsDifferPerUser('power');
+        });
+
+        it('should list Elser panels contents correctly', async () => {
+          await ml.testExecution.logTestStep('should display the Elser header copy');
+          await ml.trainedModelsFlyout.assertElserModelHeaderCopy();
+
+          await ml.testExecution.logTestStep('should display the Elser Panels');
+          await ml.trainedModelsFlyout.assertElserPanelsExist();
+
+          await ml.testExecution.logTestStep('should display the E5 Panels');
+          await ml.trainedModelsFlyout.assertE5PanelsExist();
+
+          await ml.testExecution.logTestStep('should display a Download Button');
+          await ml.trainedModelsFlyout.assertDownloadButtonExists();
+        });
+      });
+
+      it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
+        await ml.testExecution.logTestStep('should select the model named elser_model_2');
+        await testSubjects.click('checkboxSelectRow-.elser_model_2');
+
+        await ml.testExecution.logTestStep('should attempt to delete the model');
+        await find.clickByButtonText('Delete');
+
+        await ml.testExecution.logTestStep(
+          'assert the action is banned, specifically checking the error message'
+        );
+        await ml.trainedModelsTable.assertSpaceAwareWarningCopy();
+
+        await ml.testExecution.logTestStep('close the eui modal');
+        await find.clickByButtonText('Close');
       });
 
       it('renders trained models list', async () => {
