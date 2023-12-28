@@ -20,7 +20,7 @@ export function registerMlAlerts(
   getStartServices: MlCoreSetup['getStartServices'],
   alerting?: AlertingSetup
 ) {
-  registerAnomalyDetectionRule(triggersActionsUi, alerting);
+  registerAnomalyDetectionRule(triggersActionsUi, getStartServices);
 
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 

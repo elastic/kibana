@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ML_PAGES } from '../../../common/constants/locator';
+import type { MlCoreSetup } from '../../plugin';
 import { JobSelectorControl } from '../job_selector';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
@@ -33,7 +35,9 @@ import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts
 import { parseInterval } from '../../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps =
-  RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+  RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
+    getStartServices: MlCoreSetup['getStartServices'];
+  };
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   ruleParams,
@@ -42,10 +46,32 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   errors,
   ruleInterval,
   alertNotifyWhen,
+  getStartServices,
 }) => {
   const {
     services: { http },
   } = useMlKibana();
+
+  const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getStartServices().then((startServices) => {
+      const locator = startServices[2].locator;
+      if (!locator) return;
+      locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }).then((url) => {
+        if (mounted) {
+          setNewJobUrl(url);
+        }
+      });
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [getStartServices]);
+
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
   const alertingApiService = useMemo(() => alertingApiProvider(mlHttpService), [mlHttpService]);
@@ -159,7 +185,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <JobSelectorControl
-        allowCreateNew
+        createJobUrl={newJobUrl}
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
         // eslint-disable-next-line react-hooks/exhaustive-deps

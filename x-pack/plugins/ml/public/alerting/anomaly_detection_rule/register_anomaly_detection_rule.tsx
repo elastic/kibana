@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import {
+  type RuleTypeParamsExpressionProps,
+  type TriggersAndActionsUIPublicPluginSetup,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { lazy } from 'react';
+import React, { lazy } from 'react';
+import type { MlCoreSetup } from '../../plugin';
 import { ML_ALERT_TYPES } from '../../../common';
 import type { MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';
 import { validateLookbackInterval, validateTopNBucket } from '../validators';
 
 export function registerAnomalyDetectionRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
-  alerting?: AlertingSetup
+  getStartServices: MlCoreSetup['getStartServices']
 ) {
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
@@ -26,7 +29,10 @@ export function registerAnomalyDetectionRule(
     documentationUrl(docLinks) {
       return docLinks.links.ml.alertingRules;
     },
-    ruleParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
+    ruleParamsExpression: (props: RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>) => {
+      const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
+      return <MlAlertTrigger {...props} getStartServices={getStartServices} />;
+    },
     validate: (ruleParams: MlAnomalyDetectionAlertParams) => {
       const validationResult = {
         errors: {
