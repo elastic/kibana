@@ -144,6 +144,10 @@ export function FunctionListPopover({
           display="block"
         >
           <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.functionListPopover.euiButtonIcon.selectAFunctionLabel',
+              { defaultMessage: 'Select function' }
+            )}
             data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
             disabled={disabled}
             iconType={selectedFunctionName ? 'cross' : 'plusInCircle'}

@@ -50,6 +50,7 @@ const noPanelStyle = css`
 export function ChatConsolidatedItems({
   consolidatedItem,
   onActionClick,
+  onEditing,
   onEditSubmit,
   onFeedback,
   onRegenerate,
@@ -58,6 +59,7 @@ export function ChatConsolidatedItems({
 }: {
   consolidatedItem: ChatTimelineItem[];
   onActionClick: ChatTimelineProps['onActionClick'];
+  onEditing: ChatTimelineProps['onEditing'];
   onEditSubmit: ChatTimelineProps['onEdit'];
   onFeedback: ChatTimelineProps['onFeedback'];
   onRegenerate: ChatTimelineProps['onRegenerate'];
@@ -125,6 +127,7 @@ export function ChatConsolidatedItems({
               key={index}
               {...item}
               onActionClick={onActionClick}
+              onEditing={onEditing}
               onEditSubmit={(message) => onEditSubmit(item.message, message)}
               onFeedbackClick={(feedback) => {
                 onFeedback(item.message, feedback);

@@ -29,6 +29,7 @@ import type { TelemetryEventTypeWithPayload } from '../../analytics';
 export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
+  onEditing: (editing: boolean) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
@@ -86,6 +87,7 @@ export function ChatItem({
   loading,
   title,
   onActionClick,
+  onEditing,
   onEditSubmit,
   onFeedbackClick,
   onRegenerateClick,
@@ -123,10 +125,13 @@ export function ChatItem({
       setExpanded(true);
     }
     setEditing(!editing);
+
+    onEditing(!editing);
   };
 
   const handleInlineEditSubmit = (newMessage: Message) => {
     handleToggleEdit();
+    onEditing(false);
     return onEditSubmit(newMessage);
   };
 

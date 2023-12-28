@@ -120,6 +120,7 @@ const defaultProps: ComponentProps<typeof Component> = {
     }),
   ],
   onActionClick: async () => {},
+  onEditing: () => {},
   onEdit: async () => {},
   onFeedback: () => {},
   onRegenerate: () => {},

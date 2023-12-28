@@ -17,13 +17,21 @@ export interface Props {
   functionName: string;
   functionPayload?: string;
   onChange: (message: Message['message']) => void;
+  onFocus: () => void;
+  onBlur: () => void;
 }
 
 const functionNameClassName = css`
   display: inline-block;
 `;
 
-export function ChatPromptEditorFunction({ functionName, functionPayload, onChange }: Props) {
+export function PromptEditorFunction({
+  functionName,
+  functionPayload,
+  onChange,
+  onFocus,
+  onBlur,
+}: Props) {
   const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
   const previousPayload = usePrevious(functionPayload);
@@ -72,6 +80,12 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
     }
   }, [functionName, functionPayload, initialJsonString, onChange, previousPayload]);
 
+  useEffect(() => {
+    return () => {
+      onBlur();
+    };
+  }, [onBlur]);
+
   return (
     <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
       <EuiCode className={functionNameClassName}>{functionName}</EuiCode>
@@ -95,6 +109,7 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
         }}
         editorDidMount={(editor) => {
           editor.focus();
+          onFocus();
         }}
         options={{
           accessibilitySupport: 'off',

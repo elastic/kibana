@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { noop } from 'lodash';
 import { css } from '@emotion/css';
+import { EuiPanel } from '@elastic/eui';
 import { MessageText } from '../message_panel/message_text';
-import { ChatPromptEditor } from './chat_prompt_editor';
+import { PromptEditor } from '../prompt_editor/prompt_editor';
 import type { Message } from '../../../common';
 import type { ChatActionClickHandler } from './types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
@@ -59,14 +60,14 @@ export function ChatItemContentInlinePromptEditor({
       hasShadow={false}
       className={editorContainerClassName}
     >
-      <ChatPromptEditor
+      <PromptEditor
         disabled={false}
         hidden={false}
         loading={false}
         initialFunctionCall={functionCall}
         initialContent={content}
         initialRole={role}
-        onChangeHeight={() => {}}
+        onChangeHeight={noop}
         onSubmit={onSubmit}
         onSendTelemetry={onSendTelemetry}
       />
