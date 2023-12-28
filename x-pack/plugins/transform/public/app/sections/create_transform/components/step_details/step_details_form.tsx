@@ -46,7 +46,6 @@ import {
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import { SearchItems } from '../../../../hooks/use_search_items';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
@@ -60,20 +59,24 @@ import {
   integerRangeMinus1To100Validator,
   transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+
+import { useCreateTransformWizardSelector } from '../../create_transform_store';
+
+import { useWizardContext } from '../wizard/wizard';
 
 import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
 
 interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
-  searchItems: SearchItems;
-  stepDefineState: StepDefineExposedState;
 }
 
 export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
-  ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
+  ({ overrides = {}, onChange }) => {
+    const { searchItems } = useWizardContext();
+    const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
+
     const { application, i18n: i18nStart, theme } = useAppDependencies();
     const { capabilities } = application;
     const toastNotifications = useToastNotifications();
@@ -109,6 +112,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
     const previewRequest = useMemo(() => {
+      if (stepDefineState === null) return undefined;
       const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
       const transformConfigQuery = getTransformConfigQuery(searchQuery);
       return getPreviewTransformRequestBody(
@@ -119,8 +123,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       );
     }, [searchItems.dataView, stepDefineState]);
 
-    const { error: transformsPreviewError, data: transformPreview } =
-      useGetTransformsPreview(previewRequest);
+    const { error: transformsPreviewError, data: transformPreview } = useGetTransformsPreview(
+      previewRequest,
+      previewRequest !== undefined
+    );
 
     const destIndexAvailableTimeFields = useMemo<string[]>(() => {
       if (!transformPreview) return [];
@@ -524,7 +530,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             </EuiFormRow>
           )}
 
-          {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
+          {stepDefineState && stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
               <EuiSpacer size={'m'} />
               <EuiCallOut color="warning" iconType="warning" size="m">

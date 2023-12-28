@@ -34,15 +34,13 @@ import {
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-  StepDefineForm,
-  StepDefineSummary,
+  euiStepDefine,
 } from '../step_define';
 import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
 import {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,
-  StepDetailsForm,
-  StepDetailsSummary,
+  euiStepDetails,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 
@@ -82,7 +80,8 @@ export const Wizard: FC = React.memo(() => {
 
   const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
-  const { initializeAppContext, setCurrentStep, setStepDefineState } =
+  const stepDetailsState = useCreateTransformWizardSelector((s) => s.stepDetails);
+  const { initializeAppContext, setCurrentStep, setStepDefineState, setStepDetailsState } =
     useCreateTransformWizardActions();
 
   useEffect(() => {
@@ -95,80 +94,14 @@ export const Wizard: FC = React.memo(() => {
       runtimeMappings: initialStepDefineState.runtimeMappings,
     });
     setStepDefineState(initialStepDefineState);
+    setStepDetailsState(
+      applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The DETAILS state
-  const [stepDetailsState, setStepDetailsState] = useState(
-    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
-  );
-
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
-
-  const stepDefine = useMemo(
-    () => ({
-      title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
-        defaultMessage: 'Configuration',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.DEFINE && stepDefineState && (
-            <>
-              <StepDefineForm onChange={setStepDefineState} overrides={{ ...stepDefineState }} />
-              <WizardNav
-                next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
-                nextActive={stepDefineState.valid}
-              />
-            </>
-          )}
-          {currentStep !== WIZARD_STEPS.DEFINE && stepDefineState && (
-            <StepDefineSummary formState={{ ...stepDefineState }} />
-          )}
-        </>
-      ),
-    }),
-    [currentStep, setCurrentStep, setStepDefineState, stepDefineState]
-  );
-
-  const stepDetails = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
-        defaultMessage: 'Transform details',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.DETAILS && stepDefineState ? (
-            <StepDetailsForm
-              onChange={setStepDetailsState}
-              overrides={stepDetailsState}
-              searchItems={searchItems}
-              stepDefineState={stepDefineState}
-            />
-          ) : (
-            <StepDetailsSummary {...stepDetailsState} />
-          )}
-          {currentStep === WIZARD_STEPS.DETAILS && (
-            <WizardNav
-              previous={() => {
-                setCurrentStep(WIZARD_STEPS.DEFINE);
-              }}
-              next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-              nextActive={stepDetailsState.valid}
-            />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [
-    currentStep,
-    setCurrentStep,
-    setStepDetailsState,
-    stepDetailsState,
-    searchItems,
-    stepDefineState,
-  ]);
 
   const stepCreate = useMemo(() => {
     return {
@@ -177,7 +110,7 @@ export const Wizard: FC = React.memo(() => {
       }),
       children: (
         <>
-          {currentStep === WIZARD_STEPS.CREATE && stepDefineState ? (
+          {currentStep === WIZARD_STEPS.CREATE && stepDefineState && stepDetailsState ? (
             <StepCreateForm
               createDataView={stepDetailsState.createDataView}
               transformId={stepDetailsState.transformId}
@@ -210,7 +143,7 @@ export const Wizard: FC = React.memo(() => {
     stepDefineState,
   ]);
 
-  const stepsConfig = [stepDefine, stepDetails, stepCreate];
+  const euiStepsConfig = [euiStepDefine, euiStepDetails, stepCreate];
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -229,7 +162,7 @@ export const Wizard: FC = React.memo(() => {
     [uiSettings, data, fieldFormats, charts]
   );
 
-  if (!stepDefineState) return null;
+  if (!stepDefineState || !stepDetailsState) return null;
 
   return (
     <FieldStatsFlyoutProvider
@@ -243,7 +176,7 @@ export const Wizard: FC = React.memo(() => {
       <UrlStateProvider>
         <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
           <DatePickerContextProvider {...datePickerDeps}>
-            <EuiSteps className="transform__steps" steps={stepsConfig} />
+            <EuiSteps className="transform__steps" steps={euiStepsConfig} />
           </DatePickerContextProvider>
         </StorageContextProvider>
       </UrlStateProvider>

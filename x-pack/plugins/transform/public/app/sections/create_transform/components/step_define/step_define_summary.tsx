@@ -32,15 +32,12 @@ import { useWizardContext } from '../wizard/wizard';
 import { AggListSummary } from '../aggregation_list';
 import { GroupByListSummary } from '../group_by_list';
 
-import { StepDefineExposedState } from './common';
 import { isLatestPartialRequest } from './common/types';
 
-interface Props {
-  formState: StepDefineExposedState;
-}
+import { useCreateTransformWizardSelector } from '../../create_transform_store';
 
-export const StepDefineSummary: FC<Props> = ({
-  formState: {
+export const StepDefineSummary: FC = () => {
+  const {
     isDatePickerApplyEnabled,
     timeRangeMs,
     runtimeMappings,
@@ -51,8 +48,7 @@ export const StepDefineSummary: FC<Props> = ({
     transformFunction,
     previewRequest: partialPreviewRequest,
     validationStatus,
-  },
-}) => {
+  } = useCreateTransformWizardSelector((s) => s.stepDefine);
   const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 

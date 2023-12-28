@@ -62,6 +62,7 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardContext } from '../wizard/wizard';
+import { useCreateTransformWizardActions } from '../../create_transform_store';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
@@ -69,11 +70,12 @@ import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
-import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
+
+import { usePivotConfigRequestPayload } from './hooks/use_pivot_config';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
@@ -92,12 +94,7 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   </>
 );
 
-export interface StepDefineFormProps {
-  overrides?: StepDefineExposedState;
-  onChange(s: StepDefineExposedState): void;
-}
-
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+export const StepDefineForm: FC = React.memo(() => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
@@ -111,7 +108,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
   const toastNotifications = useToastNotifications();
-  const stepDefineForm = useStepDefineForm(props);
+  const stepDefineForm = useStepDefineForm();
+  const { setAggList, setGroupByList } = useCreateTransformWizardActions();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
@@ -142,9 +140,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
+
+  const pivotConfig = usePivotConfigRequestPayload();
   const { requestPayload, validationStatus } =
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
-      ? stepDefineForm.pivotConfig.state
+      ? pivotConfig
       : stepDefineForm.latestFunctionConfig;
 
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
@@ -218,7 +218,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         };
       });
     }
-    stepDefineForm.pivotConfig.actions.setGroupByList(newGroupByList);
+    setGroupByList(newGroupByList);
 
     const newAggList: PivotAggsConfigDict = {};
     if (pivot !== undefined && pivot.aggregations !== undefined) {
@@ -229,7 +229,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         newAggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
       });
     }
-    stepDefineForm.pivotConfig.actions.setAggList(newAggList);
+    setAggList(newAggList);
 
     stepDefineForm.advancedPivotEditor.actions.setAdvancedEditorConfigLastApplied(
       advancedEditorConfig

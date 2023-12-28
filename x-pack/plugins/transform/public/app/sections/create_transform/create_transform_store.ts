@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { bindActionCreators } from 'redux';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import { useToastNotifications } from '../../app_dependencies';
+import {
+  getPivotConfigActions,
+  usePivotConfigOptions,
+} from './components/step_define/hooks/use_pivot_config';
+
+import type {
+  PivotAggsConfigDict,
+  PivotGroupByConfigDict,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+} from '../../common';
+
 import type { StepDefineExposedState } from './components/step_define';
+import { getDefaultStepDefineState } from './components/step_define/common';
+import type { StepDetailsExposedState } from './components/step_details';
 
 export enum WIZARD_STEPS {
   DEFINE,
@@ -43,31 +59,89 @@ const createTransformWizardAppContextSlice = createSlice({
   },
 });
 
-const stepDefineSlice = createSlice({
+export const stepDefineSlice = createSlice({
   name: 'stepDefine',
-  initialState: null as StepDefineExposedState | null,
+  initialState: getDefaultStepDefineState(),
   reducers: {
+    setAggList: (state, action: PayloadAction<PivotAggsConfigDict>) => {
+      state.aggList = action.payload;
+    },
+    setGroupByList: (state, action: PayloadAction<PivotGroupByConfigDict>) => {
+      state.groupByList = action.payload;
+    },
     setStepDefineState: (_, action: PayloadAction<StepDefineExposedState>) => action.payload,
+    rAddAggregation: (
+      state,
+      action: PayloadAction<{ aggName: string; config: PivotAggsConfig }>
+    ) => {
+      state.aggList[action.payload.aggName] = action.payload.config;
+    },
+    rDeleteAggregation: (state, action: PayloadAction<string>) => {
+      delete state.aggList[action.payload];
+    },
+    rUpdateAggregation: (
+      state,
+      action: PayloadAction<{ previousAggName: string; config: PivotAggsConfig }>
+    ) => {
+      delete state.aggList[action.payload.previousAggName];
+      state.aggList[action.payload.config.aggName] = action.payload.config;
+    },
+    rAddGroupBy: (
+      state,
+      action: PayloadAction<{ aggName: string; config: PivotGroupByConfig }>
+    ) => {
+      state.groupByList[action.payload.aggName] = action.payload.config;
+    },
+    rDeleteGroupBy: (state, action: PayloadAction<string>) => {
+      delete state.groupByList[action.payload];
+    },
   },
 });
 
-export const createTransformStore = configureStore({
-  reducer: {
-    wizard: createTransformWizardAppContextSlice.reducer,
-    stepDefine: stepDefineSlice.reducer,
+const stepDetailsSlice = createSlice({
+  name: 'stepDetails',
+  initialState: null as StepDetailsExposedState | null,
+  reducers: {
+    setStepDetailsState: (_, action: PayloadAction<StepDetailsExposedState>) => action.payload,
   },
 });
+
+export const getTransformWizardStore = () =>
+  configureStore({
+    reducer: {
+      wizard: createTransformWizardAppContextSlice.reducer,
+      stepDefine: stepDefineSlice.reducer,
+      stepDetails: stepDetailsSlice.reducer,
+    },
+  });
 
 interface StoreState {
   wizard: CreateTransformWizardAppContextState;
-  stepDefine: StepDefineExposedState | null;
+  stepDefine: StepDefineExposedState;
+  stepDetails: StepDetailsExposedState | null;
 }
 
 export function useCreateTransformWizardActions() {
+  const pivotConfigOptions = usePivotConfigOptions();
+  const toastNotifications = useToastNotifications();
   const dispatch = useDispatch();
-  return bindActionCreators(
-    { ...createTransformWizardAppContextSlice.actions, ...stepDefineSlice.actions },
-    dispatch
+  return useMemo(
+    () => ({
+      ...bindActionCreators(
+        {
+          ...createTransformWizardAppContextSlice.actions,
+          ...stepDefineSlice.actions,
+          ...stepDetailsSlice.actions,
+        },
+        dispatch
+      ),
+      pivotConfig: bindActionCreators(
+        getPivotConfigActions(pivotConfigOptions, toastNotifications),
+        dispatch
+      ),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 }
 

@@ -28,6 +28,10 @@ import {
   PivotAggsConfigWithUiSupport,
 } from '../../../../common';
 import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../create_transform_store';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
@@ -47,10 +51,12 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
       isRuntimeMappingsEditorEnabled,
     },
   } = props.runtimeMappingsEditor;
+
   const {
-    actions: { deleteAggregation, deleteGroupBy, updateAggregation },
-    state: { groupByList, aggList },
-  } = props.pivotConfig;
+    pivotConfig: { deleteAggregation, deleteGroupBy, updateAggregation },
+  } = useCreateTransformWizardActions();
+  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
+  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
 
   const applyChanges = () => {
     const nextConfig =

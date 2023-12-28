@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
+import type { Action } from 'redux';
+import type { ThunkAction } from 'redux-thunk';
 
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isDefined } from '@kbn/ml-is-defined';
+
 import { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
-import { useToastNotifications } from '../../../../../app_dependencies';
 import {
   DropDownLabel,
   getRequestPayload,
@@ -24,11 +27,12 @@ import {
 } from '../../../../../common';
 
 import {
-  getAggNameConflictToastMessages,
-  getPivotDropdownOptions,
-  StepDefineExposedState,
-} from '../common';
-import { StepDefineFormProps } from '../step_define_form';
+  stepDefineSlice,
+  useCreateTransformWizardSelector,
+  type StoreState,
+} from '../../../create_transform_store';
+import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
+import { useWizardContext } from '../../wizard/wizard';
 import {
   isPivotAggConfigTopMetric,
   isPivotAggsWithExtendedForm,
@@ -99,24 +103,60 @@ function getRootAggregation(item: PivotAggsConfig) {
   return rootItem;
 }
 
-export const usePivotConfig = (
-  defaults: StepDefineExposedState,
-  dataView: StepDefineFormProps['searchItems']['dataView']
-) => {
-  const toastNotifications = useToastNotifications();
+export const usePivotConfigOptions = () => {
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
 
-  const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData, fields } = useMemo(
-    () => getPivotDropdownOptions(dataView, defaults.runtimeMappings),
-    [defaults.runtimeMappings, dataView]
+  return useMemo(
+    () => getPivotDropdownOptions(dataView, runtimeMappings),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [runtimeMappings]
   );
+};
+export type PivotConfigOptions = ReturnType<typeof usePivotConfigOptions>;
+
+export const usePivotConfigRequestPayload = () => {
+  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
+  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
+
+  const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
+  const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
+  const requestPayload = useMemo(
+    () => getRequestPayload(pivotAggsArr, pivotGroupByArr),
+    [pivotAggsArr, pivotGroupByArr]
+  );
+  const validationStatus = useMemo(() => {
+    return validatePivotConfig(requestPayload.pivot);
+  }, [requestPayload]);
+
+  return useMemo(
+    () => ({
+      requestPayload,
+      validationStatus,
+    }),
+    [requestPayload, validationStatus]
+  );
+};
+
+export const getPivotConfigActions = (
+  pivotConfigOptions: PivotConfigOptions,
+  toastNotifications: NotificationsStart['toasts']
+) => {
+  const { rAddAggregation, rAddGroupBy, rDeleteAggregation, rDeleteGroupBy, rUpdateAggregation } =
+    stepDefineSlice.actions;
 
   // The list of selected aggregations
-  const [aggList, setAggList] = useState(defaults.aggList);
+  // const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
   // The list of selected group by fields
-  const [groupByList, setGroupByList] = useState(defaults.groupByList);
+  // const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
 
-  const addGroupBy = useCallback(
-    (d: DropDownLabel[]) => {
+  const { aggOptionsData, groupByOptionsData, fields } = pivotConfigOptions;
+
+  const addGroupBy =
+    (d: DropDownLabel[]): ThunkAction<void, StoreState, unknown, ReturnType<typeof rAddGroupBy>> =>
+    (dispatch, getState) => {
+      const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotGroupByConfig = groupByOptionsData[label];
       const aggName: AggName = config.aggName;
@@ -131,14 +171,16 @@ export const usePivotConfig = (
         return;
       }
 
-      groupByList[aggName] = config;
-      setGroupByList({ ...groupByList });
-    },
-    [aggList, groupByList, groupByOptionsData, toastNotifications]
-  );
+      dispatch(rAddGroupBy({ aggName, config }));
+    };
 
-  const updateGroupBy = useCallback(
-    (previousAggName: AggName, item: PivotGroupByConfig) => {
+  const updateGroupBy =
+    (
+      previousAggName: AggName,
+      item: PivotGroupByConfig
+    ): ThunkAction<void, StoreState, unknown, ReturnType<typeof rAddGroupBy>> =>
+    (dispatch, getState) => {
+      const { aggList, groupByList } = getState().stepDefine;
       const groupByListWithoutPrevious = { ...groupByList };
       delete groupByListWithoutPrevious[previousAggName];
 
@@ -152,25 +194,20 @@ export const usePivotConfig = (
         return;
       }
 
-      groupByListWithoutPrevious[item.aggName] = item;
-      setGroupByList(groupByListWithoutPrevious);
-    },
-    [aggList, groupByList, toastNotifications]
-  );
+      dispatch(rAddGroupBy({ aggName: item.aggName, config: item }));
+    };
 
-  const deleteGroupBy = useCallback(
-    (aggName: AggName) => {
-      delete groupByList[aggName];
-      setGroupByList({ ...groupByList });
-    },
-    [groupByList]
-  );
+  const deleteGroupBy = rDeleteGroupBy;
 
   /**
    * Adds an aggregation to the list.
    */
-  const addAggregation = useCallback(
-    (d: DropDownLabel[]) => {
+  const addAggregation =
+    (
+      d: DropDownLabel[]
+    ): ThunkAction<void, StoreState, unknown, ReturnType<typeof rAddAggregation>> =>
+    (dispatch, getState) => {
+      const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
 
@@ -227,17 +264,18 @@ export const usePivotConfig = (
         return;
       }
 
-      aggList[aggName] = config;
-      setAggList({ ...aggList });
-    },
-    [aggList, aggOptionsData, groupByList, toastNotifications, fields]
-  );
-
+      dispatch(rAddAggregation({ aggName, config }));
+    };
   /**
    * Adds updated aggregation to the list
    */
-  const updateAggregation = useCallback(
-    (previousAggName: AggName, item: PivotAggsConfig) => {
+  const updateAggregation =
+    (
+      previousAggName: AggName,
+      item: PivotAggsConfig
+    ): ThunkAction<void, StoreState, unknown, ReturnType<typeof rUpdateAggregation>> =>
+    (dispatch, getState) => {
+      const { aggList, groupByList } = getState().stepDefine;
       const aggListWithoutPrevious = { ...aggList };
       delete aggListWithoutPrevious[previousAggName];
 
@@ -250,17 +288,18 @@ export const usePivotConfig = (
         aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
         return;
       }
-      aggListWithoutPrevious[item.aggName] = item;
-      setAggList(aggListWithoutPrevious);
-    },
-    [aggList, groupByList, toastNotifications]
-  );
 
+      dispatch(rUpdateAggregation({ previousAggName, config: item }));
+    };
   /**
    * Adds sub-aggregation to the aggregation item
    */
-  const addSubAggregation = useCallback(
-    (item: PivotAggsConfig, d: DropDownLabel[]) => {
+  const addSubAggregation =
+    (
+      item: PivotAggsConfig,
+      d: DropDownLabel[]
+    ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
+    (dispatch) => {
       if (!item.isSubAggsSupported) {
         throw new Error(`Aggregation "${item.agg}" does not support sub-aggregations`);
       }
@@ -282,16 +321,18 @@ export const usePivotConfig = (
       item.subAggs[config.aggName] = config;
 
       const newRootItem = cloneAggItem(getRootAggregation(item));
-      updateAggregation(newRootItem.aggName, newRootItem);
-    },
-    [aggOptionsData, toastNotifications, updateAggregation]
-  );
+      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+    };
 
   /**
    * Updates sub-aggregation of the aggregation item
    */
-  const updateSubAggregation = useCallback(
-    (prevSubItemName: AggName, subItem: PivotAggsConfig) => {
+  const updateSubAggregation =
+    (
+      prevSubItemName: AggName,
+      subItem: PivotAggsConfig
+    ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
+    (dispatch) => {
       const parent = subItem.parentAgg;
       if (!parent || !parent.subAggs) {
         throw new Error('No parent aggregation reference found');
@@ -314,106 +355,40 @@ export const usePivotConfig = (
         [subItem.aggName]: subItem,
       };
       const newRootItem = cloneAggItem(getRootAggregation(subItem));
-      updateAggregation(newRootItem.aggName, newRootItem);
-    },
-    [toastNotifications, updateAggregation]
-  );
+      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+    };
 
   /**
    * Deletes sub-aggregation of the aggregation item
    */
-  const deleteSubAggregation = useCallback(
-    (item: PivotAggsConfig, subAggName: string) => {
+  const deleteSubAggregation =
+    (
+      item: PivotAggsConfig,
+      subAggName: string
+    ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
+    (dispatch) => {
       if (!item.subAggs || !item.subAggs[subAggName]) {
         throw new Error('Unable to delete a sub-agg');
       }
       delete item.subAggs[subAggName];
       const newRootItem = cloneAggItem(getRootAggregation(item));
-      updateAggregation(newRootItem.aggName, newRootItem);
-    },
-    [updateAggregation]
-  );
+      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+    };
 
   /**
    * Deletes aggregation from the list
    */
-  const deleteAggregation = useCallback(
-    (aggName: AggName) => {
-      delete aggList[aggName];
-      setAggList({ ...aggList });
-    },
-    [aggList]
-  );
+  const deleteAggregation = rDeleteAggregation;
 
-  const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
-  const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
-
-  const requestPayload = useMemo(
-    () => getRequestPayload(pivotAggsArr, pivotGroupByArr),
-    [pivotAggsArr, pivotGroupByArr]
-  );
-
-  const validationStatus = useMemo(() => {
-    return validatePivotConfig(requestPayload.pivot);
-  }, [requestPayload]);
-
-  const actions = useMemo(() => {
-    return {
-      addAggregation,
-      addGroupBy,
-      addSubAggregation,
-      updateSubAggregation,
-      deleteSubAggregation,
-      deleteAggregation,
-      deleteGroupBy,
-      setAggList,
-      setGroupByList,
-      updateAggregation,
-      updateGroupBy,
-    };
-  }, [
+  return {
     addAggregation,
     addGroupBy,
     addSubAggregation,
+    updateSubAggregation,
+    deleteSubAggregation,
     deleteAggregation,
     deleteGroupBy,
-    deleteSubAggregation,
     updateAggregation,
     updateGroupBy,
-    updateSubAggregation,
-  ]);
-
-  return useMemo(() => {
-    return {
-      actions,
-      state: {
-        aggList,
-        aggOptions,
-        aggOptionsData,
-        groupByList,
-        groupByOptions,
-        groupByOptionsData,
-        pivotAggsArr,
-        pivotGroupByArr,
-        validationStatus,
-        requestPayload,
-        fields,
-      },
-    };
-  }, [
-    actions,
-    aggList,
-    aggOptions,
-    aggOptionsData,
-    groupByList,
-    groupByOptions,
-    groupByOptionsData,
-    pivotAggsArr,
-    pivotGroupByArr,
-    validationStatus,
-    requestPayload,
-    fields,
-  ]);
+  };
 };
-
-export type PivotService = ReturnType<typeof usePivotConfig>;

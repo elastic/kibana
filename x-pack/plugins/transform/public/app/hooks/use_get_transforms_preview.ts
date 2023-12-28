@@ -18,7 +18,7 @@ import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common
 import { useAppDependencies } from '../app_dependencies';
 
 export const useGetTransformsPreview = (
-  obj: PostTransformsPreviewRequestSchema,
+  obj?: PostTransformsPreviewRequestSchema,
   enabled?: boolean
 ) => {
   const { http } = useAppDependencies();

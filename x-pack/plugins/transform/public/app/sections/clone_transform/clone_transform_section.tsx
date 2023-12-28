@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 
@@ -24,6 +25,7 @@ import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../se
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard, WizardContext } from '../create_transform/components/wizard';
+import { getTransformWizardStore } from '../create_transform/create_transform_store';
 import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
@@ -152,7 +154,9 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
         {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
           <WizardContext.Provider value={{ cloneConfig: transformConfig, searchItems }}>
-            <Wizard />
+            <ReduxProvider store={getTransformWizardStore()}>
+              <Wizard />
+            </ReduxProvider>
           </WizardContext.Provider>
         )}
       </EuiPageTemplate.Section>

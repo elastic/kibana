@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AggListForm } from './list_form';
 import { DropDown } from '../aggregation_dropdown';
 import { PivotAggsConfig } from '../../../../common';
-import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
 import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
+import { useCreateTransformWizardActions } from '../../create_transform_store';
+import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
 
 /**
  * Component for managing sub-aggregation of the provided
  * aggregation item.
  */
 export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
-  const { state, actions } = useContext(PivotConfigurationContext)!;
-
+  const { pivotConfig: actions } = useCreateTransformWizardActions();
+  const { aggOptions, aggOptionsData } = usePivotConfigOptions();
   const addSubAggHandler = useCallback(
     (d: EuiComboBoxOptionOption[]) => {
       actions.addSubAggregation(item, d);
@@ -56,7 +57,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
   const dropdown = (
     <DropDown
       changeHandler={addSubAggHandler}
-      options={state.aggOptions}
+      options={aggOptions}
       placeholder={i18n.translate('xpack.transform.stepDefineForm.addSubAggregationPlaceholder', {
         defaultMessage: 'Add a sub-aggregation ...',
       })}
@@ -73,7 +74,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
           onChange={updateSubAggHandler}
           deleteHandler={deleteSubAggHandler}
           list={item.subAggs}
-          options={state.aggOptionsData}
+          options={aggOptionsData}
         />
       )}
       {isNewSubAggAllowed ? (

@@ -11,21 +11,27 @@ import { getPreviewTransformRequestBody } from '../../../../../common';
 
 import { getDefaultStepDefineState } from '../common';
 
-import { StepDefineFormProps } from '../step_define_form';
-
 import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';
 import { useDatePicker } from './use_date_picker';
-import { usePivotConfig } from './use_pivot_config';
+import { usePivotConfigRequestPayload } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
 import { useWizardContext } from '../../wizard/wizard';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
-export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) => {
+export const useStepDefineForm = () => {
+  const overrides = useCreateTransformWizardSelector((s) => s.stepDefine);
+  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
+  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
+  const { setStepDefineState } = useCreateTransformWizardActions();
   const { searchItems } = useWizardContext();
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
   const { dataView } = searchItems;
@@ -34,7 +40,7 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
 
   const datePicker = useDatePicker(defaults, dataView);
   const searchBar = useSearchBar(defaults, dataView);
-  const pivotConfig = usePivotConfig(defaults, dataView);
+  const { requestPayload, validationStatus } = usePivotConfigRequestPayload();
 
   const latestFunctionConfig = useLatestFunctionConfig(
     defaults.latestConfig,
@@ -45,7 +51,7 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
   const previewRequest = getPreviewTransformRequestBody(
     dataView,
     searchBar.state.transformConfigQuery,
-    pivotConfig.state.requestPayload,
+    requestPayload,
     defaults?.runtimeMappings
   );
 
@@ -64,7 +70,7 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
       const previewRequestUpdate = getPreviewTransformRequestBody(
         dataView,
         searchBar.state.transformConfigQuery,
-        pivotConfig.state.requestPayload,
+        requestPayload,
         runtimeMappings
       );
 
@@ -76,11 +82,11 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
 
       advancedSourceEditor.actions.setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
     }
-    onChange({
+    setStepDefineState({
       transformFunction,
       latestConfig: latestFunctionConfig.config,
-      aggList: pivotConfig.state.aggList,
-      groupByList: pivotConfig.state.groupByList,
+      aggList,
+      groupByList,
       isAdvancedPivotEditorEnabled: advancedPivotEditor.state.isAdvancedPivotEditorEnabled,
       isAdvancedSourceEditorEnabled: advancedSourceEditor.state.isAdvancedSourceEditorEnabled,
       isDatePickerApplyEnabled: datePicker.state.isDatePickerApplyEnabled,
@@ -90,15 +96,15 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
       sourceConfigUpdated: advancedSourceEditor.state.sourceConfigUpdated,
       valid:
         transformFunction === TRANSFORM_FUNCTION.PIVOT
-          ? pivotConfig.state.validationStatus.isValid
+          ? validationStatus.isValid
           : latestFunctionConfig.validationStatus.isValid,
       validationStatus:
         transformFunction === TRANSFORM_FUNCTION.PIVOT
-          ? pivotConfig.state.validationStatus
+          ? validationStatus
           : latestFunctionConfig.validationStatus,
       previewRequest:
         transformFunction === TRANSFORM_FUNCTION.PIVOT
-          ? pivotConfig.state.requestPayload
+          ? requestPayload
           : latestFunctionConfig.requestPayload,
       runtimeMappings,
       runtimeMappingsUpdated: runtimeMappingsEditor.state.runtimeMappingsUpdated,
@@ -111,7 +117,6 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
     JSON.stringify(advancedPivotEditor.state),
     JSON.stringify(advancedSourceEditor.state),
     JSON.stringify(datePicker.state),
-    pivotConfig.state,
     JSON.stringify(searchBar.state),
     JSON.stringify([
       runtimeMappingsEditor.state.runtimeMappings,
@@ -129,7 +134,6 @@ export const useStepDefineForm = ({ overrides, onChange }: StepDefineFormProps) 
     advancedSourceEditor,
     runtimeMappingsEditor,
     datePicker,
-    pivotConfig,
     latestFunctionConfig,
     searchBar,
   };
