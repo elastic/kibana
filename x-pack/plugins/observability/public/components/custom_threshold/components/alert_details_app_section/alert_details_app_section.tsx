@@ -29,11 +29,11 @@ import { MetricsExplorerChartType } from '../../../../common/custom_threshold_ru
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
-
+import { AlertParams, CustomThresholdRuleTypeParams } from '../types';
+import { useLicense } from '../hooks/use_license';
 import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './custom_threshold';
-import { AlertParams, CustomThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
@@ -59,6 +59,8 @@ export default function AlertDetailsAppSection({
 }: AppSectionProps) {
   const { uiSettings, charts, data } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+  const { hasAtLeast } = useLicense();
+  const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
@@ -83,6 +85,7 @@ export default function AlertDetailsAppSection({
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
+
   useEffect(() => {
     setAlertSummaryFields([
       {
