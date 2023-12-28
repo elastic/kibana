@@ -7,25 +7,27 @@
 
 import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
-import { DocumentCountChartSingular } from '@kbn/aiops-components';
+import { DocumentCountChartWithBrush } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type {
-  BrushSelectionUpdateHandler,
-  BrushSettings,
-  DocumentCountChartProps,
-} from '@kbn/aiops-components';
+import type { BrushSettings, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
-
 import { isDefined } from '@kbn/ml-is-defined';
+import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
 import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
 import { getDataTestSubject } from '../common/util/get_data_test_subject';
+
+export type BrushSelectionUpdateHandler = (
+  windowParameters: SingleBrushWindowParameters,
+  force: boolean
+) => void;
+
 export interface DocumentCountContentProps
   extends Omit<
     DocumentCountChartProps,
@@ -54,7 +56,7 @@ export interface DocumentCountContentProps
   reload: () => void;
   approximate: boolean;
   stateManager: DataDriftStateManager;
-  label?: string;
+  label?: Element | string;
   id?: string;
 }
 
@@ -197,7 +199,7 @@ export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
 
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
-          <DocumentCountChartSingular
+          <DocumentCountChartWithBrush
             id={id}
             dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}

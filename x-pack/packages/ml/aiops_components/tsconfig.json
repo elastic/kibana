@@ -17,6 +17,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "../../../plugins/data_visualizer/public/application/data_drift/document_count_chart_single_brush/document_count_chart_singular.tsx",
+    "../../../plugins/data_visualizer/public/application/data_drift/document_count_chart_single_brush/single_brush.tsx",
   ],
   "kbn_references": [
     "@kbn/i18n-react",

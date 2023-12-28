@@ -39,8 +39,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
+import { DualBrushAnnotation } from '@kbn/aiops-components';
 import { SingleBrush } from './single_brush';
-import { DualBrushAnnotation } from '../..';
 
 declare global {
   interface Window {
@@ -154,7 +154,7 @@ export interface SingleBrushWindowParameters {
  * @param props DocumentCountChart component props
  * @returns The DocumentCountChart component.
  */
-export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) => {
+export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) => {
   const {
     id,
     dataTestSubj,
