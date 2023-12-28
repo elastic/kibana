@@ -158,6 +158,11 @@ export const allowedExperimentalValues = Object.freeze({
    * version and the latest available version.
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Enables discover esql tab within timeline
+   *
+   */
+  discoverInTimeline: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
