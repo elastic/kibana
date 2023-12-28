@@ -33,7 +33,6 @@ import {
   getWindowParameters,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
-  type SingleBrushWindowParameters,
 } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -42,8 +41,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { SingleBrush } from './single_brush';
 import { DualBrushAnnotation } from '../..';
-
-import { BrushBadge } from './brush_badge';
 
 declare global {
   interface Window {
@@ -138,25 +135,9 @@ export interface DocumentCountChartProps {
 
 const SPEC_ID = 'document_count';
 
-const BADGE_HEIGHT = 20;
-const BADGE_WIDTH = 75;
-
 enum VIEW_MODE {
   ZOOM = 'zoom',
   BRUSH = 'brush',
-}
-
-function getBaselineBadgeOverflow(
-  windowParametersAsPixels: SingleBrushWindowParameters,
-  baselineBadgeWidth: number
-) {
-  const { baselineMin, baselineMax, deviationMin } = windowParametersAsPixels;
-
-  const baselineBrushWidth = baselineMax - baselineMin;
-  const baselineBadgeActualMax = baselineMin + baselineBadgeWidth;
-  return deviationMin < baselineBadgeActualMax
-    ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
-    : 0;
 }
 
 export interface SingleBrushWindowParameters {
@@ -334,8 +315,6 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
           setWindowParameters(wpSnap);
 
           if (brushSelectionUpdateHandler !== undefined) {
-            console.log(`--@@brushSelectionUpdateHandler from triggerAnalysis`);
-
             brushSelectionUpdateHandler(
               wpSnap,
               true,
@@ -394,8 +373,6 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    // @TODO: remove
-    console.log(`--@@brushSelectionUpdateHandler from onWindowParametersChange`);
     brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
   }
 
@@ -415,13 +392,6 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     mlBrushMarginLeft &&
     mlBrushWidth &&
     mlBrushWidth > 0;
-
-  // Avoid overlap of brush badges when the brushes are quite narrow.
-  const baselineBadgeOverflow = windowParametersAsPixels
-    ? getBaselineBadgeOverflow(windowParametersAsPixels, BADGE_WIDTH)
-    : 0;
-  const baselineBadgeMarginLeft =
-    (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
   const barColor = barColorOverride ? [barColorOverride] : undefined;
   const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];

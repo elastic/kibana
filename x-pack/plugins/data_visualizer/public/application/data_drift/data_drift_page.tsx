@@ -36,6 +36,7 @@ import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import type { SingleBrushWindowParameters } from '@kbn/aiops-components/src/document_count_chart/single_brush';
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
@@ -255,7 +256,6 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     overlapColor: 'black',
   };
 
-  // Troubleshoot how is it possible for brushRanges to be {baselineMin: undefined, baselineMax: undefined}
   const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();
 
   // Ref to keep track of previous values
@@ -267,7 +267,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
   const referenceBrushSelectionUpdate = useCallback(
-    function referenceBrushSelectionUpdate(d: WindowParameters, force: boolean) {
+    function referenceBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean) {
       if (!isBrushCleared || force) {
         const clone = cloneDeep(brushRangesRef.current);
         clone.baselineMin = d.min;
@@ -280,16 +280,12 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         setIsBrushCleared(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [brushRanges, isBrushCleared]
   );
 
   const comparisonBrushSelectionUpdate = useCallback(
-    function comparisonBrushSelectionUpdate(d: WindowParameters, force: boolean, id) {
-      console.log(
-        `--@@comparisonBrushSelectionUpdate brushRangesRef.current`,
-        brushRangesRef.current
-      );
-
+    function comparisonBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean, id) {
       if (!isBrushCleared || force) {
         const clone = cloneDeep(brushRangesRef.current);
         clone.deviationMin = d.min;
@@ -301,16 +297,15 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         setBrushRanges(clone);
       }
       if (force) {
-        // @TODO: remove
-        console.log(`--@@comparisonBrushSelectionUpdate force`, force);
         setIsBrushCleared(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [brushRanges, isBrushCleared]
   );
 
   function clearSelection() {
-    // setBrushRanges(undefined);
+    setBrushRanges(undefined);
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
   }
@@ -319,10 +314,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     (datum: DataSeriesDatum) => {
       if (!brushRanges) return null;
 
-      const start = datum.x;
-      const end =
-        (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
-        (documentCountStats?.interval ?? 0);
+      const start = typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x;
+      const end = start + (documentCountStats?.interval ?? 0);
 
       const isBetweenReference = isBarBetween(
         start,
@@ -411,7 +404,6 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 sampleProbability={documentStatsProd.sampleProbability}
                 initialAnalysisStart={initialAnalysisStart}
                 barStyleAccessor={barStyleAccessor}
-                // @TODO: rename baselineBrush -> to brush
                 brush={{
                   label: COMPARISON_LABEL,
                   annotationStyle: {

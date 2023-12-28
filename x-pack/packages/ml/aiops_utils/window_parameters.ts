@@ -8,27 +8,17 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 /**
- * Time range definition for baseline.
- *
- * @export
- * @interface BaselineWindowParameters
- * @typedef {BaselineWindowParameters}
- */
-export interface BaselineWindowParameters {
-  /** Baseline minimum value */
-  baselineMin: number;
-  /** Baseline maximum value */
-  baselineMax: number;
-}
-
-/**
  * Time range definition for baseline and deviation to be used by log rate analysis.
  *
  * @export
  * @interface WindowParameters
  * @typedef {WindowParameters}
  */
-export interface WindowParameters extends BaselineWindowParameters {
+export interface WindowParameters {
+  /** Baseline minimum value */
+  baselineMin: number;
+  /** Baseline maximum value */
+  baselineMax: number;
   /** Deviation minimum value */
   deviationMin: number;
   /** Deviation maximum value */

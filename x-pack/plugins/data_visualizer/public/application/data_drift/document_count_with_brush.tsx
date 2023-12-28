@@ -9,7 +9,11 @@ import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
 import { DocumentCountChartSingular } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
+import type {
+  BrushSelectionUpdateHandler,
+  BrushSettings,
+  DocumentCountChartProps,
+} from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
@@ -32,6 +36,7 @@ export interface DocumentCountContentProps
     | 'interval'
     | 'chartPointsSplitLabel'
   > {
+  brush?: BrushSettings;
   brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
