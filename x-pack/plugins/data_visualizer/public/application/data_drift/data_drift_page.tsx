@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
+  EuiBadge,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -128,12 +129,16 @@ export const PageHeader: FC = () => {
   );
 };
 
-const getDataDriftDataLabel = (label: string, indexPattern?: string) =>
-  i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
-    defaultMessage: '{label} data',
-    values: { label },
-  }) + (indexPattern ? `: ${indexPattern}` : '');
-
+const getDataDriftDataLabel = (label: string, indexPattern?: string) => (
+  <>
+    <EuiBadge>{label}</EuiBadge>
+    {' ' +
+      i18n.translate('xpack.dataVisualizer.dataDrift.dataLabel', {
+        defaultMessage: 'data',
+      }) +
+      (indexPattern ? `: ${indexPattern}` : '')}
+  </>
+);
 interface Props {
   initialSettings: InitialSettings;
 }
@@ -272,9 +277,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         const clone = cloneDeep(brushRangesRef.current);
         clone.baselineMin = d.min;
         clone.baselineMax = d.max;
-        Object.freeze(clone);
         brushRangesRef.current = clone;
-        setBrushRanges(clone);
+        setBrushRanges(clone as WindowParameters);
       }
       if (force) {
         setIsBrushCleared(false);
@@ -290,11 +294,10 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         const clone = cloneDeep(brushRangesRef.current);
         clone.deviationMin = d.min;
         clone.deviationMax = d.max;
-        Object.freeze(clone);
 
         brushRangesRef.current = clone;
 
-        setBrushRanges(clone);
+        setBrushRanges(clone as WindowParameters);
       }
       if (force) {
         setIsBrushCleared(false);

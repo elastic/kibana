@@ -163,7 +163,7 @@ export const DataDriftView = ({
         <h2>
           <FormattedMessage
             id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
-            defaultMessage="Select a time range for reference and comparison data in the histogram chart to compare data distribution."
+            defaultMessage="Click and select a time range for Reference and Comparison data in the histogram chart to compare data distribution."
           />
         </h2>
       }
