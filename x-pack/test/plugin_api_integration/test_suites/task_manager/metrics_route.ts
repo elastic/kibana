@@ -253,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: { ids: { values: [`alert:${ruleId}`] } },
           },
           refresh: true,
+          conflicts: 'proceed',
         });
 
         // run the rule and expect counters to increment
@@ -284,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: { ids: { values: [`alert:${ruleId}`] } },
           },
           refresh: true,
+          conflicts: 'proceed',
         });
 
         // update apiKey to fix decryption error
