@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRule } from './create_rule';
+import { createRule } from './manage_rule';
 
 export const createApmRule = async (
   kibanaUrl: string,

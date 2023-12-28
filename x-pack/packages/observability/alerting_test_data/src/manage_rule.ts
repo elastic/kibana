@@ -14,3 +14,18 @@ export const createRule = async (kibanaUrl: string, ruleParams: any) => {
     headers: HEADERS
   });
 };
+
+
+export const findRulesByName = async (kibanaUrl: string, ruleParams: any) => {
+  const RULE_FIND_API = `${kibanaUrl}/api/alerting/rules/_find?fields=[\"id\"]&search_fields=name&search=${ruleParams.name}*`;
+  return axios.get(RULE_FIND_API, {
+    headers: HEADERS
+  });
+};
+
+export const deleteRule = async (kibanaUrl: string, ruleRespose: { id: string, actions: [] }) => {
+  const RULE_DELETE_API = `${kibanaUrl}/api/alerting/rule/${ruleRespose.id}`;
+  return axios.delete(RULE_DELETE_API, {
+    headers: HEADERS
+  });
+};

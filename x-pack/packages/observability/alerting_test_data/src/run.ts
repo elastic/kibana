@@ -7,9 +7,10 @@
 
 import { createApmRule } from './create_apm_rule';
 import { createCustomThresholdRule } from './create_custom_threshold_rule';
-import { createDataView } from './create_data_view';
-import { createIndexConnector } from './create_index_connector';
+import { createDataView, deleteDataView } from './manage_data_view';
+import { createIndexConnector, getConnectors, deleteIndexConnector } from './manage_index_connector';
 import { getKibanaUrl } from './get_kibana_url';
+import { findRulesByName, deleteRule } from './manage_rule';
 
 import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
 
@@ -58,5 +59,40 @@ export async function run(kibanaUrlAuth?: string) {
     console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name}`,);
     await createApmRule(kibanaUrl, actionId, scenario.ruleParams);
     console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name} finished`);
+  }
+}
+
+export async function clean(kibanaUrlAuth?: string) {
+  const kibanaUrl = kibanaUrlAuth || await getKibanaUrl()
+  console.log('Deleting index connectors - start');
+  const connectors = await getConnectors(kibanaUrl);
+  for (let connector_index in connectors.data) {
+    if (connectors.data[connector_index].name === "Test Index Connector") {
+      console.log('Deleting Connector', connectors.data[connector_index].id);
+      await deleteIndexConnector(kibanaUrl, connectors.data[connector_index].id)
+    };
+  }
+  for (const scenario of scenarios_custom_threshold) {
+    if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
+      if (scenario.dataView.shouldCreate) {
+        console.log('Deleting data view - start - id: ', scenario.dataView.id);
+        await deleteDataView(kibanaUrl, scenario.dataView);
+        console.log('Deleting data view - finished - id: ', scenario.dataView.id);
+      }
+      console.log('Deleting Custom Threshold Rules - start');
+      let rules = await findRulesByName(kibanaUrl, scenario.ruleParams)
+      for (let rule_index in rules.data.data) {
+        console.log('Deleting rule: ', rules.data.data[rule_index]);
+        await deleteRule(kibanaUrl, rules.data.data[rule_index])
+      }
+    }
+  }
+  for (const scenario of scenarios_apm) {
+    console.log('Deleting APM - start');
+    let rules = await findRulesByName(kibanaUrl, scenario.ruleParams)
+    for (let rule_index in rules.data.data) {
+      console.log('Deleting rule: ', rules.data.data[rule_index]);
+      await deleteRule(kibanaUrl, rules.data.data[rule_index])
+    }
   }
 }

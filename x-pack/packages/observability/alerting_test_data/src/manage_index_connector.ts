@@ -23,3 +23,18 @@ export const createIndexConnector = async (kibanaUrl: string) => {
     headers: HEADERS
   });
 };
+
+export const getConnectors = async (kibanaUrl: string) => {
+  const INDEX_CONNECTOR_API = `${kibanaUrl}/api/actions/connectors`;
+  return axios.get(INDEX_CONNECTOR_API, {
+    headers: HEADERS
+  });
+};
+
+export const deleteIndexConnector = async (kibanaUrl: string, connectorId: string) => {
+  const INDEX_CONNECTOR_API = `${kibanaUrl}/api/actions/connector/${connectorId}`;
+
+  return axios.delete(INDEX_CONNECTOR_API, {
+    headers: HEADERS
+  });
+};

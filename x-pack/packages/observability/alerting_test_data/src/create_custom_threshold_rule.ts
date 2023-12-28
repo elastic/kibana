@@ -11,7 +11,7 @@ import {
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FIRED_ACTIONS_ID } from './constants';
-import { createRule } from './create_rule';
+import { createRule } from './manage_rule';
 
 export const createCustomThresholdRule = async (
   kibanaUrl: string,

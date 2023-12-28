@@ -38,3 +38,24 @@ export const createDataView = async (kibanaUrl: string, {
     validateStatus: () => true
   });
 };
+
+export const deleteDataView = async (kibanaUrl: string, {
+  indexPattern,
+  id,
+}: {
+  indexPattern: string;
+  id: string;
+}) => {
+  const DATA_VIEW_DELETE_API = `${kibanaUrl}/api/content_management/rpc/delete`;
+  const dataViewParams = {
+    contentTypeId: 'index-pattern',
+    id: id,
+    options: { force: true },
+    version: 1,
+  };
+
+  return axios.post(DATA_VIEW_DELETE_API, dataViewParams, {
+    headers: HEADERS,
+    validateStatus: () => true
+  });
+};
