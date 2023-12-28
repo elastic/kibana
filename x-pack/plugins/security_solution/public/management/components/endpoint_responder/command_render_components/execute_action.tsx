@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
+import type {
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+} from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
@@ -47,7 +50,8 @@ export const ExecuteActionResult = memo<
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
     ExecuteActionRequestBody,
-    ResponseActionExecuteOutputContent
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
   >({
     ResultComponent,
     setStore,
