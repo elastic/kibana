@@ -11290,10 +11290,10 @@ apidoc-light@^0.54.0:
     semver "^7.5.4"
     winston "^3.11.0"
 
-apidoc-markdown@7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/apidoc-markdown/-/apidoc-markdown-7.3.0.tgz#c2a47f073103287b9c84eb4632d48b4e5592f93b"
-  integrity sha512-0DAclAqEU+B2fCiX4KhWHZAOem1vFQwWr0r9l7uPEJGniQH22MHTUEQtJHs2eDzTS/bQP06aBLX9pMPEV3MAlA==
+apidoc-markdown@^7.3.0:
+  version "7.3.2"
+  resolved "https://registry.yarnpkg.com/apidoc-markdown/-/apidoc-markdown-7.3.2.tgz#64c1ad45ba29dd57f376419a900cd59c786624a0"
+  integrity sha512-0nOfTWSaFfbgJ673ztWiup5CKauuwmhg7hJ0jR7gb0TDK1RX3b0unl6soc8UVhdjYgrvRBRvujMUB/KUF5OG3Q==
   dependencies:
     apidoc-light "^0.54.0"
     ejs "^3.1.9"
@@ -17776,7 +17776,7 @@ glob@7.2.0:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@8.1.0, glob@^8.0.3:
+glob@8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/glob/-/glob-8.1.0.tgz#d388f656593ef708ee3e34640fdfb99a9fd1c33e"
   integrity sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==
