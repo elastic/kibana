@@ -328,7 +328,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
   rate: {
     text: i18n.translate(
       'xpack.observability..customThreshold.rule.alertFlyout.aggregationText.rate',
-      { defaultMessage: 'RATE' }
+      { defaultMessage: 'Rate' }
     ),
     fieldRequired: false,
     value: Aggregators.RATE,
