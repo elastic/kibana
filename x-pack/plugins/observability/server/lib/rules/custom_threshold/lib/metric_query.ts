@@ -63,7 +63,7 @@ export const getElasticsearchMetricQuery = (
 ) => {
   // We need to make a timeframe that represents the current timeframe as opposed
   // to the total timeframe (which includes the last period).
-  const currentTimeframe = {
+  const currentTimeFrame = {
     ...calculateCurrentTimeFrame(metricParams, timeframe),
     timeFieldName,
   };
@@ -71,6 +71,8 @@ export const getElasticsearchMetricQuery = (
   const metricAggregations = createCustomMetricsAggregations(
     'aggregatedValue',
     metricParams.metrics,
+    currentTimeFrame,
+    timeFieldName,
     metricParams.equation
   );
 
@@ -82,7 +84,7 @@ export const getElasticsearchMetricQuery = (
     lastPeriodEnd
   );
 
-  const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
+  const currentPeriod = wrapInCurrentPeriod(currentTimeFrame, metricAggregations);
 
   const containerIncludesList = ['container.*'];
   const containerExcludesList = [

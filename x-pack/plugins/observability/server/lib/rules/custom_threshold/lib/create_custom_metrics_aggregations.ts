@@ -11,10 +11,13 @@ import {
   Aggregators,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
+import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 
 export const createCustomMetricsAggregations = (
   id: string,
   customMetrics: CustomThresholdExpressionMetric[],
+  currentTimeFrame: { start: number; end: number },
+  timeFieldName: string,
   equation?: string
 ) => {
   const bucketsPath: { [id: string]: string } = {};
@@ -44,6 +47,15 @@ export const createCustomMetricsAggregations = (
             keyed: true,
           },
         },
+      };
+    }
+
+    if (aggregation === Aggregators.RATE) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        ...createRateAggsBuckets(currentTimeFrame, key, timeFieldName, metric.field || ''),
+        ...createRateAggsBucketScript(currentTimeFrame, key),
       };
     }
 
