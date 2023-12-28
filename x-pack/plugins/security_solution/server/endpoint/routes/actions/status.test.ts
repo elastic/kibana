@@ -36,6 +36,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 
 describe('Endpoint Pending Action Summary API', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -109,6 +110,8 @@ describe('Endpoint Pending Action Summary API', () => {
             break;
 
           case ACTION_RESPONSE_INDICES.join():
+          case AGENT_ACTIONS_RESULTS_INDEX:
+          case ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN:
             items.push(...endpointResponses.splice(0, size));
             index = ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN;
             break;
