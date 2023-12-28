@@ -151,92 +151,92 @@ PUT _ingest/pipeline/tri_met_tracks_for_elastic_agent
 ====
 [source,js]
 ----------------------------------
-PUT _component_template/logs-httpjson.trimet@package 
+PUT _component_template/logs-httpjson.trimet@package
 {
-   "template": {
-          "settings": {
-            "index": {
-              "lifecycle": {
-                "name": "tri_met_tracks"
-              },
-              "codec": "best_compression",
-              "default_pipeline": "tri_met_tracks_for_elastic_agent"
+  "template": {
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "tri_met_tracks"
+        },
+        "codec": "best_compression",
+        "default_pipeline": "tri_met_tracks_for_elastic_agent"
+      }
+    },
+    "mappings": {
+      "_routing": {
+        "required": false
+      },
+      "numeric_detection": false,
+      "dynamic_date_formats": [
+        "strict_date_optional_time",
+        "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
+      ],
+      "dynamic": true,
+      "_source": {
+        "excludes": [],
+        "includes": [],
+        "enabled": true
+      },
+      "dynamic_templates": [],
+      "date_detection": true,
+      "properties": {
+        "input": {
+          "properties": {
+            "type": {
+              "ignore_above": 1024,
+              "type": "keyword"
             }
-          },
-          "mappings": {
-            "_routing": {
-              "required": false
+          }
+        },
+        "@timestamp": {
+          "ignore_malformed": false,
+          "type": "date"
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "data_stream": {
+          "properties": {
+            "namespace": {
+              "type": "constant_keyword"
             },
-            "numeric_detection": false,
-            "dynamic_date_formats": [
-              "strict_date_optional_time",
-              "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
-            ],
-            "dynamic": true,
-            "_source": {
-              "excludes": [],
-              "includes": [],
-              "enabled": true
+            "type": {
+              "type": "constant_keyword"
             },
-            "dynamic_templates": [],
-            "date_detection": true,
-            "properties": {
-              "input": {
-                "properties": {
-                  "type": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
-                  }
-                }
-              },
-              "@timestamp": {
-                "ignore_malformed": false,
-                "type": "date"
-              },
-              "ecs": {
-                "properties": {
-                  "version": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
-                  }
-                }
-              },
-              "data_stream": {
-                "properties": {
-                  "namespace": {
-                    "type": "constant_keyword"
-                  },
-                  "type": {
-                    "type": "constant_keyword"
-                  },
-                  "dataset": {
-                    "type": "constant_keyword"
-                  }
-                }
-              },
-              "event": {
-                "properties": {
-                  "created": {
-                    "type": "date"
-                  },
-                  "module": {
-                    "type": "constant_keyword",
-                    "value": "httpjson"
-                  },
-                  "dataset": {
-                    "type": "constant_keyword",
-                    "value": "httpjson.trimet"
-                  }
-                }
-              },
-              "message": {
-                "type": "match_only_text"
-              },
-              "tags": {
-                "ignore_above": 1024,
-                "type": "keyword"
-              },
-              "trimet": {
+            "dataset": {
+              "type": "constant_keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "created": {
+              "type": "date"
+            },
+            "module": {
+              "type": "constant_keyword",
+              "value": "httpjson"
+            },
+            "dataset": {
+              "type": "constant_keyword",
+              "value": "httpjson.trimet"
+            }
+          }
+        },
+        "message": {
+          "type": "match_only_text"
+        },
+        "tags": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "trimet": {
           "type": "object",
           "properties": {
             "expires": {
@@ -326,9 +326,9 @@ PUT _component_template/logs-httpjson.trimet@package
             }
           }
         }
-            }
-          }
-        }
+      }
+    }
+  }
 }
 ----------------------------------
 ====
@@ -387,6 +387,9 @@ If you already have an agent policy, get its identifier from the `View policy` a
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/agent-policy-id.png[]
+
+[role="screenshot"]
+image::maps/images/asset-tracking-tutorial/policy_id.png[]
 ++++
   </div>
   <div tabindex="1"
@@ -418,9 +421,6 @@ POST kbn:/api/fleet/agent_policies?sys_monitoring=true
 </div>
 ++++
 
-
-
-
 Execute the following request from the **Console** to install a new Custom API integration. Put the corresponding values for the `policy_id` and `tri_met_app_id`.
 
 .Create a new Custom API integration
@@ -430,7 +430,7 @@ Execute the following request from the **Console** to install a new Custom API i
 ----------------------------------
 POST kbn:/api/fleet/package_policies
 {
-  "policy_id": "<policy_id>",
+  "policy_id": "<policy_id>", <1>
   "package": {
     "name": "httpjson",
     "version": "1.18.0"
@@ -446,8 +446,8 @@ POST kbn:/api/fleet/package_policies
           "enabled": true,
           "vars": {
             "data_stream.dataset": "httpjson.trimet",
-            "request_url": "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>",
-            "request_interval": "1m",
+            "request_url": "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>", <2>
+            "request_interval": "1m", <3>
             "request_method": "GET",
             "response_split": "target: body.resultSet.vehicle",
             "request_redirect_headers_ban_list": [],
@@ -463,6 +463,10 @@ POST kbn:/api/fleet/package_policies
   }
 }
 ----------------------------------
+
+<1> Agent policy identifier
+<2> TriMet application identifier
+<3> Retrieve vehicle positions every minute
 ====
 
 This request will configure the integration to make requests to the TriMet REST API every minute, splitting the API response into one message per vehicle into the `httpjson.trimet` data stream, and encoding the vehicle's data into the `trimet` field. The rest of the data management will be handled by the ingest policy defined in the first step.
@@ -489,6 +493,8 @@ POST kbn:/api/data_views/data_view
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/data_view.png[]
+
+TIP: You may want to tweak this Data View to adjust the field names and number or date formatting to your personal preferences. These settings are honored by the Maps application in the tooltips and other UI elements. Check <<managing-fields>> for more details.
 
 [float]
 ==== Step 4: Explore the Portland TriMet data
