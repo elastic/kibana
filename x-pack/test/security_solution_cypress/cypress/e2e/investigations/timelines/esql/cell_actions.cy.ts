@@ -27,6 +27,13 @@ describe.skip(
   `ESQL Datagrid Cell Actions`,
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['discoveInTimeline'])}`,
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {

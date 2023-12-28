@@ -33,6 +33,13 @@ describe(
   'Timeline Discover ESQL State',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['discoveInTimeline'])}`,
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {

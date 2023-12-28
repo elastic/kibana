@@ -65,6 +65,13 @@ describe.skip(
   {
     tags: ['@ess', '@brokenInServerless'],
     // ESQL and test involving STACK_MANAGEMENT_PAGE are broken in serverless
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['discoveInTimeline'])}`,
+        ],
+      },
+    },
   },
 
   () => {

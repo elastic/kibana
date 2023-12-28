@@ -40,6 +40,13 @@ describe(
   'Basic esql search and filter operations',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['discoveInTimeline'])}`,
+        ],
+      },
+    },
   },
   () => {
     beforeEach(() => {
