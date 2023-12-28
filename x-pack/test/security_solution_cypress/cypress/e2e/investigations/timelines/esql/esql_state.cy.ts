@@ -36,7 +36,9 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['discoveInTimeline'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'timelineEsqlTabEnabled',
+          ])}`,
         ],
       },
     },

@@ -162,7 +162,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables discover esql tab within timeline
    *
    */
-  discoverInTimeline: false,
+  timelineEsqlTabEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
