@@ -89,6 +89,7 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
           agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
@@ -171,6 +172,7 @@ describe('When using `getActionList()', () => {
       endDate: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a'],
           agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
@@ -266,6 +268,7 @@ describe('When using `getActionList()', () => {
       statuses: undefined,
       data: [
         {
+          action: '123',
           agents: ['agent-a', 'agent-b', 'agent-x'],
           agentType: 'endpoint',
           hosts: {

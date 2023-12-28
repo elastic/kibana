@@ -66,6 +66,7 @@ describe('When using `getActionDetailsById()', () => {
     await expect(
       getActionDetailsById(esClient, endpointAppContextService.getEndpointMetadataService(), '123')
     ).resolves.toEqual({
+      action: '123',
       agents: ['agent-a'],
       agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },

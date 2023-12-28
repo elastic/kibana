@@ -1026,6 +1026,7 @@ describe('When using Actions service utilities', () => {
 
     it('should return expected action details record', () => {
       expect(createActionDetailsRecord(actionRequest, actionResponses, agentHostInfo)).toEqual({
+        action: '90d62689-f72d-4a05-b5e3-500cad0dc366',
         id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
         agentType: 'endpoint',
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
