@@ -6,7 +6,10 @@
  */
 
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { validateCustomFieldTypesInRequest } from './validators';
+import {
+  validateCustomFieldTypesInRequest,
+  validateRequiredCustomFieldInRequest,
+} from './validators';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -65,6 +68,44 @@ describe('validators', () => {
           originalCustomFields: [],
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('validateRequiredCustomFieldInRequest', () => {
+    it('does not throw an error for not required custom fields', () => {
+      expect(() =>
+        validateRequiredCustomFieldInRequest({
+          requestCustomFields: [
+            { key: '1', required: false },
+            { key: '2', required: false },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw an error for required custom fields with default values', () => {
+      expect(() =>
+        validateRequiredCustomFieldInRequest({
+          requestCustomFields: [
+            { key: '1', required: true, default_value: false },
+            { key: '2', required: true, default_value: 'foobar' },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('throws an error with the keys of required customFields missing a default value', () => {
+      expect(() =>
+        validateRequiredCustomFieldInRequest({
+          requestCustomFields: [
+            { key: '1', required: true, default_value: null },
+            { key: '2', required: true },
+            { key: '3', required: false },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following required custom fields are missing the default value: 1,2"`
+      );
     });
   });
 });

@@ -346,6 +346,29 @@ describe('client', () => {
         'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: wrong_type_key'
       );
     });
+
+    it('throws when a required custom field is missing the default value', async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'missing_default',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: true,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: The following required custom fields are missing the default value: missing_default'
+      );
+    });
   });
 
   describe('create', () => {
@@ -405,6 +428,28 @@ describe('client', () => {
         )
       ).rejects.toThrow(
         'Failed to create case configuration: Error: Invalid duplicated custom field keys in request: duplicated_key'
+      );
+    });
+
+    it('throws when a required custom field is missing the default value', async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: [
+              {
+                key: 'missing_default',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: true,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: The following required custom fields are missing the default value: missing_default'
       );
     });
   });
