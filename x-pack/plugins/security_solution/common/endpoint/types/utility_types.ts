@@ -19,14 +19,14 @@ export type DeepMutable<T> = T extends Record<any, any>
   : T;
 
 /**
- * Ensure that a given type includes all of its key, even if they are optional
+ * Ensure that a given type includes all of its key, even if they are optional (value can still be `undefined`)
  *
  * @example
  * interface Foo {
  *   one?: number;
  *   two: number;
  * }
- * const missingKeys: Foo = { two: 2 };
+ * const missingKeys: Foo = { two: 2 }; // ok
  *
  * const shouldHaveAllKeys: WithAlLKeys<Foo> = { two: 2 }; // TS Error
  *
