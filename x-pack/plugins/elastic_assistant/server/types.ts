@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AnalyticsServiceSetup,
   CustomRequestHandlerContext,
   KibanaRequest,
   Logger,
@@ -57,6 +58,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
 }
 
 /**
@@ -88,7 +90,7 @@ export interface AssistantToolParams {
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;
