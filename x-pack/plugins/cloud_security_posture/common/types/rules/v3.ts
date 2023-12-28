@@ -107,9 +107,14 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    * benchmark id
    */
   benchmarkId: schema.maybe(
-    schema.oneOf([schema.literal('cis_k8s'), schema.literal('cis_eks'), schema.literal('cis_aws')])
+    schema.oneOf([
+      schema.literal('cis_k8s'),
+      schema.literal('cis_eks'),
+      schema.literal('cis_aws'),
+      schema.literal('cis_azure'),
+      schema.literal('cis_gcp'),
+    ])
   ),
-
   /**
    * package_policy_id
    */
@@ -130,18 +135,23 @@ export interface FindCspBenchmarkRuleResponse {
   perPage: number;
 }
 
-export const cspBenchmarkRules = schema.arrayOf(
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+
+export const rulesToUpdate = schema.arrayOf(
   schema.object({
     rule_id: schema.string(),
+    benchmark_id: schema.string(),
+    benchmark_version: schema.string(),
+    rule_number: schema.string(),
   })
 );
 
 export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
   action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
-  rules: cspBenchmarkRules,
+  rules: rulesToUpdate,
 });
 
-export type CspBenchmarkRules = TypeOf<typeof cspBenchmarkRules>;
+export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
 
 export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
   typeof cspBenchmarkRulesBulkActionRequestSchema
