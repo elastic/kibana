@@ -6,7 +6,7 @@
  */
 
 import type { PackageInfo } from '../../../types';
-import { getArchiveFilelist, getAsset, getAssetFromAssetsMap } from '../archive';
+import { getAsset, getAssetFromAssetsMap } from '../archive';
 import type { ArchiveEntry } from '../archive';
 
 const maybeFilterByDataset =
@@ -32,18 +32,8 @@ export function getAssets(
   filter = (path: string): boolean => true,
   datasetName?: string
 ): string[] {
-  const paths = getArchiveFilelist(packageInfo);
-
-  if (!paths || paths.length === 0) return [];
-
-  // filter out directories
-  let assets: string[] = paths.filter((path) => !path.endsWith('/'));
-
-  if (datasetName) {
-    assets = paths.filter(maybeFilterByDataset(packageInfo, datasetName));
-  }
-
-  return assets.filter(filter);
+  // TODO remove
+  return [];
 }
 
 export function getAssetsFromAssetsMap(

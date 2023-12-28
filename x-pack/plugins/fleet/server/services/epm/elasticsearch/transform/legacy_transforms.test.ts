@@ -35,7 +35,6 @@ import { getESAssetMetadata } from '../meta';
 import type { PackageInstallContext } from '../../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
-import { getAsset } from './common';
 import { installTransforms } from './install';
 
 describe('test transform install with legacy schema', () => {
@@ -93,10 +92,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'))
-      .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -305,9 +300,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
-      Buffer.from('{"content": "data"}', 'utf8')
-    );
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -522,9 +514,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
-      Buffer.from('{"content": "data"}', 'utf8')
-    );
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));

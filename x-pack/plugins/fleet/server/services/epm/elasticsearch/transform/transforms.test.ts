@@ -26,7 +26,6 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import type { PackageInstallContext } from '../../../../../common/types';
 
 import { installTransforms } from './install';
-import { getAsset } from './common';
 
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
@@ -237,13 +236,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.BEATS_FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.AGENT_FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -1097,9 +1089,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
@@ -1191,9 +1180,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
@@ -1297,11 +1283,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))

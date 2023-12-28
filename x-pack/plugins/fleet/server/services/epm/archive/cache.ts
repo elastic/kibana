@@ -8,18 +8,16 @@
 import type { ArchivePackage, RegistryPackage, PackageVerificationResult } from '../../../types';
 import { appContextService } from '../..';
 
-import type { ArchiveEntry } from '.';
-
 type SharedKeyString = string;
 
 const sharedKey = ({ name, version }: SharedKey): SharedKeyString => `${name}-${version}`;
 
-const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
-export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
-export const setArchiveEntry = (key: string, value: Buffer) => archiveEntryCache.set(key, value);
-export const hasArchiveEntry = (key: string) => archiveEntryCache.has(key);
-export const clearArchiveEntries = () => archiveEntryCache.clear();
-export const deleteArchiveEntry = (key: string) => archiveEntryCache.delete(key);
+// TODO remove
+export const getArchiveEntry = (key: string) => undefined;
+export const setArchiveEntry = (key: string, value: Buffer) => undefined;
+export const hasArchiveEntry = (key: string) => false;
+export const clearArchiveEntries = () => undefined;
+export const deleteArchiveEntry = (key: string) => undefined;
 
 const verificationResultCache: Map<SharedKeyString, PackageVerificationResult> = new Map();
 export const getVerificationResult = (key: SharedKey) =>
@@ -37,19 +35,14 @@ export interface SharedKey {
   version: string;
 }
 
-const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
-export const getArchiveFilelist = (keyArgs: SharedKey) =>
-  archiveFilelistCache.get(sharedKey(keyArgs));
+// // TODO remove
+export const getArchiveFilelist = (keyArgs: SharedKey) => undefined;
 
 export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) => {
-  const logger = appContextService.getLogger();
-  logger.debug(`Setting file list to the cache for ${keyArgs.name}-${keyArgs.version}`);
-  logger.trace(JSON.stringify(paths));
-  return archiveFilelistCache.set(sharedKey(keyArgs), paths);
+  // TODO remove
 };
-
-export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
-  archiveFilelistCache.delete(sharedKey(keyArgs));
+// TODO remove
+export const deleteArchiveFilelist = (keyArgs: SharedKey) => undefined;
 
 const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
 
@@ -58,13 +51,8 @@ export const getPackageInfo = (args: SharedKey) => {
 };
 
 export const getArchivePackage = (args: SharedKey) => {
-  const packageInfo = getPackageInfo(args);
-  const paths = getArchiveFilelist(args);
-  if (!paths || !packageInfo) return undefined;
-  return {
-    paths,
-    packageInfo,
-  };
+  // TODO remove
+  return undefined;
 };
 
 /*
