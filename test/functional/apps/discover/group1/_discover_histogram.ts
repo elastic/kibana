@@ -289,8 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // now remove the query
       await queryBar.clearQuery();
-      await queryBar.clickQuerySubmitButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // check no error state
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
