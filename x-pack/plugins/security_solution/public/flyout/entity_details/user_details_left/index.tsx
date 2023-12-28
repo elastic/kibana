@@ -14,10 +14,7 @@ import { PanelContent } from './content';
 import type { LeftPanelTabsType, UserDetailsLeftPanelTab } from './tabs';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-
-interface RiskInputsParam {
-  alertIds: string[];
-}
+import type { UserRiskScore } from '../../../../common/search_strategy';
 
 interface UserParam {
   name: string;
@@ -25,7 +22,7 @@ interface UserParam {
 }
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
-  riskInputs: RiskInputsParam;
+  riskScore: UserRiskScore;
   user: UserParam;
   path?: PanelPath;
 }
@@ -35,10 +32,10 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({ riskScore, user, path }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, riskInputs.alertIds);
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(riskInputs, user, tabs, path);
+  const tabs = useTabs(managedUser.data, riskScore);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(riskScore, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;
 
@@ -51,7 +48,7 @@ export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelPro
 };
 
 const useSelectedTab = (
-  riskInputs: RiskInputsParam,
+  riskScore: UserRiskScore,
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
@@ -72,7 +69,7 @@ const useSelectedTab = (
         tab: tabId,
       },
       params: {
-        riskInputs,
+        riskScore,
         user,
       },
     });

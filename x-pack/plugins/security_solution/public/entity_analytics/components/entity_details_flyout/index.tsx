@@ -10,10 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { UserDetailsLeftPanelTab } from '../../../flyout/entity_details/user_details_left/tabs';
 import { RiskInputsTab } from './tabs/risk_inputs';
+import type { UserRiskScore } from '../../../../common/search_strategy';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 
-export const getRiskInputTab = (alertIds: string[]) => ({
+export const getRiskInputTab = (riskScore: UserRiskScore) => ({
   id: UserDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
@@ -22,5 +23,5 @@ export const getRiskInputTab = (alertIds: string[]) => ({
       defaultMessage="Risk Inputs"
     />
   ),
-  content: <RiskInputsTab alertIds={alertIds} />,
+  content: <RiskInputsTab riskScore={riskScore} />,
 });

@@ -11,13 +11,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { useAlertsByIds } from '../../../../common/containers/alerts/use_alerts_by_ids';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
+import { useRiskContributingAlerts } from '../../../api/hooks/use_risk_contributing_alerts';
+import type { UserRiskScore } from '../../../../../common/search_strategy';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
-  alertIds: string[];
+  riskScore: UserRiskScore;
 }
 
 export interface AlertRawData {
@@ -26,9 +27,9 @@ export interface AlertRawData {
   _id: string;
 }
 
-export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
+export const RiskInputsTab = ({ riskScore }: RiskInputsTabProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
-  const { loading, data: alertsData } = useAlertsByIds({ alertIds });
+  const { loading, data: alertsData } = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -98,11 +99,11 @@ export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
 
   const pagination: Pagination = useMemo(
     () => ({
-      totalItemCount: alertIds.length,
+      totalItemCount: alertsData?.length ?? 0,
       pageIndex: currentPage.index,
       pageSize: currentPage.size,
     }),
-    [currentPage.index, currentPage.size, alertIds.length]
+    [currentPage.index, currentPage.size, alertsData?.length]
   );
 
   return (

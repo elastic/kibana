@@ -19,6 +19,7 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { RightPanelProvider } from '../../document_details/right/context';
+import type { UserRiskScore } from '../../../../common/search_strategy';
 
 export type LeftPanelTabsType = Array<{
   id: UserDetailsLeftPanelTab;
@@ -33,14 +34,17 @@ export enum UserDetailsLeftPanelTab {
   ENTRA = 'entra_document',
 }
 
-export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftPanelTabsType =>
+export const useTabs = (
+  managedUser: ManagedUserHits,
+  riskScore: UserRiskScore
+): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
-    if (alertIds.length > 0) {
-      tabs.push(getRiskInputTab(alertIds));
+    if (riskScore) {
+      tabs.push(getRiskInputTab(riskScore));
     }
 
     if (oktaManagedUser) {
@@ -52,7 +56,7 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
     }
 
     return tabs;
-  }, [alertIds, managedUser]);
+  }, [riskScore, managedUser]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: UserDetailsLeftPanelTab.OKTA,
