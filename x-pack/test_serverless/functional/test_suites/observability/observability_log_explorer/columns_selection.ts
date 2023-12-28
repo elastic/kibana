@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const defaultLogColumns = ['@timestamp', 'content', 'service.name', 'host.name'];
