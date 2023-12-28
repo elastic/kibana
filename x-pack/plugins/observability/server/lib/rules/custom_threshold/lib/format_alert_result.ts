@@ -15,6 +15,9 @@ import {
   DOCUMENT_COUNT_I18N,
   MAX_I18N,
   MIN_I18N,
+  PERCENTILE_95_I18N,
+  PERCENTILE_99_I18N,
+  RATE_I18N,
   SUM_I18N,
 } from '../translations';
 import { Evaluation } from './evaluate_rule';
@@ -31,6 +34,12 @@ export const getLabel = (criterion: Evaluation) => {
         return DOCUMENT_COUNT_I18N;
       case Aggregators.AVERAGE:
         return AVERAGE_I18N(criterion.metrics[0].field!);
+      case Aggregators.P95:
+        return PERCENTILE_95_I18N(criterion.metrics[0].field!);
+      case Aggregators.P99:
+        return PERCENTILE_99_I18N(criterion.metrics[0].field!);
+      case Aggregators.RATE:
+        return RATE_I18N(criterion.metrics[0].field!);
       case Aggregators.MAX:
         return MAX_I18N(criterion.metrics[0].field!);
       case Aggregators.MIN:

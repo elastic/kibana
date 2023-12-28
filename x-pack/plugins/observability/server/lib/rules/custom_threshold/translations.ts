@@ -22,6 +22,30 @@ export const AVERAGE_I18N = (metric: string) =>
     },
   });
 
+export const PERCENTILE_99_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.p99', {
+    defaultMessage: '99th Percentile {metric}',
+    values: {
+      metric,
+    },
+  });
+
+export const PERCENTILE_95_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.p95', {
+    defaultMessage: '95th Percentile {metric}',
+    values: {
+      metric,
+    },
+  });
+
+export const RATE_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.rate', {
+    defaultMessage: 'Rate {metric}',
+    values: {
+      metric,
+    },
+  });
+
 export const MAX_I18N = (metric: string) =>
   i18n.translate('xpack.observability.customThreshold.rule.aggregators.max', {
     defaultMessage: 'Max {metric}',
