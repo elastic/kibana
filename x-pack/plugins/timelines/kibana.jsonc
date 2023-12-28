@@ -14,11 +14,12 @@
       "alerting",
       "cases",
       "data",
-      "kibanaReact",
-      "kibanaUtils"
     ],
     "optionalPlugins": [
       "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
     ],
     "extraPublicDirs": [
       "common"

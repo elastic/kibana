@@ -11,9 +11,7 @@
       "cases",
       "data",
       "dataViews",
-      "kibanaUtils",
       "navigation",
-      "kibanaReact",
       "triggersActionsUi",
       "inspector"
     ],

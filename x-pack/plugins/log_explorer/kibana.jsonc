@@ -19,14 +19,15 @@
       "embeddable",
       "fieldFormats",
       "fleet",
-      "kibanaReact",
-      "kibanaUtils",
       "navigation",
       "share",
       "unifiedSearch"
     ],
     "optionalPlugins": [],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+    ],
     "extraPublicDirs": [
       "common",
     ]

@@ -11,13 +11,16 @@
       "contentManagement",
       "dashboard",
       "embeddable",
-      "kibanaReact",
-      "kibanaUtils",
       "presentationUtil",
       "uiActionsEnhanced",
       "visualizations"
     ],
-    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
-    "requiredBundles": ["savedObjects"]
+    "optionalPlugins": [
+      "triggersActionsUi",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "savedObjects",
+    ]
   }
 }

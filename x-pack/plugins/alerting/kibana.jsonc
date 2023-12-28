@@ -18,10 +18,8 @@
       "encryptedSavedObjects",
       "eventLog",
       "features",
-      "kibanaUtils",
       "licensing",
       "taskManager",
-      "kibanaReact",
       "management",
       "esUiShared",
       "unifiedSearch",
@@ -32,6 +30,10 @@
       "monitoringCollection",
       "spaces",
       "serverless",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
     ],
     "extraPublicDirs": [
       "common",

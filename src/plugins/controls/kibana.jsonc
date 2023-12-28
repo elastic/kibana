@@ -10,7 +10,6 @@
     "requiredPlugins": [
       "presentationUtil",
       "savedObjects",
-      "kibanaReact",
       "expressions",
       "embeddable",
       "dataViews",
@@ -18,6 +17,11 @@
       "unifiedSearch",
       "uiActions"
     ],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaReact",
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

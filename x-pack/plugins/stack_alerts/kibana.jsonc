@@ -15,16 +15,17 @@
       "alerting",
       "features",
       "triggersActionsUi",
-      "kibanaReact",
       "savedObjects",
       "data",
       "dataViews",
-      "kibanaUtils"
     ],
     "requiredBundles": [
       "esUiShared",
-      "textBasedLanguages"
+      "textBasedLanguages",
+      "kibanaReact",
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
