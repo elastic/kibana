@@ -115,7 +115,7 @@ export const getTransformWizardStore = () =>
     },
   });
 
-interface StoreState {
+export interface StoreState {
   wizard: CreateTransformWizardAppContextState;
   stepDefine: StepDefineExposedState;
   stepDetails: StepDetailsExposedState | null;
