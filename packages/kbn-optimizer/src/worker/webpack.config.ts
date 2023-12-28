@@ -185,12 +185,12 @@ export function getWebpackConfig(
                         )
                       )};\n${content}`;
                     },
-                    implementation: require('sass-embedded'),
+                    webpackImporter: false,
+                    implementation: require('node-sass'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'expanded',
+                      outputStyle: worker.dist ? 'compressed' : 'nested',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMap: true,
-                      quietDeps: true,
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
                 },
