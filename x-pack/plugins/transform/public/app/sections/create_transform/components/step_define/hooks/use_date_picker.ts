@@ -13,13 +13,15 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { StepDefineExposedState } from '../common';
-import { StepDefineFormProps } from '../step_define_form';
+import { useWizardContext } from '../../wizard/wizard';
+import { useCreateTransformWizardActions } from '../../../create_transform_store';
 
-export const useDatePicker = (
-  defaults: StepDefineExposedState,
-  dataView: StepDefineFormProps['searchItems']['dataView']
-) => {
+export const useDatePicker = () => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
+  const { setTimeRangeMs } = useCreateTransformWizardActions();
+
   const hasValidTimeField = useMemo(
     () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
     [dataView.timeFieldName]
@@ -29,11 +31,6 @@ export const useDatePicker = (
     timeRangeSelector: hasValidTimeField,
     autoRefreshSelector: false,
   });
-
-  // The internal state of the date picker apply button.
-  const [isDatePickerApplyEnabled, setDatePickerApplyEnabled] = useState(
-    defaults.isDatePickerApplyEnabled
-  );
 
   // The time range selected via the date picker
   const [timeRange, setTimeRange] = useState<TimeRange>();
@@ -75,8 +72,12 @@ export const useDatePicker = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange]);
 
+  useEffect(() => {
+    setTimeRangeMs(timeRangeMs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRangeMs]);
+
   return {
-    actions: { setDatePickerApplyEnabled },
-    state: { isDatePickerApplyEnabled, hasValidTimeField, timeRange, timeRangeMs },
+    state: { hasValidTimeField, timeRange },
   };
 };

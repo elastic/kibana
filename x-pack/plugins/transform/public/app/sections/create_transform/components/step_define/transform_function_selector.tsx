@@ -9,17 +9,16 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import { TRANSFORM_FUNCTION, TransformFunction } from '../../../../../../common/constants';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../create_transform_store';
 
-interface TransformFunctionSelectorProps {
-  selectedFunction: TransformFunction;
-  onChange: (update: TransformFunction) => void;
-}
+export const TransformFunctionSelector: FC = () => {
+  const selectedFunction = useCreateTransformWizardSelector((s) => s.stepDefine.transformFunction);
+  const { setTransformFunction } = useCreateTransformWizardActions();
 
-export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
-  selectedFunction,
-  onChange,
-}) => {
   const transformFunctions = [
     {
       name: TRANSFORM_FUNCTION.PIVOT,
@@ -61,7 +60,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
                   if (selectedFunction === name) {
                     return;
                   }
-                  onChange(name);
+                  setTransformFunction(name);
                 },
                 isSelected: selectedFunction === name,
               }}

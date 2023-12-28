@@ -44,12 +44,7 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
 export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) => {
   const {
     actions: { applyRuntimeMappingsEditorChanges },
-    state: {
-      runtimeMappings,
-      advancedRuntimeMappingsConfig,
-      isRuntimeMappingsEditorApplyButtonEnabled,
-      isRuntimeMappingsEditorEnabled,
-    },
+    state: { advancedRuntimeMappingsConfig, isRuntimeMappingsEditorApplyButtonEnabled },
   } = props.runtimeMappingsEditor;
 
   const {
@@ -57,6 +52,10 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
   } = useCreateTransformWizardActions();
   const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
   const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
+  );
 
   const applyChanges = () => {
     const nextConfig =

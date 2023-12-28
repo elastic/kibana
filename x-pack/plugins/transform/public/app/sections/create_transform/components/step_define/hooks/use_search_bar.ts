@@ -11,37 +11,27 @@ import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@k
 import type { Query } from '@kbn/es-query';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
-import { getTransformConfigQuery } from '../../../../../common';
+import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE, QUERY_LANGUAGE } from '../common';
 
+import { useWizardContext } from '../../wizard/wizard';
 import {
-  StepDefineExposedState,
-  QUERY_LANGUAGE_KUERY,
-  QUERY_LANGUAGE_LUCENE,
-  QUERY_LANGUAGE,
-} from '../common';
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
 
-import { StepDefineFormProps } from '../step_define_form';
+export const useSearchBar = () => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
 
-export const useSearchBar = (
-  defaults: StepDefineExposedState,
-  dataView: StepDefineFormProps['searchItems']['dataView']
-) => {
+  const searchLanguage = useCreateTransformWizardSelector((s) => s.stepDefine.searchLanguage);
+  const searchString = useCreateTransformWizardSelector((s) => s.stepDefine.searchString);
+  const { setSearchLanguage, setSearchQuery, setSearchString } = useCreateTransformWizardActions();
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
-    query: defaults.searchString || '',
-    language: defaults.searchLanguage,
+    query: searchString || '',
+    language: searchLanguage,
   });
-
-  // The state of the input query bar updated on every submit and to be exposed.
-  const [searchLanguage, setSearchLanguage] = useState<StepDefineExposedState['searchLanguage']>(
-    defaults.searchLanguage
-  );
-
-  const [searchString, setSearchString] = useState<StepDefineExposedState['searchString']>(
-    defaults.searchString
-  );
-
-  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
   const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
     undefined
@@ -67,25 +57,16 @@ export const useSearchBar = (
     }
   };
 
-  const transformConfigQuery = getTransformConfigQuery(searchQuery);
-
   return {
     actions: {
       searchChangeHandler,
       searchSubmitHandler,
       setQueryErrorMessage,
       setSearchInput,
-      setSearchLanguage,
-      setSearchQuery,
-      setSearchString,
     },
     state: {
       queryErrorMessage,
-      transformConfigQuery,
       searchInput,
-      searchLanguage,
-      searchQuery,
-      searchString,
     },
   };
 };

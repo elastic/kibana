@@ -12,19 +12,27 @@ import { bindActionCreators } from 'redux';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import { dictionaryToArray } from '../../../../common/types/common';
+import { type TransformFunction, TRANSFORM_FUNCTION } from '../../../../common/constants';
 import { useToastNotifications } from '../../app_dependencies';
 import {
   getPivotConfigActions,
   usePivotConfigOptions,
+  validatePivotConfig,
 } from './components/step_define/hooks/use_pivot_config';
 
-import type {
-  PivotAggsConfigDict,
-  PivotGroupByConfigDict,
-  PivotAggsConfig,
-  PivotGroupByConfig,
+import {
+  getRequestPayload,
+  type PivotAggsConfigDict,
+  type PivotGroupByConfigDict,
+  type PivotAggsConfig,
+  type PivotGroupByConfig,
 } from '../../common';
 
+import {
+  latestConfigMapper,
+  validateLatestConfig,
+} from './components/step_define/hooks/use_latest_function_config';
 import type { StepDefineExposedState } from './components/step_define';
 import { getDefaultStepDefineState } from './components/step_define/common';
 import type { StepDetailsExposedState } from './components/step_details';
@@ -63,13 +71,83 @@ export const stepDefineSlice = createSlice({
   name: 'stepDefine',
   initialState: getDefaultStepDefineState(),
   reducers: {
+    setAdvancedPivotEditorEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isAdvancedPivotEditorEnabled = action.payload;
+    },
+    setAdvancedSourceEditorEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isAdvancedSourceEditorEnabled = action.payload;
+    },
     setAggList: (state, action: PayloadAction<PivotAggsConfigDict>) => {
       state.aggList = action.payload;
+    },
+    setDatePickerApplyEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isDatePickerApplyEnabled = action.payload;
     },
     setGroupByList: (state, action: PayloadAction<PivotGroupByConfigDict>) => {
       state.groupByList = action.payload;
     },
+    setLatestFunctionConfig: (
+      state,
+      action: PayloadAction<StepDefineExposedState['latestConfig']>
+    ) => {
+      state.latestConfig = action.payload as any;
+    },
+    setRuntimeMappings: (
+      state,
+      action: PayloadAction<StepDefineExposedState['runtimeMappings']>
+    ) => {
+      state.runtimeMappings = action.payload;
+    },
+    setRuntimeMappingsEditorEnabled: (
+      state,
+      action: PayloadAction<StepDefineExposedState['isRuntimeMappingsEditorEnabled']>
+    ) => {
+      state.isRuntimeMappingsEditorEnabled = action.payload;
+    },
+    setRuntimeMappingsUpdated: (
+      state,
+      action: PayloadAction<StepDefineExposedState['runtimeMappingsUpdated']>
+    ) => {
+      state.runtimeMappingsUpdated = action.payload;
+    },
+    setSearchLanguage: (state, action: PayloadAction<StepDefineExposedState['searchLanguage']>) => {
+      state.searchLanguage = action.payload;
+    },
+    setSearchQuery: (state, action: PayloadAction<StepDefineExposedState['searchQuery']>) => {
+      state.searchQuery = action.payload;
+    },
+    setSearchString: (state, action: PayloadAction<string | undefined>) => {
+      state.searchString = action.payload;
+    },
+    setSourceConfigUpdated: (state, action: PayloadAction<boolean>) => {
+      state.sourceConfigUpdated = action.payload;
+    },
     setStepDefineState: (_, action: PayloadAction<StepDefineExposedState>) => action.payload,
+    setTimeRangeMs: (state, action: PayloadAction<StepDefineExposedState['timeRangeMs']>) => {
+      state.timeRangeMs = action.payload;
+    },
+    setTransformFunction: (state, action: PayloadAction<TransformFunction>) => {
+      const pivotAggsArr = dictionaryToArray(state.aggList);
+      const pivotGroupByArr = dictionaryToArray(state.groupByList);
+      const pivotRequestPayload = getRequestPayload(pivotAggsArr, pivotGroupByArr);
+      const pivotValidationStatus = validatePivotConfig(pivotRequestPayload.pivot);
+
+      const latest = latestConfigMapper.toAPIConfig(state.latestConfig);
+      const latestRequestPayload = latest ? { latest } : undefined;
+      const latestValidationStatus = validateLatestConfig(latestRequestPayload?.latest);
+
+      state.transformFunction = action.payload;
+      state.valid =
+        action.payload === TRANSFORM_FUNCTION.PIVOT
+          ? pivotValidationStatus.isValid
+          : latestValidationStatus.isValid;
+      state.validationStatus =
+        action.payload === TRANSFORM_FUNCTION.PIVOT
+          ? pivotValidationStatus
+          : latestValidationStatus;
+      state.previewRequest =
+        action.payload === TRANSFORM_FUNCTION.PIVOT ? pivotRequestPayload : latestRequestPayload;
+    },
     rAddAggregation: (
       state,
       action: PayloadAction<{ aggName: string; config: PivotAggsConfig }>

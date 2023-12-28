@@ -50,6 +50,7 @@ import {
 } from '../../../../common/data_grid';
 import {
   getPreviewTransformRequestBody,
+  getTransformConfigQuery,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
@@ -62,7 +63,10 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardContext } from '../wizard/wizard';
-import { useCreateTransformWizardActions } from '../../create_transform_store';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../create_transform_store';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
@@ -109,17 +113,23 @@ export const StepDefineForm: FC = React.memo(() => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm();
-  const { setAggList, setGroupByList } = useCreateTransformWizardActions();
+  const isAdvancedSourceEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isAdvancedSourceEditorEnabled
+  );
+  const isDatePickerApplyEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isDatePickerApplyEnabled
+  );
+  const timeRangeMs = useCreateTransformWizardSelector((s) => s.stepDefine.timeRangeMs);
+  const transformFunction = useCreateTransformWizardSelector((s) => s.stepDefine.transformFunction);
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const transformConfigQuery = useCreateTransformWizardSelector((s) =>
+    getTransformConfigQuery(s.stepDefine.searchQuery)
+  );
+  const { setAggList, setGroupByList, setSearchQuery } = useCreateTransformWizardActions();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
-  const {
-    advancedEditorSourceConfig,
-    isAdvancedSourceEditorEnabled,
-    isAdvancedSourceEditorApplyButtonEnabled,
-  } = stepDefineForm.advancedSourceEditor.state;
-  const { isDatePickerApplyEnabled, timeRangeMs } = stepDefineForm.datePicker.state;
-  const { transformConfigQuery } = stepDefineForm.searchBar.state;
-  const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
+  const { advancedEditorSourceConfig, isAdvancedSourceEditorApplyButtonEnabled } =
+    stepDefineForm.advancedSourceEditor.state;
 
   const appDependencies = useAppDependencies();
   const {
@@ -143,7 +153,7 @@ export const StepDefineForm: FC = React.memo(() => {
 
   const pivotConfig = usePivotConfigRequestPayload();
   const { requestPayload, validationStatus } =
-    stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
+    transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? pivotConfig
       : stepDefineForm.latestFunctionConfig;
 
@@ -184,7 +194,7 @@ export const StepDefineForm: FC = React.memo(() => {
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
-    ...(stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST
+    ...(transformFunction === TRANSFORM_FUNCTION.LATEST
       ? {
           copyToClipboard: copyToClipboardPivot,
           copyToClipboardDescription: copyToClipboardPivotDescription,
@@ -194,7 +204,7 @@ export const StepDefineForm: FC = React.memo(() => {
 
   const applySourceChangesHandler = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);
-    stepDefineForm.searchBar.actions.setSearchQuery(sourceConfig);
+    setSearchQuery(sourceConfig);
     stepDefineForm.advancedSourceEditor.actions.applyAdvancedSourceEditorChanges();
   };
 
@@ -288,10 +298,7 @@ export const StepDefineForm: FC = React.memo(() => {
     <div data-test-subj="transformStepDefineForm">
       <EuiForm>
         <EuiFormRow fullWidth>
-          <TransformFunctionSelector
-            selectedFunction={stepDefineForm.transformFunction}
-            onChange={stepDefineForm.setTransformFunction}
-          />
+          <TransformFunctionSelector />
         </EuiFormRow>
 
         <ConfigSectionTitle title="Source data" />
@@ -473,7 +480,7 @@ export const StepDefineForm: FC = React.memo(() => {
       <ConfigSectionTitle title="Transform configuration" />
 
       <EuiForm>
-        {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
+        {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
           <PivotFunctionForm
             {...{
               applyPivotChangesHandler,
@@ -483,7 +490,7 @@ export const StepDefineForm: FC = React.memo(() => {
             }}
           />
         ) : null}
-        {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
+        {transformFunction === TRANSFORM_FUNCTION.LATEST ? (
           <LatestFunctionForm
             copyToClipboard={copyToClipboardPivot}
             copyToClipboardDescription={copyToClipboardPivotDescription}
@@ -492,7 +499,7 @@ export const StepDefineForm: FC = React.memo(() => {
         ) : null}
       </EuiForm>
       <EuiSpacer size="m" />
-      {(stepDefineForm.transformFunction !== TRANSFORM_FUNCTION.LATEST ||
+      {(transformFunction !== TRANSFORM_FUNCTION.LATEST ||
         stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
         <EuiFormRow
           fullWidth

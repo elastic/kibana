@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
-import { StepDefineFormProps } from '../step_define_form';
 import { StepDefineExposedState } from '../common';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { useAppDependencies } from '../../../../../app_dependencies';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
+import { useWizardContext } from '../../wizard/wizard';
 
 /**
  * Latest function config mapper between API and UI
@@ -36,7 +42,7 @@ export const latestConfigMapper = {
  * @param runtimeMappings
  */
 function getOptions(
-  dataView: StepDefineFormProps['searchItems']['dataView'],
+  dataView: DataView,
   aggConfigs: AggConfigs,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ) {
@@ -128,11 +134,7 @@ export function validateLatestConfig(config?: LatestFunctionConfig) {
   };
 }
 
-export function useLatestFunctionConfig(
-  defaults: StepDefineExposedState['latestConfig'],
-  dataView: StepDefineFormProps['searchItems']['dataView'],
-  runtimeMappings: StepDefineExposedState['runtimeMappings']
-): {
+export function useLatestFunctionConfig(): {
   config: LatestFunctionConfigUI;
   uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>>;
   sortFieldOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -140,10 +142,11 @@ export function useLatestFunctionConfig(
   validationStatus: { isValid: boolean; errorMessage?: string };
   requestPayload: { latest: LatestFunctionConfig } | undefined;
 } {
-  const [config, setLatestFunctionConfig] = useState<LatestFunctionConfigUI>({
-    unique_key: defaults.unique_key,
-    sort: defaults.sort,
-  });
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+  const config = useCreateTransformWizardSelector((s) => s.stepDefine.latestConfig);
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const { setLatestFunctionConfig } = useCreateTransformWizardActions();
 
   const { data } = useAppDependencies();
 
@@ -158,6 +161,7 @@ export function useLatestFunctionConfig(
         ...config,
         ...update,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [config]
   );
 

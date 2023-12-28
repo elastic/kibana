@@ -5,27 +5,47 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
-import { StepDefineExposedState } from '../common';
+import { getPreviewTransformRequestBody, getTransformConfigQuery } from '../../../../../common';
 
-export const useAdvancedSourceEditor = (
-  defaults: StepDefineExposedState,
-  previewRequest: PostTransformsPreviewRequestSchema
-) => {
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
+
+import { useWizardContext } from '../../wizard/wizard';
+
+import { usePivotConfigRequestPayload } from './use_pivot_config';
+
+export const useAdvancedSourceEditor = (previewRequest: PostTransformsPreviewRequestSchema) => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
+  const { requestPayload } = usePivotConfigRequestPayload();
+
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
 
-  // Advanced editor for source config state
-  const [sourceConfigUpdated, setSourceConfigUpdated] = useState(defaults.sourceConfigUpdated);
+  const { setAdvancedSourceEditorEnabled, setSourceConfigUpdated } =
+    useCreateTransformWizardActions();
+  const isAdvancedSourceEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isAdvancedSourceEditorEnabled
+  );
+  const transformConfigQuery = useCreateTransformWizardSelector((s) =>
+    getTransformConfigQuery(s.stepDefine.searchQuery)
+  );
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappingsUpdated = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.runtimeMappingsUpdated
+  );
+  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
+  );
 
   const [isAdvancedSourceEditorSwitchModalVisible, setAdvancedSourceEditorSwitchModalVisible] =
     useState(false);
-
-  const [isAdvancedSourceEditorEnabled, setAdvancedSourceEditorEnabled] = useState(
-    defaults.isAdvancedSourceEditorEnabled
-  );
 
   const [isAdvancedSourceEditorApplyButtonEnabled, setAdvancedSourceEditorApplyButtonEnabled] =
     useState(false);
@@ -58,24 +78,46 @@ export const useAdvancedSourceEditor = (
     setAdvancedSourceEditorApplyButtonEnabled(false);
   };
 
+  useEffect(() => {
+    if (!isAdvancedSourceEditorEnabled) {
+      const previewRequestUpdate = getPreviewTransformRequestBody(
+        dataView,
+        transformConfigQuery,
+        requestPayload,
+        runtimeMappings
+      );
+
+      const stringifiedSourceConfigUpdate = JSON.stringify(
+        previewRequestUpdate.source.query,
+        null,
+        2
+      );
+
+      setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
+    }
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    isAdvancedSourceEditorEnabled,
+    JSON.stringify(transformConfigQuery),
+    JSON.stringify(requestPayload),
+    JSON.stringify([runtimeMappings, runtimeMappingsUpdated, isRuntimeMappingsEditorEnabled]),
+  ]);
+
   return {
     actions: {
       applyAdvancedSourceEditorChanges,
       setAdvancedSourceEditorApplyButtonEnabled,
-      setAdvancedSourceEditorEnabled,
       setAdvancedEditorSourceConfig,
       setAdvancedEditorSourceConfigLastApplied,
       setAdvancedSourceEditorSwitchModalVisible,
-      setSourceConfigUpdated,
       toggleAdvancedSourceEditor,
     },
     state: {
       advancedEditorSourceConfig,
       advancedEditorSourceConfigLastApplied,
       isAdvancedSourceEditorApplyButtonEnabled,
-      isAdvancedSourceEditorEnabled,
       isAdvancedSourceEditorSwitchModalVisible,
-      sourceConfigUpdated,
     },
   };
 };

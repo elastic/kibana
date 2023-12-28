@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { StepDefineExposedState } from '../common';
+
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
 
-export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedState) => {
-  const stringifiedRuntimeMappings = JSON.stringify(defaults.runtimeMappings, null, 2);
-
-  // Advanced editor for source config state
-  const [runtimeMappingsUpdated, setRuntimeMappingsUpdated] = useState(
-    defaults.runtimeMappingsUpdated
+export const useAdvancedRuntimeMappingsEditor = () => {
+  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
   );
-  const [runtimeMappings, setRuntimeMappings] = useState(defaults.runtimeMappings);
+  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const { setRuntimeMappings, setRuntimeMappingsEditorEnabled, setRuntimeMappingsUpdated } =
+    useCreateTransformWizardActions();
+
+  const stringifiedRuntimeMappings = useMemo(
+    () => JSON.stringify(runtimeMappings, null, 2),
+    [runtimeMappings]
+  );
 
   const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =
     useState(false);
-
-  const [isRuntimeMappingsEditorEnabled, setRuntimeMappingsEditorEnabled] = useState(
-    defaults.isRuntimeMappingsEditorEnabled
-  );
 
   const [isRuntimeMappingsEditorApplyButtonEnabled, setRuntimeMappingsEditorApplyButtonEnabled] =
     useState(false);
@@ -66,10 +70,8 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
     actions: {
       applyRuntimeMappingsEditorChanges,
       setRuntimeMappingsEditorApplyButtonEnabled,
-      setRuntimeMappingsEditorEnabled,
       setAdvancedEditorRuntimeMappingsLastApplied,
       setRuntimeMappingsEditorSwitchModalVisible,
-      setRuntimeMappingsUpdated,
       toggleRuntimeMappingsEditor,
       convertToJson,
       setAdvancedRuntimeMappingsConfig,
@@ -77,12 +79,9 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
     state: {
       advancedEditorRuntimeMappingsLastApplied,
       isRuntimeMappingsEditorApplyButtonEnabled,
-      isRuntimeMappingsEditorEnabled,
       isRuntimeMappingsEditorSwitchModalVisible,
-      runtimeMappingsUpdated,
       advancedRuntimeMappingsConfig,
       xJsonMode,
-      runtimeMappings,
     },
   };
 };

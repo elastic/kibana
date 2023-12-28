@@ -12,26 +12,27 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
-import { StepDefineExposedState } from '../common';
+import {
+  useCreateTransformWizardActions,
+  useCreateTransformWizardSelector,
+} from '../../../create_transform_store';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
 
-export const useAdvancedPivotEditor = (
-  defaults: StepDefineExposedState,
-  previewRequest: PostTransformsPreviewRequestSchema
-) => {
+export const useAdvancedPivotEditor = (previewRequest: PostTransformsPreviewRequestSchema) => {
   const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+
+  const isAdvancedPivotEditorEnabled = useCreateTransformWizardSelector(
+    (s) => s.stepDefine.isAdvancedPivotEditorEnabled
+  );
+  const { setAdvancedPivotEditorEnabled } = useCreateTransformWizardActions();
 
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
 
   const [isAdvancedPivotEditorApplyButtonEnabled, setAdvancedPivotEditorApplyButtonEnabled] =
     useState(false);
-
-  const [isAdvancedPivotEditorEnabled, setAdvancedPivotEditorEnabled] = useState(
-    defaults.isAdvancedPivotEditorEnabled
-  );
 
   const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] =
     useState(stringifiedPivotConfig);
@@ -62,7 +63,6 @@ export const useAdvancedPivotEditor = (
       setAdvancedEditorConfigLastApplied,
       setAdvancedEditorSwitchModalVisible,
       setAdvancedPivotEditorApplyButtonEnabled,
-      setAdvancedPivotEditorEnabled,
       toggleAdvancedEditor,
     },
     state: {
@@ -70,7 +70,6 @@ export const useAdvancedPivotEditor = (
       advancedEditorConfigLastApplied,
       isAdvancedEditorSwitchModalVisible,
       isAdvancedPivotEditorApplyButtonEnabled,
-      isAdvancedPivotEditorEnabled,
       xJsonMode,
     },
   };
