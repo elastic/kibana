@@ -14,6 +14,7 @@ import { FIRED_ACTIONS_ID } from './constants';
 import { createRule } from './create_rule';
 
 export const createCustomThresholdRule = async (
+  kibanaUrl: string,
   actionId: string,
   dataViewId: string,
   ruleParams: {
@@ -85,5 +86,5 @@ export const createCustomThresholdRule = async (
     },
   };
 
-  return createRule(customThresholdRuleParams);
+  return createRule(kibanaUrl, customThresholdRuleParams);
 };

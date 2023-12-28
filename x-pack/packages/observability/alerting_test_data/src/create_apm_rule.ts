@@ -8,6 +8,7 @@
 import { createRule } from './create_rule';
 
 export const createApmRule = async (
+  kibanaUrl: string,
   actionId: string,
   ruleParams: {
     consumer?: string;
@@ -84,5 +85,5 @@ export const createApmRule = async (
     },
   };
 
-  return createRule(apmErrorRateRuleParams);
+  return createRule(kibanaUrl, apmErrorRateRuleParams);
 };
