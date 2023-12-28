@@ -53,13 +53,19 @@ export function defineUpdateUserProfileDataRoute({
       const imageDataUrl = userProfileData.avatar.imageUrl;
       const matches = imageDataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (!matches || matches.length !== 3) {
-        return response.forbidden();
+        return response.customError({
+          body: 'Unsupported media type',
+          statusCode: 415,
+        });
       }
 
       const [, mimeType] = matches;
 
       if (!IMAGE_FILE_TYPES.includes(mimeType)) {
-        return response.forbidden();
+        return response.customError({
+          body: 'Unsupported media type',
+          statusCode: 415,
+        });
       }
 
       const keysToUpdate = Object.keys(flattenObject(userProfileData));
