@@ -72,7 +72,7 @@ function runEvaluations() {
           const scenarios =
             (argv.files !== undefined &&
               castArray(argv.files).map((file) => Path.join(process.cwd(), file))) ||
-            fastGlob.sync(Path.join(__dirname, './scenarios/**/*.ts'));
+            fastGlob.sync(Path.join(__dirname, './scenarios/**/*.spec.ts'));
 
           if (!scenarios.length) {
             throw new Error('No scenarios to run');

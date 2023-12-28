@@ -2,7 +2,7 @@
   "overrides": [
     {
       "files": [
-        "**/*.test.ts"
+        "**/*.spec.ts"
       ],
       "rules": {
         "@kbn/imports/require_import": [

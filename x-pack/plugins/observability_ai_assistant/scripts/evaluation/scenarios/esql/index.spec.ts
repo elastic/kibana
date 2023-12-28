@@ -10,9 +10,9 @@
 import { last } from 'lodash';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
 import { MessageRole } from '../../../../common';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
-import expect from '@kbn/expect';
 
 function extractEsqlQuery(response: string) {
   return response.match(/```esql([\s\S]*?)```/)?.[1];
