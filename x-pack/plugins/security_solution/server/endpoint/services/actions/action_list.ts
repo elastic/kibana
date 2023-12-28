@@ -273,9 +273,8 @@ const getActionDetailsList = async ({
 
     const actionRecord = createActionDetailsRecord(action, matchedResponses, agentsHostInfo);
 
-    if (withOutputs && withOutputs.includes(action.id)) {
+    if (withOutputs && !withOutputs.includes(action.id)) {
       delete actionRecord.outputs;
-      return actionRecord;
     }
 
     return actionRecord;
