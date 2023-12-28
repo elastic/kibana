@@ -671,10 +671,9 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
-    const isValidating = await field.getAttribute('data-is-validating');
-    this.log.debug(`validation set to ${isValidating}`);
     await this.retry.waitFor('validating the given index pattern should be finished', async () => {
-      return (await field.getAttribute('data-is-validating')) === '0';
+      const isValidating = await field.getAttribute('data-is-validating');
+      return isValidating === '0';
     });
   }
 
