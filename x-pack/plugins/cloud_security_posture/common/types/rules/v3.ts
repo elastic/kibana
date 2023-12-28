@@ -137,18 +137,21 @@ export interface FindCspBenchmarkRuleResponse {
 
 export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 
-export const cspBenchmarkRules = schema.arrayOf(
+export const rulesToUpdate = schema.arrayOf(
   schema.object({
     rule_id: schema.string(),
+    benchmark_id: schema.string(),
+    benchmark_version: schema.string(),
+    rule_number: schema.string(),
   })
 );
 
 export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
   action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
-  rules: cspBenchmarkRules,
+  rules: rulesToUpdate,
 });
 
-export type CspBenchmarkRules = TypeOf<typeof cspBenchmarkRules>;
+export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
 
 export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
   typeof cspBenchmarkRulesBulkActionRequestSchema
