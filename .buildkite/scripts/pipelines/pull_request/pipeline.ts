@@ -260,7 +260,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+      );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
