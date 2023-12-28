@@ -21,10 +21,14 @@ import { parsedExecuteTimeout } from '../lib/utils';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
-  ActionRequestComponentProps<{
-    command: string;
-    timeout?: string;
-  }>
+  ActionRequestComponentProps<
+    {
+      command: string;
+      timeout?: string;
+    },
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
+  >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
