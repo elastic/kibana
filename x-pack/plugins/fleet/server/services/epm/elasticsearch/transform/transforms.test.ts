@@ -31,12 +31,6 @@ jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
 
-jest.mock('./common', () => {
-  return {
-    getAsset: jest.fn(),
-  };
-});
-
 const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
 describe('test transform install', () => {

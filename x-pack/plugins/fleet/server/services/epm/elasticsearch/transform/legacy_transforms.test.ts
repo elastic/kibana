@@ -12,12 +12,6 @@ jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
 
-jest.mock('./common', () => {
-  return {
-    getAsset: jest.fn(),
-  };
-});
-
 import { errors } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';

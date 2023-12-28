@@ -130,11 +130,6 @@ export function getPathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getAsset(key: string) {
-  // TODO remove
-  return undefined;
-}
-
 export function getAssetFromAssetsMap(assetsMap: Map<string, Buffer | undefined>, key: string) {
   const buffer = assetsMap.get(key);
   if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);

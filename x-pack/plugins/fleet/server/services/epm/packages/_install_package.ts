@@ -191,7 +191,6 @@ export async function _installPackage({
       );
       logger.debug(`Package install - Installing Data Stream ILM policies`);
       ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
-        // TODO fix
         installIlmForDataStream(
           packageInstallContext,
           esClient,
