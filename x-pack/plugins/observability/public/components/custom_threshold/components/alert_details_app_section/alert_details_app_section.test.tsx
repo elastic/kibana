@@ -15,9 +15,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,
-} from '../mocks/custom_threshold_rule';
+} from '../../mocks/custom_threshold_rule';
 import AlertDetailsAppSection from './alert_details_app_section';
-import { ExpressionChart } from './expression_chart';
+import { ExpressionChart } from '../expression_chart';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -33,11 +33,11 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('./expression_chart', () => ({
+jest.mock('../expression_chart', () => ({
   ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
 }));
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       ...mockCoreMock.createStart(),

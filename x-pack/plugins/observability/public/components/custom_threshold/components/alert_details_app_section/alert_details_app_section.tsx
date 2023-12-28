@@ -25,15 +25,16 @@ import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../utils/kibana_react';
-import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertSummaryField, TopAlert } from '../../..';
-import { AlertParams, CustomThresholdRuleTypeParams } from '../types';
-import { useLicense } from '../hooks/use_license';
-import { ExpressionChart } from './expression_chart';
-import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
-import { Threshold } from './custom_threshold';
+import { MetricsExplorerChartType } from '../../../../../common/custom_threshold_rule/types';
+import { useLicense } from '../../../../hooks/use_license';
+import { useKibana } from '../../../../utils/kibana_react';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { AlertSummaryField, TopAlert } from '../../../..';
+import { AlertParams, CustomThresholdRuleTypeParams } from '../../types';
+import { ExpressionChart } from '../expression_chart';
+import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
+import { Threshold } from '../custom_threshold';
+import { LogRateAnalysis } from './log_rate_analysis';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
@@ -57,7 +58,8 @@ export default function AlertDetailsAppSection({
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
-  const { uiSettings, charts, data } = useKibana().services;
+  const services = useKibana().services;
+  const { uiSettings, charts, data } = services;
   const { euiTheme } = useEuiTheme();
   const { hasAtLeast } = useLicense();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
@@ -184,6 +186,9 @@ export default function AlertDetailsAppSection({
           </EuiPanel>
         </EuiFlexItem>
       ))}
+      {hasLogRateAnalysisLicense && (
+        <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
+      )}
     </EuiFlexGroup>
   ) : null;
 

@@ -107,6 +107,11 @@ export enum InfraFormatterType {
   percent = 'percent',
 }
 
+// Custom threshold alert types
+
+// Alert fields['kibana.alert.group] type
+export type GroupBy = Array<{ field: string; value: string }>;
+
 /*
  * Utils
  *
