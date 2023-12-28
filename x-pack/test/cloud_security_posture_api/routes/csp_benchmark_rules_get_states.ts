@@ -77,9 +77,15 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -95,6 +101,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'unmute',
           rules: [
             {
+              benchmark_id: rule3.metadata.benchmark.id,
+              benchmark_version: rule3.metadata.benchmark.version,
+              rule_number: rule3.metadata.benchmark.rule_number || '',
               rule_id: rule3.metadata.id,
             },
           ],

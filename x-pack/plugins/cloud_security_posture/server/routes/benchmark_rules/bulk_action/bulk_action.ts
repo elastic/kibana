@@ -10,6 +10,7 @@ import {
   CspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
+  CspBenchmarkRulesBulkActionResponse,
 } from '../../../../common/types/rules/v3';
 import { CspRouter } from '../../../types';
 
@@ -23,6 +24,9 @@ import { bulkActionBenchmarkRulesHandler } from './v1';
 	  action: 'mute' | 'unmute'; // Specify the bulk action type (mute or unmute)
 	  rules: [
 	    {
+        benchmark_id: string;       // Identifier for the CSP benchmark
+	      benchmark_version: string;  // Version of the CSP benchmark
+	      rule_number: string;        // Rule number within the benchmark
 	      rule_id: string;            // Unique identifier for the rule
 	    },
 	    // ... (additional benchmark rules)
@@ -76,13 +80,16 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
           const updatedBenchmarkRules: CspBenchmarkRulesStates =
             handlerResponse.newCspSettings.attributes.rules!;
 
-          return response.ok({
-            body: {
-              updated_benchmark_rules: updatedBenchmarkRules,
-              detection_rules: `disabled ${handlerResponse.disabledRulesCounter} detections rules.`,
-              message: 'The bulk operation has been executed successfully.',
-            },
-          });
+          const body: CspBenchmarkRulesBulkActionResponse = {
+            updated_benchmark_rules: updatedBenchmarkRules,
+            message: 'The bulk operation has been executed successfully.',
+          };
+
+          if (requestBody.action === 'mute' && handlerResponse.disabledRules) {
+            body.disabled_detection_rules = handlerResponse.disabledRules;
+          }
+
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
 
