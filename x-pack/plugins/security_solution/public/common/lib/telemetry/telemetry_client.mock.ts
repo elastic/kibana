@@ -14,6 +14,7 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportAssistantInvoked: jest.fn(),
   reportAssistantMessageSent: jest.fn(),
   reportAssistantQuickPrompt: jest.fn(),
+  reportAssistantSettingToggled: jest.fn(),
   reportEntityDetailsClicked: jest.fn(),
   reportEntityAlertsClicked: jest.fn(),
   reportEntityRiskFiltered: jest.fn(),
