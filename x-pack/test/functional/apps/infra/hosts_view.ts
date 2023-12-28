@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await retry.waitFor(
       'wait for table and KPI charts to load',
       async () =>
-        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isHostTableLoaded()) &&
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 

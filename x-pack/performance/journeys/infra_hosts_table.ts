@@ -13,6 +13,7 @@ import {
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { infra, timerange } from '@kbn/apm-synthtrace-client';
+import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
   beforeSteps: async ({ kbnUrl, auth, es }) => {
@@ -42,13 +43,16 @@ export const journey = new Journey({
       })
     );
   },
-}).step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl }) => {
+}).step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl, kibanaPage }) => {
   await page.goto(
     kbnUrl.get(
       `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
     )
   );
-  await page.waitForSelector('[data-test-subj="hostsView-tableRow"]');
+  // wait for table to be loaded
+  await page.waitForSelector(subj('hostsView-table-loaded'));
+  // wait for metric charts to be loaded
+  await kibanaPage.waitForCharts({ count: 5, timeout: 60000 });
 });
 
 export function generateHostsData({
