@@ -27,6 +27,7 @@ export const createMlAlertType = (
           return MachineLearningRuleParams.parse(object);
         },
       },
+      zodSchema: MachineLearningRuleParams,
     },
     actionGroups: [
       {

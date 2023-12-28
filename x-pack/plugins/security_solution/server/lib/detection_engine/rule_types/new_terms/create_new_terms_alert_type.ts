@@ -68,6 +68,7 @@ export const createNewTermsAlertType = (
           return mutatedRuleParams;
         },
       },
+      zodSchema: NewTermsRuleParams,
     },
     actionGroups: [
       {

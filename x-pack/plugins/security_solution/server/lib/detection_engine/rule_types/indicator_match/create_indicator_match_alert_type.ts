@@ -40,6 +40,7 @@ export const createIndicatorMatchAlertType = (
           return mutatedRuleParams;
         },
       },
+      zodSchema: ThreatRuleParams,
     },
     actionGroups: [
       {

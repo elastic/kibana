@@ -51,6 +51,7 @@ export const createQueryAlertType = (
           return mutatedRuleParams;
         },
       },
+      zodSchema: UnifiedQueryRuleParams,
     },
     actionGroups: [
       {

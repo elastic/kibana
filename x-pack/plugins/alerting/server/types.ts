@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import z from 'zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -279,6 +280,8 @@ export interface RuleType<
   name: string;
   validate: {
     params: RuleTypeParamsValidator<Params>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    zodSchema?: z.ZodObject<any> | z.ZodIntersection<any, any>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
