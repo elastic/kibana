@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('svlLogsSynthtraceClient');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const from = moment('2023-12-27T10:24:14.035Z');
-  const to = moment('2023-12-27T10:25:14.091Z');
+  const from = '2023-12-27T10:24:14.035Z';
+  const to = '2023-12-27T10:25:14.091Z';
   const TEST_TIMEOUT = 10 * 1000; // 10 secs
 
   const navigateToLogExplorer = () =>
@@ -153,8 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 }
 
-function generateLogsData({ to, count = 1 }: { to: Moment; count?: number }) {
-  const logs = timerange(moment(to).subtract(1, 'second'), to)
+function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
+  const logs = timerange(moment(to).subtract(1, 'second'), moment(to))
     .interval('1m')
     .rate(1)
     .generator((timestamp) =>
