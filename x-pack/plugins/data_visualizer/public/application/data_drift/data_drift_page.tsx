@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, FC, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -35,6 +35,7 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
@@ -251,51 +252,65 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     comparisonColor: euiTheme.euiColorVis1,
+    overlapColor: 'black',
   };
 
-  const [brushRanges, _setWindowParameters] = useState<WindowParameters | undefined>();
+  // Troubleshoot how is it possible for brushRanges to be {baselineMin: undefined, baselineMax: undefined}
+  const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();
 
-  console.log(`--@@brushRanges`, brushRanges);
+  // Ref to keep track of previous values
+  const brushRangesRef = useRef<Partial<WindowParameters>>({});
 
-  const setBrushRanges = useCallback(
-    (changes) => {
-      // @TODO: remove
-      console.log(`--@@setWindowParameters brushRanges`, brushRanges);
-      _setWindowParameters({ ...brushRanges, ...changes });
-    },
-    [brushRanges]
-  );
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
   >();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
-  function referenceBrushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      setBrushRanges({
-        baselineMin: d.min,
-        baselineMax: d.max,
-      });
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
+  const referenceBrushSelectionUpdate = useCallback(
+    function referenceBrushSelectionUpdate(d: WindowParameters, force: boolean) {
+      if (!isBrushCleared || force) {
+        const clone = cloneDeep(brushRangesRef.current);
+        clone.baselineMin = d.min;
+        clone.baselineMax = d.max;
+        Object.freeze(clone);
+        brushRangesRef.current = clone;
+        setBrushRanges(clone);
+      }
+      if (force) {
+        setIsBrushCleared(false);
+      }
+    },
+    [brushRanges, isBrushCleared]
+  );
 
-  function comparisonBrushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      setBrushRanges({
-        deviationMin: d.min,
-        deviationMax: d.max,
-      });
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
+  const comparisonBrushSelectionUpdate = useCallback(
+    function comparisonBrushSelectionUpdate(d: WindowParameters, force: boolean, id) {
+      console.log(
+        `--@@comparisonBrushSelectionUpdate brushRangesRef.current`,
+        brushRangesRef.current
+      );
+
+      if (!isBrushCleared || force) {
+        const clone = cloneDeep(brushRangesRef.current);
+        clone.deviationMin = d.min;
+        clone.deviationMax = d.max;
+        Object.freeze(clone);
+
+        brushRangesRef.current = clone;
+
+        setBrushRanges(clone);
+      }
+      if (force) {
+        // @TODO: remove
+        console.log(`--@@comparisonBrushSelectionUpdate force`, force);
+        setIsBrushCleared(false);
+      }
+    },
+    [brushRanges, isBrushCleared]
+  );
 
   function clearSelection() {
-    // _setWindowParameters(undefined);
+    // setBrushRanges(undefined);
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
   }
@@ -321,7 +336,14 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         brushRanges.deviationMin,
         brushRanges.deviationMax
       );
-      if (isBetweenReference && isBetweenDeviation) return 'red';
+      if (isBetweenReference && isBetweenDeviation)
+        return {
+          rect: {
+            texture: 'Line',
+            fill: 'transparent',
+            // fill: colors.overlapColor,
+          },
+        };
       if (isBetweenReference) return colors.referenceColor;
       if (isBetweenDeviation) return colors.comparisonColor;
       // if (
@@ -439,7 +461,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              {/* <DataDriftView
+              <DataDriftView
                 initialSettings={initialSettings}
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}
@@ -449,7 +471,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
                 onRefresh={forceRefresh}
-              /> */}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

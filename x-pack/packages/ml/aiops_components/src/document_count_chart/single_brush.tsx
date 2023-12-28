@@ -127,8 +127,6 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
   const maxRef = useRef(max);
   const snapTimestampsRef = useRef(snapTimestamps);
 
-  // @TODO: remove
-  console.log(`--@@SingleBrush`, brushId);
   const { min: baselineMin, max: baselineMax } = windowParameters;
 
   useEffect(() => {
@@ -165,8 +163,6 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           if (!isBrushXSelection(baselineSelection)) {
             return;
           }
-          // @TODO: remove
-          console.log(`--@@brushend ${brushId}`, baselineSelection);
 
           const baselineOverlay = baselineBrush.selectAll('.overlay');
           // const deviationOverlay = deviationBrush.selectAll('.overlay');
@@ -251,14 +247,13 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           // brushes.current[1].end = snappedWindowParameters.deviationMax;
 
           if (onChange) {
-            // @TODO: remove
-            console.log(`--@@ onChange snappedWindowParameters`, snappedWindowParameters);
             onChange(
               {
                 min: snappedWindowParameters.baselineMin,
                 max: snappedWindowParameters.baselineMax,
               },
-              { min: newBrushPx.baselineMin, max: newBrushPx.baselineMax }
+              { min: newBrushPx.baselineMin, max: newBrushPx.baselineMax },
+              brushId
             );
           }
           drawBrushes();
@@ -332,8 +327,6 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
         });
       }
 
-      // @TODO: remove
-      console.log(`--@@brushes.current ${brushId}`, brushes.current);
       if (brushes.current.length !== 1) {
         widthRef.current = width;
         newBrush(`${brushId}-baseline`, baselineMin, baselineMax);

@@ -301,6 +301,7 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
   const [windowParameters, setWindowParameters] = useState<
     SingleBrushWindowParameters | undefined
   >();
+
   const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
     SingleBrushWindowParameters | undefined
   >();
@@ -333,6 +334,8 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
           setWindowParameters(wpSnap);
 
           if (brushSelectionUpdateHandler !== undefined) {
+            console.log(`--@@brushSelectionUpdateHandler from triggerAnalysis`);
+
             brushSelectionUpdateHandler(
               wpSnap,
               true,
@@ -391,6 +394,8 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
+    // @TODO: remove
+    console.log(`--@@brushSelectionUpdateHandler from onWindowParametersChange`);
     brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
   }
 
@@ -425,32 +430,6 @@ export const DocumentCountChartSingular: FC<DocumentCountChartProps> = (props) =
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
-          <div css={{ height: BADGE_HEIGHT }}>
-            <BrushBadge
-              label={
-                brush.label ??
-                i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
-                  defaultMessage: 'Baseline',
-                })
-              }
-              marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
-              timestampFrom={windowParameters.baselineMin}
-              timestampTo={windowParameters.baselineMax}
-              width={brush.badgeWidth ?? BADGE_WIDTH}
-            />
-            {/* <BrushBadge
-              label={
-                deviationBrush.label ??
-                i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
-                  defaultMessage: 'Deviation',
-                })
-              }
-              marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
-              timestampFrom={windowParameters.deviationMin}
-              timestampTo={windowParameters.deviationMax}
-              width={deviationBrush.badgeWidth ?? BADGE_WIDTH}
-            /> */}
-          </div>
           <div
             css={{
               'margin-bottom': '-4px',

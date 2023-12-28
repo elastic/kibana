@@ -44,7 +44,6 @@ export interface DocumentCountContentProps
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
   randomSampler: RandomSampler;
   reload: () => void;
@@ -68,7 +67,6 @@ export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
   initialAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
-  windowParameters,
   incomingInitialAnalysisStart,
   stateManager,
   label,
