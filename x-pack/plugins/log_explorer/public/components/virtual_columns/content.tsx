@@ -9,16 +9,21 @@ import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
-import {
-  SourceDocument,
-  SourcePopoverContent as DiscoverSourcePopoverContent,
-} from '@kbn/unified-data-table/src/utils/get_render_cell_value';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail } from '../flyout_detail/use_doc_detail';
 import { FlyoutDoc, LogDocument } from '../../controller';
 import { LogLevel } from '../flyout_detail/sub_components/log_level';
 import * as constants from '../../../common/constants';
+import { dynamic } from '../../utils/dynamic';
+
+const SourceDocument = dynamic(
+  () => import('@kbn/unified-data-table/src/utils/render_source_document')
+);
+
+const DiscoverSourcePopoverContent = dynamic(
+  () => import('@kbn/unified-data-table/src/utils/render_source_document_popover')
+);
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (

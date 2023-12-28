@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
 }
 
-function generateLogsData({ from, to, count = 1 }: { from: Moment; to: Moment; count: number }) {
+function generateLogsData({ to, count = 1 }: { to: Moment; count?: number }) {
   const logs = timerange(moment(to).subtract(1, 'second'), to)
     .interval('1m')
     .rate(1)
