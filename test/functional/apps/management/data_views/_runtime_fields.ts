@@ -61,6 +61,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should modify runtime field', async function () {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('flyoutTitle');
+        });
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
         await PageObjects.settings.toggleRow('formatRow');
