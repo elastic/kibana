@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from '../../../utils/dump';
+import { stringify } from '../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../types';
 import type {
   ResponseActionsApiCommandNames,
@@ -88,7 +88,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       });
     } catch (err) {
       // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${dump(err)}`);
+      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
     }
 
     return response as TResponse;

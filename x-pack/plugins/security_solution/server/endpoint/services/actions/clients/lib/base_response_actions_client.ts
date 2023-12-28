@@ -56,7 +56,7 @@ import type {
   ResponseActionsRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
-import { dump } from '../../../../utils/dump';
+import { stringify } from '../../../../utils/stringify';
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -164,7 +164,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return;
     }
 
-    this.log.debug(`Updating cases:\n${dump(allCases)}`);
+    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
     // Create an attachment for each case that includes info. about the response actions taken against the hosts
     const attachments = allCases.map(() => ({
@@ -187,14 +187,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           .catch((err) => {
             // Log any error, BUT: do not fail execution
             this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${dump(err)}`
+              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
             );
             return null;
           })
       )
     );
 
-    this.log.debug(`Update to cases done:\n${dump(casesUpdateResponse)}`);
+    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   /**
@@ -309,7 +309,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       error,
     };
 
-    this.log.debug(`Writing response action response:\n${dump(doc)}`);
+    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
       .index<LogsEndpointActionResponse<TOutputContent>>({

@@ -19,7 +19,7 @@ import type {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
-import { dump } from '../../../../utils/dump';
+import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
 import type {
@@ -109,13 +109,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for SentinelOne with:\n${dump(executeOptions)}`
+      `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
 
     if (actionSendResponse.status === 'error') {
-      this.log.error(dump(actionSendResponse));
+      this.log.error(stringify(actionSendResponse));
 
       throw new ResponseActionsClientError(
         `Attempt to send [${actionType}] to SentinelOne failed: ${
@@ -126,7 +126,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    this.log.debug(`Response:\n${dump(actionSendResponse)}`);
+    this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
 
     return actionSendResponse;
   }
@@ -150,7 +150,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         executeOptions
       )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 
-      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${dump(response)}`);
+      this.log.debug(`Response for SentinelOne agent id [${id}] returned:\n${stringify(response)}`);
 
       s1ApiResponse = response.data;
     } catch (err) {
