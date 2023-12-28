@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useEffect } from 'react';
+import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
 import type {
   UserRiskScore,
   HostRiskScore,
-} from '../../../../common/search_strategy/security_solution/risk_score/all';
+} from '../../../common/search_strategy/security_solution/risk_score/all';
 import {
   isUserRiskScore,
   RiskScoreFields,
-} from '../../../../common/search_strategy/security_solution/risk_score/all';
-import { getStartDateFromRiskScore } from '../../common/get_start_date_from_risk_score';
+} from '../../../common/search_strategy/security_solution/risk_score/all';
+import { getStartDateFromRiskScore } from '../common/get_start_date_from_risk_score';
+import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
 
 interface UseRiskContributingAlerts {
   riskScore: UserRiskScore | HostRiskScore;
@@ -43,37 +44,33 @@ const ALERTS_SIZE = 100;
 export const useRiskContributingAlerts = ({
   riskScore,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
-  let entityField: string;
-  let entityValue: string;
-
-  if (isUserRiskScore(riskScore)) {
-    entityField = RiskScoreFields.userName;
-    entityValue = riskScore.user.name;
-  } else {
-    entityField = RiskScoreFields.hostName;
-    entityValue = riskScore.host.name;
-  }
-  const riskScoreTimestamp = riskScore['@timestamp'];
-  const startRiskScoringDate = getStartDateFromRiskScore({
-    riskScoreTimestamp,
-    riskRangeStart: 'now-30d',
-  });
-
-  const [initialQuery] = useState(() =>
-    getQuery({
-      from: startRiskScoringDate,
-      to: riskScoreTimestamp,
-      entityField,
-      entityValue,
-    })
-  );
+  const { data: riskEngineSettings } = useRiskEngineSettings();
 
   const { loading, data, setQuery } = useQueryAlerts<Hit, unknown>({
-    query: initialQuery,
+    // is empty query, to skip fetching alert, until we have risk engine settings
+    query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
   });
 
   useEffect(() => {
+    if (!riskEngineSettings?.range?.start) return;
+
+    let entityField: string;
+    let entityValue: string;
+
+    if (isUserRiskScore(riskScore)) {
+      entityField = RiskScoreFields.userName;
+      entityValue = riskScore.user.name;
+    } else {
+      entityField = RiskScoreFields.hostName;
+      entityValue = riskScore.host.name;
+    }
+    const riskScoreTimestamp = riskScore['@timestamp'];
+    const startRiskScoringDate = getStartDateFromRiskScore({
+      riskScoreTimestamp,
+      riskRangeStart: riskEngineSettings.range.start,
+    });
+
     setQuery(
       getQuery({
         from: startRiskScoringDate,
@@ -82,7 +79,7 @@ export const useRiskContributingAlerts = ({
         entityValue,
       })
     );
-  }, [setQuery, riskScoreTimestamp, startRiskScoringDate, entityField, entityValue]);
+  }, [setQuery, riskScore, riskEngineSettings?.range?.start]);
 
   const error = !loading && data === undefined;
 

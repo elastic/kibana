@@ -14,7 +14,7 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
-import { useRiskContributingAlerts } from '../../../api/hooks/use_risk_contributing_alerts';
+import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
 import type { UserRiskScore } from '../../../../../common/search_strategy';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {

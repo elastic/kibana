@@ -11,18 +11,30 @@ import { TestProviders } from '../../../../common/mock';
 import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs';
 import { alertDataMock } from '../mocks';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
-const mockUseAlertsByIds = jest.fn().mockReturnValue({ loading: false, data: [] });
+const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../../common/containers/alerts/use_alerts_by_ids', () => ({
-  useAlertsByIds: () => mockUseAlertsByIds(),
+jest.mock('../../../hooks/use_risk_contributing_alerts', () => ({
+  useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
-const ALERT_IDS = ['123'];
+const riskScore = {
+  '@timestamp': '2021-08-19T16:00:00.000Z',
+  user: {
+    name: 'elastic',
+    risk: {
+      rule_risks: [],
+      calculated_score_norm: 100,
+      multipliers: [],
+      calculated_level: RiskSeverity.critical,
+    },
+  },
+};
 
 describe('RiskInputsTab', () => {
   it('renders', () => {
-    mockUseAlertsByIds.mockReturnValue({
+    mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
       data: [alertDataMock],
@@ -30,7 +42,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab alertIds={ALERT_IDS} />
+        <RiskInputsTab riskScore={riskScore} />
       </TestProviders>
     );
 
@@ -41,7 +53,6 @@ describe('RiskInputsTab', () => {
   });
 
   it('paginates', () => {
-    const alertsIds = times((number) => number.toString(), 11);
     const alerts = times(
       (number) => ({
         ...alertDataMock,
@@ -50,7 +61,7 @@ describe('RiskInputsTab', () => {
       11
     );
 
-    mockUseAlertsByIds.mockReturnValue({
+    mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
       data: alerts,
@@ -58,7 +69,7 @@ describe('RiskInputsTab', () => {
 
     const { getAllByTestId, getByLabelText } = render(
       <TestProviders>
-        <RiskInputsTab alertIds={alertsIds} />
+        <RiskInputsTab riskScore={riskScore} />
       </TestProviders>
     );
 

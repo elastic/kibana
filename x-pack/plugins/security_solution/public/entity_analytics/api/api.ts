@@ -15,6 +15,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
+  RISK_ENGINE_SETTINGS_URL,
 } from '../../../common/constants';
 
 import type {
@@ -26,6 +27,7 @@ import type {
 } from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
+import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityAnalyticsRoutes = () => {
@@ -124,6 +126,15 @@ export const useEntityAnalyticsRoutes = () => {
       signal,
     });
 
+  /**
+   * Fetches risk engine settings
+   */
+  const fetchRiskEngineSettings = () =>
+    http.fetch<RiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
+      version: '1',
+      method: 'GET',
+    });
+
   return {
     fetchRiskScorePreview,
     fetchRiskEngineStatus,
@@ -133,5 +144,6 @@ export const useEntityAnalyticsRoutes = () => {
     fetchRiskEnginePrivileges,
     fetchAssetCriticalityPrivileges,
     getRiskScoreIndexStatus,
+    fetchRiskEngineSettings,
   };
 };
