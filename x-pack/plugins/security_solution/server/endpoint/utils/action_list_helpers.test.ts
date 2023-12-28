@@ -34,18 +34,7 @@ describe('action helpers', () => {
                 must: [
                   {
                     bool: {
-                      filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
-                      ],
+                      filter: [],
                     },
                   },
                 ],
@@ -94,16 +83,6 @@ describe('action helpers', () => {
                   {
                     bool: {
                       filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
                         {
                           range: {
                             '@timestamp': {
@@ -208,16 +187,6 @@ describe('action helpers', () => {
                   {
                     bool: {
                       filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
                         {
                           range: {
                             '@timestamp': {
