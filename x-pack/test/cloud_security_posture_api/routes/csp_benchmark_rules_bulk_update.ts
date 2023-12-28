@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const createDetectionRule = async (rule: CspBenchmarkRule) => {
-    await supertest
+    const detectionRule = await supertest
       .post(DETECTION_ENGINE_RULES_URL)
       .set('version', DETECTION_RULE_RULES_API_CURRENT_VERSION)
       .set('kbn-xsrf', 'xxxx')
@@ -74,7 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
         name: rule.metadata.name,
         description: rule.metadata.rationale,
         tags: generateBenchmarkRuleTags(rule.metadata),
-      });
+      })
+      .expect(200);
+    return detectionRule;
   };
 
   /**
@@ -99,6 +101,9 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: ['cloud-security-posture-settings'],
+      });
+      await kibanaServer.savedObjects.clean({
+        types: ['alert'],
       });
     });
 
@@ -152,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
       );
-      expectExpect(body.detection_rules).toEqual('disabled 0 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([]);
     });
 
     it('unmute rules successfully', async () => {
@@ -312,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('mute detection rule successfully', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
 
-      await createDetectionRule(rule1);
+      const detectionRule = await createDetectionRule(rule1);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -332,14 +337,14 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(body.detection_rules).toEqual('disabled 1 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([detectionRule.body.id]);
     });
 
-    it('Expect to two benchmark rules and one detection rule', async () => {
+    it('Expect to mute two benchmark rules and one detection rule', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
       const rule2 = await getRandomCspBenchmarkRule();
 
-      await createDetectionRule(rule1);
+      const detectionRule = await createDetectionRule(rule1);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -365,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expectExpect(body.detection_rules).toEqual('disabled 1 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([detectionRule.body.id]);
     });
 
     it('set wrong action input', async () => {

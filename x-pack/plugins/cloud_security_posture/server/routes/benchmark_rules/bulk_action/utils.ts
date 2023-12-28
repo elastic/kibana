@@ -40,10 +40,11 @@ export const getRuleIdsToDisable = async (detectionRules: Array<FindResult<RuleP
 const disableDetectionRules = async (
   detectionRulesClient: RulesClient,
   detectionRules: Array<FindResult<RuleParams>>
-) => {
-  const idsToDisable = await getRuleIdsToDisable(detectionRules);
-  if (!idsToDisable.length) return;
-  return await detectionRulesClient.bulkDisableRules({ ids: idsToDisable });
+): Promise<string[]> => {
+  const detectionRulesIdsToDisable = await getRuleIdsToDisable(detectionRules);
+  if (!detectionRulesIdsToDisable.length) return [];
+  await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
+  return detectionRulesIdsToDisable;
 };
 
 export const getDetectionRules = async (
@@ -87,7 +88,7 @@ export const muteDetectionRules = async (
   soClient: SavedObjectsClientContract,
   detectionRulesClient: RulesClient,
   rulesIds: string[]
-): Promise<number> => {
+): Promise<string[]> => {
   const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
   if (benchmarkRules.includes(undefined)) {
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
@@ -99,8 +100,7 @@ export const muteDetectionRules = async (
   const detectionRules = await getDetectionRules(detectionRulesClient, benchmarkRulesTags);
 
   const disabledDetectionRules = await disableDetectionRules(detectionRulesClient, detectionRules);
-
-  return disabledDetectionRules ? disabledDetectionRules.rules.length : 0;
+  return disabledDetectionRules;
 };
 
 export const updateRulesStates = async (

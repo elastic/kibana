@@ -13,8 +13,9 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { getMuteBenchmarkRulesIds } from '../routes/benchmark_rules/get_states/v1';
+import { buildMutedRulesFilter } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
@@ -125,14 +126,14 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const getScoreQuery = (mutedRuleIds: string[]): SearchRequest => ({
+const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     bool: {
-      must_not: { terms: { 'rule.id': mutedRuleIds } },
+      must_not: filteredRules,
     },
   },
   aggs: {
@@ -380,10 +381,10 @@ export const aggregateLatestFindings = async (
   try {
     const startAggTime = performance.now();
 
-    const mutedRuleIds = await getMuteBenchmarkRulesIds(encryptedSoClient);
+    const rulesFilter = await buildMutedRulesFilter(encryptedSoClient);
 
     const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
-      getScoreQuery(mutedRuleIds)
+      getScoreQuery(rulesFilter)
     );
 
     const fullScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(

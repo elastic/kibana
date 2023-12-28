@@ -157,25 +157,33 @@ export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
   typeof cspBenchmarkRulesBulkActionRequestSchema
 >;
 
-const rulesStates = schema.recordOf(
-  schema.string(),
-  schema.object({
-    muted: schema.boolean(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
-    rule_id: schema.string(),
-  })
-);
+export interface CspBenchmarkRulesBulkActionResponse {
+  updated_benchmark_rules: CspBenchmarkRulesStates;
+  disabled_detection_rules?: string[];
+  message: string;
+}
+
+const ruleStateAttributes = schema.object({
+  muted: schema.boolean(),
+  benchmark_id: schema.string(),
+  benchmark_version: schema.string(),
+  rule_number: schema.string(),
+  rule_id: schema.string(),
+});
+
+export type RuleStateAttributes = TypeOf<typeof ruleStateAttributes>;
+
+const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
+
+export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 
 export const cspSettingsSchema = schema.object({
   rules: rulesStates,
 });
 
-export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export interface BulkActionBenchmarkRulesResponse {
   newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
-  disabledRulesCounter: number;
+  disabledRules: string[];
 }
