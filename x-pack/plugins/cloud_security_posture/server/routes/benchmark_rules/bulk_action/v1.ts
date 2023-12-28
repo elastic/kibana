@@ -41,7 +41,6 @@ export const bulkActionBenchmarkRulesHandler = async (
   const rulesKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
-
   const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], rulesToUpdate);
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
