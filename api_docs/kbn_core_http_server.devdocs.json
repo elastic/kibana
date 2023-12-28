@@ -3414,6 +3414,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/anonymous_access/get_capabilities.ts"
               },
               {
@@ -5523,6 +5527,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/get.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.test.ts"
               },
               {
                 "plugin": "security",

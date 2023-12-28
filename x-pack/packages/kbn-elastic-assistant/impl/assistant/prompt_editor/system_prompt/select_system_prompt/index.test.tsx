@@ -48,6 +48,10 @@ const mockUseAssistantContext = {
     },
   ],
   setAllSystemPrompts: jest.fn(),
+  knowledgeBase: {
+    isEnabledRAGAlerts: false,
+    isEnabledKnowledgeBase: false,
+  },
 };
 jest.mock('../../../../assistant_context', () => {
   const original = jest.requireActual('../../../../assistant_context');
