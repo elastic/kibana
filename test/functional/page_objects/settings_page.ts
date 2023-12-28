@@ -185,6 +185,7 @@ export class SettingsPageObject extends FtrService {
     }
     await this.retry.waitFor('time field dropdown have the right value', async () => {
       await timefield.click();
+      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
       await this.browser.pressKeys(selection);
       await this.browser.pressKeys(this.browser.keys.TAB);
       const value = await timefield.getAttribute('value');
