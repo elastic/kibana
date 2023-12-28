@@ -29,26 +29,29 @@ export function IndexSelection() {
   const currentIndexPattern = watch('indicator.params.index');
 
   useEffect(() => {
-    const missingAdHocDataView = adHocDataViews.find(
-      (dataView) => dataView.getIndexPattern() === currentIndexPattern
-    );
+    if (!isDataViewsLoading) {
+      const missingAdHocDataView =
+        dataViews.find((dataView) => dataView.title === currentIndexPattern) ||
+        adHocDataViews.find((dataView) => dataView.getIndexPattern() === currentIndexPattern);
 
-    if (!missingAdHocDataView && currentIndexPattern) {
-      async function loadMissingDataView() {
-        const dataView = await dataViewsService.create(
-          {
-            title: currentIndexPattern,
-            allowNoIndex: true,
-          },
-          true
-        );
-        if (dataView.getIndexPattern() === currentIndexPattern) {
-          setAdHocDataViews((prev) => [...prev, dataView]);
+      if (!missingAdHocDataView && currentIndexPattern) {
+        async function loadMissingDataView() {
+          const dataView = await dataViewsService.create(
+            {
+              title: currentIndexPattern,
+              allowNoIndex: true,
+            },
+            true
+          );
+          if (dataView.getIndexPattern() === currentIndexPattern) {
+            setAdHocDataViews((prev) => [...prev, dataView]);
+          }
         }
+
+        loadMissingDataView();
       }
-      loadMissingDataView();
     }
-  }, [adHocDataViews, currentIndexPattern, dataViewsService]);
+  }, [adHocDataViews, currentIndexPattern, dataViews, dataViewsService, isDataViewsLoading]);
 
   const getDataViewPatternById = (id?: string) => {
     return (
