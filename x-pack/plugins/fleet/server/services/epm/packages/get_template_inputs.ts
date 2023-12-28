@@ -10,8 +10,12 @@ import { merge } from 'lodash';
 import { safeDump } from 'js-yaml';
 
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
-import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
-
+import {
+  getAssetsMap,
+  getInputsWithStreamIds,
+  _compilePackagePolicyInputs,
+} from '../../package_policy';
+import { appContextService } from '../../app_context';
 import type {
   PackageInfo,
   NewPackagePolicy,
@@ -89,11 +93,16 @@ export async function getTemplateInputs(
   }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
   const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
-
+  const assetsMap = await getAssetsMap({
+    logger: appContextService.getLogger(),
+    pkgInfo: packageInfo,
+    savedObjectsClient: soClient,
+  });
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
-    inputsWithStreamIds
+    inputsWithStreamIds,
+    assetsMap
   );
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,

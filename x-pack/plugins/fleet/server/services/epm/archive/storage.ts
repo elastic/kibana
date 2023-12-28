@@ -23,7 +23,7 @@ import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../error
 
 import { appContextService } from '../../app_context';
 
-import { setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
+import { setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
 import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from './parse';
 
@@ -215,7 +215,6 @@ export const getEsPackage = async (
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
     if (path && buffer) {
-      setArchiveEntry(path, buffer);
       assetsMap.set(path, buffer);
       paths.push(path);
     }
@@ -223,8 +222,6 @@ export const getEsPackage = async (
       parseAndVerifyAssetsMap[path] = buffer;
     }
   });
-  // Add asset references to cache
-  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
   const packageInfo = parseAndVerifyArchive(paths, parseAndVerifyAssetsMap);
   setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });

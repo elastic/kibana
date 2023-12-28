@@ -29,7 +29,6 @@ import type {
 } from '../../../types';
 import {
   getPathParts,
-  unpackBufferToCache,
   setVerificationResult,
   getPackageInfo,
   setPackageInfo,
@@ -346,16 +345,6 @@ export async function getPackage(
     verificationResult = latestVerificationResult;
     setVerificationResult({ name, version }, latestVerificationResult);
   }
-
-  // TODO remove when cache is not used anymore
-  await withPackageSpan('Unpack archive', () =>
-    unpackBufferToCache({
-      name,
-      version,
-      archiveBuffer,
-      contentType: ensureContentType(archivePath),
-    })
-  );
 
   const { assetsMap, paths } = await unpackBufferToAssetsMap({
     name,

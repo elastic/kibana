@@ -53,7 +53,6 @@ import { appContextService } from '../..';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
-import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { auditLoggingService } from '../../audit_logging';
@@ -544,16 +543,6 @@ export async function getPackageFromSource(options: {
   // If the package is installed
   if (installedPkg && installedPkg.version === pkgVersion) {
     const { install_source: pkgInstallSource } = installedPkg;
-    // check cache
-    res = getArchivePackage({
-      name: pkgName,
-      version: pkgVersion,
-    });
-
-    if (res) {
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from cache`);
-    }
-
     if (!res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
@@ -582,20 +571,14 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    res = getArchivePackage({ name: pkgName, version: pkgVersion });
-
-    if (res) {
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
-    } else {
-      try {
-        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
-      } catch (err) {
-        if (err instanceof RegistryResponseError && err.status === 404) {
-          res = await Registry.getBundledArchive(pkgName, pkgVersion);
-        } else {
-          throw err;
-        }
+    try {
+      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    } catch (err) {
+      if (err instanceof RegistryResponseError && err.status === 404) {
+        res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      } else {
+        throw err;
       }
     }
   }

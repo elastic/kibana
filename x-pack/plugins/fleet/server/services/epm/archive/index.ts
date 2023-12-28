@@ -12,16 +12,7 @@ import {
   PackageNotFoundError,
 } from '../../../errors';
 
-import {
-  getArchiveEntry,
-  setArchiveEntry,
-  deleteArchiveEntry,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-  deletePackageInfo,
-  clearPackageFileCache,
-} from './cache';
+import { deletePackageInfo } from './cache';
 import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
@@ -60,34 +51,6 @@ export async function unpackBufferToAssetsMap({
   return { assetsMap, paths };
 }
 
-export async function unpackBufferToCache({
-  name,
-  version,
-  contentType,
-  archiveBuffer,
-}: {
-  name: string;
-  version: string;
-  contentType: string;
-  archiveBuffer: Buffer;
-}): Promise<string[]> {
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
-  // Make sure any buffers from previous installations from registry or upload are deleted first
-  clearPackageFileCache({ name, version });
-
-  const paths: string[] = [];
-  entries.forEach((entry) => {
-    const { path, buffer } = entry;
-    if (buffer) {
-      setArchiveEntry(path, buffer);
-      paths.push(path);
-    }
-  });
-  setArchiveFilelist({ name, version }, paths);
-
-  return paths;
-}
-
 export async function unpackBufferEntries(
   archiveBuffer: Buffer,
   contentType: string
@@ -120,16 +83,6 @@ export async function unpackBufferEntries(
 }
 
 export const deletePackageCache = ({ name, version }: SharedKey) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist({ name, version });
-
-  // delete cached archive filelist
-  deleteArchiveFilelist({ name, version });
-
-  // delete cached archive files
-  // this has been populated in unpackBufferToCache()
-  paths?.forEach(deleteArchiveEntry);
-
   deletePackageInfo({ name, version });
 };
 
@@ -178,10 +131,8 @@ export function getPathParts(path: string): AssetParts {
 }
 
 export function getAsset(key: string) {
-  const buffer = getArchiveEntry(key);
-  if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
-
-  return buffer;
+  // TODO remove
+  return undefined;
 }
 
 export function getAssetFromAssetsMap(assetsMap: Map<string, Buffer | undefined>, key: string) {

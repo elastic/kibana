@@ -7,13 +7,9 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { getArchiveEntry } from '../../archive/cache';
-
 import { prepareToInstallPipelines } from './install';
 
 jest.mock('../../archive/cache');
-
-const mockedGetArchiveEntry = getArchiveEntry as jest.MockedFunction<typeof getArchiveEntry>;
 
 describe('Install pipeline tests', () => {
   describe('prepareToInstallPipelines', () => {
@@ -86,8 +82,6 @@ describe('Install pipeline tests', () => {
 
       const esClient = elasticsearchClientMock.createInternalClient();
       const logger = loggerMock.create();
-
-      mockedGetArchiveEntry.mockReturnValue(Buffer.from(`description: test`));
 
       await res.install(esClient, logger);
 

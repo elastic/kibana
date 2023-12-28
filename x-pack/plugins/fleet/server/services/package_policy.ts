@@ -131,7 +131,8 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-async function getAssetsMap({
+// Todo move from that package
+export async function getAssetsMap({
   savedObjectsClient,
   pkgInfo,
   logger,

@@ -12,13 +12,6 @@ type SharedKeyString = string;
 
 const sharedKey = ({ name, version }: SharedKey): SharedKeyString => `${name}-${version}`;
 
-// TODO remove
-export const getArchiveEntry = (key: string) => undefined;
-export const setArchiveEntry = (key: string, value: Buffer) => undefined;
-export const hasArchiveEntry = (key: string) => false;
-export const clearArchiveEntries = () => undefined;
-export const deleteArchiveEntry = (key: string) => undefined;
-
 const verificationResultCache: Map<SharedKeyString, PackageVerificationResult> = new Map();
 export const getVerificationResult = (key: SharedKey) =>
   verificationResultCache.get(sharedKey(key));
@@ -35,24 +28,10 @@ export interface SharedKey {
   version: string;
 }
 
-// // TODO remove
-export const getArchiveFilelist = (keyArgs: SharedKey) => undefined;
-
-export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) => {
-  // TODO remove
-};
-// TODO remove
-export const deleteArchiveFilelist = (keyArgs: SharedKey) => undefined;
-
 const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
 
 export const getPackageInfo = (args: SharedKey) => {
   return packageInfoCache.get(sharedKey(args));
-};
-
-export const getArchivePackage = (args: SharedKey) => {
-  // TODO remove
-  return undefined;
 };
 
 /*
@@ -73,11 +52,3 @@ export const setPackageInfo = ({
 };
 
 export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));
-
-export const clearPackageFileCache = (args: SharedKey) => {
-  const fileList = getArchiveFilelist(args) ?? [];
-  fileList.forEach((filePath) => {
-    deleteArchiveEntry(filePath);
-  });
-  deleteArchiveFilelist(args);
-};
