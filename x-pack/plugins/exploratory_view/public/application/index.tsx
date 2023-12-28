@@ -52,7 +52,7 @@ export const renderApp = ({
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.exploratoryView.feedbackMenu.appName', {
