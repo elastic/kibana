@@ -70,6 +70,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityMetricsAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityMetricsAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,

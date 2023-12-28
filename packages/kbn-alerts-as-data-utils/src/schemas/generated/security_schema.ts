@@ -117,6 +117,7 @@ const SecurityAlertRequired = rt.type({
   'kibana.alert.uuid': schemaString,
   'kibana.space_ids': schemaStringArray,
 });
+// prettier-ignore
 const SecurityAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'event.action': schemaString,
@@ -131,7 +132,6 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.flapping_history': schemaBooleanArray,
   'kibana.alert.group.id': schemaString,
   'kibana.alert.group.index': schemaNumber,
-  'kibana.alert.host.criticality_level': schemaString,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.new_terms': schemaStringArray,
@@ -194,7 +194,6 @@ const SecurityAlertOptional = rt.partial({
   ),
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.url': schemaString,
-  'kibana.alert.user.criticality_level': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
