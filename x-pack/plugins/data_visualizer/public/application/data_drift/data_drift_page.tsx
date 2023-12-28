@@ -336,41 +336,9 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         brushRanges.deviationMin,
         brushRanges.deviationMax
       );
-      if (isBetweenReference && isBetweenDeviation)
-        return {
-          rect: {
-            texture: 'Line',
-            fill: 'transparent',
-            // fill: colors.overlapColor,
-          },
-        };
+      if (isBetweenReference && isBetweenDeviation) return colors.overlapColor;
       if (isBetweenReference) return colors.referenceColor;
       if (isBetweenDeviation) return colors.comparisonColor;
-      // if (
-      //   start >= windowParameters.baselineMin &&
-      //   end <= windowParameters.baselineMax &&
-      //   !isBetweenTwo
-      // ) {
-      //   return colors.referenceColor;
-      // }
-
-      // // @TODO: remove
-      // // console.log(
-      // //   windowParameters,
-      // //   `--@@start >= windowParameters.deviationMin && end <= windowParameters.deviationMax`,
-      // //   start >= windowParameters.deviationMin && end <= windowParameters.deviationMax
-      // // );
-      // if (
-      //   start >= windowParameters.deviationMin &&
-      //   end <= windowParameters.deviationMax &&
-      //   !isBetweenTwo
-      // ) {
-      //   return colors.comparisonColor;
-      // }
-
-      // if (isBetweenTwo) {
-      //   return 'red';
-      // }
 
       return null;
     },
