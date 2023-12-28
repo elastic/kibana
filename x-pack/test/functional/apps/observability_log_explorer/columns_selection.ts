@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('When the log explorer loads', () => {
     before(async () => {
-      await synthtrace.index(generateLogsData({ from, to }));
+      await synthtrace.index(generateLogsData({ to }));
       await navigateToLogExplorer();
     });
 
