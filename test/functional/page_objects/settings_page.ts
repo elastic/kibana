@@ -177,9 +177,19 @@ export class SettingsPageObject extends FtrService {
   async selectTimeFieldOption(selection: string) {
     // open dropdown
     const timefield = await this.getTimeFieldNameField();
-    await timefield.click();
-    await this.browser.pressKeys(selection);
-    await this.browser.pressKeys(this.browser.keys.TAB);
+    const prevValue = await timefield.getAttribute('value');
+    const enabled = await timefield.isEnabled();
+
+    if (prevValue === selection || !enabled) {
+      return;
+    }
+    await this.retry.waitFor('time field dropdown have the right value', async () => {
+      await timefield.click();
+      await this.browser.pressKeys(selection);
+      await this.browser.pressKeys(this.browser.keys.TAB);
+      const value = await timefield.getAttribute('value');
+      return value === selection;
+    });
   }
 
   async getTimeFieldOption(selection: string) {
@@ -579,10 +589,14 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
-      await this.getSaveDataViewButtonActive();
-    });
+      const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
+      await indexPatternSaveBtn.click();
 
-    await (await this.getSaveIndexPatternButton()).click();
+      const form = await this.testSubjects.findAll('indexPatternEditorForm');
+      const hasValidationErrors =
+        form.length !== 0 && (await form[0].getAttribute('data-validation-error')) === '1';
+      expect(hasValidationErrors).to.eql(false);
+    });
 
     if (errorCheck) {
       await this.retry.try(async () => {
