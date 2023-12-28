@@ -362,7 +362,7 @@ export interface ActionDetails<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   /**
-   * The action ID. This is a legacy property action and should not longer be used. Only here for
+   * The action ID. This is a legacy property action and should no longer be used. Only here for
    * backwards compatibility
    *
    * @deprecated

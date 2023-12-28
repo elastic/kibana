@@ -27,6 +27,7 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   EndpointActionResponseDataOutput,
+  WithAllKeys,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import {
@@ -188,7 +189,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   >(
     overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
   ): ActionDetails<TOutputContent, TParameters> {
-    const details: ActionDetails = {
+    const details: WithAllKeys<ActionDetails> = {
+      action: '123',
       agents: ['agent-a'],
       agentType: 'endpoint',
       command: 'isolate',
@@ -213,6 +215,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           wasSuccessful: true,
         },
       },
+      alertIds: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
     };
 
     const command = overrides.command ?? details.command;

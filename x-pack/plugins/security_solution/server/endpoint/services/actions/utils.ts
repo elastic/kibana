@@ -30,6 +30,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  WithAllKeys,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
@@ -562,7 +563,8 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     wasSuccessful,
   });
 
-  const actionDetails: ActionDetails = {
+  const actionDetails: WithAllKeys<ActionDetails> = {
+    action: actionRequest.id,
     id: actionRequest.id,
     agentType: actionRequest.agentType,
     agents: actionRequest.agents,
@@ -583,6 +585,9 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     createdBy: actionRequest.createdBy,
     comment: actionRequest.comment,
     parameters: actionRequest.parameters,
+    alertIds: actionRequest.alertIds,
+    ruleId: actionRequest.ruleId,
+    ruleName: actionRequest.ruleName,
   };
 
   return actionDetails as T;
