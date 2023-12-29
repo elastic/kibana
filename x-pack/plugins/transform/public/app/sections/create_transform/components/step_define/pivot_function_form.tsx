@@ -20,36 +20,89 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+
+import type {
+  PivotAggsConfig,
+  PivotAggsConfigDict,
+  PivotGroupByConfigDict,
+  PivotSupportedGroupByAggs,
+} from '../../../../common';
+import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
+
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { PivotConfiguration } from '../pivot_configuration';
 
-import { useWizardSelector } from '../../state_management/create_transform_store';
+const { collapseLiteralStrings } = XJson;
 
 const advancedEditorsSidebarWidth = '220px';
 
 interface PivotFunctionFormProps {
-  applyPivotChangesHandler: () => void;
   copyToClipboardPivot: string;
   copyToClipboardPivotDescription: string;
 }
 
 export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
-  applyPivotChangesHandler,
   copyToClipboardPivot,
   copyToClipboardPivotDescription,
 }) => {
   const { esTransformPivot } = useDocumentationLinks();
 
+  const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
   );
   const isAdvancedPivotEditorApplyButtonEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorApplyButtonEnabled
   );
+  const {
+    setAdvancedPivotEditorApplyButtonEnabled,
+    setAdvancedEditorConfigLastApplied,
+    setAggList,
+    setGroupByList,
+  } = useWizardActions();
+
+  const applyPivotChangesHandler = () => {
+    const pivot = JSON.parse(collapseLiteralStrings(advancedEditorConfig));
+
+    const newGroupByList: PivotGroupByConfigDict = {};
+    if (pivot !== undefined && pivot.group_by !== undefined) {
+      Object.entries(pivot.group_by).forEach((d) => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotGroupByDict;
+        const aggConfigKeys = Object.keys(aggConfig);
+        const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
+        newGroupByList[aggName] = {
+          ...aggConfig[agg],
+          agg,
+          aggName,
+          dropDownName: '',
+        };
+      });
+    }
+    setGroupByList(newGroupByList);
+
+    const newAggList: PivotAggsConfigDict = {};
+    if (pivot !== undefined && pivot.aggregations !== undefined) {
+      Object.entries(pivot.aggregations).forEach((d) => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotAggDict;
+
+        newAggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
+      });
+    }
+    setAggList(newAggList);
+
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+    setAdvancedPivotEditorApplyButtonEnabled(false);
+  };
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">

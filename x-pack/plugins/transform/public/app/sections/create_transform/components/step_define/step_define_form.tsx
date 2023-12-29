@@ -35,10 +35,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
-import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import {
   TRANSFORM_FROZEN_TIER_PREFERENCE,
@@ -50,18 +47,11 @@ import {
   getIndexDevConsoleStatement,
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-import {
-  getPreviewTransformRequestBody,
-  type PivotAggsConfigDict,
-  type PivotGroupByConfigDict,
-  type PivotSupportedGroupByAggs,
-  type PivotAggsConfig,
-} from '../../../../common';
+import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardContext } from '../wizard/wizard';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
@@ -83,8 +73,6 @@ import { useLatestFunctionConfig } from './hooks/use_latest_function_config';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
-
-const { collapseLiteralStrings } = XJson;
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
@@ -119,7 +107,6 @@ export const StepDefineForm: FC = () => {
   const toastNotifications = useToastNotifications();
   const { hasValidTimeField } = useDatePicker();
   const latestFunctionConfig = useLatestFunctionConfig();
-  const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
   );
@@ -143,13 +130,10 @@ export const StepDefineForm: FC = () => {
     applyAdvancedSourceEditorChanges,
     setAdvancedEditorConfig,
     setAdvancedEditorConfigLastApplied,
-    setAdvancedPivotEditorApplyButtonEnabled,
     setAdvancedSourceEditorConfig,
     setAdvancedSourceEditorConfigLastApplied,
     setAdvancedRuntimeMappingsConfig,
     setAdvancedRuntimeMappingsConfigLastApplied,
-    setAggList,
-    setGroupByList,
     setSearchQuery,
   } = useWizardActions();
 
@@ -226,41 +210,6 @@ export const StepDefineForm: FC = () => {
     const sourceConfig = JSON.parse(advancedSourceEditorConfig);
     setSearchQuery(sourceConfig);
     applyAdvancedSourceEditorChanges();
-  };
-
-  const applyPivotChangesHandler = () => {
-    const pivot = JSON.parse(collapseLiteralStrings(advancedEditorConfig));
-
-    const newGroupByList: PivotGroupByConfigDict = {};
-    if (pivot !== undefined && pivot.group_by !== undefined) {
-      Object.entries(pivot.group_by).forEach((d) => {
-        const aggName = d[0];
-        const aggConfig = d[1] as PivotGroupByDict;
-        const aggConfigKeys = Object.keys(aggConfig);
-        const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
-        newGroupByList[aggName] = {
-          ...aggConfig[agg],
-          agg,
-          aggName,
-          dropDownName: '',
-        };
-      });
-    }
-    setGroupByList(newGroupByList);
-
-    const newAggList: PivotAggsConfigDict = {};
-    if (pivot !== undefined && pivot.aggregations !== undefined) {
-      Object.entries(pivot.aggregations).forEach((d) => {
-        const aggName = d[0];
-        const aggConfig = d[1] as PivotAggDict;
-
-        newAggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
-      });
-    }
-    setAggList(newAggList);
-
-    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
-    setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
   const { esQueryDsl } = useDocumentationLinks();
@@ -527,7 +476,6 @@ export const StepDefineForm: FC = () => {
         {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
           <PivotFunctionForm
             {...{
-              applyPivotChangesHandler,
               copyToClipboardPivot,
               copyToClipboardPivotDescription,
             }}
