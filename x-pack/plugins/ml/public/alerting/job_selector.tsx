@@ -56,6 +56,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
 }) => {
   const {
     services: {
+      notifications: { toasts },
       application: { navigateToUrl },
     },
   } = useMlKibana();
@@ -138,9 +139,22 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           : []),
       ]);
     } catch (e) {
-      // TODO add error handling
+      toasts.addError(e, {
+        title: i18n.translate('xpack.ml.jobSelector.fetchJobErrorTitle', {
+          defaultMessage: 'Failed to load anomaly detection jobs',
+        }),
+      });
     }
-  }, [adJobsApiService, allowSelectAll, createJobUrl, groupIds, isMounted, jobIds, multiSelect]);
+  }, [
+    adJobsApiService,
+    allowSelectAll,
+    createJobUrl,
+    groupIds,
+    isMounted,
+    jobIds,
+    multiSelect,
+    toasts,
+  ]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
