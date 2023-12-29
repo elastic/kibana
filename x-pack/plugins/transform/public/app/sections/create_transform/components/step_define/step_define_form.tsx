@@ -51,10 +51,11 @@ import {
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
 import {
-  PivotAggsConfigDict,
-  PivotGroupByConfigDict,
-  PivotSupportedGroupByAggs,
-  PivotAggsConfig,
+  getPreviewTransformRequestBody,
+  type PivotAggsConfigDict,
+  type PivotGroupByConfigDict,
+  type PivotSupportedGroupByAggs,
+  type PivotAggsConfig,
 } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
@@ -78,7 +79,7 @@ import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 import { useDatePicker } from './hooks/use_date_picker';
-import { useStepDefineForm } from './hooks/use_step_define_form';
+import { useLatestFunctionConfig } from './hooks/use_latest_function_config';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
@@ -117,8 +118,11 @@ export const StepDefineForm: FC = () => {
   );
   const toastNotifications = useToastNotifications();
   const { hasValidTimeField } = useDatePicker();
-  const stepDefineForm = useStepDefineForm();
+  const latestFunctionConfig = useLatestFunctionConfig();
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
+  const isAdvancedPivotEditorEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
+  );
   const isAdvancedSourceEditorEnabled = useWizardSelector(
     (s) => s.advancedSourceEditor.isAdvancedSourceEditorEnabled
   );
@@ -128,14 +132,22 @@ export const StepDefineForm: FC = () => {
   const isAdvancedSourceEditorApplyButtonEnabled = useWizardSelector(
     (s) => s.advancedSourceEditor.isAdvancedSourceEditorApplyButtonEnabled
   );
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
+  );
   const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
   const {
     applyAdvancedSourceEditorChanges,
+    setAdvancedEditorConfig,
     setAdvancedEditorConfigLastApplied,
     setAdvancedPivotEditorApplyButtonEnabled,
+    setAdvancedSourceEditorConfig,
+    setAdvancedSourceEditorConfigLastApplied,
+    setAdvancedRuntimeMappingsConfig,
+    setAdvancedRuntimeMappingsConfigLastApplied,
     setAggList,
     setGroupByList,
     setSearchQuery,
@@ -167,7 +179,7 @@ export const StepDefineForm: FC = () => {
   const { requestPayload, validationStatus } =
     transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? { requestPayload: pivotRequestPayload, validationStatus: pivotValidationStatus }
-      : stepDefineForm.latestFunctionConfig;
+      : latestFunctionConfig;
 
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
@@ -292,6 +304,45 @@ export const StepDefineForm: FC = () => {
       timeUpdateSubscription.unsubscribe();
     };
   });
+
+  const previewRequest = useMemo(
+    () =>
+      getPreviewTransformRequestBody(
+        dataView,
+        transformConfigQuery,
+        requestPayload,
+        runtimeMappings
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transformConfigQuery, requestPayload, runtimeMappings]
+  );
+
+  useEffect(() => {
+    if (!isAdvancedPivotEditorEnabled) {
+      const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+      setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
+      setAdvancedEditorConfig(stringifiedPivotConfig);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdvancedPivotEditorEnabled, previewRequest]);
+
+  useEffect(() => {
+    if (!isAdvancedSourceEditorEnabled) {
+      const stringifiedSourceConfigUpdate = JSON.stringify(previewRequest.source.query, null, 2);
+
+      setAdvancedSourceEditorConfigLastApplied(stringifiedSourceConfigUpdate);
+      setAdvancedSourceEditorConfig(stringifiedSourceConfigUpdate);
+    }
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [isAdvancedSourceEditorEnabled]);
+
+  useEffect(() => {
+    if (!isRuntimeMappingsEditorEnabled) {
+      const stringifiedRuntimeMappings = JSON.stringify(runtimeMappings, null, 2);
+      setAdvancedRuntimeMappingsConfigLastApplied(stringifiedRuntimeMappings);
+      setAdvancedRuntimeMappingsConfig(stringifiedRuntimeMappings);
+    }
+  }, [isRuntimeMappingsEditorEnabled, runtimeMappings]);
 
   return (
     <div data-test-subj="transformStepDefineForm">
@@ -479,7 +530,6 @@ export const StepDefineForm: FC = () => {
               applyPivotChangesHandler,
               copyToClipboardPivot,
               copyToClipboardPivotDescription,
-              stepDefineForm,
             }}
           />
         ) : null}
@@ -487,13 +537,13 @@ export const StepDefineForm: FC = () => {
           <LatestFunctionForm
             copyToClipboard={copyToClipboardPivot}
             copyToClipboardDescription={copyToClipboardPivotDescription}
-            latestFunctionService={stepDefineForm.latestFunctionConfig}
+            latestFunctionService={latestFunctionConfig}
           />
         ) : null}
       </EuiForm>
       <EuiSpacer size="m" />
       {(transformFunction !== TRANSFORM_FUNCTION.LATEST ||
-        stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
+        latestFunctionConfig.sortFieldOptions.length > 0) && (
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {

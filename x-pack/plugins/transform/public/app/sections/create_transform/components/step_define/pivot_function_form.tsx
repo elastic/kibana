@@ -27,8 +27,6 @@ import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { PivotConfiguration } from '../pivot_configuration';
 
-import type { StepDefineFormHook } from './hooks/use_step_define_form';
-
 import { useWizardSelector } from '../../state_management/create_transform_store';
 
 const advancedEditorsSidebarWidth = '220px';
@@ -37,14 +35,12 @@ interface PivotFunctionFormProps {
   applyPivotChangesHandler: () => void;
   copyToClipboardPivot: string;
   copyToClipboardPivotDescription: string;
-  stepDefineForm: StepDefineFormHook;
 }
 
 export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
   applyPivotChangesHandler,
   copyToClipboardPivot,
   copyToClipboardPivotDescription,
-  stepDefineForm,
 }) => {
   const { esTransformPivot } = useDocumentationLinks();
 
