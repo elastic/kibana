@@ -145,6 +145,7 @@ export function getTextBasedDatasource({
       const query = context.query;
       const updatedState = {
         ...state,
+        initialContext: undefined,
         fieldList: textBasedQueryColumns,
         ...(context.dataViewSpec.id
           ? {

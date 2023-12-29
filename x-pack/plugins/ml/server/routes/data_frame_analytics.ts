@@ -6,13 +6,17 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import {
   JOB_MAP_NODE_TYPES,
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
+import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
+import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
+
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -30,24 +34,14 @@ import {
   dataFrameAnalyticsQuerySchema,
   dataFrameAnalyticsNewJobCapsParamsSchema,
   dataFrameAnalyticsNewJobCapsQuerySchema,
+  type PutDataFrameAnalyticsResponseSchema,
 } from './schemas/data_frame_analytics_schema';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
-import { DataViewHandler } from '../models/data_frame_analytics/data_view_handler';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
-
-async function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
-  const iph = new DataViewHandler(dataViewsService);
-  return await iph.getDataViewId(patternName);
-}
-
-async function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: string) {
-  const iph = new DataViewHandler(dataViewsService);
-  return await iph.deleteDataViewById(dataViewId);
-}
 
 function getExtendedMap(
   mlClient: MlClient,
@@ -306,28 +300,64 @@ export function dataFrameAnalyticsRoutes(
         validate: {
           request: {
             params: dataFrameAnalyticsIdSchema,
+            query: dataViewCreateQuerySchema,
             body: dataFrameAnalyticsJobConfigSchema,
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-        try {
+      routeGuard.fullLicenseAPIGuard(
+        async ({ mlClient, request, response, getDataViewsService }) => {
           const { analyticsId } = request.params;
-          const body = await mlClient.putDataFrameAnalytics(
-            {
+          const { createDataView, timeFieldName } = request.query;
+
+          const fullResponse: PutDataFrameAnalyticsResponseSchema = {
+            dataFrameAnalyticsJobsCreated: [],
+            dataFrameAnalyticsJobsErrors: [],
+            dataViewsCreated: [],
+            dataViewsErrors: [],
+          };
+
+          try {
+            const resp = await mlClient.putDataFrameAnalytics(
+              {
+                id: analyticsId,
+                // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+                body: request.body,
+              },
+              getAuthorizationHeader(request)
+            );
+
+            if (resp.id && resp.create_time) {
+              fullResponse.dataFrameAnalyticsJobsCreated.push({ id: analyticsId });
+            } else {
+              fullResponse.dataFrameAnalyticsJobsErrors.push({
+                id: analyticsId,
+                error: wrapError(resp),
+              });
+            }
+          } catch (e) {
+            fullResponse.dataFrameAnalyticsJobsErrors.push({
               id: analyticsId,
-              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+              error: wrapError(e),
+            });
+          }
+
+          if (createDataView) {
+            const { dataViewsCreated, dataViewsErrors } = await createDataViewFn({
+              dataViewsService: await getDataViewsService(),
+              dataViewName: request.body.dest.index,
+              runtimeMappings: request.body.source.runtime_mappings as Record<string, RuntimeField>,
+              timeFieldName,
+              errorFallbackId: analyticsId,
+            });
+
+            fullResponse.dataViewsCreated = dataViewsCreated;
+            fullResponse.dataViewsErrors = dataViewsErrors;
+          }
+
+          return response.ok({ body: fullResponse });
         }
-      })
+      )
     );
 
   /**
@@ -453,7 +483,7 @@ export function dataFrameAnalyticsRoutes(
             let destinationIndex: string | undefined;
             const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
             const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-            const destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+            let destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
               success: false,
             };
 
@@ -493,18 +523,12 @@ export function dataFrameAnalyticsRoutes(
                 }
               }
 
-              // Delete the index pattern if there's an index pattern that matches the name of dest index
+              // Delete the data view if there's a data view that matches the name of dest index
               if (destinationIndex && deleteDestDataView) {
-                try {
-                  const dataViewsService = await getDataViewsService();
-                  const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
-                  if (dataViewId) {
-                    await deleteDestDataViewById(dataViewsService, dataViewId);
-                  }
-                  destDataViewDeleted.success = true;
-                } catch (deleteDestIndexPatternError) {
-                  destDataViewDeleted.error = deleteDestIndexPatternError;
-                }
+                destDataViewDeleted = await deleteDataViewFn({
+                  dataViewsService: await getDataViewsService(),
+                  dataViewName: destinationIndex,
+                });
               }
             }
             // Grab the target index from the data frame analytics job id

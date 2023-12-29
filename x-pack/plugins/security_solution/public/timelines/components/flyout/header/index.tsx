@@ -13,9 +13,9 @@ import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -26,9 +26,11 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import { TimelineStatusInfo } from './timeline_status_info';
+import { TimelineSaveStatus } from '../../save_status';
+import { timelineDefaults } from '../../../store/defaults';
+import { AddTimelineButton } from '../add_timeline_button';
 
-export interface FlyoutHeaderPanelProps {
+interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
@@ -53,36 +55,22 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const {
-    activeTab,
-    dataProviders,
-    kqlQuery,
-    title,
-    timelineType,
-    status: timelineStatus,
-    updated,
-    show,
-    filters,
-    kqlMode,
-    changed = false,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      [
-        'activeTab',
-        'dataProviders',
-        'kqlQuery',
-        'status',
-        'title',
-        'timelineType',
-        'updated',
-        'show',
-        'filters',
-        'kqlMode',
-        'changed',
-      ],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
-  );
+  const { activeTab, dataProviders, kqlQuery, title, timelineType, show, filters, kqlMode } =
+    useDeepEqualSelector((state) =>
+      pick(
+        [
+          'activeTab',
+          'dataProviders',
+          'kqlQuery',
+          'title',
+          'timelineType',
+          'show',
+          'filters',
+          'kqlMode',
+        ],
+        getTimeline(state, timelineId) ?? timelineDefaults
+      )
+    );
   const isDataInTimeline = useMemo(
     () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
     [dataProviders, kqlQuery]
@@ -117,6 +105,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   const handleClose = useCallback(() => {
+    createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
@@ -139,6 +128,14 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {!show ? (
+              <EuiFlexItem grow={false}>
+                <AddTimelineButton timelineId={timelineId} />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <AddToFavoritesButton timelineId={timelineId} compact />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ActiveTimelinesContainer grow={false}>
                 <ActiveTimelines
@@ -150,10 +147,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               </ActiveTimelinesContainer>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AddToFavoritesButton timelineId={timelineId} compact />
+              <TimelineSaveStatus timelineId={timelineId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

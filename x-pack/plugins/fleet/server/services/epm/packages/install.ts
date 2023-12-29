@@ -106,6 +106,7 @@ import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
+import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -236,6 +237,13 @@ export async function handleInstallPackageFailure({
     version: pkgVersion,
   });
 
+  const latestInstallFailedAttempts = addErrorToLatestFailedAttempts({
+    error,
+    targetVersion: pkgVersion,
+    createdAt: new Date().toISOString(),
+    latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+  });
+
   // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
@@ -245,17 +253,17 @@ export async function handleInstallPackageFailure({
       return;
     }
 
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts,
+    });
+
     if (installType === 'reinstall') {
       logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
     }
-
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -278,13 +286,20 @@ export async function handleInstallPackageFailure({
     }
   } catch (e) {
     // If an error happens while removing the integration or while doing a rollback update the status to failed
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts: installedPkg
+        ? addErrorToLatestFailedAttempts({
+            error: e,
+            targetVersion: installedPkg.attributes.version,
+            createdAt: installedPkg.attributes.install_started_at,
+            latestAttempts: latestInstallFailedAttempts,
+          })
+        : [],
+    });
     logger.error(`failed to uninstall or rollback package after installation error ${e}`);
   }
 }
@@ -501,6 +516,7 @@ async function installPackageCommon(options: {
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
+  logger.info(`Install - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `);
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -549,7 +565,8 @@ async function installPackageCommon(options: {
     }
     const elasticSubscription = getElasticSubscription(packageInfo);
     if (!licenseService.hasAtLeast(elasticSubscription)) {
-      const err = new Error(`Requires ${elasticSubscription} license`);
+      logger.error(`Installation requires ${elasticSubscription} license`);
+      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
@@ -591,6 +608,7 @@ async function installPackageCommon(options: {
       skipDataStreamRollover,
     })
       .then(async (assets) => {
+        logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
           soClient: savedObjectsClient,
           pkgName: packageInfo.name,
@@ -744,13 +762,15 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
 
     if (matchingBundledPackage) {
       logger.debug(
-        `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
+        `Found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
+
+      const archiveBuffer = await matchingBundledPackage.getBuffer();
 
       const response = await installPackageByUpload({
         savedObjectsClient,
         esClient,
-        archiveBuffer: matchingBundledPackage.buffer,
+        archiveBuffer,
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,
@@ -763,7 +783,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       return { ...response, installSource: 'bundled' };
     }
 
-    logger.debug(`kicking off install of ${pkgkey} from registry`);
+    logger.debug(`Kicking off install of ${pkgkey} from registry`);
     const response = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
@@ -786,6 +806,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     } = args;
+    logger.debug(`Installing package by upload`);
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -799,6 +820,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     return response;
   } else if (args.installSource === 'custom') {
     const { pkgName, force, datasets, spaceId, kibanaVersion } = args;
+    logger.debug(`Kicking off install of custom package ${pkgName}`);
     const response = await installCustomPackage({
       savedObjectsClient,
       pkgName,
@@ -883,24 +905,34 @@ export const updateVersion = async (
   });
 };
 
-export const updateInstallStatus = async ({
+export const updateInstallStatusToFailed = async ({
+  logger,
   savedObjectsClient,
   pkgName,
   status,
+  latestInstallFailedAttempts,
 }: {
+  logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   status: EpmPackageInstallStatus;
+  latestInstallFailedAttempts: any;
 }) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    install_status: status,
-  });
+  try {
+    return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      install_status: status,
+      latest_install_failed_attempts: latestInstallFailedAttempts,
+    });
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`failed to update package status to: install_failed  ${err}`);
+    }
+  }
 };
 
 export async function restartInstallation(options: {

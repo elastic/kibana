@@ -58,6 +58,12 @@ Then use the [React UI component](https://github.com/elastic/kibana/tree/main/pa
 ```
 _where `myPanels` is a list of all the panels that can be rendered in the flyout_
 
+## State persistence 
+
+The expandable flyout offers 2 ways of managing its state:
+- the default behavior saves the state of the flyout in the url. This allows the flyout to be automatically reopened when users refresh the browser page, or when users share a url 
+- the second way (done by setting the `storage` prop to `memory`) stores the state of the flyout in memory. This means that the flyout will not be reopened when users refresh the browser page, or when users share a url
+
 
 ## Terminology
 

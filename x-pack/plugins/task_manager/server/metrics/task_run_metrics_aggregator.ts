@@ -7,22 +7,19 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
+import { isUserError } from '../task_running';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
   ErroredTask,
-  RanTask,
-  TaskRun,
   isTaskManagerStatEvent,
   isTaskRunEvent,
+  RanTask,
   TaskManagerStat,
+  TaskRun,
 } from '../task_events';
-import {
-  getTaskTypeGroup,
-  MetricCounterService,
-  SimpleHistogram,
-  type SerializedHistogram,
-} from './lib';
+import type { SerializedHistogram } from './lib';
+import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
 import { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
@@ -32,6 +29,8 @@ enum TaskRunKeys {
   SUCCESS = 'success',
   NOT_TIMED_OUT = 'not_timed_out',
   TOTAL = 'total',
+  USER_ERRORS = 'user_errors',
+  FRAMEWORK_ERRORS = 'framework_errors',
 }
 
 enum TaskRunMetricKeys {
@@ -43,6 +42,8 @@ interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.SUCCESS]: number;
   [TaskRunKeys.NOT_TIMED_OUT]: number;
   [TaskRunKeys.TOTAL]: number;
+  [TaskRunKeys.USER_ERRORS]: number;
+  [TaskRunKeys.FRAMEWORK_ERRORS]: number;
 }
 
 export interface TaskRunMetrics extends JsonObject {
@@ -91,7 +92,8 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
   }
 
   private processTaskRunEvent(taskEvent: TaskRun) {
-    const { task, isExpired }: RanTask | ErroredTask = unwrap(taskEvent.event);
+    const taskRunResult: RanTask | ErroredTask = unwrap(taskEvent.event);
+    const { task, isExpired } = taskRunResult;
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
     const taskTypeGroup = getTaskTypeGroup(taskType);
@@ -102,6 +104,14 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     // increment success counters
     if (success) {
       this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
+    } else {
+      if (isUserError((taskRunResult as ErroredTask).error)) {
+        // increment the user error counters
+        this.incrementCounters(TaskRunKeys.USER_ERRORS, taskType, taskTypeGroup);
+      } else {
+        // increment the framework error counters
+        this.incrementCounters(TaskRunKeys.FRAMEWORK_ERRORS, taskType, taskTypeGroup);
+      }
     }
 
     // increment expired counters

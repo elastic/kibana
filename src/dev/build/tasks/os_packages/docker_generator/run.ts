@@ -45,7 +45,7 @@ export async function runDockerGenerator(
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
-  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
+  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';

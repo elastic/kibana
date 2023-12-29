@@ -113,6 +113,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
+                "isElasticInternalLink": false,
                 "path": "group1.item1",
                 "sideNavStatus": "visible",
                 "title": "Item 1",
@@ -121,6 +122,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
+                "isElasticInternalLink": false,
                 "path": "group1.item2",
                 "sideNavStatus": "visible",
                 "title": "Item 2",
@@ -131,6 +133,7 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
+                    "isElasticInternalLink": false,
                     "path": "group1.group1A.item1",
                     "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
@@ -141,6 +144,7 @@ describe('builds navigation tree', () => {
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
+                        "isElasticInternalLink": false,
                         "path": "group1.group1A.group1A_1.item1",
                         "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
@@ -149,6 +153,7 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
+                    "isElasticInternalLink": false,
                     "path": "group1.group1A.group1A_1",
                     "sideNavStatus": "visible",
                     "title": "Group1A_1",
@@ -158,6 +163,7 @@ describe('builds navigation tree', () => {
                 "defaultIsCollapsed": false,
                 "href": undefined,
                 "id": "group1A",
+                "isElasticInternalLink": false,
                 "path": "group1.group1A",
                 "sideNavStatus": "visible",
                 "title": "Group1A",
@@ -167,6 +173,7 @@ describe('builds navigation tree', () => {
             "defaultIsCollapsed": false,
             "href": undefined,
             "id": "group1",
+            "isElasticInternalLink": false,
             "path": "group1",
             "sideNavStatus": "visible",
             "title": "",
@@ -209,6 +216,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
+                "isElasticInternalLink": false,
                 "path": "group1.item1",
                 "sideNavStatus": "visible",
                 "title": "Item 1",
@@ -217,6 +225,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
+                "isElasticInternalLink": false,
                 "path": "group1.item2",
                 "sideNavStatus": "visible",
                 "title": "Item 2",
@@ -227,6 +236,7 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
+                    "isElasticInternalLink": false,
                     "path": "group1.group1A.item1",
                     "sideNavStatus": "visible",
                     "title": "Group 1A Item 1",
@@ -237,6 +247,7 @@ describe('builds navigation tree', () => {
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
+                        "isElasticInternalLink": false,
                         "path": "group1.group1A.group1A_1.item1",
                         "sideNavStatus": "visible",
                         "title": "Group 1A_1 Item 1",
@@ -245,6 +256,7 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
+                    "isElasticInternalLink": false,
                     "path": "group1.group1A.group1A_1",
                     "sideNavStatus": "visible",
                     "title": "Group1A_1",
@@ -253,6 +265,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": undefined,
                 "id": "group1A",
+                "isElasticInternalLink": false,
                 "path": "group1.group1A",
                 "sideNavStatus": "visible",
                 "title": "Group1A",
@@ -262,6 +275,7 @@ describe('builds navigation tree', () => {
             "defaultIsCollapsed": false,
             "href": undefined,
             "id": "group1",
+            "isElasticInternalLink": false,
             "path": "group1",
             "sideNavStatus": "visible",
             "title": "",
@@ -606,28 +620,28 @@ describe('builds navigation tree', () => {
 
         {
           const userAndRolesLink = await findByTestId(/nav-item-group1.cloudLink1/);
-          expect(userAndRolesLink.textContent).toBe('Mock Users & RolesExternal link');
+          expect(userAndRolesLink.textContent).toBe('Mock Users & Roles');
           const href = userAndRolesLink.getAttribute('href');
           expect(href).toBe(stripLastChar(mockCloudLinks.userAndRoles?.href));
         }
 
         {
           const performanceLink = await findByTestId(/nav-item-group1.cloudLink2/);
-          expect(performanceLink.textContent).toBe('Mock PerformanceExternal link');
+          expect(performanceLink.textContent).toBe('Mock Performance');
           const href = performanceLink.getAttribute('href');
           expect(href).toBe(stripLastChar(mockCloudLinks.performance?.href));
         }
 
         {
           const billingLink = await findByTestId(/nav-item-group1.cloudLink3/);
-          expect(billingLink.textContent).toBe('Mock Billing & SubscriptionsExternal link');
+          expect(billingLink.textContent).toBe('Mock Billing & Subscriptions');
           const href = billingLink.getAttribute('href');
           expect(href).toBe(stripLastChar(mockCloudLinks.billingAndSub?.href));
         }
 
         {
           const deploymentLink = await findByTestId(/nav-item-group1.cloudLink4/);
-          expect(deploymentLink.textContent).toBe('Mock DeploymentExternal link');
+          expect(deploymentLink.textContent).toBe('Mock Deployment');
           const href = deploymentLink.getAttribute('href');
           expect(href).toBe(stripLastChar(mockCloudLinks.deployment?.href));
         }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   DESCRIPTION_TITLE_TEST_ID,
@@ -19,6 +19,8 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/types';
+import { i18n } from '@kbn/i18n';
 
 const ruleUuid = {
   category: 'kibana',
@@ -46,7 +48,7 @@ const ruleName = {
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]) =>
   ({
@@ -135,11 +137,9 @@ describe('<Description />', () => {
           indexName: panelContext.indexName,
           scopeId: panelContext.scopeId,
           banner: {
-            title: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
-                defaultMessage="Preview rule details"
-              />
+            title: i18n.translate(
+              'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
+              { defaultMessage: 'Preview rule details' }
             ),
             backgroundColor: 'warning',
             textColor: 'warning',

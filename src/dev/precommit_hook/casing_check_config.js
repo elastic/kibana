@@ -37,7 +37,6 @@ export const IGNORE_FILE_GLOBS = [
   'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
-  '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',

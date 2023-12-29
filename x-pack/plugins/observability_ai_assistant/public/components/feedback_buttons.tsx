@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { useKibana } from '../hooks/use_kibana';
 
 export type Feedback = 'positive' | 'negative';
 
@@ -15,7 +16,28 @@ interface FeedbackButtonsProps {
   onClickFeedback: (feedback: Feedback) => void;
 }
 
+const THANK_YOU_MESSAGE = i18n.translate(
+  'xpack.observabilityAiAssistant.feedbackButtons.em.thanksForYourFeedbackLabel',
+  { defaultMessage: 'Thanks for your feedback' }
+);
+
 export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
+  const { notifications } = useKibana().services;
+
+  const [hasBeenClicked, setHasBeenClicked] = useState(false);
+
+  const handleClickPositive = () => {
+    onClickFeedback('positive');
+    setHasBeenClicked(true);
+    notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
+  };
+
+  const handleClickNegative = () => {
+    onClickFeedback('negative');
+    setHasBeenClicked(true);
+    notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
+  };
+
   return (
     <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -34,9 +56,10 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
             <EuiButtonEmpty
               data-test-subj="observabilityAiAssistantFeedbackButtonsPositiveButton"
               color="success"
+              disabled={hasBeenClicked}
               iconType="faceHappy"
               size="s"
-              onClick={() => onClickFeedback('positive')}
+              onClick={handleClickPositive}
             >
               {i18n.translate('xpack.observabilityAiAssistant.insight.feedbackButtons.positive', {
                 defaultMessage: 'Yes',
@@ -48,9 +71,10 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
             <EuiButtonEmpty
               data-test-subj="observabilityAiAssistantFeedbackButtonsNegativeButton"
               color="danger"
+              disabled={hasBeenClicked}
               iconType="faceSad"
               size="s"
-              onClick={() => onClickFeedback('negative')}
+              onClick={handleClickNegative}
             >
               {i18n.translate('xpack.observabilityAiAssistant.insight.feedbackButtons.negative', {
                 defaultMessage: 'No',

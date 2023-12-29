@@ -8,10 +8,11 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
-  mockManagedUser,
+  mockManagedUserData,
   mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
@@ -20,7 +21,9 @@ import { UserPanelContent } from './content';
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
   panels: {},
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
+
+const riskScoreData = { ...mockRiskScoreState, data: [] };
 
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
@@ -34,61 +37,48 @@ storiesOf('Components/UserPanelContent', module)
   ))
   .add('default', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('integration disabled', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: false,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('no managed data', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('no observed data', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -114,26 +104,19 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('loading', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: true,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: true,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: true,
-          date: undefined,
-        },
       }}
       observedUser={{
         details: {
@@ -160,9 +143,10 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ));
