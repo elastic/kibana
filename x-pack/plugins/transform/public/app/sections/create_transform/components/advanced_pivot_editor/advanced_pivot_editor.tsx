@@ -5,73 +5,91 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
+import React, { useEffect, useRef, type FC } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { StepDefineFormHook } from '../step_define';
+import { useWizardActions } from '../../state_management/create_transform_store';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
-export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> = memo(
-  ({
-    actions: { convertToJson, setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled },
-    state: { advancedEditorConfigLastApplied, advancedEditorConfig, xJsonMode },
-  }) => {
-    return (
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
-          defaultMessage: 'Pivot configuration object',
-        })}
-        data-test-subj="transformAdvancedPivotEditor"
-      >
-        <CodeEditor
-          height={250}
-          languageId={'json'}
-          onChange={(d: string) => {
-            setAdvancedEditorConfig(d);
+const { collapseLiteralStrings, useXJsonMode } = XJson;
 
-            // Disable the "Apply"-Button if the config hasn't changed.
-            if (advancedEditorConfigLastApplied === d) {
-              setAdvancedPivotEditorApplyButtonEnabled(false);
-              return;
-            }
+export const AdvancedPivotEditor: FC = () => {
+  const initialized = useRef(false);
 
-            // Try to parse the string passed on from the editor.
-            // If parsing fails, the "Apply"-Button will be disabled
-            try {
-              JSON.parse(convertToJson(d));
-              setAdvancedPivotEditorApplyButtonEnabled(true);
-            } catch (e) {
-              setAdvancedPivotEditorApplyButtonEnabled(false);
-            }
-          }}
-          options={{
-            ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
-              defaultMessage: 'Advanced pivot editor',
-            }),
-            automaticLayout: true,
-            fontSize: 12,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          value={advancedEditorConfig}
-        />
-      </EuiFormRow>
-    );
-  },
-  (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))
-);
+  const { setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled } = useWizardActions();
+  const advancedEditorConfigLastApplied = useWizardSelector(
+    (s) => s.advancedPivotEditor.advancedEditorConfigLastApplied
+  );
+  const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
 
-function pickProps(props: StepDefineFormHook['advancedPivotEditor']) {
-  return [props.state.advancedEditorConfigLastApplied, props.state.advancedEditorConfig];
-}
+  const { setXJson, xJson } = useXJsonMode(null);
+
+  useEffect(() => {
+    if (xJson !== advancedEditorConfig && initialized.current) {
+      setAdvancedEditorConfig(xJson);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [xJson]);
+
+  useEffect(() => {
+    if (xJson !== advancedEditorConfig) {
+      setXJson(advancedEditorConfig);
+      initialized.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [advancedEditorConfig]);
+
+  return (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorLabel', {
+        defaultMessage: 'Pivot configuration object',
+      })}
+      data-test-subj="transformAdvancedPivotEditor"
+    >
+      <CodeEditor
+        height={250}
+        languageId={'json'}
+        onChange={(d: string) => {
+          setXJson(d);
+
+          // Disable the "Apply"-Button if the config hasn't changed.
+          if (advancedEditorConfigLastApplied === d) {
+            setAdvancedPivotEditorApplyButtonEnabled(false);
+            return;
+          }
+
+          // Try to parse the string passed on from the editor.
+          // If parsing fails, the "Apply"-Button will be disabled
+          try {
+            JSON.parse(collapseLiteralStrings(d));
+            setAdvancedPivotEditorApplyButtonEnabled(true);
+          } catch (e) {
+            setAdvancedPivotEditorApplyButtonEnabled(false);
+          }
+        }}
+        options={{
+          ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
+            defaultMessage: 'Advanced pivot editor',
+          }),
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={xJson}
+      />
+    </EuiFormRow>
+  );
+};

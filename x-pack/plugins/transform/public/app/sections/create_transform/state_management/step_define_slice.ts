@@ -31,9 +31,6 @@ export const stepDefineSlice = createSlice({
   name: 'stepDefine',
   initialState: getDefaultStepDefineState(),
   reducers: {
-    setAdvancedPivotEditorEnabled: (state, action: PayloadAction<boolean>) => {
-      state.isAdvancedPivotEditorEnabled = action.payload;
-    },
     setAdvancedSourceEditorEnabled: (state, action: PayloadAction<boolean>) => {
       state.isAdvancedSourceEditorEnabled = action.payload;
     },

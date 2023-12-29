@@ -235,7 +235,6 @@ describe('Transform: Common', () => {
     const transformConfigState: StepDefineExposedState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
-      isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
@@ -315,7 +314,6 @@ describe('Transform: Common', () => {
     const pivotState: StepDefineExposedState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
-      isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,

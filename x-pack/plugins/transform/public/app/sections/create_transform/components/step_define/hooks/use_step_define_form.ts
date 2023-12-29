@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getPreviewTransformRequestBody, getTransformConfigQuery } from '../../../../../common';
+import { getPreviewTransformRequestBody } from '../../../../../common';
 
-import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';
 import { useDatePicker } from './use_date_picker';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
+import { useWizardActions } from '../../../state_management/create_transform_store';
 import { useWizardContext } from '../../wizard/wizard';
 import { useWizardSelector } from '../../../state_management/create_transform_store';
-import { selectRequestPayload } from '../../../state_management/step_define_selectors';
+import {
+  selectRequestPayload,
+  selectTransformConfigQuery,
+} from '../../../state_management/step_define_selectors';
 import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
@@ -29,23 +33,36 @@ export const useStepDefineForm = () => {
 
   const datePicker = useDatePicker();
   const searchBar = useSearchBar();
+
   const requestPayload = useSelector(selectRequestPayload);
+  const transformConfigQuery = useSelector(selectTransformConfigQuery);
+  const isAdvancedPivotEditorEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
+  );
+  const { setAdvancedEditorConfig, setAdvancedEditorConfigLastApplied } = useWizardActions();
 
   const latestFunctionConfig = useLatestFunctionConfig();
 
-  const transformConfigQuery = useWizardSelector((s) =>
-    getTransformConfigQuery(s.stepDefine.searchQuery)
+  const previewRequest = useMemo(
+    () =>
+      getPreviewTransformRequestBody(
+        dataView,
+        transformConfigQuery,
+        requestPayload,
+        runtimeMappings
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transformConfigQuery, requestPayload, runtimeMappings]
   );
 
-  const previewRequest = getPreviewTransformRequestBody(
-    dataView,
-    transformConfigQuery,
-    requestPayload,
-    runtimeMappings
-  );
-
-  // pivot config hook
-  const advancedPivotEditor = useAdvancedPivotEditor(previewRequest);
+  useEffect(() => {
+    if (!isAdvancedPivotEditorEnabled) {
+      const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+      setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
+      setAdvancedEditorConfig(stringifiedPivotConfig);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdvancedPivotEditorEnabled, previewRequest]);
 
   // source config hook
   const advancedSourceEditor = useAdvancedSourceEditor(previewRequest);
@@ -54,7 +71,6 @@ export const useStepDefineForm = () => {
   const runtimeMappingsEditor = useAdvancedRuntimeMappingsEditor();
 
   return {
-    advancedPivotEditor,
     advancedSourceEditor,
     runtimeMappingsEditor,
     datePicker,

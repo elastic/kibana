@@ -20,6 +20,10 @@ import {
 import type { StepDefineExposedState } from '../components/step_define';
 import type { StepDetailsExposedState } from '../components/step_details';
 
+import {
+  advancedPivotEditorSlice,
+  type AdvancedPivotEditorState,
+} from './advanced_pivot_editor_slice';
 import { stepDefineSlice } from './step_define_slice';
 import { stepDetailsSlice } from './step_details_slice';
 import { wizardSlice, type WizardState } from './wizard_slice';
@@ -28,6 +32,7 @@ export interface StoreState {
   wizard: WizardState;
   stepDefine: StepDefineExposedState;
   stepDetails: StepDetailsExposedState | null;
+  advancedPivotEditor: AdvancedPivotEditorState;
 }
 
 export const getTransformWizardStore = () =>
@@ -36,6 +41,7 @@ export const getTransformWizardStore = () =>
       wizard: wizardSlice.reducer,
       stepDefine: stepDefineSlice.reducer,
       stepDetails: stepDetailsSlice.reducer,
+      advancedPivotEditor: advancedPivotEditorSlice.reducer,
     },
   });
 
@@ -50,6 +56,7 @@ export function useWizardActions() {
           ...wizardSlice.actions,
           ...stepDefineSlice.actions,
           ...stepDetailsSlice.actions,
+          ...advancedPivotEditorSlice.actions,
         },
         dispatch
       ),

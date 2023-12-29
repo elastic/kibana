@@ -35,6 +35,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
@@ -81,6 +82,8 @@ import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
 
+const { collapseLiteralStrings } = XJson;
+
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
@@ -98,7 +101,7 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   </>
 );
 
-export const StepDefineForm: FC = React.memo(() => {
+export const StepDefineForm: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
@@ -113,6 +116,7 @@ export const StepDefineForm: FC = React.memo(() => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm();
+  const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const isAdvancedSourceEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isAdvancedSourceEditorEnabled
   );
@@ -120,9 +124,14 @@ export const StepDefineForm: FC = React.memo(() => {
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
   const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
-  const { setAggList, setGroupByList, setSearchQuery } = useWizardActions();
+  const {
+    setAdvancedEditorConfigLastApplied,
+    setAdvancedPivotEditorApplyButtonEnabled,
+    setAggList,
+    setGroupByList,
+    setSearchQuery,
+  } = useWizardActions();
 
-  const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const { advancedEditorSourceConfig, isAdvancedSourceEditorApplyButtonEnabled } =
     stepDefineForm.advancedSourceEditor.state;
 
@@ -202,9 +211,7 @@ export const StepDefineForm: FC = React.memo(() => {
   };
 
   const applyPivotChangesHandler = () => {
-    const pivot = JSON.parse(
-      stepDefineForm.advancedPivotEditor.actions.convertToJson(advancedEditorConfig)
-    );
+    const pivot = JSON.parse(collapseLiteralStrings(advancedEditorConfig));
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivot !== undefined && pivot.group_by !== undefined) {
@@ -234,10 +241,8 @@ export const StepDefineForm: FC = React.memo(() => {
     }
     setAggList(newAggList);
 
-    stepDefineForm.advancedPivotEditor.actions.setAdvancedEditorConfigLastApplied(
-      advancedEditorConfig
-    );
-    stepDefineForm.advancedPivotEditor.actions.setAdvancedPivotEditorApplyButtonEnabled(false);
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+    setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
   const { esQueryDsl } = useDocumentationLinks();
@@ -508,4 +513,4 @@ export const StepDefineForm: FC = React.memo(() => {
       )}
     </div>
   );
-});
+};

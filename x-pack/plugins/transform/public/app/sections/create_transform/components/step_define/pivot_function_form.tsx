@@ -29,6 +29,8 @@ import { PivotConfiguration } from '../pivot_configuration';
 
 import type { StepDefineFormHook } from './hooks/use_step_define_form';
 
+import { useWizardSelector } from '../../state_management/create_transform_store';
+
 const advancedEditorsSidebarWidth = '220px';
 
 interface PivotFunctionFormProps {
@@ -46,17 +48,19 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
 }) => {
   const { esTransformPivot } = useDocumentationLinks();
 
-  const { isAdvancedPivotEditorEnabled, isAdvancedPivotEditorApplyButtonEnabled } =
-    stepDefineForm.advancedPivotEditor.state;
+  const isAdvancedPivotEditorEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
+  );
+  const isAdvancedPivotEditorApplyButtonEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorApplyButtonEnabled
+  );
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       {/* Flex Column #1: Pivot Config Form / Advanced Pivot Config Editor */}
       <EuiFlexItem>
-        {!isAdvancedPivotEditorEnabled && <PivotConfiguration {...stepDefineForm.pivotConfig} />}
-        {isAdvancedPivotEditorEnabled && (
-          <AdvancedPivotEditor {...stepDefineForm.advancedPivotEditor} />
-        )}
+        {!isAdvancedPivotEditorEnabled && <PivotConfiguration />}
+        {isAdvancedPivotEditorEnabled && <AdvancedPivotEditor />}
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
         <EuiFlexGroup gutterSize="xs" direction="column" justifyContent="spaceBetween">
@@ -64,7 +68,7 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
             <EuiFormRow hasEmptyLabelSpace>
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <AdvancedPivotEditorSwitch {...stepDefineForm} />
+                  <AdvancedPivotEditorSwitch />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiCopy

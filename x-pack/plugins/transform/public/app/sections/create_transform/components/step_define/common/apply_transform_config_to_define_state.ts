@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { Dictionary } from '../../../../../../../common/types/common';
@@ -29,14 +30,13 @@ import {
 import { StepDefineExposedState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
-import { StepDefineFormProps } from '../step_define_form';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
   transformConfig?: TransformBaseConfig,
-  dataView?: StepDefineFormProps['searchItems']['dataView']
+  dataView?: DataView
 ): StepDefineExposedState {
   // apply runtime fields from both the index pattern and inline configurations
   state.runtimeMappings = getCombinedRuntimeMappings(

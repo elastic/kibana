@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
 
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
@@ -15,13 +16,11 @@ import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { StepDefineFormHook } from '../step_define';
 
+const { collapseLiteralStrings } = XJson;
+
 export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
   ({
-    actions: {
-      convertToJson,
-      setAdvancedRuntimeMappingsConfig,
-      setRuntimeMappingsEditorApplyButtonEnabled,
-    },
+    actions: { setAdvancedRuntimeMappingsConfig, setRuntimeMappingsEditorApplyButtonEnabled },
     state: { advancedEditorRuntimeMappingsLastApplied, advancedRuntimeMappingsConfig, xJsonMode },
   }) => {
     return (
@@ -44,7 +43,7 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
               // if the user deletes the json in the editor
               // they should still be able to apply changes
               const isEmptyStr = d === '';
-              const parsedJson = isEmptyStr ? {} : JSON.parse(convertToJson(d));
+              const parsedJson = isEmptyStr ? {} : JSON.parse(collapseLiteralStrings(d));
               setRuntimeMappingsEditorApplyButtonEnabled(
                 isEmptyStr || isRuntimeMappings(parsedJson)
               );

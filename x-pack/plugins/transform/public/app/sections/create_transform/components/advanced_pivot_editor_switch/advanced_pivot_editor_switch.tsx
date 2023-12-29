@@ -13,20 +13,24 @@ import { i18n } from '@kbn/i18n';
 
 import { SwitchModal } from '../switch_modal';
 
-import { StepDefineFormHook } from '../step_define';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
-export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
-  advancedPivotEditor: {
-    actions: { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor },
-    state: {
-      advancedEditorConfig,
-      advancedEditorConfigLastApplied,
-      isAdvancedEditorSwitchModalVisible,
-      isAdvancedPivotEditorEnabled,
-      isAdvancedPivotEditorApplyButtonEnabled,
-    },
-  },
-}) => {
+export const AdvancedPivotEditorSwitch: FC = () => {
+  const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
+  const advancedEditorConfigLastApplied = useWizardSelector(
+    (s) => s.advancedPivotEditor.advancedEditorConfigLastApplied
+  );
+  const isAdvancedPivotEditorApplyButtonEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorApplyButtonEnabled
+  );
+  const isAdvancedPivotEditorEnabled = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
+  );
+  const isAdvancedEditorSwitchModalVisible = useWizardSelector(
+    (s) => s.advancedPivotEditor.isAdvancedEditorSwitchModalVisible
+  );
+  const { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor } = useWizardActions();
+
   return (
     <EuiFormRow>
       <EuiFlexGroup gutterSize="none">

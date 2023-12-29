@@ -39,11 +39,8 @@ export const useAdvancedRuntimeMappingsEditor = () => {
   const [advancedEditorRuntimeMappingsLastApplied, setAdvancedEditorRuntimeMappingsLastApplied] =
     useState(stringifiedRuntimeMappings);
 
-  const {
-    convertToJson,
-    setXJson: setAdvancedRuntimeMappingsConfig,
-    xJson: advancedRuntimeMappingsConfig,
-  } = useXJsonMode(stringifiedRuntimeMappings ?? '');
+  const { setXJson: setAdvancedRuntimeMappingsConfig, xJson: advancedRuntimeMappingsConfig } =
+    useXJsonMode(stringifiedRuntimeMappings ?? '');
 
   const applyRuntimeMappingsEditorChanges = () => {
     const parsedRuntimeMappings =
@@ -73,7 +70,6 @@ export const useAdvancedRuntimeMappingsEditor = () => {
       setAdvancedEditorRuntimeMappingsLastApplied,
       setRuntimeMappingsEditorSwitchModalVisible,
       toggleRuntimeMappingsEditor,
-      convertToJson,
       setAdvancedRuntimeMappingsConfig,
     },
     state: {

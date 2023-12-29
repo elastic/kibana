@@ -36,7 +36,7 @@ export const selectPivotValidationStatus = createSelector(selectRequestPayload, 
 
 export const selectTransformConfigQuery = createSelector(
   (state: StoreState) => state.stepDefine.searchQuery,
-  getTransformConfigQuery
+  (s) => getTransformConfigQuery(s)
 );
 
 export const selectCopyToClipboardPreviewRequest = createSelector(

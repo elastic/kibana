@@ -55,7 +55,6 @@ describe('Transform: <DefinePivotSummary />', () => {
     const formState: StepDefineExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
-      isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
@@ -82,7 +81,7 @@ describe('Transform: <DefinePivotSummary />', () => {
     const { queryByText } = render(
       <QueryClientProvider client={queryClient}>
         <MlSharedContext.Provider value={mlSharedImports}>
-          <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
+          <StepDefineSummary />
         </MlSharedContext.Provider>
       </QueryClientProvider>
     );

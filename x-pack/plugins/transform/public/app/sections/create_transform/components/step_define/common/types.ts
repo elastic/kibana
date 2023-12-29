@@ -39,7 +39,6 @@ export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;
   latestConfig: LatestFunctionConfigUI;
-  isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
   searchLanguage: QUERY_LANGUAGE;
   searchString: string | undefined;

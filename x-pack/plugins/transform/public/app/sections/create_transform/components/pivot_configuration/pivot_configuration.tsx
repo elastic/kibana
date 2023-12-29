@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, FC, useMemo } from 'react';
+import React, { type FC, useMemo } from 'react';
 
 import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 
@@ -23,7 +23,7 @@ import { GroupByListForm } from '../group_by_list';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { useWizardContext } from '../wizard/wizard';
 
-export const PivotConfiguration: FC = memo(() => {
+export const PivotConfiguration: FC = () => {
   const {
     ml: { useFieldStatsTrigger, FieldStatsInfoButton },
   } = useAppDependencies();
@@ -133,4 +133,4 @@ export const PivotConfiguration: FC = memo(() => {
       </EuiFormRow>
     </>
   );
-});
+};

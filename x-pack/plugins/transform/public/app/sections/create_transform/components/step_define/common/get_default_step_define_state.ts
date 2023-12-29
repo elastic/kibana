@@ -19,7 +19,6 @@ export function getDefaultStepDefineState(searchItems?: SearchItems): StepDefine
     latestConfig: {} as LatestFunctionConfigUI,
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
-    isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
     isDatePickerApplyEnabled: false,
     searchLanguage: QUERY_LANGUAGE_KUERY,
