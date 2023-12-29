@@ -23,13 +23,13 @@ import { SeverityControl } from '../../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
-import {
+import type {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
 } from '../../../common/types/alerts';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
-import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
 import { parseInterval } from '../../../common/util/parse_interval';

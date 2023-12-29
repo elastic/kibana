@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
+import { type MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
 import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 
