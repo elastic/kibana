@@ -5,7 +5,16 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSwitch,
+  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiIconTip,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
@@ -122,6 +131,9 @@ export const DataDriftView = ({
     searchQueryLanguage,
   });
 
+  // @TODO: remove
+  console.log(`--@@result`, result);
+
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
 
@@ -153,32 +165,64 @@ export const DataDriftView = ({
 
   const requiresWindowParameters = dataView?.isTimeBased() && windowParameters === undefined;
 
-  return requiresWindowParameters ? (
-    <EuiEmptyPrompt
-      color="subdued"
-      hasShadow={false}
-      hasBorder={false}
-      css={{ minWidth: '100%' }}
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
-            defaultMessage="Click and select a time range for Reference and Comparison data in the histogram chart to compare data distribution."
-          />
-        </h2>
-      }
-      titleSize="xs"
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
-            defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
-          />
-        </p>
-      }
-      data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
-    />
-  ) : (
+  const showRunAnalysisHint = result.status === 'not_initiated';
+
+  if (requiresWindowParameters) {
+    return (
+      <EuiEmptyPrompt
+        color="subdued"
+        hasShadow={false}
+        hasBorder={false}
+        css={{ minWidth: '100%' }}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.dataVisualizer.dataDrift.emptyPromptTitle"
+              defaultMessage="Click and select a time range for Reference and Comparison data in the histogram chart to compare data distribution."
+            />
+          </h2>
+        }
+        titleSize="xs"
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
+              defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
+            />
+          </p>
+        }
+        data-test-subj="dataDriftNoWindowParametersEmptyPrompt"
+      />
+    );
+  }
+  if (showRunAnalysisHint) {
+    return (
+      <EuiEmptyPrompt
+        color="subdued"
+        hasShadow={false}
+        hasBorder={false}
+        css={{ minWidth: '100%' }}
+        body={
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
+                defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
+              />
+            </p>
+            <EuiButton fill size="m" onClick={refresh}>
+              <FormattedMessage
+                id="xpack.aiops.rerunAnalysisButtonTitle"
+                defaultMessage="Run analysis"
+              />
+            </EuiButton>
+          </>
+        }
+        data-test-subj="dataDriftRunAnalysisEmptyPrompt"
+      />
+    );
+  }
+  return (
     <div>
       <ProgressControls
         isBrushCleared={isBrushCleared}
