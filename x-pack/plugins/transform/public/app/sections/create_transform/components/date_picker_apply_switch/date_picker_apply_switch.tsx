@@ -11,14 +11,12 @@ import { EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { StepDefineFormHook } from '../step_define';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
-export const DatePickerApplySwitch: FC<StepDefineFormHook> = ({
-  datePicker: {
-    actions: { setDatePickerApplyEnabled },
-    state: { isDatePickerApplyEnabled },
-  },
-}) => {
+export const DatePickerApplySwitch: FC = () => {
+  const isDatePickerApplyEnabled = useWizardSelector((s) => s.stepDefine.isDatePickerApplyEnabled);
+  const { setDatePickerApplyEnabled } = useWizardActions();
+
   return (
     <EuiSwitch
       label={i18n.translate('xpack.transform.stepDefineForm.datePickerApplySwitchLabel', {

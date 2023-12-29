@@ -79,6 +79,7 @@ export const Wizard: FC = React.memo(() => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
   const stepDetailsState = useWizardSelector((s) => s.stepDetails);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const {
     setAdvancedSourceEditorEnabled,
     setCurrentStep,
@@ -130,7 +131,8 @@ export const Wizard: FC = React.memo(() => {
               transformConfig={getCreateTransformRequestBody(
                 dataView,
                 stepDefineState,
-                stepDetailsState
+                stepDetailsState,
+                runtimeMappings
               )}
               onChange={setStepCreateState}
               overrides={stepCreateState}
@@ -154,6 +156,7 @@ export const Wizard: FC = React.memo(() => {
     stepDetailsState,
     stepCreateState,
     stepDefineState,
+    runtimeMappings,
   ]);
 
   const euiStepsConfig = [euiStepDefine, euiStepDetails, stepCreate];
@@ -183,7 +186,8 @@ export const Wizard: FC = React.memo(() => {
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={stepDefineState.timeRangeMs}
       dslQuery={
-        getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState).source.query
+        getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState, runtimeMappings)
+          .source.query
       }
     >
       <UrlStateProvider>

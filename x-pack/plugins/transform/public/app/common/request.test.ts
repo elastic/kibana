@@ -274,7 +274,8 @@ describe('Transform: Common', () => {
     const request = getCreateTransformRequestBody(
       { getIndexPattern: () => 'the-data-view-title' } as DataView,
       transformConfigState,
-      transformDetailsState
+      transformDetailsState,
+      {}
     );
 
     expect(request).toEqual({
@@ -349,7 +350,8 @@ describe('Transform: Common', () => {
     const request = getCreateTransformRequestBody(
       { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
-      transformDetailsState
+      transformDetailsState,
+      {}
     );
 
     expect(request).toEqual({

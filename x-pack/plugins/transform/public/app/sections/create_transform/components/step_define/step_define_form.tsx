@@ -77,6 +77,7 @@ import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
+import { useDatePicker } from './hooks/use_date_picker';
 import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
@@ -115,6 +116,7 @@ export const StepDefineForm: FC = () => {
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
   const toastNotifications = useToastNotifications();
+  const { hasValidTimeField } = useDatePicker();
   const stepDefineForm = useStepDefineForm();
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const isAdvancedSourceEditorEnabled = useWizardSelector(
@@ -251,11 +253,6 @@ export const StepDefineForm: FC = () => {
 
   const { esQueryDsl } = useDocumentationLinks();
 
-  const hasValidTimeField = useMemo(
-    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
-    [dataView.timeFieldName]
-  );
-
   const timefilter = useTimefilter({
     timeRangeSelector: dataView?.timeFieldName !== undefined,
     autoRefreshSelector: false,
@@ -349,9 +346,7 @@ export const StepDefineForm: FC = () => {
                 {ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG && (
                   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      {searchItems.savedSearch === undefined && (
-                        <DatePickerApplySwitch {...stepDefineForm} />
-                      )}
+                      {searchItems.savedSearch === undefined && <DatePickerApplySwitch />}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}

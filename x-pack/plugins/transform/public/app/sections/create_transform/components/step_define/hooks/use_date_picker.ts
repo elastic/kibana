@@ -77,7 +77,5 @@ export const useDatePicker = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeMs]);
 
-  return {
-    state: { hasValidTimeField, timeRange },
-  };
+  return { hasValidTimeField, timeRange };
 };

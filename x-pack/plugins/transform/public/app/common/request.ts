@@ -40,6 +40,8 @@ import {
   PivotGroupByConfig,
 } from '.';
 
+import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
+
 export interface SimpleQuery {
   query_string: {
     query: string;
@@ -167,7 +169,7 @@ export function getPreviewTransformRequestBody(
   dataView: DataView,
   transformConfigQuery: TransformConfigQuery,
   partialRequest?: StepDefineExposedState['previewRequest'],
-  runtimeMappings?: StepDefineExposedState['runtimeMappings'],
+  runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
   timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
@@ -229,13 +231,14 @@ export const getCreateTransformSettingsRequestBody = (
 export const getCreateTransformRequestBody = (
   dataView: DataView,
   transformConfigState: StepDefineExposedState,
-  transformDetailsState: StepDetailsExposedState
+  transformDetailsState: StepDetailsExposedState,
+  runtimeMappings: AdvancedRuntimeMappingsEditorState['runtimeMappings']
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     dataView,
     getTransformConfigQuery(transformConfigState.searchQuery),
     transformConfigState.previewRequest,
-    transformConfigState.runtimeMappings,
+    runtimeMappings,
     transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
       ? transformConfigState.timeRangeMs
       : undefined
