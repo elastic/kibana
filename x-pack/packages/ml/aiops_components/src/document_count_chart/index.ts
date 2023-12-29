@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { DocumentCountChartWithBrush } from '@kbn/data-visualizer-plugin/public/application/data_drift/document_count_chart_single_brush/document_count_chart_singular';
 export { DocumentCountChart } from './document_count_chart';
 export type {
   BrushSelectionUpdateHandler,

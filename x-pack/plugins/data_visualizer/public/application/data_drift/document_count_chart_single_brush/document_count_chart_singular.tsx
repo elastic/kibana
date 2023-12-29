@@ -29,8 +29,6 @@ import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
-  getSnappedWindowParameters,
-  getWindowParameters,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
 } from '@kbn/aiops-utils';
@@ -40,7 +38,11 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrushAnnotation } from '@kbn/aiops-components';
-import { SingleBrush } from './single_brush';
+import {
+  SingleBrush,
+  getSingleBrushWindowParameters,
+  getSnappedWindowParameters as getSnappedSingleBrushWindowParameters,
+} from './single_brush';
 
 declare global {
   interface Window {
@@ -304,13 +306,13 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
         ) {
           const wp =
             typeof startRange === 'number'
-              ? getWindowParameters(
+              ? getSingleBrushWindowParameters(
                   startRange + interval / 2,
                   timeRangeEarliest,
                   timeRangeLatest + interval
                 )
               : startRange;
-          const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+          const wpSnap = getSnappedSingleBrushWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
 

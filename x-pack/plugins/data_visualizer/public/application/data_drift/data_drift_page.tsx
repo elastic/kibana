@@ -267,7 +267,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const brushRangesRef = useRef<Partial<WindowParameters>>({});
 
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
+    number | SingleBrushWindowParameters | undefined
   >();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
 
@@ -289,7 +289,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   );
 
   const comparisonBrushSelectionUpdate = useCallback(
-    function comparisonBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean, id) {
+    function comparisonBrushSelectionUpdate(d: SingleBrushWindowParameters, force: boolean) {
       if (!isBrushCleared || force) {
         const clone = cloneDeep(brushRangesRef.current);
         clone.deviationMin = d.min;

@@ -7,7 +7,6 @@
 
 import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
-import { DocumentCountChartWithBrush } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSettings, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
@@ -22,6 +21,7 @@ import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
 import { getDataTestSubject } from '../common/util/get_data_test_subject';
+import { DocumentCountChartWithBrush } from './document_count_chart_single_brush';
 
 export type BrushSelectionUpdateHandler = (
   windowParameters: SingleBrushWindowParameters,
@@ -31,6 +31,7 @@ export type BrushSelectionUpdateHandler = (
 export interface DocumentCountContentProps
   extends Omit<
     DocumentCountChartProps,
+    | 'brushSelectionUpdateHandler'
     | 'dependencies'
     | 'chartPoints'
     | 'timeRangeEarliest'
@@ -46,17 +47,17 @@ export interface DocumentCountContentProps
   isBrushCleared: boolean;
   totalCount: number;
   sampleProbability: number;
-  initialAnalysisStart?: number | WindowParameters;
+  initialAnalysisStart?: number | SingleBrushWindowParameters;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  incomingInitialAnalysisStart?: number | WindowParameters;
+  incomingInitialAnalysisStart?: number | SingleBrushWindowParameters;
   randomSampler: RandomSampler;
   reload: () => void;
   approximate: boolean;
   stateManager: DataDriftStateManager;
-  label?: Element | string;
+  label?: React.ReactElement | string;
   id?: string;
 }
 
