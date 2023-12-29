@@ -28,6 +28,7 @@
     "@kbn/es-types",
     "@kbn/deeplinks-observability",
     "@kbn/router-utils",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
