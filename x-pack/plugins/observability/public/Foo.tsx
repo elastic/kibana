@@ -10,5 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { AlertStatusIndicator } from './components/alert_status_indicator';
 
 export function Foo() {
-  return null;
+  return (
+    <div>
+      <AlertStatusIndicator />
+      {i18n.translate('xpack.observability.foo.div.helloLabel', { defaultMessage: 'hello' })}
+    </div>
+  );
 }
