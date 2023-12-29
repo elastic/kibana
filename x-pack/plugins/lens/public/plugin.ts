@@ -384,8 +384,8 @@ export class LensPlugin {
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           theme: core.theme,
-          overlays: startServices().core.overlays,
-          i18nStart: startServices().core.i18n,
+          overlays: () => startServices().core.overlays,
+          i18nStart: () => startServices().core.i18n,
         })
       );
     }
