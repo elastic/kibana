@@ -12,8 +12,6 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiButton,
-  EuiFlexGroup,
-  EuiIconTip,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -210,10 +208,23 @@ export const DataDriftView = ({
                 defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
               />
             </p>
-            <EuiButton fill size="m" onClick={refresh}>
+
+            <EuiButton
+              fill
+              size="m"
+              onClick={refresh}
+              iconType="visTagCloud"
+              data-test-subj="analyzeDataDriftWithoutSavingButton"
+              aria-label={i18n.translate(
+                'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
+                {
+                  defaultMessage: 'Analyze data drift',
+                }
+              )}
+            >
               <FormattedMessage
-                id="xpack.aiops.rerunAnalysisButtonTitle"
-                defaultMessage="Run analysis"
+                id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
+                defaultMessage="Analyze data drift"
               />
             </EuiButton>
           </>
