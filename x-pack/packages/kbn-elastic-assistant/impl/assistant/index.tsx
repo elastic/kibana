@@ -83,7 +83,7 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     promptContexts,
     setLastConversationId,
-    localStorageLastConversationId,
+    getConversationId,
     title,
     allSystemPrompts,
   } = useAssistantContext();
@@ -113,12 +113,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isAssistantEnabled
-      ? // if a conversationId has been provided, use that
-        // if not, check local storage
-        // last resort, go to welcome conversation
-        conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
-      : WELCOME_CONVERSATION_TITLE
+    isAssistantEnabled ? getConversationId(conversationId) : WELCOME_CONVERSATION_TITLE
   );
 
   useEffect(() => {

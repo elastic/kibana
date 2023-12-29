@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition } from '@kbn/expression-xy-plugin/common';
-import { TooltipWrapper } from '@kbn/visualization-ui-components';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import { YAxisMode } from '../../types';
 
 import { idPrefix } from '../dimension_editor';
