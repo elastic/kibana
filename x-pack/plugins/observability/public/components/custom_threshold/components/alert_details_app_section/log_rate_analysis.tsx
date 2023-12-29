@@ -40,12 +40,12 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysis = ({
+export function LogRateAnalysis({
   alert,
   dataView,
   rule,
   services,
-}: AlertDetailsLogRateAnalysisProps) => {
+}: AlertDetailsLogRateAnalysisProps) {
   const {
     observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = services;
@@ -235,4 +235,4 @@ export const LogRateAnalysis = ({
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}
