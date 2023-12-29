@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
-import { CustomThresholdAlert, CustomThresholdRule } from '../components/alert_details_app_section';
+import {
+  CustomThresholdAlert,
+  CustomThresholdRule,
+} from '../components/alert_details_app_section/alert_details_app_section';
 
 export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}

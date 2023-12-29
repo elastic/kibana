@@ -23,7 +23,7 @@ import { ALERT_END } from '@kbn/rule-data-utils';
 import { CustomThresholdRuleTypeParams } from '../../types';
 import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
-import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
+import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
 import { getInitialAnalysisStart } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
@@ -47,7 +47,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisProps> = ({
   services,
 }) => {
   const {
-    logsShared,
     observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = services;
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
@@ -57,18 +56,12 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisProps> = ({
   >();
 
   useEffect(() => {
-    const getQuery = (timestampField: string) => {
-      const esSearchRequest = getESQueryForLogRateAnalysis(rule.params, timestampField, alert);
+    const esSearchRequest = getLogRateAnalysisEQQuery(alert, rule.params);
 
-      if (esSearchRequest) {
-        setEsSearchQuery(esSearchRequest);
-      }
-    };
-
-    if (dataView?.timeFieldName) {
-      getQuery(dataView.timeFieldName);
+    if (esSearchRequest) {
+      setEsSearchQuery(esSearchRequest);
     }
-  }, [alert, dataView, logsShared, rule.params]);
+  }, [alert, rule.params]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.

@@ -28,7 +28,6 @@
       "files",
       "inspector",
       "lens",
-      "logsShared",
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",

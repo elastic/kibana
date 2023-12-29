@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Aggregators, GroupBy } from '../../../../../../common/custom_threshold_rule/types';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
@@ -38,10 +39,9 @@ const getKuery = (
   return query;
 };
 
-export const getESQueryForLogRateAnalysis = (
-  params: CustomThresholdRuleTypeParams,
-  timestampField: string,
-  alert: TopAlert<Record<string, any>>
+export const getLogRateAnalysisEQQuery = (
+  alert: TopAlert<Record<string, any>>,
+  params: CustomThresholdRuleTypeParams
 ): QueryDslQueryContainer | undefined => {
   // We only show log rate analysis for one condition with one count aggregation
   if (
@@ -52,8 +52,8 @@ export const getESQueryForLogRateAnalysis = (
     return;
   }
 
-  const groupBy = alert.fields['kibana.alert.group'] as GroupBy;
-  const optionalFilter = (params.searchConfiguration.query as { query: string }).query;
+  const groupBy: GroupBy | undefined = get(alert, 'fields["kibana.alert.group"]');
+  const optionalFilter: string | undefined = get(params.searchConfiguration, 'query.query');
   const boolQuery = buildEsQuery({
     kuery: getKuery(params.criteria[0].metrics, optionalFilter, groupBy),
   });

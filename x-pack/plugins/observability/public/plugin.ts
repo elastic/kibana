@@ -32,10 +32,6 @@ import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-pl
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import {
-  LogsSharedClientSetupExports,
-  LogsSharedClientStartExports,
-} from '@kbn/logs-shared-plugin/public';
 import type {
   NavigationEntry,
   ObservabilitySharedPluginSetup,
@@ -129,7 +125,6 @@ export interface ObservabilityPublicPluginsSetup {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
-  logsShared: LogsSharedClientSetupExports;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
 }
@@ -148,7 +143,6 @@ export interface ObservabilityPublicPluginsStart {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
-  logsShared: LogsSharedClientStartExports;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
