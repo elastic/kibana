@@ -13,6 +13,7 @@ import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
   CspBenchmarkRule,
+  RulesToUpdate,
   CspBenchmarkRulesStates,
   CspSettings,
 } from '../../../../common/types/rules/v3';
@@ -118,23 +119,22 @@ export const updateRulesStates = async (
 export const setRulesStates = (
   ruleIds: string[],
   state: boolean,
-  benchmarkRules: CspBenchmarkRule[]
+  rulesToUpdate: RulesToUpdate
 ): CspBenchmarkRulesStates => {
   const rulesStates: CspBenchmarkRulesStates = {};
   ruleIds.forEach((ruleId, index) => {
-    const benchmarkRule = benchmarkRules[index];
+    const benchmarkRule = rulesToUpdate[index];
     rulesStates[ruleId] = {
       muted: state,
-      benchmark_id: benchmarkRule.metadata.benchmark.id,
-      benchmark_version: benchmarkRule.metadata.benchmark.version,
-      rule_number: benchmarkRule.metadata.benchmark.rule_number || '',
-      rule_id: benchmarkRule.metadata.id,
+      benchmark_id: benchmarkRule.benchmark_id,
+      benchmark_version: benchmarkRule.benchmark_version,
+      rule_number: benchmarkRule.rule_number,
+      rule_id: benchmarkRule.rule_id,
     };
   });
   return rulesStates;
 };
 
-export const buildRuleKey = (benchmarkRule: CspBenchmarkRule) => {
-  const ruleNumber = benchmarkRule.metadata.benchmark.rule_number;
-  return `${benchmarkRule.metadata.benchmark.id};${benchmarkRule.metadata.benchmark.version};${ruleNumber}`;
+export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
+  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
 };
