@@ -44,7 +44,7 @@ export const selectCopyToClipboardPreviewRequest = createSelector(
     (_: StoreState, dataView: DataView) => dataView,
     selectTransformConfigQuery,
     selectRequestPayload,
-    (state: StoreState) => state.stepDefine.runtimeMappings,
+    (state: StoreState) => state.advancedRuntimeMappingsEditor.runtimeMappings,
     (state: StoreState) => state.stepDefine.isDatePickerApplyEnabled,
     (state: StoreState) => state.stepDefine.timeRangeMs,
   ],

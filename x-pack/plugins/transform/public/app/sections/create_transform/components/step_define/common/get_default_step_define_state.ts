@@ -33,8 +33,5 @@ export function getDefaultStepDefineState(searchItems?: SearchItems): StepDefine
       isValid: false,
     },
     previewRequest: undefined,
-    runtimeMappings: undefined,
-    runtimeMappingsUpdated: false,
-    isRuntimeMappingsEditorEnabled: false,
   };
 }

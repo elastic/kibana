@@ -21,12 +21,11 @@ import {
   selectRequestPayload,
   selectTransformConfigQuery,
 } from '../../../state_management/step_define_selectors';
-import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
 export const useStepDefineForm = () => {
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
@@ -39,7 +38,15 @@ export const useStepDefineForm = () => {
   const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
   );
-  const { setAdvancedEditorConfig, setAdvancedEditorConfigLastApplied } = useWizardActions();
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
+  );
+  const {
+    setAdvancedEditorConfig,
+    setAdvancedEditorConfigLastApplied,
+    setAdvancedRuntimeMappingsConfig,
+    setAdvancedRuntimeMappingsConfigLastApplied,
+  } = useWizardActions();
 
   const latestFunctionConfig = useLatestFunctionConfig();
 
@@ -67,12 +74,17 @@ export const useStepDefineForm = () => {
   // source config hook
   const advancedSourceEditor = useAdvancedSourceEditor(previewRequest);
 
-  // runtime fields config hook
-  const runtimeMappingsEditor = useAdvancedRuntimeMappingsEditor();
+  useEffect(() => {
+    if (!isRuntimeMappingsEditorEnabled) {
+      const stringifiedRuntimeMappings = JSON.stringify(runtimeMappings, null, 2);
+      setAdvancedRuntimeMappingsConfigLastApplied(stringifiedRuntimeMappings);
+      setAdvancedRuntimeMappingsConfig(stringifiedRuntimeMappings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRuntimeMappingsEditorEnabled, runtimeMappings]);
 
   return {
     advancedSourceEditor,
-    runtimeMappingsEditor,
     datePicker,
     latestFunctionConfig,
     searchBar,

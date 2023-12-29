@@ -76,6 +76,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange }) => {
     const { searchItems } = useWizardContext();
     const stepDefineState = useWizardSelector((s) => s.stepDefine);
+    const runtimeMappings = useWizardSelector(
+      (s) => s.advancedRuntimeMappingsEditor.runtimeMappings
+    );
 
     const { application, i18n: i18nStart, theme } = useAppDependencies();
     const { capabilities } = application;
@@ -112,16 +115,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
     const previewRequest = useMemo(() => {
-      if (stepDefineState === null) return undefined;
       const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
       const transformConfigQuery = getTransformConfigQuery(searchQuery);
       return getPreviewTransformRequestBody(
         searchItems.dataView,
         transformConfigQuery,
         partialPreviewRequest,
-        stepDefineState.runtimeMappings
+        runtimeMappings
       );
-    }, [searchItems.dataView, stepDefineState]);
+    }, [searchItems.dataView, stepDefineState, runtimeMappings]);
 
     const { error: transformsPreviewError, data: transformPreview } = useGetTransformsPreview(
       previewRequest,

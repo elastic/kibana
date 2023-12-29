@@ -35,10 +35,12 @@ export const useAdvancedSourceEditor = (previewRequest: PostTransformsPreviewReq
   const transformConfigQuery = useWizardSelector((s) =>
     getTransformConfigQuery(s.stepDefine.searchQuery)
   );
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
-  const runtimeMappingsUpdated = useWizardSelector((s) => s.stepDefine.runtimeMappingsUpdated);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
+  const runtimeMappingsUpdated = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.runtimeMappingsUpdated
+  );
   const isRuntimeMappingsEditorEnabled = useWizardSelector(
-    (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
   );
 
   const [isAdvancedSourceEditorSwitchModalVisible, setAdvancedSourceEditorSwitchModalVisible] =

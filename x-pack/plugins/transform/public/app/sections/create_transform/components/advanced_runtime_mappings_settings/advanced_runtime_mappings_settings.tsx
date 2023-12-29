@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
-import { StepDefineFormHook } from '../step_define';
 import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
 import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
 import {
@@ -38,20 +37,22 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   }
 );
 
-export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) => {
+export const AdvancedRuntimeMappingsSettings: FC = () => {
   const {
-    actions: { applyRuntimeMappingsEditorChanges },
-    state: { advancedRuntimeMappingsConfig, isRuntimeMappingsEditorApplyButtonEnabled },
-  } = props.runtimeMappingsEditor;
-
-  const {
+    applyRuntimeMappingsEditorChanges,
     pivotConfig: { deleteAggregation, deleteGroupBy, updateAggregation },
   } = useWizardActions();
   const aggList = useWizardSelector((s) => s.stepDefine.aggList);
   const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const advancedRuntimeMappingsConfig = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.advancedRuntimeMappingsConfig
+  );
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const isRuntimeMappingsEditorEnabled = useWizardSelector(
-    (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
+  );
+  const isRuntimeMappingsEditorApplyButtonEnabled = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorApplyButtonEnabled
   );
 
   const applyChanges = () => {
@@ -121,7 +122,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
             {isRuntimeMappingsEditorEnabled && (
               <>
                 <EuiSpacer size="s" />
-                <AdvancedRuntimeMappingsEditor {...props.runtimeMappingsEditor} />
+                <AdvancedRuntimeMappingsEditor />
               </>
             )}
           </EuiFlexItem>
@@ -131,7 +132,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <AdvancedRuntimeMappingsEditorSwitch {...props.runtimeMappingsEditor} />
+                    <AdvancedRuntimeMappingsEditorSwitch />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy

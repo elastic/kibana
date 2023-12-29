@@ -253,9 +253,6 @@ describe('Transform: Common', () => {
       validationStatus: {
         isValid: true,
       },
-      runtimeMappings: undefined,
-      runtimeMappingsUpdated: false,
-      isRuntimeMappingsEditorEnabled: false,
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
@@ -332,9 +329,6 @@ describe('Transform: Common', () => {
       validationStatus: {
         isValid: true,
       },
-      runtimeMappings,
-      runtimeMappingsUpdated: false,
-      isRuntimeMappingsEditorEnabled: false,
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',

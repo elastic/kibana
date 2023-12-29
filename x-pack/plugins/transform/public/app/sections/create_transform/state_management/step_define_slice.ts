@@ -49,24 +49,6 @@ export const stepDefineSlice = createSlice({
     ) => {
       state.latestConfig = action.payload as any;
     },
-    setRuntimeMappings: (
-      state,
-      action: PayloadAction<StepDefineExposedState['runtimeMappings']>
-    ) => {
-      state.runtimeMappings = action.payload;
-    },
-    setRuntimeMappingsEditorEnabled: (
-      state,
-      action: PayloadAction<StepDefineExposedState['isRuntimeMappingsEditorEnabled']>
-    ) => {
-      state.isRuntimeMappingsEditorEnabled = action.payload;
-    },
-    setRuntimeMappingsUpdated: (
-      state,
-      action: PayloadAction<StepDefineExposedState['runtimeMappingsUpdated']>
-    ) => {
-      state.runtimeMappingsUpdated = action.payload;
-    },
     setSearchLanguage: (state, action: PayloadAction<StepDefineExposedState['searchLanguage']>) => {
       state.searchLanguage = action.payload;
     },

@@ -17,6 +17,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
@@ -78,13 +79,18 @@ export const Wizard: FC = React.memo(() => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
   const stepDetailsState = useWizardSelector((s) => s.stepDetails);
-  const { setCurrentStep, setStepDefineState, setStepDetailsState } = useWizardActions();
+  const { setCurrentStep, setRuntimeMappings, setStepDefineState, setStepDetailsState } =
+    useWizardActions();
 
   useEffect(() => {
     const initialStepDefineState = applyTransformConfigToDefineState(
       getDefaultStepDefineState(searchItems),
       cloneConfig,
       dataView
+    );
+    setRuntimeMappings(
+      // apply runtime fields from both the index pattern and inline configurations
+      getCombinedRuntimeMappings(dataView, cloneConfig?.source?.runtime_mappings)
     );
     setStepDefineState(initialStepDefineState);
     setStepDetailsState(

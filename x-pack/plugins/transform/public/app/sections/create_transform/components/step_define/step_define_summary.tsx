@@ -40,7 +40,6 @@ export const StepDefineSummary: FC = () => {
   const {
     isDatePickerApplyEnabled,
     timeRangeMs,
-    runtimeMappings,
     searchString,
     searchQuery,
     groupByList,
@@ -49,6 +48,7 @@ export const StepDefineSummary: FC = () => {
     previewRequest: partialPreviewRequest,
     validationStatus,
   } = useWizardSelector((s) => s.stepDefine);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 

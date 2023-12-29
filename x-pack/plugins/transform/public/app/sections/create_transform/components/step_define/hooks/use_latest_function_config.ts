@@ -13,7 +13,6 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
-import { StepDefineExposedState } from '../common';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { useAppDependencies } from '../../../../../app_dependencies';
 import {
@@ -21,6 +20,7 @@ import {
   useWizardSelector,
 } from '../../../state_management/create_transform_store';
 import { useWizardContext } from '../../wizard/wizard';
+import type { AdvancedRuntimeMappingsEditorState } from '../../../state_management/advanced_runtime_mappings_editor_slice';
 
 /**
  * Latest function config mapper between API and UI
@@ -44,7 +44,7 @@ export const latestConfigMapper = {
 function getOptions(
   dataView: DataView,
   aggConfigs: AggConfigs,
-  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+  runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings']
 ) {
   const aggConfig = aggConfigs.aggs[0];
   const param = aggConfig.type.params.find((p) => p.type === 'field');
@@ -145,7 +145,7 @@ export function useLatestFunctionConfig(): {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
   const config = useWizardSelector((s) => s.stepDefine.latestConfig);
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const { setLatestFunctionConfig } = useWizardActions();
 
   const { data } = useAppDependencies();

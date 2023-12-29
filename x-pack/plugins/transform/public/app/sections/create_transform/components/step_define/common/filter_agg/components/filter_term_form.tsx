@@ -33,7 +33,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const { searchItems } = useWizardContext();
-  const runtimeMappings = useWizardSelector((d) => d.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((d) => d.advancedRuntimeMappingsEditor.runtimeMappings);
   const toastNotifications = useToastNotifications();
 
   const [searchValue, setSearchValue] = useState('');

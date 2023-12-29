@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
+import React, { useEffect, useRef, type FC } from 'react';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -14,68 +13,81 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { StepDefineFormHook } from '../step_define';
+import { useWizardSelector, useWizardActions } from '../../state_management/create_transform_store';
 
-const { collapseLiteralStrings } = XJson;
+const { collapseLiteralStrings, useXJsonMode } = XJson;
 
-export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
-  ({
-    actions: { setAdvancedRuntimeMappingsConfig, setRuntimeMappingsEditorApplyButtonEnabled },
-    state: { advancedEditorRuntimeMappingsLastApplied, advancedRuntimeMappingsConfig, xJsonMode },
-  }) => {
-    return (
-      <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
-        <CodeEditor
-          height={250}
-          languageId={'json'}
-          onChange={(d: string) => {
-            setAdvancedRuntimeMappingsConfig(d);
+export const AdvancedRuntimeMappingsEditor: FC = () => {
+  const advancedRuntimeMappingsConfig = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.advancedRuntimeMappingsConfig
+  );
+  const advancedRuntimeMappingsConfigLastApplied = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.advancedRuntimeMappingsConfigLastApplied
+  );
+  const { setAdvancedRuntimeMappingsConfig, setRuntimeMappingsEditorApplyButtonEnabled } =
+    useWizardActions();
 
-            // Disable the "Apply"-Button if the config hasn't changed.
-            if (advancedEditorRuntimeMappingsLastApplied === d) {
-              setRuntimeMappingsEditorApplyButtonEnabled(false);
-              return;
-            }
+  const initialized = useRef(false);
 
-            // Try to parse the string passed on from the editor.
-            // If parsing fails, the "Apply"-Button will be disabled
-            try {
-              // if the user deletes the json in the editor
-              // they should still be able to apply changes
-              const isEmptyStr = d === '';
-              const parsedJson = isEmptyStr ? {} : JSON.parse(collapseLiteralStrings(d));
-              setRuntimeMappingsEditorApplyButtonEnabled(
-                isEmptyStr || isRuntimeMappings(parsedJson)
-              );
-            } catch (e) {
-              setRuntimeMappingsEditorApplyButtonEnabled(false);
-            }
-          }}
-          options={{
-            ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
-              defaultMessage: 'Advanced pivot editor',
-            }),
-            automaticLayout: true,
-            fontSize: 12,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          value={advancedRuntimeMappingsConfig}
-        />
-      </div>
-    );
-  },
-  (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))
-);
+  const { setXJson, xJson } = useXJsonMode(null);
 
-function pickProps(props: StepDefineFormHook['runtimeMappingsEditor']) {
-  return [
-    props.state.advancedEditorRuntimeMappingsLastApplied,
-    props.state.advancedRuntimeMappingsConfig,
-  ];
-}
+  useEffect(() => {
+    if (xJson !== advancedRuntimeMappingsConfig && initialized.current) {
+      setAdvancedRuntimeMappingsConfig(xJson);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [xJson]);
+
+  useEffect(() => {
+    if (xJson !== advancedRuntimeMappingsConfig) {
+      setXJson(advancedRuntimeMappingsConfig);
+      initialized.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [advancedRuntimeMappingsConfig]);
+
+  return (
+    <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
+      <CodeEditor
+        height={250}
+        languageId={'json'}
+        onChange={(d: string) => {
+          setAdvancedRuntimeMappingsConfig(d);
+
+          // Disable the "Apply"-Button if the config hasn't changed.
+          if (advancedRuntimeMappingsConfigLastApplied === d) {
+            setRuntimeMappingsEditorApplyButtonEnabled(false);
+            return;
+          }
+
+          // Try to parse the string passed on from the editor.
+          // If parsing fails, the "Apply"-Button will be disabled
+          try {
+            // if the user deletes the json in the editor
+            // they should still be able to apply changes
+            const isEmptyStr = d === '';
+            const parsedJson = isEmptyStr ? {} : JSON.parse(collapseLiteralStrings(d));
+            setRuntimeMappingsEditorApplyButtonEnabled(isEmptyStr || isRuntimeMappings(parsedJson));
+          } catch (e) {
+            setRuntimeMappingsEditorApplyButtonEnabled(false);
+          }
+        }}
+        options={{
+          ariaLabel: i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
+            defaultMessage: 'Advanced pivot editor',
+          }),
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={advancedRuntimeMappingsConfig}
+      />
+    </div>
+  );
+};

@@ -44,7 +44,7 @@ export const PivotConfiguration: FC = () => {
 
   const aggList = useWizardSelector((s) => s.stepDefine.aggList);
   const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
     () => getPivotDropdownOptions(dataView, runtimeMappings),

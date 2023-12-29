@@ -24,6 +24,10 @@ import {
   advancedPivotEditorSlice,
   type AdvancedPivotEditorState,
 } from './advanced_pivot_editor_slice';
+import {
+  advancedRuntimeMappingsEditorSlice,
+  type AdvancedRuntimeMappingsEditorState,
+} from './advanced_runtime_mappings_editor_slice';
 import { stepDefineSlice } from './step_define_slice';
 import { stepDetailsSlice } from './step_details_slice';
 import { wizardSlice, type WizardState } from './wizard_slice';
@@ -33,6 +37,7 @@ export interface StoreState {
   stepDefine: StepDefineExposedState;
   stepDetails: StepDetailsExposedState | null;
   advancedPivotEditor: AdvancedPivotEditorState;
+  advancedRuntimeMappingsEditor: AdvancedRuntimeMappingsEditorState;
 }
 
 export const getTransformWizardStore = () =>
@@ -42,6 +47,7 @@ export const getTransformWizardStore = () =>
       stepDefine: stepDefineSlice.reducer,
       stepDetails: stepDetailsSlice.reducer,
       advancedPivotEditor: advancedPivotEditorSlice.reducer,
+      advancedRuntimeMappingsEditor: advancedRuntimeMappingsEditorSlice.reducer,
     },
   });
 
@@ -57,6 +63,7 @@ export function useWizardActions() {
           ...stepDefineSlice.actions,
           ...stepDetailsSlice.actions,
           ...advancedPivotEditorSlice.actions,
+          ...advancedRuntimeMappingsEditorSlice.actions,
         },
         dispatch
       ),

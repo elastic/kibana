@@ -10,7 +10,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
@@ -46,9 +45,6 @@ export interface StepDefineExposedState {
   sourceConfigUpdated: boolean;
   valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
-  runtimeMappings?: RuntimeMappings;
-  runtimeMappingsUpdated: boolean;
-  isRuntimeMappingsEditorEnabled: boolean;
   timeRangeMs?: TimeRangeMs;
   isDatePickerApplyEnabled: boolean;
   /**

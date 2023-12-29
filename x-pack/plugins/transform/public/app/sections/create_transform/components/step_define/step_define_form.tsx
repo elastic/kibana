@@ -122,7 +122,7 @@ export const StepDefineForm: FC = () => {
   );
   const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
   const {
     setAdvancedEditorConfigLastApplied,
@@ -460,7 +460,7 @@ export const StepDefineForm: FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <AdvancedRuntimeMappingsSettings {...stepDefineForm} />
+            <AdvancedRuntimeMappingsSettings />
             <EuiSpacer size="s" />
 
             <EuiFormRow

@@ -8,7 +8,6 @@
 import { isEqual } from 'lodash';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { Dictionary } from '../../../../../../../common/types/common';
 import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
@@ -38,12 +37,6 @@ export function applyTransformConfigToDefineState(
   transformConfig?: TransformBaseConfig,
   dataView?: DataView
 ): StepDefineExposedState {
-  // apply runtime fields from both the index pattern and inline configurations
-  state.runtimeMappings = getCombinedRuntimeMappings(
-    dataView,
-    transformConfig?.source?.runtime_mappings
-  );
-
   if (transformConfig === undefined) {
     return state;
   }

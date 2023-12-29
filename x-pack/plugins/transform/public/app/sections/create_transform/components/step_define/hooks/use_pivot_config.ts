@@ -103,7 +103,7 @@ function getRootAggregation(item: PivotAggsConfig) {
 }
 
 export const usePivotConfigOptions = () => {
-  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 

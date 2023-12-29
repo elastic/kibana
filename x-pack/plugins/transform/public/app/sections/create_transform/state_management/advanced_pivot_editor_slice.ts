@@ -15,7 +15,6 @@ export interface AdvancedPivotEditorState {
   isAdvancedEditorSwitchModalVisible: boolean;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedPivotEditorApplyButtonEnabled: boolean;
-  xJsonMode: any;
 }
 
 const getAdvancedPivotEditorInitialState = (): AdvancedPivotEditorState => ({
@@ -26,7 +25,6 @@ const getAdvancedPivotEditorInitialState = (): AdvancedPivotEditorState => ({
   isAdvancedEditorSwitchModalVisible: false,
   isAdvancedPivotEditorEnabled: false,
   isAdvancedPivotEditorApplyButtonEnabled: false,
-  xJsonMode: null,
 });
 
 export const advancedPivotEditorSlice = createSlice({

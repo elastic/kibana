@@ -37,7 +37,7 @@ import { getErrorMessage } from '../../../common/utils/errors';
 
 import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
 import { useToastNotifications, useAppDependencies } from '../app_dependencies';
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
+import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
 
 import { SearchItems } from './use_search_items';
 import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
@@ -46,7 +46,7 @@ import { useDataSearch } from './use_data_search';
 export const useIndexData = (
   dataView: SearchItems['dataView'],
   query: TransformConfigQuery,
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  combinedRuntimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
   timeRangeMs?: TimeRangeMs,
   populatedFields?: string[]
 ): UseIndexDataReturnType => {
