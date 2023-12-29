@@ -19,7 +19,7 @@ export const custom_threshold_AIAssistant_metric_avg = {
   ruleParams: {
     consumer: 'logs',
     name: 'metric_synth',
-    ruleTypeId: 'observability.rules.custom_threshold',
+    rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {
@@ -36,6 +36,10 @@ export const custom_threshold_AIAssistant_metric_avg = {
           query: '',
         },
       },
+    },
+    actions: [],
+    schedule: {
+      interval: '1m',
     },
   },
 };

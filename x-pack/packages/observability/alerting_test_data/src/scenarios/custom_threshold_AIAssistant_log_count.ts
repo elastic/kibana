@@ -17,9 +17,10 @@ export const custom_threshold_AIAssistant_log_count = {
     shouldCreate: true,
   },
   ruleParams: {
+    tags: ['observability'],
     consumer: 'logs',
     name: 'logs_synth',
-    ruleTypeId: 'observability.rules.custom_threshold',
+    rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {
@@ -31,11 +32,19 @@ export const custom_threshold_AIAssistant_log_count = {
         },
       ],
       groupBy: ['service.name'],
+      alertOnNoData: true,
+      alertOnGroupDisappear: true,
       searchConfiguration: {
         query: {
           query: '',
+          language: 'kuery',
         },
+        index: ".ds-logs-synth*",
       },
+    },
+    actions: [],
+    schedule: {
+      interval: '1m',
     },
   },
 };
