@@ -386,9 +386,7 @@ export const StepDefineForm: FC = () => {
                 {/* Flex Column #1: Search Bar / Advanced Search Editor */}
                 {searchItems.savedSearch === undefined && (
                   <>
-                    {!isAdvancedSourceEditorEnabled && (
-                      <SourceSearchBar dataView={dataView} searchBar={stepDefineForm.searchBar} />
-                    )}
+                    {!isAdvancedSourceEditorEnabled && <SourceSearchBar />}
                     {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor />}
                   </>
                 )}

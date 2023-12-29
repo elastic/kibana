@@ -11,7 +11,6 @@ import { useSelector } from 'react-redux';
 import { getPreviewTransformRequestBody } from '../../../../../common';
 
 import { useDatePicker } from './use_date_picker';
-import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
 import { useWizardActions } from '../../../state_management/create_transform_store';
 import { useWizardContext } from '../../wizard/wizard';
@@ -28,7 +27,6 @@ export const useStepDefineForm = () => {
   const { dataView } = searchItems;
 
   const datePicker = useDatePicker();
-  const searchBar = useSearchBar();
 
   const requestPayload = useSelector(selectRequestPayload);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
@@ -95,6 +93,5 @@ export const useStepDefineForm = () => {
   return {
     datePicker,
     latestFunctionConfig,
-    searchBar,
   };
 };

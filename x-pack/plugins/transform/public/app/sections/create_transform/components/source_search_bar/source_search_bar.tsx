@@ -10,19 +10,21 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PLUGIN } from '../../../../../../common/constants';
-import { SearchItems } from '../../../../hooks/use_search_items';
-import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
+
 import { useAppDependencies } from '../../../../app_dependencies';
 
-interface SourceSearchBarProps {
-  dataView: SearchItems['dataView'];
-  searchBar: StepDefineFormHook['searchBar'];
-}
-export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar }) => {
+import { useWizardContext } from '../wizard/wizard';
+import { useSearchBar } from '../step_define/hooks/use_search_bar';
+import { QUERY_LANGUAGE_KUERY } from '../step_define';
+
+export const SourceSearchBar: FC = () => {
   const {
     actions: { searchChangeHandler, searchSubmitHandler, setQueryErrorMessage },
     state: { queryErrorMessage, searchInput },
-  } = searchBar;
+  } = useSearchBar();
+
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
 
   const {
     unifiedSearch: {
