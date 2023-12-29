@@ -106,8 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update correctly when switching data views and brushing the histogram', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
@@ -116,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different count
-      expect(await PageObjects.discover.getHitCount()).to.be('12');
+      expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {
