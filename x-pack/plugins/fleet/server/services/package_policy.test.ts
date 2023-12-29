@@ -173,7 +173,7 @@ jest.mock('./epm/registry', () => ({
 }));
 
 jest.mock('./epm/packages/get', () => ({
-  getInstalledPackageWithAssets: jest.fn().mockResolvedValue({ assetsMap: [], installation: {} }),
+  getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
 }));
 
 jest.mock('./agent_policy');
