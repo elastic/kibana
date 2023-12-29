@@ -125,9 +125,11 @@ export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
+export type AssetsMap = Map<string, Buffer | undefined>;
+
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  assetsMap: Map<string, Buffer | undefined>;
+  assetsMap: AssetsMap;
   paths: string[];
 }
 

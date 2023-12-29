@@ -68,6 +68,7 @@ import type {
   ExperimentalDataStreamFeature,
   DeletePackagePoliciesResponse,
   PolicySecretReference,
+  AssetsMap,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -141,7 +142,7 @@ async function getPkgInfoAssetsMap({
 }) {
   const packageInfosandAssetsMap = new Map<
     string,
-    { assetsMap: Map<string, Buffer | undefined>; pkgInfo: PackageInfo }
+    { assetsMap: AssetsMap; pkgInfo: PackageInfo }
   >();
   await pMap(
     packageInfos,
@@ -1544,7 +1545,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     packagePolicy: PackagePolicy,
     packageInfo: PackageInfo,
-    assetsMap: Map<string, Buffer | undefined>
+    assetsMap: AssetsMap
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     const updatedPackagePolicy = updatePackageInputs(
       {
@@ -2004,7 +2005,7 @@ export async function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: Map<string, Buffer | undefined>
+  assetsMap: AssetsMap
 ): Promise<PackagePolicyInput[]> {
   const inputsPromises = inputs.map(async (input) => {
     const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
@@ -2023,7 +2024,7 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: Map<string, Buffer | undefined>
+  assetsMap: AssetsMap
 ) {
   const packagePolicyTemplate = input.policy_template
     ? pkgInfo.policy_templates?.find(
@@ -2072,7 +2073,7 @@ async function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: Map<string, Buffer | undefined>
+  assetsMap: AssetsMap
 ) {
   const streamsPromises = input.streams.map((stream) =>
     _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
@@ -2134,7 +2135,7 @@ async function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: Map<string, Buffer | undefined>
+  assetsMap: AssetsMap
 ) {
   let stream = streamIn;
 

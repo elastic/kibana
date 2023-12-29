@@ -26,6 +26,7 @@ import type {
   PackageVerificationResult,
   ArchivePackage,
   BundledPackage,
+  AssetsMap,
 } from '../../../types';
 import {
   getPathParts,
@@ -318,7 +319,7 @@ export async function getPackage(
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
-  assetsMap: Map<string, Buffer | undefined>;
+  assetsMap: AssetsMap;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;

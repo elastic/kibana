@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetParts } from '../../../../common/types';
+import type { AssetParts, AssetsMap } from '../../../../common/types';
 import {
   PackageInvalidArchiveError,
   PackageUnsupportedMediaTypeError,
@@ -35,7 +35,7 @@ export async function unpackBufferToAssetsMap({
   version: string;
   contentType: string;
   archiveBuffer: Buffer;
-}): Promise<{ paths: string[]; assetsMap: Map<string, Buffer | undefined> }> {
+}): Promise<{ paths: string[]; assetsMap: AssetsMap }> {
   const assetsMap = new Map<string, Buffer | undefined>();
   const paths: string[] = [];
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
@@ -130,7 +130,7 @@ export function getPathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getAssetFromAssetsMap(assetsMap: Map<string, Buffer | undefined>, key: string) {
+export function getAssetFromAssetsMap(assetsMap: AssetsMap, key: string) {
   const buffer = assetsMap.get(key);
   if (buffer === undefined) throw new PackageNotFoundError(`Cannot find asset ${key}`);
 

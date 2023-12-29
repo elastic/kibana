@@ -33,6 +33,7 @@ import type {
   PackageList,
   InstalledPackage,
   PackageSpecManifest,
+  AssetsMap,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -288,7 +289,7 @@ export async function getPackageSavedObjects(
   return result;
 }
 
-export async function getInstalledPackageSavedObjects(
+async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient'>
 ) {
@@ -716,7 +717,7 @@ export async function getPackageAssetsMap({
     logger,
   });
 
-  let assetsMap: Map<string, Buffer | undefined> | undefined;
+  let assetsMap: AssetsMap | undefined;
   if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
     // Try to get from registry
     const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version);

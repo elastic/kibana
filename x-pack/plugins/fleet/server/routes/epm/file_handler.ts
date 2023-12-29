@@ -30,14 +30,12 @@ export const getFileHandler: FleetRequestHandler<
     const savedObjectsClient = (await context.fleet).internalSoClient;
 
     const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const useLocalFile = pkgVersion === installation?.version;
+    const isPackageInstalled = pkgVersion === installation?.version;
     const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
 
-    if (useLocalFile) {
-      // only pull local installation if we don't have it cached
+    if (isPackageInstalled) {
       const storedAsset = await getAsset({ savedObjectsClient, path: assetPath });
 
-      // error, if neither is available
       if (!storedAsset) {
         return response.custom({
           body: `installed package file not found: ${filePath}`,
