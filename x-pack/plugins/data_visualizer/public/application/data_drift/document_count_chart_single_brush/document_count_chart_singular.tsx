@@ -401,7 +401,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
+        <div className="dataDriftSingleBrush" data-test-subj={'dataDriftSingleBrush'}>
           <div
             css={{
               'margin-bottom': '-4px',
@@ -422,7 +422,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
       )}
       <div
         css={{ width: width ?? '100%' }}
-        data-test-subj={dataTestSubj ?? 'aiopsDocumentCountChart'}
+        data-test-subj={dataTestSubj ?? 'dataDriftDocumentCountChart'}
       >
         <Chart
           size={{

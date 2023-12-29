@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { BrushSettings, DocumentCountChartProps } from '@kbn/aiops-components';
+import type { BrushSettings } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { BarStyleAccessor } from '@elastic/charts';
 import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
 import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
@@ -28,17 +29,7 @@ export type BrushSelectionUpdateHandler = (
   force: boolean
 ) => void;
 
-export interface DocumentCountContentProps
-  extends Omit<
-    DocumentCountChartProps,
-    | 'brushSelectionUpdateHandler'
-    | 'dependencies'
-    | 'chartPoints'
-    | 'timeRangeEarliest'
-    | 'timeRangeLatest'
-    | 'interval'
-    | 'chartPointsSplitLabel'
-  > {
+export interface DocumentCountContentProps {
   brush?: BrushSettings;
   brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
@@ -58,7 +49,10 @@ export interface DocumentCountContentProps
   approximate: boolean;
   stateManager: DataDriftStateManager;
   label?: React.ReactElement | string;
+  /** Optional unique id  */
   id?: string;
+  /** Optional style to override bar chart  */
+  barStyleAccessor?: BarStyleAccessor;
 }
 
 export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
