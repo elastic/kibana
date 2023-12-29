@@ -19,7 +19,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable/change_point_chart/embeddable_change_point_chart';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;

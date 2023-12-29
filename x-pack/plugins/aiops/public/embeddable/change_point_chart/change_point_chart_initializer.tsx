@@ -24,22 +24,22 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
+import { PartitionsSelector } from '../../components/change_point_detection/partitions_selector';
 import { DEFAULT_SERIES } from './const';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { type EmbeddableChangePointChartExplicitInput } from './types';
-import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
-import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
-import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
+import { MaxSeriesControl } from '../../components/change_point_detection/max_series_control';
+import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
+import { MetricFieldSelector } from '../../components/change_point_detection/metric_field_selector';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
-} from '../components/change_point_detection/change_point_detection_context';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
+} from '../../components/change_point_detection/change_point_detection_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import { FunctionPicker } from '../components/change_point_detection/function_picker';
-import { DataSourceContextProvider } from '../hooks/use_data_source';
-import { DEFAULT_AGG_FUNCTION } from '../components/change_point_detection/constants';
+import { FunctionPicker } from '../../components/change_point_detection/function_picker';
+import { DataSourceContextProvider } from '../../hooks/use_data_source';
+import { DEFAULT_AGG_FUNCTION } from '../../components/change_point_detection/constants';
 
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<EmbeddableChangePointChartInput>;

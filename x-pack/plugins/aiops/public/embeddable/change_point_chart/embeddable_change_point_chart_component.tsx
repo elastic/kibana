@@ -15,10 +15,10 @@ import {
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
-import type { AiopsPluginStartDeps } from '../types';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
+import type { AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
+import type { ChangePointAnnotation } from '../../components/change_point_detection/change_point_detection_context';
 
 export interface EmbeddableChangePointChartProps {
   dataViewId: string;

@@ -13,8 +13,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
-import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import {
   EmbeddableChangePointChart,
   EmbeddableChangePointChartInput,
