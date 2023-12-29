@@ -10,14 +10,11 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
-import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
 export const TransformFunctionSelector: FC = () => {
-  const selectedFunction = useCreateTransformWizardSelector((s) => s.stepDefine.transformFunction);
-  const { setTransformFunction } = useCreateTransformWizardActions();
+  const selectedFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
+  const { setTransformFunction } = useWizardActions();
 
   const transformFunctions = [
     {

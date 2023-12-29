@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useCreateTransformWizardActions } from '../../create_transform_store';
+import { useWizardActions } from '../../state_management/create_transform_store';
 
 import { StepDefineFormHook } from '../step_define';
 
@@ -21,7 +21,7 @@ export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
     state: { advancedEditorSourceConfig, advancedEditorSourceConfigLastApplied },
   },
 }) => {
-  const { setSearchString } = useCreateTransformWizardActions();
+  const { setSearchString } = useWizardActions();
 
   return (
     <div data-test-subj="transformAdvancedRuntimeMappingsEditor">

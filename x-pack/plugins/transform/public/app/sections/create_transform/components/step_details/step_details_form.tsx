@@ -61,7 +61,7 @@ import {
 } from '../../../../common/validators';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { useCreateTransformWizardSelector } from '../../create_transform_store';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
 import { useWizardContext } from '../wizard/wizard';
 
@@ -75,7 +75,7 @@ interface StepDetailsFormProps {
 export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange }) => {
     const { searchItems } = useWizardContext();
-    const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
+    const stepDefineState = useWizardSelector((s) => s.stepDefine);
 
     const { application, i18n: i18nStart, theme } = useAppDependencies();
     const { capabilities } = application;

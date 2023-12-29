@@ -18,7 +18,7 @@ import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../se
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard, WizardContext } from './components/wizard';
-import { getTransformWizardStore } from './create_transform_store';
+import { getTransformWizardStore } from './state_management/create_transform_store';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
 export const CreateTransformSection: FC<Props> = ({ match }) => {

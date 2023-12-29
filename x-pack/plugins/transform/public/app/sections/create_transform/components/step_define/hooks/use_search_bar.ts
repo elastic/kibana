@@ -15,17 +15,17 @@ import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE, QUERY_LANGUAGE } from '../
 
 import { useWizardContext } from '../../wizard/wizard';
 import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../../create_transform_store';
+  useWizardActions,
+  useWizardSelector,
+} from '../../../state_management/create_transform_store';
 
 export const useSearchBar = () => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
-  const searchLanguage = useCreateTransformWizardSelector((s) => s.stepDefine.searchLanguage);
-  const searchString = useCreateTransformWizardSelector((s) => s.stepDefine.searchString);
-  const { setSearchLanguage, setSearchQuery, setSearchString } = useCreateTransformWizardActions();
+  const searchLanguage = useWizardSelector((s) => s.stepDefine.searchLanguage);
+  const searchString = useWizardSelector((s) => s.stepDefine.searchString);
+  const { setSearchLanguage, setSearchQuery, setSearchString } = useWizardActions();
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({

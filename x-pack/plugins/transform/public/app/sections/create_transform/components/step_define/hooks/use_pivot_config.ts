@@ -26,10 +26,10 @@ import {
 } from '../../../../../common';
 
 import {
-  stepDefineSlice,
-  useCreateTransformWizardSelector,
+  useWizardSelector,
   type StoreState,
-} from '../../../create_transform_store';
+} from '../../../state_management/create_transform_store';
+import { stepDefineSlice } from '../../../state_management/step_define_slice';
 import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
 import { useWizardContext } from '../../wizard/wizard';
 import {
@@ -103,7 +103,7 @@ function getRootAggregation(item: PivotAggsConfig) {
 }
 
 export const usePivotConfigOptions = () => {
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
@@ -123,9 +123,9 @@ export const getPivotConfigActions = (
     stepDefineSlice.actions;
 
   // The list of selected aggregations
-  // const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
+  // const aggList = useWizardSelector((s) => s.stepDefine.aggList);
   // The list of selected group by fields
-  // const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
+  // const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
 
   const { aggOptionsData, groupByOptionsData, fields } = pivotConfigOptions;
 

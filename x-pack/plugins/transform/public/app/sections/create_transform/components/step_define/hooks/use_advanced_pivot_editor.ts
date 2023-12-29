@@ -13,9 +13,9 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
 import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../../create_transform_store';
+  useWizardActions,
+  useWizardSelector,
+} from '../../../state_management/create_transform_store';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -23,10 +23,10 @@ const xJsonMode = new XJsonMode();
 export const useAdvancedPivotEditor = (previewRequest: PostTransformsPreviewRequestSchema) => {
   const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
 
-  const isAdvancedPivotEditorEnabled = useCreateTransformWizardSelector(
+  const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isAdvancedPivotEditorEnabled
   );
-  const { setAdvancedPivotEditorEnabled } = useCreateTransformWizardActions();
+  const { setAdvancedPivotEditorEnabled } = useWizardActions();
 
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);

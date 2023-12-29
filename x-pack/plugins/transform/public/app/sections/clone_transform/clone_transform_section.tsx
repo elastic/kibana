@@ -25,7 +25,7 @@ import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../se
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard, WizardContext } from '../create_transform/components/wizard';
-import { getTransformWizardStore } from '../create_transform/create_transform_store';
+import { getTransformWizardStore } from '../create_transform/state_management/create_transform_store';
 import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;

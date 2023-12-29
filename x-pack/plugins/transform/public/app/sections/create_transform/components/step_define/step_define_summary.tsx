@@ -34,7 +34,7 @@ import { GroupByListSummary } from '../group_by_list';
 
 import { isLatestPartialRequest } from './common/types';
 
-import { useCreateTransformWizardSelector } from '../../create_transform_store';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
 export const StepDefineSummary: FC = () => {
   const {
@@ -48,7 +48,7 @@ export const StepDefineSummary: FC = () => {
     transformFunction,
     previewRequest: partialPreviewRequest,
     validationStatus,
-  } = useCreateTransformWizardSelector((s) => s.stepDefine);
+  } = useWizardSelector((s) => s.stepDefine);
   const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 

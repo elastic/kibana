@@ -25,11 +25,8 @@ import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-  WIZARD_STEPS,
-} from '../../create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { WIZARD_STEPS } from '../../state_management/wizard_slice';
 
 import {
   applyTransformConfigToDefineState,
@@ -78,11 +75,10 @@ export const Wizard: FC = React.memo(() => {
   } = appDependencies;
   const { dataView } = searchItems;
 
-  const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
-  const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
-  const stepDetailsState = useCreateTransformWizardSelector((s) => s.stepDetails);
-  const { initializeAppContext, setCurrentStep, setStepDefineState, setStepDetailsState } =
-    useCreateTransformWizardActions();
+  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
+  const stepDefineState = useWizardSelector((s) => s.stepDefine);
+  const stepDetailsState = useWizardSelector((s) => s.stepDetails);
+  const { setCurrentStep, setStepDefineState, setStepDetailsState } = useWizardActions();
 
   useEffect(() => {
     const initialStepDefineState = applyTransformConfigToDefineState(
@@ -90,9 +86,6 @@ export const Wizard: FC = React.memo(() => {
       cloneConfig,
       dataView
     );
-    initializeAppContext({
-      runtimeMappings: initialStepDefineState.runtimeMappings,
-    });
     setStepDefineState(initialStepDefineState);
     setStepDetailsState(
       applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)

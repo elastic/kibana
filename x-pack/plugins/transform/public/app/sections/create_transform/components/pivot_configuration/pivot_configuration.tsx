@@ -20,10 +20,7 @@ import { useAppDependencies } from '../../../../app_dependencies';
 import { AggListForm } from '../aggregation_list';
 import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
-import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { useWizardContext } from '../wizard/wizard';
 
 export const PivotConfiguration: FC = memo(() => {
@@ -35,7 +32,7 @@ export const PivotConfiguration: FC = memo(() => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
-  const { pivotConfig: actions } = useCreateTransformWizardActions();
+  const { pivotConfig: actions } = useWizardActions();
   const {
     addAggregation,
     addGroupBy,
@@ -45,9 +42,9 @@ export const PivotConfiguration: FC = memo(() => {
     updateGroupBy,
   } = actions;
 
-  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
-  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const aggList = useWizardSelector((s) => s.stepDefine.aggList);
+  const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
     () => getPivotDropdownOptions(dataView, runtimeMappings),

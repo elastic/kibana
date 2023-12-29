@@ -15,16 +15,14 @@ import { useDatePicker } from './use_date_picker';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
 import { useWizardContext } from '../../wizard/wizard';
-import {
-  useCreateTransformWizardSelector,
-  selectRequestPayload,
-} from '../../../create_transform_store';
+import { useWizardSelector } from '../../../state_management/create_transform_store';
+import { selectRequestPayload } from '../../../state_management/step_define_selectors';
 import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
 export const useStepDefineForm = () => {
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
 
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
@@ -35,7 +33,7 @@ export const useStepDefineForm = () => {
 
   const latestFunctionConfig = useLatestFunctionConfig();
 
-  const transformConfigQuery = useCreateTransformWizardSelector((s) =>
+  const transformConfigQuery = useWizardSelector((s) =>
     getTransformConfigQuery(s.stepDefine.searchQuery)
   );
 

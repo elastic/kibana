@@ -9,11 +9,8 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-  WIZARD_STEPS,
-} from '../../create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { WIZARD_STEPS } from '../../state_management/wizard_slice';
 
 import { WizardNav } from '../wizard_nav';
 
@@ -21,10 +18,10 @@ import { StepDefineForm } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
 export const StepDefine: FC = () => {
-  const currentStep = useCreateTransformWizardSelector((s) => s.wizard.currentStep);
-  const stepDefineState = useCreateTransformWizardSelector((s) => s.stepDefine);
+  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
+  const stepDefineState = useWizardSelector((s) => s.stepDefine);
 
-  const { setCurrentStep } = useCreateTransformWizardActions();
+  const { setCurrentStep } = useWizardActions();
 
   return stepDefineState ? (
     <>

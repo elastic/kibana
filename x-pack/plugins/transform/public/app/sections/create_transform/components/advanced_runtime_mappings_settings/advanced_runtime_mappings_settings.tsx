@@ -28,10 +28,7 @@ import {
   PivotAggsConfigWithUiSupport,
 } from '../../../../common';
 import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
-import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
@@ -49,11 +46,11 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
 
   const {
     pivotConfig: { deleteAggregation, deleteGroupBy, updateAggregation },
-  } = useCreateTransformWizardActions();
-  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
-  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
-  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+  } = useWizardActions();
+  const aggList = useWizardSelector((s) => s.stepDefine.aggList);
+  const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
   );
 

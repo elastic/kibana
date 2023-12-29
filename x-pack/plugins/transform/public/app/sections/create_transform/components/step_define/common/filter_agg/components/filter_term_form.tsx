@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
-import { useCreateTransformWizardSelector } from '../../../../../create_transform_store';
+import { useWizardSelector } from '../../../../../state_management/create_transform_store';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 import { useWizardContext } from '../../../../wizard/wizard';
 
@@ -33,7 +33,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const { searchItems } = useWizardContext();
-  const runtimeMappings = useCreateTransformWizardSelector((d) => d.wizard.runtimeMappings);
+  const runtimeMappings = useWizardSelector((d) => d.stepDefine.runtimeMappings);
   const toastNotifications = useToastNotifications();
 
   const [searchValue, setSearchValue] = useState('');

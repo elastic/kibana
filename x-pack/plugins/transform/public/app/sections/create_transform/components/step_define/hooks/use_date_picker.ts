@@ -14,13 +14,13 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { useWizardContext } from '../../wizard/wizard';
-import { useCreateTransformWizardActions } from '../../../create_transform_store';
+import { useWizardActions } from '../../../state_management/create_transform_store';
 
 export const useDatePicker = () => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
-  const { setTimeRangeMs } = useCreateTransformWizardActions();
+  const { setTimeRangeMs } = useWizardActions();
 
   const hasValidTimeField = useMemo(
     () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',

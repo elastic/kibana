@@ -13,7 +13,7 @@ import { AggListForm } from './list_form';
 import { DropDown } from '../aggregation_dropdown';
 import { PivotAggsConfig } from '../../../../common';
 import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
-import { useCreateTransformWizardActions } from '../../create_transform_store';
+import { useWizardActions } from '../../state_management/create_transform_store';
 import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
 
 /**
@@ -21,7 +21,7 @@ import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
  * aggregation item.
  */
 export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
-  const { pivotConfig: actions } = useCreateTransformWizardActions();
+  const { pivotConfig: actions } = useWizardActions();
   const { aggOptions, aggOptionsData } = usePivotConfigOptions();
   const addSubAggHandler = useCallback(
     (d: EuiComboBoxOptionOption[]) => {

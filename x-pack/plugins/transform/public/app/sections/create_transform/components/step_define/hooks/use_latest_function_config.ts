@@ -17,9 +17,9 @@ import { StepDefineExposedState } from '../common';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { useAppDependencies } from '../../../../../app_dependencies';
 import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../../create_transform_store';
+  useWizardActions,
+  useWizardSelector,
+} from '../../../state_management/create_transform_store';
 import { useWizardContext } from '../../wizard/wizard';
 
 /**
@@ -144,9 +144,9 @@ export function useLatestFunctionConfig(): {
 } {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
-  const config = useCreateTransformWizardSelector((s) => s.stepDefine.latestConfig);
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
-  const { setLatestFunctionConfig } = useCreateTransformWizardActions();
+  const config = useWizardSelector((s) => s.stepDefine.latestConfig);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const { setLatestFunctionConfig } = useWizardActions();
 
   const { data } = useAppDependencies();
 

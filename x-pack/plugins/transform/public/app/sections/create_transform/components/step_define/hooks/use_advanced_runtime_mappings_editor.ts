@@ -10,20 +10,20 @@ import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import {
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../../create_transform_store';
+  useWizardActions,
+  useWizardSelector,
+} from '../../../state_management/create_transform_store';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
 
 export const useAdvancedRuntimeMappingsEditor = () => {
-  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
   );
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
   const { setRuntimeMappings, setRuntimeMappingsEditorEnabled, setRuntimeMappingsUpdated } =
-    useCreateTransformWizardActions();
+    useWizardActions();
 
   const stringifiedRuntimeMappings = useMemo(
     () => JSON.stringify(runtimeMappings, null, 2),

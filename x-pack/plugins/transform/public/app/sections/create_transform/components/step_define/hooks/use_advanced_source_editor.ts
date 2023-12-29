@@ -13,10 +13,10 @@ import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/
 import { getPreviewTransformRequestBody, getTransformConfigQuery } from '../../../../../common';
 
 import {
-  selectRequestPayload,
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../../create_transform_store';
+  useWizardActions,
+  useWizardSelector,
+} from '../../../state_management/create_transform_store';
+import { selectRequestPayload } from '../../../state_management/step_define_selectors';
 
 import { useWizardContext } from '../../wizard/wizard';
 
@@ -28,19 +28,16 @@ export const useAdvancedSourceEditor = (previewRequest: PostTransformsPreviewReq
 
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
 
-  const { setAdvancedSourceEditorEnabled, setSourceConfigUpdated } =
-    useCreateTransformWizardActions();
-  const isAdvancedSourceEditorEnabled = useCreateTransformWizardSelector(
+  const { setAdvancedSourceEditorEnabled, setSourceConfigUpdated } = useWizardActions();
+  const isAdvancedSourceEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isAdvancedSourceEditorEnabled
   );
-  const transformConfigQuery = useCreateTransformWizardSelector((s) =>
+  const transformConfigQuery = useWizardSelector((s) =>
     getTransformConfigQuery(s.stepDefine.searchQuery)
   );
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
-  const runtimeMappingsUpdated = useCreateTransformWizardSelector(
-    (s) => s.stepDefine.runtimeMappingsUpdated
-  );
-  const isRuntimeMappingsEditorEnabled = useCreateTransformWizardSelector(
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const runtimeMappingsUpdated = useWizardSelector((s) => s.stepDefine.runtimeMappingsUpdated);
+  const isRuntimeMappingsEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isRuntimeMappingsEditorEnabled
   );
 

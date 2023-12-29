@@ -62,14 +62,13 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardContext } from '../wizard/wizard';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import {
   selectCopyToClipboardPreviewRequest,
   selectPivotValidationStatus,
   selectRequestPayload,
   selectTransformConfigQuery,
-  useCreateTransformWizardActions,
-  useCreateTransformWizardSelector,
-} from '../../create_transform_store';
+} from '../../state_management/step_define_selectors';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
@@ -114,14 +113,14 @@ export const StepDefineForm: FC = React.memo(() => {
   );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm();
-  const isAdvancedSourceEditorEnabled = useCreateTransformWizardSelector(
+  const isAdvancedSourceEditorEnabled = useWizardSelector(
     (s) => s.stepDefine.isAdvancedSourceEditorEnabled
   );
-  const timeRangeMs = useCreateTransformWizardSelector((s) => s.stepDefine.timeRangeMs);
-  const transformFunction = useCreateTransformWizardSelector((s) => s.stepDefine.transformFunction);
-  const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
+  const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
+  const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
+  const runtimeMappings = useWizardSelector((s) => s.stepDefine.runtimeMappings);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
-  const { setAggList, setGroupByList, setSearchQuery } = useCreateTransformWizardActions();
+  const { setAggList, setGroupByList, setSearchQuery } = useWizardActions();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const { advancedEditorSourceConfig, isAdvancedSourceEditorApplyButtonEnabled } =
@@ -163,7 +162,7 @@ export const StepDefineForm: FC = React.memo(() => {
     }
   );
 
-  const copyToClipboardPreviewRequest = useCreateTransformWizardSelector((state) =>
+  const copyToClipboardPreviewRequest = useWizardSelector((state) =>
     selectCopyToClipboardPreviewRequest(state, dataView)
   );
 
