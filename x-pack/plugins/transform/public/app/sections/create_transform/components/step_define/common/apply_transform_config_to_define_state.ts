@@ -101,9 +101,7 @@ export function applyTransformConfigToDefineState(
   // only apply the query from the transform config to wizard state if it's not the default query
   const query = transformConfig.source.query;
   if (query !== undefined && !isEqual(query, matchAllQuery)) {
-    state.isAdvancedSourceEditorEnabled = true;
     state.searchQuery = query;
-    state.sourceConfigUpdated = true;
   }
 
   // applying a transform config to wizard state will always result in a valid configuration

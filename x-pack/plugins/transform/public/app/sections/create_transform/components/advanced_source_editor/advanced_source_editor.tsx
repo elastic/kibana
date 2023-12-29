@@ -11,17 +11,20 @@ import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useWizardActions } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
-import { StepDefineFormHook } from '../step_define';
-
-export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
-  advancedSourceEditor: {
-    actions: { setAdvancedEditorSourceConfig, setAdvancedSourceEditorApplyButtonEnabled },
-    state: { advancedEditorSourceConfig, advancedEditorSourceConfigLastApplied },
-  },
-}) => {
-  const { setSearchString } = useWizardActions();
+export const AdvancedSourceEditor: FC = () => {
+  const advancedEditorSourceConfig = useWizardSelector(
+    (s) => s.advancedSourceEditor.advancedSourceEditorConfig
+  );
+  const advancedSourceEditorConfigLastApplied = useWizardSelector(
+    (s) => s.advancedSourceEditor.advancedSourceEditorConfigLastApplied
+  );
+  const {
+    setAdvancedSourceEditorConfig,
+    setAdvancedSourceEditorApplyButtonEnabled,
+    setSearchString,
+  } = useWizardActions();
 
   return (
     <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
@@ -30,10 +33,10 @@ export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
         languageId={'json'}
         onChange={(d: string) => {
           setSearchString(undefined);
-          setAdvancedEditorSourceConfig(d);
+          setAdvancedSourceEditorConfig(d);
 
           // Disable the "Apply"-Button if the config hasn't changed.
-          if (advancedEditorSourceConfigLastApplied === d) {
+          if (advancedSourceEditorConfigLastApplied === d) {
             setAdvancedSourceEditorApplyButtonEnabled(false);
             return;
           }

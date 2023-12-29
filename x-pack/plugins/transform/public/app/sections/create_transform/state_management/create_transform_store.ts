@@ -28,6 +28,10 @@ import {
   advancedRuntimeMappingsEditorSlice,
   type AdvancedRuntimeMappingsEditorState,
 } from './advanced_runtime_mappings_editor_slice';
+import {
+  advancedSourceEditorSlice,
+  type AdvancedSourceEditorState,
+} from './advanced_source_editor_slice';
 import { stepDefineSlice } from './step_define_slice';
 import { stepDetailsSlice } from './step_details_slice';
 import { wizardSlice, type WizardState } from './wizard_slice';
@@ -38,6 +42,7 @@ export interface StoreState {
   stepDetails: StepDetailsExposedState | null;
   advancedPivotEditor: AdvancedPivotEditorState;
   advancedRuntimeMappingsEditor: AdvancedRuntimeMappingsEditorState;
+  advancedSourceEditor: AdvancedSourceEditorState;
 }
 
 export const getTransformWizardStore = () =>
@@ -48,6 +53,7 @@ export const getTransformWizardStore = () =>
       stepDetails: stepDetailsSlice.reducer,
       advancedPivotEditor: advancedPivotEditorSlice.reducer,
       advancedRuntimeMappingsEditor: advancedRuntimeMappingsEditorSlice.reducer,
+      advancedSourceEditor: advancedSourceEditorSlice.reducer,
     },
   });
 
@@ -64,6 +70,7 @@ export function useWizardActions() {
           ...stepDetailsSlice.actions,
           ...advancedPivotEditorSlice.actions,
           ...advancedRuntimeMappingsEditorSlice.actions,
+          ...advancedSourceEditorSlice.actions,
         },
         dispatch
       ),

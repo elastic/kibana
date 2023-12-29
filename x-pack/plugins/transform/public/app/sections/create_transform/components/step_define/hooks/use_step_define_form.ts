@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 
 import { getPreviewTransformRequestBody } from '../../../../../common';
 
-import { useAdvancedSourceEditor } from './use_advanced_source_editor';
 import { useDatePicker } from './use_date_picker';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
@@ -25,8 +24,6 @@ import {
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
 export const useStepDefineForm = () => {
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
@@ -38,14 +35,20 @@ export const useStepDefineForm = () => {
   const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
   );
+  const isAdvancedSourceEditorEnabled = useWizardSelector(
+    (s) => s.advancedSourceEditor.isAdvancedSourceEditorEnabled
+  );
   const isRuntimeMappingsEditorEnabled = useWizardSelector(
     (s) => s.advancedRuntimeMappingsEditor.isRuntimeMappingsEditorEnabled
   );
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const {
     setAdvancedEditorConfig,
     setAdvancedEditorConfigLastApplied,
     setAdvancedRuntimeMappingsConfig,
     setAdvancedRuntimeMappingsConfigLastApplied,
+    setAdvancedSourceEditorConfig,
+    setAdvancedSourceEditorConfigLastApplied,
   } = useWizardActions();
 
   const latestFunctionConfig = useLatestFunctionConfig();
@@ -71,8 +74,15 @@ export const useStepDefineForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdvancedPivotEditorEnabled, previewRequest]);
 
-  // source config hook
-  const advancedSourceEditor = useAdvancedSourceEditor(previewRequest);
+  useEffect(() => {
+    if (!isAdvancedSourceEditorEnabled) {
+      const stringifiedSourceConfigUpdate = JSON.stringify(previewRequest.source.query, null, 2);
+
+      setAdvancedSourceEditorConfigLastApplied(stringifiedSourceConfigUpdate);
+      setAdvancedSourceEditorConfig(stringifiedSourceConfigUpdate);
+    }
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [isAdvancedSourceEditorEnabled]);
 
   useEffect(() => {
     if (!isRuntimeMappingsEditorEnabled) {
@@ -80,11 +90,9 @@ export const useStepDefineForm = () => {
       setAdvancedRuntimeMappingsConfigLastApplied(stringifiedRuntimeMappings);
       setAdvancedRuntimeMappingsConfig(stringifiedRuntimeMappings);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRuntimeMappingsEditorEnabled, runtimeMappings]);
 
   return {
-    advancedSourceEditor,
     datePicker,
     latestFunctionConfig,
     searchBar,

@@ -118,22 +118,26 @@ export const StepDefineForm: FC = () => {
   const stepDefineForm = useStepDefineForm();
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const isAdvancedSourceEditorEnabled = useWizardSelector(
-    (s) => s.stepDefine.isAdvancedSourceEditorEnabled
+    (s) => s.advancedSourceEditor.isAdvancedSourceEditorEnabled
+  );
+  const advancedSourceEditorConfig = useWizardSelector(
+    (s) => s.advancedSourceEditor.advancedSourceEditorConfig
+  );
+  const isAdvancedSourceEditorApplyButtonEnabled = useWizardSelector(
+    (s) => s.advancedSourceEditor.isAdvancedSourceEditorApplyButtonEnabled
   );
   const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const transformConfigQuery = useSelector(selectTransformConfigQuery);
   const {
+    applyAdvancedSourceEditorChanges,
     setAdvancedEditorConfigLastApplied,
     setAdvancedPivotEditorApplyButtonEnabled,
     setAggList,
     setGroupByList,
     setSearchQuery,
   } = useWizardActions();
-
-  const { advancedEditorSourceConfig, isAdvancedSourceEditorApplyButtonEnabled } =
-    stepDefineForm.advancedSourceEditor.state;
 
   const appDependencies = useAppDependencies();
   const {
@@ -205,9 +209,9 @@ export const StepDefineForm: FC = () => {
   };
 
   const applySourceChangesHandler = () => {
-    const sourceConfig = JSON.parse(advancedEditorSourceConfig);
+    const sourceConfig = JSON.parse(advancedSourceEditorConfig);
     setSearchQuery(sourceConfig);
-    stepDefineForm.advancedSourceEditor.actions.applyAdvancedSourceEditorChanges();
+    applyAdvancedSourceEditorChanges();
   };
 
   const applyPivotChangesHandler = () => {
@@ -385,7 +389,7 @@ export const StepDefineForm: FC = () => {
                     {!isAdvancedSourceEditorEnabled && (
                       <SourceSearchBar dataView={dataView} searchBar={stepDefineForm.searchBar} />
                     )}
-                    {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor {...stepDefineForm} />}
+                    {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor />}
                   </>
                 )}
                 {searchItems?.savedSearch?.id !== undefined && (
@@ -399,9 +403,7 @@ export const StepDefineForm: FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>
-                        {searchItems.savedSearch === undefined && (
-                          <AdvancedQueryEditorSwitch {...stepDefineForm} />
-                        )}
+                        {searchItems.savedSearch === undefined && <AdvancedQueryEditorSwitch />}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiCopy

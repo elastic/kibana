@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { pick } from 'lodash';
+import { isEqual, pick } from 'lodash';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
@@ -22,7 +22,7 @@ import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { getCreateTransformRequestBody } from '../../../../common';
+import { getCreateTransformRequestBody, matchAllQuery } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
@@ -79,8 +79,14 @@ export const Wizard: FC = React.memo(() => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
   const stepDetailsState = useWizardSelector((s) => s.stepDetails);
-  const { setCurrentStep, setRuntimeMappings, setStepDefineState, setStepDetailsState } =
-    useWizardActions();
+  const {
+    setAdvancedSourceEditorEnabled,
+    setCurrentStep,
+    setRuntimeMappings,
+    setSourceConfigUpdated,
+    setStepDefineState,
+    setStepDetailsState,
+  } = useWizardActions();
 
   useEffect(() => {
     const initialStepDefineState = applyTransformConfigToDefineState(
@@ -88,10 +94,18 @@ export const Wizard: FC = React.memo(() => {
       cloneConfig,
       dataView
     );
+
     setRuntimeMappings(
       // apply runtime fields from both the index pattern and inline configurations
       getCombinedRuntimeMappings(dataView, cloneConfig?.source?.runtime_mappings)
     );
+
+    const query = cloneConfig?.source?.query;
+    if (query !== undefined && !isEqual(query, matchAllQuery)) {
+      setAdvancedSourceEditorEnabled(true);
+      setSourceConfigUpdated(true);
+    }
+
     setStepDefineState(initialStepDefineState);
     setStepDetailsState(
       applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)

@@ -13,28 +13,29 @@ import { i18n } from '@kbn/i18n';
 
 import { SwitchModal } from '../switch_modal';
 import { defaultSearch } from '../step_define';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
-import { StepDefineFormHook } from '../step_define';
+export const AdvancedQueryEditorSwitch: FC = () => {
+  const isAdvancedSourceEditorEnabled = useWizardSelector(
+    (s) => s.advancedSourceEditor.isAdvancedSourceEditorEnabled
+  );
+  const isAdvancedSourceEditorSwitchModalVisible = useWizardSelector(
+    (s) => s.advancedSourceEditor.isAdvancedSourceEditorSwitchModalVisible
+  );
+  const sourceConfigUpdated = useWizardSelector((s) => s.advancedSourceEditor.sourceConfigUpdated);
+  const advancedSourceEditorConfigLastApplied = useWizardSelector(
+    (s) => s.advancedSourceEditor.advancedSourceEditorConfigLastApplied
+  );
+  const advancedSourceEditorConfig = useWizardSelector(
+    (s) => s.advancedSourceEditor.advancedSourceEditorConfig
+  );
+  const {
+    setAdvancedSourceEditorSwitchModalVisible,
+    setSearchQuery,
+    setSourceConfigUpdated,
+    toggleAdvancedSourceEditor,
+  } = useWizardActions();
 
-export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
-  advancedSourceEditor: {
-    actions: {
-      setAdvancedSourceEditorSwitchModalVisible,
-      setSourceConfigUpdated,
-      toggleAdvancedSourceEditor,
-    },
-    state: {
-      isAdvancedSourceEditorEnabled,
-      isAdvancedSourceEditorSwitchModalVisible,
-      sourceConfigUpdated,
-      advancedEditorSourceConfigLastApplied,
-      advancedEditorSourceConfig,
-    },
-  },
-  searchBar: {
-    actions: { setSearchQuery },
-  },
-}) => {
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
     if (reset === true) {
@@ -58,7 +59,7 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
           if (
             isAdvancedSourceEditorEnabled &&
             (sourceConfigUpdated ||
-              advancedEditorSourceConfig !== advancedEditorSourceConfigLastApplied)
+              advancedSourceEditorConfig !== advancedSourceEditorConfigLastApplied)
           ) {
             setAdvancedSourceEditorSwitchModalVisible(true);
             return;

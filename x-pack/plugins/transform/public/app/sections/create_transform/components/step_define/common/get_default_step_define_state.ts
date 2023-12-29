@@ -19,7 +19,6 @@ export function getDefaultStepDefineState(searchItems?: SearchItems): StepDefine
     latestConfig: {} as LatestFunctionConfigUI,
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
-    isAdvancedSourceEditorEnabled: false,
     isDatePickerApplyEnabled: false,
     searchLanguage: QUERY_LANGUAGE_KUERY,
     searchString: undefined,
@@ -27,7 +26,6 @@ export function getDefaultStepDefineState(searchItems?: SearchItems): StepDefine
       searchItems && searchItems.savedSearch !== undefined
         ? searchItems.combinedQuery
         : defaultSearch,
-    sourceConfigUpdated: false,
     valid: false,
     validationStatus: {
       isValid: false,

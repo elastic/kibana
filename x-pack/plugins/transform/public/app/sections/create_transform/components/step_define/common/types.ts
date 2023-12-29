@@ -38,11 +38,9 @@ export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;
   latestConfig: LatestFunctionConfigUI;
-  isAdvancedSourceEditorEnabled: boolean;
   searchLanguage: QUERY_LANGUAGE;
   searchString: string | undefined;
   searchQuery: string | SavedSearchQuery;
-  sourceConfigUpdated: boolean;
   valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
   timeRangeMs?: TimeRangeMs;

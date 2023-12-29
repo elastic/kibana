@@ -31,9 +31,6 @@ export const stepDefineSlice = createSlice({
   name: 'stepDefine',
   initialState: getDefaultStepDefineState(),
   reducers: {
-    setAdvancedSourceEditorEnabled: (state, action: PayloadAction<boolean>) => {
-      state.isAdvancedSourceEditorEnabled = action.payload;
-    },
     setAggList: (state, action: PayloadAction<PivotAggsConfigDict>) => {
       state.aggList = action.payload;
     },
@@ -57,9 +54,6 @@ export const stepDefineSlice = createSlice({
     },
     setSearchString: (state, action: PayloadAction<string | undefined>) => {
       state.searchString = action.payload;
-    },
-    setSourceConfigUpdated: (state, action: PayloadAction<boolean>) => {
-      state.sourceConfigUpdated = action.payload;
     },
     setStepDefineState: (_, action: PayloadAction<StepDefineExposedState>) => action.payload,
     setTimeRangeMs: (state, action: PayloadAction<StepDefineExposedState['timeRangeMs']>) => {
