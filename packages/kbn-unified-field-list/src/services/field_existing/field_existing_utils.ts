@@ -54,6 +54,7 @@ export async function fetchFieldExistence({
     // filled in by data views service
     pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    includeFieldsWithNoValue: false,
   });
   return {
     indexPatternTitle: dataView.title,
