@@ -258,7 +258,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     comparisonColor: euiTheme.euiColorVis1,
-    overlapColor: 'black',
+    overlapColor: '#490771',
   };
 
   const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();

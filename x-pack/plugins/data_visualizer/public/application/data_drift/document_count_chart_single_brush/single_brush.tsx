@@ -49,7 +49,7 @@ export const getSingleBrushWindowParameters = (
     max: Math.round(baselineMax),
   };
 };
-export const getSnappedWindowParameters = (
+export const getSnappedSingleBrushWindowParameters = (
   windowParameters: SingleBrushWindowParameters,
   snapTimestamps: number[]
 ): SingleBrushWindowParameters => {
@@ -229,7 +229,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           }
 
           const snappedWindowParameters = snapTimestampsRef.current
-            ? getSnappedWindowParameters(newWindowParameters, snapTimestampsRef.current)
+            ? getSnappedSingleBrushWindowParameters(newWindowParameters, snapTimestampsRef.current)
             : newWindowParameters;
 
           const newBrushPx = {

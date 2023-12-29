@@ -27,11 +27,7 @@ import {
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
-import {
-  getLogRateAnalysisType,
-  type LogRateAnalysisType,
-  type LogRateHistogramItem,
-} from '@kbn/aiops-utils';
+import { type LogRateHistogramItem } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -41,7 +37,7 @@ import { DualBrushAnnotation } from '@kbn/aiops-components';
 import {
   SingleBrush,
   getSingleBrushWindowParameters,
-  getSnappedWindowParameters as getSnappedSingleBrushWindowParameters,
+  getSnappedSingleBrushWindowParameters,
 } from './single_brush';
 
 declare global {
@@ -85,8 +81,7 @@ export interface BrushSettings {
  */
 export type BrushSelectionUpdateHandler = (
   windowParameters: SingleBrushWindowParameters,
-  force: boolean,
-  logRateAnalysisType: LogRateAnalysisType
+  force: boolean
 ) => void;
 
 /**
@@ -285,10 +280,6 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
     SingleBrushWindowParameters | undefined
   >();
 
-  const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
-    SingleBrushWindowParameters | undefined
-  >();
-
   const triggerAnalysis = useCallback(
     (startRange: number | SingleBrushWindowParameters) => {
       if (viewMode === VIEW_MODE.ZOOM && typeof startRange === 'number') {
@@ -317,11 +308,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
           setWindowParameters(wpSnap);
 
           if (brushSelectionUpdateHandler !== undefined) {
-            brushSelectionUpdateHandler(
-              wpSnap,
-              true,
-              getLogRateAnalysisType(adjustedChartPoints, wpSnap)
-            );
+            brushSelectionUpdateHandler(wpSnap, true);
           }
         }
       }
@@ -374,8 +361,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
       return;
     }
     setWindowParameters(wp);
-    setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
+    brushSelectionUpdateHandler(wp, false);
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
