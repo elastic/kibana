@@ -51,6 +51,7 @@ interface IQuery {
   include_unmapped?: boolean;
   fields?: string[];
   allow_hidden?: boolean;
+  include_fields_with_no_value?: boolean;
 }
 
 const querySchema = schema.object({
@@ -64,6 +65,7 @@ const querySchema = schema.object({
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
+  include_fields_with_no_value: schema.maybe(schema.boolean()),
 });
 
 const fieldSubTypeSchema = schema.object({
@@ -125,7 +127,10 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
       allow_hidden: allowHidden,
+      include_fields_with_no_value: includeFieldsWithNoValue,
     } = request.query;
+    console.log(request.query);
+    console.log(includeFieldsWithNoValue);
 
     // not available to get request
     const indexFilter = request.body?.index_filter;
@@ -151,6 +156,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         },
         indexFilter,
         allowHidden,
+        includeFieldsWithNoValue,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

@@ -61,6 +61,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       includeUnmapped,
       fields,
       allowHidden,
+      includeFieldsWithNoValue,
     } = options;
     return this._request<FieldsForWildcardResponse>(
       FIELDS_FOR_WILDCARD_PATH,
@@ -73,6 +74,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_unmapped: includeUnmapped,
         fields,
         allow_hidden: allowHidden,
+        include_fields_with_no_value:includeFieldsWithNoValue,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined
     ).then((response) => {
