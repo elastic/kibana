@@ -7,7 +7,7 @@
 
 import { pick, orderBy } from 'lodash';
 import moment from 'moment';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   LOG_RATE_ANALYSIS_TYPE,
@@ -40,12 +40,12 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisProps> = ({
+export const LogRateAnalysis = ({
   alert,
   dataView,
   rule,
   services,
-}) => {
+}: AlertDetailsLogRateAnalysisProps) => {
   const {
     observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
   } = services;
