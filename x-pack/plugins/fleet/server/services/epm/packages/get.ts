@@ -617,7 +617,7 @@ export async function getInstallationObject(options: {
   return installation;
 }
 
-export async function getInstallationObjects(options: {
+async function getInstallationObjects(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgNames: string[];
 }) {
@@ -695,4 +695,35 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+/**
+ * Return assets for an installed package from ES or from the registry otherwise
+ */
+export async function getPackageAssetsMap({
+  savedObjectsClient,
+  packageInfo,
+  logger,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  packageInfo: PackageInfo;
+  logger: Logger;
+}) {
+  // Retrieve package assets refacto this
+  const installedPackageWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: packageInfo.name,
+    logger,
+  });
+
+  let assetsMap: Map<string, Buffer | undefined> | undefined;
+  if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+    // Try to get from registry
+    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version);
+    assetsMap = pkg.assetsMap;
+  } else {
+    assetsMap = installedPackageWithAssets.assetsMap;
+  }
+
+  return assetsMap;
 }

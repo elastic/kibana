@@ -34,6 +34,7 @@ import {
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToAssetsMap,
+  getVerificationResult,
 } from '../archive';
 import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
@@ -321,13 +322,11 @@ export async function getPackage(
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
-  //  TODO check if needed
-  let packageInfo: ArchivePackage | undefined; // = getPackageInfo({ name, version });
-  let verificationResult: PackageVerificationResult | undefined; //  = verifyPackage ? getVerificationResult({ name, version }) : undefined;
+  let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
+  let verificationResult: PackageVerificationResult | undefined = verifyPackage
+    ? getVerificationResult({ name, version })
+    : undefined;
 
-  // if (paths && packageInfo) {
-  //   return { paths, packageInfo, assetsMap: new Map(), verificationResult };
-  // }
   const {
     archiveBuffer,
     archivePath,

@@ -122,43 +122,13 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
-import { getInstalledPackageWithAssets } from './epm/packages/get';
-import { getPackage } from './epm/registry';
+import { getPackageAssetsMap } from './epm/packages/get';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
-
-// Todo move from that package
-export async function getAssetsMap({
-  savedObjectsClient,
-  pkgInfo,
-  logger,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgInfo: PackageInfo;
-  logger: Logger;
-}) {
-  // Retrieve package assets refacto this
-  const installedPackageWithAssets = await getInstalledPackageWithAssets({
-    savedObjectsClient,
-    pkgName: pkgInfo.name,
-    logger,
-  });
-
-  let assetsMap: Map<string, Buffer | undefined> | undefined;
-  if (installedPackageWithAssets?.installation.version !== pkgInfo.version) {
-    // Try to get from registry
-    const pkg = await getPackage(pkgInfo.name, pkgInfo.version);
-    assetsMap = pkg.assetsMap;
-  } else {
-    assetsMap = installedPackageWithAssets.assetsMap;
-  }
-
-  return assetsMap;
-}
 
 async function getPkgInfoAssetsMap({
   savedObjectsClient,
@@ -176,9 +146,9 @@ async function getPkgInfoAssetsMap({
   await pMap(
     packageInfos,
     async (pkgInfo) => {
-      const assetsMap = await getAssetsMap({
+      const assetsMap = await getPackageAssetsMap({
         logger,
-        pkgInfo,
+        packageInfo: pkgInfo,
         savedObjectsClient,
       });
       packageInfosandAssetsMap.set(`${pkgInfo.name}-${pkgInfo.version}`, {
@@ -324,9 +294,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
       }
-      const assetsMap = await getAssetsMap({
+      const assetsMap = await getPackageAssetsMap({
         logger,
-        pkgInfo,
+        packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
       inputs = await _compilePackagePolicyInputs(
@@ -571,9 +541,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           `Package info and assets not found: ${packagePolicy.package.name}-${packagePolicy.package.version}`
         );
       }
-      const assetsMap = await getAssetsMap({
+      const assetsMap = await getPackageAssetsMap({
         logger: appContextService.getLogger(),
-        pkgInfo,
+        packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
       inputs = pkgInfo
@@ -870,9 +840,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         secretsToDelete = secretsRes.secretsToDelete;
         inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
       }
-      const assetsMap = await getAssetsMap({
+      const assetsMap = await getPackageAssetsMap({
         logger,
-        pkgInfo,
+        packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
       inputs = await _compilePackagePolicyInputs(
@@ -1503,9 +1473,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo,
       packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
     );
-    const assetsMap = await getAssetsMap({
+    const assetsMap = await getPackageAssetsMap({
       logger: appContextService.getLogger(),
-      pkgInfo: packageInfo,
+      packageInfo,
       savedObjectsClient: soClient,
     });
     updatePackagePolicy.inputs = await _compilePackagePolicyInputs(
@@ -1549,9 +1519,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       ({ packagePolicy, packageInfo, experimentalDataStreamFeatures } =
         await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion));
-      const assetsMap = await getAssetsMap({
+      const assetsMap = await getPackageAssetsMap({
         logger: appContextService.getLogger(),
-        pkgInfo: packageInfo,
+        packageInfo,
         savedObjectsClient: soClient,
       });
 

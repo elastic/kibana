@@ -443,7 +443,6 @@ async function installPackageFromRegistry({
       spaceId,
       force,
       packageInstallContext,
-      packageInfo,
       paths,
       verificationResult,
       authorizationHeader,
@@ -480,7 +479,6 @@ async function installPackageCommon(options: {
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
-  packageInfo: ArchivePackage; // TODO remove
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
@@ -488,7 +486,7 @@ async function installPackageCommon(options: {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
 }): Promise<InstallResult> {
-  const packageInfo = options.packageInstallContext?.packageInfo ?? options.packageInfo;
+  const packageInfo = options.packageInstallContext.packageInfo;
 
   const {
     pkgName,
@@ -710,7 +708,6 @@ async function installPackageByUpload({
       esClient,
       spaceId,
       force: true, // upload has implicit force
-      packageInfo,
       paths,
       authorizationHeader,
       ignoreMappingUpdateErrors,
@@ -893,7 +890,6 @@ export async function installCustomPackage(
     esClient,
     spaceId,
     force,
-    packageInfo,
     paths,
     authorizationHeader,
   });
