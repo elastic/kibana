@@ -6,8 +6,6 @@
  */
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
 
-export { IMAGE_FILE_TYPES } from '../../../common/constants';
-
 export const MAX_IMAGE_SIZE = 64;
 
 export function readFile(data: File) {
