@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildEsQuery should generate correct es query for {"params":{"groupBy":["host.hostname"],"searchConfiguration":{"index":"changedMockedIndex","query":{"query":"optionalFilter: container-1","language":"kuery"}},"criteria":[{"0":{"metrics":[{"name":"A","aggType":"count","filter":"host.name: host-1"}],"timeSize":1,"timeUnit":"m","threshold":[90],"comparator":">"},"metrics":[{"name":"A","aggType":"count","filter":"host.name: host-1"},{"name":"B","aggType":"avg","field":"system.load.1"}]}]},"alert":{}} 1`] = `undefined`;
-
 exports[`buildEsQuery should generate correct es query for {"params":{"groupBy":["host.hostname"],"searchConfiguration":{"index":"changedMockedIndex","query":{"query":"optionalFilter: container-1","language":"kuery"}},"criteria":[{"metrics":[{"name":"A","aggType":"count","filter":"host.name: host-1"},{"name":"B","aggType":"avg","field":"system.load.1"}],"timeSize":1,"timeUnit":"m","threshold":[90],"comparator":">"}]},"alert":{}} 1`] = `undefined`;
 
 exports[`buildEsQuery should generate correct es query for {"params":{"groupBy":["host.hostname"],"searchConfiguration":{"index":"changedMockedIndex","query":{"query":"optionalFilter: container-1","language":"kuery"}},"criteria":[{"metrics":[{"name":"A","aggType":"count","filter":"host.name: host-1"}],"timeSize":1,"timeUnit":"m","threshold":[90],"comparator":">"}]},"alert":{"fields":{"kibana.alert.group":[{"field":"groupByField","value":"groupByValue"},{"field":"secondGroupByField","value":"secondGroupByValue"}]}}} 1`] = `
