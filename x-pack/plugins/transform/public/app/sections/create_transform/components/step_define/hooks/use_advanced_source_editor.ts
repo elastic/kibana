@@ -6,25 +6,25 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
 import { getPreviewTransformRequestBody, getTransformConfigQuery } from '../../../../../common';
 
 import {
+  selectRequestPayload,
   useCreateTransformWizardActions,
   useCreateTransformWizardSelector,
 } from '../../../create_transform_store';
 
 import { useWizardContext } from '../../wizard/wizard';
 
-import { usePivotConfigRequestPayload } from './use_pivot_config';
-
 export const useAdvancedSourceEditor = (previewRequest: PostTransformsPreviewRequestSchema) => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
-  const { requestPayload } = usePivotConfigRequestPayload();
+  const requestPayload = useSelector(selectRequestPayload);
 
   const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
 

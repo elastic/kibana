@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, FC } from 'react';
 import { merge } from 'rxjs';
+import { useSelector } from 'react-redux';
 
 import {
   EuiButton,
@@ -49,8 +50,6 @@ import {
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
 import {
-  getPreviewTransformRequestBody,
-  getTransformConfigQuery,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
@@ -64,6 +63,10 @@ import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardContext } from '../wizard/wizard';
 import {
+  selectCopyToClipboardPreviewRequest,
+  selectPivotValidationStatus,
+  selectRequestPayload,
+  selectTransformConfigQuery,
   useCreateTransformWizardActions,
   useCreateTransformWizardSelector,
 } from '../../create_transform_store';
@@ -78,8 +81,6 @@ import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
-
-import { usePivotConfigRequestPayload } from './hooks/use_pivot_config';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
@@ -116,15 +117,10 @@ export const StepDefineForm: FC = React.memo(() => {
   const isAdvancedSourceEditorEnabled = useCreateTransformWizardSelector(
     (s) => s.stepDefine.isAdvancedSourceEditorEnabled
   );
-  const isDatePickerApplyEnabled = useCreateTransformWizardSelector(
-    (s) => s.stepDefine.isDatePickerApplyEnabled
-  );
   const timeRangeMs = useCreateTransformWizardSelector((s) => s.stepDefine.timeRangeMs);
   const transformFunction = useCreateTransformWizardSelector((s) => s.stepDefine.transformFunction);
   const runtimeMappings = useCreateTransformWizardSelector((s) => s.stepDefine.runtimeMappings);
-  const transformConfigQuery = useCreateTransformWizardSelector((s) =>
-    getTransformConfigQuery(s.stepDefine.searchQuery)
-  );
+  const transformConfigQuery = useSelector(selectTransformConfigQuery);
   const { setAggList, setGroupByList, setSearchQuery } = useCreateTransformWizardActions();
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
@@ -151,10 +147,12 @@ export const StepDefineForm: FC = React.memo(() => {
     toastNotifications,
   };
 
-  const pivotConfig = usePivotConfigRequestPayload();
+  const pivotRequestPayload = useSelector(selectRequestPayload);
+  const pivotValidationStatus = useSelector(selectPivotValidationStatus);
+
   const { requestPayload, validationStatus } =
     transformFunction === TRANSFORM_FUNCTION.PIVOT
-      ? pivotConfig
+      ? { requestPayload: pivotRequestPayload, validationStatus: pivotValidationStatus }
       : stepDefineForm.latestFunctionConfig;
 
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
@@ -165,12 +163,8 @@ export const StepDefineForm: FC = React.memo(() => {
     }
   );
 
-  const copyToClipboardPreviewRequest = getPreviewTransformRequestBody(
-    dataView,
-    transformConfigQuery,
-    requestPayload,
-    runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+  const copyToClipboardPreviewRequest = useCreateTransformWizardSelector((state) =>
+    selectCopyToClipboardPreviewRequest(state, dataView)
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(

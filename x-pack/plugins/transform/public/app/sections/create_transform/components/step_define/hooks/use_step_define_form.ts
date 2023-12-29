@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import { useSelector } from 'react-redux';
+
 import { getPreviewTransformRequestBody, getTransformConfigQuery } from '../../../../../common';
 
 import { useAdvancedPivotEditor } from './use_advanced_pivot_editor';
 import { useAdvancedSourceEditor } from './use_advanced_source_editor';
 import { useDatePicker } from './use_date_picker';
-import { usePivotConfigRequestPayload } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
 import { useWizardContext } from '../../wizard/wizard';
-import { useCreateTransformWizardSelector } from '../../../create_transform_store';
+import {
+  useCreateTransformWizardSelector,
+  selectRequestPayload,
+} from '../../../create_transform_store';
 import { useAdvancedRuntimeMappingsEditor } from './use_advanced_runtime_mappings_editor';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
@@ -27,7 +31,7 @@ export const useStepDefineForm = () => {
 
   const datePicker = useDatePicker();
   const searchBar = useSearchBar();
-  const { requestPayload } = usePivotConfigRequestPayload();
+  const requestPayload = useSelector(selectRequestPayload);
 
   const latestFunctionConfig = useLatestFunctionConfig();
 

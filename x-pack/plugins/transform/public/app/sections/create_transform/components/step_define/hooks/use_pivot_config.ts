@@ -19,7 +19,6 @@ import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import {
   DropDownLabel,
-  getRequestPayload,
   isPivotGroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -115,29 +114,6 @@ export const usePivotConfigOptions = () => {
   );
 };
 export type PivotConfigOptions = ReturnType<typeof usePivotConfigOptions>;
-
-export const usePivotConfigRequestPayload = () => {
-  const aggList = useCreateTransformWizardSelector((s) => s.stepDefine.aggList);
-  const groupByList = useCreateTransformWizardSelector((s) => s.stepDefine.groupByList);
-
-  const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
-  const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
-  const requestPayload = useMemo(
-    () => getRequestPayload(pivotAggsArr, pivotGroupByArr),
-    [pivotAggsArr, pivotGroupByArr]
-  );
-  const validationStatus = useMemo(() => {
-    return validatePivotConfig(requestPayload.pivot);
-  }, [requestPayload]);
-
-  return useMemo(
-    () => ({
-      requestPayload,
-      validationStatus,
-    }),
-    [requestPayload, validationStatus]
-  );
-};
 
 export const getPivotConfigActions = (
   pivotConfigOptions: PivotConfigOptions,

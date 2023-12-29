@@ -7,9 +7,10 @@
 
 import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { configureStore, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { bindActionCreators } from 'redux';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { dictionaryToArray } from '../../../../common/types/common';
@@ -22,7 +23,9 @@ import {
 } from './components/step_define/hooks/use_pivot_config';
 
 import {
+  getPreviewTransformRequestBody,
   getRequestPayload,
+  getTransformConfigQuery,
   type PivotAggsConfigDict,
   type PivotGroupByConfigDict,
   type PivotAggsConfig,
@@ -175,6 +178,50 @@ export const stepDefineSlice = createSlice({
     },
   },
 });
+
+export const selectRequestPayload = createSelector(
+  [
+    (state: StoreState) => state.stepDefine.aggList,
+    (state: StoreState) => state.stepDefine.groupByList,
+  ],
+  (aggList, groupByList) =>
+    getRequestPayload(dictionaryToArray(aggList), dictionaryToArray(groupByList))
+);
+
+export const selectPivotValidationStatus = createSelector(selectRequestPayload, (requestPayload) =>
+  validatePivotConfig(requestPayload.pivot)
+);
+
+export const selectTransformConfigQuery = createSelector(
+  (state: StoreState) => state.stepDefine.searchQuery,
+  getTransformConfigQuery
+);
+
+export const selectCopyToClipboardPreviewRequest = createSelector(
+  [
+    (_: StoreState, dataView: DataView) => dataView,
+    selectTransformConfigQuery,
+    selectRequestPayload,
+    (state: StoreState) => state.stepDefine.runtimeMappings,
+    (state: StoreState) => state.stepDefine.isDatePickerApplyEnabled,
+    (state: StoreState) => state.stepDefine.timeRangeMs,
+  ],
+  (
+    dataView,
+    transformConfigQuery,
+    requestPayload,
+    runtimeMappings,
+    isDatePickerApplyEnabled,
+    timeRangeMs
+  ) =>
+    getPreviewTransformRequestBody(
+      dataView,
+      transformConfigQuery,
+      requestPayload,
+      runtimeMappings,
+      isDatePickerApplyEnabled ? timeRangeMs : undefined
+    )
+);
 
 const stepDetailsSlice = createSlice({
   name: 'stepDetails',
