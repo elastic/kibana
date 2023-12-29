@@ -27,12 +27,16 @@ describe('buildEsQuery', () => {
       },
     ],
   };
-  const mockedAlertWithGroup = {
+  const mockedAlertWithMultipleGroups = {
     fields: {
       'kibana.alert.group': [
         {
           field: 'groupByField',
           value: 'groupByValue',
+        },
+        {
+          field: 'secondGroupByField',
+          value: 'secondGroupByValue',
         },
       ],
     },
@@ -44,7 +48,16 @@ describe('buildEsQuery', () => {
     // With optional filer, count filter and group by
     {
       params: mockedParams,
-      alert: mockedAlertWithGroup,
+      alert: {
+        fields: {
+          'kibana.alert.group': [mockedAlertWithMultipleGroups.fields['kibana.alert.group'][0]],
+        },
+      },
+    },
+    // With optional filer, count filter and multiple group by
+    {
+      params: mockedParams,
+      alert: mockedAlertWithMultipleGroups,
     },
     // With optional filer, count filter and WITHOUT group by
     {
