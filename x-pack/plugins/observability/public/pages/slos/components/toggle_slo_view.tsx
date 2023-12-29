@@ -53,17 +53,6 @@ export function ToggleSLOView({
 
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
-            defaultMessage: 'SLO View',
-          })}
-          options={toggleButtonsIcons}
-          idSelected={sloView}
-          onChange={(id) => onChangeView(id as SLOView)}
-          isIconOnly
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiText size="s">
           <FormattedMessage
@@ -83,6 +72,17 @@ export function ToggleSLOView({
             }}
           />
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
+            defaultMessage: 'SLO View',
+          })}
+          options={toggleButtonsIcons}
+          idSelected={sloView}
+          onChange={(id) => onChangeView(id as SLOView)}
+          isIconOnly
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />
