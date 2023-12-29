@@ -9,7 +9,7 @@ export const apm_transaction_rate = {
   ruleParams: {
     consumer: 'apm',
     name: 'apm_failed_transaction_rate_threshold',
-    ruleTypeId: 'apm.transaction_error_rate',
+    rule_type_id: 'apm.transaction_error_rate',
     params: {
       threshold: 30,
       windowSize: 1,

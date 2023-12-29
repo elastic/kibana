@@ -9,7 +9,7 @@ export const apm_error_count = {
   ruleParams: {
     consumer: 'apm',
     name: 'apm_error_count_threshold',
-    ruleTypeId: 'apm.error_rate',
+    rule_type_id: 'apm.error_rate',
     params: {
       threshold: 5,
       windowSize: 5,

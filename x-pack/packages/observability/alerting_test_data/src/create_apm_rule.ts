@@ -13,7 +13,7 @@ export const createApmRule = async (
   ruleParams: {
     consumer?: string;
     name?: string;
-    ruleTypeId?: string;
+    rule_type_id?: string;
     params?: {
       threshold?: number;
       windowSize?: number;
@@ -35,7 +35,7 @@ export const createApmRule = async (
     tags: ['apm'],
     consumer: ruleParams.consumer || 'apm',
     name: ruleParams.name || 'Default APM rule name',
-    rule_type_id: ruleParams.ruleTypeId || 'apm.transaction_error_rate',
+    rule_type_id: ruleParams.rule_type_id || 'apm.transaction_error_rate',
     params: {
       threshold: ruleParams.params?.threshold || 30,
       windowSize: ruleParams.params?.windowSize || 5,

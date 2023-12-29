@@ -19,7 +19,7 @@ export const scenario1 = {
   ruleParams: {
     consumer: 'logs',
     name: 'custom_threshold_log_count',
-    ruleTypeId: 'observability.rules.custom_threshold',
+    rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {

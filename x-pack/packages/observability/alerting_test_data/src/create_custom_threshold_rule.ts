@@ -20,7 +20,7 @@ export const createCustomThresholdRule = async (
   ruleParams: {
     consumer?: string;
     name?: string;
-    ruleTypeId?: string;
+    rule_type_id?: string;
     params?: {
       criteria: any[];
       groupBy?: string[];
@@ -36,7 +36,7 @@ export const createCustomThresholdRule = async (
     tags: ['observability'],
     consumer: ruleParams.consumer || 'logs',
     name: ruleParams.name || 'Default custom threshold rule name',
-    rule_type_id: ruleParams.ruleTypeId || OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+    rule_type_id: ruleParams.rule_type_id || OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     params: {
       criteria: ruleParams.params?.criteria || [
         {

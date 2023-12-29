@@ -44,7 +44,7 @@ export async function run(kibanaUrlAuth?: string) {
   const actionId = await response.data.id;
   console.log('Creating index connector - finished - actionId: ', actionId);
   for (const scenario of scenarios_custom_threshold) {
-    if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
+    if (scenario.ruleParams.rule_type_id.includes("custom_threshold")) {
       if (scenario.dataView.shouldCreate) {
         console.log('Creating data view - start - id: ', scenario.dataView.id);
         await createDataView(kibanaUrl, scenario.dataView);
@@ -56,9 +56,9 @@ export async function run(kibanaUrlAuth?: string) {
     }
   }
   for (const scenario of scenarios_apm) {
-    console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name}`,);
+    console.log(`Creating APM ${scenario.ruleParams.rule_type_id} rule - start - name: ${scenario.ruleParams.name}`,);
     await createApmRule(kibanaUrl, actionId, scenario.ruleParams);
-    console.log(`Creating APM ${scenario.ruleParams.ruleTypeId} rule - start - name: ${scenario.ruleParams.name} finished`);
+    console.log(`Creating APM ${scenario.ruleParams.rule_type_id} rule - start - name: ${scenario.ruleParams.name} finished`);
   }
 }
 
@@ -73,7 +73,7 @@ export async function clean(kibanaUrlAuth?: string) {
     };
   }
   for (const scenario of scenarios_custom_threshold) {
-    if (scenario.ruleParams.ruleTypeId.includes("custom_threshold")) {
+    if (scenario.ruleParams.rule_type_id.includes("custom_threshold")) {
       if (scenario.dataView.shouldCreate) {
         console.log('Deleting data view - start - id: ', scenario.dataView.id);
         await deleteDataView(kibanaUrl, scenario.dataView);
