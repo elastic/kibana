@@ -129,9 +129,6 @@ export const DataDriftView = ({
     searchQueryLanguage,
   });
 
-  // @TODO: remove
-  console.log(`--@@result`, result);
-
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
 

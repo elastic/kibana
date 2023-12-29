@@ -32,7 +32,7 @@ export interface WindowParameters {
  * @returns {arg is WindowParameters}
  */
 export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
-  isPopulatedObject(arg, ['baselineMin', 'baselineMax']) &&
+  isPopulatedObject(arg, ['baselineMin', 'baselineMax', 'deviationMin', 'deviationMax']) &&
   Object.values(arg).every((d) => typeof d === 'number');
 
 /**

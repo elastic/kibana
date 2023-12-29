@@ -173,10 +173,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
     barStyleAccessor,
     barHighlightColorOverride,
     brush = {},
-    label,
   } = props;
-  // @TODO: remove
-  console.log(`--@@label`, label);
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
