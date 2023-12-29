@@ -377,8 +377,11 @@ export class ObservabilityAIAssistantClient {
     stream?: TStream;
     signal: AbortSignal;
   }): Promise<TStream extends false ? OpenAI.ChatCompletion : Readable> => {
-    // @ts-expect-error
-    const messagesForOpenAI: OpenAI.ChatCompletionMessageParam[] = compact(
+    const messagesForOpenAI: Array<
+      Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
+        role: MessageRole;
+      }
+    > = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
         .map((message) => {
@@ -399,7 +402,7 @@ export class ObservabilityAIAssistantClient {
     const functionsForOpenAI = functions;
 
     const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
-      messages: messagesForOpenAI,
+      messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
       ...(stream ? { stream: true } : {}),
       ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
       temperature: 0,

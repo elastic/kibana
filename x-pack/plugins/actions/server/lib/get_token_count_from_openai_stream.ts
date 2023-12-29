@@ -25,7 +25,9 @@ export async function getTokenCountFromOpenAIStream({
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
+  const chatCompletionRequest = JSON.parse(
+    body
+  ) as OpenAI.ChatCompletionCreateParams.ChatCompletionCreateParamsStreaming;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
@@ -33,14 +35,10 @@ export async function getTokenCountFromOpenAIStream({
       .map(
         (msg) =>
           `<|start|>${msg.role}\n${msg.content}\n${
-            // @ts-expect-error
-            msg.name
-              ? // @ts-expect-error
-                msg.name
-              : // @ts-expect-error
-              msg.function_call
-              ? // @ts-expect-error
-                msg.function_call.name + '\n' + msg.function_call.arguments
+            'name' in msg
+              ? msg.name
+              : 'function_call' in msg && msg.function_call
+              ? msg.function_call.name + '\n' + msg.function_call.arguments
               : ''
           }<|end|>`
       )

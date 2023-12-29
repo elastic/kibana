@@ -47,9 +47,10 @@ function createLlmSimulator() {
         model: 'gpt-4',
         object: 'chat.completion.chunk',
         choices: [
-          // @ts-expect-error
           {
             delta: msg,
+            index: 0,
+            finish_reason: null,
           },
         ],
       };

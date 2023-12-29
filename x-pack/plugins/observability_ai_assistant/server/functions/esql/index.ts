@@ -284,11 +284,12 @@ export function registerEsqlFunction({
                   model: '',
                   object: 'chat.completion.chunk',
                   choices: [
-                    // @ts-expect-error
                     {
                       delta: {
                         content: cachedContent,
                       },
+                      index: 0,
+                      finish_reason: null,
                     },
                   ],
                 });
