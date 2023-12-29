@@ -34,6 +34,8 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrushAnnotation } from '@kbn/aiops-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText } from '@elastic/eui';
 import {
   SingleBrush,
   getSingleBrushWindowParameters,
@@ -171,7 +173,10 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
     barStyleAccessor,
     barHighlightColorOverride,
     brush = {},
+    label,
   } = props;
+  // @TODO: remove
+  console.log(`--@@label`, label);
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
@@ -386,7 +391,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
 
   return (
     <>
-      {isBrushVisible && (
+      {isBrushVisible ? (
         <div className="dataDriftSingleBrush" data-test-subj={'dataDriftSingleBrush'}>
           <div
             css={{
@@ -405,6 +410,14 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
             />
           </div>
         </div>
+      ) : (
+        <EuiText color="subdued" size="s" textAlign="center">
+          <FormattedMessage
+            id="xpack.dataDrift.dataDriftDocumentCountChart.clickToSelectTimeRangeLabel"
+            defaultMessage="Click on a bucket in the chart to select a time range for {id} data"
+            values={{ id }}
+          />
+        </EuiText>
       )}
       <div
         css={{ width: width ?? '100%' }}
