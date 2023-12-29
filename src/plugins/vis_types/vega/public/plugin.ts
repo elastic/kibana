@@ -20,7 +20,7 @@ import {
   setData,
   setDataViews,
   setInjectedVars,
-  setUISettings,
+  setThemeService,
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
@@ -77,8 +77,6 @@ export class VegaPlugin implements Plugin<void, void> {
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
     });
 
-    setUISettings(core.uiSettings);
-
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
@@ -104,6 +102,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
+    setThemeService(core.theme);
     setUsageCollectionStart(usageCollection);
   }
 }

@@ -13,6 +13,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -242,7 +243,13 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(Object.keys(resp.body)).to.eql([
+                'status',
+                'message',
+                'retry',
+                'errorSource',
+                'connector_id',
+              ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -262,6 +269,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -280,6 +288,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -306,6 +315,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -334,6 +344,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -361,6 +372,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -459,6 +471,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON.  ',
               });
@@ -489,6 +502,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: JSON Error: Update case JSON body must be valid JSON.  ',
               });
@@ -556,6 +570,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON.  ',
               });
@@ -623,6 +638,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.  ',
               });
@@ -653,6 +669,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: Error: Invalid URL.  ',
               });
@@ -720,6 +737,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: Error: Invalid URL.  ',
               });

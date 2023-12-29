@@ -20,7 +20,11 @@ import { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
-export async function brotliCompressBundles({ buildDir, log }: TaskContext) {
+export async function brotliCompressBundles({ buildDir, log, plugin }: TaskContext) {
+  if (!plugin.manifest.ui) {
+    return;
+  }
+
   const compressDir = Path.resolve(buildDir, 'target/public');
 
   log.info(

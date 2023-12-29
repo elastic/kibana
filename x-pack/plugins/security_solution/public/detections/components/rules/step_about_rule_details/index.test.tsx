@@ -148,11 +148,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('[idSelected="details"]').exists()).toBeTruthy();
       expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
 
-      wrapper
-        .find('[title="Investigation guide"]')
-        .at(0)
-        .find('input')
-        .simulate('change', { target: { value: 'notes' } });
+      wrapper.find('button[title="Investigation guide"]').simulate('click');
 
       expect(wrapper.find('[idSelected="details"]').exists()).toBeFalsy();
       expect(wrapper.find('[idSelected="notes"]').exists()).toBeTruthy();
@@ -174,11 +170,7 @@ describe('StepAboutRuleToggleDetails', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[title="Investigation guide"]')
-        .at(0)
-        .find('input')
-        .simulate('change', { target: { value: 'notes' } });
+      wrapper.find('button[title="Investigation guide"]').simulate('click');
 
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
       expect(wrapper.find('div.euiMarkdownFormat').text()).toEqual(
@@ -254,11 +246,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
       expect(wrapper.find('[idSelected="setup"]').exists()).toBeFalsy();
 
-      wrapper
-        .find('[title="Setup guide"]')
-        .at(0)
-        .find('input')
-        .simulate('change', { target: { value: 'setup' } });
+      wrapper.find('button[title="Setup guide"]').simulate('click');
 
       expect(wrapper.find('[idSelected="details"]').exists()).toBeFalsy();
       expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
@@ -281,11 +269,7 @@ describe('StepAboutRuleToggleDetails', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[title="Setup guide"]')
-        .at(0)
-        .find('input')
-        .simulate('change', { target: { value: 'setup' } });
+      wrapper.find('button[title="Setup guide"]').simulate('click');
 
       expect(wrapper.find('EuiButtonGroup[idSelected="setup"]').exists()).toBeTruthy();
       expect(wrapper.find('div.euiMarkdownFormat').text()).toEqual(
