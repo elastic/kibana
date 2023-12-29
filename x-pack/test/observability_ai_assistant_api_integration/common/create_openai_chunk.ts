@@ -22,7 +22,7 @@ export function createOpenAiChunk(
       {
         delta: msg,
         index: 0,
-        finish_reason: 0,
+        finish_reason: null,
       },
     ],
   };
