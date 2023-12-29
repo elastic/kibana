@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.teardownEcommerce();
       });
 
-      it.skip('Download CSV export of a saved search panel', async function () {
+      it('Download CSV export of a saved search panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it.skip('Downloads a filtered CSV export of a saved search panel', async function () {
+      it('Downloads a filtered CSV export of a saved search panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it.skip('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
+      it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
         await PageObjects.dashboard.loadSavedDashboard(
           'Ecom Dashboard - 3 Day Period - custom time range'
         );
@@ -135,8 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
         await testSubjects.existOrFail('csvDownloadStarted');
 
-        // const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
-        // expect(csvFile).to.not.be(null);
+        const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
+        expect(csvFile).to.not.be(null);
       });
     });
 
@@ -178,13 +178,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await reporting.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
-
+        const from = 'Nov 26, 1981 @ 21:54:15.526';
+        const to = 'Mar 5, 1982 @ 18:17:44.821';
+        await PageObjects.common.setTime({ from, to });
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Nov 26, 1981 @ 21:54:15.526',
-          'Mar 5, 1982 @ 18:17:44.821'
-        );
 
         await PageObjects.common.sleep(1000);
         await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
