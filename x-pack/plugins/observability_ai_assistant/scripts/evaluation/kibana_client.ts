@@ -39,7 +39,7 @@ export interface ChatClient {
   ) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
 
   evaluate: (
-    {}: { conversationId?: string; messages: InnerMessage[] },
+    { }: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
@@ -72,6 +72,19 @@ export class KibanaClient {
     });
 
     return url;
+  }
+
+  callKibana(method: string, props: { query?: UrlObject['query']; pathname: string }, data?: any) {
+    const url = this.getUrl(props);
+    return axios({
+      method: method,
+      url: url,
+      data: data || {},
+      headers: {
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': 'foo',
+      },
+    });
   }
 
   createChatClient({
@@ -141,12 +154,12 @@ export class KibanaClient {
       functionCall?: string;
     }) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
-        {
-          messages,
-          connectorId,
-          functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
-          functionCall,
-        };
+      {
+        messages,
+        connectorId,
+        functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
+        functionCall,
+      };
       const stream$ = streamIntoObservable(
         (
           await that.axios.post(
