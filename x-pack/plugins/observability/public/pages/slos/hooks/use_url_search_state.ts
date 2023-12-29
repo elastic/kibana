@@ -38,7 +38,7 @@ export const DEFAULT_STATE = {
   view: 'cardView' as const,
   compact: true,
   filters: [],
-  lastRefresh: Date.now(),
+  lastRefresh: 0,
 };
 
 export function useUrlSearchState(): {
