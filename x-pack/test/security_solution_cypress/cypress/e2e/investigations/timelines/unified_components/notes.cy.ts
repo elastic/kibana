@@ -12,21 +12,36 @@ import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 
-describe('Query Tab Notes', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(ALERTS_URL);
-    openTimelineUsingToggle();
-    populateTimeline();
-  });
+describe(
+  'Query Tab Notes',
+  {
+    tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'useDiscoverInTimeline',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(ALERTS_URL);
+      openTimelineUsingToggle();
+      populateTimeline();
+    });
 
-  it('should be able to add/delete notes', () => {
-    const notesToAdd = ['First Note', 'Second Note'];
-    for (const note of notesToAdd) {
-      cy.log(`Add note - ${note}`);
-      addNotesToEvents(0, note);
-    }
-    deleteNote(0);
-    cy.get(NOTES_PREVIEWS).eq(0).should('contain.text', notesToAdd[1]);
-  });
-});
+    it('should be able to add/delete notes', () => {
+      const notesToAdd = ['First Note', 'Second Note'];
+      for (const note of notesToAdd) {
+        cy.log(`Add note - ${note}`);
+        addNotesToEvents(0, note);
+      }
+      deleteNote(0);
+      cy.get(NOTES_PREVIEWS).eq(0).should('contain.text', notesToAdd[1]);
+    });
+  }
+);
