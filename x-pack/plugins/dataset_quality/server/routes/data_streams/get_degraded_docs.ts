@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { DegradedDocs } from '../../../common/api_types';
 import {
   DATA_STREAM_DATASET,
@@ -29,7 +30,15 @@ export async function getDegradedDocsPaginated(options: {
   };
   prevResults?: DegradedDocs[];
 }): Promise<DegradedDocs[]> {
-  const { esClient, type = 'logs', datasetQuery, start, end, after, prevResults = [] } = options;
+  const {
+    esClient,
+    type = DEFAULT_DATASET_TYPE,
+    datasetQuery,
+    start,
+    end,
+    after,
+    prevResults = [],
+  } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 

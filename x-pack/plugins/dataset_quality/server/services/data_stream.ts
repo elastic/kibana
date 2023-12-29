@@ -58,6 +58,21 @@ class DataStreamService {
       throw e;
     }
   }
+
+  public async getDataSteamIndexSettings(
+    esClient: ElasticsearchClient,
+    dataStreamParts: {
+      dataset: string;
+      type: string;
+    }
+  ): Promise<Awaited<ReturnType<ElasticsearchClient['indices']['getSettings']>>> {
+    const dataStream = this.streamPartsToIndexPattern(dataStreamParts);
+    const settings = await esClient.indices.getSettings({
+      index: dataStream,
+    });
+
+    return settings;
+  }
 }
 
 export const dataStreamService = new DataStreamService();

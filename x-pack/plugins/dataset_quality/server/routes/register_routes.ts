@@ -6,6 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { isKibanaResponse } from '@kbn/core-http-router-server-internal';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
   ServerRouteRepository,
@@ -53,6 +54,7 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
           const data = (await handler({
             context,
             request,
+            response,
             logger,
             params: decodedParams,
             plugins,
@@ -71,8 +73,12 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
               body: { message: error.output.payload.message },
             });
           }
-
           logger.error(error);
+
+          if (isKibanaResponse(error)) {
+            return error;
+          }
+
           const opts = {
             statusCode: 500,
             body: {

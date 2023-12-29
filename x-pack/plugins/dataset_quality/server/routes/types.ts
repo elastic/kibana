@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { DatasetQualityServerRouteRepository } from '.';
 import {
   DatasetQualityPluginSetupDependencies,
@@ -18,6 +18,7 @@ export interface DatasetQualityRouteHandlerResources {
   context: DatasetQualityRequestHandlerContext;
   logger: Logger;
   request: KibanaRequest;
+  response: KibanaResponseFactory;
   plugins: {
     [key in keyof DatasetQualityPluginSetupDependencies]: {
       setup: Required<DatasetQualityPluginSetupDependencies>[key];

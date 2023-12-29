@@ -29,7 +29,7 @@ interface FlyoutProps {
 }
 
 export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
-  const { dataStreamStat, loading, fieldFormats } = useDatasetQualityFlyout({
+  const { dataStreamStat, dataStreamDetails, loading, fieldFormats } = useDatasetQualityFlyout({
     datasetQuery: `${dataset.name}-${dataset.namespace}`,
   });
 
@@ -45,7 +45,11 @@ export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
           </EuiFlyoutBody>
         ) : (
           <EuiFlyoutBody>
-            <DatasetSummary dataStreamStat={dataStreamStat} fieldFormats={fieldFormats} />
+            <DatasetSummary
+              dataStreamStat={dataStreamStat}
+              dataStreamDetails={dataStreamDetails}
+              fieldFormats={fieldFormats}
+            />
             <EuiSpacer />
             {dataStreamStat.integration && (
               <IntegrationSummary integration={dataStreamStat.integration} />

@@ -6,48 +6,47 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiBadge } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
+  flyoutDatasetCreatedOnText,
   flyoutDatasetDetailsText,
   flyoutDatasetLastActivityText,
-  flyoutDatasetNameSpaceText,
 } from '../../../common/translations';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
+import { DataStreamDetails } from '../../../common/data_streams_stats/data_stream_details';
 import { FieldsList } from './fields_list';
 
 interface DatasetSummaryProps {
   fieldFormats: FieldFormatsStart;
+  dataStreamDetails: DataStreamDetails;
   dataStreamStat: DataStreamStat;
 }
 
-export function DatasetSummary({ dataStreamStat, fieldFormats }: DatasetSummaryProps) {
-  const formattedLastActivity = fieldFormats
-    .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-    .convert(dataStreamStat.lastActivity);
+export function DatasetSummary({
+  dataStreamStat,
+  dataStreamDetails,
+  fieldFormats,
+}: DatasetSummaryProps) {
+  const dataFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
+    ES_FIELD_TYPES.DATE,
+  ]);
+  const formattedLastActivity = dataFormatter.convert(dataStreamStat.lastActivity);
+  const formattedCreatedOn = dataStreamDetails.createdOn
+    ? dataFormatter.convert(dataStreamDetails.createdOn)
+    : '';
 
   return (
     <FieldsList
       title={flyoutDatasetDetailsText}
       fields={[
         {
-          fieldTitle: flyoutDatasetNameSpaceText,
-          fieldValue: (
-            <EuiBadge
-              color="hollow"
-              css={css`
-                width: fit-content;
-              `}
-            >
-              {dataStreamStat.namespace}
-            </EuiBadge>
-          ),
-        },
-        {
           fieldTitle: flyoutDatasetLastActivityText,
           fieldValue: formattedLastActivity,
+        },
+        {
+          fieldTitle: flyoutDatasetCreatedOnText,
+          fieldValue: formattedCreatedOn,
         },
       ]}
     />

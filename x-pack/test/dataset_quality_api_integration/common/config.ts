@@ -11,6 +11,7 @@ import {
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
@@ -65,6 +66,7 @@ export interface CreateTest {
   services: InheritedServices & {
     datasetQualityFtrConfig: () => DatasetQualityFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
+    es: Client;
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
