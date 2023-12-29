@@ -66,7 +66,7 @@ export interface CreateTest {
   services: InheritedServices & {
     datasetQualityFtrConfig: () => DatasetQualityFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    es: Client;
+    es: (context: InheritedFtrProviderContext) => Client;
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
