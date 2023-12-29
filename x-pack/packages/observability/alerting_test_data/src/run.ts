@@ -12,7 +12,7 @@ import { createIndexConnector, getConnectors, deleteIndexConnector } from './man
 import { getKibanaUrl } from './get_kibana_url';
 import { findRulesByName, deleteRule } from './manage_rule';
 
-import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate, apm_error_count_AIAssistant, apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count, custom_threshold_AIAssistant_metric_avg } from './scenarios';
+import { scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, apm_error_count, apm_transaction_rate } from './scenarios';
 
 const scenarios_custom_threshold = [
   // Logs use-cases
@@ -23,17 +23,11 @@ const scenarios_custom_threshold = [
   scenario4,
   scenario5,
   scenario6,
-  // AI Assistant Use Cases
-  custom_threshold_AIAssistant_log_count,
-  custom_threshold_AIAssistant_metric_avg
 ];
 
 const scenarios_apm = [
   apm_error_count,
   apm_transaction_rate,
-  // AI Assistant Use Cases
-  apm_error_count_AIAssistant,
-  apm_transaction_rate_AIAssistant
 ];
 
 /* eslint-disable no-console */
