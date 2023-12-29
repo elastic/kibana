@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -15,10 +15,7 @@ import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { useAppDependencies } from '../../../../../app_dependencies';
-import {
-  useWizardActions,
-  useWizardSelector,
-} from '../../../state_management/create_transform_store';
+import { useWizardSelector } from '../../../state_management/create_transform_store';
 import { useWizardContext } from '../../wizard/wizard';
 import type { AdvancedRuntimeMappingsEditorState } from '../../../state_management/advanced_runtime_mappings_editor_slice';
 
@@ -41,7 +38,7 @@ export const latestConfigMapper = {
  * @param aggConfigs
  * @param runtimeMappings
  */
-function getOptions(
+export function getLatestConfigOptions(
   dataView: DataView,
   aggConfigs: AggConfigs,
   runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings']
@@ -134,55 +131,20 @@ export function validateLatestConfig(config?: LatestFunctionConfig) {
   };
 }
 
-export function useLatestFunctionConfig(): {
-  config: LatestFunctionConfigUI;
+export function useLatestFunctionOptions(): {
   uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>>;
   sortFieldOptions: Array<EuiComboBoxOptionOption<string>>;
-  updateLatestFunctionConfig: (update: Partial<LatestFunctionConfigUI>) => void;
-  validationStatus: { isValid: boolean; errorMessage?: string };
-  requestPayload: { latest: LatestFunctionConfig } | undefined;
 } {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
-  const config = useWizardSelector((s) => s.stepDefine.latestConfig);
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-  const { setLatestFunctionConfig } = useWizardActions();
 
   const { data } = useAppDependencies();
 
   const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => {
     const aggConfigs = data.search.aggs.createAggConfigs(dataView, [{ type: 'terms' }]);
-    return getOptions(dataView, aggConfigs, runtimeMappings);
+    return getLatestConfigOptions(dataView, aggConfigs, runtimeMappings);
   }, [dataView, data.search.aggs, runtimeMappings]);
 
-  const updateLatestFunctionConfig = useCallback(
-    (update) =>
-      setLatestFunctionConfig({
-        ...config,
-        ...update,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config]
-  );
-
-  const requestPayload: { latest: LatestFunctionConfig } | undefined = useMemo(() => {
-    const latest = latestConfigMapper.toAPIConfig(config);
-    return latest ? { latest } : undefined;
-  }, [config]);
-
-  const validationStatus = useMemo(
-    () => validateLatestConfig(requestPayload?.latest),
-    [requestPayload?.latest]
-  );
-
-  return {
-    config,
-    uniqueKeyOptions,
-    sortFieldOptions,
-    updateLatestFunctionConfig,
-    validationStatus,
-    requestPayload,
-  };
+  return { uniqueKeyOptions, sortFieldOptions };
 }
-
-export type LatestFunctionService = ReturnType<typeof useLatestFunctionConfig>;

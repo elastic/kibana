@@ -11,23 +11,28 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { LatestFunctionService } from './hooks/use_latest_function_config';
+
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+
+import { useLatestFunctionOptions } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
   copyToClipboard: string;
   copyToClipboardDescription: string;
-  latestFunctionService: LatestFunctionService;
 }
 
 export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
   copyToClipboard,
   copyToClipboardDescription,
-  latestFunctionService,
 }) => {
   const {
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();
   const { renderOption, closeFlyout } = useFieldStatsTrigger();
+  const config = useWizardSelector((s) => s.stepDefine.latestConfig);
+  const { setLatestFunctionConfigUniqueKey, setLatestFunctionConfigSort } = useWizardActions();
+  const { uniqueKeyOptions, sortFieldOptions } = useLatestFunctionOptions();
+
   return (
     <>
       <EuiFormRow
@@ -45,12 +50,10 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
           placeholder={i18n.translate('xpack.transform.stepDefineForm.uniqueKeysPlaceholder', {
             defaultMessage: 'Add unique keys ...',
           })}
-          options={latestFunctionService.uniqueKeyOptions}
-          selectedOptions={latestFunctionService.config.unique_key ?? []}
+          options={uniqueKeyOptions}
+          selectedOptions={config.unique_key ?? []}
           onChange={(selected) => {
-            latestFunctionService.updateLatestFunctionConfig({
-              unique_key: selected,
-            });
+            setLatestFunctionConfigUniqueKey(selected);
             closeFlyout();
           }}
           isClearable={false}
@@ -67,7 +70,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
           />
         }
         helpText={
-          latestFunctionService.sortFieldOptions.length > 0
+          sortFieldOptions.length > 0
             ? i18n.translate('xpack.transform.stepDefineForm.sortHelpText', {
                 defaultMessage: 'Select the date field to be used to identify the latest document.',
               })
@@ -75,20 +78,19 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
         }
       >
         <>
-          {latestFunctionService.sortFieldOptions.length > 0 && (
+          {sortFieldOptions.length > 0 && (
             <EuiComboBox
               fullWidth
               placeholder={i18n.translate('xpack.transform.stepDefineForm.sortPlaceholder', {
                 defaultMessage: 'Add a date field ...',
               })}
               singleSelection={{ asPlainText: true }}
-              options={latestFunctionService.sortFieldOptions}
-              selectedOptions={
-                latestFunctionService.config.sort ? [latestFunctionService.config.sort] : []
-              }
+              options={sortFieldOptions}
+              selectedOptions={config.sort ? [config.sort] : []}
               onChange={(selected) => {
-                latestFunctionService.updateLatestFunctionConfig({
-                  sort: { value: selected[0].value, label: selected[0].label as string },
+                setLatestFunctionConfigSort({
+                  value: selected[0].value,
+                  label: selected[0].label as string,
                 });
                 closeFlyout();
               }}
@@ -97,7 +99,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
               renderOption={renderOption}
             />
           )}
-          {latestFunctionService.sortFieldOptions.length === 0 && (
+          {sortFieldOptions.length === 0 && (
             <EuiCallOut color="danger" iconType="warning" size="m">
               <p>
                 <FormattedMessage

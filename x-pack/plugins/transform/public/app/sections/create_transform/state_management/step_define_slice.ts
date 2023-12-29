@@ -40,11 +40,17 @@ export const stepDefineSlice = createSlice({
     setGroupByList: (state, action: PayloadAction<PivotGroupByConfigDict>) => {
       state.groupByList = action.payload;
     },
-    setLatestFunctionConfig: (
+    setLatestFunctionConfigUniqueKey: (
       state,
-      action: PayloadAction<StepDefineExposedState['latestConfig']>
+      action: PayloadAction<StepDefineExposedState['latestConfig']['unique_key']>
     ) => {
-      state.latestConfig = action.payload as any;
+      state.latestConfig.unique_key = action.payload;
+    },
+    setLatestFunctionConfigSort: (
+      state,
+      action: PayloadAction<StepDefineExposedState['latestConfig']['sort']>
+    ) => {
+      state.latestConfig.sort = action.payload;
     },
     setSearchLanguage: (state, action: PayloadAction<StepDefineExposedState['searchLanguage']>) => {
       state.searchLanguage = action.payload;

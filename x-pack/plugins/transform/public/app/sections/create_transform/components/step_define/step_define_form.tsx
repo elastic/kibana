@@ -57,9 +57,8 @@ import { useWizardContext } from '../wizard/wizard';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import {
   selectCopyToClipboardPreviewRequest,
-  selectPivotValidationStatus,
-  selectRequestPayload,
   selectTransformConfigQuery,
+  selectValidatedRequestPayload,
 } from '../../state_management/step_define_selectors';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
@@ -69,7 +68,7 @@ import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 import { useDatePicker } from './hooks/use_date_picker';
-import { useLatestFunctionConfig } from './hooks/use_latest_function_config';
+import { useLatestFunctionOptions } from './hooks/use_latest_function_config';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
@@ -106,7 +105,7 @@ export const StepDefineForm: FC = () => {
   );
   const toastNotifications = useToastNotifications();
   const { hasValidTimeField } = useDatePicker();
-  const latestFunctionConfig = useLatestFunctionConfig();
+  const latestFunctionOptions = useLatestFunctionOptions();
   const isAdvancedPivotEditorEnabled = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
   );
@@ -157,13 +156,7 @@ export const StepDefineForm: FC = () => {
     toastNotifications,
   };
 
-  const pivotRequestPayload = useSelector(selectRequestPayload);
-  const pivotValidationStatus = useSelector(selectPivotValidationStatus);
-
-  const { requestPayload, validationStatus } =
-    transformFunction === TRANSFORM_FUNCTION.PIVOT
-      ? { requestPayload: pivotRequestPayload, validationStatus: pivotValidationStatus }
-      : latestFunctionConfig;
+  const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
 
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
@@ -485,13 +478,12 @@ export const StepDefineForm: FC = () => {
           <LatestFunctionForm
             copyToClipboard={copyToClipboardPivot}
             copyToClipboardDescription={copyToClipboardPivotDescription}
-            latestFunctionService={latestFunctionConfig}
           />
         ) : null}
       </EuiForm>
       <EuiSpacer size="m" />
       {(transformFunction !== TRANSFORM_FUNCTION.LATEST ||
-        latestFunctionConfig.sortFieldOptions.length > 0) && (
+        latestFunctionOptions.sortFieldOptions.length > 0) && (
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {
