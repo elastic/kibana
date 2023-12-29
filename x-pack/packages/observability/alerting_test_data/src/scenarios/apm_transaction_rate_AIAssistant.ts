@@ -11,7 +11,7 @@ export const apm_transaction_rate_AIAssistant = {
     name: 'apm_error_count_AIAssistant',
     rule_type_id: 'apm.transaction_error_rate',
     params: {
-      threshold: 30,
+      threshold: 10,
       windowSize: 1,
       windowUnit: 'h',
       transactionType: undefined,
