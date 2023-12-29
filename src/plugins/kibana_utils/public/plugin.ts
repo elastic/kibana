@@ -27,7 +27,6 @@ export class KibanaUtilsPublicPlugin
       KibanaUtilsPublicStartDependencies
     >
 {
-
   public setup(_core: CoreSetup): KibanaUtilsPublicSetup {
     return undefined;
   }
