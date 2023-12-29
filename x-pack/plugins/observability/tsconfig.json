@@ -100,7 +100,10 @@
     "@kbn/presentation-util-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks"
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/aiops-utils",
+    "@kbn/field-formats-plugin",
+    "@kbn/logs-shared-plugin"
   ],
   "exclude": [
     "target/**/*"
