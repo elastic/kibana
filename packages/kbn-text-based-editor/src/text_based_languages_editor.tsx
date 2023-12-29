@@ -732,6 +732,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         responsive={false}
         css={{ margin: '0 0 1px 0' }}
         ref={containerRef}
+        direction={isChatVisible ? 'column' : 'row'}
       >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
@@ -740,161 +741,166 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 restoreInitialMode();
               }}
             >
-              <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem
-                  data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
-                  className={editorClassName}
-                >
-                  <div css={styles.editorContainer}>
-                    {!isCompactFocused && (
-                      <EuiBadge
-                        color={euiTheme.colors.lightShade}
-                        css={styles.linesBadge}
-                        data-test-subj="TextBasedLangEditor-inline-lines-badge"
-                      >
-                        {i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
-                          {
-                            defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                            values: { count: lines },
-                          }
+              <>
+                {isChatVisible && observabilityAIAssistant && chatService.value && (
+                  <Chat
+                    chatService={chatService.value}
+                    observabilityAIAssistant={observabilityAIAssistant}
+                    height={editorHeight}
+                    onHumanLanguageRun={onHumanLanguageRun}
+                    containerCSS={styles.bottomContainer}
+                    textAreaCSS={styles.editorContainer}
+                    resizeRef={resizeRef}
+                    resizableCSS={styles.resizableContainer}
+                  />
+                )}
+                {!isChatVisible && (
+                  <div ref={resizeRef} css={styles.resizableContainer}>
+                    <EuiFlexItem
+                      data-test-subj={dataTestSubj ?? 'TextBasedLangEditor'}
+                      className={editorClassName}
+                    >
+                      <div css={styles.editorContainer}>
+                        {!isCompactFocused && (
+                          <EuiBadge
+                            color={euiTheme.colors.lightShade}
+                            css={styles.linesBadge}
+                            data-test-subj="TextBasedLangEditor-inline-lines-badge"
+                          >
+                            {i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.lineCount',
+                              {
+                                defaultMessage: '{count} {count, plural, one {line} other {lines}}',
+                                values: { count: lines },
+                              }
+                            )}
+                          </EuiBadge>
                         )}
-                      </EuiBadge>
-                    )}
-                    {!isCompactFocused && editorMessages.errors.length > 0 && (
-                      <EuiBadge
-                        color={euiTheme.colors.danger}
-                        css={styles.errorsBadge}
-                        iconType="error"
-                        iconSide="left"
-                        data-test-subj="TextBasedLangEditor-inline-errors-badge"
-                        title={i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
-                          {
-                            defaultMessage:
-                              '{count} {count, plural, one {error} other {errors}} found',
-                            values: { count: editorMessages.errors.length },
-                          }
+                        {!isCompactFocused && editorMessages.errors.length > 0 && (
+                          <EuiBadge
+                            color={euiTheme.colors.danger}
+                            css={styles.errorsBadge}
+                            iconType="error"
+                            iconSide="left"
+                            data-test-subj="TextBasedLangEditor-inline-errors-badge"
+                            title={i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
+                              {
+                                defaultMessage:
+                                  '{count} {count, plural, one {error} other {errors}} found',
+                                values: { count: editorMessages.errors.length },
+                              }
+                            )}
+                          >
+                            {editorMessages.errors.length}
+                          </EuiBadge>
                         )}
-                      >
-                        {editorMessages.errors.length}
-                      </EuiBadge>
-                    )}
-                    {!isCompactFocused &&
-                      editorMessages.warnings.length > 0 &&
-                      editorMessages.errors.length === 0 && (
-                        <EuiBadge
-                          color={euiTheme.colors.warning}
-                          css={styles.errorsBadge}
-                          iconType="warning"
-                          iconSide="left"
-                          data-test-subj="TextBasedLangEditor-inline-warning-badge"
-                          title={i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
-                            {
-                              defaultMessage:
-                                '{count} {count, plural, one {warning} other {warnings}} found',
-                              values: { count: editorMessages.warnings.length },
-                            }
+                        {!isCompactFocused &&
+                          editorMessages.warnings.length > 0 &&
+                          editorMessages.errors.length === 0 && (
+                            <EuiBadge
+                              color={euiTheme.colors.warning}
+                              css={styles.errorsBadge}
+                              iconType="warning"
+                              iconSide="left"
+                              data-test-subj="TextBasedLangEditor-inline-warning-badge"
+                              title={i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
+                                {
+                                  defaultMessage:
+                                    '{count} {count, plural, one {warning} other {warnings}} found',
+                                  values: { count: editorMessages.warnings.length },
+                                }
+                              )}
+                            >
+                              {editorMessages.warnings.length}
+                            </EuiBadge>
                           )}
-                        >
-                          {editorMessages.warnings.length}
-                        </EuiBadge>
-                      )}
-                    {!isChatVisible && (
-                      <CodeEditor
-                        languageId={languageId(language)}
-                        value={codeOneLiner || code}
-                        options={codeEditorOptions}
-                        width="100%"
-                        suggestionProvider={suggestionProvider}
-                        hoverProvider={{
-                          provideHover: (model, position, token) => {
-                            if (isCompactFocused || !hoverProvider?.provideHover) {
-                              return { contents: [] };
+                        <CodeEditor
+                          languageId={languageId(language)}
+                          value={codeOneLiner || code}
+                          options={codeEditorOptions}
+                          width="100%"
+                          suggestionProvider={suggestionProvider}
+                          hoverProvider={{
+                            provideHover: (model, position, token) => {
+                              if (isCompactFocused || !hoverProvider?.provideHover) {
+                                return { contents: [] };
+                              }
+                              return hoverProvider?.provideHover(model, position, token);
+                            },
+                          }}
+                          onChange={onQueryUpdate}
+                          editorDidMount={(editor) => {
+                            editor1.current = editor;
+                            const model = editor.getModel();
+                            if (model) {
+                              editorModel.current = model;
                             }
-                            return hoverProvider?.provideHover(model, position, token);
-                          },
-                        }}
-                        onChange={onQueryUpdate}
-                        editorDidMount={(editor) => {
-                          editor1.current = editor;
-                          const model = editor.getModel();
-                          if (model) {
-                            editorModel.current = model;
-                          }
-                          if (isCodeEditorExpanded) {
-                            lines = model?.getLineCount() || 1;
-                          }
-
-                          editor.onDidChangeModelContent((e) => {
-                            if (updateLinesFromModel) {
+                            if (isCodeEditorExpanded) {
                               lines = model?.getLineCount() || 1;
                             }
-                            const currentPosition = editor.getPosition();
-                            const content = editorModel.current?.getValueInRange({
-                              startLineNumber: 0,
-                              startColumn: 0,
-                              endLineNumber: currentPosition?.lineNumber ?? 1,
-                              endColumn: currentPosition?.column ?? 1,
+
+                            editor.onDidChangeModelContent((e) => {
+                              if (updateLinesFromModel) {
+                                lines = model?.getLineCount() || 1;
+                              }
+                              const currentPosition = editor.getPosition();
+                              const content = editorModel.current?.getValueInRange({
+                                startLineNumber: 0,
+                                startColumn: 0,
+                                endLineNumber: currentPosition?.lineNumber ?? 1,
+                                endColumn: currentPosition?.column ?? 1,
+                              });
+                              if (content) {
+                                codeRef.current = content || editor.getValue();
+                              }
                             });
-                            if (content) {
-                              codeRef.current = content || editor.getValue();
+
+                            editor.onDidFocusEditorText(() => {
+                              onEditorFocus();
+                            });
+
+                            editor.onKeyDown(() => {
+                              onEditorFocus();
+                            });
+
+                            // on CMD/CTRL + Enter submit the query
+                            editor.addCommand(
+                              // eslint-disable-next-line no-bitwise
+                              monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                              onQuerySubmit
+                            );
+                            if (!isCodeEditorExpanded) {
+                              editor.onDidContentSizeChange((e) => {
+                                updateHeight(editor);
+                              });
                             }
-                          });
-
-                          editor.onDidFocusEditorText(() => {
-                            onEditorFocus();
-                          });
-
-                          editor.onKeyDown(() => {
-                            onEditorFocus();
-                          });
-
-                          // on CMD/CTRL + Enter submit the query
-                          editor.addCommand(
-                            // eslint-disable-next-line no-bitwise
-                            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                            onQuerySubmit
-                          );
-                          if (!isCodeEditorExpanded) {
-                            editor.onDidContentSizeChange((e) => {
-                              updateHeight(editor);
-                            });
-                          }
-                        }}
-                      />
-                    )}
-                    {isChatVisible && observabilityAIAssistant && chatService.value && (
-                      <Chat
-                        chatService={chatService.value}
-                        observabilityAIAssistant={observabilityAIAssistant}
-                        height={editorHeight}
-                        onHumanLanguageRun={onHumanLanguageRun}
-                      />
-                    )}
-                    {isCompactFocused && !isCodeEditorExpanded && (
-                      <EditorFooter
-                        lines={lines}
-                        containerCSS={styles.bottomContainer}
-                        {...editorMessages}
-                        onErrorClick={onErrorClick}
-                        runQuery={() => {
-                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onQuerySubmit();
-                          }
-                        }}
-                        detectTimestamp={detectTimestamp}
-                        editorIsInline={editorIsInline}
-                        disableSubmitAction={disableSubmitAction}
-                        hideRunQueryText={hideRunQueryText || isChatVisible}
-                        isSpaceReduced={isSpaceReduced}
-                        isAiChatVisible={isChatVisible}
-                      />
-                    )}
+                          }}
+                        />
+                        {isCompactFocused && !isCodeEditorExpanded && !isChatVisible && (
+                          <EditorFooter
+                            lines={lines}
+                            containerCSS={styles.bottomContainer}
+                            {...editorMessages}
+                            onErrorClick={onErrorClick}
+                            runQuery={() => {
+                              if (editorMessages.errors.some((e) => e.source !== 'client')) {
+                                onQuerySubmit();
+                              }
+                            }}
+                            detectTimestamp={detectTimestamp}
+                            editorIsInline={editorIsInline}
+                            disableSubmitAction={disableSubmitAction}
+                            hideRunQueryText={hideRunQueryText || isChatVisible}
+                            isSpaceReduced={isSpaceReduced}
+                          />
+                        )}
+                      </div>
+                    </EuiFlexItem>
                   </div>
-                </EuiFlexItem>
-              </div>
+                )}
+              </>
             </EuiOutsideClickDetector>
           )}
         </EuiResizeObserver>
@@ -968,7 +974,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isCodeEditorExpanded && (
+      {isCodeEditorExpanded && !isChatVisible && (
         <EditorFooter
           lines={lines}
           containerCSS={styles.bottomContainer}
@@ -980,7 +986,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
           {...editorMessages}
-          isAiChatVisible={isChatVisible}
         />
       )}
       {isCodeEditorExpanded && (
