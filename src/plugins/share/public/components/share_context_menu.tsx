@@ -58,20 +58,34 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     shareMenuItems,
     objectTypeTitle,
     objectId,
+    allowShortUrl,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
+    anonymousAccess,
+    showPublicUrlSwitch,
+    snapshotShareWarning,
+    embedUrlParamExtensions,
   } = props;
 
   const openLinkModal = () => {
     const session = openModal(
       toMountPoint(
         <LinkModal
-          isEmbedded={true}
-          allowShortUrl={true}
+          isEmbedded={false}
+          allowShortUrl={allowShortUrl}
+          objectId={objectId}
+          objectType={objectType}
+          shareableUrl={shareableUrl}
+          shareableUrlForSavedObject={shareableUrlForSavedObject}
+          shareableUrlLocatorParams={shareableUrlLocatorParams}
+          anonymousAccess={anonymousAccess}
           onClose={() => {
             session.close();
           }}
+          showPublicUrlSwitch={showPublicUrlSwitch}
           urlService={urlService}
-          objectId={objectId}
-          objectType={objectType}
+          snapshotShareWarning={snapshotShareWarning}
         />,
         { theme, i18n: i18nStart }
       ),
@@ -86,13 +100,21 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     const session = openModal(
       toMountPoint(
         <EmbedModal
-          isEmbedded={true}
-          allowShortUrl={true}
+          allowShortUrl={allowShortUrl}
+          isEmbedded
           onClose={() => {
             session.close();
           }}
-          urlService={urlService}
+          objectId={objectId}
           objectType={objectType}
+          shareableUrl={shareableUrl}
+          shareableUrlForSavedObject={shareableUrlForSavedObject}
+          shareableUrlLocatorParams={shareableUrlLocatorParams}
+          urlParamExtensions={embedUrlParamExtensions}
+          anonymousAccess={anonymousAccess}
+          showPublicUrlSwitch={showPublicUrlSwitch}
+          urlService={urlService}
+          snapshotShareWarning={snapshotShareWarning}
         />,
         { theme, i18n: i18nStart }
       ),

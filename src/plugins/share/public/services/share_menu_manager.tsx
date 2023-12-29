@@ -154,10 +154,6 @@ export class ShareMenuManager {
               openModal={overlays.openModal}
               theme={theme}
               i18nStart={i18n}
-              notifications={notifications}
-              http={http}
-              taggingApi={taggingApi}
-              allowedTypes={allowedTypes}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

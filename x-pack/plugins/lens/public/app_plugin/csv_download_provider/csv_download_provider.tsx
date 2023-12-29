@@ -11,6 +11,12 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type {
+  JobParamsProviderOptions,
+  ReportingSharingData,
+} from '@kbn/reporting-plugin/public/share_context_menu';
+import { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormatFactory } from '../../../common/types';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -93,11 +99,17 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
+  theme: ThemeServiceStart;
+  overlays: OverlayStart;
+  i18nStart: I18nStart;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
+  theme,
+  overlays,
+  i18nStart,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
@@ -110,10 +122,37 @@ export const downloadCsvShareProvider = ({
       csvEnabled: boolean;
     };
 
+    const openCsvLensModal = () => {
+      const session = overlays.openModal(
+        toMountPoint(
+          <DownloadPanelContent
+            isDisabled={!csvEnabled}
+            warnings={getWarnings(activeData)}
+            onClick={async () => {
+              await downloadCSVs({
+                title,
+                formatFactory: formatFactoryFn(),
+                activeData,
+                uiSettings,
+              });
+              () => {
+                session.close();
+              };
+            }}
+          />,
+          { theme, i18n: i18nStart }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'link-modal',
+        }
+      );
+    };
+
     const panelTitle = i18n.translate(
-      'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
+      'xpack.lens.reporting.shareContextMenu.csvExportButtonLabel',
       {
-        defaultMessage: 'CSV Download',
+        defaultMessage: 'CSV Export',
       }
     );
 
@@ -128,28 +167,33 @@ export const downloadCsvShareProvider = ({
         panel: {
           id: 'csvDownloadPanel',
           title: panelTitle,
-          content: (
-            <DownloadPanelContent
-              isDisabled={!csvEnabled}
-              warnings={getWarnings(activeData)}
-              onClick={async () => {
-                await downloadCSVs({
-                  title,
-                  formatFactory: formatFactoryFn(),
-                  activeData,
-                  uiSettings,
-                });
-                onClose?.();
-              }}
-            />
-          ),
+          content: openCsvLensModal,
         },
       },
     ];
   };
 
+  const jobProviderOptions = ({
+    objectType,
+    objectId,
+    isDirty,
+    onClose,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    ...shareOpts
+  }: ShareContext) => {
+    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
+
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
+      objectType,
+      sharingData,
+    };
+    return jobProviderOptions;
+  };
   return {
-    id: 'csvDownload',
+    id: 'csv export',
     getShareMenuItems,
+    jobProviderOptions: jobProviderOptions as unknown as JobParamsProviderOptions,
   };
 };

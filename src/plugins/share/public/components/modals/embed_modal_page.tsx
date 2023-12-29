@@ -27,7 +27,7 @@ import {
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
@@ -68,8 +68,9 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     onClose,
   } = props;
   const isMounted = useMountedState();
-  const [shortUrl, isCreatingShortUrl] = useState<boolean>(false);
-  const [urlParams] = useState<undefined | UrlParams>(undefined);
+  const [useShortUrl, setUseShortUrl] = useState<boolean>(false);
+  const [createShortUrl, isCreatingShortUrl] = useState<boolean>(false);
+  const [urlParams, setUrlParams] = useState<undefined | UrlParams>(undefined);
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({
@@ -82,29 +83,40 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
+
+  useEffect(() => {
+    isMounted();
+    setUrlHelper();
+    resetUrl();
+    return function cleanup() {
+      resetUrl();
+      !isMounted();
+    };
+  }, []);
+
   interface UrlParams {
     [extensionName: string]: {
       [queryParam: string]: boolean;
     };
   }
 
-  const makeUrlEmbeddable = (url: string): string => {
+  const makeUrlEmbeddable = (tempUrl: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
+      return tempUrl.replace('?', `${embedParam}&`);
     }
 
-    return `${url}${embedParam}`;
+    return `${tempUrl}${embedParam}`;
   };
 
-  const makeIframeTag = (url?: string) => {
-    if (!url) {
+  const makeIframeTag = (tempUrl?: string) => {
+    if (!tempUrl) {
       return;
     }
 
-    return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
+    return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
   };
 
   const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
@@ -116,6 +128,14 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  };
+
+  const resetUrl = () => {
+    if (isMounted()) {
+      setShortUrlCache(undefined);
+      setUseShortUrl(false);
+      setUrlHelper();
+    }
   };
 
   const getUrlParamExtensions = (tempUrl: string): string => {
@@ -134,11 +154,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       : tempUrl;
   };
 
-  const updateUrlParams = (url: string) => {
-    url = isEmbedded ? makeUrlEmbeddable(url) : url;
-    url = urlParams ? getUrlParamExtensions(url) : url;
+  const updateUrlParams = (tempUrl: string) => {
+    tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+    tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
 
-    return url;
+    return tempUrl;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -152,8 +172,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     return updateUrlParams(tempUrl);
   };
 
-  const createShortUrl = async () => {
-    setShortUrl(true);
+  const createShortUrlHelper = async () => {
+    isCreatingShortUrl(true);
     setShortUrlErrorMsg(undefined);
 
     try {
@@ -239,7 +259,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   };
 
   const setUrlHelper = () => {
-    let tempUrl: string | undefined = '';
+    let tempUrl: string | undefined;
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       tempUrl = getSavedObjectUrl();
@@ -269,7 +289,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     }
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
-    createShortUrl();
+    createShortUrlHelper();
   };
 
   const renderShortUrlSwitch = () => {
@@ -321,7 +341,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     });
   };
 
-
   const checkboxOptions = [
     { id: 'filterBar', label: 'Filter bar', 'data-test-sub': 'filter-bar-embed' },
     { id: 'query', label: 'Query', 'data-test-sub': 'query-embed' },
@@ -334,7 +353,12 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'snapshot', label: 'Snapshot' },
   ];
 
-  const copyEmbed = () => alert('implement this');
+  const setParamValue =
+    (paramName: string) =>
+    (values: { [queryParam: string]: boolean } = {}): void => {
+      setUrlParams({ [paramName]: { ...values } });
+      useShortUrl ? createShortUrlHelper() : setUrlHelper();
+    };
 
   return (
     <EuiModal onClose={onClose}>
@@ -347,7 +371,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={1}>
-              <EuiFormLabel>Include in Embed</EuiFormLabel>
+              <EuiFormLabel>Include</EuiFormLabel>
               <EuiCheckboxGroup
                 options={checkboxOptions}
                 idToSelectedMap={checkboxSelectedMap}
@@ -357,6 +381,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
+              <EuiFormLabel>Generate the link as</EuiFormLabel>
               <EuiRadioGroup
                 options={radioOptions}
                 onChange={(id) => setSelectedRadio(id)}
@@ -368,9 +393,11 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup>
-            <EuiButton fill onClick={() => copyEmbed()}>
+            {/* {props.urlParamExtensions && props.urlParamExtensions?.map(({paramName}) => { */}
+            <EuiButton fill onClick={() => setParamValue('embed')}>
               <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
             </EuiButton>
+            {/* })} */}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">

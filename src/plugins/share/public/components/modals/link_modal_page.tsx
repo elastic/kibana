@@ -27,7 +27,12 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { AnonymousAccessServiceContract, AnonymousAccessState, LocatorPublic } from '../../../common';
+import { Capabilities } from '@kbn/core/public';
+import {
+  AnonymousAccessServiceContract,
+  AnonymousAccessState,
+  LocatorPublic,
+} from '../../../common';
 import { BrowserUrlService } from '../../types';
 
 export enum ExportUrlAsType {
@@ -55,7 +60,7 @@ interface LinksModalPageProps {
   objectType: string;
   snapshotShareWarning?: string;
   anonymousAccess?: AnonymousAccessServiceContract;
-  showPublicUrlSwitch: boolean;
+  showPublicUrlSwitch?: ((anonymousUserCapabilities: Capabilities) => boolean) | undefined;
 }
 
 export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
@@ -71,7 +76,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     objectType,
     snapshotShareWarning,
     anonymousAccess,
-    showPublicUrlSwitch
+    showPublicUrlSwitch,
   } = props;
 
   const isMounted = useMountedState();
@@ -80,27 +85,31 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [useShortUrl, setUseShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
   const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
   const [url, setUrl] = useState<string>('');
-  const [anonymousAccessParameters, setAnonymousAccessParameters] = useState<null | AnonymousAccessState['accessURLParameters']>(null);
-  const [ showWarningButton, setShowWarningButton ] = useState<boolean>(Boolean(snapshotShareWarning))
-  
-  useEffect(() =>{
+  const [anonymousAccessParameters, setAnonymousAccessParameters] = useState<
+    null | AnonymousAccessState['accessURLParameters']
+  >(null);
+  const [showWarningButton, setShowWarningButton] = useState<boolean>(
+    Boolean(snapshotShareWarning)
+  );
+
+  useEffect(() => {
     isMounted();
     setUrlHelper();
 
     if (anonymousAccess) {
-      (async () => {
-        const { accessURLParameters: anonymousAccessParameters} = 
-        await anonymousAccess!.getState();
+      async () => {
+        const { accessURLParameters: anonymousAccessParameters } =
+          await anonymousAccess!.getState();
 
-        if(!isMounted) {
-          return
+        if (!isMounted) {
+          return;
         }
 
         if (!anonymousAccessParameters) {
-          return
+          return;
         }
 
-        let showPublicUrlSwitch: boolean = false;
+        const showPublicUrlSwitch: boolean = false;
 
         if (showPublicUrlSwitch) {
           const anonymousUserCapabilities = await anonymousAccess!.getCapabilities();
@@ -110,17 +119,17 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
           }
 
           try {
-            setUsePublicUrl!(Boolean(anonymousUserCapabilities))
+            setUsePublicUrl!(Boolean(anonymousUserCapabilities));
           } catch {
-            setUsePublicUrl(false)
+            setUsePublicUrl(false);
           }
         }
-        setAnonymousAccessParameters(anonymousAccessParameters)
-        setUsePublicUrl(true)
-      })
+        setAnonymousAccessParameters(anonymousAccessParameters);
+        setUsePublicUrl(true);
+      };
     }
-  }, [])
-  
+  }, []);
+
   const [, isCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
@@ -355,7 +364,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     );
   };
 
-  const copyLink = () => {}
+  const copyLink = () => {};
 
   return (
     <EuiModal onClose={onClose}>
