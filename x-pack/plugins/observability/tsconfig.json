@@ -103,7 +103,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/aiops-utils",
     "@kbn/field-formats-plugin",
-    "@kbn/logs-shared-plugin"
   ],
   "exclude": [
     "target/**/*"
