@@ -29,7 +29,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe(
   'Host details flyout',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
