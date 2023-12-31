@@ -9,7 +9,7 @@
 import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, CoreStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { Capabilities, CoreStart, HttpStart } from '@kbn/core/public';
 import type { JobParamsProviderOptions } from '@kbn/reporting-plugin/public/share_context_menu';
 import { SearchSourceFields } from '@kbn/data-plugin/common';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -120,7 +120,6 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   onClose?: () => void;
   objectTypeTitle?: string;
   overlays: CoreStart['overlays'];
-  notifications: NotificationsStart;
   http: HttpStart;
   taggingApi?: SavedObjectsTaggingApi;
   allowedTypes: SavedObjectManagementTypeInfo[];

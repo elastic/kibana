@@ -285,6 +285,8 @@ export const LensTopNavMenu = ({
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  overlays,
+  http,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -622,7 +624,7 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, // we'll manage this implicitly via the new service
+              allowShortUrl: false,
               shareableUrl: shareableUrl || '',
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
@@ -639,6 +641,9 @@ export const LensTopNavMenu = ({
               onClose: () => {
                 anchorElement?.focus();
               },
+              overlays,
+              http,
+              allowedTypes: [],
             });
           },
         },
@@ -794,6 +799,8 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    overlays,
+    http,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

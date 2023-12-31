@@ -133,6 +133,8 @@ export interface LensTopNavMenuProps {
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
+  overlays: OverlayStart;
+  http: HttpStart;
 }
 
 export interface HistoryLocationState {

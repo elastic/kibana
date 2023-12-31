@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { HttpStart, NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common';
@@ -61,7 +61,6 @@ export class ShareMenuManager {
           theme: core.theme,
           overlays: core.overlays,
           i18n: core.i18n,
-          notifications: core.notifications,
           http: core.http,
           taggingApi,
           allowedTypes: await getTypes(core),
@@ -97,7 +96,6 @@ export class ShareMenuManager {
     disabledShareUrl,
     i18n,
     overlays,
-    notifications,
     http,
     taggingApi,
     allowedTypes,
@@ -109,7 +107,6 @@ export class ShareMenuManager {
     onClose: () => void;
     i18n: CoreStart['i18n'];
     overlays: OverlayStart;
-    notifications: NotificationsStart;
     http: HttpStart;
     taggingApi?: SavedObjectsTaggingApi;
     allowedTypes: SavedObjectManagementTypeInfo[];

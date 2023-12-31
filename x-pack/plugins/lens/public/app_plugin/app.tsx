@@ -562,6 +562,8 @@ export function App({
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          overlays={coreStart.overlays}
+          http={coreStart.http}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
