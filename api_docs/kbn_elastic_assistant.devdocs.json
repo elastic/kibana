@@ -159,7 +159,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantStreamingEnabled, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePath, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, modelEvaluatorEnabled, nameSpace, ragOnAlerts, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, toasts, }: React.PropsWithChildren<",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantStreamingEnabled, assistantTelemetry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePath, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, modelEvaluatorEnabled, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, toasts, }: React.PropsWithChildren<",
           "AssistantProviderProps",
           ">) => JSX.Element"
         ],
@@ -172,7 +172,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantStreamingEnabled = false,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  modelEvaluatorEnabled = false,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  ragOnAlerts = false,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantStreamingEnabled = false,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  modelEvaluatorEnabled = false,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -534,7 +534,7 @@
             "label": "reportAssistantMessageSent",
             "description": [],
             "signature": [
-              "(params: { conversationId: string; role: string; }) => void"
+              "(params: { conversationId: string; role: string; isEnabledKnowledgeBase: boolean; isEnabledRAGAlerts: boolean; }) => void"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -568,6 +568,28 @@
                     "type": "string",
                     "tags": [],
                     "label": "role",
+                    "description": [],
+                    "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantMessageSent.$1.isEnabledKnowledgeBase",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isEnabledKnowledgeBase",
+                    "description": [],
+                    "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantMessageSent.$1.isEnabledRAGAlerts",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isEnabledRAGAlerts",
                     "description": [],
                     "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
                     "deprecated": false,
@@ -621,6 +643,64 @@
                     "tags": [],
                     "label": "promptTitle",
                     "description": [],
+                    "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled",
+            "type": "Function",
+            "tags": [],
+            "label": "reportAssistantSettingToggled",
+            "description": [],
+            "signature": [
+              "(params: { isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; }) => void"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled.$1.isEnabledKnowledgeBase",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isEnabledKnowledgeBase",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled.$1.isEnabledRAGAlerts",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isEnabledRAGAlerts",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
                     "deprecated": false,
                     "trackAdoption": false
