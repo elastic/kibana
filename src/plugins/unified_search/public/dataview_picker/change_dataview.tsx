@@ -197,7 +197,7 @@ export function ChangeDataView({
             data-test-subj="indexPattern-manage-field"
             onClick={async () => {
               if (onEditDataView) {
-                const dataView = await dataViews.get(currentDataViewId!);
+                const dataView = await dataViews.getLegacy(currentDataViewId!);
                 dataViewEditor.openEditor({
                   editData: dataView,
                   onSave: (updatedDataView) => {

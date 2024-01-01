@@ -34,9 +34,18 @@ export async function fetchIndexPatterns(
 
   const searchString = searchStringList.map((value) => `"${value}"`).join(' | ');
 
-  const [searchMatches, ...matchesById] = await Promise.all([
-    indexPatternsService.find(searchString),
-    ...searchIdsList.map((id) => indexPatternsService.get(id)),
+  // todo this code was better parallelized before
+  const searchMatches = await Promise.all(
+    (await indexPatternsService.find(searchString)).map((d) => indexPatternsService.toDataView(d))
+  );
+
+  const defaultDataViewLazy = await indexPatternsService.getDefault();
+  const defaultDataView = defaultDataViewLazy
+    ? await indexPatternsService.toDataView(defaultDataViewLazy)
+    : null;
+
+  const matchesById = await Promise.all([
+    ...searchIdsList.map((id) => indexPatternsService.getLegacy(id)),
   ]);
 
   const exactMatches = [
@@ -47,7 +56,7 @@ export async function fetchIndexPatterns(
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
-      : [...exactMatches, await indexPatternsService.getDefault()];
+      : [...exactMatches, defaultDataView];
 
   return allMatches.filter((d: DataView | null): d is DataView => d != null);
 }
