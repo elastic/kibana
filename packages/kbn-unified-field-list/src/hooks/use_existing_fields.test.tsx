@@ -76,7 +76,7 @@ describe('UnifiedFieldList useExistingFields', () => {
       }
     });
 
-    dataViews.get.mockImplementation(async (id: string) => {
+    dataViews.getLegacy.mockImplementation(async (id: string) => {
       return [dataView, anotherDataView, dataViewWithRestrictions].find((dw) => dw.id === id)!;
     });
 

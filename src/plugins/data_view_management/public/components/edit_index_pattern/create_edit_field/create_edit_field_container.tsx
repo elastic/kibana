@@ -24,7 +24,7 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
     props.match.params.fieldName && decodeURIComponent(props.match.params.fieldName);
 
   useEffect(() => {
-    dataViews.get(props.match.params.id).then((ip: DataView) => {
+    dataViews.getLegacy(props.match.params.id).then((ip: DataView) => {
       setIndexPattern(ip);
       if (ip) {
         setBreadcrumbs(

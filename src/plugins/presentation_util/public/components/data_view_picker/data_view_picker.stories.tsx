@@ -27,7 +27,7 @@ export function Example({}: {} & StorybookParams) {
   pluginServices.setRegistry(registry.start({}));
 
   const {
-    dataViews: { getIdsWithTitle, get },
+    dataViews: { getIdsWithTitle, getLegacy },
   } = pluginServices.getServices();
 
   const [dataViews, setDataViews] = useState<DataViewListItem[]>();
@@ -41,7 +41,7 @@ export function Example({}: {} & StorybookParams) {
   });
 
   const onChange = (newId: string) => {
-    get(newId).then((newDataView) => {
+    getLegacy(newId).then((newDataView) => {
       setDataView(newDataView);
     });
   };

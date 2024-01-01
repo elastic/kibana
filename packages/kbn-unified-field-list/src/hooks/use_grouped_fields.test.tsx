@@ -44,7 +44,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       core: coreMock.createStart(),
     };
 
-    dataViews.get.mockImplementation(async (id: string) => {
+    dataViews.getLegacy.mockImplementation(async (id: string) => {
       return [dataView, stubDataViewWithoutTimeField].find((dw) => dw.id === id)!;
     });
   });

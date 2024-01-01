@@ -88,7 +88,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       if (dataViewId) {
         let nextDataView: DataView | null = null;
         try {
-          nextDataView = await services.dataViews.get(dataViewId, false);
+          nextDataView = await services.dataViews.getLegacy(dataViewId, false);
         } catch (e) {
           //
         }
