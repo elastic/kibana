@@ -17,10 +17,10 @@ let currentDataView: DataView;
 export const injectStorybookDataView = (dataView: DataView) => (currentDataView = dataView);
 
 export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
-  get: (() =>
+  getLegacy: (() =>
     new Promise((r) =>
       setTimeout(() => r(currentDataView), 100)
-    ) as unknown) as DataViewsPublicPluginStart['get'],
+    ) as unknown) as DataViewsPublicPluginStart['getLegacy'],
   getIdsWithTitle: (() =>
     new Promise((r) =>
       setTimeout(() => r([{ id: currentDataView.id, title: currentDataView.title }]), 100)
