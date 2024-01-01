@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine/types';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -21,6 +22,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -37,6 +39,7 @@ describe('RiskSummary', () => {
           riskScoreData={{ ...mockRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -50,6 +53,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -64,6 +68,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
