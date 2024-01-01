@@ -126,14 +126,14 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
+const getScoreQuery = (rulesFilter: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     bool: {
-      must_not: filteredRules,
+      must_not: rulesFilter,
     },
   },
   aggs: {
