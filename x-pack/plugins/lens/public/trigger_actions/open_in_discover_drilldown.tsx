@@ -36,7 +36,7 @@ export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
   locator: () => DiscoverAppLocator | undefined;
-  dataViews: () => Pick<DataViewsService, 'get'>;
+  dataViews: () => Pick<DataViewsService, 'getLegacy'>;
   hasDiscoverAccess: () => boolean;
   application: () => ApplicationStart;
 }
