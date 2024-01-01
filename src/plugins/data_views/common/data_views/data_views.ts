@@ -202,6 +202,9 @@ export interface DataViewsServicePublicMethods {
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
+
+  findLegacy: (search: string, size?: number) => Promise<DataView[]>;
+
   get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<DataViewLazy>;
   /**
    * Get populated data view saved object cache.
@@ -219,6 +222,8 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get default data view id.
    */
+
+  getDefaultLegacy: (displayErrors?: boolean) => Promise<DataView | null>;
   getDefaultId: () => Promise<string | null>;
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
@@ -426,6 +431,12 @@ export class DataViewsService {
     return await Promise.all(getIndexPatternPromises);
   };
 
+  findLegacy = async (search: string, size: number = 10): Promise<DataView[]> => {
+    return this.find(search, size).then((dataViews) =>
+      Promise.all(dataViews.map((dv) => this.toDataView(dv)))
+    );
+  };
+
   /**
    * Gets list of index pattern ids with titles.
    * @param refresh Force refresh of index pattern list
@@ -500,6 +511,11 @@ export class DataViewsService {
     }
 
     return null;
+  };
+
+  getDefaultLegacy = async (displayErrors: boolean = true) => {
+    const dvLazy = await this.getDefault(displayErrors);
+    return dvLazy ? this.toDataView(dvLazy) : null;
   };
 
   /**

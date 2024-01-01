@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy } from '@kbn/data-views-plugin/public';
 import { setDataViewsStart } from './services';
 import type { TimeseriesVisParams } from './types';
 import type { Vis } from '@kbn/visualizations-plugin/public';
@@ -15,8 +15,8 @@ import { metricsVisDefinition } from './metrics_type';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
-    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataView;
-    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataView;
+    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataViewLazy;
+    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataViewLazy;
     let defaultParams: TimeseriesVisParams;
 
     beforeEach(async () => {

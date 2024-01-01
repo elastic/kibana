@@ -92,7 +92,9 @@ export const requestEventAnnotations = (
       }, []);
 
     const loadedDataViews = await Promise.all(
-      uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
+      uniqueDataViewsToLoad.map((dataView) =>
+        dataViews.create(dataView, true).then((dv) => dataViews.toDataView(dv))
+      )
     );
 
     const [manualGroups, queryGroups] = partition(
