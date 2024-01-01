@@ -95,7 +95,7 @@ const registerCreateDataViewRouteFactory =
 
           const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
-          const dataView = await createDataView({
+          const dataViewLazy = await createDataView({
             dataViewsService,
             usageCollection,
             spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
@@ -103,6 +103,8 @@ const registerCreateDataViewRouteFactory =
             refreshFields: body.refresh_fields,
             counterName: `${req.route.method} ${path}`,
           });
+
+          const dataView = await dataViewsService.toDataView(dataViewLazy);
 
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {

@@ -29,7 +29,7 @@ export class DataLoader {
 
   constructor(indexPattern: DataView, toastNotifications?: CoreSetup['notifications']['toasts']) {
     this._indexPattern = indexPattern;
-    this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
+    this._runtimeMappings = this._indexPattern.getRuntimeMappings() as RuntimeMappings; // todo is specific type needed
     this._indexPatternTitle = indexPattern.title;
   }
 

@@ -84,7 +84,7 @@ export const DiscoverTopNav = ({
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
+              const dataViewInstance = await data.dataViews.getLegacy(dataView.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,

@@ -53,7 +53,7 @@ export function getFunctionDefinition({
 
         const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await indexPatterns.createLegacy(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],

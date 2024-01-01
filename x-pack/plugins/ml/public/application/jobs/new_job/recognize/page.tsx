@@ -127,7 +127,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const getTimeRange = useCallback(
     async (useFullIndexData: boolean, timeRange: TimeRange): Promise<TimeRange> => {
       if (useFullIndexData) {
-        const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
+        const runtimeMappings = dataView.getRuntimeMappings() as RuntimeMappings; // TODO is specific type needed
         const { start, end } = await getTimeFieldRange({
           index: dataView.getIndexPattern(),
           timeFieldName: dataView.timeFieldName,

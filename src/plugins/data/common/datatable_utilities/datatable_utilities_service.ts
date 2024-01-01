@@ -99,7 +99,7 @@ export class DatatableUtilitiesService {
       return;
     }
 
-    return this.dataViews.get(column.meta.index);
+    return this.dataViews.getLegacy(column.meta.index);
   }
 
   async getField(column: DatatableColumn): Promise<DataViewField | undefined> {

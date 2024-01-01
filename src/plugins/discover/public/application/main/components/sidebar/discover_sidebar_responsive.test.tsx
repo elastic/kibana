@@ -196,7 +196,7 @@ async function mountComponent(
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
       : []
   );
-  mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
+  mockedServices.data.dataViews.getLegacy = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
   mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());

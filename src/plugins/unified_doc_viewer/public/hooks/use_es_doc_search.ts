@@ -123,7 +123,7 @@ export function buildSearchBody(
   requestAllFields?: boolean
 ): RequestBody | undefined {
   const computedFields = dataView.getComputedFields();
-  const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
+  const runtimeFields = dataView.getRuntimeMappings(); // computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
     body: {
       query: {

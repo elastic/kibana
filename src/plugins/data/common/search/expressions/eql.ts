@@ -103,7 +103,9 @@ export const getEqlFn = ({
       } as unknown as Required<EqlSearchRequest>['body'];
 
       if (input) {
-        const dataview = args.index ? await dataViews.create({ title: args.index }) : undefined;
+        const dataview = args.index
+          ? await dataViews.createLegacy({ title: args.index })
+          : undefined;
         const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
         const query = buildEsQuery(
           dataview,

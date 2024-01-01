@@ -47,7 +47,7 @@ export const putRuntimeField = async ({
   runtimeField,
 }: PutRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getLegacy(id);
 
   const oldFieldObject = dataView.fields.getByName(name);
 

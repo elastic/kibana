@@ -78,7 +78,7 @@ export class AggsService {
             fieldFormats: await fieldFormats.fieldFormatServiceFactory(uiSettingsClient),
             getIndexPattern: (
               await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
-            ).get,
+            ).getLegacy,
             calculateBounds: this.calculateBounds,
           });
 

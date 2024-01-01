@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewSpecRestResponse } from '../route_types';
-import { DataViewsService, DataView } from '../../../common/data_views';
+import { DataViewsService } from '../../../common/data_views';
 import { DataViewSpec } from '../../../common/types';
 import { handleErrors } from './util/handle_errors';
 import {
@@ -69,7 +69,7 @@ export const updateDataView = async ({
   counterName,
 }: UpdateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getLegacy(id);
   const {
     title,
     timeFieldName,
@@ -138,12 +138,13 @@ export const updateDataView = async ({
   }
 
   if (isChanged) {
-    const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
+    // const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
+    await dataViewsService.updateSavedObject(dataView);
 
     if (doRefreshFields && refreshFields) {
       await dataViewsService.refreshFields(dataView);
     }
-    return result;
+    return dataView;
   }
 
   return dataView;

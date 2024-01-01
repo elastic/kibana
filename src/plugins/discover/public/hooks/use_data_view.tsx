@@ -15,7 +15,8 @@ export const useDataView = ({ index }: { index: string | DataViewSpec }) => {
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    const promise = typeof index === 'object' ? dataViews.create(index) : dataViews.get(index);
+    const promise =
+      typeof index === 'object' ? dataViews.createLegacy(index) : dataViews.getLegacy(index);
     promise.then(setDataView).catch(setError);
   }, [dataViews, index]);
 

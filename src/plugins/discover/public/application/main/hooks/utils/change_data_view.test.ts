@@ -24,7 +24,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
     savedSearch,
   });
   discoverState.internalState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
-  services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
+  services.dataViews.getLegacy = jest.fn(() => Promise.resolve(dataView as DataView));
   discoverState.appState.update = jest.fn();
   return { services, appState: discoverState.appState, internalState: discoverState.internalState };
 };

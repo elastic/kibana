@@ -41,7 +41,10 @@ export const getESQLSearchProvider: (
           defaultMessage: 'Create ES|QL queries',
           description: 'ES|QL is a product name and should not be translated',
         });
-        const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
+        const defaultDataViewLazy = await dataViews.getDefaultDataView({ displayErrors: false });
+        const defaultDataView = defaultDataViewLazy
+          ? await dataViews.toDataView(defaultDataViewLazy)
+          : null;
 
         if (!defaultDataView) {
           return [];

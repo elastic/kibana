@@ -70,7 +70,7 @@ export const registerPutScriptedFieldRoute = (
             throw new Error('Only scripted fields can be put.');
           }
 
-          const indexPattern = await indexPatternsService.get(id);
+          const indexPattern = await indexPatternsService.getLegacy(id);
           indexPattern.upsertScriptedField({
             ...field,
             runtimeField: undefined, // make sure not creating runttime field with scripted field endpoint

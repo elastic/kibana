@@ -50,7 +50,7 @@ export async function getSeriesRequestParams(
     index: seriesIndex.indexPatternString,
     body: {
       ...request,
-      runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+      runtime_mappings: seriesIndex.indexPattern?.getRuntimeMappings() ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
     trackingEsSearchMeta: {

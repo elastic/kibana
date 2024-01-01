@@ -22,9 +22,8 @@ export function getCombinedRuntimeMappings(
 
   // Add runtime field mappings defined by index pattern
   if (dataView) {
-    const computedFields = dataView?.getComputedFields();
-    if (computedFields?.runtimeFields !== undefined) {
-      const dataViewRuntimeMappings = computedFields.runtimeFields;
+    const dataViewRuntimeMappings = dataView?.getRuntimeMappings();
+    if (dataViewRuntimeMappings !== undefined) {
       if (isRuntimeMappings(dataViewRuntimeMappings)) {
         combinedRuntimeMappings = { ...combinedRuntimeMappings, ...dataViewRuntimeMappings };
       }

@@ -116,7 +116,8 @@ export default new Datasource('es', {
       config.forceFixedInterval = Boolean(timeField?.fixedInterval?.[0]);
     }
 
-    const { scriptFields = {}, runtimeFields = {} } = indexPatternSpec?.getComputedFields() ?? {};
+    const scriptFields = indexPatternSpec?.getScriptedFields() ?? {};
+    const runtimeFields = indexPatternSpec?.getRuntimeFields() ?? {};
     const esShardTimeout = tlConfig.esShardTimeout;
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);

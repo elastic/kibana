@@ -70,7 +70,7 @@ export async function loadDataView({
   let fetchedDataView: DataView | null = null;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
+    fetchedDataView = fetchId ? await dataViews.getLegacy(fetchId) : null;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -88,10 +88,14 @@ export async function loadDataView({
   let defaultDataView: DataView | null = null;
   if (!fetchedDataView) {
     try {
-      defaultDataView = await dataViews.getDefaultDataView({
+      const defaultDataViewLazy = await dataViews.getDefaultDataView({
         displayErrors: false,
         refreshFields: true,
       });
+
+      defaultDataView = defaultDataViewLazy
+        ? await dataViews.toDataView(defaultDataViewLazy)
+        : null;
     } catch (e) {
       //
     }
