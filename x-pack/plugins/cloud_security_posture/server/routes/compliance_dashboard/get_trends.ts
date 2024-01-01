@@ -64,7 +64,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
           },
         },
         {
-          term: { is_custom_score: true },
+          term: { is_enabled_rules_score: true },
         },
       ],
     },

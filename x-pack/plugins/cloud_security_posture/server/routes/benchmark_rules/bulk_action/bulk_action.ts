@@ -11,7 +11,7 @@ import {
   CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesBulkActionResponse,
-} from '../../../../common/types/rules/v3';
+} from '../../../../common/types/rules/v4';
 import { CspRouter } from '../../../types';
 
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';

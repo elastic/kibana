@@ -17,7 +17,7 @@ import {
 import type {
   BulkActionBenchmarkRulesResponse,
   RulesToUpdate,
-} from '../../../../common/types/rules/v3';
+} from '../../../../common/types/rules/v4';
 
 const muteStatesMap = {
   mute: true,

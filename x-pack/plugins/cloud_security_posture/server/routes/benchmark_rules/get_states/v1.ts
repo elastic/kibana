@@ -10,7 +10,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
+import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,

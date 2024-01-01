@@ -16,7 +16,7 @@ import type {
   RulesToUpdate,
   CspBenchmarkRulesStates,
   CspSettings,
-} from '../../../../common/types/rules/v3';
+} from '../../../../common/types/rules/v4';
 import {
   convertRuleTagsToKQL,
   generateBenchmarkRuleTags,
