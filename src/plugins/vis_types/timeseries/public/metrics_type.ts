@@ -57,7 +57,7 @@ async function withDefaultIndexPattern(
 ): Promise<Vis<TimeseriesVisParams>> {
   const dataViews = getDataViewsStart();
 
-  const defaultIndex = await dataViews.getDefault();
+  const defaultIndex = await dataViews.getDefaultLegacy();
   if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
@@ -71,11 +71,11 @@ async function resolveIndexPattern(
 ) {
   if (!indexPatternValue) return;
   if (isStringTypeIndexPattern(indexPatternValue)) {
-    return await indexPatterns.find(indexPatternValue, 1);
+    return await indexPatterns.findLegacy(indexPatternValue, 1);
   }
 
   if (indexPatternValue.id) {
-    return [await indexPatterns.get(indexPatternValue.id)];
+    return [await indexPatterns.getLegacy(indexPatternValue.id)];
   }
 }
 

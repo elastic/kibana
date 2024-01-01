@@ -96,7 +96,7 @@ export function getTimelionRequestHandler({
     const firstFilterIndex = filters[0]?.meta.index;
     if (firstFilterIndex) {
       dataView = await getIndexPatterns()
-        .get(firstFilterIndex)
+        .getLegacy(firstFilterIndex)
         .catch(() => undefined);
     }
 

@@ -25,7 +25,7 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
     if (this.controlGroup) this.controlGroup.setRelevantDataViewId(newDataViewIds[0]);
 
     // fetch all data views. These should be cached locally at this time so we will not need to query ES.
-    const responses = await Promise.allSettled(newDataViewIds.map((id) => dataViews.get(id)));
+    const responses = await Promise.allSettled(newDataViewIds.map((id) => dataViews.getLegacy(id)));
     // Keep only fullfilled ones as each panel will handle the rejected ones already on their own
     const allDataViews = responses
       .filter(

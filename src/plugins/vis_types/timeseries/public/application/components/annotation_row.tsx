@@ -92,7 +92,7 @@ export const AnnotationRow = ({
             })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await dataViews.getDefault(),
+              defaultIndex: await dataViews.getDefaultLegacy(),
             };
       } catch {
         if (isDataViewTypeIndexPattern(index)) {

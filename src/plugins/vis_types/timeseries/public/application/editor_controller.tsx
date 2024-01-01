@@ -32,7 +32,7 @@ export class EditorController implements IEditorController {
 
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
     const I18nContext = getI18n().Context;
-    const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
+    const defaultIndexPattern = (await getDataViewsStart().getDefaultLegacy()) || undefined;
 
     render(
       <I18nContext>

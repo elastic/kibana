@@ -16,7 +16,7 @@ const getOverwrittenIndexPattern = async (
   dataViews: DataViewsPublicPluginStart
 ) => {
   if (isStringTypeIndexPattern(overwrittenIndexPattern)) {
-    const indexPattern = await dataViews.create(
+    const indexPattern = await dataViews.createLegacy(
       {
         id: `tsvb_ad_hoc_${overwrittenIndexPattern}${
           overwrittenTimeField ? '/' + overwrittenTimeField : ''
@@ -31,7 +31,7 @@ const getOverwrittenIndexPattern = async (
     const timeField = indexPattern.timeFieldName;
     return { indexPattern, indexPatternId, timeField };
   } else if (overwrittenIndexPattern) {
-    const indexPattern = await dataViews.get(overwrittenIndexPattern.id);
+    const indexPattern = await dataViews.getLegacy(overwrittenIndexPattern.id);
     if (indexPattern) {
       const indexPatternId = indexPattern.id ?? '';
       const timeField = overwrittenTimeField ?? indexPattern.timeFieldName;
@@ -50,7 +50,7 @@ const getSelectedIndexPattern = async (
     if (!selectedTimeField) {
       throw new Error('Time field is empty');
     }
-    const indexPattern = await dataViews.create(
+    const indexPattern = await dataViews.createLegacy(
       {
         id: `tsvb_ad_hoc_${selectedIndexPattern}${
           selectedTimeField ? '/' + selectedTimeField : ''
@@ -64,7 +64,7 @@ const getSelectedIndexPattern = async (
     const indexPatternId = indexPattern.id ?? '';
     return { indexPattern, indexPatternId, timeField: indexPattern.timeFieldName };
   }
-  const indexPattern = await dataViews.getDefault();
+  const indexPattern = await dataViews.getDefaultLegacy();
   const indexPatternId = indexPattern?.id ?? '';
   const timeField = indexPattern?.timeFieldName;
   return { indexPattern, indexPatternId, timeField };
@@ -114,7 +114,7 @@ export const extractOrGenerateDatasourceInfo = async (
         result.timeField,
       ];
     } else {
-      indexPattern = await dataViews.get(indexPatternId);
+      indexPattern = await dataViews.getLegacy(indexPatternId);
       if (!timeField) {
         timeField = indexPattern.timeFieldName;
       }
