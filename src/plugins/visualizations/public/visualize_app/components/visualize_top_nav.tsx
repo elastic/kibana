@@ -220,7 +220,10 @@ const TopNav = ({
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
-        const defaultIndex = await services.dataViews.getDefault();
+        const defaultIndexLazy = await services.dataViews.getDefault();
+        const defaultIndex = defaultIndexLazy
+          ? await services.dataViews.toDataView(defaultIndexLazy)
+          : undefined;
         if (defaultIndex) {
           indexes = [defaultIndex];
         }
@@ -243,7 +246,7 @@ const TopNav = ({
             visInstance.vis.data.indexPattern &&
             dataView !== visInstance.vis.data.indexPattern.id
           ) {
-            const dataViewFromState = await services.dataViews.get(dataView);
+            const dataViewFromState = await services.dataViews.getLegacy(dataView);
 
             if (dataViewFromState) {
               setIndexPatterns([dataViewFromState]);

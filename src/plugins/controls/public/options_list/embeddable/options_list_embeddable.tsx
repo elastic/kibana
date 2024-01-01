@@ -247,7 +247,7 @@ export class OptionsListEmbeddable
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
-        this.dataView = await this.dataViewsService.get(dataViewId);
+        this.dataView = await this.dataViewsService.getLegacy(dataViewId);
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
       }

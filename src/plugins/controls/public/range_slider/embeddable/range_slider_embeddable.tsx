@@ -203,7 +203,7 @@ export class RangeSliderEmbeddable
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
-        this.dataView = await this.dataViewsService.get(dataViewId);
+        this.dataView = await this.dataViewsService.getLegacy(dataViewId);
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
         this.onLoadingError(e.message);

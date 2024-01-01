@@ -9,7 +9,7 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface ControlsDataViewsService {
-  get: DataViewsPublicPluginStart['get'];
+  getLegacy: DataViewsPublicPluginStart['getLegacy'];
   getDefaultId: DataViewsPublicPluginStart['getDefaultId'];
   getIdsWithTitle: DataViewsPublicPluginStart['getIdsWithTitle'];
 }

@@ -33,7 +33,7 @@ export const getCompatibleControlType = async ({
   dataViewId: string;
   fieldName: string;
 }) => {
-  const dataView = await pluginServices.getServices().dataViews.get(dataViewId);
+  const dataView = await pluginServices.getServices().dataViews.getLegacy(dataViewId);
   const fieldRegistry = await getDataControlFieldRegistry(dataView);
   const field = fieldRegistry[fieldName];
   return field.compatibleControlTypes[0];
