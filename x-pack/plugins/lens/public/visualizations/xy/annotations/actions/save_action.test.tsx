@@ -137,7 +137,7 @@ describe('annotation group save action', () => {
 
     const getProps: () => Parameters<typeof onSave>[0] = () => {
       const dataViews = dataViewPluginMocks.createStartContract();
-      dataViews.get.mockResolvedValue({
+      dataViews.getLegacy.mockResolvedValue({
         isPersisted: () => true,
       } as Partial<DataView> as DataView);
 

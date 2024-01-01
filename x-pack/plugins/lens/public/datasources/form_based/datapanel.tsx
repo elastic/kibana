@@ -301,7 +301,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
+            const indexPatternInstance = await dataViews.getLegacy(currentIndexPattern?.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
@@ -333,7 +333,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     () =>
       editPermission
         ? async (fieldName: string) => {
-            const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
+            const indexPatternInstance = await dataViews.getLegacy(currentIndexPattern?.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,

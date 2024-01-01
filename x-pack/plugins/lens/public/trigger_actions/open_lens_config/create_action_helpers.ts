@@ -49,9 +49,7 @@ export async function executeCreateAction({
   deleteEmbeddable: (embeddableId: string) => void;
 }) {
   const isCompatibleAction = isCreateActionCompatible(core);
-  const defaultDataView = await deps.dataViews.getDefaultDataView({
-    displayErrors: false,
-  });
+  const defaultDataView = await deps.dataViews.getDefaultLegacy(false);
   if (!isCompatibleAction || !defaultDataView) {
     throw new IncompatibleActionError();
   }

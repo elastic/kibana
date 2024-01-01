@@ -358,7 +358,7 @@ describe('FormBased Data Panel', () => {
         return [];
       }
     });
-    dataViews.get.mockImplementation(async (id: string) => {
+    dataViews.getLegacy.mockImplementation(async (id: string) => {
       const dataView = [
         indexPatterns.a,
         indexPatterns.b,

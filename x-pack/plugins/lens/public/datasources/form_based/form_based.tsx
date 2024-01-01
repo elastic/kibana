@@ -861,7 +861,7 @@ export function getFormBasedDatasource({
       const layers = references ? injectReferences(state, references).layers : state.layers;
       const indexPatterns: DataView[] = [];
       for (const { indexPatternId } of Object.values(layers)) {
-        const dataView = await dataViewsService?.get(indexPatternId);
+        const dataView = await dataViewsService?.getLegacy(indexPatternId);
         if (dataView) {
           indexPatterns.push(dataView);
         }

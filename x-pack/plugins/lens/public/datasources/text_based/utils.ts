@@ -89,7 +89,7 @@ export async function getStateFromAggregateQuery(
   let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = await dataViews.create({
+    const dataView = await dataViews.createLegacy({
       title: indexPattern,
     });
     if (dataView && dataView.id) {

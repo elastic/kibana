@@ -68,9 +68,9 @@ export const AnnotationsPanel = (
       let dataView: DataView;
       const availableIds = await props.dataViewsService.getIds();
       if (availableIds.includes(localLayer.indexPatternId)) {
-        dataView = await props.dataViewsService.get(localLayer.indexPatternId);
+        dataView = await props.dataViewsService.getLegacy(localLayer.indexPatternId);
       } else {
-        dataView = await props.dataViewsService.create(
+        dataView = await props.dataViewsService.createLegacy(
           frame.dataViews.indexPatterns[localLayer.indexPatternId].spec
         );
       }

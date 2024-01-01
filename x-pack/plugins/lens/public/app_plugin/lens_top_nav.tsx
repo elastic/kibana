@@ -421,7 +421,7 @@ export const LensTopNavMenu = ({
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
-        const dataView = dataViewId ? await data.dataViews.get(dataViewId) : undefined;
+        const dataView = dataViewId ? await data.dataViews.getLegacy(dataViewId) : undefined;
         setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
     };
@@ -899,7 +899,7 @@ export const LensTopNavMenu = ({
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
-              const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
+              const indexPatternInstance = await data.dataViews.getLegacy(currentIndexPattern?.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
@@ -960,7 +960,7 @@ export const LensTopNavMenu = ({
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {
-      const dataView = await dataViewsService.create(dataViewSpec);
+      const dataView = await dataViewsService.createLegacy(dataViewSpec);
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
@@ -997,7 +997,7 @@ export const LensTopNavMenu = ({
     onCreateDefaultAdHocDataView,
     adHocDataViews,
     onChangeDataView: async (newIndexPatternId: string) => {
-      const currentDataView = await data.dataViews.get(newIndexPatternId);
+      const currentDataView = await data.dataViews.getLegacy(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
       if (isOnTextBasedMode) {
@@ -1016,7 +1016,9 @@ export const LensTopNavMenu = ({
       if (currentIndexPattern.isPersisted()) {
         // clear instance cache and fetch again to make sure fields are up to date (in case pattern changed)
         dataViewsService.clearInstanceCache(currentIndexPattern.id);
-        const updatedCurrentIndexPattern = await dataViewsService.get(currentIndexPattern.id!);
+        const updatedCurrentIndexPattern = await dataViewsService.getLegacy(
+          currentIndexPattern.id!
+        );
         // if the data view was persisted, reload it from cache
         const updatedCache = {
           ...dataViews.indexPatterns,
