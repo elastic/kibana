@@ -48,12 +48,13 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
     // opens a field editor using default data view and first number field
     const openDateViewNumberFieldEditor = async () => {
       const [, plugins] = await core.getStartServices();
-      const dataView = await plugins.data.dataViews.getDefault();
-      if (!dataView) {
+      const dataViewLazy = await plugins.data.dataViews.getDefault();
+      if (!dataViewLazy) {
         alert('Create at least one data view to continue with this example');
         return;
       }
 
+      const dataView = await plugins.data.dataViews.toDataView(dataViewLazy);
       const numberField = dataView.fields
         .getAll()
         .find((f) => !f.name.startsWith('_') && f.type === KBN_FIELD_TYPES.NUMBER && !f.scripted);

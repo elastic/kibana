@@ -206,12 +206,13 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     let dataView;
     let results: FileUploadGeoResults | undefined;
     try {
-      dataView = await getDataViewsService().createAndSave(
+      const dataViewLazy = await getDataViewsService().createAndSave(
         {
           title: this.state.indexName,
         },
         true
       );
+      dataView = await getDataViewsService().toDataView(dataViewLazy);
       if (!dataView.id) {
         throw new Error('id not provided');
       }

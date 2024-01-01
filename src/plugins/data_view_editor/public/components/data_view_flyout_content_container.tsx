@@ -59,9 +59,10 @@ const DataViewFlyoutContentContainer = ({
           ? await dataViews.updateSavedObject(editData)
           : editData;
       } else {
-        saveResponse = persist
+        const saveResponseLazy = persist
           ? await dataViews.createAndSave(dataViewSpec)
           : await dataViews.create(dataViewSpec);
+        saveResponse = await dataViews.toDataView(saveResponseLazy);
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {

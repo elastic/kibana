@@ -33,7 +33,7 @@ export async function hydrateIndexPattern(
     return null;
   }
 
-  const indexObj = await dataViews.get(index);
+  const indexObj = await dataViews.getLegacy(index);
   savedObject.searchSource.setField('index', indexObj);
   return indexObj;
 }
