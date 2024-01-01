@@ -27,7 +27,7 @@ interface Context {
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
-  dataViews: Pick<DataViewsService, 'get'>;
+  dataViews: Pick<DataViewsService, 'getLegacy'>;
   locator?: DiscoverAppLocator;
   timeFieldName?: string;
 }

@@ -15,7 +15,7 @@ import { sortDataViewRefs } from '../utils';
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<
   DataViewsContract,
-  'get' | 'getIdsWithTitle' | 'create' | 'getLegacy' | 'createLegacy'
+  'getIdsWithTitle' | 'getLegacy' | 'createLegacy'
 >;
 
 /**
@@ -172,7 +172,7 @@ export async function loadIndexPatterns({
   // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
   if (!indexPatterns.length && !hasAdHocDataViews && notUsedPatterns) {
     for (const notUsedPattern of notUsedPatterns) {
-      const resp = await dataViews.get(notUsedPattern).catch((e) => {
+      const resp = await dataViews.getLegacy(notUsedPattern).catch((e) => {
         // do nothing
       });
       if (resp) {
