@@ -350,11 +350,6 @@ interface BaseOperationDefinitionProps<
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
-  documentation?: {
-    signature: string;
-    description: string;
-    section: 'elasticsearch' | 'calculation' | 'constants';
-  };
   quickFunctionDocumentation?: string;
   /**
    * React component for operation field specific behaviour
