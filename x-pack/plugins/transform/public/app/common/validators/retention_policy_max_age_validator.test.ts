@@ -8,38 +8,47 @@
 import { retentionPolicyMaxAgeValidator } from './retention_policy_max_age_validator';
 
 describe('Transform: retentionPolicyMaxAgeValidator()', () => {
-  const transformRetentionPolicyMaxAgeValidator = (arg: string) =>
-    retentionPolicyMaxAgeValidator(arg).length === 0;
-
   it('should only allow values equal or above 60s.', () => {
-    expect(transformRetentionPolicyMaxAgeValidator('0nanos')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999999999nanos')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000000nanos')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000001nanos')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0nanos')).toEqual(['The frequency value is not valid.']);
+    expect(retentionPolicyMaxAgeValidator('59999999999nanos')).toEqual([
+      'Invalid max age format. Minimum of 60s required.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('60000000000nanos')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('60000000001nanos')).toEqual([]);
 
-    expect(transformRetentionPolicyMaxAgeValidator('0micros')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999999micros')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000micros')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60000001micros')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0micros')).toEqual([
+      'The frequency value is not valid.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('59999999micros')).toEqual([
+      'Invalid max age format. Minimum of 60s required.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('60000000micros')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('60000001micros')).toEqual([]);
 
-    expect(transformRetentionPolicyMaxAgeValidator('0ms')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999ms')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000ms')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60001ms')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0ms')).toEqual(['The frequency value is not valid.']);
+    expect(retentionPolicyMaxAgeValidator('59999ms')).toEqual([
+      'Invalid max age format. Minimum of 60s required.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('60000ms')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('60001ms')).toEqual([]);
 
-    expect(transformRetentionPolicyMaxAgeValidator('0s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60s')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('61s')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('10000s')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0s')).toEqual(['The frequency value is not valid.']);
+    expect(retentionPolicyMaxAgeValidator('1s')).toEqual([
+      'Invalid max age format. Minimum of 60s required.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('59s')).toEqual([
+      'Invalid max age format. Minimum of 60s required.',
+    ]);
+    expect(retentionPolicyMaxAgeValidator('60s')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('61s')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('10000s')).toEqual([]);
 
-    expect(transformRetentionPolicyMaxAgeValidator('0m')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1m')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('100m')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0m')).toEqual(['The frequency value is not valid.']);
+    expect(retentionPolicyMaxAgeValidator('1m')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('100m')).toEqual([]);
 
-    expect(transformRetentionPolicyMaxAgeValidator('0h')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1h')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('2h')).toBe(true);
+    expect(retentionPolicyMaxAgeValidator('0h')).toEqual(['The frequency value is not valid.']);
+    expect(retentionPolicyMaxAgeValidator('1h')).toEqual([]);
+    expect(retentionPolicyMaxAgeValidator('2h')).toEqual([]);
   });
 });
