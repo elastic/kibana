@@ -494,6 +494,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
+      // FAILS
       it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionTypeEnum.export })
