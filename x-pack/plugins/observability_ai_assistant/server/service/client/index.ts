@@ -10,12 +10,13 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
 import type {
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
   CreateChatCompletionResponse,
 } from 'openai';
+import { decode, encode } from 'gpt-tokenizer';
+import { compact, isEmpty, last, merge, omit, pick, take } from 'lodash';
 import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
@@ -176,6 +177,11 @@ export class ObservabilityAIAssistantClient {
       });
     }
 
+    let numFunctionsCalled: number = 0;
+
+    const MAX_FUNCTION_CALLS = 3;
+    const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
     const next = async (nextMessages: Message[]): Promise<void> => {
       const lastMessage = last(nextMessages);
 
@@ -222,9 +228,12 @@ export class ObservabilityAIAssistantClient {
               connectorId,
               stream: true,
               signal,
-              functions: functionClient
-                .getFunctions()
-                .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+              functions:
+                numFunctionsCalled >= MAX_FUNCTION_CALLS
+                  ? []
+                  : functionClient
+                      .getFunctions()
+                      .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
             })
           ).pipe(processOpenAiStream()),
         });
@@ -232,22 +241,52 @@ export class ObservabilityAIAssistantClient {
       }
 
       if (isAssistantMessageWithFunctionRequest) {
-        const functionResponse = await functionClient
-          .executeFunction({
-            connectorId,
-            name: lastMessage.message.function_call!.name,
-            messages: nextMessages,
-            args: lastMessage.message.function_call!.arguments,
-            signal,
-          })
-          .catch((error): FunctionResponse => {
-            return {
-              content: {
-                message: error.toString(),
-                error,
-              },
-            };
-          });
+        const functionResponse =
+          numFunctionsCalled >= MAX_FUNCTION_CALLS
+            ? {
+                content: {
+                  error: {},
+                  message: 'Function limit exceeded, ask the user what to do next',
+                },
+              }
+            : await functionClient
+                .executeFunction({
+                  connectorId,
+                  name: lastMessage.message.function_call!.name,
+                  messages: nextMessages,
+                  args: lastMessage.message.function_call!.arguments,
+                  signal,
+                })
+                .then((response) => {
+                  if (isObservable(response)) {
+                    return response;
+                  }
+
+                  const encoded = encode(JSON.stringify(response.content || {}));
+
+                  if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
+                    return response;
+                  }
+
+                  return {
+                    data: response.data,
+                    content: {
+                      message:
+                        'Function response exceeded the maximum length allowed and was truncated',
+                      truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                    },
+                  };
+                })
+                .catch((error): FunctionResponse => {
+                  return {
+                    content: {
+                      message: error.toString(),
+                      error,
+                    },
+                  };
+                });
+
+        numFunctionsCalled++;
 
         if (signal.aborted) {
           return;
