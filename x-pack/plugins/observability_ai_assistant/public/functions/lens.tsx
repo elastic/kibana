@@ -54,7 +54,7 @@ function Lens({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return dataViews.create({
+    return dataViews.createLegacy({
       title: indexPattern,
       timeFieldName: timeField,
     });

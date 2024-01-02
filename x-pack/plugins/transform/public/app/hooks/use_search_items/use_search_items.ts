@@ -33,7 +33,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     let fetchedSavedSearch;
 
     try {
-      fetchedDataView = await dataViewsContract.get(id);
+      fetchedDataView = await dataViewsContract.getLegacy(id);
     } catch (e) {
       // Just let fetchedDataView stay undefined in case it doesn't exist.
     }
