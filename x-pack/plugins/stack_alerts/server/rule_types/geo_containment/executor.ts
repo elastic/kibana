@@ -101,7 +101,6 @@ export async function executor({
         services.alertsClient?.setAlertData({
           id: recoveredAlertId,
           context,
-          payload: {},
         });
       }
     } catch (e) {

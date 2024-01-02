@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 import { OTHER_CATEGORY } from '../constants';
+import type { GeoContainmentAlertInstanceContext } from '../types';
 
 describe('getEntitiesAndGenerateAlerts', () => {
   const alerts: unknown[] = [];
   const mockAlertsClient = {
-    report: ({ id, context }) => {
+    report: ({ id, context }: { id: string; context: GeoContainmentAlertInstanceContext; }) => {
       alerts.push({
         context: {
           containingBoundaryId: context.containingBoundaryId,
@@ -24,8 +24,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
       });
     },
   } as any;
+
   beforeEach(() => {
-    jest.clearAllMocks();
     alerts.length = 0;
   });
 

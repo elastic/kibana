@@ -48,7 +48,6 @@ export function getEntitiesAndGenerateAlerts(
           actionGroup: ActionGroupId,
           state: containment,
           context: context,
-          payload: {},
         });
       }
     });
