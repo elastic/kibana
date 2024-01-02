@@ -94,7 +94,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [showWarningButton, setShowWarningButton] = useState<boolean>(
     Boolean(snapshotShareWarning)
   );
-  const [, isCreatingShortUrl] = useState<boolean | string>(false);
+  const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
@@ -247,7 +247,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
       setShortUrlCache(undefined);
       setShortUrl(true);
-      isCreatingShortUrl(false);
+      setIsCreatingShortUrl(false);
       setShortUrlErrorMsg(
         i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
           defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
@@ -358,7 +358,8 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel = Boolean(isCreatingShortUrl) ? (
+
+    const switchLabel = isCreatingShortUrl ? (
       <span>
         <EuiLoadingSpinner size="s" /> {shortUrlLabel}
       </span>
@@ -409,13 +410,20 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
           }}
           name="embed radio group"
           idSelected={selectedRadio}
+          legend={{
+            children: (
+              <FormattedMessage
+                id="share.urlPanel.generateLinkAsLabel"
+                defaultMessage="Generate the link as"
+              />
+            ),
+          }}
         />
         <EuiSpacer size="m" />
         {saveNeeded}
         <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiFlexGroup>
-          {url}
           <EuiCopy
             beforeMessage={showWarningButton ? props.snapshotShareWarning : undefined}
             textToCopy={url}
