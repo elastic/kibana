@@ -20,7 +20,7 @@ export const esqlLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esqlDescription', {
     defaultMessage: 'Create a map layer using the Elasticsearch Query Language',
-  })
+  }),
   icon: DocumentsLayerIcon,
   isBeta: true,
   renderWizard: ({ previewLayers, mapColors, mostCommonDataViewId }: RenderWizardArguments) => {
