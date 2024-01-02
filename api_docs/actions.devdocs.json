@@ -2845,6 +2845,27 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4574,6 +4595,27 @@
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionTypeExecutorResult.errorSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "errorSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "common",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-common.TaskErrorSource",
+                "text": "TaskErrorSource"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5245,6 +5287,21 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GenerativeAIForObservabilityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"generativeAIForObservability\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.IExecutionKPIResult",
         "type": "Type",
         "tags": [],
@@ -5604,6 +5661,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GenerativeAIFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForObservabilityFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForObservabilityFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForObservabilityFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForObservabilityFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",
