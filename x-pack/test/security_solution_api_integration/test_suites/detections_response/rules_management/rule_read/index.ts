@@ -8,11 +8,11 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Rules Management - Legacy rule bulk routes APIs', function () {
-    loadTestFile(require.resolve('./create_rules_bulk'));
-    loadTestFile(require.resolve('./delete_rules_bulk_legacy'));
-    loadTestFile(require.resolve('./delete_rules_bulk'));
-    loadTestFile(require.resolve('./patch_rules_bulk'));
-    loadTestFile(require.resolve('./update_rules_bulk'));
+  describe('Rules Management  - Rule Read API', function () {
+    loadTestFile(require.resolve('./find_rules'));
+    loadTestFile(require.resolve('./find_rules_ess'));
+    loadTestFile(require.resolve('./read_rules'));
+    loadTestFile(require.resolve('./read_rules_ess'));
+    loadTestFile(require.resolve('./resolve_read_rules_ess'));
   });
 }
