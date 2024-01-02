@@ -85,7 +85,7 @@ export const EmbeddablePanelHeader = ({
 
   if (!showPanelBar) {
     return (
-      <div className={headerClasses}>
+      <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
         {embeddablePanelContextMenu}
         {ariaLabelElement}
       </div>

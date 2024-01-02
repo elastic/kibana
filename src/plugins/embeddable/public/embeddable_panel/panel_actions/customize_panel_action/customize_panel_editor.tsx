@@ -116,7 +116,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     if (!editMode) return null;
 
     return (
-      <>
+      <div data-test-subj="customEmbeddableTitleComponent">
         <EuiFormRow>
           <EuiSwitch
             checked={!hideTitle}
@@ -228,7 +228,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             )}
           />
         </EuiFormRow>
-      </>
+      </div>
     );
   };
 
@@ -301,7 +301,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm>
+        <EuiForm data-test-subj="customizePanelForm">
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
           {renderFilterDetails()}

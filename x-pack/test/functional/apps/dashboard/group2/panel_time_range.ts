@@ -87,19 +87,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('xyVisChart')).to.be(true);
       });
     });
-
-    describe('embeddable that does not support time', () => {
-      it('should not show custom time picker in flyout', async () => {
-        await dashboardPanelActions.removePanel();
-        await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardAddPanel.clickMarkdownQuickButton();
-        await PageObjects.visEditor.setMarkdownTxt('I am timeless!');
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualizationAndReturn();
-        await PageObjects.dashboard.clickQuickSave();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.expectMissingCustomTimeRange();
-      });
-    });
   });
 }

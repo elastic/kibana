@@ -127,7 +127,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       toMountPoint(
         <KibanaReactContextProvider>
           <CustomizePanelEditor
-            titleFocus={!trigger}
+            titleFocus={!trigger} // if no trigger, then execute was called from the title element being clicked
             embeddable={embeddable}
             timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
             dateFormat={this.dateFormat}

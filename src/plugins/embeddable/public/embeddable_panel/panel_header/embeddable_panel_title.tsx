@@ -56,15 +56,21 @@ export const EmbeddablePanelTitle = ({
   }, [customizePanelAction, embeddable, title, viewMode, hideTitle]);
 
   const titleComponentWithDescription = useMemo(() => {
-    if (!description) return <span className="embPanel__titleInner">{titleComponent}</span>;
+    if (!description)
+      return (
+        <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
+          {titleComponent}
+        </span>
+      );
     return (
       <EuiToolTip
         content={description}
         delay="regular"
         position="top"
         anchorClassName="embPanel__titleTooltipAnchor"
+        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
       >
-        <span className="embPanel__titleInner">
+        <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
           {titleComponent}{' '}
           <EuiIcon
             type="iInCircle"
