@@ -51,6 +51,8 @@ export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findin
 export const LOCAL_STORAGE_COMPLIANCE_DASHBOARD_SELECTED_TAB_KEY =
   'cloudPosture:complianceDashboard:selectedTab';
 
+export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
+
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
   CloudPostureIntegrationProps
