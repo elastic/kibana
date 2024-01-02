@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIconTip,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -293,51 +292,47 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) => {
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-      return <ErrorUnsavedWorkPanel />;
-    } else if (exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    }
+    // if (isUnsaved) {
+    //   if (exceedsMaxLength) {
+    //     return <ErrorUrlTooLongPanel isUnsaved />;
+    //   }
+    //   return <ErrorUnsavedWorkPanel />;
+    // } else if (exceedsMaxLength) {
+    //   return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    // }
     return (
-      <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButtonEmpty iconType="copy" flush="both" onClick={copy} data-test-subj="shareReportingCopyURL">
-            <FormattedMessage
-              id="xpack.reporting.panelContent.copyUrlButtonLabel"
-              defaultMessage="Copy URL  "
-            /> 
-          </EuiButtonEmpty>
-        )}
-      </EuiCopy>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={0}>
+          <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
+            {(copy) => (
+              <EuiButtonEmpty disabled={isUnsaved || exceedsMaxLength ? true : false} iconType="copy" flush="both" onClick={copy} data-test-subj="shareReportingCopyURL">
+                <FormattedMessage
+                  id="xpack.reporting.panelContent.copyUrlButtonLabel"
+                  defaultMessage="Copy URL  "
+                /> 
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>{isUnsaved ? (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved />) : (<ErrorUnsavedWorkPanel />)) : (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved={false} />) : null)}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' ? (
-      <EuiFormRow
-        helpText={
-          <FormattedMessage
-            id="xpack.reporting.panelContent.saveWorkDescription"
-            defaultMessage="Please save your work before generating a report."
-          />
-        }
+      <EuiButton
+        disabled={Boolean(createReportingJob)}
+        fill
+        onClick={() => generateReportingJob()}
+        data-test-subj="generateReportButton"
+        isLoading={Boolean(createReportingJob)}
       >
-        <EuiButton
-          disabled={Boolean(createReportingJob)}
-          fill
-          onClick={() => generateReportingJob()}
-          data-test-subj="generateReportButton"
-          isLoading={Boolean(createReportingJob)}
-        >
-          <FormattedMessage
-            id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate export"
-          />
-        </EuiButton>
-      </EuiFormRow>
+        <FormattedMessage
+          id="xpack.reporting.generateButtonLabel"
+          defaultMessage="Generate export"
+        />
+      </EuiButton>
     ) : (
       <EuiButton
         disabled={Boolean(createReportingJob)}
@@ -358,6 +353,17 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
+      <EuiCallOut 
+        size="s"
+        title={
+          <FormattedMessage
+          id="xpack.reporting.panelContent.saveWorkDescription"
+          defaultMessage="Save your work before generating a report."
+          />
+        }
+        iconType="save"
+      />
+      <EuiSpacer size="s" />
       <EuiCallOut
         size="s"
         title={renderDescription(objectType)}
@@ -381,26 +387,14 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {renderOptions()}
+        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
       </EuiForm>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-        </EuiFlexItem>
-        <EuiFlexItem grow={0}>
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiFlexItem>
-              <EuiButtonEmpty onClick={onClose}>
-                <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {saveWarningMessageWithButton}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiButtonEmpty onClick={onClose}>
+        <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
+      </EuiButtonEmpty>
+      {saveWarningMessageWithButton}
     </EuiModalFooter>
     </>
   );
