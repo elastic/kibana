@@ -273,11 +273,7 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
-    const docOutput: ReportOutput = {
-      content: '',
-      size: 0,
-      content_type: null,
-    };
+    const docOutput = {} as ReportOutput;
     const unknownMime = null;
 
     if (isOutput(output)) {
