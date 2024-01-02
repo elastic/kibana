@@ -220,6 +220,10 @@ export const CloudSecurityDataTable = ({
     return customCellRenderer(rows);
   }, [customCellRenderer, rows]);
 
+  const onResetColumns = () => {
+    setColumns(defaultColumns.map((c) => c.id));
+  };
+
   if (!isLoading && !rows.length) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
@@ -233,6 +237,7 @@ export const CloudSecurityDataTable = ({
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       groupSelectorComponent={groupSelectorComponent}
+      onResetColumns={onResetColumns}
     />
   );
 
