@@ -23,14 +23,15 @@ export const getPrebuiltRulesAndTimelinesStatus = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
+
   const response = await supertest
     .get(PREBUILT_RULES_STATUS_URL)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send()
     .expect(200);
-
-  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
 
   return response.body;
 };

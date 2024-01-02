@@ -6,10 +6,16 @@
  */
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  epmRouteService,
+} from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
+import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
-
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import { retry } from '../../retry';
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
  * create real `security-rule` asset saved objects from the package.
@@ -23,32 +29,64 @@ export const installPrebuiltRulesFleetPackage = async ({
   supertest,
   version,
   overrideExistingPackage,
+  retryService,
 }: {
   es: Client;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   version?: string;
   overrideExistingPackage: boolean;
-}): Promise<void> => {
+  retryService: RetryService;
+}): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
-    await supertest
-      .post(epmRouteService.getInstallPath('security_detection_engine', version))
-      .set('kbn-xsrf', 'true')
-      .send({
-        force: overrideExistingPackage,
-      })
-      .expect(200);
+    const response = await retry<InstallPackageResponse>({
+      test: async () => {
+        const testResponse = await supertest
+          .post(epmRouteService.getInstallPath('security_detection_engine', version))
+          .set('kbn-xsrf', 'true')
+          .send({
+            force: overrideExistingPackage,
+          })
+          .expect(200);
+        expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+        expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+
+        return testResponse.body;
+      },
+      retryService,
+      retries: 1,
+    });
+
+    return response as InstallPackageResponse;
   } else {
     // Install the latest version
-    await supertest
-      .post(epmRouteService.getBulkInstallPath())
-      .query({ prerelease: true })
-      .set('kbn-xsrf', 'true')
-      .send({
-        packages: ['security_detection_engine'],
-        force: overrideExistingPackage,
-      })
-      .expect(200);
+    const response = await retry<BulkInstallPackagesResponse>({
+      test: async () => {
+        const testResponse = await supertest
+          .post(epmRouteService.getBulkInstallPath())
+          .query({ prerelease: true })
+          .set('kbn-xsrf', 'true')
+          .send({
+            packages: ['security_detection_engine'],
+            force: overrideExistingPackage,
+          })
+          .expect(200);
+
+        const body = testResponse.body as BulkInstallPackagesResponse;
+
+        // First and only item in the response should be the security_detection_engine package
+        expect(body.items[0]).toBeDefined();
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
+        // Should have installed at least 1 security-rule asset
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
+
+        return body;
+      },
+      retryService,
+      retries: 1,
+    });
+
+    return response as BulkInstallPackagesResponse;
   }
 
   // Before we proceed, we need to refresh saved object indices.

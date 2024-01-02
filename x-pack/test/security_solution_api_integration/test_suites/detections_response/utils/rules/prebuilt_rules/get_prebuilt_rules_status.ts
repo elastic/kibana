@@ -22,6 +22,9 @@ export const getPrebuiltRulesStatus = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<GetPrebuiltRulesStatusResponseBody> => {
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
+
   const response = await supertest
     .get(GET_PREBUILT_RULES_STATUS_URL)
     .set('kbn-xsrf', 'true')
@@ -29,8 +32,6 @@ export const getPrebuiltRulesStatus = async (
     .set('x-elastic-internal-origin', 'foo')
     .send()
     .expect(200);
-
-  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
 
   return response.body;
 };

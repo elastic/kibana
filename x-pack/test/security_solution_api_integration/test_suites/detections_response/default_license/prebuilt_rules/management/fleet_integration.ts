@@ -20,6 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('@ess @serverless @skipInQA install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
