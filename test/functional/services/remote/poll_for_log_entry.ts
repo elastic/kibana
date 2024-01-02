@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, delay } from 'rxjs/operators';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 
-export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS OVER';
+export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';
 
 /**
  * Create an observable that emits log entries representing the calls to log messages
@@ -35,6 +35,7 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
               entries = await logCtrl.get(type);
             } catch (error) {
               if (error instanceof NoSuchSessionError) {
+                // WebDriver session is invalid, sending the last log message
                 return [new logging.Entry('SEVERE', `${FINAL_LOG_ENTRY_PREFIX}: ${error.message}`)];
               }
             }
@@ -62,7 +63,7 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
               return true;
             });
 
-            if (!poll$.isStopped) {
+            if (!poll$.closed) {
               // schedule next poll
               poll$.next(undefined);
             }
