@@ -138,7 +138,7 @@ export const renderContent =
   (services: UseVirtualColumnServices['services']) => (props: DataGridCellValueElementProps) => {
     return (
       <VirtualColumnServiceProvider services={services}>
-        <Content {...props} />;
+        <Content {...props} />
       </VirtualColumnServiceProvider>
     );
   };

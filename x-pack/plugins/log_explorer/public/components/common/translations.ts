@@ -172,7 +172,7 @@ export const copyValueText = i18n.translate('xpack.logExplorer.popoverAction.cop
 });
 
 export const copyValueAriaText = (fieldName: string) =>
-  i18n.translate('xpack.logExplorer.popoverAction.copyValue', {
+  i18n.translate('xpack.logExplorer.popoverAction.copyValueAriaText', {
     defaultMessage: `Copy value of ${fieldName}`,
   });
 
