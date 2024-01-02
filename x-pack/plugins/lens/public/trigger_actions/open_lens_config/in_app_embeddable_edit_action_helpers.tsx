@@ -84,6 +84,15 @@ export async function executeEditEmbeddableAction({
       onUpdate(attrs);
     }
   };
+
+  const onUpdateSuggestion = (attrs: TypedLensByValueInput['attributes']) => {
+    const newAttributes = {
+      ...attributes,
+      ...attrs,
+    };
+    onUpdate(newAttributes);
+  };
+
   const Component = await getEditLensConfiguration(core, deps, visualizationMap, datasourceMap);
   const ConfigPanel = (
     <Component
@@ -94,6 +103,8 @@ export async function executeEditEmbeddableAction({
       displayFlyoutHeader
       datasourceId={activeDatasourceId}
       onApplyCb={onApply}
+      canEditTextBasedQuery
+      updateSuggestion={onUpdateSuggestion}
     />
   );
 

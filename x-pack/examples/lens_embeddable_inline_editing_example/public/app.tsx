@@ -57,7 +57,7 @@ export const App = (props: {
     } as unknown as LensConfig;
   }, []);
 
-  const options: LensConfigOptions = useMemo(() => {
+  const options = useMemo(() => {
     return {
       embeddable: true,
       timeRange: {
@@ -65,7 +65,10 @@ export const App = (props: {
         to: 'now',
         type: 'relative',
       },
-    };
+      query: {
+        esql: 'from kibana_sample_data_logs | stats count=count(bytes)',
+      },
+    } as unknown as LensConfigOptions;
   }, []);
   useEffect(() => {
     ref.current = true;
