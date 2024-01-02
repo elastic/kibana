@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { HOST_NOT_ENROLLED, LICENSE_TOO_LOW } from '../../create/validate';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
@@ -64,6 +65,12 @@ export interface ResponseActionsClientOptions {
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
+  /**
+   * Is the instance of the client being used for automated response actions.
+   * When set to `true`, additional checks will be performed and the Endpoint response action
+   * request will always be created, even if there are errors.
+   */
+  isAutomated?: boolean;
 }
 
 export interface ResponseActionsClientUpdateCasesOptions {
@@ -83,7 +90,7 @@ export interface ResponseActionsClientUpdateCasesOptions {
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
   ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
+    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name' | 'error'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -92,6 +99,16 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   actionId: string;
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
+type ResponseActionsClientValidateRequestResponse =
+  | {
+      isValid: true;
+      error: undefined;
+    }
+  | {
+      isValid: false;
+      error: ResponseActionsClientError;
+    };
 
 /**
  * Base class for a Response Actions client
@@ -212,6 +229,30 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     );
   }
 
+  private async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Validation for Automated Response actions
+    if (this.options.isAutomated) {
+      // Automated response actions is an Enterprise level feature
+      if (!this.options.endpointService.getLicenseService().isEnterprise()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(LICENSE_TOO_LOW, 403),
+        };
+      }
+    }
+
+    if (actionRequest.endpoint_ids.length === 0) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(HOST_NOT_ENROLLED, 400),
+      };
+    }
+
+    return { isValid: true, error: undefined };
+  }
+
   /**
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
@@ -219,6 +260,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    let errorMsg = String(actionRequest.error ?? '').trim();
+
+    if (!errorMsg) {
+      const validation = await this.validateRequest(actionRequest);
+
+      if (!validation.isValid) {
+        if (this.options.isAutomated) {
+          errorMsg = validation.error.message;
+        } else {
+          throw validation.error;
+        }
+      }
+    }
+
     this.notifyUsage(actionRequest.command);
 
     const doc: LogsEndpointAction = {
@@ -242,6 +297,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...addRuleInfoToAction(actionRequest),
     };
 
