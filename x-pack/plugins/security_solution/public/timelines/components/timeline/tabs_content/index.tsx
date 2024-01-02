@@ -16,7 +16,6 @@ import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -134,7 +133,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -182,7 +180,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
+        {showTimeline && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
@@ -287,7 +285,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -401,7 +398,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
+          {!isEsqlTabInTimelineDisabled && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
