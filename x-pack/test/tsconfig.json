@@ -165,5 +165,6 @@
     "@kbn/log-explorer-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
+    "@kbn/typed-react-router-config",
   ]
 }
