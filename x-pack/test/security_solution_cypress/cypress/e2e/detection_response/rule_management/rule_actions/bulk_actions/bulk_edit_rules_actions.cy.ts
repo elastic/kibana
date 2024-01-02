@@ -77,7 +77,7 @@ const expectedSlackMessage = 'Slack action test message';
 // TODO: Fix and unskip in Serverless https://github.com/elastic/kibana/issues/171101
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
       login();
