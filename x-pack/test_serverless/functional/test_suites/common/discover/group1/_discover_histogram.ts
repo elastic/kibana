@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
@@ -64,13 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
       let renderingCountInc = 1;
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await queryBar.submitQuery();
       await retry.waitFor('chart rendering complete', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
@@ -108,8 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update correctly when switching data views and brushing the histogram', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
@@ -118,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different count
-      expect(await PageObjects.discover.getHitCount()).to.be('12');
+      expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {
@@ -286,7 +282,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should recover from broken query search when clearing the query bar', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       // Make sure the chart is visible
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();

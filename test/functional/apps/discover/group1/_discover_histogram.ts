@@ -33,8 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173586
-  describe.skip('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -44,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
@@ -66,13 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
       let renderingCountInc = 1;
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await queryBar.submitQuery();
       await retry.waitFor('chart rendering complete', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
@@ -107,8 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should update correctly when switching data views and brushing the histogram', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -284,7 +279,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should recover from broken query search when clearing the query bar', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       // Make sure the chart is visible
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
