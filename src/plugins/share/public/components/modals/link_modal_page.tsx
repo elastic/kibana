@@ -8,6 +8,7 @@
 
 import {
   EuiButton,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { Capabilities } from '@kbn/core/public';
@@ -81,7 +82,9 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
   const isMounted = useMountedState();
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
-  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
+  const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
+    ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT
+  );
   const [useShortUrl, setUseShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
   const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
   const [url, setUrl] = useState<string>('');
@@ -91,45 +94,6 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [showWarningButton, setShowWarningButton] = useState<boolean>(
     Boolean(snapshotShareWarning)
   );
-
-  useEffect(() => {
-    isMounted();
-    setUrlHelper();
-
-    if (anonymousAccess) {
-      async () => {
-        const { accessURLParameters: anonymousAccessParameters } =
-          await anonymousAccess!.getState();
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (!anonymousAccessParameters) {
-          return;
-        }
-
-        const showPublicUrlSwitch: boolean = false;
-
-        if (showPublicUrlSwitch) {
-          const anonymousUserCapabilities = await anonymousAccess!.getCapabilities();
-
-          if (!isMounted()) {
-            return;
-          }
-
-          try {
-            setUsePublicUrl!(Boolean(anonymousUserCapabilities));
-          } catch {
-            setUsePublicUrl(false);
-          }
-        }
-        setAnonymousAccessParameters(anonymousAccessParameters);
-        setUsePublicUrl(true);
-      };
-    }
-  }, []);
-
   const [, isCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
@@ -137,23 +101,15 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
 
-  const makeUrlEmbeddable = (url: string): string => {
+  const makeUrlEmbeddable = (tempUrl: string): string => {
     const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
 
     if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
+      return tempUrl.replace('?', `${embedParam}&`);
     }
 
-    return `${url}${embedParam}`;
-  };
-
-  const makeIframeTag = (url?: string) => {
-    if (!url) {
-      return;
-    }
-
-    return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
+    return `${tempUrl}${embedParam}`;
   };
 
   const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
@@ -167,60 +123,67 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     );
   };
 
-  const getUrlParamExtensions = (tempUrl: string): string => {
-    return urlParams
-      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-          const urlParam = urlParams[key];
-          return urlParam
-            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                const isQueryParamEnabled = urlParam[queryParam];
-                return isQueryParamEnabled
-                  ? queryAccumulator + `&${queryParam}=true`
-                  : queryAccumulator;
-              }, urlAccumulator)
-            : urlAccumulator;
-        }, tempUrl)
-      : tempUrl;
-  };
+  const getUrlParamExtensions = useCallback(
+    (tempUrl: string): string => {
+      return urlParams
+        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+            const urlParam = urlParams[key];
+            return urlParam
+              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                  const isQueryParamEnabled = urlParam[queryParam];
+                  return isQueryParamEnabled
+                    ? queryAccumulator + `&${queryParam}=true`
+                    : queryAccumulator;
+                }, urlAccumulator)
+              : urlAccumulator;
+          }, tempUrl)
+        : tempUrl;
+    },
+    [urlParams]
+  );
 
-  const updateUrlParams = (tempUrl: string) => {
-    tempUrl = isEmbedded ? makeUrlEmbeddable(url) : tempUrl;
-    tempUrl = urlParams ? getUrlParamExtensions(url) : tempUrl;
+  const updateUrlParams = useCallback(
+    (tempUrl: string) => {
+      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+      setUrl(tempUrl);
+      return url;
+    },
+    [getUrlParamExtensions, isEmbedded, url, urlParams]
+  );
 
-    return tempUrl;
-  };
-
-  const getSnapshotUrl = (forSavedObject?: boolean) => {
-    let tempUrl = '';
-    if (forSavedObject && shareableUrlForSavedObject) {
-      tempUrl = shareableUrlForSavedObject;
-    }
-    if (!tempUrl) {
-      tempUrl = shareableUrl || window.location.href;
-    }
-    return updateUrlParams(tempUrl);
-  };
-
-  const isNotSaved = () => {
-    return objectId === undefined || objectId === '';
-  };
+  const getSnapshotUrl = useCallback(
+    (forSavedObject?: boolean) => {
+      let tempUrl = '';
+      if (forSavedObject && shareableUrlForSavedObject) {
+        tempUrl = shareableUrlForSavedObject;
+        setUrl(tempUrl);
+      }
+      if (!tempUrl) {
+        tempUrl = shareableUrl ?? window.location.href;
+        setUrl(tempUrl);
+      }
+      return updateUrlParams(tempUrl);
+    },
+    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
+  );
 
   const saveNeeded =
-    isNotSaved() && objectType === 'dashboard' ? (
+    objectId === undefined || (objectId === '' && objectType === 'dashboard') ? (
       <FormattedMessage
         id="share.linkModalPage.saveWorkDescription"
         defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
       />
     ) : null;
 
-  const getSavedObjectUrl = () => {
-    if (isNotSaved()) {
+  const getSavedObjectUrl = useCallback(() => {
+    if (objectId === undefined || objectId === '') {
       return;
     }
 
-    const url = getSnapshotUrl(true);
+    const tempUrl = getSnapshotUrl();
 
-    const parsedUrl = parseUrl(url);
+    const parsedUrl = parseUrl(tempUrl);
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }
@@ -243,21 +206,24 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       }),
     });
     return updateUrlParams(formattedUrl);
-  };
+  }, [getSnapshotUrl, updateUrlParams, objectId]);
 
-  const addUrlAnonymousAccessParameters = (url: string): string => {
-    if (!anonymousAccessParameters || !usePublicUrl) {
-      return url;
-    }
+  const addUrlAnonymousAccessParameters = useCallback(
+    (tempUrl: string): string => {
+      if (!anonymousAccessParameters || !usePublicUrl) {
+        return tempUrl;
+      }
+      const parsedUrl = new URL(tempUrl);
 
-    const parsedUrl = new URL(url);
+      for (const [name, value] of Object.entries(anonymousAccessParameters)) {
+        parsedUrl.searchParams.set(name, value);
+      }
 
-    for (const [name, value] of Object.entries(anonymousAccessParameters)) {
-      parsedUrl.searchParams.set(name, value);
-    }
+      return parsedUrl.toString();
+    },
+    [anonymousAccessParameters, usePublicUrl]
+  );
 
-    return parsedUrl.toString();
-  };
   const createShortUrl = async () => {
     setShortUrl(true);
     setShortUrlErrorMsg(undefined);
@@ -270,7 +236,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
           await tempShortUrl.locator.getUrl(tempShortUrl.params, { absolute: true })
         );
       } else {
-        const snapshotUrl = getSnapshotUrl();
+        const snapshotUrl = getSnapshotUrl(true);
         const tempShortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
         setShortUrlCache(tempShortUrl.url);
       }
@@ -293,13 +259,21 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     }
   };
 
-  const setUrlHelper = () => {
+  const setUrlHelper = useCallback(() => {
+    const makeIframeTag = (tempUrl?: string) => {
+      if (!tempUrl) {
+        return;
+      }
+
+      return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
+    };
+
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       setUrl(getSavedObjectUrl()!);
     } else if (useShortUrl !== undefined && shortUrlCache !== undefined) {
       setUrl(shortUrlCache);
     } else {
-      setUrl(getSnapshotUrl());
+      getSnapshotUrl(true);
     }
 
     if (url !== '') {
@@ -311,7 +285,49 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     }
 
     setUrl(url);
-  };
+  }, [
+    addUrlAnonymousAccessParameters,
+    exportUrlAs,
+    getSavedObjectUrl,
+    getSnapshotUrl,
+    isEmbedded,
+    shortUrlCache,
+    url,
+    shortUrl,
+    useShortUrl,
+  ]);
+
+  useEffect(() => {
+    isMounted();
+    setUrlHelper();
+    if (anonymousAccess) {
+      (async () => {
+        if (!isMounted) {
+          return;
+        }
+
+        if (!anonymousAccessParameters) {
+          return;
+        }
+
+        if (showPublicUrlSwitch) {
+          const anonymousUserCapabilities = await anonymousAccess!.getCapabilities();
+
+          if (!isMounted()) {
+            return;
+          }
+
+          try {
+            setUsePublicUrl!(Boolean(anonymousUserCapabilities));
+          } catch {
+            setUsePublicUrl(false);
+          }
+        }
+        setAnonymousAccessParameters(anonymousAccessParameters);
+        setUsePublicUrl(true);
+      })();
+    }
+  }, [anonymousAccess, anonymousAccessParameters, isMounted, setUrlHelper, showPublicUrlSwitch]);
 
   const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
     setCheckShortUrlSwitch(evt.target.checked);
@@ -323,6 +339,16 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
     createShortUrl();
+  };
+
+  const handleExportUrlAs = (optionId: string) => {
+    setExportUrlAs(optionId as ExportUrlAsType);
+
+    setShowWarningButton(
+      Boolean(props.snapshotShareWarning) &&
+        (optionId as ExportUrlAsType) === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
+    );
+    setUrlHelper();
   };
 
   const renderShortUrlSwitch = () => {
@@ -364,8 +390,6 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     );
   };
 
-  const copyLink = () => {};
-
   return (
     <EuiModal onClose={onClose}>
       <EuiForm className="kbnShareContextMenu__finalPanel">
@@ -379,7 +403,10 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
             { id: 'savedObject', label: 'Saved object' },
             { id: 'snapshot', label: 'Snapshot' },
           ]}
-          onChange={(id) => setSelectedRadio(id)}
+          onChange={(id) => {
+            setSelectedRadio(id);
+            handleExportUrlAs(id);
+          }}
           name="embed radio group"
           idSelected={selectedRadio}
         />
@@ -388,12 +415,36 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
         <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiFlexGroup>
-          <EuiButton fill onClick={() => copyLink()}>
-            <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy Link" />
-          </EuiButton>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup direction="row" justifyContent="flexEnd">
+          {url}
+          <EuiCopy
+            beforeMessage={showWarningButton ? props.snapshotShareWarning : undefined}
+            textToCopy={url}
+            anchorClassName="eui-displayBlock"
+          >
+            {(copy) => (
+              <EuiButton
+                fill
+                fullWidth
+                onClick={copy}
+                data-share-url={url}
+                data-test-subj="copyShareUrlButton"
+                iconType={showWarningButton ? 'warning' : undefined}
+                color={showWarningButton ? 'warning' : 'primary'}
+              >
+                {isEmbedded ? (
+                  <FormattedMessage
+                    id="share.urlPanel.copyIframeCodeButtonLabel"
+                    defaultMessage="Copy iFrame code"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="share.urlPanel.copyLinkButtonLabel"
+                    defaultMessage="Copy link"
+                  />
+                )}
+              </EuiButton>
+            )}
+          </EuiCopy>
           <EuiButton fill onClick={onClose}>
             <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
           </EuiButton>
