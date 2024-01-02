@@ -178,7 +178,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       }
 
       if (typeof parsedQueryString?.index === 'string') {
-        const dataView = await dataViews.get(parsedQueryString.index);
+        const dataView = await dataViews.getLegacy(parsedQueryString.index);
         setCurrentDataView(dataView);
       }
     };
