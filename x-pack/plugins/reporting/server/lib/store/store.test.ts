@@ -221,6 +221,7 @@ describe('ReportingStore', () => {
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
+        "error": undefined,
         "execution_time_ms": undefined,
         "jobtype": "csv_searchsource",
         "kibana_id": undefined,
