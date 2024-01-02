@@ -2352,6 +2352,10 @@
       }
     }
   },
+  "cloud-security-posture-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "slo": {
     "dynamic": false,
     "properties": {

@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiBetaBadge,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -28,12 +29,14 @@ interface FunctionListOption {
 }
 
 export function FunctionListPopover({
+  mode,
   selectedFunctionName,
   onSelectFunction,
   disabled,
 }: {
+  mode: 'prompt' | 'function';
   selectedFunctionName?: string;
-  onSelectFunction: (func: string) => void;
+  onSelectFunction: (func: string | undefined) => void;
   disabled: boolean;
 }) {
   const { getFunctions } = useObservabilityAIAssistantChatService();
@@ -48,6 +51,12 @@ export function FunctionListPopover({
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
   const handleClickFunctionList = () => {
+    if (selectedFunctionName) {
+      onSelectFunction(undefined);
+      setIsFunctionListOpen(false);
+      return;
+    }
+
     setIsFunctionListOpen(!isFunctionListOpen);
   };
 
@@ -118,20 +127,30 @@ export function FunctionListPopover({
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiButtonEmpty
-          data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
-          iconType="arrowRight"
-          iconSide="right"
-          size="xs"
-          onClick={handleClickFunctionList}
-          disabled={disabled}
+        <EuiToolTip
+          content={
+            mode === 'prompt'
+              ? i18n.translate(
+                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.selectAFunctionLabel',
+                  { defaultMessage: 'Select a function' }
+                )
+              : i18n.translate(
+                  'xpack.observabilityAiAssistant.functionListPopover.euiToolTip.clearFunction',
+                  {
+                    defaultMessage: 'Clear function',
+                  }
+                )
+          }
+          display="block"
         >
-          {selectedFunctionName
-            ? selectedFunctionName
-            : i18n.translate('xpack.observabilityAiAssistant.prompt.functionList.callFunction', {
-                defaultMessage: 'Call function',
-              })}
-        </EuiButtonEmpty>
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantFunctionListPopoverButton"
+            disabled={disabled}
+            iconType={selectedFunctionName ? 'cross' : 'plusInCircle'}
+            size="xs"
+            onClick={handleClickFunctionList}
+          />
+        </EuiToolTip>
       }
       closePopover={handleClickFunctionList}
       css={{ maxWidth: 400 }}
@@ -161,7 +180,7 @@ export function FunctionListPopover({
         }}
         singleSelection
         onChange={(options) => {
-          const selectedFunction = options.filter((fn) => fn.checked !== 'off');
+          const selectedFunction = options.filter((fn) => !('checked' in fn));
           if (selectedFunction && selectedFunction.length === 1) {
             handleSelectFunction({ ...selectedFunction[0], checked: 'on' });
           }

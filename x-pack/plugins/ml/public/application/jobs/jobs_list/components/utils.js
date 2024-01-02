@@ -185,17 +185,19 @@ function showResults(resp, action) {
   }
 
   const toastNotifications = getToastNotifications();
-  toastNotifications.addSuccess(
-    i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
-      defaultMessage:
-        '{successesJobsCount, plural, one{{successJob}} other{# jobs}} {actionTextPT} successfully',
-      values: {
-        successesJobsCount: successes.length,
-        successJob: successes[0],
-        actionTextPT,
-      },
-    })
-  );
+  if (successes.length > 0) {
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
+        defaultMessage:
+          '{successesJobsCount, plural, one{{successJob}} other{# jobs}} {actionTextPT} successfully',
+        values: {
+          successesJobsCount: successes.length,
+          successJob: successes[0],
+          actionTextPT,
+        },
+      })
+    );
+  }
 
   if (failures.length > 0) {
     failures.forEach((f) => {

@@ -23,6 +23,7 @@ import type {
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
+  ReportAssistantSettingToggledParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -54,10 +55,14 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportAssistantMessageSent = ({
     conversationId,
+    isEnabledKnowledgeBase,
+    isEnabledRAGAlerts,
     role,
   }: ReportAssistantMessageSentParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
       conversationId,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       role,
     });
   };
@@ -70,6 +75,10 @@ export class TelemetryClient implements TelemetryClientStart {
       conversationId,
       promptTitle,
     });
+  };
+
+  public reportAssistantSettingToggled = (params: ReportAssistantSettingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {

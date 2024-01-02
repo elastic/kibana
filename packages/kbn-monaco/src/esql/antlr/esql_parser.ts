@@ -31,78 +31,100 @@ export class esql_parser extends Parser {
 	public static readonly DROP = 2;
 	public static readonly ENRICH = 3;
 	public static readonly EVAL = 4;
-	public static readonly FROM = 5;
-	public static readonly GROK = 6;
-	public static readonly KEEP = 7;
-	public static readonly LIMIT = 8;
-	public static readonly MV_EXPAND = 9;
-	public static readonly PROJECT = 10;
-	public static readonly RENAME = 11;
-	public static readonly ROW = 12;
-	public static readonly SHOW = 13;
-	public static readonly SORT = 14;
-	public static readonly STATS = 15;
-	public static readonly WHERE = 16;
-	public static readonly UNKNOWN_CMD = 17;
-	public static readonly LINE_COMMENT = 18;
-	public static readonly MULTILINE_COMMENT = 19;
-	public static readonly WS = 20;
-	public static readonly PIPE = 21;
-	public static readonly STRING = 22;
-	public static readonly INTEGER_LITERAL = 23;
-	public static readonly DECIMAL_LITERAL = 24;
-	public static readonly BY = 25;
-	public static readonly AND = 26;
-	public static readonly ASC = 27;
-	public static readonly ASSIGN = 28;
-	public static readonly COMMA = 29;
-	public static readonly DESC = 30;
-	public static readonly DOT = 31;
-	public static readonly FALSE = 32;
-	public static readonly FIRST = 33;
-	public static readonly LAST = 34;
-	public static readonly LP = 35;
-	public static readonly IN = 36;
-	public static readonly IS = 37;
-	public static readonly LIKE = 38;
-	public static readonly NOT = 39;
-	public static readonly NULL = 40;
-	public static readonly NULLS = 41;
-	public static readonly OR = 42;
-	public static readonly PARAM = 43;
-	public static readonly RLIKE = 44;
-	public static readonly RP = 45;
-	public static readonly TRUE = 46;
-	public static readonly INFO = 47;
-	public static readonly FUNCTIONS = 48;
-	public static readonly UNDERSCORE = 49;
-	public static readonly EQ = 50;
-	public static readonly NEQ = 51;
-	public static readonly LT = 52;
-	public static readonly LTE = 53;
-	public static readonly GT = 54;
-	public static readonly GTE = 55;
-	public static readonly PLUS = 56;
-	public static readonly MINUS = 57;
-	public static readonly ASTERISK = 58;
-	public static readonly SLASH = 59;
-	public static readonly PERCENT = 60;
-	public static readonly OPENING_BRACKET = 61;
-	public static readonly CLOSING_BRACKET = 62;
-	public static readonly UNQUOTED_IDENTIFIER = 63;
-	public static readonly QUOTED_IDENTIFIER = 64;
-	public static readonly EXPR_LINE_COMMENT = 65;
-	public static readonly EXPR_MULTILINE_COMMENT = 66;
-	public static readonly EXPR_WS = 67;
-	public static readonly AS = 68;
-	public static readonly METADATA = 69;
-	public static readonly ON = 70;
-	public static readonly WITH = 71;
-	public static readonly SRC_UNQUOTED_IDENTIFIER = 72;
-	public static readonly SRC_QUOTED_IDENTIFIER = 73;
-	public static readonly SRC_LINE_COMMENT = 74;
-	public static readonly SRC_MULTILINE_COMMENT = 75;
-	public static readonly SRC_WS = 76;
+	public static readonly EXPLAIN = 5;
+	public static readonly FROM = 6;
+	public static readonly GROK = 7;
+	public static readonly INLINESTATS = 8;
+	public static readonly KEEP = 9;
+	public static readonly LIMIT = 10;
+	public static readonly MV_EXPAND = 11;
+	public static readonly PROJECT = 12;
+	public static readonly RENAME = 13;
+	public static readonly ROW = 14;
+	public static readonly SHOW = 15;
+	public static readonly SORT = 16;
+	public static readonly STATS = 17;
+	public static readonly WHERE = 18;
+	public static readonly UNKNOWN_CMD = 19;
+	public static readonly LINE_COMMENT = 20;
+	public static readonly MULTILINE_COMMENT = 21;
+	public static readonly WS = 22;
+	public static readonly EXPLAIN_WS = 23;
+	public static readonly EXPLAIN_LINE_COMMENT = 24;
+	public static readonly EXPLAIN_MULTILINE_COMMENT = 25;
+	public static readonly PIPE = 26;
+	public static readonly STRING = 27;
+	public static readonly INTEGER_LITERAL = 28;
+	public static readonly DECIMAL_LITERAL = 29;
+	public static readonly BY = 30;
+	public static readonly AND = 31;
+	public static readonly ASC = 32;
+	public static readonly ASSIGN = 33;
+	public static readonly COMMA = 34;
+	public static readonly DESC = 35;
+	public static readonly DOT = 36;
+	public static readonly FALSE = 37;
+	public static readonly FIRST = 38;
+	public static readonly LAST = 39;
+	public static readonly LP = 40;
+	public static readonly IN = 41;
+	public static readonly IS = 42;
+	public static readonly LIKE = 43;
+	public static readonly NOT = 44;
+	public static readonly NULL = 45;
+	public static readonly NULLS = 46;
+	public static readonly OR = 47;
+	public static readonly PARAM = 48;
+	public static readonly RLIKE = 49;
+	public static readonly RP = 50;
+	public static readonly TRUE = 51;
+	public static readonly EQ = 52;
+	public static readonly NEQ = 53;
+	public static readonly LT = 54;
+	public static readonly LTE = 55;
+	public static readonly GT = 56;
+	public static readonly GTE = 57;
+	public static readonly PLUS = 58;
+	public static readonly MINUS = 59;
+	public static readonly ASTERISK = 60;
+	public static readonly SLASH = 61;
+	public static readonly PERCENT = 62;
+	public static readonly OPENING_BRACKET = 63;
+	public static readonly CLOSING_BRACKET = 64;
+	public static readonly UNQUOTED_IDENTIFIER = 65;
+	public static readonly QUOTED_IDENTIFIER = 66;
+	public static readonly EXPR_LINE_COMMENT = 67;
+	public static readonly EXPR_MULTILINE_COMMENT = 68;
+	public static readonly EXPR_WS = 69;
+	public static readonly METADATA = 70;
+	public static readonly FROM_UNQUOTED_IDENTIFIER = 71;
+	public static readonly FROM_LINE_COMMENT = 72;
+	public static readonly FROM_MULTILINE_COMMENT = 73;
+	public static readonly FROM_WS = 74;
+	public static readonly PROJECT_UNQUOTED_IDENTIFIER = 75;
+	public static readonly PROJECT_LINE_COMMENT = 76;
+	public static readonly PROJECT_MULTILINE_COMMENT = 77;
+	public static readonly PROJECT_WS = 78;
+	public static readonly AS = 79;
+	public static readonly RENAME_LINE_COMMENT = 80;
+	public static readonly RENAME_MULTILINE_COMMENT = 81;
+	public static readonly RENAME_WS = 82;
+	public static readonly ON = 83;
+	public static readonly WITH = 84;
+	public static readonly ENRICH_LINE_COMMENT = 85;
+	public static readonly ENRICH_MULTILINE_COMMENT = 86;
+	public static readonly ENRICH_WS = 87;
+	public static readonly ENRICH_FIELD_LINE_COMMENT = 88;
+	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 89;
+	public static readonly ENRICH_FIELD_WS = 90;
+	public static readonly MVEXPAND_LINE_COMMENT = 91;
+	public static readonly MVEXPAND_MULTILINE_COMMENT = 92;
+	public static readonly MVEXPAND_WS = 93;
+	public static readonly INFO = 94;
+	public static readonly FUNCTIONS = 95;
+	public static readonly SHOW_LINE_COMMENT = 96;
+	public static readonly SHOW_MULTILINE_COMMENT = 97;
+	public static readonly SHOW_WS = 98;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
 	public static readonly RULE_sourceCommand = 2;
@@ -121,69 +143,82 @@ export class esql_parser extends Parser {
 	public static readonly RULE_metadata = 15;
 	public static readonly RULE_evalCommand = 16;
 	public static readonly RULE_statsCommand = 17;
-	public static readonly RULE_grouping = 18;
-	public static readonly RULE_sourceIdentifier = 19;
-	public static readonly RULE_qualifiedName = 20;
-	public static readonly RULE_identifier = 21;
-	public static readonly RULE_constant = 22;
-	public static readonly RULE_limitCommand = 23;
-	public static readonly RULE_sortCommand = 24;
-	public static readonly RULE_orderExpression = 25;
-	public static readonly RULE_keepCommand = 26;
-	public static readonly RULE_dropCommand = 27;
-	public static readonly RULE_renameCommand = 28;
-	public static readonly RULE_renameClause = 29;
-	public static readonly RULE_dissectCommand = 30;
-	public static readonly RULE_grokCommand = 31;
-	public static readonly RULE_mvExpandCommand = 32;
-	public static readonly RULE_commandOptions = 33;
-	public static readonly RULE_commandOption = 34;
-	public static readonly RULE_booleanValue = 35;
-	public static readonly RULE_numericValue = 36;
-	public static readonly RULE_decimalValue = 37;
-	public static readonly RULE_integerValue = 38;
-	public static readonly RULE_string = 39;
-	public static readonly RULE_comparisonOperator = 40;
-	public static readonly RULE_showCommand = 41;
-	public static readonly RULE_enrichCommand = 42;
-	public static readonly RULE_enrichWithClause = 43;
+	public static readonly RULE_inlinestatsCommand = 18;
+	public static readonly RULE_grouping = 19;
+	public static readonly RULE_fromIdentifier = 20;
+	public static readonly RULE_qualifiedName = 21;
+	public static readonly RULE_qualifiedNamePattern = 22;
+	public static readonly RULE_identifier = 23;
+	public static readonly RULE_identifierPattern = 24;
+	public static readonly RULE_constant = 25;
+	public static readonly RULE_limitCommand = 26;
+	public static readonly RULE_sortCommand = 27;
+	public static readonly RULE_orderExpression = 28;
+	public static readonly RULE_keepCommand = 29;
+	public static readonly RULE_dropCommand = 30;
+	public static readonly RULE_renameCommand = 31;
+	public static readonly RULE_renameClause = 32;
+	public static readonly RULE_dissectCommand = 33;
+	public static readonly RULE_grokCommand = 34;
+	public static readonly RULE_mvExpandCommand = 35;
+	public static readonly RULE_commandOptions = 36;
+	public static readonly RULE_commandOption = 37;
+	public static readonly RULE_booleanValue = 38;
+	public static readonly RULE_numericValue = 39;
+	public static readonly RULE_decimalValue = 40;
+	public static readonly RULE_integerValue = 41;
+	public static readonly RULE_string = 42;
+	public static readonly RULE_comparisonOperator = 43;
+	public static readonly RULE_explainCommand = 44;
+	public static readonly RULE_subqueryExpression = 45;
+	public static readonly RULE_showCommand = 46;
+	public static readonly RULE_enrichCommand = 47;
+	public static readonly RULE_enrichWithClause = 48;
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
 		"singleStatement", "query", "sourceCommand", "processingCommand", "whereCommand", 
 		"booleanExpression", "regexBooleanExpression", "valueExpression", "operatorExpression", 
 		"primaryExpression", "functionExpression", "rowCommand", "fields", "field", 
-		"fromCommand", "metadata", "evalCommand", "statsCommand", "grouping", 
-		"sourceIdentifier", "qualifiedName", "identifier", "constant", "limitCommand", 
-		"sortCommand", "orderExpression", "keepCommand", "dropCommand", "renameCommand", 
-		"renameClause", "dissectCommand", "grokCommand", "mvExpandCommand", "commandOptions", 
+		"fromCommand", "metadata", "evalCommand", "statsCommand", "inlinestatsCommand", 
+		"grouping", "fromIdentifier", "qualifiedName", "qualifiedNamePattern", 
+		"identifier", "identifierPattern", "constant", "limitCommand", "sortCommand", 
+		"orderExpression", "keepCommand", "dropCommand", "renameCommand", "renameClause", 
+		"dissectCommand", "grokCommand", "mvExpandCommand", "commandOptions", 
 		"commandOption", "booleanValue", "numericValue", "decimalValue", "integerValue", 
-		"string", "comparisonOperator", "showCommand", "enrichCommand", "enrichWithClause",
+		"string", "comparisonOperator", "explainCommand", "subqueryExpression", 
+		"showCommand", "enrichCommand", "enrichWithClause",
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, "'.'", undefined, undefined, undefined, 
-		"'('", undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, "'?'", undefined, "')'", undefined, undefined, undefined, "'_'", 
+		undefined, undefined, undefined, undefined, undefined, "'|'", undefined, 
+		undefined, undefined, undefined, undefined, undefined, "'='", "','", undefined, 
+		"'.'", undefined, undefined, undefined, "'('", undefined, undefined, undefined, 
+		undefined, undefined, undefined, undefined, "'?'", undefined, "')'", undefined, 
 		"'=='", "'!='", "'<'", "'<='", "'>'", "'>='", "'+'", "'-'", "'*'", "'/'", 
 		"'%'", undefined, "']'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
-		undefined, "DISSECT", "DROP", "ENRICH", "EVAL", "FROM", "GROK", "KEEP", 
-		"LIMIT", "MV_EXPAND", "PROJECT", "RENAME", "ROW", "SHOW", "SORT", "STATS", 
-		"WHERE", "UNKNOWN_CMD", "LINE_COMMENT", "MULTILINE_COMMENT", "WS", "PIPE", 
-		"STRING", "INTEGER_LITERAL", "DECIMAL_LITERAL", "BY", "AND", "ASC", "ASSIGN", 
-		"COMMA", "DESC", "DOT", "FALSE", "FIRST", "LAST", "LP", "IN", "IS", "LIKE", 
-		"NOT", "NULL", "NULLS", "OR", "PARAM", "RLIKE", "RP", "TRUE", "INFO", 
-		"FUNCTIONS", "UNDERSCORE", "EQ", "NEQ", "LT", "LTE", "GT", "GTE", "PLUS", 
-		"MINUS", "ASTERISK", "SLASH", "PERCENT", "OPENING_BRACKET", "CLOSING_BRACKET", 
-		"UNQUOTED_IDENTIFIER", "QUOTED_IDENTIFIER", "EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", 
-		"EXPR_WS", "AS", "METADATA", "ON", "WITH", "SRC_UNQUOTED_IDENTIFIER", 
-		"SRC_QUOTED_IDENTIFIER", "SRC_LINE_COMMENT", "SRC_MULTILINE_COMMENT", 
-		"SRC_WS",
+		undefined, "DISSECT", "DROP", "ENRICH", "EVAL", "EXPLAIN", "FROM", "GROK", 
+		"INLINESTATS", "KEEP", "LIMIT", "MV_EXPAND", "PROJECT", "RENAME", "ROW", 
+		"SHOW", "SORT", "STATS", "WHERE", "UNKNOWN_CMD", "LINE_COMMENT", "MULTILINE_COMMENT", 
+		"WS", "EXPLAIN_WS", "EXPLAIN_LINE_COMMENT", "EXPLAIN_MULTILINE_COMMENT", 
+		"PIPE", "STRING", "INTEGER_LITERAL", "DECIMAL_LITERAL", "BY", "AND", "ASC", 
+		"ASSIGN", "COMMA", "DESC", "DOT", "FALSE", "FIRST", "LAST", "LP", "IN", 
+		"IS", "LIKE", "NOT", "NULL", "NULLS", "OR", "PARAM", "RLIKE", "RP", "TRUE", 
+		"EQ", "NEQ", "LT", "LTE", "GT", "GTE", "PLUS", "MINUS", "ASTERISK", "SLASH", 
+		"PERCENT", "OPENING_BRACKET", "CLOSING_BRACKET", "UNQUOTED_IDENTIFIER", 
+		"QUOTED_IDENTIFIER", "EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", "EXPR_WS", 
+		"METADATA", "FROM_UNQUOTED_IDENTIFIER", "FROM_LINE_COMMENT", "FROM_MULTILINE_COMMENT", 
+		"FROM_WS", "PROJECT_UNQUOTED_IDENTIFIER", "PROJECT_LINE_COMMENT", "PROJECT_MULTILINE_COMMENT", 
+		"PROJECT_WS", "AS", "RENAME_LINE_COMMENT", "RENAME_MULTILINE_COMMENT", 
+		"RENAME_WS", "ON", "WITH", "ENRICH_LINE_COMMENT", "ENRICH_MULTILINE_COMMENT", 
+		"ENRICH_WS", "ENRICH_FIELD_LINE_COMMENT", "ENRICH_FIELD_MULTILINE_COMMENT", 
+		"ENRICH_FIELD_WS", "MVEXPAND_LINE_COMMENT", "MVEXPAND_MULTILINE_COMMENT", 
+		"MVEXPAND_WS", "INFO", "FUNCTIONS", "SHOW_LINE_COMMENT", "SHOW_MULTILINE_COMMENT", 
+		"SHOW_WS",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(esql_parser._LITERAL_NAMES, esql_parser._SYMBOLIC_NAMES, []);
 
@@ -214,9 +249,9 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 88;
+			this.state = 98;
 			this.query(0);
-			this.state = 89;
+			this.state = 99;
 			this.match(esql_parser.EOF);
 			}
 		}
@@ -258,11 +293,11 @@ export class esql_parser extends Parser {
 			this._ctx = _localctx;
 			_prevctx = _localctx;
 
-			this.state = 92;
+			this.state = 102;
 			this.sourceCommand();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 99;
+			this.state = 109;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 0, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
@@ -275,18 +310,18 @@ export class esql_parser extends Parser {
 					{
 					_localctx = new CompositeQueryContext(new QueryContext(_parentctx, _parentState));
 					this.pushNewRecursionContext(_localctx, _startState, esql_parser.RULE_query);
-					this.state = 94;
+					this.state = 104;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw new FailedPredicateException(this, "this.precpred(this._ctx, 1)");
 					}
-					this.state = 95;
+					this.state = 105;
 					this.match(esql_parser.PIPE);
-					this.state = 96;
+					this.state = 106;
 					this.processingCommand();
 					}
 					}
 				}
-				this.state = 101;
+				this.state = 111;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 0, this._ctx);
 			}
@@ -311,27 +346,34 @@ export class esql_parser extends Parser {
 		let _localctx: SourceCommandContext = new SourceCommandContext(this._ctx, this.state);
 		this.enterRule(_localctx, 4, esql_parser.RULE_sourceCommand);
 		try {
-			this.state = 105;
+			this.state = 116;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case esql_parser.FROM:
+			case esql_parser.EXPLAIN:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 102;
+				this.state = 112;
+				this.explainCommand();
+				}
+				break;
+			case esql_parser.FROM:
+				this.enterOuterAlt(_localctx, 2);
+				{
+				this.state = 113;
 				this.fromCommand();
 				}
 				break;
 			case esql_parser.ROW:
-				this.enterOuterAlt(_localctx, 2);
+				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 103;
+				this.state = 114;
 				this.rowCommand();
 				}
 				break;
 			case esql_parser.SHOW:
-				this.enterOuterAlt(_localctx, 3);
+				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 104;
+				this.state = 115;
 				this.showCommand();
 				}
 				break;
@@ -358,91 +400,98 @@ export class esql_parser extends Parser {
 		let _localctx: ProcessingCommandContext = new ProcessingCommandContext(this._ctx, this.state);
 		this.enterRule(_localctx, 6, esql_parser.RULE_processingCommand);
 		try {
-			this.state = 119;
+			this.state = 131;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case esql_parser.EVAL:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 107;
+				this.state = 118;
 				this.evalCommand();
 				}
 				break;
-			case esql_parser.LIMIT:
+			case esql_parser.INLINESTATS:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 108;
+				this.state = 119;
+				this.inlinestatsCommand();
+				}
+				break;
+			case esql_parser.LIMIT:
+				this.enterOuterAlt(_localctx, 3);
+				{
+				this.state = 120;
 				this.limitCommand();
 				}
 				break;
 			case esql_parser.KEEP:
 			case esql_parser.PROJECT:
-				this.enterOuterAlt(_localctx, 3);
+				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 109;
+				this.state = 121;
 				this.keepCommand();
 				}
 				break;
 			case esql_parser.SORT:
-				this.enterOuterAlt(_localctx, 4);
+				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 110;
+				this.state = 122;
 				this.sortCommand();
 				}
 				break;
 			case esql_parser.STATS:
-				this.enterOuterAlt(_localctx, 5);
+				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 111;
+				this.state = 123;
 				this.statsCommand();
 				}
 				break;
 			case esql_parser.WHERE:
-				this.enterOuterAlt(_localctx, 6);
+				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 112;
+				this.state = 124;
 				this.whereCommand();
 				}
 				break;
 			case esql_parser.DROP:
-				this.enterOuterAlt(_localctx, 7);
+				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 113;
+				this.state = 125;
 				this.dropCommand();
 				}
 				break;
 			case esql_parser.RENAME:
-				this.enterOuterAlt(_localctx, 8);
+				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 114;
+				this.state = 126;
 				this.renameCommand();
 				}
 				break;
 			case esql_parser.DISSECT:
-				this.enterOuterAlt(_localctx, 9);
+				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 115;
+				this.state = 127;
 				this.dissectCommand();
 				}
 				break;
 			case esql_parser.GROK:
-				this.enterOuterAlt(_localctx, 10);
+				this.enterOuterAlt(_localctx, 11);
 				{
-				this.state = 116;
+				this.state = 128;
 				this.grokCommand();
 				}
 				break;
 			case esql_parser.ENRICH:
-				this.enterOuterAlt(_localctx, 11);
+				this.enterOuterAlt(_localctx, 12);
 				{
-				this.state = 117;
+				this.state = 129;
 				this.enrichCommand();
 				}
 				break;
 			case esql_parser.MV_EXPAND:
-				this.enterOuterAlt(_localctx, 12);
+				this.enterOuterAlt(_localctx, 13);
 				{
-				this.state = 118;
+				this.state = 130;
 				this.mvExpandCommand();
 				}
 				break;
@@ -471,9 +520,9 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 121;
+			this.state = 133;
 			this.match(esql_parser.WHERE);
-			this.state = 122;
+			this.state = 134;
 			this.booleanExpression(0);
 			}
 		}
@@ -511,7 +560,7 @@ export class esql_parser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 152;
+			this.state = 164;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 6, this._ctx) ) {
 			case 1:
@@ -520,9 +569,9 @@ export class esql_parser extends Parser {
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 
-				this.state = 125;
+				this.state = 137;
 				this.match(esql_parser.NOT);
-				this.state = 126;
+				this.state = 138;
 				this.booleanExpression(7);
 				}
 				break;
@@ -532,7 +581,7 @@ export class esql_parser extends Parser {
 				_localctx = new BooleanDefaultContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 127;
+				this.state = 139;
 				this.valueExpression();
 				}
 				break;
@@ -542,7 +591,7 @@ export class esql_parser extends Parser {
 				_localctx = new RegexExpressionContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 128;
+				this.state = 140;
 				this.regexBooleanExpression();
 				}
 				break;
@@ -552,41 +601,41 @@ export class esql_parser extends Parser {
 				_localctx = new LogicalInContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 129;
+				this.state = 141;
 				this.valueExpression();
-				this.state = 131;
+				this.state = 143;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === esql_parser.NOT) {
 					{
-					this.state = 130;
+					this.state = 142;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 133;
+				this.state = 145;
 				this.match(esql_parser.IN);
-				this.state = 134;
+				this.state = 146;
 				this.match(esql_parser.LP);
-				this.state = 135;
+				this.state = 147;
 				this.valueExpression();
-				this.state = 140;
+				this.state = 152;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === esql_parser.COMMA) {
 					{
 					{
-					this.state = 136;
+					this.state = 148;
 					this.match(esql_parser.COMMA);
-					this.state = 137;
+					this.state = 149;
 					this.valueExpression();
 					}
 					}
-					this.state = 142;
+					this.state = 154;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 143;
+				this.state = 155;
 				this.match(esql_parser.RP);
 				}
 				break;
@@ -596,27 +645,27 @@ export class esql_parser extends Parser {
 				_localctx = new IsNullContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 145;
+				this.state = 157;
 				this.valueExpression();
-				this.state = 146;
+				this.state = 158;
 				this.match(esql_parser.IS);
-				this.state = 148;
+				this.state = 160;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === esql_parser.NOT) {
 					{
-					this.state = 147;
+					this.state = 159;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 150;
+				this.state = 162;
 				this.match(esql_parser.NULL);
 				}
 				break;
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 162;
+			this.state = 174;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 8, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
@@ -626,7 +675,7 @@ export class esql_parser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 160;
+					this.state = 172;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input, 7, this._ctx) ) {
 					case 1:
@@ -634,13 +683,13 @@ export class esql_parser extends Parser {
 						_localctx = new LogicalBinaryContext(new BooleanExpressionContext(_parentctx, _parentState));
 						(_localctx as LogicalBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, esql_parser.RULE_booleanExpression);
-						this.state = 154;
+						this.state = 166;
 						if (!(this.precpred(this._ctx, 4))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 4)");
 						}
-						this.state = 155;
+						this.state = 167;
 						(_localctx as LogicalBinaryContext)._operator = this.match(esql_parser.AND);
-						this.state = 156;
+						this.state = 168;
 						(_localctx as LogicalBinaryContext)._right = this.booleanExpression(5);
 						}
 						break;
@@ -650,20 +699,20 @@ export class esql_parser extends Parser {
 						_localctx = new LogicalBinaryContext(new BooleanExpressionContext(_parentctx, _parentState));
 						(_localctx as LogicalBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, esql_parser.RULE_booleanExpression);
-						this.state = 157;
+						this.state = 169;
 						if (!(this.precpred(this._ctx, 3))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
 						}
-						this.state = 158;
+						this.state = 170;
 						(_localctx as LogicalBinaryContext)._operator = this.match(esql_parser.OR);
-						this.state = 159;
+						this.state = 171;
 						(_localctx as LogicalBinaryContext)._right = this.booleanExpression(4);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 164;
+				this.state = 176;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 8, this._ctx);
 			}
@@ -689,27 +738,27 @@ export class esql_parser extends Parser {
 		this.enterRule(_localctx, 12, esql_parser.RULE_regexBooleanExpression);
 		let _la: number;
 		try {
-			this.state = 179;
+			this.state = 191;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 11, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 165;
+				this.state = 177;
 				this.valueExpression();
-				this.state = 167;
+				this.state = 179;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === esql_parser.NOT) {
 					{
-					this.state = 166;
+					this.state = 178;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 169;
+				this.state = 181;
 				_localctx._kind = this.match(esql_parser.LIKE);
-				this.state = 170;
+				this.state = 182;
 				_localctx._pattern = this.string();
 				}
 				break;
@@ -717,21 +766,21 @@ export class esql_parser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 172;
+				this.state = 184;
 				this.valueExpression();
-				this.state = 174;
+				this.state = 186;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === esql_parser.NOT) {
 					{
-					this.state = 173;
+					this.state = 185;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 176;
+				this.state = 188;
 				_localctx._kind = this.match(esql_parser.RLIKE);
-				this.state = 177;
+				this.state = 189;
 				_localctx._pattern = this.string();
 				}
 				break;
@@ -756,14 +805,14 @@ export class esql_parser extends Parser {
 		let _localctx: ValueExpressionContext = new ValueExpressionContext(this._ctx, this.state);
 		this.enterRule(_localctx, 14, esql_parser.RULE_valueExpression);
 		try {
-			this.state = 186;
+			this.state = 198;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 12, this._ctx) ) {
 			case 1:
 				_localctx = new ValueExpressionDefaultContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 181;
+				this.state = 193;
 				this.operatorExpression(0);
 				}
 				break;
@@ -772,11 +821,11 @@ export class esql_parser extends Parser {
 				_localctx = new ComparisonContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 182;
+				this.state = 194;
 				(_localctx as ComparisonContext)._left = this.operatorExpression(0);
-				this.state = 183;
+				this.state = 195;
 				this.comparisonOperator();
-				this.state = 184;
+				this.state = 196;
 				(_localctx as ComparisonContext)._right = this.operatorExpression(0);
 				}
 				break;
@@ -816,7 +865,7 @@ export class esql_parser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 192;
+			this.state = 204;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 13, this._ctx) ) {
 			case 1:
@@ -825,7 +874,7 @@ export class esql_parser extends Parser {
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 
-				this.state = 189;
+				this.state = 201;
 				this.primaryExpression();
 				}
 				break;
@@ -835,7 +884,7 @@ export class esql_parser extends Parser {
 				_localctx = new ArithmeticUnaryContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 190;
+				this.state = 202;
 				(_localctx as ArithmeticUnaryContext)._operator = this._input.LT(1);
 				_la = this._input.LA(1);
 				if (!(_la === esql_parser.PLUS || _la === esql_parser.MINUS)) {
@@ -848,13 +897,13 @@ export class esql_parser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 191;
+				this.state = 203;
 				this.operatorExpression(3);
 				}
 				break;
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 202;
+			this.state = 214;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 15, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
@@ -864,7 +913,7 @@ export class esql_parser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 200;
+					this.state = 212;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input, 14, this._ctx) ) {
 					case 1:
@@ -872,14 +921,14 @@ export class esql_parser extends Parser {
 						_localctx = new ArithmeticBinaryContext(new OperatorExpressionContext(_parentctx, _parentState));
 						(_localctx as ArithmeticBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, esql_parser.RULE_operatorExpression);
-						this.state = 194;
+						this.state = 206;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
 						}
-						this.state = 195;
+						this.state = 207;
 						(_localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if (!(((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (esql_parser.ASTERISK - 58)) | (1 << (esql_parser.SLASH - 58)) | (1 << (esql_parser.PERCENT - 58)))) !== 0))) {
+						if (!(((((_la - 60)) & ~0x1F) === 0 && ((1 << (_la - 60)) & ((1 << (esql_parser.ASTERISK - 60)) | (1 << (esql_parser.SLASH - 60)) | (1 << (esql_parser.PERCENT - 60)))) !== 0))) {
 							(_localctx as ArithmeticBinaryContext)._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -889,7 +938,7 @@ export class esql_parser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 196;
+						this.state = 208;
 						(_localctx as ArithmeticBinaryContext)._right = this.operatorExpression(3);
 						}
 						break;
@@ -899,11 +948,11 @@ export class esql_parser extends Parser {
 						_localctx = new ArithmeticBinaryContext(new OperatorExpressionContext(_parentctx, _parentState));
 						(_localctx as ArithmeticBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(_localctx, _startState, esql_parser.RULE_operatorExpression);
-						this.state = 197;
+						this.state = 209;
 						if (!(this.precpred(this._ctx, 1))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 1)");
 						}
-						this.state = 198;
+						this.state = 210;
 						(_localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
 						if (!(_la === esql_parser.PLUS || _la === esql_parser.MINUS)) {
@@ -916,14 +965,14 @@ export class esql_parser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 199;
+						this.state = 211;
 						(_localctx as ArithmeticBinaryContext)._right = this.operatorExpression(2);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 204;
+				this.state = 216;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 15, this._ctx);
 			}
@@ -948,14 +997,14 @@ export class esql_parser extends Parser {
 		let _localctx: PrimaryExpressionContext = new PrimaryExpressionContext(this._ctx, this.state);
 		this.enterRule(_localctx, 18, esql_parser.RULE_primaryExpression);
 		try {
-			this.state = 212;
+			this.state = 224;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 16, this._ctx) ) {
 			case 1:
 				_localctx = new ConstantDefaultContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 205;
+				this.state = 217;
 				this.constant();
 				}
 				break;
@@ -964,7 +1013,7 @@ export class esql_parser extends Parser {
 				_localctx = new DereferenceContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 206;
+				this.state = 218;
 				this.qualifiedName();
 				}
 				break;
@@ -973,7 +1022,7 @@ export class esql_parser extends Parser {
 				_localctx = new FunctionContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 207;
+				this.state = 219;
 				this.functionExpression();
 				}
 				break;
@@ -982,11 +1031,11 @@ export class esql_parser extends Parser {
 				_localctx = new ParenthesizedExpressionContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 208;
+				this.state = 220;
 				this.match(esql_parser.LP);
-				this.state = 209;
+				this.state = 221;
 				this.booleanExpression(0);
-				this.state = 210;
+				this.state = 222;
 				this.match(esql_parser.RP);
 				}
 				break;
@@ -1014,16 +1063,16 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 214;
+			this.state = 226;
 			this.identifier();
-			this.state = 215;
+			this.state = 227;
 			this.match(esql_parser.LP);
-			this.state = 225;
+			this.state = 237;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case esql_parser.ASTERISK:
 				{
-				this.state = 216;
+				this.state = 228;
 				this.match(esql_parser.ASTERISK);
 				}
 				break;
@@ -1043,21 +1092,21 @@ export class esql_parser extends Parser {
 			case esql_parser.QUOTED_IDENTIFIER:
 				{
 				{
-				this.state = 217;
+				this.state = 229;
 				this.booleanExpression(0);
-				this.state = 222;
+				this.state = 234;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === esql_parser.COMMA) {
 					{
 					{
-					this.state = 218;
+					this.state = 230;
 					this.match(esql_parser.COMMA);
-					this.state = 219;
+					this.state = 231;
 					this.booleanExpression(0);
 					}
 					}
-					this.state = 224;
+					this.state = 236;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
@@ -1069,7 +1118,7 @@ export class esql_parser extends Parser {
 			default:
 				break;
 			}
-			this.state = 227;
+			this.state = 239;
 			this.match(esql_parser.RP);
 			}
 		}
@@ -1094,9 +1143,9 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 229;
+			this.state = 241;
 			this.match(esql_parser.ROW);
-			this.state = 230;
+			this.state = 242;
 			this.fields();
 			}
 		}
@@ -1122,23 +1171,23 @@ export class esql_parser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 232;
+			this.state = 244;
 			this.field();
-			this.state = 237;
+			this.state = 249;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 19, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 233;
+					this.state = 245;
 					this.match(esql_parser.COMMA);
-					this.state = 234;
+					this.state = 246;
 					this.field();
 					}
 					}
 				}
-				this.state = 239;
+				this.state = 251;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 19, this._ctx);
 			}
@@ -1163,13 +1212,13 @@ export class esql_parser extends Parser {
 		let _localctx: FieldContext = new FieldContext(this._ctx, this.state);
 		this.enterRule(_localctx, 26, esql_parser.RULE_field);
 		try {
-			this.state = 245;
+			this.state = 257;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 20, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 240;
+				this.state = 252;
 				this.booleanExpression(0);
 				}
 				break;
@@ -1177,11 +1226,11 @@ export class esql_parser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 241;
+				this.state = 253;
 				this.qualifiedName();
-				this.state = 242;
+				this.state = 254;
 				this.match(esql_parser.ASSIGN);
-				this.state = 243;
+				this.state = 255;
 				this.booleanExpression(0);
 				}
 				break;
@@ -1209,34 +1258,34 @@ export class esql_parser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 247;
+			this.state = 259;
 			this.match(esql_parser.FROM);
-			this.state = 248;
-			this.sourceIdentifier();
-			this.state = 253;
+			this.state = 260;
+			this.fromIdentifier();
+			this.state = 265;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 21, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 249;
+					this.state = 261;
 					this.match(esql_parser.COMMA);
-					this.state = 250;
-					this.sourceIdentifier();
+					this.state = 262;
+					this.fromIdentifier();
 					}
 					}
 				}
-				this.state = 255;
+				this.state = 267;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 21, this._ctx);
 			}
-			this.state = 257;
+			this.state = 269;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 22, this._ctx) ) {
 			case 1:
 				{
-				this.state = 256;
+				this.state = 268;
 				this.metadata();
 				}
 				break;
@@ -1265,29 +1314,29 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 259;
+			this.state = 271;
 			this.match(esql_parser.OPENING_BRACKET);
-			this.state = 260;
+			this.state = 272;
 			this.match(esql_parser.METADATA);
-			this.state = 261;
-			this.sourceIdentifier();
-			this.state = 266;
+			this.state = 273;
+			this.fromIdentifier();
+			this.state = 278;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === esql_parser.COMMA) {
 				{
 				{
-				this.state = 262;
+				this.state = 274;
 				this.match(esql_parser.COMMA);
-				this.state = 263;
-				this.sourceIdentifier();
+				this.state = 275;
+				this.fromIdentifier();
 				}
 				}
-				this.state = 268;
+				this.state = 280;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 269;
+			this.state = 281;
 			this.match(esql_parser.CLOSING_BRACKET);
 			}
 		}
@@ -1312,9 +1361,9 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 271;
+			this.state = 283;
 			this.match(esql_parser.EVAL);
-			this.state = 272;
+			this.state = 284;
 			this.fields();
 			}
 		}
@@ -1339,26 +1388,65 @@ export class esql_parser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 274;
+			this.state = 286;
 			this.match(esql_parser.STATS);
-			this.state = 276;
+			this.state = 288;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 24, this._ctx) ) {
 			case 1:
 				{
-				this.state = 275;
+				this.state = 287;
 				this.fields();
 				}
 				break;
 			}
-			this.state = 280;
+			this.state = 292;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 25, this._ctx) ) {
 			case 1:
 				{
-				this.state = 278;
+				this.state = 290;
 				this.match(esql_parser.BY);
-				this.state = 279;
+				this.state = 291;
+				this.grouping();
+				}
+				break;
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public inlinestatsCommand(): InlinestatsCommandContext {
+		let _localctx: InlinestatsCommandContext = new InlinestatsCommandContext(this._ctx, this.state);
+		this.enterRule(_localctx, 36, esql_parser.RULE_inlinestatsCommand);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 294;
+			this.match(esql_parser.INLINESTATS);
+			this.state = 295;
+			this.fields();
+			this.state = 298;
+			this._errHandler.sync(this);
+			switch ( this.interpreter.adaptivePredict(this._input, 26, this._ctx) ) {
+			case 1:
+				{
+				this.state = 296;
+				this.match(esql_parser.BY);
+				this.state = 297;
 				this.grouping();
 				}
 				break;
@@ -1382,30 +1470,30 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public grouping(): GroupingContext {
 		let _localctx: GroupingContext = new GroupingContext(this._ctx, this.state);
-		this.enterRule(_localctx, 36, esql_parser.RULE_grouping);
+		this.enterRule(_localctx, 38, esql_parser.RULE_grouping);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 282;
+			this.state = 300;
 			this.qualifiedName();
-			this.state = 287;
+			this.state = 305;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 26, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 27, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 283;
+					this.state = 301;
 					this.match(esql_parser.COMMA);
-					this.state = 284;
+					this.state = 302;
 					this.qualifiedName();
 					}
 					}
 				}
-				this.state = 289;
+				this.state = 307;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 26, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 27, this._ctx);
 			}
 			}
 		}
@@ -1424,16 +1512,16 @@ export class esql_parser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public sourceIdentifier(): SourceIdentifierContext {
-		let _localctx: SourceIdentifierContext = new SourceIdentifierContext(this._ctx, this.state);
-		this.enterRule(_localctx, 38, esql_parser.RULE_sourceIdentifier);
+	public fromIdentifier(): FromIdentifierContext {
+		let _localctx: FromIdentifierContext = new FromIdentifierContext(this._ctx, this.state);
+		this.enterRule(_localctx, 40, esql_parser.RULE_fromIdentifier);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 290;
+			this.state = 308;
 			_la = this._input.LA(1);
-			if (!(_la === esql_parser.SRC_UNQUOTED_IDENTIFIER || _la === esql_parser.SRC_QUOTED_IDENTIFIER)) {
+			if (!(_la === esql_parser.QUOTED_IDENTIFIER || _la === esql_parser.FROM_UNQUOTED_IDENTIFIER)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1462,30 +1550,74 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public qualifiedName(): QualifiedNameContext {
 		let _localctx: QualifiedNameContext = new QualifiedNameContext(this._ctx, this.state);
-		this.enterRule(_localctx, 40, esql_parser.RULE_qualifiedName);
+		this.enterRule(_localctx, 42, esql_parser.RULE_qualifiedName);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 292;
+			this.state = 310;
 			this.identifier();
-			this.state = 297;
+			this.state = 315;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 27, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 28, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 293;
+					this.state = 311;
 					this.match(esql_parser.DOT);
-					this.state = 294;
+					this.state = 312;
 					this.identifier();
 					}
 					}
 				}
-				this.state = 299;
+				this.state = 317;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 27, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 28, this._ctx);
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public qualifiedNamePattern(): QualifiedNamePatternContext {
+		let _localctx: QualifiedNamePatternContext = new QualifiedNamePatternContext(this._ctx, this.state);
+		this.enterRule(_localctx, 44, esql_parser.RULE_qualifiedNamePattern);
+		try {
+			let _alt: number;
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 318;
+			this.identifierPattern();
+			this.state = 323;
+			this._errHandler.sync(this);
+			_alt = this.interpreter.adaptivePredict(this._input, 29, this._ctx);
+			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
+				if (_alt === 1) {
+					{
+					{
+					this.state = 319;
+					this.match(esql_parser.DOT);
+					this.state = 320;
+					this.identifierPattern();
+					}
+					}
+				}
+				this.state = 325;
+				this._errHandler.sync(this);
+				_alt = this.interpreter.adaptivePredict(this._input, 29, this._ctx);
 			}
 			}
 		}
@@ -1506,12 +1638,12 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public identifier(): IdentifierContext {
 		let _localctx: IdentifierContext = new IdentifierContext(this._ctx, this.state);
-		this.enterRule(_localctx, 42, esql_parser.RULE_identifier);
+		this.enterRule(_localctx, 46, esql_parser.RULE_identifier);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 300;
+			this.state = 326;
 			_la = this._input.LA(1);
 			if (!(_la === esql_parser.UNQUOTED_IDENTIFIER || _la === esql_parser.QUOTED_IDENTIFIER)) {
 			this._errHandler.recoverInline(this);
@@ -1540,19 +1672,55 @@ export class esql_parser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public constant(): ConstantContext {
-		let _localctx: ConstantContext = new ConstantContext(this._ctx, this.state);
-		this.enterRule(_localctx, 44, esql_parser.RULE_constant);
+	public identifierPattern(): IdentifierPatternContext {
+		let _localctx: IdentifierPatternContext = new IdentifierPatternContext(this._ctx, this.state);
+		this.enterRule(_localctx, 48, esql_parser.RULE_identifierPattern);
 		let _la: number;
 		try {
-			this.state = 344;
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 328;
+			_la = this._input.LA(1);
+			if (!(_la === esql_parser.QUOTED_IDENTIFIER || _la === esql_parser.PROJECT_UNQUOTED_IDENTIFIER)) {
+			this._errHandler.recoverInline(this);
+			} else {
+				if (this._input.LA(1) === Token.EOF) {
+					this.matchedEOF = true;
+				}
+
+				this._errHandler.reportMatch(this);
+				this.consume();
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public constant(): ConstantContext {
+		let _localctx: ConstantContext = new ConstantContext(this._ctx, this.state);
+		this.enterRule(_localctx, 50, esql_parser.RULE_constant);
+		let _la: number;
+		try {
+			this.state = 372;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 31, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 33, this._ctx) ) {
 			case 1:
 				_localctx = new NullLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 302;
+				this.state = 330;
 				this.match(esql_parser.NULL);
 				}
 				break;
@@ -1561,9 +1729,9 @@ export class esql_parser extends Parser {
 				_localctx = new QualifiedIntegerLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 303;
+				this.state = 331;
 				this.integerValue();
-				this.state = 304;
+				this.state = 332;
 				this.match(esql_parser.UNQUOTED_IDENTIFIER);
 				}
 				break;
@@ -1572,7 +1740,7 @@ export class esql_parser extends Parser {
 				_localctx = new DecimalLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 306;
+				this.state = 334;
 				this.decimalValue();
 				}
 				break;
@@ -1581,7 +1749,7 @@ export class esql_parser extends Parser {
 				_localctx = new IntegerLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 307;
+				this.state = 335;
 				this.integerValue();
 				}
 				break;
@@ -1590,7 +1758,7 @@ export class esql_parser extends Parser {
 				_localctx = new BooleanLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 308;
+				this.state = 336;
 				this.booleanValue();
 				}
 				break;
@@ -1599,7 +1767,7 @@ export class esql_parser extends Parser {
 				_localctx = new InputParamContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 309;
+				this.state = 337;
 				this.match(esql_parser.PARAM);
 				}
 				break;
@@ -1608,7 +1776,7 @@ export class esql_parser extends Parser {
 				_localctx = new StringLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 310;
+				this.state = 338;
 				this.string();
 				}
 				break;
@@ -1617,27 +1785,27 @@ export class esql_parser extends Parser {
 				_localctx = new NumericArrayLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 311;
+				this.state = 339;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 312;
+				this.state = 340;
 				this.numericValue();
-				this.state = 317;
+				this.state = 345;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === esql_parser.COMMA) {
 					{
 					{
-					this.state = 313;
+					this.state = 341;
 					this.match(esql_parser.COMMA);
-					this.state = 314;
+					this.state = 342;
 					this.numericValue();
 					}
 					}
-					this.state = 319;
+					this.state = 347;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 320;
+				this.state = 348;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -1646,27 +1814,27 @@ export class esql_parser extends Parser {
 				_localctx = new BooleanArrayLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 322;
+				this.state = 350;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 323;
+				this.state = 351;
 				this.booleanValue();
-				this.state = 328;
+				this.state = 356;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === esql_parser.COMMA) {
 					{
 					{
-					this.state = 324;
+					this.state = 352;
 					this.match(esql_parser.COMMA);
-					this.state = 325;
+					this.state = 353;
 					this.booleanValue();
 					}
 					}
-					this.state = 330;
+					this.state = 358;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 331;
+				this.state = 359;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -1675,27 +1843,27 @@ export class esql_parser extends Parser {
 				_localctx = new StringArrayLiteralContext(_localctx);
 				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 333;
+				this.state = 361;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 334;
+				this.state = 362;
 				this.string();
-				this.state = 339;
+				this.state = 367;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === esql_parser.COMMA) {
 					{
 					{
-					this.state = 335;
+					this.state = 363;
 					this.match(esql_parser.COMMA);
-					this.state = 336;
+					this.state = 364;
 					this.string();
 					}
 					}
-					this.state = 341;
+					this.state = 369;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 342;
+				this.state = 370;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -1718,13 +1886,13 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public limitCommand(): LimitCommandContext {
 		let _localctx: LimitCommandContext = new LimitCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 46, esql_parser.RULE_limitCommand);
+		this.enterRule(_localctx, 52, esql_parser.RULE_limitCommand);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 346;
+			this.state = 374;
 			this.match(esql_parser.LIMIT);
-			this.state = 347;
+			this.state = 375;
 			this.match(esql_parser.INTEGER_LITERAL);
 			}
 		}
@@ -1745,32 +1913,32 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public sortCommand(): SortCommandContext {
 		let _localctx: SortCommandContext = new SortCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 48, esql_parser.RULE_sortCommand);
+		this.enterRule(_localctx, 54, esql_parser.RULE_sortCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 349;
+			this.state = 377;
 			this.match(esql_parser.SORT);
-			this.state = 350;
+			this.state = 378;
 			this.orderExpression();
-			this.state = 355;
+			this.state = 383;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 32, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 34, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 351;
+					this.state = 379;
 					this.match(esql_parser.COMMA);
-					this.state = 352;
+					this.state = 380;
 					this.orderExpression();
 					}
 					}
 				}
-				this.state = 357;
+				this.state = 385;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 32, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 34, this._ctx);
 			}
 			}
 		}
@@ -1791,19 +1959,19 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public orderExpression(): OrderExpressionContext {
 		let _localctx: OrderExpressionContext = new OrderExpressionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 50, esql_parser.RULE_orderExpression);
+		this.enterRule(_localctx, 56, esql_parser.RULE_orderExpression);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 358;
+			this.state = 386;
 			this.booleanExpression(0);
-			this.state = 360;
+			this.state = 388;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 33, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 35, this._ctx) ) {
 			case 1:
 				{
-				this.state = 359;
+				this.state = 387;
 				_localctx._ordering = this._input.LT(1);
 				_la = this._input.LA(1);
 				if (!(_la === esql_parser.ASC || _la === esql_parser.DESC)) {
@@ -1819,14 +1987,14 @@ export class esql_parser extends Parser {
 				}
 				break;
 			}
-			this.state = 364;
+			this.state = 392;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 34, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 36, this._ctx) ) {
 			case 1:
 				{
-				this.state = 362;
+				this.state = 390;
 				this.match(esql_parser.NULLS);
-				this.state = 363;
+				this.state = 391;
 				_localctx._nullOrdering = this._input.LT(1);
 				_la = this._input.LA(1);
 				if (!(_la === esql_parser.FIRST || _la === esql_parser.LAST)) {
@@ -1861,63 +2029,63 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public keepCommand(): KeepCommandContext {
 		let _localctx: KeepCommandContext = new KeepCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 52, esql_parser.RULE_keepCommand);
+		this.enterRule(_localctx, 58, esql_parser.RULE_keepCommand);
 		try {
 			let _alt: number;
-			this.state = 384;
+			this.state = 412;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case esql_parser.KEEP:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 366;
+				this.state = 394;
 				this.match(esql_parser.KEEP);
-				this.state = 367;
-				this.sourceIdentifier();
-				this.state = 372;
+				this.state = 395;
+				this.qualifiedNamePattern();
+				this.state = 400;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 35, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 37, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 368;
+						this.state = 396;
 						this.match(esql_parser.COMMA);
-						this.state = 369;
-						this.sourceIdentifier();
+						this.state = 397;
+						this.qualifiedNamePattern();
 						}
 						}
 					}
-					this.state = 374;
+					this.state = 402;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 35, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 37, this._ctx);
 				}
 				}
 				break;
 			case esql_parser.PROJECT:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 375;
+				this.state = 403;
 				this.match(esql_parser.PROJECT);
-				this.state = 376;
-				this.sourceIdentifier();
-				this.state = 381;
+				this.state = 404;
+				this.qualifiedNamePattern();
+				this.state = 409;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 36, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 38, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 377;
+						this.state = 405;
 						this.match(esql_parser.COMMA);
-						this.state = 378;
-						this.sourceIdentifier();
+						this.state = 406;
+						this.qualifiedNamePattern();
 						}
 						}
 					}
-					this.state = 383;
+					this.state = 411;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 36, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 38, this._ctx);
 				}
 				}
 				break;
@@ -1942,32 +2110,32 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public dropCommand(): DropCommandContext {
 		let _localctx: DropCommandContext = new DropCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 54, esql_parser.RULE_dropCommand);
+		this.enterRule(_localctx, 60, esql_parser.RULE_dropCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 386;
+			this.state = 414;
 			this.match(esql_parser.DROP);
-			this.state = 387;
-			this.sourceIdentifier();
-			this.state = 392;
+			this.state = 415;
+			this.qualifiedNamePattern();
+			this.state = 420;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 38, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 40, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 388;
+					this.state = 416;
 					this.match(esql_parser.COMMA);
-					this.state = 389;
-					this.sourceIdentifier();
+					this.state = 417;
+					this.qualifiedNamePattern();
 					}
 					}
 				}
-				this.state = 394;
+				this.state = 422;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 38, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 40, this._ctx);
 			}
 			}
 		}
@@ -1988,32 +2156,32 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public renameCommand(): RenameCommandContext {
 		let _localctx: RenameCommandContext = new RenameCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 56, esql_parser.RULE_renameCommand);
+		this.enterRule(_localctx, 62, esql_parser.RULE_renameCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 395;
+			this.state = 423;
 			this.match(esql_parser.RENAME);
-			this.state = 396;
+			this.state = 424;
 			this.renameClause();
-			this.state = 401;
+			this.state = 429;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 39, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 41, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 397;
+					this.state = 425;
 					this.match(esql_parser.COMMA);
-					this.state = 398;
+					this.state = 426;
 					this.renameClause();
 					}
 					}
 				}
-				this.state = 403;
+				this.state = 431;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 39, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 41, this._ctx);
 			}
 			}
 		}
@@ -2034,16 +2202,16 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public renameClause(): RenameClauseContext {
 		let _localctx: RenameClauseContext = new RenameClauseContext(this._ctx, this.state);
-		this.enterRule(_localctx, 58, esql_parser.RULE_renameClause);
+		this.enterRule(_localctx, 64, esql_parser.RULE_renameClause);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 404;
-			_localctx._oldName = this.sourceIdentifier();
-			this.state = 405;
+			this.state = 432;
+			_localctx._oldName = this.qualifiedNamePattern();
+			this.state = 433;
 			this.match(esql_parser.AS);
-			this.state = 406;
-			_localctx._newName = this.sourceIdentifier();
+			this.state = 434;
+			_localctx._newName = this.qualifiedNamePattern();
 			}
 		}
 		catch (re) {
@@ -2063,22 +2231,22 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public dissectCommand(): DissectCommandContext {
 		let _localctx: DissectCommandContext = new DissectCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 60, esql_parser.RULE_dissectCommand);
+		this.enterRule(_localctx, 66, esql_parser.RULE_dissectCommand);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 408;
+			this.state = 436;
 			this.match(esql_parser.DISSECT);
-			this.state = 409;
+			this.state = 437;
 			this.primaryExpression();
-			this.state = 410;
+			this.state = 438;
 			this.string();
-			this.state = 412;
+			this.state = 440;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 40, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 42, this._ctx) ) {
 			case 1:
 				{
-				this.state = 411;
+				this.state = 439;
 				this.commandOptions();
 				}
 				break;
@@ -2102,15 +2270,15 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public grokCommand(): GrokCommandContext {
 		let _localctx: GrokCommandContext = new GrokCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 62, esql_parser.RULE_grokCommand);
+		this.enterRule(_localctx, 68, esql_parser.RULE_grokCommand);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 414;
+			this.state = 442;
 			this.match(esql_parser.GROK);
-			this.state = 415;
+			this.state = 443;
 			this.primaryExpression();
-			this.state = 416;
+			this.state = 444;
 			this.string();
 			}
 		}
@@ -2131,14 +2299,14 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public mvExpandCommand(): MvExpandCommandContext {
 		let _localctx: MvExpandCommandContext = new MvExpandCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 64, esql_parser.RULE_mvExpandCommand);
+		this.enterRule(_localctx, 70, esql_parser.RULE_mvExpandCommand);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 418;
+			this.state = 446;
 			this.match(esql_parser.MV_EXPAND);
-			this.state = 419;
-			this.sourceIdentifier();
+			this.state = 447;
+			this.qualifiedName();
 			}
 		}
 		catch (re) {
@@ -2158,30 +2326,30 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public commandOptions(): CommandOptionsContext {
 		let _localctx: CommandOptionsContext = new CommandOptionsContext(this._ctx, this.state);
-		this.enterRule(_localctx, 66, esql_parser.RULE_commandOptions);
+		this.enterRule(_localctx, 72, esql_parser.RULE_commandOptions);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 421;
+			this.state = 449;
 			this.commandOption();
-			this.state = 426;
+			this.state = 454;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 41, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 43, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 422;
+					this.state = 450;
 					this.match(esql_parser.COMMA);
-					this.state = 423;
+					this.state = 451;
 					this.commandOption();
 					}
 					}
 				}
-				this.state = 428;
+				this.state = 456;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 41, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 43, this._ctx);
 			}
 			}
 		}
@@ -2202,15 +2370,15 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public commandOption(): CommandOptionContext {
 		let _localctx: CommandOptionContext = new CommandOptionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 68, esql_parser.RULE_commandOption);
+		this.enterRule(_localctx, 74, esql_parser.RULE_commandOption);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 429;
+			this.state = 457;
 			this.identifier();
-			this.state = 430;
+			this.state = 458;
 			this.match(esql_parser.ASSIGN);
-			this.state = 431;
+			this.state = 459;
 			this.constant();
 			}
 		}
@@ -2231,12 +2399,12 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public booleanValue(): BooleanValueContext {
 		let _localctx: BooleanValueContext = new BooleanValueContext(this._ctx, this.state);
-		this.enterRule(_localctx, 70, esql_parser.RULE_booleanValue);
+		this.enterRule(_localctx, 76, esql_parser.RULE_booleanValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 433;
+			this.state = 461;
 			_la = this._input.LA(1);
 			if (!(_la === esql_parser.FALSE || _la === esql_parser.TRUE)) {
 			this._errHandler.recoverInline(this);
@@ -2267,15 +2435,15 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public numericValue(): NumericValueContext {
 		let _localctx: NumericValueContext = new NumericValueContext(this._ctx, this.state);
-		this.enterRule(_localctx, 72, esql_parser.RULE_numericValue);
+		this.enterRule(_localctx, 78, esql_parser.RULE_numericValue);
 		try {
-			this.state = 437;
+			this.state = 465;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 42, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 44, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 435;
+				this.state = 463;
 				this.decimalValue();
 				}
 				break;
@@ -2283,7 +2451,7 @@ export class esql_parser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 436;
+				this.state = 464;
 				this.integerValue();
 				}
 				break;
@@ -2306,17 +2474,17 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public decimalValue(): DecimalValueContext {
 		let _localctx: DecimalValueContext = new DecimalValueContext(this._ctx, this.state);
-		this.enterRule(_localctx, 74, esql_parser.RULE_decimalValue);
+		this.enterRule(_localctx, 80, esql_parser.RULE_decimalValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 440;
+			this.state = 468;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === esql_parser.PLUS || _la === esql_parser.MINUS) {
 				{
-				this.state = 439;
+				this.state = 467;
 				_la = this._input.LA(1);
 				if (!(_la === esql_parser.PLUS || _la === esql_parser.MINUS)) {
 				this._errHandler.recoverInline(this);
@@ -2331,7 +2499,7 @@ export class esql_parser extends Parser {
 				}
 			}
 
-			this.state = 442;
+			this.state = 470;
 			this.match(esql_parser.DECIMAL_LITERAL);
 			}
 		}
@@ -2352,17 +2520,17 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public integerValue(): IntegerValueContext {
 		let _localctx: IntegerValueContext = new IntegerValueContext(this._ctx, this.state);
-		this.enterRule(_localctx, 76, esql_parser.RULE_integerValue);
+		this.enterRule(_localctx, 82, esql_parser.RULE_integerValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 445;
+			this.state = 473;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === esql_parser.PLUS || _la === esql_parser.MINUS) {
 				{
-				this.state = 444;
+				this.state = 472;
 				_la = this._input.LA(1);
 				if (!(_la === esql_parser.PLUS || _la === esql_parser.MINUS)) {
 				this._errHandler.recoverInline(this);
@@ -2377,7 +2545,7 @@ export class esql_parser extends Parser {
 				}
 			}
 
-			this.state = 447;
+			this.state = 475;
 			this.match(esql_parser.INTEGER_LITERAL);
 			}
 		}
@@ -2398,11 +2566,11 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public string(): StringContext {
 		let _localctx: StringContext = new StringContext(this._ctx, this.state);
-		this.enterRule(_localctx, 78, esql_parser.RULE_string);
+		this.enterRule(_localctx, 84, esql_parser.RULE_string);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 449;
+			this.state = 477;
 			this.match(esql_parser.STRING);
 			}
 		}
@@ -2423,14 +2591,14 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public comparisonOperator(): ComparisonOperatorContext {
 		let _localctx: ComparisonOperatorContext = new ComparisonOperatorContext(this._ctx, this.state);
-		this.enterRule(_localctx, 80, esql_parser.RULE_comparisonOperator);
+		this.enterRule(_localctx, 86, esql_parser.RULE_comparisonOperator);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 451;
+			this.state = 479;
 			_la = this._input.LA(1);
-			if (!(((((_la - 50)) & ~0x1F) === 0 && ((1 << (_la - 50)) & ((1 << (esql_parser.EQ - 50)) | (1 << (esql_parser.NEQ - 50)) | (1 << (esql_parser.LT - 50)) | (1 << (esql_parser.LTE - 50)) | (1 << (esql_parser.GT - 50)) | (1 << (esql_parser.GTE - 50)))) !== 0))) {
+			if (!(((((_la - 52)) & ~0x1F) === 0 && ((1 << (_la - 52)) & ((1 << (esql_parser.EQ - 52)) | (1 << (esql_parser.NEQ - 52)) | (1 << (esql_parser.LT - 52)) | (1 << (esql_parser.LTE - 52)) | (1 << (esql_parser.GT - 52)) | (1 << (esql_parser.GTE - 52)))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2457,20 +2625,76 @@ export class esql_parser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
+	public explainCommand(): ExplainCommandContext {
+		let _localctx: ExplainCommandContext = new ExplainCommandContext(this._ctx, this.state);
+		this.enterRule(_localctx, 88, esql_parser.RULE_explainCommand);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 481;
+			this.match(esql_parser.EXPLAIN);
+			this.state = 482;
+			this.subqueryExpression();
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public subqueryExpression(): SubqueryExpressionContext {
+		let _localctx: SubqueryExpressionContext = new SubqueryExpressionContext(this._ctx, this.state);
+		this.enterRule(_localctx, 90, esql_parser.RULE_subqueryExpression);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 484;
+			this.match(esql_parser.OPENING_BRACKET);
+			this.state = 485;
+			this.query(0);
+			this.state = 486;
+			this.match(esql_parser.CLOSING_BRACKET);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
 	public showCommand(): ShowCommandContext {
 		let _localctx: ShowCommandContext = new ShowCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 82, esql_parser.RULE_showCommand);
+		this.enterRule(_localctx, 92, esql_parser.RULE_showCommand);
 		try {
-			this.state = 457;
+			this.state = 492;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 45, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 47, this._ctx) ) {
 			case 1:
 				_localctx = new ShowInfoContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 453;
+				this.state = 488;
 				this.match(esql_parser.SHOW);
-				this.state = 454;
+				this.state = 489;
 				this.match(esql_parser.INFO);
 				}
 				break;
@@ -2479,9 +2703,9 @@ export class esql_parser extends Parser {
 				_localctx = new ShowFunctionsContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 455;
+				this.state = 490;
 				this.match(esql_parser.SHOW);
-				this.state = 456;
+				this.state = 491;
 				this.match(esql_parser.FUNCTIONS);
 				}
 				break;
@@ -2504,53 +2728,53 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public enrichCommand(): EnrichCommandContext {
 		let _localctx: EnrichCommandContext = new EnrichCommandContext(this._ctx, this.state);
-		this.enterRule(_localctx, 84, esql_parser.RULE_enrichCommand);
+		this.enterRule(_localctx, 94, esql_parser.RULE_enrichCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 459;
+			this.state = 494;
 			this.match(esql_parser.ENRICH);
-			this.state = 460;
-			_localctx._policyName = this.sourceIdentifier();
-			this.state = 463;
-			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 46, this._ctx) ) {
-			case 1:
-				{
-				this.state = 461;
-				this.match(esql_parser.ON);
-				this.state = 462;
-				_localctx._matchField = this.sourceIdentifier();
-				}
-				break;
-			}
-			this.state = 474;
+			this.state = 495;
+			_localctx._policyName = this.fromIdentifier();
+			this.state = 498;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 48, this._ctx) ) {
 			case 1:
 				{
-				this.state = 465;
+				this.state = 496;
+				this.match(esql_parser.ON);
+				this.state = 497;
+				_localctx._matchField = this.qualifiedNamePattern();
+				}
+				break;
+			}
+			this.state = 509;
+			this._errHandler.sync(this);
+			switch ( this.interpreter.adaptivePredict(this._input, 50, this._ctx) ) {
+			case 1:
+				{
+				this.state = 500;
 				this.match(esql_parser.WITH);
-				this.state = 466;
+				this.state = 501;
 				this.enrichWithClause();
-				this.state = 471;
+				this.state = 506;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 47, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 49, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 467;
+						this.state = 502;
 						this.match(esql_parser.COMMA);
-						this.state = 468;
+						this.state = 503;
 						this.enrichWithClause();
 						}
 						}
 					}
-					this.state = 473;
+					this.state = 508;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 47, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 49, this._ctx);
 				}
 				}
 				break;
@@ -2574,24 +2798,24 @@ export class esql_parser extends Parser {
 	// @RuleVersion(0)
 	public enrichWithClause(): EnrichWithClauseContext {
 		let _localctx: EnrichWithClauseContext = new EnrichWithClauseContext(this._ctx, this.state);
-		this.enterRule(_localctx, 86, esql_parser.RULE_enrichWithClause);
+		this.enterRule(_localctx, 96, esql_parser.RULE_enrichWithClause);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 479;
+			this.state = 514;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 49, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 51, this._ctx) ) {
 			case 1:
 				{
-				this.state = 476;
-				_localctx._newName = this.sourceIdentifier();
-				this.state = 477;
+				this.state = 511;
+				_localctx._newName = this.qualifiedNamePattern();
+				this.state = 512;
 				this.match(esql_parser.ASSIGN);
 				}
 				break;
 			}
-			this.state = 481;
-			_localctx._enrichField = this.sourceIdentifier();
+			this.state = 516;
+			_localctx._enrichField = this.qualifiedNamePattern();
 			}
 		}
 		catch (re) {
@@ -2651,7 +2875,7 @@ export class esql_parser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03N\u01E6\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03d\u0209\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -2659,233 +2883,249 @@ export class esql_parser extends Parser {
 		"\x18\t\x18\x04\x19\t\x19\x04\x1A\t\x1A\x04\x1B\t\x1B\x04\x1C\t\x1C\x04" +
 		"\x1D\t\x1D\x04\x1E\t\x1E\x04\x1F\t\x1F\x04 \t \x04!\t!\x04\"\t\"\x04#" +
 		"\t#\x04$\t$\x04%\t%\x04&\t&\x04\'\t\'\x04(\t(\x04)\t)\x04*\t*\x04+\t+" +
-		"\x04,\t,\x04-\t-\x03\x02\x03\x02\x03\x02\x03\x03\x03\x03\x03\x03\x03\x03" +
-		"\x03\x03\x03\x03\x07\x03d\n\x03\f\x03\x0E\x03g\v\x03\x03\x04\x03\x04\x03" +
-		"\x04\x05\x04l\n\x04\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03" +
-		"\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x05\x05z\n\x05\x03\x06\x03" +
-		"\x06\x03\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05" +
-		"\x07\x86\n\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x07\x07\x8D\n\x07" +
-		"\f\x07\x0E\x07\x90\v\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07" +
-		"\x97\n\x07\x03\x07\x03\x07\x05\x07\x9B\n\x07\x03\x07\x03\x07\x03\x07\x03" +
-		"\x07\x03\x07\x03\x07\x07\x07\xA3\n\x07\f\x07\x0E\x07\xA6\v\x07\x03\b\x03" +
-		"\b\x05\b\xAA\n\b\x03\b\x03\b\x03\b\x03\b\x03\b\x05\b\xB1\n\b\x03\b\x03" +
-		"\b\x03\b\x05\b\xB6\n\b\x03\t\x03\t\x03\t\x03\t\x03\t\x05\t\xBD\n\t\x03" +
-		"\n\x03\n\x03\n\x03\n\x05\n\xC3\n\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n" +
-		"\x07\n\xCB\n\n\f\n\x0E\n\xCE\v\n\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03" +
-		"\v\x05\v\xD7\n\v\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x07\f\xDF\n\f\f\f" +
-		"\x0E\f\xE2\v\f\x05\f\xE4\n\f\x03\f\x03\f\x03\r\x03\r\x03\r\x03\x0E\x03" +
-		"\x0E\x03\x0E\x07\x0E\xEE\n\x0E\f\x0E\x0E\x0E\xF1\v\x0E\x03\x0F\x03\x0F" +
-		"\x03\x0F\x03\x0F\x03\x0F\x05\x0F\xF8\n\x0F\x03\x10\x03\x10\x03\x10\x03" +
-		"\x10\x07\x10\xFE\n\x10\f\x10\x0E\x10\u0101\v\x10\x03\x10\x05\x10\u0104" +
-		"\n\x10\x03\x11\x03\x11\x03\x11\x03\x11\x03\x11\x07\x11\u010B\n\x11\f\x11" +
-		"\x0E\x11\u010E\v\x11\x03\x11\x03\x11\x03\x12\x03\x12\x03\x12\x03\x13\x03" +
-		"\x13\x05\x13\u0117\n\x13\x03\x13\x03\x13\x05\x13\u011B\n\x13\x03\x14\x03" +
-		"\x14\x03\x14\x07\x14\u0120\n\x14\f\x14\x0E\x14\u0123\v\x14\x03\x15\x03" +
-		"\x15\x03\x16\x03\x16\x03\x16\x07\x16\u012A\n\x16\f\x16\x0E\x16\u012D\v" +
-		"\x16\x03\x17\x03\x17\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03" +
-		"\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x07\x18\u013E\n\x18" +
-		"\f\x18\x0E\x18\u0141\v\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03\x18\x03" +
-		"\x18\x07\x18\u0149\n\x18\f\x18\x0E\x18\u014C\v\x18\x03\x18\x03\x18\x03" +
-		"\x18\x03\x18\x03\x18\x03\x18\x07\x18\u0154\n\x18\f\x18\x0E\x18\u0157\v" +
-		"\x18\x03\x18\x03\x18\x05\x18\u015B\n\x18\x03\x19\x03\x19\x03\x19\x03\x1A" +
-		"\x03\x1A\x03\x1A\x03\x1A\x07\x1A\u0164\n\x1A\f\x1A\x0E\x1A\u0167\v\x1A" +
-		"\x03\x1B\x03\x1B\x05\x1B\u016B\n\x1B\x03\x1B\x03\x1B\x05\x1B\u016F\n\x1B" +
-		"\x03\x1C\x03\x1C\x03\x1C\x03\x1C\x07\x1C\u0175\n\x1C\f\x1C\x0E\x1C\u0178" +
-		"\v\x1C\x03\x1C\x03\x1C\x03\x1C\x03\x1C\x07\x1C\u017E\n\x1C\f\x1C\x0E\x1C" +
-		"\u0181\v\x1C\x05\x1C\u0183\n\x1C\x03\x1D\x03\x1D\x03\x1D\x03\x1D\x07\x1D" +
-		"\u0189\n\x1D\f\x1D\x0E\x1D\u018C\v\x1D\x03\x1E\x03\x1E\x03\x1E\x03\x1E" +
-		"\x07\x1E\u0192\n\x1E\f\x1E\x0E\x1E\u0195\v\x1E\x03\x1F\x03\x1F\x03\x1F" +
-		"\x03\x1F\x03 \x03 \x03 \x03 \x05 \u019F\n \x03!\x03!\x03!\x03!\x03\"\x03" +
-		"\"\x03\"\x03#\x03#\x03#\x07#\u01AB\n#\f#\x0E#\u01AE\v#\x03$\x03$\x03$" +
-		"\x03$\x03%\x03%\x03&\x03&\x05&\u01B8\n&\x03\'\x05\'\u01BB\n\'\x03\'\x03" +
-		"\'\x03(\x05(\u01C0\n(\x03(\x03(\x03)\x03)\x03*\x03*\x03+\x03+\x03+\x03" +
-		"+\x05+\u01CC\n+\x03,\x03,\x03,\x03,\x05,\u01D2\n,\x03,\x03,\x03,\x03," +
-		"\x07,\u01D8\n,\f,\x0E,\u01DB\v,\x05,\u01DD\n,\x03-\x03-\x03-\x05-\u01E2" +
-		"\n-\x03-\x03-\x03-\x02\x02\x05\x04\f\x12.\x02\x02\x04\x02\x06\x02\b\x02" +
-		"\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C" +
-		"\x02\x1E\x02 \x02\"\x02$\x02&\x02(\x02*\x02,\x02.\x020\x022\x024\x026" +
-		"\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02F\x02H\x02J\x02L\x02N\x02P\x02" +
-		"R\x02T\x02V\x02X\x02\x02\n\x03\x02:;\x03\x02<>\x03\x02JK\x03\x02AB\x04" +
-		"\x02\x1D\x1D  \x03\x02#$\x04\x02\"\"00\x03\x0249\x02\u0204\x02Z\x03\x02" +
-		"\x02\x02\x04]\x03\x02\x02\x02\x06k\x03\x02\x02\x02\by\x03\x02\x02\x02" +
-		"\n{\x03\x02\x02\x02\f\x9A\x03\x02\x02\x02\x0E\xB5\x03\x02\x02\x02\x10" +
-		"\xBC\x03\x02\x02\x02\x12\xC2\x03\x02\x02\x02\x14\xD6\x03\x02\x02\x02\x16" +
-		"\xD8\x03\x02\x02\x02\x18\xE7\x03\x02\x02\x02\x1A\xEA\x03\x02\x02\x02\x1C" +
-		"\xF7\x03\x02\x02\x02\x1E\xF9\x03\x02\x02\x02 \u0105\x03\x02\x02\x02\"" +
-		"\u0111\x03\x02\x02\x02$\u0114\x03\x02\x02\x02&\u011C\x03\x02\x02\x02(" +
-		"\u0124\x03\x02\x02\x02*\u0126\x03\x02\x02\x02,\u012E\x03\x02\x02\x02." +
-		"\u015A\x03\x02\x02\x020\u015C\x03\x02\x02\x022\u015F\x03\x02\x02\x024" +
-		"\u0168\x03\x02\x02\x026\u0182\x03\x02\x02\x028\u0184\x03\x02\x02\x02:" +
-		"\u018D\x03\x02\x02\x02<\u0196\x03\x02\x02\x02>\u019A\x03\x02\x02\x02@" +
-		"\u01A0\x03\x02\x02\x02B\u01A4\x03\x02\x02\x02D\u01A7\x03\x02\x02\x02F" +
-		"\u01AF\x03\x02\x02\x02H\u01B3\x03\x02\x02\x02J\u01B7\x03\x02\x02\x02L" +
-		"\u01BA\x03\x02\x02\x02N\u01BF\x03\x02\x02\x02P\u01C3\x03\x02\x02\x02R" +
-		"\u01C5\x03\x02\x02\x02T\u01CB\x03\x02\x02\x02V\u01CD\x03\x02\x02\x02X" +
-		"\u01E1\x03\x02\x02\x02Z[\x05\x04\x03\x02[\\\x07\x02\x02\x03\\\x03\x03" +
-		"\x02\x02\x02]^\b\x03\x01\x02^_\x05\x06\x04\x02_e\x03\x02\x02\x02`a\f\x03" +
-		"\x02\x02ab\x07\x17\x02\x02bd\x05\b\x05\x02c`\x03\x02\x02\x02dg\x03\x02" +
-		"\x02\x02ec\x03\x02\x02\x02ef\x03\x02\x02\x02f\x05\x03\x02\x02\x02ge\x03" +
-		"\x02\x02\x02hl\x05\x1E\x10\x02il\x05\x18\r\x02jl\x05T+\x02kh\x03\x02\x02" +
-		"\x02ki\x03\x02\x02\x02kj\x03\x02\x02\x02l\x07\x03\x02\x02\x02mz\x05\"" +
-		"\x12\x02nz\x050\x19\x02oz\x056\x1C\x02pz\x052\x1A\x02qz\x05$\x13\x02r" +
-		"z\x05\n\x06\x02sz\x058\x1D\x02tz\x05:\x1E\x02uz\x05> \x02vz\x05@!\x02" +
-		"wz\x05V,\x02xz\x05B\"\x02ym\x03\x02\x02\x02yn\x03\x02\x02\x02yo\x03\x02" +
-		"\x02\x02yp\x03\x02\x02\x02yq\x03\x02\x02\x02yr\x03\x02\x02\x02ys\x03\x02" +
-		"\x02\x02yt\x03\x02\x02\x02yu\x03\x02\x02\x02yv\x03\x02\x02\x02yw\x03\x02" +
-		"\x02\x02yx\x03\x02\x02\x02z\t\x03\x02\x02\x02{|\x07\x12\x02\x02|}\x05" +
-		"\f\x07\x02}\v\x03\x02\x02\x02~\x7F\b\x07\x01\x02\x7F\x80\x07)\x02\x02" +
-		"\x80\x9B\x05\f\x07\t\x81\x9B\x05\x10\t\x02\x82\x9B\x05\x0E\b\x02\x83\x85" +
-		"\x05\x10\t\x02\x84\x86\x07)\x02\x02\x85\x84\x03\x02\x02\x02\x85\x86\x03" +
-		"\x02\x02\x02\x86\x87\x03\x02\x02\x02\x87\x88\x07&\x02\x02\x88\x89\x07" +
-		"%\x02\x02\x89\x8E\x05\x10\t\x02\x8A\x8B\x07\x1F\x02\x02\x8B\x8D\x05\x10" +
-		"\t\x02\x8C\x8A\x03\x02\x02\x02\x8D\x90\x03\x02\x02\x02\x8E\x8C\x03\x02" +
-		"\x02\x02\x8E\x8F\x03\x02\x02\x02\x8F\x91\x03\x02\x02\x02\x90\x8E\x03\x02" +
-		"\x02\x02\x91\x92\x07/\x02\x02\x92\x9B\x03\x02\x02\x02\x93\x94\x05\x10" +
-		"\t\x02\x94\x96\x07\'\x02\x02\x95\x97\x07)\x02\x02\x96\x95\x03\x02\x02" +
-		"\x02\x96\x97\x03\x02\x02\x02\x97\x98\x03\x02\x02\x02\x98\x99\x07*\x02" +
-		"\x02\x99\x9B\x03\x02\x02\x02\x9A~\x03\x02\x02\x02\x9A\x81\x03\x02\x02" +
-		"\x02\x9A\x82\x03\x02\x02\x02\x9A\x83\x03\x02\x02\x02\x9A\x93\x03\x02\x02" +
-		"\x02\x9B\xA4\x03\x02\x02\x02\x9C\x9D\f\x06\x02\x02\x9D\x9E\x07\x1C\x02" +
-		"\x02\x9E\xA3\x05\f\x07\x07\x9F\xA0\f\x05\x02\x02\xA0\xA1\x07,\x02\x02" +
-		"\xA1\xA3\x05\f\x07\x06\xA2\x9C\x03\x02\x02\x02\xA2\x9F\x03\x02\x02\x02" +
-		"\xA3\xA6\x03\x02\x02\x02\xA4\xA2\x03\x02\x02\x02\xA4\xA5\x03\x02\x02\x02" +
-		"\xA5\r\x03\x02\x02\x02\xA6\xA4\x03\x02\x02\x02\xA7\xA9\x05\x10\t\x02\xA8" +
-		"\xAA\x07)\x02\x02\xA9\xA8\x03\x02\x02\x02\xA9\xAA\x03\x02\x02\x02\xAA" +
-		"\xAB\x03\x02\x02\x02\xAB\xAC\x07(\x02\x02\xAC\xAD\x05P)\x02\xAD\xB6\x03" +
-		"\x02\x02\x02\xAE\xB0\x05\x10\t\x02\xAF\xB1\x07)\x02\x02\xB0\xAF\x03\x02" +
-		"\x02\x02\xB0\xB1\x03\x02\x02\x02\xB1\xB2\x03\x02\x02\x02\xB2\xB3\x07." +
-		"\x02\x02\xB3\xB4\x05P)\x02\xB4\xB6\x03\x02\x02\x02\xB5\xA7\x03\x02\x02" +
-		"\x02\xB5\xAE\x03\x02\x02\x02\xB6\x0F\x03\x02\x02\x02\xB7\xBD\x05\x12\n" +
-		"\x02\xB8\xB9\x05\x12\n\x02\xB9\xBA\x05R*\x02\xBA\xBB\x05\x12\n\x02\xBB" +
-		"\xBD\x03\x02\x02\x02\xBC\xB7\x03\x02\x02\x02\xBC\xB8\x03\x02\x02\x02\xBD" +
-		"\x11\x03\x02\x02\x02\xBE\xBF\b\n\x01\x02\xBF\xC3\x05\x14\v\x02\xC0\xC1" +
-		"\t\x02\x02\x02\xC1\xC3\x05\x12\n\x05\xC2\xBE\x03\x02\x02\x02\xC2\xC0\x03" +
-		"\x02\x02\x02\xC3\xCC\x03\x02\x02\x02\xC4\xC5\f\x04\x02\x02\xC5\xC6\t\x03" +
-		"\x02\x02\xC6\xCB\x05\x12\n\x05\xC7\xC8\f\x03\x02\x02\xC8\xC9\t\x02\x02" +
-		"\x02\xC9\xCB\x05\x12\n\x04\xCA\xC4\x03\x02\x02\x02\xCA\xC7\x03\x02\x02" +
-		"\x02\xCB\xCE\x03\x02\x02\x02\xCC\xCA\x03\x02\x02\x02\xCC\xCD\x03\x02\x02" +
-		"\x02\xCD\x13\x03\x02\x02\x02\xCE\xCC\x03\x02\x02\x02\xCF\xD7\x05.\x18" +
-		"\x02\xD0\xD7\x05*\x16\x02\xD1\xD7\x05\x16\f\x02\xD2\xD3\x07%\x02\x02\xD3" +
-		"\xD4\x05\f\x07\x02\xD4\xD5\x07/\x02\x02\xD5\xD7\x03\x02\x02\x02\xD6\xCF" +
-		"\x03\x02\x02\x02\xD6\xD0\x03\x02\x02\x02\xD6\xD1\x03\x02\x02\x02\xD6\xD2" +
-		"\x03\x02\x02\x02\xD7\x15\x03\x02\x02\x02\xD8\xD9\x05,\x17\x02\xD9\xE3" +
-		"\x07%\x02\x02\xDA\xE4\x07<\x02\x02\xDB\xE0\x05\f\x07\x02\xDC\xDD\x07\x1F" +
-		"\x02\x02\xDD\xDF\x05\f\x07\x02\xDE\xDC\x03\x02\x02\x02\xDF\xE2\x03\x02" +
-		"\x02\x02\xE0\xDE\x03\x02\x02\x02\xE0\xE1\x03\x02\x02\x02\xE1\xE4\x03\x02" +
-		"\x02\x02\xE2\xE0\x03\x02\x02\x02\xE3\xDA\x03\x02\x02\x02\xE3\xDB\x03\x02" +
-		"\x02\x02\xE3\xE4\x03\x02\x02\x02\xE4\xE5\x03\x02\x02\x02\xE5\xE6\x07/" +
-		"\x02\x02\xE6\x17\x03\x02\x02\x02\xE7\xE8\x07\x0E\x02\x02\xE8\xE9\x05\x1A" +
-		"\x0E\x02\xE9\x19\x03\x02\x02\x02\xEA\xEF\x05\x1C\x0F\x02\xEB\xEC\x07\x1F" +
-		"\x02\x02\xEC\xEE\x05\x1C\x0F\x02\xED\xEB\x03\x02\x02\x02\xEE\xF1\x03\x02" +
-		"\x02\x02\xEF\xED\x03\x02\x02\x02\xEF\xF0\x03\x02\x02\x02\xF0\x1B\x03\x02" +
-		"\x02\x02\xF1\xEF\x03\x02\x02\x02\xF2\xF8\x05\f\x07\x02\xF3\xF4\x05*\x16" +
-		"\x02\xF4\xF5\x07\x1E\x02\x02\xF5\xF6\x05\f\x07\x02\xF6\xF8\x03\x02\x02" +
-		"\x02\xF7\xF2\x03\x02\x02\x02\xF7\xF3\x03\x02\x02\x02\xF8\x1D\x03\x02\x02" +
-		"\x02\xF9\xFA\x07\x07\x02\x02\xFA\xFF\x05(\x15\x02\xFB\xFC\x07\x1F\x02" +
-		"\x02\xFC\xFE\x05(\x15\x02\xFD\xFB\x03\x02\x02\x02\xFE\u0101\x03\x02\x02" +
-		"\x02\xFF\xFD\x03\x02\x02\x02\xFF\u0100\x03\x02\x02\x02\u0100\u0103\x03" +
-		"\x02\x02\x02\u0101\xFF\x03\x02\x02\x02\u0102\u0104\x05 \x11\x02\u0103" +
-		"\u0102\x03\x02\x02\x02\u0103\u0104\x03\x02\x02\x02\u0104\x1F\x03\x02\x02" +
-		"\x02\u0105\u0106\x07?\x02\x02\u0106\u0107\x07G\x02\x02\u0107\u010C\x05" +
-		"(\x15\x02\u0108\u0109\x07\x1F\x02\x02\u0109\u010B\x05(\x15\x02\u010A\u0108" +
-		"\x03\x02\x02\x02\u010B\u010E\x03\x02\x02\x02\u010C\u010A\x03\x02\x02\x02" +
-		"\u010C\u010D\x03\x02\x02\x02\u010D\u010F\x03\x02\x02\x02\u010E\u010C\x03" +
-		"\x02\x02\x02\u010F\u0110\x07@\x02\x02\u0110!\x03\x02\x02\x02\u0111\u0112" +
-		"\x07\x06\x02\x02\u0112\u0113\x05\x1A\x0E\x02\u0113#\x03\x02\x02\x02\u0114" +
-		"\u0116\x07\x11\x02\x02\u0115\u0117\x05\x1A\x0E\x02\u0116\u0115\x03\x02" +
-		"\x02\x02\u0116\u0117\x03\x02\x02\x02\u0117\u011A\x03\x02\x02\x02\u0118" +
-		"\u0119\x07\x1B\x02\x02\u0119\u011B\x05&\x14\x02\u011A\u0118\x03\x02\x02" +
-		"\x02\u011A\u011B\x03\x02\x02\x02\u011B%\x03\x02\x02\x02\u011C\u0121\x05" +
-		"*\x16\x02\u011D\u011E\x07\x1F\x02\x02\u011E\u0120\x05*\x16\x02\u011F\u011D" +
-		"\x03\x02\x02\x02\u0120\u0123\x03\x02\x02\x02\u0121\u011F\x03\x02\x02\x02" +
-		"\u0121\u0122\x03\x02\x02\x02\u0122\'\x03\x02\x02\x02\u0123\u0121\x03\x02" +
-		"\x02\x02\u0124\u0125\t\x04\x02\x02\u0125)\x03\x02\x02\x02\u0126\u012B" +
-		"\x05,\x17\x02\u0127\u0128\x07!\x02\x02\u0128\u012A\x05,\x17\x02\u0129" +
-		"\u0127\x03\x02\x02\x02\u012A\u012D\x03\x02\x02\x02\u012B\u0129\x03\x02" +
-		"\x02\x02\u012B\u012C\x03\x02\x02\x02\u012C+\x03\x02\x02\x02\u012D\u012B" +
-		"\x03\x02\x02\x02\u012E\u012F\t\x05\x02\x02\u012F-\x03\x02\x02\x02\u0130" +
-		"\u015B\x07*\x02\x02\u0131\u0132\x05N(\x02\u0132\u0133\x07A\x02\x02\u0133" +
-		"\u015B\x03\x02\x02\x02\u0134\u015B\x05L\'\x02\u0135\u015B\x05N(\x02\u0136" +
-		"\u015B\x05H%\x02\u0137\u015B\x07-\x02\x02\u0138\u015B\x05P)\x02\u0139" +
-		"\u013A\x07?\x02\x02\u013A\u013F\x05J&\x02\u013B\u013C\x07\x1F\x02\x02" +
-		"\u013C\u013E\x05J&\x02\u013D\u013B\x03\x02\x02\x02\u013E\u0141\x03\x02" +
-		"\x02\x02\u013F\u013D\x03\x02\x02\x02\u013F\u0140\x03\x02\x02\x02\u0140" +
-		"\u0142\x03\x02\x02\x02\u0141\u013F\x03\x02\x02\x02\u0142\u0143\x07@\x02" +
-		"\x02\u0143\u015B\x03\x02\x02\x02\u0144\u0145\x07?\x02\x02\u0145\u014A" +
-		"\x05H%\x02\u0146\u0147\x07\x1F\x02\x02\u0147\u0149\x05H%\x02\u0148\u0146" +
-		"\x03\x02\x02\x02\u0149\u014C\x03\x02\x02\x02\u014A\u0148\x03\x02\x02\x02" +
-		"\u014A\u014B\x03\x02\x02\x02\u014B\u014D\x03\x02\x02\x02\u014C\u014A\x03" +
-		"\x02\x02\x02\u014D\u014E\x07@\x02\x02\u014E\u015B\x03\x02\x02\x02\u014F" +
-		"\u0150\x07?\x02\x02\u0150\u0155\x05P)\x02\u0151\u0152\x07\x1F\x02\x02" +
-		"\u0152\u0154\x05P)\x02\u0153\u0151\x03\x02\x02\x02\u0154\u0157\x03\x02" +
-		"\x02\x02\u0155\u0153\x03\x02\x02\x02\u0155\u0156\x03\x02\x02\x02\u0156" +
-		"\u0158\x03\x02\x02\x02\u0157\u0155\x03\x02\x02\x02\u0158\u0159\x07@\x02" +
-		"\x02\u0159\u015B\x03\x02\x02\x02\u015A\u0130\x03\x02\x02\x02\u015A\u0131" +
-		"\x03\x02\x02\x02\u015A\u0134\x03\x02\x02\x02\u015A\u0135\x03\x02\x02\x02" +
-		"\u015A\u0136\x03\x02\x02\x02\u015A\u0137\x03\x02\x02\x02\u015A\u0138\x03" +
-		"\x02\x02\x02\u015A\u0139\x03\x02\x02\x02\u015A\u0144\x03\x02\x02\x02\u015A" +
-		"\u014F\x03\x02\x02\x02\u015B/\x03\x02\x02\x02\u015C\u015D\x07\n\x02\x02" +
-		"\u015D\u015E\x07\x19\x02\x02\u015E1\x03\x02\x02\x02\u015F\u0160\x07\x10" +
-		"\x02\x02\u0160\u0165\x054\x1B\x02\u0161\u0162\x07\x1F\x02\x02\u0162\u0164" +
-		"\x054\x1B\x02\u0163\u0161\x03\x02\x02\x02\u0164\u0167\x03\x02\x02\x02" +
-		"\u0165\u0163\x03\x02\x02\x02\u0165\u0166\x03\x02\x02\x02\u01663\x03\x02" +
-		"\x02\x02\u0167\u0165\x03\x02\x02\x02\u0168\u016A\x05\f\x07\x02\u0169\u016B" +
-		"\t\x06\x02\x02\u016A\u0169\x03\x02\x02\x02\u016A\u016B\x03\x02\x02\x02" +
-		"\u016B\u016E\x03\x02\x02\x02\u016C\u016D\x07+\x02\x02\u016D\u016F\t\x07" +
-		"\x02\x02\u016E\u016C\x03\x02\x02\x02\u016E\u016F\x03\x02\x02\x02\u016F" +
-		"5\x03\x02\x02\x02\u0170\u0171\x07\t\x02\x02\u0171\u0176\x05(\x15\x02\u0172" +
-		"\u0173\x07\x1F\x02\x02\u0173\u0175\x05(\x15\x02\u0174\u0172\x03\x02\x02" +
-		"\x02\u0175\u0178\x03\x02\x02\x02\u0176\u0174\x03\x02\x02\x02\u0176\u0177" +
-		"\x03\x02\x02\x02\u0177\u0183\x03\x02\x02\x02\u0178\u0176\x03\x02\x02\x02" +
-		"\u0179\u017A\x07\f\x02\x02\u017A\u017F\x05(\x15\x02\u017B\u017C\x07\x1F" +
-		"\x02\x02\u017C\u017E\x05(\x15\x02\u017D\u017B\x03\x02\x02\x02\u017E\u0181" +
-		"\x03\x02\x02\x02\u017F\u017D\x03\x02\x02\x02\u017F\u0180\x03\x02\x02\x02" +
-		"\u0180\u0183\x03\x02\x02\x02\u0181\u017F\x03\x02\x02\x02\u0182\u0170\x03" +
-		"\x02\x02\x02\u0182\u0179\x03\x02\x02\x02\u01837\x03\x02\x02\x02\u0184" +
-		"\u0185\x07\x04\x02\x02\u0185\u018A\x05(\x15\x02\u0186\u0187\x07\x1F\x02" +
-		"\x02\u0187\u0189\x05(\x15\x02\u0188\u0186\x03\x02\x02\x02\u0189\u018C" +
-		"\x03\x02\x02\x02\u018A\u0188\x03\x02\x02\x02\u018A\u018B\x03\x02\x02\x02" +
-		"\u018B9\x03\x02\x02\x02\u018C\u018A\x03\x02\x02\x02\u018D\u018E\x07\r" +
-		"\x02\x02\u018E\u0193\x05<\x1F\x02\u018F\u0190\x07\x1F\x02\x02\u0190\u0192" +
-		"\x05<\x1F\x02\u0191\u018F\x03\x02\x02\x02\u0192\u0195\x03\x02\x02\x02" +
-		"\u0193\u0191\x03\x02\x02\x02\u0193\u0194\x03\x02\x02\x02\u0194;\x03\x02" +
-		"\x02\x02\u0195\u0193\x03\x02\x02\x02\u0196\u0197\x05(\x15\x02\u0197\u0198" +
-		"\x07F\x02\x02\u0198\u0199\x05(\x15\x02\u0199=\x03\x02\x02\x02\u019A\u019B" +
-		"\x07\x03\x02\x02\u019B\u019C\x05\x14\v\x02\u019C\u019E\x05P)\x02\u019D" +
-		"\u019F\x05D#\x02\u019E\u019D\x03\x02\x02\x02\u019E\u019F\x03\x02\x02\x02" +
-		"\u019F?\x03\x02\x02\x02\u01A0\u01A1\x07\b\x02\x02\u01A1\u01A2\x05\x14" +
-		"\v\x02\u01A2\u01A3\x05P)\x02\u01A3A\x03\x02\x02\x02\u01A4\u01A5\x07\v" +
-		"\x02\x02\u01A5\u01A6\x05(\x15\x02\u01A6C\x03\x02\x02\x02\u01A7\u01AC\x05" +
-		"F$\x02\u01A8\u01A9\x07\x1F\x02\x02\u01A9\u01AB\x05F$\x02\u01AA\u01A8\x03" +
-		"\x02\x02\x02\u01AB\u01AE\x03\x02\x02\x02\u01AC\u01AA\x03\x02\x02\x02\u01AC" +
-		"\u01AD\x03\x02\x02\x02\u01ADE\x03\x02\x02\x02\u01AE\u01AC\x03\x02\x02" +
-		"\x02\u01AF\u01B0\x05,\x17\x02\u01B0\u01B1\x07\x1E\x02\x02\u01B1\u01B2" +
-		"\x05.\x18\x02\u01B2G\x03\x02\x02\x02\u01B3\u01B4\t\b\x02\x02\u01B4I\x03" +
-		"\x02\x02\x02\u01B5\u01B8\x05L\'\x02\u01B6\u01B8\x05N(\x02\u01B7\u01B5" +
-		"\x03\x02\x02\x02\u01B7\u01B6\x03\x02\x02\x02\u01B8K\x03\x02\x02\x02\u01B9" +
-		"\u01BB\t\x02\x02\x02\u01BA\u01B9\x03\x02\x02\x02\u01BA\u01BB\x03\x02\x02" +
-		"\x02\u01BB\u01BC\x03\x02\x02\x02\u01BC\u01BD\x07\x1A\x02\x02\u01BDM\x03" +
-		"\x02\x02\x02\u01BE\u01C0\t\x02\x02\x02\u01BF\u01BE\x03\x02\x02\x02\u01BF" +
-		"\u01C0\x03\x02\x02\x02\u01C0\u01C1\x03\x02\x02\x02\u01C1\u01C2\x07\x19" +
-		"\x02\x02\u01C2O\x03\x02\x02\x02\u01C3\u01C4\x07\x18\x02\x02\u01C4Q\x03" +
-		"\x02\x02\x02\u01C5\u01C6\t\t\x02\x02\u01C6S\x03\x02\x02\x02\u01C7\u01C8" +
-		"\x07\x0F\x02\x02\u01C8\u01CC\x071\x02\x02\u01C9\u01CA\x07\x0F\x02\x02" +
-		"\u01CA\u01CC\x072\x02\x02\u01CB\u01C7\x03\x02\x02\x02\u01CB\u01C9\x03" +
-		"\x02\x02\x02\u01CCU\x03\x02\x02\x02\u01CD\u01CE\x07\x05\x02\x02\u01CE" +
-		"\u01D1\x05(\x15\x02\u01CF\u01D0\x07H\x02\x02\u01D0\u01D2\x05(\x15\x02" +
-		"\u01D1\u01CF\x03\x02\x02\x02\u01D1\u01D2\x03\x02\x02\x02\u01D2\u01DC\x03" +
-		"\x02\x02\x02\u01D3\u01D4\x07I\x02\x02\u01D4\u01D9\x05X-\x02\u01D5\u01D6" +
-		"\x07\x1F\x02\x02\u01D6\u01D8\x05X-\x02\u01D7\u01D5\x03\x02\x02\x02\u01D8" +
-		"\u01DB\x03\x02\x02\x02\u01D9\u01D7\x03\x02\x02\x02\u01D9\u01DA\x03\x02" +
-		"\x02\x02\u01DA\u01DD\x03\x02\x02\x02\u01DB\u01D9\x03\x02\x02\x02\u01DC" +
-		"\u01D3\x03\x02\x02\x02\u01DC\u01DD\x03\x02\x02\x02\u01DDW\x03\x02\x02" +
-		"\x02\u01DE\u01DF\x05(\x15\x02\u01DF\u01E0\x07\x1E\x02\x02\u01E0\u01E2" +
-		"\x03\x02\x02\x02\u01E1\u01DE\x03\x02\x02\x02\u01E1\u01E2\x03\x02\x02\x02" +
-		"\u01E2\u01E3\x03\x02\x02\x02\u01E3\u01E4\x05(\x15\x02\u01E4Y\x03\x02\x02" +
-		"\x024eky\x85\x8E\x96\x9A\xA2\xA4\xA9\xB0\xB5\xBC\xC2\xCA\xCC\xD6\xE0\xE3" +
-		"\xEF\xF7\xFF\u0103\u010C\u0116\u011A\u0121\u012B\u013F\u014A\u0155\u015A" +
-		"\u0165\u016A\u016E\u0176\u017F\u0182\u018A\u0193\u019E\u01AC\u01B7\u01BA" +
-		"\u01BF\u01CB\u01D1\u01D9\u01DC\u01E1";
+		"\x04,\t,\x04-\t-\x04.\t.\x04/\t/\x040\t0\x041\t1\x042\t2\x03\x02\x03\x02" +
+		"\x03\x02\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x07\x03n\n\x03" +
+		"\f\x03\x0E\x03q\v\x03\x03\x04\x03\x04\x03\x04\x03\x04\x05\x04w\n\x04\x03" +
+		"\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x03" +
+		"\x05\x03\x05\x03\x05\x03\x05\x05\x05\x86\n\x05\x03\x06\x03\x06\x03\x06" +
+		"\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07\x92\n" +
+		"\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x07\x07\x99\n\x07\f\x07\x0E" +
+		"\x07\x9C\v\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x05\x07\xA3\n\x07" +
+		"\x03\x07\x03\x07\x05\x07\xA7\n\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03" +
+		"\x07\x03\x07\x07\x07\xAF\n\x07\f\x07\x0E\x07\xB2\v\x07\x03\b\x03\b\x05" +
+		"\b\xB6\n\b\x03\b\x03\b\x03\b\x03\b\x03\b\x05\b\xBD\n\b\x03\b\x03\b\x03" +
+		"\b\x05\b\xC2\n\b\x03\t\x03\t\x03\t\x03\t\x03\t\x05\t\xC9\n\t\x03\n\x03" +
+		"\n\x03\n\x03\n\x05\n\xCF\n\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x07\n" +
+		"\xD7\n\n\f\n\x0E\n\xDA\v\n\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x03\v\x05" +
+		"\v\xE3\n\v\x03\f\x03\f\x03\f\x03\f\x03\f\x03\f\x07\f\xEB\n\f\f\f\x0E\f" +
+		"\xEE\v\f\x05\f\xF0\n\f\x03\f\x03\f\x03\r\x03\r\x03\r\x03\x0E\x03\x0E\x03" +
+		"\x0E\x07\x0E\xFA\n\x0E\f\x0E\x0E\x0E\xFD\v\x0E\x03\x0F\x03\x0F\x03\x0F" +
+		"\x03\x0F\x03\x0F\x05\x0F\u0104\n\x0F\x03\x10\x03\x10\x03\x10\x03\x10\x07" +
+		"\x10\u010A\n\x10\f\x10\x0E\x10\u010D\v\x10\x03\x10\x05\x10\u0110\n\x10" +
+		"\x03\x11\x03\x11\x03\x11\x03\x11\x03\x11\x07\x11\u0117\n\x11\f\x11\x0E" +
+		"\x11\u011A\v\x11\x03\x11\x03\x11\x03\x12\x03\x12\x03\x12\x03\x13\x03\x13" +
+		"\x05\x13\u0123\n\x13\x03\x13\x03\x13\x05\x13\u0127\n\x13\x03\x14\x03\x14" +
+		"\x03\x14\x03\x14\x05\x14\u012D\n\x14\x03\x15\x03\x15\x03\x15\x07\x15\u0132" +
+		"\n\x15\f\x15\x0E\x15\u0135\v\x15\x03\x16\x03\x16\x03\x17\x03\x17\x03\x17" +
+		"\x07\x17\u013C\n\x17\f\x17\x0E\x17\u013F\v\x17\x03\x18\x03\x18\x03\x18" +
+		"\x07\x18\u0144\n\x18\f\x18\x0E\x18\u0147\v\x18\x03\x19\x03\x19\x03\x1A" +
+		"\x03\x1A\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B" +
+		"\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x07\x1B\u015A\n\x1B\f\x1B\x0E" +
+		"\x1B\u015D\v\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B\x07\x1B" +
+		"\u0165\n\x1B\f\x1B\x0E\x1B\u0168\v\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1B" +
+		"\x03\x1B\x03\x1B\x07\x1B\u0170\n\x1B\f\x1B\x0E\x1B\u0173\v\x1B\x03\x1B" +
+		"\x03\x1B\x05\x1B\u0177\n\x1B\x03\x1C\x03\x1C\x03\x1C\x03\x1D\x03\x1D\x03" +
+		"\x1D\x03\x1D\x07\x1D\u0180\n\x1D\f\x1D\x0E\x1D\u0183\v\x1D\x03\x1E\x03" +
+		"\x1E\x05\x1E\u0187\n\x1E\x03\x1E\x03\x1E\x05\x1E\u018B\n\x1E\x03\x1F\x03" +
+		"\x1F\x03\x1F\x03\x1F\x07\x1F\u0191\n\x1F\f\x1F\x0E\x1F\u0194\v\x1F\x03" +
+		"\x1F\x03\x1F\x03\x1F\x03\x1F\x07\x1F\u019A\n\x1F\f\x1F\x0E\x1F\u019D\v" +
+		"\x1F\x05\x1F\u019F\n\x1F\x03 \x03 \x03 \x03 \x07 \u01A5\n \f \x0E \u01A8" +
+		"\v \x03!\x03!\x03!\x03!\x07!\u01AE\n!\f!\x0E!\u01B1\v!\x03\"\x03\"\x03" +
+		"\"\x03\"\x03#\x03#\x03#\x03#\x05#\u01BB\n#\x03$\x03$\x03$\x03$\x03%\x03" +
+		"%\x03%\x03&\x03&\x03&\x07&\u01C7\n&\f&\x0E&\u01CA\v&\x03\'\x03\'\x03\'" +
+		"\x03\'\x03(\x03(\x03)\x03)\x05)\u01D4\n)\x03*\x05*\u01D7\n*\x03*\x03*" +
+		"\x03+\x05+\u01DC\n+\x03+\x03+\x03,\x03,\x03-\x03-\x03.\x03.\x03.\x03/" +
+		"\x03/\x03/\x03/\x030\x030\x030\x030\x050\u01EF\n0\x031\x031\x031\x031" +
+		"\x051\u01F5\n1\x031\x031\x031\x031\x071\u01FB\n1\f1\x0E1\u01FE\v1\x05" +
+		"1\u0200\n1\x032\x032\x032\x052\u0205\n2\x032\x032\x032\x02\x02\x05\x04" +
+		"\f\x123\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12" +
+		"\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&" +
+		"\x02(\x02*\x02,\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02" +
+		"B\x02D\x02F\x02H\x02J\x02L\x02N\x02P\x02R\x02T\x02V\x02X\x02Z\x02\\\x02" +
+		"^\x02`\x02b\x02\x02\v\x03\x02<=\x03\x02>@\x04\x02DDII\x03\x02CD\x04\x02" +
+		"DDMM\x04\x02\"\"%%\x03\x02()\x04\x02\'\'55\x03\x026;\x02\u0226\x02d\x03" +
+		"\x02\x02\x02\x04g\x03\x02\x02\x02\x06v\x03\x02\x02\x02\b\x85\x03\x02\x02" +
+		"\x02\n\x87\x03\x02\x02\x02\f\xA6\x03\x02\x02\x02\x0E\xC1\x03\x02\x02\x02" +
+		"\x10\xC8\x03\x02\x02\x02\x12\xCE\x03\x02\x02\x02\x14\xE2\x03\x02\x02\x02" +
+		"\x16\xE4\x03\x02\x02\x02\x18\xF3\x03\x02\x02\x02\x1A\xF6\x03\x02\x02\x02" +
+		"\x1C\u0103\x03\x02\x02\x02\x1E\u0105\x03\x02\x02\x02 \u0111\x03\x02\x02" +
+		"\x02\"\u011D\x03\x02\x02\x02$\u0120\x03\x02\x02\x02&\u0128\x03\x02\x02" +
+		"\x02(\u012E\x03\x02\x02\x02*\u0136\x03\x02\x02\x02,\u0138\x03\x02\x02" +
+		"\x02.\u0140\x03\x02\x02\x020\u0148\x03\x02\x02\x022\u014A\x03\x02\x02" +
+		"\x024\u0176\x03\x02\x02\x026\u0178\x03\x02\x02\x028\u017B\x03\x02\x02" +
+		"\x02:\u0184\x03\x02\x02\x02<\u019E\x03\x02\x02\x02>\u01A0\x03\x02\x02" +
+		"\x02@\u01A9\x03\x02\x02\x02B\u01B2\x03\x02\x02\x02D\u01B6\x03\x02\x02" +
+		"\x02F\u01BC\x03\x02\x02\x02H\u01C0\x03\x02\x02\x02J\u01C3\x03\x02\x02" +
+		"\x02L\u01CB\x03\x02\x02\x02N\u01CF\x03\x02\x02\x02P\u01D3\x03\x02\x02" +
+		"\x02R\u01D6\x03\x02\x02\x02T\u01DB\x03\x02\x02\x02V\u01DF\x03\x02\x02" +
+		"\x02X\u01E1\x03\x02\x02\x02Z\u01E3\x03\x02\x02\x02\\\u01E6\x03\x02\x02" +
+		"\x02^\u01EE\x03\x02\x02\x02`\u01F0\x03\x02\x02\x02b\u0204\x03\x02\x02" +
+		"\x02de\x05\x04\x03\x02ef\x07\x02\x02\x03f\x03\x03\x02\x02\x02gh\b\x03" +
+		"\x01\x02hi\x05\x06\x04\x02io\x03\x02\x02\x02jk\f\x03\x02\x02kl\x07\x1C" +
+		"\x02\x02ln\x05\b\x05\x02mj\x03\x02\x02\x02nq\x03\x02\x02\x02om\x03\x02" +
+		"\x02\x02op\x03\x02\x02\x02p\x05\x03\x02\x02\x02qo\x03\x02\x02\x02rw\x05" +
+		"Z.\x02sw\x05\x1E\x10\x02tw\x05\x18\r\x02uw\x05^0\x02vr\x03\x02\x02\x02" +
+		"vs\x03\x02\x02\x02vt\x03\x02\x02\x02vu\x03\x02\x02\x02w\x07\x03\x02\x02" +
+		"\x02x\x86\x05\"\x12\x02y\x86\x05&\x14\x02z\x86\x056\x1C\x02{\x86\x05<" +
+		"\x1F\x02|\x86\x058\x1D\x02}\x86\x05$\x13\x02~\x86\x05\n\x06\x02\x7F\x86" +
+		"\x05> \x02\x80\x86\x05@!\x02\x81\x86\x05D#\x02\x82\x86\x05F$\x02\x83\x86" +
+		"\x05`1\x02\x84\x86\x05H%\x02\x85x\x03\x02\x02\x02\x85y\x03\x02\x02\x02" +
+		"\x85z\x03\x02\x02\x02\x85{\x03\x02\x02\x02\x85|\x03\x02\x02\x02\x85}\x03" +
+		"\x02\x02\x02\x85~\x03\x02\x02\x02\x85\x7F\x03\x02\x02\x02\x85\x80\x03" +
+		"\x02\x02\x02\x85\x81\x03\x02\x02\x02\x85\x82\x03\x02\x02\x02\x85\x83\x03" +
+		"\x02\x02\x02\x85\x84\x03\x02\x02\x02\x86\t\x03\x02\x02\x02\x87\x88\x07" +
+		"\x14\x02\x02\x88\x89\x05\f\x07\x02\x89\v\x03\x02\x02\x02\x8A\x8B\b\x07" +
+		"\x01\x02\x8B\x8C\x07.\x02\x02\x8C\xA7\x05\f\x07\t\x8D\xA7\x05\x10\t\x02" +
+		"\x8E\xA7\x05\x0E\b\x02\x8F\x91\x05\x10\t\x02\x90\x92\x07.\x02\x02\x91" +
+		"\x90\x03\x02\x02\x02\x91\x92\x03\x02\x02\x02\x92\x93\x03\x02\x02\x02\x93" +
+		"\x94\x07+\x02\x02\x94\x95\x07*\x02\x02\x95\x9A\x05\x10\t\x02\x96\x97\x07" +
+		"$\x02\x02\x97\x99\x05\x10\t\x02\x98\x96\x03\x02\x02\x02\x99\x9C\x03\x02" +
+		"\x02\x02\x9A\x98\x03\x02\x02\x02\x9A\x9B\x03\x02\x02\x02\x9B\x9D\x03\x02" +
+		"\x02\x02\x9C\x9A\x03\x02\x02\x02\x9D\x9E\x074\x02\x02\x9E\xA7\x03\x02" +
+		"\x02\x02\x9F\xA0\x05\x10\t\x02\xA0\xA2\x07,\x02\x02\xA1\xA3\x07.\x02\x02" +
+		"\xA2\xA1\x03\x02\x02\x02\xA2\xA3\x03\x02\x02\x02\xA3\xA4\x03\x02\x02\x02" +
+		"\xA4\xA5\x07/\x02\x02\xA5\xA7\x03\x02\x02\x02\xA6\x8A\x03\x02\x02\x02" +
+		"\xA6\x8D\x03\x02\x02\x02\xA6\x8E\x03\x02\x02\x02\xA6\x8F\x03\x02\x02\x02" +
+		"\xA6\x9F\x03\x02\x02\x02\xA7\xB0\x03\x02\x02\x02\xA8\xA9\f\x06\x02\x02" +
+		"\xA9\xAA\x07!\x02\x02\xAA\xAF\x05\f\x07\x07\xAB\xAC\f\x05\x02\x02\xAC" +
+		"\xAD\x071\x02\x02\xAD\xAF\x05\f\x07\x06\xAE\xA8\x03\x02\x02\x02\xAE\xAB" +
+		"\x03\x02\x02\x02\xAF\xB2\x03\x02\x02\x02\xB0\xAE\x03\x02\x02\x02\xB0\xB1" +
+		"\x03\x02\x02\x02\xB1\r\x03\x02\x02\x02\xB2\xB0\x03\x02\x02\x02\xB3\xB5" +
+		"\x05\x10\t\x02\xB4\xB6\x07.\x02\x02\xB5\xB4\x03\x02\x02\x02\xB5\xB6\x03" +
+		"\x02\x02\x02\xB6\xB7\x03\x02\x02\x02\xB7\xB8\x07-\x02\x02\xB8\xB9\x05" +
+		"V,\x02\xB9\xC2\x03\x02\x02\x02\xBA\xBC\x05\x10\t\x02\xBB\xBD\x07.\x02" +
+		"\x02\xBC\xBB\x03\x02\x02\x02\xBC\xBD\x03\x02\x02\x02\xBD\xBE\x03\x02\x02" +
+		"\x02\xBE\xBF\x073\x02\x02\xBF\xC0\x05V,\x02\xC0\xC2\x03\x02\x02\x02\xC1" +
+		"\xB3\x03\x02\x02\x02\xC1\xBA\x03\x02\x02\x02\xC2\x0F\x03\x02\x02\x02\xC3" +
+		"\xC9\x05\x12\n\x02\xC4\xC5\x05\x12\n\x02\xC5\xC6\x05X-\x02\xC6\xC7\x05" +
+		"\x12\n\x02\xC7\xC9\x03\x02\x02\x02\xC8\xC3\x03\x02\x02\x02\xC8\xC4\x03" +
+		"\x02\x02\x02\xC9\x11\x03\x02\x02\x02\xCA\xCB\b\n\x01\x02\xCB\xCF\x05\x14" +
+		"\v\x02\xCC\xCD\t\x02\x02\x02\xCD\xCF\x05\x12\n\x05\xCE\xCA\x03\x02\x02" +
+		"\x02\xCE\xCC\x03\x02\x02\x02\xCF\xD8\x03\x02\x02\x02\xD0\xD1\f\x04\x02" +
+		"\x02\xD1\xD2\t\x03\x02\x02\xD2\xD7\x05\x12\n\x05\xD3\xD4\f\x03\x02\x02" +
+		"\xD4\xD5\t\x02\x02\x02\xD5\xD7\x05\x12\n\x04\xD6\xD0\x03\x02\x02\x02\xD6" +
+		"\xD3\x03\x02\x02\x02\xD7\xDA\x03\x02\x02\x02\xD8\xD6\x03\x02\x02\x02\xD8" +
+		"\xD9\x03\x02\x02\x02\xD9\x13\x03\x02\x02\x02\xDA\xD8\x03\x02\x02\x02\xDB" +
+		"\xE3\x054\x1B\x02\xDC\xE3\x05,\x17\x02\xDD\xE3\x05\x16\f\x02\xDE\xDF\x07" +
+		"*\x02\x02\xDF\xE0\x05\f\x07\x02\xE0\xE1\x074\x02\x02\xE1\xE3\x03\x02\x02" +
+		"\x02\xE2\xDB\x03\x02\x02\x02\xE2\xDC\x03\x02\x02\x02\xE2\xDD\x03\x02\x02" +
+		"\x02\xE2\xDE\x03\x02\x02\x02\xE3\x15\x03\x02\x02\x02\xE4\xE5\x050\x19" +
+		"\x02\xE5\xEF\x07*\x02\x02\xE6\xF0\x07>\x02\x02\xE7\xEC\x05\f\x07\x02\xE8" +
+		"\xE9\x07$\x02\x02\xE9\xEB\x05\f\x07\x02\xEA\xE8\x03\x02\x02\x02\xEB\xEE" +
+		"\x03\x02\x02\x02\xEC\xEA\x03\x02\x02\x02\xEC\xED\x03\x02\x02\x02\xED\xF0" +
+		"\x03\x02\x02\x02\xEE\xEC\x03\x02\x02\x02\xEF\xE6\x03\x02\x02\x02\xEF\xE7" +
+		"\x03\x02\x02\x02\xEF\xF0\x03\x02\x02\x02\xF0\xF1\x03\x02\x02\x02\xF1\xF2" +
+		"\x074\x02\x02\xF2\x17\x03\x02\x02\x02\xF3\xF4\x07\x10\x02\x02\xF4\xF5" +
+		"\x05\x1A\x0E\x02\xF5\x19\x03\x02\x02\x02\xF6\xFB\x05\x1C\x0F\x02\xF7\xF8" +
+		"\x07$\x02\x02\xF8\xFA\x05\x1C\x0F\x02\xF9\xF7\x03\x02\x02\x02\xFA\xFD" +
+		"\x03\x02\x02\x02\xFB\xF9\x03\x02\x02\x02\xFB\xFC\x03\x02\x02\x02\xFC\x1B" +
+		"\x03\x02\x02\x02\xFD\xFB\x03\x02\x02\x02\xFE\u0104\x05\f\x07\x02\xFF\u0100" +
+		"\x05,\x17\x02\u0100\u0101\x07#\x02\x02\u0101\u0102\x05\f\x07\x02\u0102" +
+		"\u0104\x03\x02\x02\x02\u0103\xFE\x03\x02\x02\x02\u0103\xFF\x03\x02\x02" +
+		"\x02\u0104\x1D\x03\x02\x02\x02\u0105\u0106\x07\b\x02\x02\u0106\u010B\x05" +
+		"*\x16\x02\u0107\u0108\x07$\x02\x02\u0108\u010A\x05*\x16\x02\u0109\u0107" +
+		"\x03\x02\x02\x02\u010A\u010D\x03\x02\x02\x02\u010B\u0109\x03\x02\x02\x02" +
+		"\u010B\u010C\x03\x02\x02\x02\u010C\u010F\x03\x02\x02\x02\u010D\u010B\x03" +
+		"\x02\x02\x02\u010E\u0110\x05 \x11\x02\u010F\u010E\x03\x02\x02\x02\u010F" +
+		"\u0110\x03\x02\x02\x02\u0110\x1F\x03\x02\x02\x02\u0111\u0112\x07A\x02" +
+		"\x02\u0112\u0113\x07H\x02\x02\u0113\u0118\x05*\x16\x02\u0114\u0115\x07" +
+		"$\x02\x02\u0115\u0117\x05*\x16\x02\u0116\u0114\x03\x02\x02\x02\u0117\u011A" +
+		"\x03\x02\x02\x02\u0118\u0116\x03\x02\x02\x02\u0118\u0119\x03\x02\x02\x02" +
+		"\u0119\u011B\x03\x02\x02\x02\u011A\u0118\x03\x02\x02\x02\u011B\u011C\x07" +
+		"B\x02\x02\u011C!\x03\x02\x02\x02\u011D\u011E\x07\x06\x02\x02\u011E\u011F" +
+		"\x05\x1A\x0E\x02\u011F#\x03\x02\x02\x02\u0120\u0122\x07\x13\x02\x02\u0121" +
+		"\u0123\x05\x1A\x0E\x02\u0122\u0121\x03\x02\x02\x02\u0122\u0123\x03\x02" +
+		"\x02\x02\u0123\u0126\x03\x02\x02\x02\u0124\u0125\x07 \x02\x02\u0125\u0127" +
+		"\x05(\x15\x02\u0126\u0124\x03\x02\x02\x02\u0126\u0127\x03\x02\x02\x02" +
+		"\u0127%\x03\x02\x02\x02\u0128\u0129\x07\n\x02\x02\u0129\u012C\x05\x1A" +
+		"\x0E\x02\u012A\u012B\x07 \x02\x02\u012B\u012D\x05(\x15\x02\u012C\u012A" +
+		"\x03\x02\x02\x02\u012C\u012D\x03\x02\x02\x02\u012D\'\x03\x02\x02\x02\u012E" +
+		"\u0133\x05,\x17\x02\u012F\u0130\x07$\x02\x02\u0130\u0132\x05,\x17\x02" +
+		"\u0131\u012F\x03\x02\x02\x02\u0132\u0135\x03\x02\x02\x02\u0133\u0131\x03" +
+		"\x02\x02\x02\u0133\u0134\x03\x02\x02\x02\u0134)\x03\x02\x02\x02\u0135" +
+		"\u0133\x03\x02\x02\x02\u0136\u0137\t\x04\x02\x02\u0137+\x03\x02\x02\x02" +
+		"\u0138\u013D\x050\x19\x02\u0139\u013A\x07&\x02\x02\u013A\u013C\x050\x19" +
+		"\x02\u013B\u0139\x03\x02\x02\x02\u013C\u013F\x03\x02\x02\x02\u013D\u013B" +
+		"\x03\x02\x02\x02\u013D\u013E\x03\x02\x02\x02\u013E-\x03\x02\x02\x02\u013F" +
+		"\u013D\x03\x02\x02\x02\u0140\u0145\x052\x1A\x02\u0141\u0142\x07&\x02\x02" +
+		"\u0142\u0144\x052\x1A\x02\u0143\u0141\x03\x02\x02\x02\u0144\u0147\x03" +
+		"\x02\x02\x02\u0145\u0143\x03\x02\x02\x02\u0145\u0146\x03\x02\x02\x02\u0146" +
+		"/\x03\x02\x02\x02\u0147\u0145\x03\x02\x02\x02\u0148\u0149\t\x05\x02\x02" +
+		"\u01491\x03\x02\x02\x02\u014A\u014B\t\x06\x02\x02\u014B3\x03\x02\x02\x02" +
+		"\u014C\u0177\x07/\x02\x02\u014D\u014E\x05T+\x02\u014E\u014F\x07C\x02\x02" +
+		"\u014F\u0177\x03\x02\x02\x02\u0150\u0177\x05R*\x02\u0151\u0177\x05T+\x02" +
+		"\u0152\u0177\x05N(\x02\u0153\u0177\x072\x02\x02\u0154\u0177\x05V,\x02" +
+		"\u0155\u0156\x07A\x02\x02\u0156\u015B\x05P)\x02\u0157\u0158\x07$\x02\x02" +
+		"\u0158\u015A\x05P)\x02\u0159\u0157\x03\x02\x02\x02\u015A\u015D\x03\x02" +
+		"\x02\x02\u015B\u0159\x03\x02\x02\x02\u015B\u015C\x03\x02\x02\x02\u015C" +
+		"\u015E\x03\x02\x02\x02\u015D\u015B\x03\x02\x02\x02\u015E\u015F\x07B\x02" +
+		"\x02\u015F\u0177\x03\x02\x02\x02\u0160\u0161\x07A\x02\x02\u0161\u0166" +
+		"\x05N(\x02\u0162\u0163\x07$\x02\x02\u0163\u0165\x05N(\x02\u0164\u0162" +
+		"\x03\x02\x02\x02\u0165\u0168\x03\x02\x02\x02\u0166\u0164\x03\x02\x02\x02" +
+		"\u0166\u0167\x03\x02\x02\x02\u0167\u0169\x03\x02\x02\x02\u0168\u0166\x03" +
+		"\x02\x02\x02\u0169\u016A\x07B\x02\x02\u016A\u0177\x03\x02\x02\x02\u016B" +
+		"\u016C\x07A\x02\x02\u016C\u0171\x05V,\x02\u016D\u016E\x07$\x02\x02\u016E" +
+		"\u0170\x05V,\x02\u016F\u016D\x03\x02\x02\x02\u0170\u0173\x03\x02\x02\x02" +
+		"\u0171\u016F\x03\x02\x02\x02\u0171\u0172\x03\x02\x02\x02\u0172\u0174\x03" +
+		"\x02\x02\x02\u0173\u0171\x03\x02\x02\x02\u0174\u0175\x07B\x02\x02\u0175" +
+		"\u0177\x03\x02\x02\x02\u0176\u014C\x03\x02\x02\x02\u0176\u014D\x03\x02" +
+		"\x02\x02\u0176\u0150\x03\x02\x02\x02\u0176\u0151\x03\x02\x02\x02\u0176" +
+		"\u0152\x03\x02\x02\x02\u0176\u0153\x03\x02\x02\x02\u0176\u0154\x03\x02" +
+		"\x02\x02\u0176\u0155\x03\x02\x02\x02\u0176\u0160\x03\x02\x02\x02\u0176" +
+		"\u016B\x03\x02\x02\x02\u01775\x03\x02\x02\x02\u0178\u0179\x07\f\x02\x02" +
+		"\u0179\u017A\x07\x1E\x02\x02\u017A7\x03\x02\x02\x02\u017B\u017C\x07\x12" +
+		"\x02\x02\u017C\u0181\x05:\x1E\x02\u017D\u017E\x07$\x02\x02\u017E\u0180" +
+		"\x05:\x1E\x02\u017F\u017D\x03\x02\x02\x02\u0180\u0183\x03\x02\x02\x02" +
+		"\u0181\u017F\x03\x02\x02\x02\u0181\u0182\x03\x02\x02\x02\u01829\x03\x02" +
+		"\x02\x02\u0183\u0181\x03\x02\x02\x02\u0184\u0186\x05\f\x07\x02\u0185\u0187" +
+		"\t\x07\x02\x02\u0186\u0185\x03\x02\x02\x02\u0186\u0187\x03\x02\x02\x02" +
+		"\u0187\u018A\x03\x02\x02\x02\u0188\u0189\x070\x02\x02\u0189\u018B\t\b" +
+		"\x02\x02\u018A\u0188\x03\x02\x02\x02\u018A\u018B\x03\x02\x02\x02\u018B" +
+		";\x03\x02\x02\x02\u018C\u018D\x07\v\x02\x02\u018D\u0192\x05.\x18\x02\u018E" +
+		"\u018F\x07$\x02\x02\u018F\u0191\x05.\x18\x02\u0190\u018E\x03\x02\x02\x02" +
+		"\u0191\u0194\x03\x02\x02\x02\u0192\u0190\x03\x02\x02\x02\u0192\u0193\x03" +
+		"\x02\x02\x02\u0193\u019F\x03\x02\x02\x02\u0194\u0192\x03\x02\x02\x02\u0195" +
+		"\u0196\x07\x0E\x02\x02\u0196\u019B\x05.\x18\x02\u0197\u0198\x07$\x02\x02" +
+		"\u0198\u019A\x05.\x18\x02\u0199\u0197\x03\x02\x02\x02\u019A\u019D\x03" +
+		"\x02\x02\x02\u019B\u0199\x03\x02\x02\x02\u019B\u019C\x03\x02\x02\x02\u019C" +
+		"\u019F\x03\x02\x02\x02\u019D\u019B\x03\x02\x02\x02\u019E\u018C\x03\x02" +
+		"\x02\x02\u019E\u0195\x03\x02\x02\x02\u019F=\x03\x02\x02\x02\u01A0\u01A1" +
+		"\x07\x04\x02\x02\u01A1\u01A6\x05.\x18\x02\u01A2\u01A3\x07$\x02\x02\u01A3" +
+		"\u01A5\x05.\x18\x02\u01A4\u01A2\x03\x02\x02\x02\u01A5\u01A8\x03\x02\x02" +
+		"\x02\u01A6\u01A4\x03\x02\x02\x02\u01A6\u01A7\x03\x02\x02\x02\u01A7?\x03" +
+		"\x02\x02\x02\u01A8\u01A6\x03\x02\x02\x02\u01A9\u01AA\x07\x0F\x02\x02\u01AA" +
+		"\u01AF\x05B\"\x02\u01AB\u01AC\x07$\x02\x02\u01AC\u01AE\x05B\"\x02\u01AD" +
+		"\u01AB\x03\x02\x02\x02\u01AE\u01B1\x03\x02\x02\x02\u01AF\u01AD\x03\x02" +
+		"\x02\x02\u01AF\u01B0\x03\x02\x02\x02\u01B0A\x03\x02\x02\x02\u01B1\u01AF" +
+		"\x03\x02\x02\x02\u01B2\u01B3\x05.\x18\x02\u01B3\u01B4\x07Q\x02\x02\u01B4" +
+		"\u01B5\x05.\x18\x02\u01B5C\x03\x02\x02\x02\u01B6\u01B7\x07\x03\x02\x02" +
+		"\u01B7\u01B8\x05\x14\v\x02\u01B8\u01BA\x05V,\x02\u01B9\u01BB\x05J&\x02" +
+		"\u01BA\u01B9\x03\x02\x02\x02\u01BA\u01BB\x03\x02\x02\x02\u01BBE\x03\x02" +
+		"\x02\x02\u01BC\u01BD\x07\t\x02\x02\u01BD\u01BE\x05\x14\v\x02\u01BE\u01BF" +
+		"\x05V,\x02\u01BFG\x03\x02\x02\x02\u01C0\u01C1\x07\r\x02\x02\u01C1\u01C2" +
+		"\x05,\x17\x02\u01C2I\x03\x02\x02\x02\u01C3\u01C8\x05L\'\x02\u01C4\u01C5" +
+		"\x07$\x02\x02\u01C5\u01C7\x05L\'\x02\u01C6\u01C4\x03\x02\x02\x02\u01C7" +
+		"\u01CA\x03\x02\x02\x02\u01C8\u01C6\x03\x02\x02\x02\u01C8\u01C9\x03\x02" +
+		"\x02\x02\u01C9K\x03\x02\x02\x02\u01CA\u01C8\x03\x02\x02\x02\u01CB\u01CC" +
+		"\x050\x19\x02\u01CC\u01CD\x07#\x02\x02\u01CD\u01CE\x054\x1B\x02\u01CE" +
+		"M\x03\x02\x02\x02\u01CF\u01D0\t\t\x02\x02\u01D0O\x03\x02\x02\x02\u01D1" +
+		"\u01D4\x05R*\x02\u01D2\u01D4\x05T+\x02\u01D3\u01D1\x03\x02\x02\x02\u01D3" +
+		"\u01D2\x03\x02\x02\x02\u01D4Q\x03\x02\x02\x02\u01D5\u01D7\t\x02\x02\x02" +
+		"\u01D6\u01D5\x03\x02\x02\x02\u01D6\u01D7\x03\x02\x02\x02\u01D7\u01D8\x03" +
+		"\x02\x02\x02\u01D8\u01D9\x07\x1F\x02\x02\u01D9S\x03\x02\x02\x02\u01DA" +
+		"\u01DC\t\x02\x02\x02\u01DB\u01DA\x03\x02\x02\x02\u01DB\u01DC\x03\x02\x02" +
+		"\x02\u01DC\u01DD\x03\x02\x02\x02\u01DD\u01DE\x07\x1E\x02\x02\u01DEU\x03" +
+		"\x02\x02\x02\u01DF\u01E0\x07\x1D\x02\x02\u01E0W\x03\x02\x02\x02\u01E1" +
+		"\u01E2\t\n\x02\x02\u01E2Y\x03\x02\x02\x02\u01E3\u01E4\x07\x07\x02\x02" +
+		"\u01E4\u01E5\x05\\/\x02\u01E5[\x03\x02\x02\x02\u01E6\u01E7\x07A\x02\x02" +
+		"\u01E7\u01E8\x05\x04\x03\x02\u01E8\u01E9\x07B\x02\x02\u01E9]\x03\x02\x02" +
+		"\x02\u01EA\u01EB\x07\x11\x02\x02\u01EB\u01EF\x07`\x02\x02\u01EC\u01ED" +
+		"\x07\x11\x02\x02\u01ED\u01EF\x07a\x02\x02\u01EE\u01EA\x03\x02\x02\x02" +
+		"\u01EE\u01EC\x03\x02\x02\x02\u01EF_\x03\x02\x02\x02\u01F0\u01F1\x07\x05" +
+		"\x02\x02\u01F1\u01F4\x05*\x16\x02\u01F2\u01F3\x07U\x02\x02\u01F3\u01F5" +
+		"\x05.\x18\x02\u01F4\u01F2\x03\x02\x02\x02\u01F4\u01F5\x03\x02\x02\x02" +
+		"\u01F5\u01FF\x03\x02\x02\x02\u01F6\u01F7\x07V\x02\x02\u01F7\u01FC\x05" +
+		"b2\x02\u01F8\u01F9\x07$\x02\x02\u01F9\u01FB\x05b2\x02\u01FA\u01F8\x03" +
+		"\x02\x02\x02\u01FB\u01FE\x03\x02\x02\x02\u01FC\u01FA\x03\x02\x02\x02\u01FC" +
+		"\u01FD\x03\x02\x02\x02\u01FD\u0200\x03\x02\x02\x02\u01FE\u01FC\x03\x02" +
+		"\x02\x02\u01FF\u01F6\x03\x02\x02\x02\u01FF\u0200\x03\x02\x02\x02\u0200" +
+		"a\x03\x02\x02\x02\u0201\u0202\x05.\x18\x02\u0202\u0203\x07#\x02\x02\u0203" +
+		"\u0205\x03\x02\x02\x02\u0204\u0201\x03\x02\x02\x02\u0204\u0205\x03\x02" +
+		"\x02\x02\u0205\u0206\x03\x02\x02\x02\u0206\u0207\x05.\x18\x02\u0207c\x03" +
+		"\x02\x02\x026ov\x85\x91\x9A\xA2\xA6\xAE\xB0\xB5\xBC\xC1\xC8\xCE\xD6\xD8" +
+		"\xE2\xEC\xEF\xFB\u0103\u010B\u010F\u0118\u0122\u0126\u012C\u0133\u013D" +
+		"\u0145\u015B\u0166\u0171\u0176\u0181\u0186\u018A\u0192\u019B\u019E\u01A6" +
+		"\u01AF\u01BA\u01C8\u01D3\u01D6\u01DB\u01EE\u01F4\u01FC\u01FF\u0204";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!esql_parser.__ATN) {
@@ -2981,6 +3221,9 @@ export class CompositeQueryContext extends QueryContext {
 
 
 export class SourceCommandContext extends ParserRuleContext {
+	public explainCommand(): ExplainCommandContext | undefined {
+		return this.tryGetRuleContext(0, ExplainCommandContext);
+	}
 	public fromCommand(): FromCommandContext | undefined {
 		return this.tryGetRuleContext(0, FromCommandContext);
 	}
@@ -3013,6 +3256,9 @@ export class SourceCommandContext extends ParserRuleContext {
 export class ProcessingCommandContext extends ParserRuleContext {
 	public evalCommand(): EvalCommandContext | undefined {
 		return this.tryGetRuleContext(0, EvalCommandContext);
+	}
+	public inlinestatsCommand(): InlinestatsCommandContext | undefined {
+		return this.tryGetRuleContext(0, InlinestatsCommandContext);
 	}
 	public limitCommand(): LimitCommandContext | undefined {
 		return this.tryGetRuleContext(0, LimitCommandContext);
@@ -3690,13 +3936,13 @@ export class FieldContext extends ParserRuleContext {
 
 export class FromCommandContext extends ParserRuleContext {
 	public FROM(): TerminalNode { return this.getToken(esql_parser.FROM, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public fromIdentifier(): FromIdentifierContext[];
+	public fromIdentifier(i: number): FromIdentifierContext;
+	public fromIdentifier(i?: number): FromIdentifierContext | FromIdentifierContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(FromIdentifierContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, FromIdentifierContext);
 		}
 	}
 	public COMMA(): TerminalNode[];
@@ -3734,13 +3980,13 @@ export class FromCommandContext extends ParserRuleContext {
 export class MetadataContext extends ParserRuleContext {
 	public OPENING_BRACKET(): TerminalNode { return this.getToken(esql_parser.OPENING_BRACKET, 0); }
 	public METADATA(): TerminalNode { return this.getToken(esql_parser.METADATA, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public fromIdentifier(): FromIdentifierContext[];
+	public fromIdentifier(i: number): FromIdentifierContext;
+	public fromIdentifier(i?: number): FromIdentifierContext | FromIdentifierContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(FromIdentifierContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, FromIdentifierContext);
 		}
 	}
 	public CLOSING_BRACKET(): TerminalNode { return this.getToken(esql_parser.CLOSING_BRACKET, 0); }
@@ -3827,6 +4073,35 @@ export class StatsCommandContext extends ParserRuleContext {
 }
 
 
+export class InlinestatsCommandContext extends ParserRuleContext {
+	public INLINESTATS(): TerminalNode { return this.getToken(esql_parser.INLINESTATS, 0); }
+	public fields(): FieldsContext {
+		return this.getRuleContext(0, FieldsContext);
+	}
+	public BY(): TerminalNode | undefined { return this.tryGetToken(esql_parser.BY, 0); }
+	public grouping(): GroupingContext | undefined {
+		return this.tryGetRuleContext(0, GroupingContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return esql_parser.RULE_inlinestatsCommand; }
+	// @Override
+	public enterRule(listener: esql_parserListener): void {
+		if (listener.enterInlinestatsCommand) {
+			listener.enterInlinestatsCommand(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: esql_parserListener): void {
+		if (listener.exitInlinestatsCommand) {
+			listener.exitInlinestatsCommand(this);
+		}
+	}
+}
+
+
 export class GroupingContext extends ParserRuleContext {
 	public qualifiedName(): QualifiedNameContext[];
 	public qualifiedName(i: number): QualifiedNameContext;
@@ -3866,24 +4141,24 @@ export class GroupingContext extends ParserRuleContext {
 }
 
 
-export class SourceIdentifierContext extends ParserRuleContext {
-	public SRC_UNQUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.SRC_UNQUOTED_IDENTIFIER, 0); }
-	public SRC_QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.SRC_QUOTED_IDENTIFIER, 0); }
+export class FromIdentifierContext extends ParserRuleContext {
+	public FROM_UNQUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.FROM_UNQUOTED_IDENTIFIER, 0); }
+	public QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return esql_parser.RULE_sourceIdentifier; }
+	public get ruleIndex(): number { return esql_parser.RULE_fromIdentifier; }
 	// @Override
 	public enterRule(listener: esql_parserListener): void {
-		if (listener.enterSourceIdentifier) {
-			listener.enterSourceIdentifier(this);
+		if (listener.enterFromIdentifier) {
+			listener.enterFromIdentifier(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: esql_parserListener): void {
-		if (listener.exitSourceIdentifier) {
-			listener.exitSourceIdentifier(this);
+		if (listener.exitFromIdentifier) {
+			listener.exitFromIdentifier(this);
 		}
 	}
 }
@@ -3928,6 +4203,45 @@ export class QualifiedNameContext extends ParserRuleContext {
 }
 
 
+export class QualifiedNamePatternContext extends ParserRuleContext {
+	public identifierPattern(): IdentifierPatternContext[];
+	public identifierPattern(i: number): IdentifierPatternContext;
+	public identifierPattern(i?: number): IdentifierPatternContext | IdentifierPatternContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(IdentifierPatternContext);
+		} else {
+			return this.getRuleContext(i, IdentifierPatternContext);
+		}
+	}
+	public DOT(): TerminalNode[];
+	public DOT(i: number): TerminalNode;
+	public DOT(i?: number): TerminalNode | TerminalNode[] {
+		if (i === undefined) {
+			return this.getTokens(esql_parser.DOT);
+		} else {
+			return this.getToken(esql_parser.DOT, i);
+		}
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return esql_parser.RULE_qualifiedNamePattern; }
+	// @Override
+	public enterRule(listener: esql_parserListener): void {
+		if (listener.enterQualifiedNamePattern) {
+			listener.enterQualifiedNamePattern(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: esql_parserListener): void {
+		if (listener.exitQualifiedNamePattern) {
+			listener.exitQualifiedNamePattern(this);
+		}
+	}
+}
+
+
 export class IdentifierContext extends ParserRuleContext {
 	public UNQUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.UNQUOTED_IDENTIFIER, 0); }
 	public QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0); }
@@ -3946,6 +4260,29 @@ export class IdentifierContext extends ParserRuleContext {
 	public exitRule(listener: esql_parserListener): void {
 		if (listener.exitIdentifier) {
 			listener.exitIdentifier(this);
+		}
+	}
+}
+
+
+export class IdentifierPatternContext extends ParserRuleContext {
+	public PROJECT_UNQUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.PROJECT_UNQUOTED_IDENTIFIER, 0); }
+	public QUOTED_IDENTIFIER(): TerminalNode | undefined { return this.tryGetToken(esql_parser.QUOTED_IDENTIFIER, 0); }
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return esql_parser.RULE_identifierPattern; }
+	// @Override
+	public enterRule(listener: esql_parserListener): void {
+		if (listener.enterIdentifierPattern) {
+			listener.enterIdentifierPattern(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: esql_parserListener): void {
+		if (listener.exitIdentifierPattern) {
+			listener.exitIdentifierPattern(this);
 		}
 	}
 }
@@ -4317,13 +4654,13 @@ export class OrderExpressionContext extends ParserRuleContext {
 
 export class KeepCommandContext extends ParserRuleContext {
 	public KEEP(): TerminalNode | undefined { return this.tryGetToken(esql_parser.KEEP, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public qualifiedNamePattern(): QualifiedNamePatternContext[];
+	public qualifiedNamePattern(i: number): QualifiedNamePatternContext;
+	public qualifiedNamePattern(i?: number): QualifiedNamePatternContext | QualifiedNamePatternContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(QualifiedNamePatternContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, QualifiedNamePatternContext);
 		}
 	}
 	public COMMA(): TerminalNode[];
@@ -4358,13 +4695,13 @@ export class KeepCommandContext extends ParserRuleContext {
 
 export class DropCommandContext extends ParserRuleContext {
 	public DROP(): TerminalNode { return this.getToken(esql_parser.DROP, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public qualifiedNamePattern(): QualifiedNamePatternContext[];
+	public qualifiedNamePattern(i: number): QualifiedNamePatternContext;
+	public qualifiedNamePattern(i?: number): QualifiedNamePatternContext | QualifiedNamePatternContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(QualifiedNamePatternContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, QualifiedNamePatternContext);
 		}
 	}
 	public COMMA(): TerminalNode[];
@@ -4437,16 +4774,16 @@ export class RenameCommandContext extends ParserRuleContext {
 
 
 export class RenameClauseContext extends ParserRuleContext {
-	public _oldName: SourceIdentifierContext;
-	public _newName: SourceIdentifierContext;
+	public _oldName: QualifiedNamePatternContext;
+	public _newName: QualifiedNamePatternContext;
 	public AS(): TerminalNode { return this.getToken(esql_parser.AS, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public qualifiedNamePattern(): QualifiedNamePatternContext[];
+	public qualifiedNamePattern(i: number): QualifiedNamePatternContext;
+	public qualifiedNamePattern(i?: number): QualifiedNamePatternContext | QualifiedNamePatternContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(QualifiedNamePatternContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, QualifiedNamePatternContext);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
@@ -4530,8 +4867,8 @@ export class GrokCommandContext extends ParserRuleContext {
 
 export class MvExpandCommandContext extends ParserRuleContext {
 	public MV_EXPAND(): TerminalNode { return this.getToken(esql_parser.MV_EXPAND, 0); }
-	public sourceIdentifier(): SourceIdentifierContext {
-		return this.getRuleContext(0, SourceIdentifierContext);
+	public qualifiedName(): QualifiedNameContext {
+		return this.getRuleContext(0, QualifiedNameContext);
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
@@ -4767,6 +5104,57 @@ export class ComparisonOperatorContext extends ParserRuleContext {
 }
 
 
+export class ExplainCommandContext extends ParserRuleContext {
+	public EXPLAIN(): TerminalNode { return this.getToken(esql_parser.EXPLAIN, 0); }
+	public subqueryExpression(): SubqueryExpressionContext {
+		return this.getRuleContext(0, SubqueryExpressionContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return esql_parser.RULE_explainCommand; }
+	// @Override
+	public enterRule(listener: esql_parserListener): void {
+		if (listener.enterExplainCommand) {
+			listener.enterExplainCommand(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: esql_parserListener): void {
+		if (listener.exitExplainCommand) {
+			listener.exitExplainCommand(this);
+		}
+	}
+}
+
+
+export class SubqueryExpressionContext extends ParserRuleContext {
+	public OPENING_BRACKET(): TerminalNode { return this.getToken(esql_parser.OPENING_BRACKET, 0); }
+	public query(): QueryContext {
+		return this.getRuleContext(0, QueryContext);
+	}
+	public CLOSING_BRACKET(): TerminalNode { return this.getToken(esql_parser.CLOSING_BRACKET, 0); }
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return esql_parser.RULE_subqueryExpression; }
+	// @Override
+	public enterRule(listener: esql_parserListener): void {
+		if (listener.enterSubqueryExpression) {
+			listener.enterSubqueryExpression(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: esql_parserListener): void {
+		if (listener.exitSubqueryExpression) {
+			listener.exitSubqueryExpression(this);
+		}
+	}
+}
+
+
 export class ShowCommandContext extends ParserRuleContext {
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
@@ -4820,17 +5208,11 @@ export class ShowFunctionsContext extends ShowCommandContext {
 
 
 export class EnrichCommandContext extends ParserRuleContext {
-	public _policyName: SourceIdentifierContext;
-	public _matchField: SourceIdentifierContext;
+	public _policyName: FromIdentifierContext;
+	public _matchField: QualifiedNamePatternContext;
 	public ENRICH(): TerminalNode { return this.getToken(esql_parser.ENRICH, 0); }
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
-		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
-		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
-		}
+	public fromIdentifier(): FromIdentifierContext {
+		return this.getRuleContext(0, FromIdentifierContext);
 	}
 	public ON(): TerminalNode | undefined { return this.tryGetToken(esql_parser.ON, 0); }
 	public WITH(): TerminalNode | undefined { return this.tryGetToken(esql_parser.WITH, 0); }
@@ -4842,6 +5224,9 @@ export class EnrichCommandContext extends ParserRuleContext {
 		} else {
 			return this.getRuleContext(i, EnrichWithClauseContext);
 		}
+	}
+	public qualifiedNamePattern(): QualifiedNamePatternContext | undefined {
+		return this.tryGetRuleContext(0, QualifiedNamePatternContext);
 	}
 	public COMMA(): TerminalNode[];
 	public COMMA(i: number): TerminalNode;
@@ -4873,15 +5258,15 @@ export class EnrichCommandContext extends ParserRuleContext {
 
 
 export class EnrichWithClauseContext extends ParserRuleContext {
-	public _newName: SourceIdentifierContext;
-	public _enrichField: SourceIdentifierContext;
-	public sourceIdentifier(): SourceIdentifierContext[];
-	public sourceIdentifier(i: number): SourceIdentifierContext;
-	public sourceIdentifier(i?: number): SourceIdentifierContext | SourceIdentifierContext[] {
+	public _newName: QualifiedNamePatternContext;
+	public _enrichField: QualifiedNamePatternContext;
+	public qualifiedNamePattern(): QualifiedNamePatternContext[];
+	public qualifiedNamePattern(i: number): QualifiedNamePatternContext;
+	public qualifiedNamePattern(i?: number): QualifiedNamePatternContext | QualifiedNamePatternContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(SourceIdentifierContext);
+			return this.getRuleContexts(QualifiedNamePatternContext);
 		} else {
-			return this.getRuleContext(i, SourceIdentifierContext);
+			return this.getRuleContext(i, QualifiedNamePatternContext);
 		}
 	}
 	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(esql_parser.ASSIGN, 0); }
