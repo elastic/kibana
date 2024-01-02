@@ -8,12 +8,15 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
-import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
@@ -22,6 +25,7 @@ import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface UserPanelContentProps {
+  userName: string;
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
@@ -32,6 +36,7 @@ interface UserPanelContentProps {
 }
 
 export const UserPanelContent = ({
+  userName,
   observedUser,
   managedUser,
   riskScoreState,
@@ -45,15 +50,14 @@ export const UserPanelContent = ({
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <RiskSummary
-            riskScoreData={riskScoreState}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
+        <RiskSummary
+          riskScoreData={riskScoreState}
+          queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+          openDetailsPanel={openDetailsPanel}
+          entity={RiskScoreEntity.user}
+        />
       )}
+      <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
