@@ -56,9 +56,9 @@ export function getDataViewById(id: string): Promise<DataView> {
   }
 
   if (id) {
-    return dataViewsService.get(id);
+    return dataViewsService.getLegacy(id);
   } else {
-    return dataViewsService.create({});
+    return dataViewsService.createLegacy({});
   }
 }
 
@@ -87,7 +87,7 @@ export const getDataViewAndSavedSearchCallback =
       return resp;
     }
     const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-    resp.dataView = await deps.dataViewsService.get(dataViewId!);
+    resp.dataView = await deps.dataViewsService.getLegacy(dataViewId!);
     resp.savedSearch = ss;
     return resp;
   };

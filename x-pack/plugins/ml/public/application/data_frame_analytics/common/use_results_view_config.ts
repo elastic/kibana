@@ -101,7 +101,7 @@ export const useResultsViewConfig = (jobId: string) => {
             let fetchedDataView: DataView | undefined;
 
             try {
-              fetchedDataView = await dataViews.get(destDataViewId);
+              fetchedDataView = await dataViews.getLegacy(destDataViewId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
@@ -117,7 +117,7 @@ export const useResultsViewConfig = (jobId: string) => {
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                fetchedDataView = await dataViews.get(sourceDataViewId);
+                fetchedDataView = await dataViews.getLegacy(sourceDataViewId);
               } catch (e) {
                 fetchedDataView = undefined;
               }

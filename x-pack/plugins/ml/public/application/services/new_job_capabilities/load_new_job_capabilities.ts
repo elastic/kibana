@@ -31,7 +31,7 @@ export function loadNewJobCapabilities(
 
       if (dataViewId !== undefined) {
         // index pattern is being used
-        const dataView: DataView = await dataViewsService.get(dataViewId);
+        const dataView: DataView = await dataViewsService.getLegacy(dataViewId);
         await serviceToUse.initializeFromDataVIew(dataView);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {

@@ -657,7 +657,7 @@ export async function getDataViewsAndIndicesWithGeoFields(
           const dataViewId = cachedDV?.id ?? (await getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
-            const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));
+            const dataView = cachedDV ?? (await dataViewsService.getLegacy(dataViewId));
 
             if (!dataView) {
               continue;

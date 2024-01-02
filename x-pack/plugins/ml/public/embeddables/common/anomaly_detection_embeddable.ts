@@ -51,7 +51,7 @@ export abstract class AnomalyDetectionEmbeddable<
       // Then find the data view assuming the data view title matches the index name
       const indexPatterns: Record<string, DataView> = {};
       for (const indexName of indices) {
-        const response = await this.dataViewsService.find(`"${indexName}"`);
+        const response = await this.dataViewsService.findLegacy(`"${indexName}"`);
         const indexPattern = response.find((obj) =>
           obj.getIndexPattern().toLowerCase().includes(indexName.toLowerCase())
         );

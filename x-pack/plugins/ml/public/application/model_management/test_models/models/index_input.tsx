@@ -157,7 +157,7 @@ export function useIndexInput({
         const supportedFieldTypes = inferrer.getSupportedFieldTypes();
 
         const hasTextField = async ({ id }: { id: string }) => {
-          const dataView = await dataViews.get(id);
+          const dataView = await dataViews.getLegacy(id);
 
           return dataView.fields
             .getAll()
@@ -187,7 +187,7 @@ export function useIndexInput({
       inferrer.reset();
       setFieldNames([]);
       if (selectedDataViewId !== undefined) {
-        dataViews.get(selectedDataViewId).then((dv) => setSelectedDataView(dv));
+        dataViews.getLegacy(selectedDataViewId).then((dv) => setSelectedDataView(dv));
       }
     },
     [selectedDataViewId, dataViews, inferrer]

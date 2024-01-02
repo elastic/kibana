@@ -250,7 +250,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
   }: VisDescriptor) {
     const dataView: DataView = sourceDataView
       ? sourceDataView
-      : await getDataViews().get(dataViewId!, true);
+      : await getDataViews().getLegacy(dataViewId!, true);
 
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());

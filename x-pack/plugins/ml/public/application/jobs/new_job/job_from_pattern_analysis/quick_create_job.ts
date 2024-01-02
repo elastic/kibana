@@ -91,7 +91,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     query: QueryDslQueryContainer
   ) {
     try {
-      const dataView = await this.data.dataViews.get(dataViewId);
+      const dataView = await this.data.dataViews.getLegacy(dataViewId);
       const field = dataView.getFieldByName(fieldName);
       const partitionField = partitionFieldName
         ? dataView.getFieldByName(partitionFieldName) ?? null
