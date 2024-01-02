@@ -508,6 +508,7 @@
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/language-documentation-popover": "link:packages/kbn-language-documentation-popover",
     "@kbn/lens-embeddable-utils": "link:packages/kbn-lens-embeddable-utils",
+    "@kbn/lens-formula-docs": "link:packages/kbn-lens-formula-docs",
     "@kbn/lens-plugin": "link:x-pack/plugins/lens",
     "@kbn/license-api-guard-plugin": "link:x-pack/plugins/license_api_guard",
     "@kbn/license-management-plugin": "link:x-pack/plugins/license_management",
