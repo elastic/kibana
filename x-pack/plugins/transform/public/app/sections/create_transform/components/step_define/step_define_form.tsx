@@ -170,10 +170,8 @@ export const StepDefineForm: FC = () => {
     selectCopyToClipboardPreviewRequest(state, dataView)
   );
 
-  const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
-    copyToClipboardPreviewRequest
-  );
-  const copyToClipboardPivotDescription = i18n.translate(
+  const copyToClipboard = getTransformPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
+  const copyToClipboardDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
       defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
@@ -193,8 +191,8 @@ export const StepDefineForm: FC = () => {
     toastNotifications,
     ...(transformFunction === TRANSFORM_FUNCTION.LATEST
       ? {
-          copyToClipboard: copyToClipboardPivot,
-          copyToClipboardDescription: copyToClipboardPivotDescription,
+          copyToClipboard,
+          copyToClipboardDescription,
         }
       : {}),
   };
@@ -469,15 +467,15 @@ export const StepDefineForm: FC = () => {
         {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
           <PivotFunctionForm
             {...{
-              copyToClipboardPivot,
-              copyToClipboardPivotDescription,
+              copyToClipboard,
+              copyToClipboardDescription,
             }}
           />
         ) : null}
         {transformFunction === TRANSFORM_FUNCTION.LATEST ? (
           <LatestFunctionForm
-            copyToClipboard={copyToClipboardPivot}
-            copyToClipboardDescription={copyToClipboardPivotDescription}
+            copyToClipboard={copyToClipboard}
+            copyToClipboardDescription={copyToClipboardDescription}
           />
         ) : null}
       </EuiForm>

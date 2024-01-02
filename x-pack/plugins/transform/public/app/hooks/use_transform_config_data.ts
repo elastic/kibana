@@ -41,6 +41,7 @@ import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
+import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
@@ -105,7 +106,7 @@ export const useTransformConfigData = (
   query: TransformConfigQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  combinedRuntimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
   timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): UseIndexDataReturnType => {
   const [previewMappingsProperties, setPreviewMappingsProperties] =

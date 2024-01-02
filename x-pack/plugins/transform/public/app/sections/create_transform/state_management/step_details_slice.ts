@@ -7,12 +7,30 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import type { StepDetailsExposedState } from '../components/step_details';
+import type { TransformId } from '../../../../../common/types/transform';
+import type { EsIndexName } from '../components/step_details/common';
+
+import {
+  getDefaultStepDetailsState,
+  type StepDetailsExposedState,
+} from '../components/step_details';
 
 export const stepDetailsSlice = createSlice({
   name: 'stepDetails',
-  initialState: null as StepDetailsExposedState | null,
+  initialState: getDefaultStepDetailsState(),
   reducers: {
     setStepDetailsState: (_, action: PayloadAction<StepDetailsExposedState>) => action.payload,
+    setTransformId: (state, action: PayloadAction<TransformId>) => {
+      state.transformId = action.payload;
+    },
+    setTransformDescription: (state, action: PayloadAction<string>) => {
+      state.transformDescription = action.payload;
+    },
+    setDestinationIndex: (state, action: PayloadAction<EsIndexName>) => {
+      state.destinationIndex = action.payload;
+    },
+    setDestinationIngestPipeline: (state, action: PayloadAction<string>) => {
+      state.destinationIngestPipeline = action.payload;
+    },
   },
 });

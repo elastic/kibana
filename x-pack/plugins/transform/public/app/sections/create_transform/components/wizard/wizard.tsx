@@ -178,8 +178,6 @@ export const Wizard: FC = React.memo(() => {
     [uiSettings, data, fieldFormats, charts]
   );
 
-  if (!stepDefineState || !stepDetailsState) return null;
-
   return (
     <FieldStatsFlyoutProvider
       dataView={dataView}

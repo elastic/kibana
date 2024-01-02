@@ -21,12 +21,12 @@ export const StepDetails: FC = () => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDetailsState = useWizardSelector((s) => s.stepDetails);
 
-  const { setCurrentStep, setStepDetailsState } = useWizardActions();
+  const { setCurrentStep } = useWizardActions();
 
   return stepDetailsState ? (
     <>
       {currentStep === WIZARD_STEPS.DETAILS ? (
-        <StepDetailsForm onChange={setStepDetailsState} overrides={stepDetailsState} />
+        <StepDetailsForm />
       ) : (
         <StepDetailsSummary {...stepDetailsState} />
       )}

@@ -17,33 +17,16 @@ import {
   usePivotConfigOptions,
 } from '../components/step_define/hooks/use_pivot_config';
 
-import type { StepDefineExposedState } from '../components/step_define';
-import type { StepDetailsExposedState } from '../components/step_details';
-
-import {
-  advancedPivotEditorSlice,
-  type AdvancedPivotEditorState,
-} from './advanced_pivot_editor_slice';
-import {
-  advancedRuntimeMappingsEditorSlice,
-  type AdvancedRuntimeMappingsEditorState,
-} from './advanced_runtime_mappings_editor_slice';
-import {
-  advancedSourceEditorSlice,
-  type AdvancedSourceEditorState,
-} from './advanced_source_editor_slice';
+import { advancedPivotEditorSlice } from './advanced_pivot_editor_slice';
+import { advancedRuntimeMappingsEditorSlice } from './advanced_runtime_mappings_editor_slice';
+import { advancedSourceEditorSlice } from './advanced_source_editor_slice';
 import { stepDefineSlice } from './step_define_slice';
 import { stepDetailsSlice } from './step_details_slice';
-import { wizardSlice, type WizardState } from './wizard_slice';
+import { wizardSlice } from './wizard_slice';
 
-export interface StoreState {
-  wizard: WizardState;
-  stepDefine: StepDefineExposedState;
-  stepDetails: StepDetailsExposedState | null;
-  advancedPivotEditor: AdvancedPivotEditorState;
-  advancedRuntimeMappingsEditor: AdvancedRuntimeMappingsEditorState;
-  advancedSourceEditor: AdvancedSourceEditorState;
-}
+// Because we get the redux store with a factory function we need to
+// use these nested ReturnTypes to dynamically get the StoreState.
+export type StoreState = ReturnType<ReturnType<typeof getTransformWizardStore>['getState']>;
 
 export const getTransformWizardStore = () =>
   configureStore({

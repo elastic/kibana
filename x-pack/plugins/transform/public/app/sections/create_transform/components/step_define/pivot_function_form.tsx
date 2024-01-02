@@ -45,13 +45,13 @@ const { collapseLiteralStrings } = XJson;
 const advancedEditorsSidebarWidth = '220px';
 
 interface PivotFunctionFormProps {
-  copyToClipboardPivot: string;
-  copyToClipboardPivotDescription: string;
+  copyToClipboard: string;
+  copyToClipboardDescription: string;
 }
 
 export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
-  copyToClipboardPivot,
-  copyToClipboardPivotDescription,
+  copyToClipboard,
+  copyToClipboardDescription,
 }) => {
   const { esTransformPivot } = useDocumentationLinks();
 
@@ -120,15 +120,12 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                   <AdvancedPivotEditorSwitch />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiCopy
-                    beforeMessage={copyToClipboardPivotDescription}
-                    textToCopy={copyToClipboardPivot}
-                  >
+                  <EuiCopy beforeMessage={copyToClipboardDescription} textToCopy={copyToClipboard}>
                     {(copy: () => void) => (
                       <EuiButtonIcon
                         onClick={copy}
                         iconType="copyClipboard"
-                        aria-label={copyToClipboardPivotDescription}
+                        aria-label={copyToClipboardDescription}
                       />
                     )}
                   </EuiCopy>
