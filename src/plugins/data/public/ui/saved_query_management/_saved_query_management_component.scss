@@ -10,7 +10,7 @@
 
 .kbnSavedQueryManagement__pagination {
   justify-content: center;
-  padding: ($euiSizeM / 2) $euiSizeM $euiSizeM;
+  padding: calc($euiSizeM / 2) $euiSizeM $euiSizeM;
 }
 
 .kbnSavedQueryManagement__text {
