@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { last, merge, repeat } from 'lodash';
-import { ChatCompletionResponseMessage } from 'openai';
+import type OpenAI from 'openai';
 import { Subject } from 'rxjs';
 import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
@@ -51,6 +51,8 @@ function createLlmSimulator() {
         choices: [
           {
             delta: msg,
+            index: 0,
+            finish_reason: null,
           },
         ],
       };
@@ -974,6 +976,7 @@ describe('Observability AI Assistant client', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
@@ -1024,6 +1027,7 @@ describe('Observability AI Assistant client', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
@@ -1342,9 +1346,9 @@ describe('Observability AI Assistant client', () => {
     it('truncates the message', () => {
       const body = JSON.parse(
         (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
-      );
+      ) as OpenAI.Chat.ChatCompletionCreateParams;
 
-      const parsed = JSON.parse(last(body.messages as ChatCompletionResponseMessage[])!.content!);
+      const parsed = JSON.parse(last(body.messages)!.content! as string);
 
       expect(parsed).toEqual({
         message: 'Function response exceeded the maximum length allowed and was truncated',
