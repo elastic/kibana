@@ -60,11 +60,7 @@ export class ElasticAssistantPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    console.log('before');
-    console.log('during', initializerContext.config);
-    console.log('get', initializerContext.config.get());
     this.config = initializerContext.config.get();
-    console.log('after');
   }
 
   private createRouteHandlerContext = ({

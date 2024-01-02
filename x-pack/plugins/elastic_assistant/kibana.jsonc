@@ -7,6 +7,8 @@
     "id": "elasticAssistant",
     "server": true,
     "browser": false,
+    // TODO Remove access to preconfigured connector creds
+    // do not commit to main. For development only
     "configPath": [
       "xpack",
       "actions"

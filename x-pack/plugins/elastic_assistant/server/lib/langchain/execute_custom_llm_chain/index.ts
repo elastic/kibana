@@ -48,8 +48,8 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
+  // do not commit to main. For development only
   const azureCreds = config.preconfigured['my-gen-ai'];
-  console.log('helloworld config', azureCreds);
   const llm2 = new ActionsClientLlm({
     actions,
     connectorId,
@@ -158,6 +158,7 @@ export const callAgentExecutor = async ({
     });
 
     return Readable.from(transformStream).pipe(new PassThrough()); // new StreamingTextResponse(transformStream);
+    return logStream; // new StreamingTextResponse(transformStream);
   }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
