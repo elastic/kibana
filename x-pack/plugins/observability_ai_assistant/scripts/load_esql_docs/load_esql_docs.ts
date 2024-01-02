@@ -15,6 +15,7 @@ import Path from 'path';
 import git, { SimpleGitProgressEvent } from 'simple-git';
 import yargs, { Argv } from 'yargs';
 import { extractSections } from './extract_sections';
+import { formatEsqlExamples } from './format_esql_examples';
 
 yargs(process.argv.slice(2))
   .command(
@@ -221,7 +222,19 @@ yargs(process.argv.slice(2))
                   outDir,
                   `esql-${doc.title.replaceAll(' ', '-').toLowerCase()}.txt`
                 );
-                await Fs.writeFile(fileName, doc.content);
+
+                // We ask the LLM to output queries wrapped in ```esql...```,
+                // so we try to format ES|QL examples in the docs in the same
+                // way. The hope is that this creates a stronger relation in the
+                // output.
+                const formattedContent = formatEsqlExamples(doc.content);
+
+                log.debug({
+                  content: doc.content,
+                  formattedContent,
+                });
+
+                await Fs.writeFile(fileName, formattedContent);
               })
             )
           );
