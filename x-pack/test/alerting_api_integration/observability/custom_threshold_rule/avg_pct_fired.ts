@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { omit } from 'lodash';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
@@ -14,6 +15,7 @@ import {
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import {
   waitForAlertInIndex,
@@ -21,7 +23,8 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -35,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts';
     const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     const MOCKED_AD_HOC_DATA_VIEW = {
       id: DATA_VIEW_ID,
-      title: DATE_VIEW,
+      title: DATE_VIEW_TITLE,
       timeFieldName: '@timestamp',
       sourceFilters: [],
       fieldFormats: {},
@@ -122,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
                     host: '{{context.host}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -218,6 +222,18 @@ export default function ({ getService }: FtrProviderContext) {
           `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
+
+        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATE_VIEW_TITLE,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });
