@@ -12,6 +12,7 @@ import { type LensChartLoadEvent } from '@kbn/visualization-utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../utils';
+
 export function isEmbeddableEditActionCompatible(core: CoreStart) {
   return core.uiSettings.get('discover:enableESQL');
 }
@@ -27,9 +28,9 @@ export async function executeEditEmbeddableAction({
   deps: LensPluginStartDependencies;
   core: CoreStart;
   attributes: TypedLensByValueInput['attributes'];
-  lensEvent?: LensChartLoadEvent;
+  lensEvent: LensChartLoadEvent;
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
-  onApply?: (input: TypedLensByValueInput['attributes']) => void;
+  onApply?: () => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core);
   if (!isCompatibleAction) {
@@ -92,7 +93,7 @@ export async function executeEditEmbeddableAction({
       output$={lensEvent?.embeddableOutput$}
       displayFlyoutHeader
       datasourceId={activeDatasourceId}
-      hidesSuggestions
+      onApplyCb={onApply}
     />
   );
 

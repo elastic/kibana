@@ -82,6 +82,8 @@ export interface EditConfigPanelProps {
   deletePanel?: () => void;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
+  /** Optional callback for apply flyout button */
+  onApplyCb?: () => void;
 }
 
 export interface LayerConfigurationProps {

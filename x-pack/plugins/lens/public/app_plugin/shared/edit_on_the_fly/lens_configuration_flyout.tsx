@@ -64,6 +64,7 @@ export function LensEditConfigurationFlyout({
   isNewPanel,
   deletePanel,
   hidesSuggestions,
+  onApplyCb,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -218,10 +219,12 @@ export function LensEditConfigurationFlyout({
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
+    onApplyCb?.();
     closeFlyout?.();
   }, [
     savedObjectId,
     closeFlyout,
+    onApplyCb,
     datasourceStates,
     visualization.state,
     activeVisualization,

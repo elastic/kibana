@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,13 +37,12 @@ export const App = (props: {
     undefined
   );
   const [lensLoadEvent, setLensLoadEvent] = useState<LensChartLoadEvent | null>(null);
-
-  useEffect(() => {
-    const configBuilder = new LensConfigBuilder(
-      props.stateHelpers.formula,
-      props.plugins.dataViews
-    );
-    const config = {
+  const configBuilder = useMemo(
+    () => new LensConfigBuilder(props.stateHelpers.formula, props.plugins.dataViews),
+    [props.plugins.dataViews, props.stateHelpers.formula]
+  );
+  const config = useMemo(() => {
+    return {
       chartType: 'metric',
       title: 'metric chart',
       layers: [
@@ -56,8 +55,10 @@ export const App = (props: {
         },
       ],
     } as unknown as LensConfig;
+  }, []);
 
-    const options: LensConfigOptions = {
+  const options: LensConfigOptions = useMemo(() => {
+    return {
       embeddable: true,
       timeRange: {
         from: 'now-30d',
@@ -65,6 +66,8 @@ export const App = (props: {
         type: 'relative',
       },
     };
+  }, []);
+  useEffect(() => {
     ref.current = true;
     configBuilder.build(config, options).then((input) => {
       if (ref.current) {
@@ -74,7 +77,9 @@ export const App = (props: {
     return () => {
       ref.current = false;
     };
-  }, [props.plugins.dataViews, props.stateHelpers.formula]);
+  }, [config, configBuilder, options, props.plugins.dataViews, props.stateHelpers.formula]);
+
+  // get the Lens load event from the embeddable
   const onLoad = useCallback(
     (
       isLoading: boolean,
@@ -93,12 +98,10 @@ export const App = (props: {
   );
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
+  // type InlineEditLensEmbeddableContext
   const triggerOptions = {
     attributes: embeddableInput?.attributes,
-    lensEvent: {
-      adapters: lensLoadEvent?.adapters,
-      embeddableOutput$: lensLoadEvent?.embeddableOutput$,
-    },
+    lensEvent: lensLoadEvent,
     onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
       if (embeddableInput) {
         const newInput = {
@@ -107,6 +110,9 @@ export const App = (props: {
         };
         setEmbeddableInput(newInput);
       }
+    },
+    onApply: () => {
+      alert('optional onApply callback!');
     },
   };
 
@@ -133,36 +139,32 @@ export const App = (props: {
               responsive={false}
             >
               <EuiFlexItem className="eui-fullHeight">
-                <EuiFlexGroup className="eui-fullHeight" gutterSize="l">
-                  <EuiFlexItem grow={3}>
-                    <EuiPanel hasShadow={false}>
-                      <p>Inline editing of an ES|QL chart.</p>
-                      <EuiSpacer />
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          {embeddableInput && (
-                            <LensComponent
-                              style={{ height: 500 }}
-                              {...embeddableInput}
-                              onLoad={onLoad}
-                            />
-                          )}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            size="xs"
-                            iconType="pencil"
-                            onClick={() => {
-                              props.plugins.uiActions
-                                .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                                .exec(triggerOptions);
-                            }}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiPanel hasShadow={false}>
+                  <p>Inline editing of an ES|QL chart.</p>
+                  <EuiSpacer />
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      {embeddableInput && (
+                        <LensComponent
+                          style={{ height: 500 }}
+                          {...embeddableInput}
+                          onLoad={onLoad}
+                        />
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="pencil"
+                        onClick={() => {
+                          props.plugins.uiActions
+                            .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
+                            .exec(triggerOptions);
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageSection>

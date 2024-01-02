@@ -13,16 +13,20 @@ import type { TypedLensByValueInput } from '../../embeddable/embeddable_componen
 
 const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
 
-interface Context {
-  attributes?: TypedLensByValueInput['attributes'];
-  lensEvent?: LensChartLoadEvent;
+interface InlineEditLensEmbeddableContext {
+  // attributes of the Lens embeddable
+  attributes: TypedLensByValueInput['attributes'];
+  // chart event, can be fetched from the onLoad embeddable callback
+  lensEvent: LensChartLoadEvent;
+  // callback which runs every time something changes in the dimension panel
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
-  onApply?: (input: TypedLensByValueInput['attributes']) => void;
+  // optional onApply callback
+  onApply?: () => void;
 }
 
 export const getAsyncHelpers = async () => await import('../../async_services');
 
-export class EditLensEmbeddableAction implements Action<Context> {
+export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;
   public id = ACTION_EDIT_LENS_EMBEDDABLE;
   public order = 50;
@@ -48,7 +52,12 @@ export class EditLensEmbeddableAction implements Action<Context> {
     return isEmbeddableEditActionCompatible(this.core);
   }
 
-  public async execute({ attributes, lensEvent, onUpdate, onApply }: Context) {
+  public async execute({
+    attributes,
+    lensEvent,
+    onUpdate,
+    onApply,
+  }: InlineEditLensEmbeddableContext) {
     const { executeEditEmbeddableAction } = await getAsyncHelpers();
     if (attributes) {
       executeEditEmbeddableAction({
