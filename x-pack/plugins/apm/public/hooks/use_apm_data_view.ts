@@ -28,7 +28,7 @@ export function useApmDataView() {
       const indexPattern = await getApmDataViewIndexPattern();
       try {
         const displayError = false;
-        return await services.dataViews.create(
+        return await services.dataViews.createLegacy(
           { title: indexPattern },
           undefined,
           displayError
