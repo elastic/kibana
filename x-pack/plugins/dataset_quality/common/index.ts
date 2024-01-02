@@ -23,4 +23,8 @@ export {
   ingestPipelineErrorFailReasonRT,
   skippedDatasetQualityCheckRT,
 } from './rest';
-export type { APIClientRequestParamsOf, APIReturnType } from './rest';
+export type {
+  APIClientRequestParamsOf,
+  APIReturnType,
+  GetDatastreamChecksResponsePayload,
+} from './rest';

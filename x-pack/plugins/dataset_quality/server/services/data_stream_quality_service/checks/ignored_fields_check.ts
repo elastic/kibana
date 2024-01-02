@@ -9,4 +9,12 @@ import { DataStreamQualityCheck } from './types';
 
 export const checkForIgnoredFields: DataStreamQualityCheck = {
   id: 'ignored-fields',
+  apply:
+    ({ search }) =>
+    async ({ dataStream, timeRange }) => {
+      // TODO: perform actual check
+      return {
+        type: 'passed',
+      };
+    },
 };

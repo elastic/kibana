@@ -67,3 +67,7 @@ export const getDatastreamChecksResponsePayloadRT = rt.strict({
   performed_checks: rt.array(datasetQualityCheckRT),
   skipped_checks: rt.array(skippedDatasetQualityCheckRT),
 });
+
+export type GetDatastreamChecksResponsePayload = rt.TypeOf<
+  typeof getDatastreamChecksResponsePayloadRT
+>;

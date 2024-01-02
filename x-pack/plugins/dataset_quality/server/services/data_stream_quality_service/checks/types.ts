@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { ISearchGeneric } from '@kbn/data-plugin/common';
+
 export interface DataStreamQualityCheck {
   id: string;
-  apply: () => Promise<QualityCheckResult>;
+  apply: (
+    dependencies: DataStreamQualityCheckDependencies
+  ) => (args: DataStreamQualityCheckArguments) => Promise<QualityCheckResult>;
 }
 
 export type QualityCheckResult = CheckPassedResult | CheckFailedResult;
@@ -19,4 +23,16 @@ interface CheckPassedResult {
 interface CheckFailedResult {
   type: 'failed';
   reasons: null;
+}
+
+interface DataStreamQualityCheckDependencies {
+  search: ISearchGeneric;
+}
+
+interface DataStreamQualityCheckArguments {
+  dataStream: string;
+  timeRange: {
+    start: string;
+    end: string;
+  };
 }
