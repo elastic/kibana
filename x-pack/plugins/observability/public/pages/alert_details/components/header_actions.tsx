@@ -10,12 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
+import { paths } from '../../../../common/locators/paths';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -27,6 +35,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    http,
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
@@ -77,6 +86,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={handleClosePopover}
+        ownFocus
         button={
           <EuiButton
             fill
@@ -95,13 +105,13 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
-            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-            onClick={handleViewRuleDetails}
-            data-test-subj="view-rule-details-button"
+            iconType="plusInCircle"
+            onClick={handleAddToCase}
+            data-test-subj="add-to-case-button"
           >
             <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
-                defaultMessage: 'View rule details',
+              {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                defaultMessage: 'Add to case',
               })}
             </EuiText>
           </EuiButtonEmpty>
@@ -109,6 +119,21 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
+            iconType="pencil"
+            onClick={handleViewRuleDetails}
+            data-test-subj="edit-rule-button"
+          >
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.alertDetails.editRule', {
+                defaultMessage: 'Edit rule',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
+
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            iconType="bellSlash"
             onClick={handleOpenSnoozeModal}
             data-test-subj="snooze-rule-button"
           >
@@ -122,12 +147,31 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
-            onClick={handleAddToCase}
-            data-test-subj="add-to-case-button"
+            iconType="eyeClosed"
+            onClick={() => {}}
+            data-test-subj="untrack-alert-button"
           >
             <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                defaultMessage: 'Add to case',
+              {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
+                defaultMessage: 'Mark as untracked',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
+
+          <EuiHorizontalRule margin="none" />
+
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            iconType="link"
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+            data-test-subj="view-rule-details-button"
+            href={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
+            target="_blank"
+          >
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                defaultMessage: 'Go to rule details',
               })}
             </EuiText>
           </EuiButtonEmpty>
