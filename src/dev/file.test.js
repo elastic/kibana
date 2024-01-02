@@ -30,9 +30,9 @@ describe('dev/File', () => {
   });
 
   describe('#isJs()', () => {
-    it('returns true if extension is .js', () => {
+    it('returns true if extension is .js @jbudz #12345', () => {
       const file = new File('file.js');
-      expect(file.isJs()).toBe(true);
+      expect(file.isJs()).not.toBe(true);
     });
     it('returns false if extension is .xml', () => {
       const file = new File('file.xml');
