@@ -107,6 +107,7 @@ export const getTopNavConfig = (
     application,
     chrome,
     overlays,
+    http,
     history,
     share,
     setActiveUrl,
@@ -410,6 +411,9 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            overlays,
+            http,
+            allowedTypes: [],
           });
         }
       },

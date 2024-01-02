@@ -20,6 +20,7 @@ import type {
   ScopedHistory,
   AppMountParameters,
   ThemeServiceStart,
+  HttpStart,
 } from '@kbn/core/public';
 
 import type {
@@ -121,6 +122,7 @@ export interface VisualizeServices extends CoreStart {
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   contentManagement: ContentManagementPublicStart;
+  http: HttpStart;
 }
 
 export interface VisInstance {

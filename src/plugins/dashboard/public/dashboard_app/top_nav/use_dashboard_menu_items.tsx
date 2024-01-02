@@ -12,6 +12,7 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
+import { HttpStart } from '@kbn/core-http-browser';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -43,6 +44,8 @@ export const useDashboardMenuItems = ({
     dashboardBackup,
     settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
+    overlays,
+    http,
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
@@ -72,9 +75,11 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
+        overlays,
+        http: http as HttpStart,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId, http, overlays]
   );
 
   const maybeRedirect = useCallback(

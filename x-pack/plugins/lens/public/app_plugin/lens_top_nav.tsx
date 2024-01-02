@@ -285,8 +285,6 @@ export const LensTopNavMenu = ({
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
-  overlays,
-  http,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -299,6 +297,8 @@ export const LensTopNavMenu = ({
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    http,
+    overlays,
   } = useKibana<LensAppServices>().services;
 
   const {
@@ -799,8 +799,6 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
-    overlays,
-    http,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

@@ -13,7 +13,7 @@ import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import { QueryState } from '@kbn/data-plugin/common';
-import type { Capabilities } from '@kbn/core/public';
+import type { Capabilities, HttpStart, OverlayStart } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
@@ -33,6 +33,8 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  overlays: OverlayStart;
+  http?: HttpStart;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -48,6 +50,8 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  overlays,
+  http,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -197,5 +201,7 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
+    overlays,
+    allowedTypes: [],
   });
 }

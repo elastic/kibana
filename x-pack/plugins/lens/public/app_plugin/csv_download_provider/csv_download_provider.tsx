@@ -111,7 +111,7 @@ export const downloadCsvShareProvider = ({
   overlays,
   i18nStart,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }

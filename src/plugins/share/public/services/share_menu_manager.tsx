@@ -96,9 +96,6 @@ export class ShareMenuManager {
     disabledShareUrl,
     i18n,
     overlays,
-    http,
-    taggingApi,
-    allowedTypes,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;

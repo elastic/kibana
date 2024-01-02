@@ -379,17 +379,19 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      const register = async () =>
+      async () => {
+        const [coreStart] = await core.getStartServices();
+
         share.register(
           downloadCsvShareProvider({
             uiSettings: core.uiSettings,
             formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
             theme: core.theme,
-            overlays: await startServices().core.overlays,
-            i18nStart: await startServices().core.i18n,
+            overlays: coreStart.overlays,
+            i18nStart: coreStart.i18n,
           })
         );
-      register();
+      };
     }
 
     visualizations.registerAlias(getLensAliasConfig());
