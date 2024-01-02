@@ -31,7 +31,7 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
     async () => {
       let dataView;
       try {
-        const data = await dataViews.find('logs-osquery_manager.result*', 1);
+        const data = await dataViews.findLegacy('logs-osquery_manager.result*', 1);
         if (data.length) {
           dataView = data[0];
         } else {
@@ -42,10 +42,11 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
 
       if (!dataView && dataViews.getCanSaveSync()) {
         try {
-          dataView = await dataViews.createAndSave({
+          const dataViewLazy = await dataViews.createAndSave({
             title: 'logs-osquery_manager.result*',
             timeFieldName: '@timestamp',
           });
+          dataView = await dataViews.toDataView(dataViewLazy);
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }

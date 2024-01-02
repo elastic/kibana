@@ -56,7 +56,7 @@ export const useLatestFindingsDataView = (dataView: string) => {
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const findDataView = async (): Promise<DataView> => {
-    const [dataViewObj] = await dataViews.find(dataView);
+    const [dataViewObj] = await dataViews.findLegacy(dataView);
     if (!dataViewObj) {
       throw new Error(`Data view not found [Name: {${dataView}}]`);
     }
