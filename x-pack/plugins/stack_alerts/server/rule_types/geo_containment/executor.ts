@@ -21,14 +21,7 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import {
-  ActionGroupId,
-  GEO_CONTAINMENT_ID,
-  FIELD_KEY_ENTITY_ID,
-  FIELD_KEY_ENTITY_TIMESTAMP,
-  FIELD_KEY_ENTITY_LOCATION,
-  FIELD_KEY_DETECTION_TIMESTAMP,
-} from './constants';
+import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
   previousStartedAt,
@@ -108,12 +101,7 @@ export async function executor({
         services.alertsClient?.setAlertData({
           id: recoveredAlertId,
           context,
-          payload: {
-            [FIELD_KEY_ENTITY_ID]: context.entityId,
-            [FIELD_KEY_ENTITY_TIMESTAMP]: context.entityDateTime,
-            [FIELD_KEY_ENTITY_LOCATION]: context.FIELD_KEY_ENTITY_LOCATION,
-            [FIELD_KEY_DETECTION_TIMESTAMP]: context.detectionDateTime,
-          },
+          payload: {},
         });
       }
     } catch (e) {

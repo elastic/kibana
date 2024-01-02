@@ -20,12 +20,6 @@ import {
   ActionGroupId,
   RecoveryActionGroupId,
   GEO_CONTAINMENT_ID,
-  FIELD_KEY_ENTITY_ID,
-  FIELD_KEY_ENTITY_TIMESTAMP,
-  FIELD_KEY_ENTITY_LOCATION,
-  FIELD_KEY_DETECTION_TIMESTAMP,
-  FIELD_KEY_BOUNDARY_ID,
-  FIELD_KEY_BOUNDARY_NAME,
 } from './constants';
 
 const actionVariables = {
@@ -211,16 +205,9 @@ export function getRuleType(): GeoContainmentRuleType {
       },
     },
     alerts: {
-      context: 'stack.containment', // TODO replace with "stack" once new fields are supported
+      context: 'stack',
       mappings: {
-        fieldMap: {
-          [FIELD_KEY_ENTITY_ID]: { type: 'keyword', array: false, required: true },
-          [FIELD_KEY_ENTITY_TIMESTAMP]: { type: 'date', array: false, required: true },
-          [FIELD_KEY_ENTITY_LOCATION]: { type: 'geo_point', array: false, required: true },
-          [FIELD_KEY_DETECTION_TIMESTAMP]: { type: 'date', array: false, required: true },
-          [FIELD_KEY_BOUNDARY_ID]: { type: 'keyword', array: false, required: false },
-          [FIELD_KEY_BOUNDARY_NAME]: { type: 'keyword', array: false, required: false },
-        },
+        fieldMap: {},
       },
       shouldWrite: true,
     }
