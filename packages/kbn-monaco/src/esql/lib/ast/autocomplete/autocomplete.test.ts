@@ -291,6 +291,7 @@ describe('autocomplete', () => {
     testSuggestions('from a,', suggestedIndexes);
     testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
     testSuggestions('from *,', suggestedIndexes);
+    testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
   });
 
   describe('where', () => {
