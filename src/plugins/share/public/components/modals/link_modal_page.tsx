@@ -393,21 +393,17 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
           </EuiForm>
         </EuiModalBody>  
         <EuiModalFooter>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem>
-                  <EuiButtonEmpty onClick={onClose}>
-                    <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton fill onClick={() => copyLink()}>
-                    <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            <EuiFlexItem grow={0}>
+              <EuiButtonEmpty onClick={onClose}>
+                <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiButton fill onClick={() => copyLink()}>
+                <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalFooter>

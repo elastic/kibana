@@ -395,20 +395,6 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <EuiSpacer size="m" />
-            <EuiFlexGroup> */}
-              {/* {props.urlParamExtensions && props.urlParamExtensions?.map(({paramName}) => { */}
-              {/* <EuiButton fill onClick={() => setParamValue('embed')}>
-                <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
-              </EuiButton> */}
-              {/* })} */}
-            {/* </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup direction="row" justifyContent="flexEnd">
-              <EuiButton fill onClick={onClose}>
-                <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
-              </EuiButton>
-            </EuiFlexGroup> */}
           </EuiForm>
         </EuiModalBody>
         <EuiModalFooter>
@@ -423,7 +409,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButton fill onClick={() => setParamValue('embed')}>
-                    <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
+                    <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy embed" />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
