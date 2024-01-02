@@ -35,7 +35,7 @@ import {
   useLensDispatch,
 } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { extractReferencesFromState } from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -281,19 +281,26 @@ export function LensEditConfigurationFlyout({
     if (!visualization.state || !visualization.activeId) {
       return false;
     }
-    return Boolean(
-      buildExpression({
-        visualization: activeVisualization,
-        visualizationState: visualization.state,
-        datasourceMap,
-        datasourceStates,
-        datasourceLayers: framePublicAPI.datasourceLayers,
-        indexPatterns: framePublicAPI.dataViews.indexPatterns,
-        dateRange: framePublicAPI.dateRange,
-        nowInstant: startDependencies.data.nowProvider.get(),
-        searchSessionId,
-      })
-    );
+    const visualizationErrors = getUserMessages(['visualization'], {
+      severity: 'error',
+    });
+    // shouldn't build expression if there is any type of error other than an expression build error
+    // (in which case we try again every time because the config might have changed)
+    if (visualizationErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+      return Boolean(
+        buildExpression({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers: framePublicAPI.datasourceLayers,
+          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
+          nowInstant: startDependencies.data.nowProvider.get(),
+          searchSessionId,
+        })
+      );
+    }
   }, [
     attributesChanged,
     activeVisualization,
@@ -306,6 +313,7 @@ export function LensEditConfigurationFlyout({
     startDependencies.data.nowProvider,
     visualization.activeId,
     visualization.state,
+    getUserMessages,
   ]);
 
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
