@@ -6,12 +6,20 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { estypes } from '@elastic/elasticsearch';
-import { ServiceAsset, GetServicesResponse } from '../../../../common/http_api/services';
-import { GetServicesOptions } from './types';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { ESSearchClient } from '../metrics/types';
+import {
+  ServiceAsset,
+  ServicesAPIRequest,
+  ServicesAPIQueryAggregationAggregation,
+} from '../../../common/http_api/host_details';
 
-export const getServices = async (options: GetServicesOptions): Promise<GetServicesResponse> => {
-  const { transaction, error, metric } = options.apmIndices;
+export const getServices = async (
+  client: ESSearchClient,
+  apmIndices: APMDataAccessConfig['indices'],
+  options: ServicesAPIRequest
+) => {
+  const { transaction, error, metric } = apmIndices;
   const filters: QueryDslQueryContainer[] = [];
   filters.push({
     bool: {
@@ -23,8 +31,7 @@ export const getServices = async (options: GetServicesOptions): Promise<GetServi
     },
   });
 
-  const dsl: estypes.SearchRequest = {
-    index: [transaction, error, metric],
+  const body = {
     size: 0,
     _source: false,
     query: {
@@ -62,12 +69,16 @@ export const getServices = async (options: GetServicesOptions): Promise<GetServi
       },
     },
   };
-  const esResponse = await options.searchClient.search(dsl);
 
-  const { buckets = [] } = (esResponse.aggregations?.services || {}) as any;
-  const services = buckets.reduce((acc: ServiceAsset[], bucket: any) => {
+  const result = await client<{}, ServicesAPIQueryAggregationAggregation>({
+    body,
+    index: [transaction, error, metric],
+  });
+
+  const { buckets: servicesListBuckets } = result.aggregations!.services;
+  const services = servicesListBuckets.reduce((acc: ServiceAsset[], bucket) => {
     const serviceName = bucket.key;
-    const agentName = bucket.latestAgent.top[0]?.metrics['agent.name'];
+    const agentName = bucket.latestAgent.top[0].metrics['agent.name'];
 
     if (!serviceName) {
       return acc;

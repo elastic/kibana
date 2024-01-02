@@ -10,10 +10,11 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   GetServicesRequestQueryRT,
   GetServicesRequestQuery,
-} from '../../../common/http_api/services';
+} from '../../../common/http_api/host_details';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getServices } from './lib/get_services';
+import { getServices } from '../../lib/host_details/get_services';
 import { validateStringAssetFilters } from './lib/utils';
+import { createSearchClient } from '../../lib/create_search_client';
 
 export const initServicesRoute = (libs: InfraBackendLibs) => {
   const validate = createRouteValidationFunction(GetServicesRequestQueryRT);
@@ -45,16 +46,13 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         if (!filters) {
           throw Boom.badRequest('Invalid filters');
         }
-        const coreContext = await requestContext.core;
-        const searchClient = coreContext.elasticsearch.client.asCurrentUser;
+        const client = createSearchClient(requestContext, framework, request);
         const soClient = savedObjects.getScopedClient(request);
         const apmIndices = await libs.getApmIndices(soClient);
-        const services = await getServices({
+        const services = await getServices(client, apmIndices, {
           from,
           to,
           filters,
-          searchClient,
-          apmIndices,
         });
         return response.ok({
           body: services,

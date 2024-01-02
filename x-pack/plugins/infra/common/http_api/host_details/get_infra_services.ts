@@ -13,9 +13,11 @@ import {
 } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
+const AgentNameRT = rt.union([rt.string, rt.null]);
+
 export const serviceAssetRT = rt.type({
   'service.name': rt.string,
-  'agent.name': rt.union([rt.string, rt.undefined]),
+  'agent.name': AgentNameRT,
 });
 
 export type ServiceAsset = rt.TypeOf<typeof serviceAssetRT>;
@@ -45,6 +47,32 @@ export const GetServicesRequestQueryRT = rt.intersection([
   }),
 ]);
 
-export interface GetServicesResponse {
-  services: ServiceAsset[];
+export interface ServicesAPIRequest {
+  filters: ServicesFilter;
+  from: string;
+  to?: string;
 }
+
+export const ServicesAPIQueryAggregationRT = rt.type({
+  services: rt.type({
+    buckets: rt.array(
+      rt.type({
+        key: rt.string,
+        latestAgent: rt.type({
+          top: rt.array(
+            rt.type({
+              sort: rt.array(rt.string),
+              metrics: rt.type({
+                'agent.name': AgentNameRT,
+              }),
+            })
+          ),
+        }),
+      })
+    ),
+  }),
+});
+
+export type ServicesAPIQueryAggregationAggregation = rt.TypeOf<
+  typeof ServicesAPIQueryAggregationRT
+>;

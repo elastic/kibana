@@ -6,7 +6,7 @@
  */
 import { RouteValidationError, RouteValidationResultFactory } from '@kbn/core/server';
 import { isLeft } from 'fp-ts/Either';
-import { servicesFiltersRT, ServicesFilter } from '../../../../common/http_api/services';
+import { servicesFiltersRT, ServicesFilter } from '../../../../common/http_api/host_details';
 
 type ValidateStringAssetFiltersReturn = [{ error: RouteValidationError }] | [null, ServicesFilter];
 
