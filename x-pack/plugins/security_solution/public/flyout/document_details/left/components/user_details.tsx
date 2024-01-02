@@ -30,7 +30,7 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import {
   SecurityCellActions,
@@ -49,7 +49,7 @@ import { useUserRelatedHosts } from '../../../../common/containers/related_entit
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
-import { ENTITY_RISK_LEVEL } from '../../../../explore/components/risk_score/translations';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const USER_DETAILS_ID = 'entities-users-details';
