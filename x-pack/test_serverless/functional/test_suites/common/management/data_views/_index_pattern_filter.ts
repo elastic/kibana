@@ -24,13 +24,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('app-card-dataViews');
     });
 
+    after(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     beforeEach(async function () {
       await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should filter indexed fields by type', async function () {
