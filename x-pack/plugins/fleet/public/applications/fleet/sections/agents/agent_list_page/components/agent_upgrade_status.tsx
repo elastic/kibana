@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import moment from 'moment';
 
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 
@@ -64,7 +65,13 @@ const formatRate = (downloadRate: number) => {
 };
 const formatRetryUntil = (retryUntil: string | undefined) => {
   if (!retryUntil) return '';
-  return `Retrying until: ${new Date(retryUntil).toISOString()}`;
+  const eta = new Date(retryUntil).toISOString();
+  const remainingTime = Date.parse(retryUntil) - Date.now();
+  const duration = moment
+    .utc(moment.duration(remainingTime, 'milliseconds').asMilliseconds())
+    .format('HH:mm');
+
+  return remainingTime > 0 ? `Retrying until: ${eta} (${duration} remaining)` : '';
 };
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {

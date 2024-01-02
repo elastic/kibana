@@ -7,6 +7,7 @@
 
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import moment from 'moment';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -185,17 +186,43 @@ describe('AgentUpgradeStatus', () => {
           metadata: {
             download_percent: 16.4,
             retry_error_msg: 'unable to download',
-            retry_until: '2024-01-30T16:03:38.159292',
+            retry_until: `${moment().add(10, 'minutes').toISOString()}`,
           },
         },
       });
 
       expectUpgradeStatusBadgeLabel(results, 'Upgrade downloading');
-      await expectTooltip(
-        results,
-        'Upgrade failing: unable to download. Retrying until: 2024-01-30T15:03:38.159Z'
-      );
+      fireEvent.mouseOver(results.getByText('Info'));
+      await waitFor(() => {
+        const tooltip = results.getByRole('tooltip');
+        expect(tooltip).toHaveTextContent('Upgrade failing: unable to download. Retrying until:');
+        expect(tooltip).toHaveTextContent('(00:09 remaining)');
+      });
     });
+
+    it('should not render retry_until if the remaining time is negative', async () => {
+      const results = render({
+        agentUpgradeDetails: {
+          target_version: 'XXX',
+          action_id: 'xxx',
+          state: 'UPG_DOWNLOADING',
+          metadata: {
+            download_percent: 16.4,
+            retry_error_msg: 'unable to download',
+            retry_until: `${moment().subtract(10, 'minutes').toISOString()}`,
+          },
+        },
+      });
+
+      expectUpgradeStatusBadgeLabel(results, 'Upgrade downloading');
+      fireEvent.mouseOver(results.getByText('Info'));
+      await waitFor(() => {
+        const tooltip = results.getByRole('tooltip');
+        expect(tooltip).toHaveTextContent('Upgrade failing: unable to download.');
+        expect(tooltip).not.toHaveTextContent('remaining');
+      });
+    });
+
     it('should render UPG_DOWNLOADING with a warning if agent has a retry_message', async () => {
       const results = render({
         agentUpgradeDetails: {
