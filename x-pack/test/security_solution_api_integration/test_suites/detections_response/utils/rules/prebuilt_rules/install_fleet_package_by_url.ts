@@ -6,11 +6,10 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { retry } from '../..';
+import { refreshSavedObjectIndices, retry } from '../..';
 
 /**
  * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
@@ -44,21 +43,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
     retries: 2,
   });
 
-  // Before we proceed, we need to refresh saved object indices.
-  // At the previous step we installed the Fleet package with prebuilt detection rules.
-  // Prebuilt rules are assets that Fleet indexes as saved objects of a certain type.
-  // Fleet does this via a savedObjectsClient.import() call with explicit `refresh: false`.
-  // So, despite of the fact that the endpoint waits until the prebuilt rule assets will be
-  // successfully indexed, it doesn't wait until they become "visible" for subsequent read
-  // operations.
-  // And this is usually what we do next in integration tests: we read these SOs with utility
-  // function such as getPrebuiltRulesAndTimelinesStatus().
-  // Now, the time left until the next refresh can be anything from 0 to the default value, and
-  // it depends on the time when savedObjectsClient.import() call happens relative to the time of
-  // the next refresh. Also, probably the refresh time can be delayed when ES is under load?
-  // Anyway, this can cause race condition between a write and subsequent read operation, and to
-  // fix it deterministically we have to refresh saved object indices and wait until it's done.
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await refreshSavedObjectIndices(es);
 
   return fleetResponse as InstallPackageResponse;
 };
@@ -96,7 +81,7 @@ export const installPrebuiltRulesPackageByVersion = async (
     retries: 2,
   });
 
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await refreshSavedObjectIndices(es);
 
   return fleetResponse as InstallPackageResponse;
 };

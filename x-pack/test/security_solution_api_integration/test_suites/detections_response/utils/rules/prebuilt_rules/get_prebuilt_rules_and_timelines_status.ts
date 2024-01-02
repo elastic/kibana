@@ -11,7 +11,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { refreshSavedObjectIndices } from '../es_indices';
 
 /**
  * (LEGACY)
@@ -23,8 +23,7 @@ export const getPrebuiltRulesAndTimelinesStatus = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
-  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
+  await refreshSavedObjectIndices(es);
 
   const response = await supertest
     .get(PREBUILT_RULES_STATUS_URL)
