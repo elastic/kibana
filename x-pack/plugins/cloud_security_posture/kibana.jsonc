@@ -21,7 +21,8 @@
       "cloud",
       "licensing",
       "share",
-      "kibanaUtils"
+      "kibanaUtils",
+      "alerting"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]
