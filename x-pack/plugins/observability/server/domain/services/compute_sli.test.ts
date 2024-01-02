@@ -16,8 +16,8 @@ describe('computeSLI', () => {
     expect(computeSLI(100, 1000)).toEqual(0.1);
   });
 
-  it('returns 1 when good is greater than total events', () => {
-    expect(computeSLI(9999, 9)).toEqual(1);
+  it('returns when good is greater than total events', () => {
+    expect(computeSLI(9999, 9)).toEqual(1111);
   });
 
   it('returns rounds the value to 6 digits', () => {

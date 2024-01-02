@@ -34,6 +34,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { getUiCommand } from '../components/hooks';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -981,10 +982,12 @@ describe('Response actions history', () => {
 
         render();
 
+        const outputCommand = getUiCommand(command);
+
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringContaining(`${command} completed successfully`),
-          expect.stringContaining(`${command} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1006,10 +1009,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = getUiCommand(command);
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed`,
-          `${command} failed`,
+          `${outputCommand} failed`,
+          `${outputCommand} failed`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1032,10 +1036,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = getUiCommand(command);
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed: action expired`,
-          `${command} failed: action expired`,
+          `${outputCommand} failed: action expired`,
+          `${outputCommand} failed: action expired`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
