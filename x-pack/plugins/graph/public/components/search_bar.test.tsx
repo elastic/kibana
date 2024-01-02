@@ -17,6 +17,7 @@ import {
   SavedObjectsStart,
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,42 +30,51 @@ import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
+const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
+
 function getServiceMocks() {
-  return {
-    uiSettings: {
-      get: (key: string) => {
-        return 10;
+  const docLinks = {
+    links: {
+      query: {
+        kueryQuerySyntax: '',
       },
-    } as IUiSettingsClient,
+    },
+  } as DocLinksStart;
+  const uiSettings = {
+    get: (key: string) => {
+      return 10;
+    },
+  } as IUiSettingsClient;
+
+  return {
     savedObjects: {} as SavedObjectsStart,
     savedObjectsManagement: {} as SavedObjectsManagementPluginStart,
-    notifications: {} as NotificationsStart,
-    docLinks: {
-      links: {
-        query: {
-          kueryQuerySyntax: '',
-        },
-      },
-    } as DocLinksStart,
-    http: {} as HttpStart,
     overlays: {} as OverlayStart,
-    storage: {
-      get: () => {},
-    },
-    data: {
-      query: {
-        savedQueries: {},
-      },
-    },
     unifiedSearch: {
       ui: {
-        QueryStringInput: () => <div>QueryStringInput</div>,
-      },
-      autocomplete: {
-        hasQuerySuggestions: () => false,
+        QueryStringInput: createQueryStringInput({
+          docLinks,
+          uiSettings,
+          storage: {
+            get: () => {},
+            set: () => {},
+            remove: () => {},
+            clear: () => {},
+          } as IStorageWrapper,
+          data: dataPluginMock.createStartContract(),
+          unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+          notifications: {} as NotificationsStart,
+          http: {} as HttpStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
+        }),
       },
     },
   };
@@ -156,6 +166,44 @@ describe('search_bar', () => {
     await mountSearchBar();
 
     expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
+  });
+
+  it('should render search bar and submit queries', async () => {
+    await mountSearchBar();
+
+    await waitForIndexPatternFetch();
+
+    act(() => {
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
+    });
+
+    act(() => {
+      instance.find('form').simulate('submit', { preventDefault: () => {} });
+    });
+
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'x-pack/graph/workspace/SUBMIT_SEARCH',
+      payload: 'testQuery',
+    });
+  });
+
+  it('should translate kql query into JSON dsl', async () => {
+    await mountSearchBar();
+
+    await waitForIndexPatternFetch();
+
+    act(() => {
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
+    });
+
+    act(() => {
+      instance.find('form').simulate('submit', { preventDefault: () => {} });
+    });
+
+    const parsedQuery = JSON.parse(dispatchSpy.mock.calls[0][0].payload);
+    expect(parsedQuery).toEqual({
+      bool: { should: [{ match: { test: 'abc' } }], minimum_should_match: 1 },
+    });
   });
 
   it('should open index pattern picker', async () => {
