@@ -17,7 +17,8 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
   }
 );
 
+// memoize validator
+const validator = numberValidator({ min: 1, integerOnly: true });
+
 export const integerAboveZeroValidator: Validator = (value) =>
-  !(value + '').includes('.') && numberValidator({ min: 1, integerOnly: true })(+value) === null
-    ? []
-    : [numberAboveZeroNotValidErrorMessage];
+  validator(+value) === null ? [] : [numberAboveZeroNotValidErrorMessage];

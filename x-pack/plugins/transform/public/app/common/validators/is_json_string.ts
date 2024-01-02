@@ -17,5 +17,4 @@ export function isJsonString(value: unknown): boolean {
   } catch (e) {
     return false;
   }
-  return true;
 }

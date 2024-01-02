@@ -9,18 +9,13 @@ import { integerAboveZeroValidator } from './integer_above_zero_validator';
 
 describe('Transform: integerAboveZeroValidator()', () => {
   it('should only allow integers above zero', () => {
-    // integerAboveZeroValidator() returns an array of error messages so
-    // an array with a length of 0 means a successful validation.
-
     // invalid
     expect(integerAboveZeroValidator('a-string')).toEqual([
       'Value needs to be an integer above zero.',
     ]);
     expect(integerAboveZeroValidator('0s')).toEqual(['Value needs to be an integer above zero.']);
     expect(integerAboveZeroValidator('1m')).toEqual(['Value needs to be an integer above zero.']);
-    expect(integerAboveZeroValidator('1.')).toEqual(['Value needs to be an integer above zero.']);
     expect(integerAboveZeroValidator('1..')).toEqual(['Value needs to be an integer above zero.']);
-    expect(integerAboveZeroValidator('1.0')).toEqual(['Value needs to be an integer above zero.']);
     expect(integerAboveZeroValidator(-1)).toEqual(['Value needs to be an integer above zero.']);
     expect(integerAboveZeroValidator(0)).toEqual(['Value needs to be an integer above zero.']);
     expect(integerAboveZeroValidator(0.1)).toEqual(['Value needs to be an integer above zero.']);
@@ -28,5 +23,7 @@ describe('Transform: integerAboveZeroValidator()', () => {
     // valid
     expect(integerAboveZeroValidator(1)).toEqual([]);
     expect(integerAboveZeroValidator('1')).toEqual([]);
+    expect(integerAboveZeroValidator('1.')).toEqual([]);
+    expect(integerAboveZeroValidator('1.0')).toEqual([]);
   });
 });

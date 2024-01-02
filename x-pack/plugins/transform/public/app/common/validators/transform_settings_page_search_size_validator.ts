@@ -17,13 +17,13 @@ const pageSearchSizeInvalidErrorMessage = i18n.translate(
   }
 );
 
+// memoize validator
+const validator = numberValidator({ min: 10, max: 65536, integerOnly: true });
+
 /**
  * Validates transform max_page_search_size input.
  * Must be a number between 10 and 65536.
  * @param value User input value.
  */
 export const transformSettingsPageSearchSizeValidator: Validator = (value) =>
-  !(value + '').includes('.') &&
-  numberValidator({ min: 10, max: 65536, integerOnly: true })(+value) === null
-    ? []
-    : [pageSearchSizeInvalidErrorMessage];
+  validator(+value) === null ? [] : [pageSearchSizeInvalidErrorMessage];

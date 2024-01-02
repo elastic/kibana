@@ -17,8 +17,8 @@ const numberOfRetriesInvalidErrorMessage = i18n.translate(
   }
 );
 
+// memoize validator
+const validator = numberValidator({ min: 1, integerOnly: true });
+
 export const transformSettingsNumberOfRetriesValidator: Validator = (value) =>
-  !(value + '').includes('.') &&
-  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
-    ? []
-    : [numberOfRetriesInvalidErrorMessage];
+  validator(+value) === null ? [] : [numberOfRetriesInvalidErrorMessage];

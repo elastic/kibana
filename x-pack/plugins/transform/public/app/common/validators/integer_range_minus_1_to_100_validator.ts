@@ -17,8 +17,8 @@ const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
   }
 );
 
+// memoize validator
+const validator = numberValidator({ min: -1, max: 100, integerOnly: true });
+
 export const integerRangeMinus1To100Validator: Validator = (value) =>
-  !(value + '').includes('.') &&
-  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
-    ? []
-    : [numberRangeMinus1To100NotValidErrorMessage];
+  validator(+value) === null ? [] : [numberRangeMinus1To100NotValidErrorMessage];
