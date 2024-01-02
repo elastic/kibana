@@ -267,9 +267,7 @@ export function Chart({
       <EuiButtonIcon
         size="xs"
         iconType="pencil"
-        onClick={() => {
-          setIsFlyoutVisible(true);
-        }}
+        onClick={() => setIsFlyoutVisible(true)}
         data-test-subj="unifiedHistogramEditFlyoutVisualization"
         aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
           defaultMessage: 'Edit visualization',
