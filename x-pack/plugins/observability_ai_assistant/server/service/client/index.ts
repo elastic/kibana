@@ -10,18 +10,9 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-<<<<<<< HEAD
-import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
 import type OpenAI from 'openai';
-=======
-import type {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai';
 import { decode, encode } from 'gpt-tokenizer';
 import { compact, isEmpty, last, merge, omit, pick, take } from 'lodash';
->>>>>>> upstream/main
 import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
