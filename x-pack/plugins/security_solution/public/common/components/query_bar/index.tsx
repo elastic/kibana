@@ -126,7 +126,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         setDataView(indexPattern);
       } else if (!isEsql) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ title: indexPattern.title });
+          dv = await data.dataViews.createLegacy({ title: indexPattern.title });
           setDataView(dv);
         };
         createDataView();

@@ -75,7 +75,7 @@ export const eqlValidator = async (
       dataViewId !== '' &&
       formData.dataSourceType === DataSourceType.DataView
     ) {
-      const dataView = await data.dataViews.get(dataViewId);
+      const dataView = await data.dataViews.getLegacy(dataViewId);
 
       dataViewTitle = dataView.title;
       runtimeMappings = dataView.getRuntimeMappings();

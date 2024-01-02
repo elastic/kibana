@@ -145,7 +145,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should call onHide when button is pressed', async () => {
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     const { result } = await renderUpdatedUseFieldBrowserOptions();
 
     const CreateFieldButton = result!.current.createFieldButton!;
@@ -159,7 +159,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it('should call onHide when the column action buttons are pressed', async () => {
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     const { result } = await renderUpdatedUseFieldBrowserOptions();
 
     const columns = result.current.getFieldTableColumns({
@@ -179,7 +179,7 @@ describe('useFieldBrowserOptions', () => {
 
   it('should dispatch the proper action when a new field is saved', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
       return () => {};
@@ -213,7 +213,7 @@ describe('useFieldBrowserOptions', () => {
 
   it('should dispatch the proper actions when a field is edited', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
       onSave = options.onSave;
       return () => {};
@@ -251,7 +251,7 @@ describe('useFieldBrowserOptions', () => {
 
   it('should dispatch the proper actions when a field is removed', async () => {
     let onDelete: ((fields: string[]) => void) | undefined;
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openDeleteModal = (options) => {
       onDelete = options.onDelete;
       return () => {};
@@ -281,7 +281,7 @@ describe('useFieldBrowserOptions', () => {
 
   it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {
     const mockCloseEditor = jest.fn();
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();
@@ -308,7 +308,7 @@ describe('useFieldBrowserOptions', () => {
 
   it("should store 'closeEditor' in the actions ref when editor is open by edit button", async () => {
     const mockCloseEditor = jest.fn();
-    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.data.dataViews.getLegacy = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();

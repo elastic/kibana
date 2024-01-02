@@ -28,7 +28,7 @@ export function useFetchDataViews({ name = '', size = 10 }: Params): UseFetchDat
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchDataViews', search],
     queryFn: async () => {
-      return dataViews.find(search, size);
+      return dataViews.findLegacy(search, size);
     },
     retry: false,
     keepPreviousData: true,

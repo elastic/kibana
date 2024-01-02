@@ -93,7 +93,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       } else if (!filterQuery) {
         const createDataView = async () => {
           try {
-            dv = await data.dataViews.create({ title: indexPattern.title });
+            dv = await data.dataViews.createLegacy({ title: indexPattern.title });
             setDataView(dv);
           } catch (error) {
             addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });

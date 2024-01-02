@@ -139,7 +139,7 @@ export const savedSearchMock = {
 
 const startServicesMock = createStartServicesMock();
 
-startServicesMock.dataViews.get = jest.fn(
+startServicesMock.dataViews.getLegacy = jest.fn(
   async () =>
     ({
       getIndexPattern: jest.fn(),

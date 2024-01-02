@@ -107,7 +107,7 @@ export default function Expressions(props: Props) {
         } else {
           const newSearchSource = data.search.searchSource.createEmpty();
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-          const defaultDataView = await data.dataViews.getDefaultDataView();
+          const defaultDataView = await data.dataViews.getDefaultLegacy();
           if (defaultDataView) {
             newSearchSource.setField('index', defaultDataView);
             setDataView(defaultDataView);

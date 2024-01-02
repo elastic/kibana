@@ -110,7 +110,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       // throw an error here.
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
-        const dv = await data.dataViews.get(memoDataViewId);
+        const dv = await data.dataViews.getLegacy(memoDataViewId);
         setDataViewLoading(false);
         setDataViewIndexPatterns(dv);
         setDataViewSpec(dv.toSpec());
