@@ -283,34 +283,49 @@ describe('ReportingStore', () => {
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('setReportFailed sets the status of a saved report to failed', async () => {
-    const store = new ReportingStore(mockCore, mockLogger);
-    const report = new SavedReport({
-      _id: 'id-of-failure',
-      _index: '.reporting-test-index-12345',
-      _seq_no: 43,
-      _primary_term: 10002,
-      jobtype: 'test-report',
-      created_by: 'created_by_test_string',
-      max_attempts: 50,
-      payload: {
-        title: 'test report',
-        headers: 'rp_test_headers',
-        objectType: 'testOt',
-        browserTimezone: 'BCD',
-        version: '7.14.0',
-      },
-      timeout: 30000,
+  describe('setReportFailed()', () => {
+    const setupReportFailed = () => {
+      const store = new ReportingStore(mockCore, mockLogger);
+      const report = new SavedReport({
+        _id: 'id-of-failure',
+        _index: '.reporting-test-index-12345',
+        _seq_no: 43,
+        _primary_term: 10002,
+        jobtype: 'test-report',
+        created_by: 'created_by_test_string',
+        max_attempts: 50,
+        payload: {
+          title: 'test report',
+          headers: 'rp_test_headers',
+          objectType: 'testOt',
+          browserTimezone: 'BCD',
+          version: '7.14.0',
+        },
+        timeout: 30000,
+      });
+      return { store, report };
+    };
+
+    it('sets the status of a saved report to failed', async () => {
+      const { store, report } = setupReportFailed();
+      await store.setReportFailed(report, { errors: 'yes' } as any);
+
+      const [[updateCall]] = mockEsClient.update.mock.calls;
+      const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+      expect(response.migration_version).toBe(`7.14.0`);
+      expect(response.status).toBe(`failed`);
+      expect(updateCall.if_seq_no).toBe(43);
+      expect(updateCall.if_primary_term).toBe(10002);
     });
 
-    await store.setReportFailed(report, { errors: 'yes' } as any);
+    it('keep the status of a saved report to processing', async () => {
+      const { store, report } = setupReportFailed();
+      await store.setReportFailed(report, { errors: 'yes' } as any, false);
 
-    const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
-    expect(response.migration_version).toBe(`7.14.0`);
-    expect(response.status).toBe(`failed`);
-    expect(updateCall.if_seq_no).toBe(43);
-    expect(updateCall.if_primary_term).toBe(10002);
+      const [[updateCall]] = mockEsClient.update.mock.calls;
+      const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+      expect(response.status).toBe(`processing`);
+    });
   });
 
   it('setReportCompleted sets the status of a saved report to completed', async () => {
