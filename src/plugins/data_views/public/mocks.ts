@@ -18,6 +18,7 @@ const createSetupContract = (): Setup => ({
 const createStartContract = (): Start => {
   return {
     find: jest.fn((search) => [{ id: search, title: search }]),
+    findLegacy: jest.fn((search) => [{ id: search, title: search }]),
     createField: jest.fn(() => {}),
     createFieldList: jest.fn(() => []),
     ensureDefaultIndexPattern: jest.fn(),
@@ -35,11 +36,13 @@ const createStartContract = (): Start => {
     getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     getDefaultId: jest.fn().mockReturnValue(Promise.resolve('')),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
+    getLegacy: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
     getIdsWithTitle: jest.fn(),
     getFieldsForIndexPattern: jest.fn(),
     create: jest.fn().mockReturnValue(Promise.resolve({})),
+    createLegacy: jest.fn().mockReturnValue(Promise.resolve({})),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

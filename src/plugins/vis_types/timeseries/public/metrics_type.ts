@@ -82,7 +82,7 @@ async function resolveIndexPattern(
 async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   const dataViews = getDataViewsStart();
 
-  const defaultIndex = await dataViews.getDefault();
+  const defaultIndex = await dataViews.getDefaultLegacy();
   const resolvedIndexPatterns: DataView[] = [];
   const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
   (

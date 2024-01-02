@@ -21,10 +21,10 @@ describe('metricsVisDefinition', () => {
 
     beforeEach(async () => {
       setDataViewsStart({
-        async getDefault() {
+        async getDefaultLegacy() {
           return indexPattern1;
         },
-        async find(title: string, size: number) {
+        async findLegacy(title: string, size: number) {
           if (size !== 1) {
             throw new Error('trying to fetch too many data views');
           }
@@ -32,7 +32,7 @@ describe('metricsVisDefinition', () => {
           if (title === 'pattern2') return [indexPattern2];
           return [];
         },
-        async get(id: string) {
+        async getLegacy(id: string) {
           if (id === '1') return indexPattern1;
           if (id === '2') return indexPattern2;
           throw new Error();
