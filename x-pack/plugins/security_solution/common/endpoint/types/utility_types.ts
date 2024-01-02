@@ -28,7 +28,7 @@ export type DeepMutable<T> = T extends Record<any, any>
  * }
  * const missingKeys: Foo = { two: 2 }; // ok
  *
- * const shouldHaveAllKeys: WithAlLKeys<Foo> = { two: 2 }; // TS Error
+ * const shouldHaveAllKeys: WithAllKeys<Foo> = { two: 2 }; // TS Error
  *
  * const withAllKeys: WithAllKeys<Foo> = {
  *    one: undefined, // All good now
