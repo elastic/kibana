@@ -96,7 +96,7 @@ export const getPrComment = (
         const failureString = `${failure.jobName} / ${failure.name}`
           .replaceAll('#', '#<span></span>')
           .replaceAll('@', '@<span></span>');
-        return `*[[job]](${jobUrl})${logsLink} ${failureString}`;
+        return `* [[job]](${jobUrl})${logsLink} ${failureString}`;
       })
       .join('\n')
   );
