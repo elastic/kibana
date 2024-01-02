@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('gets slo by id and calculates SLI - occurances calenderAligned', async () => {
+    it('gets slo by id and calculates SLI - occurences calendarAligned', async () => {
       const id = await createSLO({
         groupBy: '*',
         timeWindow: {
