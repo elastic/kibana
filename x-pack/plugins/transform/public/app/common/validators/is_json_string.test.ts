@@ -9,6 +9,7 @@ import { isJsonString } from './is_json_string';
 
 describe('isJsonString', () => {
   it('should return false for non-string input', () => {
+    expect(isJsonString(true)).toBe(false);
     expect(isJsonString(false)).toBe(false);
     expect(isJsonString(undefined)).toBe(false);
     expect(isJsonString(null)).toBe(false);
