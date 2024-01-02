@@ -226,7 +226,7 @@ const rules = {
     },
     ip_prefix: {
       __template: {
-        field: ''
+        field: '',
       },
       ipPrefix: {
         __template: {

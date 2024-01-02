@@ -8,8 +8,7 @@
 
 import React, { useCallback } from 'react';
 
-import { isUndefined } from 'lodash';
-import { 
+import {
   EuiFormRow,
   EuiFieldNumber,
   EuiFieldNumberProps,
@@ -18,23 +17,21 @@ import {
   EuiSwitch,
   EuiSwitchProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../agg_param_props';
 import { useValidation } from './utils';
-import { i18n } from '@kbn/i18n';
 
 export interface IpPrefix {
   prefixLength: number;
   isIpv6: boolean;
-};
+}
 
 function isPrefixValid({ prefixLength, isIpv6 }: IpPrefix): boolean {
   if (prefixLength < 0) {
     return false;
-  }
-  else if (prefixLength > 32 && !isIpv6) {
+  } else if (prefixLength > 32 && !isIpv6) {
     return false;
-  }
-  else if (prefixLength > 128 && isIpv6) {
+  } else if (prefixLength > 128 && isIpv6) {
     return false;
   }
 
@@ -57,13 +54,13 @@ function IpPrefixParamEditor({
   setValidity,
   showValidation,
 }: AggParamEditorProps<IpPrefix>) {
-
   const isValid = isPrefixValid(value);
   let error;
 
   if (!isValid) {
     error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessage', {
-      defaultMessage: 'Prefix Length must be between 0 and 32 for IPv4 Addresses and 0 and 128 for IPv6 Addresses.',
+      defaultMessage:
+        'Prefix Length must be between 0 and 32 for IPv4 Addresses and 0 and 128 for IPv6 Addresses.',
     });
   }
 
@@ -71,17 +68,17 @@ function IpPrefixParamEditor({
 
   const onPrefixLengthChange: EuiFieldNumberProps['onChange'] = useCallback(
     (e) => {
-      if(e.target.dataset.testSubj === "visEditorIpPrefixPrefixLength") {
-        setValue({...value, prefixLength: e.target.valueAsNumber});
+      if (e.target.dataset.testSubj === 'visEditorIpPrefixPrefixLength') {
+        setValue({ ...value, prefixLength: e.target.valueAsNumber });
       }
-    }, 
+    },
     [setValue, value]
   );
 
   const onIsIpv6Change: EuiSwitchProps['onChange'] = useCallback(
     (e) => {
-      if(e.target.dataset.testSubj === "visEditorIpPrefixIsIpv6") {
-        setValue({...value, isIpv6: e.target.checked});
+      if (e.target.dataset.testSubj === 'visEditorIpPrefixIsIpv6') {
+        setValue({ ...value, isIpv6: e.target.checked });
       }
     },
     [setValue, value]
@@ -95,7 +92,7 @@ function IpPrefixParamEditor({
       isInvalid={showValidation ? !isValid : false}
     >
       <EuiFlexGroup gutterSize="m" responsive={false} direction={'column'}>
-        <EuiFlexItem> 
+        <EuiFlexItem>
           <EuiFieldNumber
             value={value.prefixLength}
             onChange={onPrefixLengthChange}

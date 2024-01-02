@@ -12,7 +12,7 @@ import { IpPrefix, ipPrefixToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpPrefix } from './create_filter/ip_prefix';
-import { IpPrefixKey, IpPrefixAggKey } from './lib/ip_prefix';
+import { IpPrefixKey } from './lib/ip_prefix';
 import { aggIpPrefixFnName } from './ip_prefix_fn';
 import { KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
@@ -23,7 +23,7 @@ const ipPrefixTitle = i18n.translate('data.search.aggs.buckets.ipPrefixTitle', {
 
 export interface AggParamsIpPrefix extends BaseAggParams {
   field: string;
-  ipPrefix?: IpPrefix; 
+  ipPrefix?: IpPrefix;
 }
 
 export const getIpPrefixBucketAgg = () =>

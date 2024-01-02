@@ -14,7 +14,7 @@ import { IpPrefixKey } from '../lib/ip_prefix';
 export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixKey) => {
   let range: RangeFilterParams;
 
-  range = new CidrMask(key.address + "/" + key.prefix_length).getRange();
+  range = new CidrMask(key.address + '/' + key.prefix_length).getRange();
 
   return buildRangeFilter(
     aggConfig.params.field,
