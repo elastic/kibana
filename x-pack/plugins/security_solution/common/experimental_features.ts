@@ -99,11 +99,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
    * Enables the new user details flyout displayed on the Alerts table.
    *
