@@ -94,8 +94,8 @@ export const getPrComment = (
         // failure name could have #<number>, which Github will link to an issue or @<string>,
         // which will send a notification so we need to "escape" it with spans
         const failureString = `${failure.jobName} / ${failure.name}`
-          .replace('#', '#<span></span>')
-          .replace('@', '@<span></span>');
+          .replaceAll('#', '#<span></span>')
+          .replaceAll('@', '@<span></span>');
         return `*[[job]](${jobUrl})${logsLink} ${failureString}`;
       })
       .join('\n')
