@@ -21,6 +21,7 @@ import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { SectionSeparator } from './section_separator';
 import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 
 export const Overview = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -63,6 +64,7 @@ export const Overview = () => {
     <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
       <EuiFlexItem grow={false}>
         <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
+        <CpuProfilingPrompt />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}

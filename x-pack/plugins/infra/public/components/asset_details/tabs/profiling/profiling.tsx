@@ -6,11 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiTabbedContent, type EuiTabbedContentProps } from '@elastic/eui';
 import React from 'react';
 import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
 import { DatePicker } from '../../date_picker/date_picker';
@@ -19,6 +20,8 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
+import { DescriptionCallout } from './description_callout';
+import { Popover } from '../common/popover';
 
 export function Profiling() {
   const { activeTabId } = useTabSwitcherContext();
@@ -38,6 +41,26 @@ export function Profiling() {
           <Flamegraph />
         </>
       ),
+      append: (
+        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+          <EuiText size="xs">
+            {i18n.translate('xpack.infra.profiling.flamegraphInfoPopoverBody', {
+              defaultMessage:
+                'The flamegraph is a visual representation of the functions that are consuming the most resources. Each function is represented by a rectangle, where the width of the rectangle represents the amount of time spent in the function, and the number of stacked rectangles represents the stack depth. The stack depth is the number of functions that were called to reach the current function.',
+            })}{' '}
+            <EuiLink
+              data-test-subj="infraProfilingFlamegraphTabLearnMoreLink"
+              href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-flamegraphs-intro"
+              external
+              target="_blank"
+            >
+              {i18n.translate('xpack.infra.profiling.flamegraphTabLearnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiText>
+        </Popover>
+      ),
     },
     {
       id: 'functions',
@@ -49,6 +72,26 @@ export function Profiling() {
           <EuiSpacer />
           <Functions />
         </>
+      ),
+      append: (
+        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+          <EuiText size="xs">
+            {i18n.translate('xpack.infra.profiling.functionsInfoPopoverBody', {
+              defaultMessage:
+                'The TopN functions view shows the most frequently sampled functions, broken down by CPU time, annualized CO2, and annualized cost estimates. You can use this view to identify the most expensive line of code on your host.',
+            })}{' '}
+            <EuiLink
+              data-test-subj="infraProfilingFunctionsTabLearnMoreLink"
+              href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-functions-intro"
+              external
+              target="_blank"
+            >
+              {i18n.translate('xpack.infra.profiling.functionsTabLearnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiText>
+        </Popover>
       ),
     },
     {
@@ -89,6 +132,7 @@ export function Profiling() {
       ) : (
         <>
           <DatePicker />
+          <DescriptionCallout />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>
       )}
