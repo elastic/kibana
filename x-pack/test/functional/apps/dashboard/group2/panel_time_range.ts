@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardBadgeActions = getService('dashboardBadgeActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
