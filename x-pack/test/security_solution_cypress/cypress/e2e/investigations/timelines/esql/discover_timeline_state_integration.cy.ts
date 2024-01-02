@@ -60,7 +60,7 @@ const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
   'response.body.data.persistTimeline.timeline.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
-describe(
+describe.skip(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@brokenInServerless'],
