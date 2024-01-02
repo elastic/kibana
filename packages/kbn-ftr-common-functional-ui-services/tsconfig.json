@@ -18,5 +18,6 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/test-subj-selector",
+    "@kbn/ftr-common-functional-services",
   ]
 }
