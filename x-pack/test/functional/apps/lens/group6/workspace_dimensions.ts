@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
-      await browser.setWindowSize(1600, 1200);
+      await browser.setWindowSize(1400, 900);
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -52,9 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     it('adjusts dimension for various chart types', async () => {
-      const VERTICAL_16_9 = { expectedWidth: '864px', expectedHeight: '486px' };
-      const HORIZONTAL_16_9 = { expectedWidth: '296.438px', expectedHeight: '527px' };
-      const UNCONSTRAINED = { expectedWidth: '864px', expectedHeight: '527px' };
+      const VERTICAL_16_9 = { expectedWidth: '690px', expectedHeight: '388.125px' };
+      const HORIZONTAL_16_9 = { expectedWidth: '225px', expectedHeight: '400px' };
+      const UNCONSTRAINED = { expectedWidth: '690px', expectedHeight: '400px' };
 
       /**
        * This list is specifically designed to test dimension transitions.
@@ -78,8 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           //
           // this is a good thing because it makes this a test case for aspect ratio preservation
           // even when specific pixel dimensions are requested.
-          expectedWidth: '263.5px',
-          expectedHeight: '527px',
+          expectedWidth: '200px',
+          expectedHeight: '400px',
         },
         { id: 'bar_horizontal_percentage_stacked', searchText: 'bar', ...HORIZONTAL_16_9 },
         { id: 'lnsLegacyMetric', ...UNCONSTRAINED },
@@ -110,7 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       while (visTypes.length) {
         const vis = visTypes.pop()!;
-        await PageObjects.lens.switchToVisualization(vis.id, vis.searchText);
+        await retry.try(async () => {
+          await PageObjects.lens.switchToVisualization(vis.id, vis.searchText);
+        });
 
         log.debug(`Testing ${vis.id}... expecting ${vis.expectedWidth}x${vis.expectedHeight}`);
 
@@ -119,7 +121,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('metric dimensions', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization('lnsMetric');
+      });
 
       await assertWorkspaceDimensions('300px', '300px');
 
@@ -134,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
       await testSubjects.setValue('lnsMetric_max_cols', '2');
 
-      await assertWorkspaceDimensions('400px', '600px');
+      await assertWorkspaceDimensions('266.664px', '400px');
     });
   });
 }
