@@ -25,10 +25,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   white-space: nowrap;
 }
 
-.c5 {
-  white-space: nowrap;
-}
-
 .c1 {
   overflow-x: auto;
 }
@@ -151,8 +147,8 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText c5 emotion-euiText-xs"
-                data-test-subj="timeline-status"
+                class="euiText emotion-euiText-xs"
+                data-test-subj="timeline-save-status"
               >
                 <span
                   class="euiBadge emotion-euiBadge-warning"
