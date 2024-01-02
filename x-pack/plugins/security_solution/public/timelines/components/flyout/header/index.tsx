@@ -26,7 +26,7 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import { TimelineStatusInfo } from './timeline_status_info';
+import { TimelineSaveStatus } from '../../save_status';
 import { timelineDefaults } from '../../../store/defaults';
 import { AddTimelineButton } from '../add_timeline_button';
 
@@ -55,36 +55,22 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const {
-    activeTab,
-    dataProviders,
-    kqlQuery,
-    title,
-    timelineType,
-    status: timelineStatus,
-    updated,
-    show,
-    filters,
-    kqlMode,
-    changed = false,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      [
-        'activeTab',
-        'dataProviders',
-        'kqlQuery',
-        'status',
-        'title',
-        'timelineType',
-        'updated',
-        'show',
-        'filters',
-        'kqlMode',
-        'changed',
-      ],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
-  );
+  const { activeTab, dataProviders, kqlQuery, title, timelineType, show, filters, kqlMode } =
+    useDeepEqualSelector((state) =>
+      pick(
+        [
+          'activeTab',
+          'dataProviders',
+          'kqlQuery',
+          'title',
+          'timelineType',
+          'show',
+          'filters',
+          'kqlMode',
+        ],
+        getTimeline(state, timelineId) ?? timelineDefaults
+      )
+    );
   const isDataInTimeline = useMemo(
     () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
     [dataProviders, kqlQuery]
@@ -161,7 +147,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               </ActiveTimelinesContainer>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
+              <TimelineSaveStatus timelineId={timelineId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

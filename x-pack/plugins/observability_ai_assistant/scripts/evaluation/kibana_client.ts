@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { pick } from 'lodash';
+import { pick, remove } from 'lodash';
 import { filter, lastValueFrom, map, tap, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { Message, MessageRole } from '../../common';
@@ -29,7 +29,7 @@ import { EvaluationResult } from './types';
 type InnerMessage = Message['message'];
 type StringOrMessageList = string | InnerMessage[];
 
-interface ChatClient {
+export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: (
     ...args: [StringOrMessageList] | [string, InnerMessage[]]
@@ -39,6 +39,8 @@ interface ChatClient {
     {}: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
+  getResults: () => EvaluationResult[];
+  onResult: (cb: (result: EvaluationResult) => void) => () => void;
 }
 
 export class KibanaClient {
@@ -72,11 +74,9 @@ export class KibanaClient {
   createChatClient({
     connectorId,
     persist,
-    title,
   }: {
     connectorId: string;
     persist: boolean;
-    title?: string;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -102,6 +102,11 @@ export class KibanaClient {
 
       return { functionDefinitions, contextDefinitions };
     }
+
+    const onResultCallbacks: Array<{
+      callback: (result: EvaluationResult) => void;
+      unregister: () => void;
+    }> = [];
 
     async function chat({
       messages,
@@ -136,6 +141,8 @@ export class KibanaClient {
 
       return receivedMessage.message;
     }
+
+    const results: EvaluationResult[] = [];
 
     return {
       chat: async (message) => {
@@ -172,7 +179,6 @@ export class KibanaClient {
                 messages,
                 connectorId,
                 persist,
-                title,
               },
               { responseType: 'stream' }
             )
@@ -287,14 +293,17 @@ export class KibanaClient {
           functionCall: 'scores',
         });
 
-        return {
+        const scoredCriteria = (
+          JSON.parse(message.function_call.arguments) as {
+            criteria: Array<{ index: number; score: number; reasoning: string }>;
+          }
+        ).criteria;
+
+        const result: EvaluationResult = {
           conversationId,
           messages,
-          scores: (
-            JSON.parse(message.function_call.arguments) as {
-              criteria: Array<{ index: number; score: number; reasoning: string }>;
-            }
-          ).criteria.map(({ index, score, reasoning }) => {
+          passed: scoredCriteria.every(({ score }) => score >= 1),
+          scores: scoredCriteria.map(({ index, score, reasoning }) => {
             return {
               criterion: criteria[index],
               score,
@@ -302,6 +311,22 @@ export class KibanaClient {
             };
           }),
         };
+
+        results.push(result);
+
+        onResultCallbacks.forEach(({ callback }) => {
+          callback(result);
+        });
+
+        return result;
+      },
+      getResults: () => results,
+      onResult: (callback) => {
+        const unregister = () => {
+          remove(onResultCallbacks, { callback });
+        };
+        onResultCallbacks.push({ callback, unregister });
+        return unregister;
       },
     };
   }

@@ -30,6 +30,9 @@ export interface UseKnowledgeBaseResult {
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const {
     notifications: { toasts },
+    plugins: {
+      start: { ml },
+    },
   } = useKibana().services;
   const service = useObservabilityAIAssistant();
 
@@ -53,6 +56,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         .callApi('POST /internal/observability_ai_assistant/kb/setup', {
           signal: null,
         })
+        .then(() => ml.mlApi?.savedObjects.syncSavedObjects())
         .then(() => {
           status.refresh();
         })
@@ -82,5 +86,5 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       isInstalling,
       installError,
     };
-  }, [status, isInstalling, installError, service, toasts]);
+  }, [status, isInstalling, installError, service, ml.mlApi?.savedObjects, toasts]);
 }

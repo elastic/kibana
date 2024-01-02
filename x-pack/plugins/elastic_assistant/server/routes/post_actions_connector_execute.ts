@@ -8,6 +8,10 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import {
+  INVOKE_ASSISTANT_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+} from '../lib/telemetry/event_based_telemetry';
 import { executeAction } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import {
@@ -39,7 +43,9 @@ export const postActionsConnectorExecuteRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger: Logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger: Logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -48,16 +54,25 @@ export const postActionsConnectorExecuteRoute = (
         const actions = (await context.elasticAssistant).actions;
 
         // if not langchain, call execute action directly and return the response:
-        if (!request.body.assistantLangChain && !requestHasRequiredAnonymizationParams(request)) {
+        if (
+          !request.body.isEnabledKnowledgeBase &&
+          !requestHasRequiredAnonymizationParams(request)
+        ) {
           logger.debug('Executing via actions framework directly');
           const result = await executeAction({ actions, request, connectorId });
+          telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
+            isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+          });
           return response.ok({
             body: result,
           });
         }
 
         // TODO: Add `traceId` to actions request when calling via langchain
-        logger.debug('Executing via langchain, assistantLangChain: true');
+        logger.debug(
+          `Executing via langchain, isEnabledKnowledgeBase: ${request.body.isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
+        );
 
         // Fetch any tools registered by the request's originating plugin
         const pluginName = getPluginNameFromRequest({
@@ -87,7 +102,7 @@ export const postActionsConnectorExecuteRoute = (
           allow: request.body.allow,
           allowReplacement: request.body.allowReplacement,
           actions,
-          assistantLangChain: request.body.assistantLangChain,
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           assistantTools,
           connectorId,
           elserId,
@@ -99,8 +114,13 @@ export const postActionsConnectorExecuteRoute = (
           request,
           replacements: request.body.replacements,
           size: request.body.size,
+          telemetry,
         });
 
+        telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
+          isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+        });
         return response.ok({
           body: {
             ...langChainResponseBody,
@@ -110,6 +130,11 @@ export const postActionsConnectorExecuteRoute = (
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
+        telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+          isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
+          isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+          errorMessage: error.message,
+        });
 
         return resp.error({
           body: error.message,
