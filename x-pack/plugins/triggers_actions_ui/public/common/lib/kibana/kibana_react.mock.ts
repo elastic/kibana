@@ -65,6 +65,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       getActions: jest.fn(),
       list: jest.fn(),
       update: jest.fn(),
+      getAlertConfigIdPerRuleTypes: jest.fn(),
     } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,

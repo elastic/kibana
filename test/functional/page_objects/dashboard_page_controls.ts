@@ -185,45 +185,17 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateAllQuerySyncSettings(querySync: boolean) {
-    this.log.debug(`Update all control group query sync settings to ${querySync}`);
+  public async updateFilterSyncSetting(querySync: boolean) {
+    this.log.debug(`Update filter sync setting to ${querySync}`);
     await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(querySync, 'control-group-query-sync');
+    await this.setSwitchState(querySync, 'control-group-filter-sync');
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async ensureAdvancedQuerySyncIsOpened() {
-    const advancedAccordion = await this.testSubjects.find(`control-group-query-sync-advanced`);
-    const opened = await advancedAccordion.elementHasClass('euiAccordion-isOpen');
-    if (!opened) {
-      await this.testSubjects.click(`control-group-query-sync-advanced`);
-      await this.retry.try(async () => {
-        expect(await advancedAccordion.elementHasClass('euiAccordion-isOpen')).to.be(true);
-      });
-    }
-  }
-
-  public async updateSyncTimeRangeAdvancedSetting(syncTimeRange: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncTimeRange}`);
+  public async updateTimeRangeSyncSetting(syncTimeRange: boolean) {
+    this.log.debug(`Update time range sync setting to ${syncTimeRange}`);
     await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
     await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncQueryAdvancedSetting(syncQuery: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncQuery}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncQuery, 'control-group-query-sync-query');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncFilterAdvancedSetting(syncFilters: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncFilters}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncFilters, 'control-group-query-sync-filters');
     await this.testSubjects.click('control-group-editor-save');
   }
 
@@ -392,10 +364,11 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-popover`);
+      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`optionsList-control-popover`);
+      });
     });
   }
 
