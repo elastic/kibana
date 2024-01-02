@@ -27,10 +27,13 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
   children,
   ...services
 }) => {
-  const { kibanaGuideDocLink, customBranding, prependBasePath, pageFlavor } = services;
+  const { kibanaGuideDocLink, useHasApiKeys, customBranding, prependBasePath, pageFlavor } =
+    services;
 
   return (
-    <Context.Provider value={{ kibanaGuideDocLink, customBranding, prependBasePath, pageFlavor }}>
+    <Context.Provider
+      value={{ kibanaGuideDocLink, useHasApiKeys, customBranding, prependBasePath, pageFlavor }}
+    >
       <KibanaNoDataPageProvider {...services}>{children}</KibanaNoDataPageProvider>
     </Context.Provider>
   );
@@ -50,6 +53,7 @@ export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDepe
     },
     prependBasePath: dependencies.coreStart.http.basePath.prepend,
     pageFlavor: dependencies.noDataPage?.getAnalyticsNoDataPageFlavor() ?? 'kibana',
+    useHasApiKeys: dependencies.noDataPage?.useHasApiKeys ?? (() => null),
   };
   return (
     <Context.Provider {...{ value }}>

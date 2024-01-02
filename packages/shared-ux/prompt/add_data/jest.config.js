@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-
-export interface NoDataPageService {
-  getAnalyticsNoDataPageFlavor: NoDataPagePluginStart['getAnalyticsNoDataPageFlavor'];
-  useHasApiKeys: NoDataPagePluginStart['useHasApiKeys'];
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/prompt/add_data'],
+};

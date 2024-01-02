@@ -7,13 +7,13 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { NoDataPagePlugin } from './plugin';
+import { NoDataPagePublic } from './plugin';
 
 export function plugin(ctx: PluginInitializerContext) {
-  return new NoDataPagePlugin(ctx);
+  return new NoDataPagePublic(ctx);
 }
 
 export type {
-  NoDataPagePublicSetup as NoDataPagePluginSetup,
-  NoDataPagePublicStart as NoDataPagePluginStart,
+  NoDataPagePublicSetup as NoDataPagePublicSetup,
+  NoDataPagePublicStart as NoDataPagePublicStart,
 } from './types';

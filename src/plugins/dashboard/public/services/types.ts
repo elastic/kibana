@@ -74,6 +74,6 @@ export interface DashboardServices {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
   serverless: DashboardServerlessService; // TODO: make this optional in follow up
-  noDataPage: NoDataPageService;
+  noDataPage?: NoDataPageService;
   uiActions: DashboardUiActionsService;
 }

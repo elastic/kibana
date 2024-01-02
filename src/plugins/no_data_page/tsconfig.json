@@ -9,6 +9,7 @@
     "@kbn/core-plugins-browser",
     "@kbn/core-plugins-server",
     "@kbn/config-schema",
+    "@kbn/core-http-browser",
   ],
   "exclude": ["target/**/*"]
 }

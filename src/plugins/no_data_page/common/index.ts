@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-
-export interface NoDataPageService {
-  getAnalyticsNoDataPageFlavor: NoDataPagePluginStart['getAnalyticsNoDataPageFlavor'];
-  useHasApiKeys: NoDataPagePluginStart['useHasApiKeys'];
-}
+/**
+ * @internal
+ */
+export const NO_DATA_API_PATHS: Record<string, Record<string, string>> = {
+  internal: {
+    /**
+     * Use the Security plugin's endpoint
+     * to determine if the user has active API Keys
+     */
+    hasApiKeys: '/internal/security/api_key/_has_active',
+  },
+};

@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-
-export interface NoDataPageService {
-  getAnalyticsNoDataPageFlavor: NoDataPagePluginStart['getAnalyticsNoDataPageFlavor'];
-  useHasApiKeys: NoDataPagePluginStart['useHasApiKeys'];
-}
+export { AddDataPrompt } from './src/add_data';

@@ -9,28 +9,27 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
-import { AnalyticsNoDataPageFlavor } from '@kbn/shared-ux-page-analytics-no-data-types';
+import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
 
 /**
  * Props for the pure component.
  */
 export interface Props {
-  /** A link to documentation. */
-  kibanaGuideDocLink: string;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
   /** if the kibana instance is customly branded */
   showPlainSpinner: boolean;
-  /** The flavor of the empty page to use. */
-  pageFlavor?: AnalyticsNoDataPageFlavor;
-  prependBasePath: (path: string) => string;
 }
+
+type AnalyticsNoDataPageProps = Props &
+  Pick<Services, 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor' | 'useHasApiKeys'>;
 
 const flavors: {
   [K in AnalyticsNoDataPageFlavor]: (deps: {
     kibanaGuideDocLink: string;
+    hasApiKeys: boolean;
     prependBasePath: (path: string) => string;
   }) => KibanaNoDataPageProps['noDataConfig'];
 } = {
@@ -55,7 +54,7 @@ const flavors: {
     },
     docsLink: kibanaGuideDocLink,
   }),
-  serverless_search: ({ prependBasePath }) => ({
+  serverless_search: ({ hasApiKeys, prependBasePath }) => ({
     solution: i18n.translate('sharedUXPackages.noDataConfig.elasticsearch', {
       defaultMessage: 'Elasticsearch',
     }),
@@ -66,14 +65,17 @@ const flavors: {
     action: {
       elasticsearch: {
         title: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
-          defaultMessage: 'Get started',
+          defaultMessage: 'Add data',
         }),
         description: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchDescription', {
-          defaultMessage:
-            'Set up your programming language client, ingest some data, and start searching.',
+          defaultMessage: hasApiKeys
+            ? `[Placeholder text for prompt to add data when user has created a valid API key.]`
+            : `[Placeholder text for prompt to add data when user has **not** created a valid API key.]`,
         }),
-        'data-test-subj': 'kbnOverviewElasticsearchGettingStarted',
-        href: prependBasePath('/app/elasticsearch/'),
+        'data-test-subj': 'kbnOverviewElasticsearchAddData',
+        href: hasApiKeys
+          ? prependBasePath('/app/elasticsearch/#ingestData') // use Ingest Data section of Home page if project has ES API keys
+          : prependBasePath('/app/elasticsearch/'),
         /** force the no data card to be shown **/
         canAccessFleet: true,
       },
@@ -109,17 +111,19 @@ const flavors: {
 /**
  * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  */
-export const AnalyticsNoDataPage = ({
-  kibanaGuideDocLink,
+export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   onDataViewCreated,
   allowAdHocDataView,
   showPlainSpinner,
-  prependBasePath,
-  pageFlavor = 'kibana',
-}: Props) => {
+  ...services
+}) => {
+  const { prependBasePath, kibanaGuideDocLink, useHasApiKeys, pageFlavor } = services;
+  const { hasApiKeys } = useHasApiKeys() ?? {};
+
   const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors[pageFlavor]({
     kibanaGuideDocLink,
     prependBasePath,
+    hasApiKeys: hasApiKeys ?? false,
   });
 
   return (

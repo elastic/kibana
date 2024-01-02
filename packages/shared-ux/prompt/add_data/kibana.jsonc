@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/shared-ux-prompt-add-data",
+  "owner": "@elastic/appex-sharedux"
+}

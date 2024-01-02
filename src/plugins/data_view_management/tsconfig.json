@@ -28,6 +28,7 @@
     "@kbn/es-query",
     "@kbn/std",
     "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-prompt-add-data",
     "@kbn/shared-ux-prompt-no-data-views",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/utility-types-jest",
@@ -35,6 +36,9 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/no-data-page-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/core-doc-links-browser",
   ],
   "exclude": [
     "target/**/*",

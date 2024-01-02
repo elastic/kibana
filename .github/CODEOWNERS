@@ -750,6 +750,7 @@ packages/shared-ux/page/no_data_config/types @elastic/appex-sharedux
 packages/shared-ux/page/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/page/no_data/types @elastic/appex-sharedux
 packages/shared-ux/page/solution_nav @elastic/appex-sharedux
+packages/shared-ux/prompt/add_data @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 packages/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux

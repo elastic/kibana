@@ -5,20 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Observable } from 'rxjs';
+
+import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
-import { Observable } from 'rxjs';
 
 /**
  * A list of services that are consumed by this component.
  */
 export interface Services {
-  kibanaGuideDocLink: string;
   customBranding: { hasCustomBranding$: Observable<boolean> };
   prependBasePath: (path: string) => string;
+  /** A link to documentation. */
+  kibanaGuideDocLink: string;
+  /** The flavor of the empty page to use. */
   pageFlavor: AnalyticsNoDataPageFlavor;
+  /** Hook to query whether API keys exist in the deployment. */
+  useHasApiKeys: NoDataPagePluginSetup['useHasApiKeys'];
 }
 
 /**
@@ -46,9 +53,7 @@ export interface KibanaDependencies {
       };
     };
   };
-  noDataPage?: {
-    getAnalyticsNoDataPageFlavor: () => AnalyticsNoDataPageFlavor;
-  };
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 /**

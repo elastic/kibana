@@ -27,6 +27,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
@@ -50,6 +51,7 @@ export interface IndexPatternManagmentContext {
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 export type IndexPatternManagmentContextValue =
