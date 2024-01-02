@@ -64,12 +64,12 @@ export function TileErrorsList(props: Props) {
     }
 
     const esError = createEsError(
-      { 
+      {
         statusCode: 400,
         message: tileError.message,
         attributes: {
-          error: tileError.error
-        }
+          error: tileError.error,
+        },
       },
       () => {
         getInspector().open(props.inspectorAdapters, {
@@ -90,7 +90,7 @@ export function TileErrorsList(props: Props) {
         {esError.getErrorMessage()}
         {esError.getActions()}
       </>
-    )
+    );
   }
 
   return (
