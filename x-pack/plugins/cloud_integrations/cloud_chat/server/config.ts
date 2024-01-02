@@ -52,8 +52,6 @@ export const config: PluginConfigDescriptor<CloudChatConfigType> = {
           { path: 'xpack.cloud.chat.enabled' },
           { path: 'xpack.cloud.chat.chatURL' },
           { path: 'xpack.cloud.chatIdentitySecret' },
-          { path: 'xpack.cloud_integrations.gain_sight.org_id' },
-          { path: 'xpack.cloud_integrations.gain_sight.enabled' },
         ],
       };
     },
