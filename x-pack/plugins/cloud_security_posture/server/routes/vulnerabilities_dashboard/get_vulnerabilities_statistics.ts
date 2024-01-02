@@ -25,7 +25,7 @@ export interface VulnerabilitiesStatisticsQueryResult {
   resources_scanned: {
     value: number;
   };
-  cloud_regions: {
+  cloud_accounts: {
     value: number;
   };
 }
@@ -51,9 +51,9 @@ export const getVulnerabilitiesStatisticsQuery = (): SearchRequest => ({
         field: 'resource.id',
       },
     },
-    cloud_regions: {
+    cloud_accounts: {
       cardinality: {
-        field: 'cloud.region',
+        field: 'cloud.account.id',
       },
     },
   },
@@ -69,6 +69,6 @@ export const getVulnerabilitiesStatistics = async (esClient: ElasticsearchClient
     highCount: queryResult.aggregations?.high.doc_count,
     mediumCount: queryResult.aggregations?.medium.doc_count,
     resourcesScanned: queryResult.aggregations?.resources_scanned.value,
-    cloudRegions: queryResult.aggregations?.cloud_regions.value,
+    cloudAccounts: queryResult.aggregations?.cloud_accounts.value,
   };
 };

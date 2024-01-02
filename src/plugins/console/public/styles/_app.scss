@@ -42,7 +42,7 @@
     padding: 0 $euiSizeS;
     display: inline-block;
     text-decoration: none;
-    border-radius: $euiBorderRadius / 2;
+    border-radius: calc($euiBorderRadius / 2);
     white-space: nowrap;
     vertical-align: middle;
     cursor: default;
