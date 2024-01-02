@@ -211,7 +211,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-
     describe('DataTable features', () => {
       it('Edit data view field option is Enabled', async () => {
         await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
