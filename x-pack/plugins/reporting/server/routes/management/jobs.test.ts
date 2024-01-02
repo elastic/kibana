@@ -363,4 +363,41 @@ describe('GET /api/reporting/jobs/download', () => {
         );
     });
   });
+
+  describe('delete report', () => {
+    const getCompleteHits = ({
+      jobType = 'unencodedJobType',
+      outputContentType = 'text/plain',
+      title = '',
+    } = {}) => {
+      return getHits({
+        jobtype: jobType,
+        status: 'completed',
+        output: { content_type: outputContentType },
+        payload: { title },
+      });
+    };
+
+    it('handles content stream errors', async () => {
+      stream = new Readable({
+        read() {
+          this.push('test');
+          this.push(null);
+        },
+      }) as typeof stream;
+      stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+        callback(new Error('An error occurred in ending the content stream'));
+      });
+
+      (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
+      mockEsClient.search.mockResolvedValueOnce({ body: getCompleteHits() } as any);
+      registerJobInfoRoutes(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete('/api/reporting/jobs/delete/denk')
+        .expect(500)
+        .expect('Content-Type', 'application/json; charset=utf-8');
+    });
+  });
 });
