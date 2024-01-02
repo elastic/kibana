@@ -85,7 +85,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
     ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT
   );
-  const [useShortUrl, setUseShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
+  const [useShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
   const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
   const [url, setUrl] = useState<string>('');
   const [anonymousAccessParameters, setAnonymousAccessParameters] = useState<
@@ -96,7 +96,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   );
   const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
-  const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
@@ -260,14 +260,6 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   };
 
   const setUrlHelper = useCallback(() => {
-    const makeIframeTag = (tempUrl?: string) => {
-      if (!tempUrl) {
-        return;
-      }
-
-      return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
-    };
-
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       setUrl(getSavedObjectUrl()!);
     } else if (useShortUrl !== undefined && shortUrlCache !== undefined) {
@@ -280,20 +272,14 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       setUrl(addUrlAnonymousAccessParameters(url));
     }
 
-    if (isEmbedded && url !== undefined) {
-      setUrl(makeIframeTag(url)!);
-    }
-
     setUrl(url);
   }, [
     addUrlAnonymousAccessParameters,
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
-    isEmbedded,
     shortUrlCache,
     url,
-    shortUrl,
     useShortUrl,
   ]);
 
