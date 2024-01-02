@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -23,6 +24,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -72,17 +74,25 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
     setQuery,
   });
 
-  const openPanel = useCallback(() => {
-    openLeftPanel({
-      id: HostDetailsPanelKey,
-      params: {
-        riskInputs: {
-          alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
+  const openTabPanel = useCallback(
+    (tab?: EntityDetailsLeftPanelTab) => {
+      openLeftPanel({
+        id: HostDetailsPanelKey,
+        params: {
+          riskInputs: {
+            alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
+            host: {
+              name: hostName,
+            },
+          },
+          path: tab ? { tab } : undefined,
         },
-      },
-    });
-  }, [openLeftPanel, hostRiskData?.host.risk.inputs]);
+      });
+    },
+    [openLeftPanel, hostRiskData?.host.risk.inputs, hostName]
+  );
 
+  const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
   const observedHost = useObservedHost(hostName);
 
   if (riskScoreState.loading || observedHost.isLoading) {
@@ -110,7 +120,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
           <>
             <FlyoutNavigation
               flyoutIsExpandable={!!hostRiskData?.host.risk}
-              expandDetails={openPanel}
+              expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
@@ -119,6 +129,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
+              openDetailsPanel={openTabPanel}
             />
           </>
         );

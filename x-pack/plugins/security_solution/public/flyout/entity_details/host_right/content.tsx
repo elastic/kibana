@@ -17,6 +17,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHostFields } from './hooks/use_observed_host_fields';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface HostPanelContentProps {
   observedHost: ObservedEntityData<HostItem>;
@@ -24,6 +25,7 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
+  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
 export const HostPanelContent = ({
@@ -32,6 +34,7 @@ export const HostPanelContent = ({
   contextID,
   scopeId,
   isDraggable,
+  openDetailsPanel,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
@@ -44,7 +47,7 @@ export const HostPanelContent = ({
               riskScoreData={riskScoreState}
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               entity={RiskScoreEntity.host}
-              openDetailsPanel={() => {}}
+              openDetailsPanel={openDetailsPanel}
             />
           }
           <EuiHorizontalRule margin="m" />

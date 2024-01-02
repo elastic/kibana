@@ -21,11 +21,11 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type {
   HostRiskScore,
   UserRiskScore,
 } from '../../../../common/search_strategy/security_solution/risk_score';
-import { UserDetailsLeftPanelTab } from '../../../flyout/entity_details/user_details_left/tabs';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -38,7 +38,7 @@ import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   queryId: string;
-  openDetailsPanel: (tab: UserDetailsLeftPanelTab) => void;
+  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
   entity: T;
 }
 
@@ -174,7 +174,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
             />
           ),
           link: {
-            callback: () => openDetailsPanel(UserDetailsLeftPanelTab.RISK_INPUTS),
+            callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
             tooltip: (
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
