@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
@@ -16,6 +15,8 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { retry } from '../../retry';
+import { refreshSavedObjectIndices } from '../..';
+
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
  * create real `security-rule` asset saved objects from the package.
@@ -57,6 +58,8 @@ export const installPrebuiltRulesFleetPackage = async ({
       retries: 1,
     });
 
+    await refreshSavedObjectIndices(es);
+
     return response as InstallPackageResponse;
   } else {
     // Install the latest version
@@ -86,24 +89,10 @@ export const installPrebuiltRulesFleetPackage = async ({
       retries: 1,
     });
 
+    await refreshSavedObjectIndices(es);
+
     return response as BulkInstallPackagesResponse;
   }
-
-  // Before we proceed, we need to refresh saved object indices.
-  // At the previous step we installed the Fleet package with prebuilt detection rules.
-  // Prebuilt rules are assets that Fleet indexes as saved objects of a certain type.
-  // Fleet does this via a savedObjectsClient.import() call with explicit `refresh: false`.
-  // So, despite of the fact that the endpoint waits until the prebuilt rule assets will be
-  // successfully indexed, it doesn't wait until they become "visible" for subsequent read
-  // operations.
-  // And this is usually what we do next in integration tests: we read these SOs with utility
-  // function such as getPrebuiltRulesAndTimelinesStatus().
-  // Now, the time left until the next refresh can be anything from 0 to the default value, and
-  // it depends on the time when savedObjectsClient.import() call happens relative to the time of
-  // the next refresh. Also, probably the refresh time can be delayed when ES is under load?
-  // Anyway, this can cause race condition between a write and subsequent read operation, and to
-  // fix it deterministically we have to refresh saved object indices and wait until it's done.
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 };
 
 /**

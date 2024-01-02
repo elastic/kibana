@@ -13,6 +13,7 @@ export * from './create_non_security_rule';
 export * from './downgrade_immutable_rule';
 export * from './delete_all_rules';
 export * from './delete_rule';
+export * from './es_indices';
 export * from './fetch_rule';
 export * from './find_immutable_rule_by_id';
 export * from './get_simple_rule';
