@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { UserEntityOverview } from './user_entity_overview';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -25,6 +24,7 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -63,7 +63,7 @@ const mockUseUserDetails = useObservedUserDetails as jest.Mock;
 jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');

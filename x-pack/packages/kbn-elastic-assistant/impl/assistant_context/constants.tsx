@@ -17,7 +17,7 @@ export const KNOWLEDGE_BASE_LOCAL_STORAGE_KEY = 'knowledgeBase';
 export const DEFAULT_LATEST_ALERTS = 20;
 
 export const DEFAULT_KNOWLEDGE_BASE_SETTINGS: KnowledgeBaseConfig = {
-  alerts: false,
-  assistantLangChain: false,
+  isEnabledRAGAlerts: false,
+  isEnabledKnowledgeBase: false,
   latestAlerts: DEFAULT_LATEST_ALERTS,
 };

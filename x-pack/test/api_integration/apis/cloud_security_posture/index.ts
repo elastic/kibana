@@ -18,7 +18,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./status/status_indexing'));
     loadTestFile(require.resolve('./benchmark/v1'));
     loadTestFile(require.resolve('./benchmark/v2'));
-    loadTestFile(require.resolve('./find_csp_benchmark_rule'));
+    loadTestFile(require.resolve('./rules/v1'));
+    loadTestFile(require.resolve('./rules/v2'));
 
     // Place your tests files under this directory and add the following here:
     // loadTestFile(require.resolve('./your test name'));
