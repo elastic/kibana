@@ -7,19 +7,22 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
+  EuiIconTip,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
@@ -90,8 +93,8 @@ const getJobParams = (
 
 const renderDescription = (objectType: string) => {
   return objectType === 'dashboard'
-    ? `PNG & PDF reports can take a few minutes to generate based upon the size of your dashboard`
-    : `CSV reports can take a few minutes to generate based upon the size of your report `;
+    ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
+    : `CSV exports can take a few minutes to generate based upon the size of your report.`;
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
@@ -235,17 +238,27 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const renderOptions = () => {
     if (layoutOption === 'print') {
       return (
-        <EuiSwitch
-          label={
+        <EuiFormRow
+          helpText={
             <FormattedMessage
-              id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
-              defaultMessage="Optimize for printing"
+              css={{ overflowWrap: 'normal' }}
+              id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+              defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
             />
           }
-          checked={usePrintLayout}
-          onChange={handlePrintLayoutChange}
-          data-test-subj="usePrintLayout"
-        />
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="Optimize for printing"
+              />
+            }
+            checked={usePrintLayout}
+            onChange={handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+        </EuiFormRow>
       );
     } else if (layoutOption === 'canvas') {
       return (
@@ -291,13 +304,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     return (
       <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiLink onClick={copy} data-test-subj="shareReportingCopyURL">
+          <EuiButtonEmpty iconType="copy" flush="both" onClick={copy} data-test-subj="shareReportingCopyURL">
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
-              defaultMessage="Export URL  "
+              defaultMessage="Copy URL  "
             /> 
-            <EuiIcon type="copy"/>
-          </EuiLink>
+          </EuiButtonEmpty>
         )}
       </EuiCopy>
     );
@@ -318,12 +330,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           fill
           onClick={() => generateReportingJob()}
           data-test-subj="generateReportButton"
-          size="s"
           isLoading={Boolean(createReportingJob)}
         >
           <FormattedMessage
             id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate Export"
+            defaultMessage="Generate export"
           />
         </EuiButton>
       </EuiFormRow>
@@ -333,63 +344,65 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         fill
         onClick={() => generateReportingJob()}
         data-test-subj="generateReportButton"
-        size="s"
         isLoading={Boolean(createReportingJob)}
       >
         <FormattedMessage
           id="xpack.reporting.generateButtonLabel"
-          defaultMessage="Generate Export"
+          defaultMessage="Generate export"
         />
       </EuiButton>
     );
   return (
-    <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-      <EuiTitle>
-        <EuiText>Share as PNG or PDF</EuiText>
-      </EuiTitle>
+    <>
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiCallOut
+        size="s"
+        title={renderDescription(objectType)}
+        iconType="iInCircle"
+      />
       <EuiSpacer size="m" />
-      <EuiFormRow>
-        <EuiText size="s">{renderDescription(objectType)}</EuiText>
-      </EuiFormRow>
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-        <EuiRadioGroup
-          options={[
-            { id: 'printablePdfV2', label: 'PDF' },
-            { id: 'pngV2', label: 'PNG' },
-          ]}
-          onChange={(id) => setSelectedRadio(id)}
-          name="image reporting radio group"
-          idSelected={selectedRadio}
-        />
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexItem>
-        {layoutOption && (
-          <FormattedMessage
-            css={{ overflowWrap: 'normal' }}
-            id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
-            defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
+      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+        <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
+          <EuiRadioGroup
+            options={[
+              { id: 'printablePdfV2', label: 'PDF' },
+              { id: 'pngV2', label: 'PNG' },
+            ]}
+            onChange={(id) => setSelectedRadio(id)}
+            name="image reporting radio group"
+            idSelected={selectedRadio}
+            legend={{
+              children: <span>File type</span>
+            }}
           />
-        )}
-        </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>{renderOptions()}</EuiFlexItem>
-        <EuiSpacer size="m" />
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+        {renderOptions()}
+      </EuiForm>
+    </EuiModalBody>
+    <EuiModalFooter>
       <EuiFlexGroup>
-        {saveWarningMessageWithButton}
-      <EuiSpacer size="m" />
-      {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}</EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" justifyContent="flexEnd">
-        <EuiButton fill onSubmit={onClose}>
-          <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
-        </EuiButton>
+        <EuiFlexItem>
+          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem>
+              <EuiButtonEmpty onClick={onClose}>
+                <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {saveWarningMessageWithButton}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiForm>
+    </EuiModalFooter>
+    </>
   );
 };
 

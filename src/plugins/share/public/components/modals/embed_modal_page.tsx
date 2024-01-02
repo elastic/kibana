@@ -8,6 +8,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCheckboxGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,12 +18,14 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -361,51 +364,72 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     };
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal maxWidth={false} onClose={onClose}>
       <I18nProvider>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-          <EuiSpacer size="xs" />
-          <EuiTitle>
-            <EuiText>{`Share this ${props.objectType}`}</EuiText>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={1}>
-              <EuiFormLabel>Include</EuiFormLabel>
-              <EuiCheckboxGroup
-                options={checkboxOptions}
-                idToSelectedMap={checkboxSelectedMap}
-                onChange={(id) => checkboxOnChangeHandler(id)}
-                compressed
-                data-test-subj="embed-radio-group"
-              />
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{`Embed this ${props.objectType}`}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem  grow={1}>
+                <EuiCheckboxGroup
+                  options={checkboxOptions}
+                  idToSelectedMap={checkboxSelectedMap}
+                  onChange={(id) => checkboxOnChangeHandler(id)}
+                  data-test-subj="embed-radio-group"
+                  legend={{
+                    children: <span>Include</span>
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiRadioGroup
+                  options={radioOptions}
+                  onChange={(id) => setSelectedRadio(id)}
+                  name="embed radio group"
+                  idSelected={selectedRadio}
+                  legend={{
+                    children: <span>Generate as</span>
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {/* <EuiSpacer size="m" />
+            <EuiFlexGroup> */}
+              {/* {props.urlParamExtensions && props.urlParamExtensions?.map(({paramName}) => { */}
+              {/* <EuiButton fill onClick={() => setParamValue('embed')}>
+                <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
+              </EuiButton> */}
+              {/* })} */}
+            {/* </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="row" justifyContent="flexEnd">
+              <EuiButton fill onClick={onClose}>
+                <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
+              </EuiButton>
+            </EuiFlexGroup> */}
+          </EuiForm>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  <EuiButtonEmpty onClick={onClose}>
+                    <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton fill onClick={() => setParamValue('embed')}>
+                    <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiFormLabel>Generate the link as</EuiFormLabel>
-              <EuiRadioGroup
-                options={radioOptions}
-                onChange={(id) => setSelectedRadio(id)}
-                name="embed radio group"
-                idSelected={selectedRadio}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            {/* {props.urlParamExtensions && props.urlParamExtensions?.map(({paramName}) => { */}
-            <EuiButton fill onClick={() => setParamValue('embed')}>
-              <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
-            </EuiButton>
-            {/* })} */}
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" justifyContent="flexEnd">
-            <EuiButton fill onClick={onClose}>
-              <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiForm>
+        </EuiModalFooter>
       </I18nProvider>
     </EuiModal>
   );

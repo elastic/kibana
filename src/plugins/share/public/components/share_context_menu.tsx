@@ -131,7 +131,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     menuItems.push({
       name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Get Link',
+        defaultMessage: 'Get link',
       }),
       icon: 'link',
       sortOrder: 0,

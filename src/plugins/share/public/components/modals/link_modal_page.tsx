@@ -8,6 +8,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -15,12 +16,14 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -368,37 +371,47 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
   return (
     <EuiModal onClose={onClose}>
-      <EuiForm className="kbnShareContextMenu__finalPanel">
-        <EuiSpacer size="xs" />
-        <EuiTitle>
-          <EuiText>{`Share this ${objectType}`}</EuiText>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiRadioGroup
-          options={[
-            { id: 'savedObject', label: 'Saved object' },
-            { id: 'snapshot', label: 'Snapshot' },
-          ]}
-          onChange={(id) => setSelectedRadio(id)}
-          name="embed radio group"
-          idSelected={selectedRadio}
-        />
-        <EuiSpacer size="m" />
-        {saveNeeded}
-        <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiButton fill onClick={() => copyLink()}>
-            <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy Link" />
-          </EuiButton>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup direction="row" justifyContent="flexEnd">
-          <EuiButton fill onClick={onClose}>
-            <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiForm>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{`Get link to this ${objectType}`}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm className="kbnShareContextMenu__finalPanel">
+          <EuiRadioGroup
+            options={[
+              { id: 'savedObject', label: 'Saved object' },
+              { id: 'snapshot', label: 'Snapshot' },
+            ]}
+            onChange={(id) => setSelectedRadio(id)}
+            name="embed radio group"
+            idSelected={selectedRadio}
+            legend={{
+              children: <span>Generate as</span>
+            }}
+          />
+          <EuiSpacer size="m" />
+          {saveNeeded}
+          </EuiForm>
+        </EuiModalBody>  
+        <EuiModalFooter>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  <EuiButtonEmpty onClick={onClose}>
+                    <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton fill onClick={() => copyLink()}>
+                    <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalFooter>
+      
     </EuiModal>
   );
 };
