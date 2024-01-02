@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 
 import { useDispatch } from 'react-redux';
 
+import { TimelineTabs } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import {
   dispatchUpdateTimeline,
@@ -17,15 +18,21 @@ import {
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { URL_PARAM_KEY } from '../use_url_state';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
+
+  const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
         queryTimelineById({
-          activeTimelineTab: initialState.activeTab,
+          activeTimelineTab:
+            initialState.activeTab === TimelineTabs.esql && isEsqlTabDisabled
+              ? TimelineTabs.query
+              : initialState.activeTab,
           duplicate: false,
           graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
@@ -37,7 +44,7 @@ export const useInitTimelineFromUrlParam = () => {
         });
       }
     },
-    [dispatch]
+    [dispatch, isEsqlTabDisabled]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);

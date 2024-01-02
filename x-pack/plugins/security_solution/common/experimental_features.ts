@@ -113,6 +113,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
+
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
