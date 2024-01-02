@@ -99,7 +99,9 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/discover-utils",
     "@kbn/lens-formula-docs",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/reporting-plugin",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*"
