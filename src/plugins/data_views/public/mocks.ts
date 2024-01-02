@@ -34,6 +34,7 @@ const createStartContract = (): Start => {
       hasDataView: jest.fn().mockReturnValue(Promise.resolve(true)),
     },
     getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
+    getDefaultLegacy: jest.fn().mockReturnValue(Promise.resolve({})),
     getDefaultId: jest.fn().mockReturnValue(Promise.resolve('')),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     getLegacy: jest.fn().mockReturnValue(Promise.resolve({})),
@@ -43,6 +44,7 @@ const createStartContract = (): Start => {
     getFieldsForIndexPattern: jest.fn(),
     create: jest.fn().mockReturnValue(Promise.resolve({})),
     createLegacy: jest.fn().mockReturnValue(Promise.resolve({})),
+    toDataView: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

@@ -54,12 +54,10 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
     const override = false;
     const skipFetchFields = true;
     // prettier-ignore
-    const newDataView = await dataService.dataViews.createAndSave({
+    return dataService.dataViews.createAndSaveLegacy({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
     }, override, skipFetchFields);
-
-    return await dataService.dataViews.toDataView(newDataView);
   }
 };
 

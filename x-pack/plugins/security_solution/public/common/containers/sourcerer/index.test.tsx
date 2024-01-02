@@ -93,7 +93,7 @@ jest.mock('../../lib/kibana', () => ({
       },
       data: {
         dataViews: {
-          get: mockSearch.mockImplementation(
+          getLegacy: mockSearch.mockImplementation(
             async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
               Promise.resolve({
                 id: dataViewId,

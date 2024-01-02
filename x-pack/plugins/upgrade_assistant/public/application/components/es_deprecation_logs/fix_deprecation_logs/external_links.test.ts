@@ -20,7 +20,7 @@ describe('External Links', () => {
   describe('getDeprecationDataView', () => {
     it('creates new data view if doesnt exist', async () => {
       dataService.dataViews.findLegacy = jest.fn().mockResolvedValue([]);
-      dataService.dataViews.createAndSave = jest.fn().mockResolvedValue({ id: '123-456' });
+      dataService.dataViews.createAndSaveLegacy = jest.fn().mockResolvedValue({ id: '123-456' });
 
       const dataViewId = (await getDeprecationDataView(dataService)).id;
 

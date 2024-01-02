@@ -98,7 +98,7 @@ describe('useFieldBrowserOptions', () => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
     useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
-    useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
+    useKibanaMock().services.data.dataViews.getLegacy = () => new Promise(() => undefined);
 
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,

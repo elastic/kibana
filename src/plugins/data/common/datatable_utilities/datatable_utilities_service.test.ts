@@ -54,8 +54,8 @@ describe('DatatableUtilitiesService', () => {
   describe('getDataView', () => {
     it('should return a data view instance', async () => {
       const column = { meta: { index: 'index' } } as DatatableColumn;
-      const dataView = {} as ReturnType<DataViewsContract['get']>;
-      dataViews.get.mockReturnValue(dataView);
+      const dataView = {} as ReturnType<DataViewsContract['getLegacy']>;
+      dataViews.getLegacy.mockReturnValue(dataView);
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBe(dataView);
       expect(dataViews.getLegacy).toHaveBeenCalledWith('index');

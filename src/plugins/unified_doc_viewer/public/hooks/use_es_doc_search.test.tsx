@@ -41,6 +41,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
     const dataView = {
       getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
+      getRuntimeMappings: () => {},
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, false);
     expect(actual).toMatchInlineSnapshot(`
@@ -79,6 +80,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody useNewFieldsApi is true', () => {
     const dataView = {
       getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
+      getRuntimeMappings: () => {},
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, true);
     expect(actual).toMatchInlineSnapshot(`
@@ -122,6 +124,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody with requestSource', () => {
     const dataView = {
       getComputedFields: () => ({ scriptFields: [], docvalueFields: [] }),
+      getRuntimeMappings: () => {},
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, true, true);
     expect(actual).toMatchInlineSnapshot(`
@@ -177,6 +180,14 @@ describe('Test of <Doc /> helper / hook', () => {
           },
         },
       }),
+      getRuntimeMappings: () => ({
+        myRuntimeField: {
+          type: 'double',
+          script: {
+            source: 'emit(10.0)',
+          },
+        },
+      }),
     } as unknown as DataView;
     const actual = buildSearchBody('1', index, dataView, true);
     expect(actual).toMatchInlineSnapshot(`
@@ -228,6 +239,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const dataView = {
       getComputedFields: () => [],
       getIndexPattern: () => index,
+      getRuntimeMappings: () => {},
     };
     const props = {
       id: '1',
@@ -246,6 +258,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const dataView = {
       getComputedFields: () => [],
       getIndexPattern: () => index,
+      getRuntimeMappings: () => {},
     };
 
     const record = { _id: '1', _index: 't', test: 1 };
@@ -293,6 +306,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const dataView = {
       getComputedFields: () => [],
       getIndexPattern: () => index,
+      getRuntimeMappings: () => {},
     };
     const props = {
       id: '1',

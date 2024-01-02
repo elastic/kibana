@@ -168,6 +168,13 @@ export interface DataViewsServicePublicMethods {
     skipFetchFields?: boolean,
     displayErrors?: boolean
   ) => Promise<DataViewLazy>;
+
+  createAndSaveLegacy: (
+    spec: DataViewSpec,
+    override?: boolean,
+    skipFetchFields?: boolean,
+    displayErrors?: boolean
+  ) => Promise<DataView>;
   /**
    * Save data view
    * @param dataView - Data view instance to save.
@@ -1072,6 +1079,16 @@ export class DataViewsService {
     );
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
+  }
+
+  async createAndSaveLegacy(
+    spec: DataViewSpec,
+    overwrite = false,
+    skipFetchFields = false,
+    displayErrors = true
+  ) {
+    const dataViewLazy = await this.createAndSave(spec, overwrite, skipFetchFields, displayErrors);
+    return this.toDataView(dataViewLazy);
   }
 
   /**
