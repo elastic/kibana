@@ -113,5 +113,6 @@
     "@kbn/securitysolution-ecs",
     "@kbn/ml-data-view-utils",
     "@kbn/ml-creation-wizard-utils",
+    "@kbn/deeplinks-management",
   ],
 }
