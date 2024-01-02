@@ -213,14 +213,14 @@ export const DataDriftView = ({
               iconType="visTagCloud"
               data-test-subj="analyzeDataDriftWithoutSavingButton"
               aria-label={i18n.translate(
-                'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
+                'xpack.dataVisualizer.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
                 {
                   defaultMessage: 'Analyze data drift',
                 }
               )}
             >
               <FormattedMessage
-                id="xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
+                id="xpack.dataVisualizer.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
                 defaultMessage="Analyze data drift"
               />
             </EuiButton>

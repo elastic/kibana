@@ -182,15 +182,12 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
-  const overallSeriesName = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
-    {
-      defaultMessage: 'document count',
-    }
-  );
+  const overallSeriesName = i18n.translate('xpack.dataVisualizer.dataDriftt.seriesLabel', {
+    defaultMessage: 'document count',
+  });
 
   const overallSeriesNameWithSplit = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
+    'xpack.dataVisualizer.dataDrifttSplit.seriesLabel',
     {
       defaultMessage: 'Other document count',
     }
@@ -410,7 +407,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
       ) : (
         <EuiText color="subdued" size="s" textAlign="center">
           <FormattedMessage
-            id="xpack.dataDrift.dataDriftDocumentCountChart.clickToSelectTimeRangeLabel"
+            id="xpack.dataVisualizer.dataDrift.dataDriftDocumentCountChart.clickToSelectTimeRangeLabel"
             defaultMessage="Click on a bucket in the chart to select a time range for {id} data"
             values={{ id }}
           />
