@@ -65,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       log.debug('Cleaning up created index and policy');
 
       try {
-        await es.indices.delete({ index: ENRICH_INDEX_NAME });
+        await es.indices.delete({ index: ENRICH_INDEX_NAME }, { ignore: [404] });
       } catch (e) {
         log.debug('[Teardown error] Error deleting test policy');
         throw e;
