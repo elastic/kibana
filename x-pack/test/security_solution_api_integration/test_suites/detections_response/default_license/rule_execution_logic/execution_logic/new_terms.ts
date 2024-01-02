@@ -1040,5 +1040,31 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
       });
     });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['host.name'],
+          from: '2019-02-19T20:42:00.000Z',
+          history_window_start: '2019-01-19T20:42:00.000Z',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const fullAlert = previewAlerts[0]._source;
+
+        expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('normal');
+        expect(fullAlert?.['kibana.alert.user.criticality_level']).to.eql('very_important');
+      });
+    });
   });
 };

@@ -16,9 +16,6 @@
     "optionalPlugins": [
       "usageCollection",
       "savedObjectsTagging"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
     ]
   }
 }

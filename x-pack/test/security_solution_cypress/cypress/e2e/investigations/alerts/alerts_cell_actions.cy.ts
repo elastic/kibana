@@ -36,7 +36,7 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     createRule(getNewRule());
   });
@@ -93,7 +93,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Add to timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172231
+  describe.skip('Add to timeline', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -126,7 +127,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Show Top N', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172232
+  describe.skip('Show Top N', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -145,7 +147,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Copy to clipboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172233
+  describe.skip('Copy to clipboard', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
