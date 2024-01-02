@@ -97,19 +97,17 @@ interface OptionalRequestParams {
 }
 
 export const getOptionalRequestParams = ({
-  alerts,
+  isEnabledRAGAlerts,
   alertsIndexPattern,
   allow,
   allowReplacement,
-  ragOnAlerts,
   replacements,
   size,
 }: {
-  alerts: boolean;
+  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  ragOnAlerts: boolean;
   replacements?: Record<string, string>;
   size?: number;
 }): OptionalRequestParams => {
@@ -119,10 +117,8 @@ export const getOptionalRequestParams = ({
   const optionalReplacements = replacements ? { replacements } : undefined;
   const optionalSize = size ? { size } : undefined;
 
-  if (
-    !ragOnAlerts || // the feature flag must be enabled
-    !alerts // the settings toggle must also be enabled
-  ) {
+  // the settings toggle must be enabled:
+  if (!isEnabledRAGAlerts) {
     return {}; // don't send any optional params
   }
 
@@ -136,11 +132,9 @@ export const getOptionalRequestParams = ({
 };
 
 export const hasParsableResponse = ({
-  alerts,
-  assistantLangChain,
-  ragOnAlerts,
+  isEnabledRAGAlerts,
+  isEnabledKnowledgeBase,
 }: {
-  alerts: boolean;
-  assistantLangChain: boolean;
-  ragOnAlerts: boolean;
-}): boolean => assistantLangChain || (ragOnAlerts && alerts);
+  isEnabledRAGAlerts: boolean;
+  isEnabledKnowledgeBase: boolean;
+}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;

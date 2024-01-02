@@ -148,9 +148,8 @@ module.exports = {
                 )};\n${content}`;
               },
               implementation: require('sass-embedded'),
-              webpackImporter: false,
               sassOptions: {
-                outputStyle: 'nested',
+                outputStyle: 'expanded',
                 includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
               },
             },
