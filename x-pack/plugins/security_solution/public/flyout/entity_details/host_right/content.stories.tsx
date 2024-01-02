@@ -36,9 +36,10 @@ storiesOf('Components/HostPanelContent', module)
     <HostPanelContent
       observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
+      contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('no observed data', () => (
@@ -57,9 +58,10 @@ storiesOf('Components/HostPanelContent', module)
         anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
+      contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('loading', () => (
@@ -78,8 +80,9 @@ storiesOf('Components/HostPanelContent', module)
         anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
+      contextID={'test-host-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ));
