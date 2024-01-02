@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { Redirect, useHistory } from 'react-router-dom';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type {
@@ -129,16 +129,22 @@ const KIBANA_HEADERS_HEIGHT = 265;
 
 const DashboardTabRedirecter = ({
   lastTabSelected,
+  children,
 }: {
   lastTabSelected?: PosturePolicyTemplate;
+  children: JSX.Element;
 }) => {
+  const { pathname } = useLocation();
   const redirectToCSPMDashboardTab = lastTabSelected === POSTURE_TYPE_CSPM;
 
-  if (redirectToCSPMDashboardTab) {
+  if (redirectToCSPMDashboardTab && pathname !== cloudPosturePages.cspm_dashboard.path) {
     return <Redirect to={{ pathname: cloudPosturePages.cspm_dashboard.path }} />;
   }
+  if (lastTabSelected === POSTURE_TYPE_KSPM && pathname !== cloudPosturePages.kspm_dashboard.path) {
+    return <Redirect to={{ pathname: cloudPosturePages.kspm_dashboard.path }} />;
+  }
 
-  return <Redirect to={{ pathname: cloudPosturePages.kspm_dashboard.path }} />;
+  return children;
 };
 
 const IntegrationPostureDashboard = ({
@@ -307,11 +313,6 @@ const TabContent = ({
     <CloudPosturePage query={getDashboardData}>
       <div data-test-subj={dataTestSubj}>
         <Routes>
-          <Route
-            exact
-            path={cloudPosturePages.dashboard.path}
-            render={() => <DashboardTabRedirecter lastTabSelected={selectedPostureTypeTab} />}
-          />
           <Route path={cloudPosturePages.cspm_dashboard.path}>
             <IntegrationPostureDashboard
               dashboardType={policyTemplate}
@@ -427,31 +428,34 @@ export const ComplianceDashboard = () => {
   ]);
 
   return (
-    <CloudPosturePage>
-      <EuiPageHeader
-        data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
-        bottomBorder
-        pageTitle={
-          <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-              defaultMessage: 'Cloud Security Posture',
-            })}
-          />
-        }
-        tabs={tabs.map(({ content, ...rest }) => rest)}
-      />
-      <EuiSpacer />
-      <div
-        data-test-subj={DASHBOARD_CONTAINER}
-        css={css`
-          margin-left: auto;
-          margin-right: auto;
-          height: 100%;
-        `}
-      >
-        {tabs.find((t) => t.isSelected)?.content}
-        {!isCloudSecurityPostureInstalled && <NoFindingsStates postureType={POSTURE_TYPE_CSPM} />}
-      </div>
-    </CloudPosturePage>
+    <DashboardTabRedirecter lastTabSelected={selectedTabLocalStorage}>
+      <CloudPosturePage>
+        <EuiPageHeader
+          data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
+          bottomBorder
+          pageTitle={
+            <CloudPosturePageTitle
+              title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+                defaultMessage: 'Cloud Security Posture',
+              })}
+            />
+          }
+          tabs={tabs.map(({ content, ...rest }) => rest)}
+        />
+        <EuiSpacer />
+        <div
+          data-test-subj={DASHBOARD_CONTAINER}
+          css={css`
+            margin-left: auto;
+            margin-right: auto;
+            height: 100%;
+          `}
+        >
+          {tabs.find((t) => t.isSelected)?.content}
+
+          {!isCloudSecurityPostureInstalled && <NoFindingsStates postureType={POSTURE_TYPE_CSPM} />}
+        </div>
+      </CloudPosturePage>
+    </DashboardTabRedirecter>
   );
 };
