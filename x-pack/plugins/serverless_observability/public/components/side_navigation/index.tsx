@@ -41,11 +41,9 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               link: 'discover',
-              sideNavStatus: 'hidden',
               children: [
                 {
                   link: 'observability-log-explorer',
-                  sideNavStatus: 'hidden',
                 },
               ],
             },
