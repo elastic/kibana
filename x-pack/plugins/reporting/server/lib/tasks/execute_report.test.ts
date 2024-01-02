@@ -33,7 +33,7 @@ describe('Execute Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 2,
+        "maxAttempts": ${configType.capture.maxAttempts + 1},
         "maxConcurrency": 1,
         "timeout": "120s",
         "title": "Reporting: execute job",

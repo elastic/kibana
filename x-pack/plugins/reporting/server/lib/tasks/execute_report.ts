@@ -402,7 +402,7 @@ export class ExecuteReportTask implements ReportingTask {
               return;
             }
 
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting... Is last attempt: ${isLastAttempt}`;
+            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
             errorLogger(this.logger, errorMessage);
 
             // Throw so Task manager can reschedule

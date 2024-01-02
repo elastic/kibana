@@ -143,6 +143,9 @@ export interface ReportSource {
    * `output` is only populated if the report job is completed or failed.
    */
   output: ReportOutput | null;
+  /**
+   * Execution error durin one of the task runs.
+   */
   error?: ExecutionError | unknown;
 
   /*
