@@ -11,7 +11,7 @@
  *
  * Informal naming convention:
  * `is*()` is a plain check that returns a `boolean`
- * `*Validator()` implements this type an returns error messages.
+ * `*Validator()` implements this type and returns error messages.
  *
  * @param value The value to be validated
  * @param isOptional Optional boolean flag if the provided value is optional
