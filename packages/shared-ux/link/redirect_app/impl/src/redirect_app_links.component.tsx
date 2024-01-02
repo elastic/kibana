@@ -29,6 +29,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   children,
   navigateToUrl,
   currentAppId,
+  ...containerProps
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +51,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
       ref={containerRef}
       css={redirectAppLinksStyles}
       data-test-subj="kbnRedirectAppLink"
+      {...containerProps}
     >
       {children}
     </div>

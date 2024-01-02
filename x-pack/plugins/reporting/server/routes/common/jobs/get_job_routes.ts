@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { promisify } from 'util';
-
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { ALLOWED_JOB_CONTENT_TYPES } from '@kbn/reporting-common';
-
 import { getCounters } from '..';
 import { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
@@ -84,9 +81,12 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
     return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
       const docIndex = doc.index;
       const stream = await getContentStream(reporting, { id: docId, index: docIndex });
-
       /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-      await promisify(stream.end.bind(stream, '', 'utf8'))();
+      await new Promise<void>((resolve) => {
+        stream.end('', 'utf8', () => {
+          resolve();
+        });
+      });
       await jobsQuery.delete(docIndex, docId);
 
       return res.ok({

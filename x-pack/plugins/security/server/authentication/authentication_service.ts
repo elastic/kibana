@@ -16,6 +16,10 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type {
+  AuditServiceSetup,
+  AuthenticationServiceStart,
+} from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
@@ -28,7 +32,6 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -75,23 +78,6 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
-  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-}
-
-/**
- * Authentication services available on the security plugin's start contract.
- */
-export interface AuthenticationServiceStart {
-  apiKeys: Pick<
-    APIKeys,
-    | 'areAPIKeysEnabled'
-    | 'areCrossClusterAPIKeysEnabled'
-    | 'create'
-    | 'invalidate'
-    | 'validate'
-    | 'grantAsInternalUser'
-    | 'invalidateAsInternalUser'
-  >;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 

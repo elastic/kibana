@@ -205,14 +205,17 @@ const indexHasDataInDateRange = async (
   cloudSecuritySolution: CloudSecuritySolutions,
   searchFrom: Date
 ) => {
-  const response = await esClient.search({
-    index: METERING_CONFIGS[cloudSecuritySolution].index,
-    size: 1,
-    _source: false,
-    query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom),
-  });
+  const response = await esClient.search(
+    {
+      index: METERING_CONFIGS[cloudSecuritySolution].index,
+      size: 1,
+      _source: false,
+      query: getSearchQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom),
+    },
+    { ignore: [404] }
+  );
 
-  return response.hits.hits.length > 0;
+  return response.hits?.hits.length > 0;
 };
 
 const getSearchStartDate = (lastSuccessfulReport: Date): Date => {

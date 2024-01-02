@@ -8,7 +8,7 @@
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
-} from './authentication_service';
+} from '@kbn/security-plugin-types-public';
 
 export const authenticationMock = {
   createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({

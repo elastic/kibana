@@ -1,0 +1,13 @@
+{
+  "buildkite-agent annotate --append --style 'info' --context 'commit-info'": "ok",
+  "buildkite-agent meta-data get \"commit-sha\"": "906987c2860b53b91d449bc164957857adddc06a",
+  "node scripts/snapshot_plugin_types compare --from b5aa37525578 --to 906987c2860b53b91d449bc164957857adddc06a --outputPath 'so_comparison.json'": "ok",
+  "buildkite-agent artifact upload 'so_comparison.json'": "ok",
+  "buildkite-agent meta-data get 'release_state'": "",
+  "buildkite-agent meta-data get 'state_data'": "",
+  "buildkite-agent meta-data set 'release_state'": "ok",
+  "buildkite-agent meta-data set 'state_data'": "ok",
+  "buildkite-agent annotate --context 'wizard-main' --style 'info'": "ok",
+  "buildkite-agent annotate --context 'wizard-instruction' --style 'info'": "ok",
+  "buildkite-agent annotate --context 'wizard-instruction' --style 'warning'": "ok"
+}

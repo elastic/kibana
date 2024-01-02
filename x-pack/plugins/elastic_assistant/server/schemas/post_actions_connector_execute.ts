@@ -34,7 +34,13 @@ export const PostActionsConnectorExecuteBody = t.type({
     ]),
     subAction: t.string,
   }),
-  assistantLangChain: t.boolean,
+  alertsIndexPattern: t.union([t.string, t.undefined]),
+  allow: t.union([t.array(t.string), t.undefined]),
+  allowReplacement: t.union([t.array(t.string), t.undefined]),
+  isEnabledKnowledgeBase: t.boolean,
+  isEnabledRAGAlerts: t.boolean,
+  replacements: t.union([t.record(t.string, t.string), t.undefined]),
+  size: t.union([t.number, t.undefined]),
 });
 
 export type PostActionsConnectorExecuteBodyInputs = t.TypeOf<

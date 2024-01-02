@@ -15,13 +15,16 @@ import type {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
+  getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
+  isNonAggregatableSampledDocs,
   NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
@@ -129,6 +132,26 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         probability
       );
 
+      const nonAggregatableFieldsExamplesObs = data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+          {
+            params: getSampleOfDocumentsForNonAggregatableFields(
+              nonAggregatableFields,
+              index,
+              searchQuery,
+              timeFieldName,
+              earliest,
+              latest,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return resp as IKibanaSearchResponse;
+          })
+        );
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
@@ -191,14 +214,29 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const sub = rateLimitingForkJoin<
         AggregatableFieldOverallStats | NonAggregatableFieldOverallStats | undefined
-      >([...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs], MAX_CONCURRENT_REQUESTS);
+      >(
+        [
+          nonAggregatableFieldsExamplesObs,
+          ...aggregatableOverallStatsObs,
+          ...nonAggregatableFieldsObs,
+        ],
+        MAX_CONCURRENT_REQUESTS
+      );
 
       searchSubscription$.current = sub.subscribe({
         next: (value) => {
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
+          let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
+            if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
+              const docs = resp.rawResponse.hits.hits.map((d) =>
+                d.fields ? getProcessedFields(d.fields) : {}
+              );
+
+              sampledNonAggregatableFieldsExamples = docs;
+            }
             if (isAggregatableFieldOverallStats(resp)) {
               aggregatableOverallStatsResp.push(resp);
             }
@@ -215,9 +253,27 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             aggregatableFields
           );
 
+          const nonAggregatableFieldsCount: number[] = new Array(nonAggregatableFields.length).fill(
+            0
+          );
+          const nonAggregatableFieldsUniqueCount = nonAggregatableFields.map(
+            () => new Set<string>()
+          );
+          if (sampledNonAggregatableFieldsExamples) {
+            sampledNonAggregatableFieldsExamples.forEach((doc) => {
+              nonAggregatableFields.forEach((field, fieldIdx) => {
+                if (doc.hasOwnProperty(field)) {
+                  nonAggregatableFieldsCount[fieldIdx] += 1;
+                  nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]!);
+                }
+              });
+            });
+          }
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
-            nonAggregatableFields
+            nonAggregatableFields,
+            nonAggregatableFieldsCount,
+            nonAggregatableFieldsUniqueCount
           );
 
           setOverallStats({

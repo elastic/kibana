@@ -78,3 +78,11 @@ components:
         - field
         - value
         - cardinality
+
+    ThresholdAlertSuppression:
+      type: object
+      properties:
+        duration: 
+          $ref: '../common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
+      required:
+        - duration

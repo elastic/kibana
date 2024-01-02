@@ -86,6 +86,7 @@ describe('Error logging', () => {
           name: 'ResponseError',
           process: {
             pid: expect.any(Number),
+            uptime: expect.any(Number),
           },
         });
       }

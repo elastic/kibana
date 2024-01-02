@@ -243,7 +243,7 @@ export const ChartGridEmbeddableWrapper: FC<
       ) : emptyState ? (
         emptyState
       ) : (
-        <NoChangePointsWarning />
+        <NoChangePointsWarning onRenderComplete={onRenderComplete} />
       )}
     </div>
   );

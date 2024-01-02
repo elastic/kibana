@@ -198,6 +198,8 @@ export interface TableSuggestion {
    * The change type indicates what was changed in this table compared to the currently active table of this layer.
    */
   changeType: TableChangeType;
+
+  notAssignedMetrics?: boolean;
 }
 
 /**
@@ -509,6 +511,8 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Promise<DataSourceInfo[]>;
 
   injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
+
+  suggestsLimitedColumns?: (state: T) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -746,6 +750,7 @@ export interface OperationMetadata {
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
+  inMetricDimension?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -882,6 +887,7 @@ export interface SuggestionRequest<T = unknown> {
   subVisualizationId?: string;
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
+  datasourceId?: string;
 }
 
 /**

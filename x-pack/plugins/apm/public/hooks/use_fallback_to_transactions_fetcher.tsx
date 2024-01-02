@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { getKueryWithMobileFilters } from '../../common/utils/get_kuery_with_mobile_filters';
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
@@ -33,11 +34,17 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
 
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
-      return callApmApi('GET /internal/apm/fallback_to_transactions', {
-        params: {
-          query: { kuery: kueryWithFilters, start, end },
-        },
-      });
+      if (start && end) {
+        return callApmApi('GET /internal/apm/fallback_to_transactions', {
+          params: {
+            query: {
+              kuery: kueryWithFilters,
+              start,
+              end,
+            },
+          },
+        });
+      }
     },
     [kueryWithFilters, start, end]
   );

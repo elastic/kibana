@@ -80,6 +80,9 @@ const getResourceFindingsQuery = ({
   ignore_unavailable: false,
 });
 
+/**
+ * @deprecated: This hook is deprecated and will be removed in the next release.
+ */
 export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   const {
     data,

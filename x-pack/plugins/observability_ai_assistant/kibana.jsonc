@@ -8,6 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistant"],
     "requiredPlugins": [
+      "alerting",
       "actions",
       "dataViews",
       "features",
@@ -19,9 +20,10 @@
       "share",
       "taskManager",
       "triggersActionsUi",
-      "dataViews"
+      "dataViews",
+      "ml"
     ],
-    "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": [ "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

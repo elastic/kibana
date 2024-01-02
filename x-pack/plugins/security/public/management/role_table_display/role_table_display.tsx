@@ -10,7 +10,7 @@ import React from 'react';
 
 import type { ApplicationStart } from '@kbn/core/public';
 
-import type { Role } from '../../../common/model';
+import type { Role } from '../../../common';
 import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
