@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { isResponseActionSupported } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { HOST_NOT_ENROLLED, LICENSE_TOO_LOW } from '../../create/validate';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
@@ -247,6 +248,21 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return {
         isValid: false,
         error: new ResponseActionsClientError(HOST_NOT_ENROLLED, 400),
+      };
+    }
+
+    if (
+      !isResponseActionSupported(
+        this.agentType,
+        actionRequest.command,
+        this.options.isAutomated ? 'automated' : 'manual'
+      )
+    ) {
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `Response action [${actionRequest.command}] is not supported for [${this.agentType}]`
+        ),
       };
     }
 
