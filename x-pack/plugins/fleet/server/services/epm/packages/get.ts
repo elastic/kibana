@@ -710,7 +710,6 @@ export async function getPackageAssetsMap({
   packageInfo: PackageInfo;
   logger: Logger;
 }) {
-  // Retrieve package assets refacto this
   const installedPackageWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient,
     pkgName: packageInfo.name,
