@@ -23,27 +23,27 @@ describe('flattenNav', () => {
       {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
         children: [
           {
             id: 'item1',
             title: 'Item 1',
-            path: ['root', 'item1'],
+            path: 'root.item1',
           },
           {
             id: 'item2',
             title: 'Item 2',
-            path: ['root', 'item2'],
+            path: 'root.item2',
           },
           {
             id: 'group1',
             title: 'Group 1',
-            path: ['root', 'group1'],
+            path: 'root.group1',
             children: [
               {
                 id: 'item3',
                 title: 'Item 3',
-                path: ['root', 'group1', 'item3'],
+                path: 'root.group1.item3',
               },
             ],
           },
@@ -55,27 +55,27 @@ describe('flattenNav', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][0]': {
         id: 'item1',
         title: 'Item 1',
-        path: ['root', 'item1'],
+        path: 'root.item1',
       },
       '[0][1]': {
         id: 'item2',
         title: 'Item 2',
-        path: ['root', 'item2'],
+        path: 'root.item2',
       },
       '[0][2]': {
         id: 'group1',
         title: 'Group 1',
-        path: ['root', 'group1'],
+        path: 'root.group1',
       },
       '[0][2][0]': {
         id: 'item3',
         title: 'Item 3',
-        path: ['root', 'group1', 'item3'],
+        path: 'root.group1.item3',
       },
     };
 
@@ -89,18 +89,18 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][0]': {
         id: 'group1',
         title: 'Group 1',
-        path: ['root', 'group1'],
+        path: 'root.group1',
       },
       '[0][0][0]': {
         id: 'item1',
         title: 'Item 1',
         deepLink: getDeepLink('item1', 'item1'),
-        path: ['root', 'group1', 'item1'],
+        path: 'root.group1.item1',
       },
     };
 
@@ -109,21 +109,18 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'group1',
           title: 'Group 1',
-          isActive: true,
-          path: ['root', 'group1'],
+          path: 'root.group1',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
           deepLink: getDeepLink('item1', 'item1'),
-          path: ['root', 'group1', 'item1'],
+          path: 'root.group1.item1',
         },
       ],
     ]);
@@ -134,35 +131,35 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][0]': {
         id: 'group1',
         title: 'Group 1',
         deepLink: getDeepLink('group1', 'group1'),
-        path: ['root', 'group1'],
+        path: 'root.group1',
       },
       '[0][0][0]': {
         id: 'group1A',
         title: 'Group 1A',
-        path: ['root', 'group1', 'group1A'],
+        path: 'root.group1.group1A',
       },
       '[0][0][0][0]': {
         id: 'item1',
         title: 'Item 1',
         deepLink: getDeepLink('item1', 'item1'),
-        path: ['root', 'group1', 'group1A', 'item1'],
+        path: 'root.group1.group1A.item1',
       },
       '[0][1]': {
         id: 'group2',
         title: 'Group 2',
-        path: ['root', 'group2'],
+        path: 'root.group2',
       },
       '[0][1][0]': {
         id: 'item2',
         title: 'Item 2',
         deepLink: getDeepLink('item1', 'item1'), // Same link as above, should match both
-        path: ['root', 'group2', 'item2'],
+        path: 'root.group2.item2',
       },
     };
 
@@ -172,49 +169,42 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'group1',
           title: 'Group 1',
-          isActive: true,
           deepLink: getDeepLink('group1', 'group1'),
-          path: ['root', 'group1'],
+          path: 'root.group1',
         },
         {
           id: 'group1A',
           title: 'Group 1A',
-          isActive: true,
-          path: ['root', 'group1', 'group1A'],
+          path: 'root.group1.group1A',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
           deepLink: getDeepLink('item1', 'item1'),
-          path: ['root', 'group1', 'group1A', 'item1'],
+          path: 'root.group1.group1A.item1',
         },
       ],
       [
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'group2',
           title: 'Group 2',
-          isActive: true,
-          path: ['root', 'group2'],
+          path: 'root.group2',
         },
         {
           id: 'item2',
           title: 'Item 2',
-          isActive: true,
           deepLink: getDeepLink('item1', 'item1'),
-          path: ['root', 'group2', 'item2'],
+          path: 'root.group2.item2',
         },
       ],
     ]);
@@ -225,13 +215,13 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][1]': {
         id: 'item1',
         title: 'Item 1',
         deepLink: getDeepLink('item1', `item1#/foo/bar`),
-        path: ['root', 'item1'],
+        path: 'root.item1',
       },
     };
 
@@ -240,15 +230,13 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
           deepLink: getDeepLink('item1', `item1#/foo/bar`),
-          path: ['root', 'item1'],
+          path: 'root.item1',
         },
       ],
     ]);
@@ -260,7 +248,7 @@ describe('findActiveNodes', () => {
         id: 'root',
         title: 'Root',
         deepLink: getDeepLink('root', `root`),
-        path: ['root'],
+        path: 'root',
       },
     };
 
@@ -269,9 +257,8 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
           deepLink: getDeepLink('root', `root`),
-          path: ['root'],
+          path: 'root',
         },
       ],
     ]);
@@ -282,19 +269,19 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][1]': {
         id: 'item1',
         title: 'Item 1',
         deepLink: getDeepLink('item1', `item1#/foo`),
-        path: ['root', 'item1'],
+        path: 'root.item1',
       },
       '[0][2]': {
         id: 'item2',
         title: 'Item 2',
         deepLink: getDeepLink('item2', `item1#/foo/bar`), // Should match this one
-        path: ['root', 'item2'],
+        path: 'root.item2',
       },
     };
 
@@ -303,15 +290,13 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item2',
           title: 'Item 2',
-          isActive: true,
           deepLink: getDeepLink('item2', `item1#/foo/bar`),
-          path: ['root', 'item2'],
+          path: 'root.item2',
         },
       ],
     ]);
@@ -322,13 +307,13 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][1]': {
         id: 'item1',
         title: 'Item 1',
         deepLink: getDeepLink('item1', `appRoot`),
-        path: ['root', 'item1'],
+        path: 'root.item1',
       },
     };
 
@@ -337,15 +322,13 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
           deepLink: getDeepLink('item1', `appRoot`),
-          path: ['root', 'item1'],
+          path: 'root.item1',
         },
       ],
     ];
@@ -362,19 +345,19 @@ describe('findActiveNodes', () => {
       '[0]': {
         id: 'root',
         title: 'Root',
-        path: ['root'],
+        path: 'root',
       },
       '[0][1]': {
         id: 'item1',
         title: 'Item 1',
-        path: ['root', 'item1'],
+        path: 'root.item1',
         getIsActive: ({ location }) => location.pathname.startsWith('/foo'), // Should match
       },
       '[0][2]': {
         id: 'item2',
         title: 'Item 2',
         deepLink: getDeepLink('item2', 'item2'), // Should match
-        path: ['root', 'item2'],
+        path: 'root.item2',
       },
     };
 
@@ -393,30 +376,26 @@ describe('findActiveNodes', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
           getIsActive: expect.any(Function),
-          path: ['root', 'item1'],
+          path: 'root.item1',
         },
       ],
       [
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item2',
           title: 'Item 2',
-          isActive: true,
           deepLink: getDeepLink('item2', 'item2'),
-          path: ['root', 'item2'],
+          path: 'root.item2',
         },
       ],
     ]);

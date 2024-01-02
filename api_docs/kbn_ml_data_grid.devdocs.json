@@ -347,10 +347,10 @@
       },
       {
         "parentPluginId": "@kbn/ml-data-grid",
-        "id": "def-common.getFieldsFromKibanaIndexPattern",
+        "id": "def-common.getFieldsFromKibanaDataView",
         "type": "Function",
         "tags": [],
-        "label": "getFieldsFromKibanaIndexPattern",
+        "label": "getFieldsFromKibanaDataView",
         "description": [
           "\nRetrieves fields from a Kibana data view."
         ],
@@ -371,7 +371,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-data-grid",
-            "id": "def-common.getFieldsFromKibanaIndexPattern.$1",
+            "id": "def-common.getFieldsFromKibanaDataView.$1",
             "type": "Object",
             "tags": [],
             "label": "dataView",
@@ -2489,12 +2489,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-data-grid",
-            "id": "def-common.UseIndexDataReturnType.indexPatternFields",
+            "id": "def-common.UseIndexDataReturnType.dataViewFields",
             "type": "Array",
             "tags": [],
-            "label": "indexPatternFields",
+            "label": "dataViewFields",
             "description": [
-              "\nOptional index pattern fields."
+              "\nOptional data view fields."
             ],
             "signature": [
               "string[] | undefined"

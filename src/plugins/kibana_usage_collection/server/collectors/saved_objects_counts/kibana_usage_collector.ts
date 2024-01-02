@@ -28,7 +28,7 @@ const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-w
 export async function getKibanaSavedObjectCounts(
   soClient: SavedObjectsClientContract
 ): Promise<KibanaSavedObjectCounts> {
-  const { per_type: buckets } = await getSavedObjectsCounts(soClient, TYPES, true);
+  const { per_type: buckets } = await getSavedObjectsCounts(soClient, TYPES, { exclusive: true });
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])

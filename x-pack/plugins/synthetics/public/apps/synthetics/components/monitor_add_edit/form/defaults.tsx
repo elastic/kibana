@@ -9,7 +9,7 @@ import { DEFAULT_FIELDS } from '../constants';
 
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   SyntheticsMonitor,
   BrowserFields,
@@ -22,7 +22,7 @@ export const getDefaultFormFields = (
   const kibanaNamespace = formatKibanaNamespace(spaceId);
   return {
     [FormMonitorType.MULTISTEP]: {
-      ...DEFAULT_FIELDS[DataStream.BROWSER],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
       'source.inline': {
         type: 'recorder',
         script: '',
@@ -32,24 +32,24 @@ export const getDefaultFormFields = (
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.SINGLE]: {
-      ...DEFAULT_FIELDS[DataStream.BROWSER],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.HTTP]: {
-      ...DEFAULT_FIELDS[DataStream.HTTP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.TCP]: {
-      ...DEFAULT_FIELDS[DataStream.TCP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.ICMP]: {
-      ...DEFAULT_FIELDS[DataStream.ICMP],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
@@ -68,9 +68,9 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
   // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
   if (!formMonitorType) {
     formMonitorType =
-      monitorType === DataStream.BROWSER
+      monitorType === MonitorTypeEnum.BROWSER
         ? FormMonitorType.MULTISTEP
-        : (monitorType as Omit<DataStream, DataStream.BROWSER> as FormMonitorType);
+        : (monitorType as Omit<MonitorTypeEnum, MonitorTypeEnum.BROWSER> as FormMonitorType);
     monitorWithFormMonitorType[ConfigKey.FORM_MONITOR_TYPE] = formMonitorType;
   }
 

@@ -19,9 +19,14 @@ import type {
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
+
+const hasFilterCellAction = (actions: LensCellValueAction[]) => {
+  return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
+};
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -81,7 +86,16 @@ export const createGridColumns = (
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
     const cellActions: EuiDataGridColumnCellAction[] = [];
-    if (filterable && handleFilterClick && !columnArgs?.oneClickFilter) {
+
+    // compatible cell actions from actions registry
+    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
+
+    if (
+      !hasFilterCellAction(compatibleCellActions) &&
+      filterable &&
+      handleFilterClick &&
+      !columnArgs?.oneClickFilter
+    ) {
       cellActions.push(
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
           const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -166,8 +180,6 @@ export const createGridColumns = (
       );
     }
 
-    // Add all the column compatible cell actions
-    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
     compatibleCellActions.forEach((action) => {
       cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
         const rowValue = table.rows[rowIndex][columnId];

@@ -13,12 +13,18 @@ import {
   isStepActive,
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
+
 import {
-  ExploreSteps,
-  ConfigureSteps,
-  GetSetUpCardId,
-  IntroductionSteps,
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  QuickStartSectionCardsId,
   SectionId,
+  GetStartedWithAlertsCardsId,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
 } from './types';
 
 import * as sectionsConfigs from './sections';
@@ -83,7 +89,7 @@ describe('isStepActive', () => {
   it('should return true if the step is active based on the active products', () => {
     const step = {
       productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
-      id: ConfigureSteps.learnAbout,
+      id: OverviewSteps.getToKnowElasticSecurity,
     } as Step;
     const activeProducts = new Set([ProductLine.cloud]);
 
@@ -94,7 +100,7 @@ describe('isStepActive', () => {
 
   it('should return true if the card has no product type requirement', () => {
     const step = {
-      id: ConfigureSteps.enablePrebuiltRules,
+      id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
     } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
@@ -106,7 +112,7 @@ describe('isStepActive', () => {
   it('should return false if the card is not active based on the active products', () => {
     const step = {
       productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
-      id: ConfigureSteps.learnAbout,
+      id: OverviewSteps.getToKnowElasticSecurity,
     } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
@@ -125,37 +131,66 @@ describe('setupActiveSections', () => {
   it('should set up active steps based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
-
     const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
     expect(
-      getCard(GetSetUpCardId.introduction, SectionId.getSetUp, activeSections).activeStepIds
-    ).toEqual([IntroductionSteps.getToKnowElasticSecurity]);
+      getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
+        .activeStepIds
+    ).toEqual([CreateProjectSteps.createFirstProject]);
 
     expect(
-      getCard(GetSetUpCardId.configure, SectionId.getSetUp, activeSections).activeStepIds
-    ).toEqual([
-      ConfigureSteps.learnAbout,
-      ConfigureSteps.deployElasticAgent,
-      ConfigureSteps.enablePrebuiltRules,
-    ]);
+      getCard(QuickStartSectionCardsId.watchTheOverviewVideo, SectionId.quickStart, activeSections)
+        .activeStepIds
+    ).toEqual([OverviewSteps.getToKnowElasticSecurity]);
 
     expect(
-      getCard(GetSetUpCardId.explore, SectionId.getSetUp, activeSections).activeStepIds
-    ).toEqual([ExploreSteps.viewAlerts, ExploreSteps.analyzeData]);
+      getCard(
+        AddAndValidateYourDataCardsId.addIntegrations,
+        SectionId.addAndValidateYourData,
+        activeSections
+      ).activeStepIds
+    ).toEqual([AddIntegrationsSteps.connectToDataSources]);
+
+    expect(
+      getCard(
+        AddAndValidateYourDataCardsId.viewDashboards,
+        SectionId.addAndValidateYourData,
+        activeSections
+      ).activeStepIds
+    ).toEqual([ViewDashboardSteps.analyzeData]);
+
+    expect(
+      getCard(
+        GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        SectionId.getStartedWithAlerts,
+        activeSections
+      ).activeStepIds
+    ).toEqual([EnablePrebuiltRulesSteps.enablePrebuiltRules]);
+
+    expect(
+      getCard(
+        GetStartedWithAlertsCardsId.viewAlerts,
+        SectionId.getStartedWithAlerts,
+        activeSections
+      ).activeStepIds
+    ).toEqual([ViewAlertsSteps.viewAlerts]);
   });
 
   it('should set up active cards based on finished steps', () => {
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
     const { activeSections } = setupActiveSections(finishedSteps, activeProducts);
 
-    expect(getCard(GetSetUpCardId.introduction, SectionId.getSetUp, activeSections)).toEqual({
-      activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
-      id: GetSetUpCardId.introduction,
+    expect(
+      getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
+    ).toEqual({
+      activeStepIds: [CreateProjectSteps.createFirstProject],
+      id: QuickStartSectionCardsId.createFirstProject,
       stepsLeft: 0,
       timeInMins: 0,
     });
@@ -178,12 +213,14 @@ describe('setupActiveSections', () => {
   it('should handle null or empty cards in sections', () => {
     mockSections.mockImplementation(() => [
       {
-        id: SectionId.getSetUp,
+        id: SectionId.quickStart,
       } as unknown as Section,
     ]);
 
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
@@ -201,40 +238,33 @@ describe('setupActiveSections', () => {
 
 describe('updateActiveSections', () => {
   const finishedSteps = {
-    [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+    [QuickStartSectionCardsId.createFirstProject]: new Set([CreateProjectSteps.createFirstProject]),
   } as unknown as Record<CardId, Set<StepId>>;
 
   const activeSections = {
-    [SectionId.getSetUp]: {
-      [GetSetUpCardId.introduction]: {
-        id: GetSetUpCardId.introduction,
-        timeInMins: 3,
+    [SectionId.quickStart]: {
+      [QuickStartSectionCardsId.createFirstProject]: {
+        id: QuickStartSectionCardsId.createFirstProject,
+        stepsLeft: 0,
+      },
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+        id: QuickStartSectionCardsId.watchTheOverviewVideo,
         stepsLeft: 1,
-      },
-      [GetSetUpCardId.configure]: {
-        id: GetSetUpCardId.configure,
-        timeInMins: 0,
-        stepsLeft: 4,
-      },
-      [GetSetUpCardId.explore]: {
-        id: GetSetUpCardId.explore,
-        timeInMins: 0,
-        stepsLeft: 2,
       },
     },
   } as ActiveSections;
 
   it('should update the active card based on finished steps and active products', () => {
     const activeProducts = new Set([ProductLine.cloud]);
-    const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.introduction;
+    const sectionId = SectionId.quickStart;
+    const cardId = QuickStartSectionCardsId.createFirstProject;
     const testActiveSections = {
-      [SectionId.getSetUp]: {
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
-          timeInMins: 3,
-          stepsLeft: 1,
-          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+      [SectionId.quickStart]: {
+        [QuickStartSectionCardsId.createFirstProject]: {
+          id: QuickStartSectionCardsId.createFirstProject,
+          stepsLeft: 0,
+          timeInMins: 0,
+          activeStepIds: [CreateProjectSteps.createFirstProject],
         },
       },
     };
@@ -249,13 +279,13 @@ describe('updateActiveSections', () => {
     expect(updatedSections).toEqual({
       activeSections: {
         ...testActiveSections,
-        [SectionId.getSetUp]: {
-          ...testActiveSections[SectionId.getSetUp],
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
+        [SectionId.quickStart]: {
+          ...testActiveSections[SectionId.quickStart],
+          [QuickStartSectionCardsId.createFirstProject]: {
+            id: QuickStartSectionCardsId.createFirstProject,
             timeInMins: 0,
             stepsLeft: 0,
-            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+            activeStepIds: [CreateProjectSteps.createFirstProject],
           },
         },
       },
@@ -266,8 +296,8 @@ describe('updateActiveSections', () => {
 
   it('should return null if the card is inactive based on active products', () => {
     const activeProducts = new Set([ProductLine.cloud]);
-    const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.introduction;
+    const sectionId = SectionId.quickStart;
+    const cardId = QuickStartSectionCardsId.createFirstProject;
 
     const updatedSections = updateActiveSections({
       activeProducts,
@@ -286,7 +316,7 @@ describe('updateActiveSections', () => {
 
   it('should return null if the card or activeSections is not found', () => {
     const activeProducts = new Set([ProductLine.cloud]);
-    const sectionId = SectionId.getSetUp;
+    const sectionId = SectionId.quickStart;
     const cardId = 'test' as CardId;
 
     const updatedSections = updateActiveSections({

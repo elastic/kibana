@@ -32,7 +32,7 @@ function createBaseOptions({
   };
 }
 
-describe('getHosts', () => {
+describe('getContainers', () => {
   let getApmIndicesMock = createGetApmIndicesMock();
   let metricsDataClientMock = MetricsDataClientMock.create();
   let baseOptions = createBaseOptions({ getApmIndicesMock, metricsDataClientMock });

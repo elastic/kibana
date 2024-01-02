@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
@@ -23,6 +23,7 @@ export const MitreAttack: FC = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiSpacer size="m" />
       <EuiFlexItem data-test-subj={MITRE_ATTACK_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           <h5>{threatDetails[0].title}</h5>

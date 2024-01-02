@@ -244,6 +244,7 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
+          width: '100px',
         }
       : null,
   };

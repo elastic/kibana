@@ -6,9 +6,9 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { CloudFullStoryConfigType } from '../server/config';
-import { CloudFullStoryPlugin } from './plugin';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { duration } from 'moment';
+import { CloudFullStoryConfig, CloudFullStoryPlugin } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -22,7 +22,7 @@ describe('Cloud Plugin', () => {
         isCloudEnabled = true,
         isElasticStaffOwned = false,
       }: {
-        config?: Partial<CloudFullStoryConfigType>;
+        config?: Partial<CloudFullStoryConfig>;
         isCloudEnabled?: boolean;
         isElasticStaffOwned?: boolean;
       }) => {
@@ -50,6 +50,20 @@ describe('Cloud Plugin', () => {
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
           fullStoryOrgId: 'foo',
+          scriptUrl: '/internal/cloud/100/fullstory.js',
+          namespace: 'FSKibana',
+        });
+      });
+
+      test('register the shipper FullStory with the correct duration', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { org_id: 'foo', pageVarsDebounceTime: `${duration(500, 'ms')}` },
+        });
+
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
+          fullStoryOrgId: 'foo',
+          pageVarsDebounceTimeMs: 500,
           scriptUrl: '/internal/cloud/100/fullstory.js',
           namespace: 'FSKibana',
         });

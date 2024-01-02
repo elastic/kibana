@@ -11,8 +11,8 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
@@ -55,7 +55,7 @@ export const CommonFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.NAME]: t.string,
     [ConfigKey.NAMESPACE]: t.string,
-    [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
@@ -350,10 +350,10 @@ export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
 ]);
 
 export const MonitorDefaultsCodec = t.interface({
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.ICMP]: ICMPSimpleFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 });
 
 export const MonitorManagementListResultCodec = t.type({

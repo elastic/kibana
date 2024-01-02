@@ -67,7 +67,7 @@ export const SUCCESS_CHART_LABEL = i18n.translate(
   }
 );
 
-export const AUTHENCICATION_SUCCESS_CHART_LABEL = i18n.translate(
+export const AUTHENTICATION_SUCCESS_CHART_LABEL = i18n.translate(
   'xpack.securitySolution.visualizationActions.userAuthentications.authentication.successChartLabel',
   {
     defaultMessage: 'Success',
@@ -81,7 +81,7 @@ export const FAIL_CHART_LABEL = i18n.translate(
   }
 );
 
-export const AUTHENCICATION_FAILURE_CHART_LABEL = i18n.translate(
+export const AUTHENTICATION_FAILURE_CHART_LABEL = i18n.translate(
   'xpack.securitySolution.visualizationActions.userAuthentications.authentication.failureChartLabel',
   {
     defaultMessage: 'Failure',
@@ -111,3 +111,10 @@ export const COUNT_OF = (field: string) =>
     values: { field },
     defaultMessage: 'Count of {field}',
   });
+
+export const ADDED_TO_LIBRARY = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addedToLibrary',
+  {
+    defaultMessage: 'Added to library',
+  }
+);

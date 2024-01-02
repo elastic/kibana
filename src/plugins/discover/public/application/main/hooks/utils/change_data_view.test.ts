@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import {
+  dataViewComplexMock,
+  dataViewWithDefaultColumnMock,
+} from '../../../../__mocks__/data_view_complex';
 import { changeDataView } from './change_data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const setupTestParams = (dataView: DataView | undefined) => {
@@ -27,11 +30,21 @@ const setupTestParams = (dataView: DataView | undefined) => {
 };
 
 describe('changeDataView', () => {
-  it('should set the right app state when a valid data view to switch to is given', async () => {
-    const params = setupTestParams(dataViewComplexMock as DataView);
-    await changeDataView('data-view-with-various-field-types', params);
+  it('should set the right app state when a valid data view (which includes the preconfigured default column) to switch to is given', async () => {
+    const params = setupTestParams(dataViewWithDefaultColumnMock);
+    await changeDataView(dataViewWithDefaultColumnMock.id!, params);
     expect(params.appState.update).toHaveBeenCalledWith({
-      columns: ['default_column'],
+      columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
+      index: 'data-view-with-user-default-column-id',
+      sort: [['@timestamp', 'desc']],
+    });
+  });
+
+  it('should set the right app state when a valid data view to switch to is given', async () => {
+    const params = setupTestParams(dataViewComplexMock);
+    await changeDataView(dataViewComplexMock.id!, params);
+    expect(params.appState.update).toHaveBeenCalledWith({
+      columns: [], // default_column would not be added as dataViewComplexMock does not have it as a mapped field
       index: 'data-view-with-various-field-types-id',
       sort: [['data', 'desc']],
     });

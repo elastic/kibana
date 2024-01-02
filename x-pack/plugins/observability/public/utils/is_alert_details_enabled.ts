@@ -9,12 +9,12 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { ConfigSchema } from '../plugin';
 import type { TopAlert } from '../typings/alerts';
 
-const ALLOWED_RULE_TYPES = ['apm.transaction_duration'];
+const ALLOWED_RULE_TYPES = ['apm.transaction_duration', 'logs.alert.document.count'];
 
 const isUnsafeAlertDetailsFlag = (
   subject: string
-): subject is keyof ConfigSchema['unsafe']['alertDetails'] =>
-  ['uptime', 'logs', 'metrics', 'observability'].includes(subject);
+): subject is keyof Omit<ConfigSchema['unsafe']['alertDetails'], 'logs'> =>
+  ['uptime', 'metrics', 'observability'].includes(subject);
 
 // We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
 // to know whether the feature flag is enabled or not.

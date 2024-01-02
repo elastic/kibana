@@ -8,6 +8,8 @@
 import { adminTestUser } from '@kbn/test';
 import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
 
+import { FleetError } from '../../errors';
+
 type Root = ReturnType<typeof createRoot>;
 
 export * from './docker_registry_helper';
@@ -18,7 +20,7 @@ export const waitForFleetSetup = async (root: Root) => {
     const resp = await statusApi.send();
     const fleetStatus = resp.body?.status?.plugins?.fleet;
     if (fleetStatus?.meta?.error) {
-      throw new Error(`Setup failed: ${JSON.stringify(fleetStatus)}`);
+      throw new FleetError(`Setup failed: ${JSON.stringify(fleetStatus)}`);
     }
 
     return !fleetStatus || fleetStatus?.summary === 'Fleet is setting up';

@@ -12,8 +12,8 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
@@ -42,12 +42,10 @@ export interface ExpressionWrapperProps {
   style?: React.CSSProperties;
   className?: string;
   addUserMessages: AddUserMessages;
-  onRuntimeError: (message?: string) => void;
+  onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
-  docLinks: CoreStart['docLinks'];
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export function ExpressionWrapper({
@@ -73,8 +71,6 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  docLinks,
-  shouldShowLegendAction,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -97,16 +93,19 @@ export function ExpressionWrapper({
           syncCursor={syncCursor}
           executionContext={executionContext}
           renderError={(errorMessage, error) => {
-            const messages = getOriginalRequestErrorMessages(error || null, docLinks);
+            const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);
-            onRuntimeError(messages[0].shortMessage ?? (errorMessage || ''));
+            if (error?.original) {
+              onRuntimeError(error.original);
+            } else {
+              onRuntimeError(new Error(errorMessage ? errorMessage : ''));
+            }
 
             return <></>; // the embeddable will take care of displaying the messages
           }}
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}
-          shouldShowLegendAction={shouldShowLegendAction}
         />
       </div>
     </I18nProvider>

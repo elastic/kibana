@@ -26,5 +26,7 @@
     "@kbn/test",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/safer-lodash-set",
+    "@kbn/tooling-log",
+    "@kbn/core-saved-objects-server",
   ]
 }

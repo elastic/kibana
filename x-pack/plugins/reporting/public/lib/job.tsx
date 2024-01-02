@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiText, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { TaskRunResult } from '@kbn/reporting-common';
 import moment from 'moment';
 import React from 'react';
-import { JobTypes, JOB_STATUSES } from '../../common/constants';
+
+import { EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import type {
   BaseParamsV2,
   JobId,
@@ -18,9 +18,12 @@ import type {
   ReportFields,
   ReportOutput,
   ReportSource,
-} from '../../common/types';
+  TaskRunResult,
+} from '@kbn/reporting-common/types';
 
-const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
+import { JobTypes } from '../../common/types';
+
+const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUS;
 
 type ReportPayload = ReportSource['payload'];
 
@@ -29,6 +32,8 @@ type ReportPayload = ReportSource['payload'];
  * It can be instantiated with ReportApiJSON: the response data format for the report job APIs
  */
 export class Job {
+  public readonly payload: Omit<ReportPayload, 'headers'>;
+
   public readonly id: JobId;
   public readonly index: string;
 
@@ -45,7 +50,7 @@ export class Job {
   public readonly created_at: ReportSource['created_at'];
   public readonly started_at: ReportSource['started_at'];
   public readonly completed_at: ReportSource['completed_at'];
-  public readonly status: JOB_STATUSES; // FIXME: can not use ReportSource['status'] due to type mismatch
+  public readonly status: JOB_STATUS; // FIXME: can not use ReportSource['status'] due to type mismatch
   public readonly attempts: ReportSource['attempts'];
   public readonly max_attempts: ReportSource['max_attempts'];
 
@@ -70,6 +75,8 @@ export class Job {
     this.id = report.id;
     this.index = report.index;
 
+    this.payload = report.payload;
+
     this.jobtype = report.jobtype;
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
@@ -79,7 +86,7 @@ export class Job {
     this.created_at = report.created_at;
     this.started_at = report.started_at;
     this.completed_at = report.completed_at;
-    this.status = report.status as JOB_STATUSES;
+    this.status = report.status as JOB_STATUS;
     this.attempts = report.attempts;
     this.max_attempts = report.max_attempts;
 
@@ -100,6 +107,10 @@ export class Job {
     this.metrics = report.metrics;
     this.queue_time_ms = report.queue_time_ms;
     this.execution_time_ms = report.execution_time_ms;
+  }
+
+  public isSearch() {
+    return this.objectType === 'search';
   }
 
   getStatusMessage() {
@@ -164,7 +175,7 @@ export class Job {
   }
 
   public get isDownloadReady(): boolean {
-    return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+    return this.status === JOB_STATUS.COMPLETED || this.status === JOB_STATUS.WARNINGS;
   }
 
   public get prettyJobTypeName(): undefined | string {
@@ -179,6 +190,7 @@ export class Job {
         return i18n.translate('xpack.reporting.jobType.pngOutputName', {
           defaultMessage: 'PNG',
         });
+      case 'csv_v2':
       case 'csv_searchsource':
         return i18n.translate('xpack.reporting.jobType.csvOutputName', {
           defaultMessage: 'CSV',
@@ -319,7 +331,7 @@ export class Job {
   }
 }
 
-const jobStatusLabelsMap = new Map<JOB_STATUSES, string>([
+const jobStatusLabelsMap = new Map<JOB_STATUS, string>([
   [
     PENDING,
     i18n.translate('xpack.reporting.jobStatuses.pendingText', {

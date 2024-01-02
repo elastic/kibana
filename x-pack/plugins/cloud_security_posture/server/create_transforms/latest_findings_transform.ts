@@ -38,6 +38,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     sort: '@timestamp',
     unique_key: ['resource.id', 'rule.id'],
   },
+  settings: { unattended: true },
   _meta: {
     package: {
       name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,

@@ -10,6 +10,7 @@ import { useProcessData } from '../hooks/use_process_data';
 import { SessionPreview } from './session_preview';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 
@@ -17,7 +18,7 @@ jest.mock('../hooks/use_process_data');
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutContextValue;
 
 const panelContextValue = {
   eventId: 'event id',

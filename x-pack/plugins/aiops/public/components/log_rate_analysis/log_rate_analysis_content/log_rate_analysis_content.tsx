@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import { isEqual } from 'lodash';
+import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
@@ -32,7 +33,18 @@ import {
 import type { GroupTableItem } from '../../log_rate_analysis_results_table/types';
 import { useLogRateAnalysisResultsTableRowContext } from '../../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
-const DEFAULT_SEARCH_QUERY = { match_all: {} };
+const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
+const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
+  bool: {
+    filter: [],
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+    must_not: [],
+  },
+};
 
 export function getDocumentCountStatsSplitLabel(
   significantItem?: SignificantItem,
@@ -64,6 +76,8 @@ export interface LogRateAnalysisContentProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional callback that exposes current window parameters */
+  onWindowParametersChange?: (wp?: WindowParameters) => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
 }
@@ -78,6 +92,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  onWindowParametersChange,
   embeddingOrigin,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
@@ -93,6 +108,35 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     setIsBrushCleared(windowParameters === undefined);
   }, [windowParameters]);
 
+  // Window parameters stored in the url state use this components
+  // `initialAnalysisStart` prop to set the initial params restore from url state.
+  // To avoid a loop with window parameters being passed around on load,
+  // the following ref and useEffect are used to check wether it's safe to call
+  // the `onWindowParametersChange` callback.
+  const windowParametersTouched = useRef(false);
+  useEffect(() => {
+    // Don't continue if window parameters were not touched yet.
+    // Because they can be reset to `undefined` at a later stage again when a user
+    // clears the selections, we cannot rely solely on checking if they are
+    // `undefined`, we need the additional ref to update on the first change.
+    if (!windowParametersTouched.current && windowParameters === undefined) {
+      return;
+    }
+
+    windowParametersTouched.current = true;
+
+    if (onWindowParametersChange) {
+      onWindowParametersChange(windowParameters);
+    }
+  }, [onWindowParametersChange, windowParameters]);
+
+  // Checks if `esSearchQuery` is the default empty query passed on from the search bar
+  // and if that's the case fall back to a simpler match all query.
+  const searchQuery = useMemo(
+    () => (isEqual(esSearchQuery, DEFAULT_SEARCH_BAR_QUERY) ? DEFAULT_SEARCH_QUERY : esSearchQuery),
+    [esSearchQuery]
+  );
+
   const {
     currentSelectedSignificantItem,
     currentSelectedGroup,
@@ -105,7 +149,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { documentStats, earliest, latest } = useData(
     dataView,
     'log_rate_analysis',
-    esSearchQuery,
+    searchQuery,
     setGlobalState,
     currentSelectedSignificantItem,
     currentSelectedGroup,
@@ -170,7 +214,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           stickyHistogram={stickyHistogram}
           onReset={clearSelection}
           sampleProbability={sampleProbability}
-          searchQuery={esSearchQuery}
+          searchQuery={searchQuery}
           windowParameters={windowParameters}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}

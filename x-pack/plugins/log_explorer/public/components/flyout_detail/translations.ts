@@ -158,3 +158,11 @@ export const flyoutHoverActionCopyToClipboardText = i18n.translate(
     defaultMessage: 'Copy to clipboard',
   }
 );
+
+export const flyoutAccordionShowMoreText = (count: number) =>
+  i18n.translate('xpack.logExplorer.flyoutDetail.section.showMore', {
+    defaultMessage: '+ {hiddenCount} more',
+    values: {
+      hiddenCount: count,
+    },
+  });

@@ -5,11 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'navigationalSearch', 'observabilityLogExplorer']);
   const testSubjects = getService('testSubjects');
+  const synthtrace = getService('logSynthtraceEsClient');
+  const dataGrid = getService('dataGrid');
 
   describe('Application', () => {
     it('is shown in the global search', async () => {
@@ -17,12 +20,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.navigationalSearch.searchFor('log explorer');
 
       const results = await PageObjects.navigationalSearch.getDisplayedResults();
-      expect(results[0].label).to.eql('Log Explorer');
+      expect(results[0].label).to.eql('Logs Explorer');
     });
 
     it('is shown in the observability side navigation', async () => {
       await PageObjects.observabilityLogExplorer.navigateTo();
       await testSubjects.existOrFail('observability-nav-observability-log-explorer-explorer');
     });
+
+    it('should load logs', async () => {
+      const from = '2023-08-03T10:24:14.035Z';
+      const to = '2023-08-03T10:24:14.091Z';
+      const COUNT = 5;
+      await synthtrace.index(generateLogsData({ from, to, count: COUNT }));
+      await PageObjects.observabilityLogExplorer.navigateTo();
+      const docCount = await dataGrid.getDocCount();
+
+      expect(docCount).to.be(COUNT);
+      await synthtrace.clean();
+    });
   });
+}
+
+function generateLogsData({ from, to, count = 1 }: { from: string; to: string; count: number }) {
+  const range = timerange(from, to);
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) =>
+      Array(count)
+        .fill(0)
+        .map(() => {
+          return log.create().message('A sample log').timestamp(timestamp);
+        })
+    );
 }
