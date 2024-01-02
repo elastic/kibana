@@ -55,7 +55,7 @@ export async function loadDataView({
   if (dataViewSpec) {
     const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (!isPersisted) {
-      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      const createdAdHocDataView = await dataViews.createLegacy(dataViewSpec);
       return {
         list: dataViewList || [],
         loaded: createdAdHocDataView,
