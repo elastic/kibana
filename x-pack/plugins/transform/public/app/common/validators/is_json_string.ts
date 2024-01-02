@@ -15,8 +15,6 @@ export function isJsonString(value: unknown): boolean {
   try {
     return !!JSON.parse(value);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`JSON is invalid.\n${e}`);
     return false;
   }
   return true;
