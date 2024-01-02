@@ -10,4 +10,5 @@ import { StackAlertsPublicPlugin } from './plugin';
 
 export { DataViewSelectPopover } from './rule_types/components/data_view_select_popover';
 
-export const plugin = (initializerContext: PluginInitializerContext) => new StackAlertsPublicPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new StackAlertsPublicPlugin(initializerContext);

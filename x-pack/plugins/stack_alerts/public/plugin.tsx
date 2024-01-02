@@ -25,11 +25,13 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
   }
 
   public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
-    registerRuleTypes({
-      ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
-      alerting,
-    },
-    this.isServerless);
+    registerRuleTypes(
+      {
+        ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+        alerting,
+      },
+      this.isServerless
+    );
   }
 
   public start() {}

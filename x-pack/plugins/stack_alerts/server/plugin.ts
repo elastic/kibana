@@ -24,15 +24,17 @@ export class AlertingBuiltinsPlugin
 
   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
-    registerBuiltInRuleTypes({
-      logger: this.logger,
-      data: core
-        .getStartServices()
-        .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
-      alerting,
-      core,
-    },
-    this.isServerless);
+    registerBuiltInRuleTypes(
+      {
+        logger: this.logger,
+        data: core
+          .getStartServices()
+          .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
+        alerting,
+        core,
+      },
+      this.isServerless
+    );
   }
 
   public start() {}
