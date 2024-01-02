@@ -21,7 +21,11 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { UserDetailsLeftPanelTab } from '../../../flyout/entity_details/user_details_left/tabs';
+import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type {
+  HostRiskScore,
+  UserRiskScore,
+} from '../../../../common/search_strategy/security_solution/risk_score';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -31,10 +35,11 @@ import { ExpandablePanel } from '../../../flyout/shared/components/expandable_pa
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
-export interface RiskSummaryProps {
-  riskScoreData: RiskScoreState<RiskScoreEntity.user>;
+export interface RiskSummaryProps<T extends RiskScoreEntity> {
+  riskScoreData: RiskScoreState<T>;
   queryId: string;
-  openDetailsPanel: (tab: UserDetailsLeftPanelTab) => void;
+  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  entity: T;
 }
 
 interface TableItem {
@@ -44,203 +49,214 @@ interface TableItem {
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
-export const RiskSummary = React.memo(
-  ({ riskScoreData, queryId, openDetailsPanel }: RiskSummaryProps) => {
-    const { data: userRisk } = riskScoreData;
-    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-    const { euiTheme } = useEuiTheme();
+const RiskSummaryComponent = <T extends RiskScoreEntity>({
+  riskScoreData,
+  queryId,
+  openDetailsPanel,
+  entity,
+}: RiskSummaryProps<T>) => {
+  const { data } = riskScoreData;
+  const riskData = data && data.length > 0 ? data[0] : undefined;
+  const { euiTheme } = useEuiTheme();
 
-    const lensAttributes = useMemo(() => {
-      return getRiskScoreSummaryAttributes({
-        severity: userRiskData?.user?.risk?.calculated_level,
-        query: `user.name: ${userRiskData?.user?.name}`,
-        spaceId: 'default',
-        riskEntity: RiskScoreEntity.user,
-      });
-    }, [userRiskData]);
+  const entityData = (() => {
+    if (!riskData) return;
+    if (entity === RiskScoreEntity.user) return (riskData as UserRiskScore).user;
+    if (entity === RiskScoreEntity.host) return (riskData as HostRiskScore).host;
+  })();
 
-    const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
-      () => [
-        {
-          field: 'category',
-          name: (
+  const lensAttributes = useMemo(() => {
+    return getRiskScoreSummaryAttributes({
+      severity: entityData?.risk?.calculated_level,
+      query: `user.name: ${entityData?.name}`,
+      spaceId: 'default',
+      riskEntity: RiskScoreEntity.user,
+    });
+  }, [entityData]);
+
+  const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
+    () => [
+      {
+        field: 'category',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
+            defaultMessage="Category"
+          />
+        ),
+        truncateText: false,
+        mobileOptions: { show: true },
+        sortable: true,
+      },
+      {
+        field: 'count',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
+            defaultMessage="Inputs"
+          />
+        ),
+        truncateText: false,
+        mobileOptions: { show: true },
+        sortable: true,
+        dataType: 'number',
+      },
+    ],
+    []
+  );
+
+  const xsFontSize = useEuiFontSize('xxs').fontSize;
+
+  const items: TableItem[] = useMemo(
+    () => [
+      {
+        category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
+          defaultMessage: 'Alerts',
+        }),
+        count: entityData?.risk.inputs?.length ?? 0,
+      },
+    ],
+    [entityData?.risk.inputs?.length]
+  );
+
+  return (
+    <EuiAccordion
+      initialIsOpen
+      id={'risk_summary'}
+      buttonProps={{
+        css: css`
+          color: ${euiTheme.colors.primary};
+        `,
+      }}
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
-              defaultMessage="Category"
+              id="xpack.securitySolution.flyout.entityDetails.title"
+              defaultMessage="Risk summary"
+            />
+          </h3>
+        </EuiTitle>
+      }
+      extraAction={
+        <span
+          data-test-subj="risk-summary-updatedAt"
+          css={css`
+            font-size: ${xsFontSize};
+          `}
+        >
+          {riskData && (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
+              defaultMessage="Updated {time}"
+              values={{
+                time: (
+                  <FormattedRelativePreferenceDate
+                    value={riskData['@timestamp']}
+                    dateFormat="MMM D, YYYY"
+                    relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                  />
+                ),
+              }}
+            />
+          )}
+        </span>
+      }
+    >
+      <EuiSpacer size="m" />
+
+      <ExpandablePanel
+        header={{
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskInputs"
+              defaultMessage="Risk inputs"
             />
           ),
-          truncateText: false,
-          mobileOptions: { show: true },
-          sortable: true,
-        },
-        {
-          field: 'count',
-          name: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
-              defaultMessage="Inputs"
-            />
-          ),
-          truncateText: false,
-          mobileOptions: { show: true },
-          sortable: true,
-          dataType: 'number',
-        },
-      ],
-      []
-    );
-
-    const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-    const items: TableItem[] = useMemo(
-      () => [
-        {
-          category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
-            defaultMessage: 'Alerts',
-          }),
-          count: userRiskData?.user.risk.inputs?.length ?? 0,
-        },
-      ],
-      [userRiskData?.user.risk.inputs?.length]
-    );
-
-    return (
-      <EuiAccordion
-        initialIsOpen
-        id={'risk_summary'}
-        buttonProps={{
-          css: css`
-            color: ${euiTheme.colors.primary};
-          `,
-        }}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
+          link: {
+            callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+            tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.title"
-                defaultMessage="Risk summary"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        extraAction={
-          <span
-            data-test-subj="risk-summary-updatedAt"
-            css={css`
-              font-size: ${xsFontSize};
-            `}
-          >
-            {userRiskData && (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
-                defaultMessage="Updated {time}"
-                values={{
-                  time: (
-                    <FormattedRelativePreferenceDate
-                      value={userRiskData['@timestamp']}
-                      dateFormat="MMM D, YYYY"
-                      relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                    />
-                  ),
-                }}
-              />
-            )}
-          </span>
-        }
-      >
-        <EuiSpacer size="m" />
-
-        <ExpandablePanel
-          header={{
-            title: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-                defaultMessage="Risk inputs"
+                id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+                defaultMessage="Show all risk inputs"
               />
             ),
-            link: {
-              callback: () => openDetailsPanel(UserDetailsLeftPanelTab.RISK_INPUTS),
-              tooltip: (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-                  defaultMessage="Show all risk inputs"
+          },
+          iconType: 'arrowStart',
+        }}
+        expand={{
+          expandable: false,
+        }}
+      >
+        <EuiFlexGroup gutterSize="m" direction="column">
+          <EuiFlexItem grow={false}>
+            <div
+              // Improve Visualization loading state by predefining the size
+              css={css`
+                height: ${LENS_VISUALIZATION_HEIGHT}px;
+              `}
+            >
+              {riskData && (
+                <VisualizationEmbeddable
+                  applyGlobalQueriesAndFilters={false}
+                  lensAttributes={lensAttributes}
+                  id={`RiskSummary-risk_score_metric`}
+                  timerange={LAST_30_DAYS}
+                  width={'100%'}
+                  height={LENS_VISUALIZATION_HEIGHT}
+                  disableOnClickFilter
+                  inspectTitle={
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
+                      defaultMessage="Risk Summary Visualization"
+                    />
+                  }
                 />
-              ),
-            },
-            iconType: 'arrowStart',
-          }}
-          expand={{
-            expandable: false,
-          }}
-        >
-          <EuiFlexGroup gutterSize="m" direction="column">
-            <EuiFlexItem grow={false}>
+              )}
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <InspectButtonContainer>
               <div
-                // Improve Visualization loading state by predefining the size
+                // Anchors the position absolute inspect button (nearest positioned ancestor)
                 css={css`
-                  height: ${LENS_VISUALIZATION_HEIGHT}px;
+                  position: relative;
                 `}
               >
-                {userRiskData && (
-                  <VisualizationEmbeddable
-                    applyGlobalQueriesAndFilters={false}
-                    lensAttributes={lensAttributes}
-                    id={`RiskSummary-risk_score_metric`}
-                    timerange={LAST_30_DAYS}
-                    width={'100%'}
-                    height={LENS_VISUALIZATION_HEIGHT}
-                    disableOnClickFilter
-                    inspectTitle={
+                <div
+                  // Position the inspect button above the table
+                  css={css`
+                    position: absolute;
+                    right: 0;
+                    top: -${euiThemeVars.euiSize};
+                  `}
+                >
+                  <InspectButton
+                    queryId={queryId}
+                    title={
                       <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
-                        defaultMessage="Risk Summary Visualization"
+                        id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
+                        defaultMessage="Risk Summary Table"
                       />
                     }
                   />
-                )}
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectButtonContainer>
-                <div
-                  // Anchors the position absolute inspect button (nearest positioned ancestor)
-                  css={css`
-                    position: relative;
-                  `}
-                >
-                  <div
-                    // Position the inspect button above the table
-                    css={css`
-                      position: absolute;
-                      right: 0;
-                      top: -${euiThemeVars.euiSize};
-                    `}
-                  >
-                    <InspectButton
-                      queryId={queryId}
-                      title={
-                        <FormattedMessage
-                          id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
-                          defaultMessage="Risk Summary Table"
-                        />
-                      }
-                    />
-                  </div>
-                  <EuiBasicTable
-                    data-test-subj="risk-summary-table"
-                    responsive={false}
-                    columns={columns}
-                    items={items}
-                    compressed
-                  />
                 </div>
-              </InspectButtonContainer>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ExpandablePanel>
-        <EuiSpacer size="s" />
-      </EuiAccordion>
-    );
-  }
-);
+                <EuiBasicTable
+                  data-test-subj="risk-summary-table"
+                  responsive={false}
+                  columns={columns}
+                  items={items}
+                  compressed
+                />
+              </div>
+            </InspectButtonContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ExpandablePanel>
+      <EuiSpacer size="s" />
+    </EuiAccordion>
+  );
+};
+
+export const RiskSummary = React.memo(RiskSummaryComponent);
 RiskSummary.displayName = 'RiskSummary';
