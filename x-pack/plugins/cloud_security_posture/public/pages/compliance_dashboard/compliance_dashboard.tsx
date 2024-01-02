@@ -300,7 +300,7 @@ const TabContent = ({
   }
 
   if (shouldRenderNoFindings) {
-    return <NoFindingsStates posturetype={selectedPostureTypeTab} />;
+    return <NoFindingsStates postureType={selectedPostureTypeTab} />;
   }
 
   return (
