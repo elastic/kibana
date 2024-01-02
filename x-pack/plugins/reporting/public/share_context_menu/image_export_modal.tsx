@@ -295,8 +295,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Export URL  "
-            /> 
-            <EuiIcon type="copy"/>
+            />
+            <EuiIcon type="copy" />
           </EuiLink>
         )}
       </EuiCopy>
@@ -372,8 +372,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
           />
         )}
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
+      </EuiFlexItem>
+      <EuiSpacer size="m" />
       <EuiFlexGroup direction="row">
         <EuiFlexItem>{renderOptions()}</EuiFlexItem>
         <EuiSpacer size="m" />
@@ -381,8 +381,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         {saveWarningMessageWithButton}
-      <EuiSpacer size="m" />
-      {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}</EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" justifyContent="flexEnd">
         <EuiButton fill onSubmit={onClose}>

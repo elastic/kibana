@@ -25,6 +25,8 @@
     "@kbn/data-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/shared-ux-prompt-not-found",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/saved-objects-management-plugin",
   ],
   "exclude": [
     "target/**/*",
