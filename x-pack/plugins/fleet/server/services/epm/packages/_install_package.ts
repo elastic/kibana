@@ -365,6 +365,7 @@ export async function _installPackage({
       })
     );
 
+    // Need to refetch the installation again to retrieve all the attributes
     const updatedPackage = await savedObjectsClient.get<Installation>(
       PACKAGES_SAVED_OBJECT_TYPE,
       pkgName

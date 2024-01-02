@@ -69,6 +69,9 @@ describe('_installPackage', () => {
     soClient.update.mockImplementation(async (type, id, attributes) => {
       return { id, attributes } as any;
     });
+    soClient.get.mockImplementation(async (type, id) => {
+      return { id, attributes: {} } as any;
+    });
 
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
