@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
@@ -207,6 +208,85 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
+      });
+    });
+
+    describe('Findings - Fields selector', () => {
+      const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+      const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+      const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+      const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
+
+      it('Add fields to the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+      });
+
+      it('Remove fields from the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+      });
+      it('Reset fields to default', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const resetFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_RESET_BUTTON);
+        await resetFieldsButton.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
       });
     });
   });
