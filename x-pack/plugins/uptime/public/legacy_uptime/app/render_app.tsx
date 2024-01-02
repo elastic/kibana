@@ -10,11 +10,7 @@ import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { getIntegratedAppAvailability } from '../lib/adapters/framework/capabilities_adapter';
-import {
-  DEFAULT_DARK_MODE,
-  DEFAULT_TIMEPICKER_QUICK_RANGES,
-  INTEGRATED_SOLUTIONS,
-} from '../../../common/constants';
+import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 
@@ -31,6 +27,7 @@ export function renderApp(
     docLinks,
     http: { basePath },
     i18n,
+    theme,
   } = core;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -39,6 +36,7 @@ export function renderApp(
   );
 
   const canSave = (capabilities.uptime.save ?? false) as boolean;
+  const darkMode = theme.getTheme().darkMode;
 
   const props: UptimeAppProps = {
     isDev,
@@ -48,7 +46,7 @@ export function renderApp(
     i18n,
     startPlugins,
     basePath: basePath.get(),
-    darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
+    darkMode,
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
