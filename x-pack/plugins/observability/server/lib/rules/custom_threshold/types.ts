@@ -18,8 +18,6 @@ import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } fr
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { AdditionalContext } from './utils';
 import { searchConfigurationSchema } from './register_custom_threshold_rule_type';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../../common';
 
 export enum AlertStates {
   OK,
@@ -73,27 +71,6 @@ type CustomThresholdAlert = Alert<
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
   CustomThresholdSpecificActionGroups
->;
-
-interface BaseMetricExpressionParams {
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-  threshold: number[];
-  comparator: Comparator;
-}
-
-export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
-  metric: string;
-}
-
-export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Aggregators.COUNT;
-}
-
-export type CustomMetricAggTypes = Exclude<
-  Aggregators,
-  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
 >;
 
 export interface AlertExecutionDetails {

@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
   INDEX_OPEN,
@@ -49,7 +50,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
-    renderTabContent: ({ index }) => <DetailsPageMappings indexName={index.name} />,
+    renderTabContent: ({ index }) => <DetailsPageMappings index={index} />,
     order: 20,
   },
   {
@@ -128,6 +129,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     }));
   }, [tabs, tab, onSectionChange]);
 
+  const pageTitle = (
+    <>
+      {index.name}
+      {renderBadges(index, extensionsService)}
+    </>
+  );
+
   return (
     <>
       <EuiPageSection paddingSize="none">
@@ -146,7 +154,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
-        pageTitle={index.name}
+        pageTitle={pageTitle}
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={index.name} asButton={true} />,

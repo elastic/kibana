@@ -24,7 +24,11 @@ describe.skip(
     let loadedPolicyData: IndexedFleetEndpointPolicyResponse;
 
     before(() => {
-      cy.task('indexFleetEndpointPolicy', { policyName: 'tests-serverless' }).then((response) => {
+      cy.task(
+        'indexFleetEndpointPolicy',
+        { policyName: 'tests-serverless' },
+        { timeout: 5 * 60 * 1000 }
+      ).then((response) => {
         loadedPolicyData = response as IndexedFleetEndpointPolicyResponse;
       });
     });

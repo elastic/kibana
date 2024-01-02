@@ -5,28 +5,58 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
-import { FlyoutProps } from '../components/flyout_detail';
+import { LogExplorerFlyoutContentProps } from '../components/flyout_detail';
+import { LogDocument, useLogExplorerControllerContext } from '../controller';
 
 export const CustomFlyoutContent = ({
-  actions,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
   dataView,
-  doc,
-  renderDefaultContent,
-}: FlyoutProps) => {
+  hit,
+}: DocViewRenderProps) => {
+  const {
+    customizations: { flyout },
+  } = useLogExplorerControllerContext();
+
+  const flyoutContentProps: LogExplorerFlyoutContentProps = useMemo(
+    () => ({
+      actions: {
+        addFilter: filter,
+        addColumn: onAddColumn,
+        removeColumn: onRemoveColumn,
+      },
+      dataView,
+      doc: hit as LogDocument,
+    }),
+    [filter, onAddColumn, onRemoveColumn, dataView, hit]
+  );
+
+  const renderCustomizedContent = useMemo(
+    () => flyout?.renderContent?.(renderContent) ?? renderContent,
+    [flyout]
+  );
+
   return (
-    <EuiFlexGroup direction="column">
-      {/* Apply custom Log Explorer detail */}
-      <EuiFlexItem>
-        <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
-      </EuiFlexItem>
-      {/* Restore default content */}
-      <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column">
+        {/* Apply custom Log Explorer detail */}
+        {renderCustomizedContent(flyoutContentProps)}
+      </EuiFlexGroup>
+    </>
   );
 };
+
+const renderContent = ({ actions, dataView, doc }: LogExplorerFlyoutContentProps) => (
+  <EuiFlexItem>
+    <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
+  </EuiFlexItem>
+);
 
 // eslint-disable-next-line import/no-default-export
 export default CustomFlyoutContent;

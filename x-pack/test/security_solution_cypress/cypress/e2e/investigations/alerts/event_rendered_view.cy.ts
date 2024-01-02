@@ -24,7 +24,6 @@ import {
   waitForAlerts,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -35,10 +34,6 @@ import {
 } from '../../../screens/shared';
 
 describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     createRule(getNewRule());

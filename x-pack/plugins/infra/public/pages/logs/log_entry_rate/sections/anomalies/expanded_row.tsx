@@ -12,11 +12,16 @@ import React from 'react';
 import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { isCategoryAnomaly, LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import {
+  isCategoryAnomaly,
+  LogEntryAnomaly,
+  logEntryRateJobType,
+} from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
+import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 
 const EXAMPLE_COUNT = 5;
 
@@ -29,6 +34,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ anomaly, timeRange }) => {
   const { logViewReference } = useLogViewContext();
+  const { idFormats } = useLogMlJobIdFormatsShimContext();
 
   if (logViewReference.type === 'log-view-inline') {
     throw new Error('Logs ML features only support persisted Log Views');
@@ -44,6 +50,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
     logViewReference,
+    idFormat: idFormats?.[logEntryRateJobType],
     startTime: anomaly.startTime,
     categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });

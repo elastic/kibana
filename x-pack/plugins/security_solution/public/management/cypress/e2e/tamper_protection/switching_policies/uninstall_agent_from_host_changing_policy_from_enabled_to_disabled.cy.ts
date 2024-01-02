@@ -13,7 +13,7 @@ import {
   getEndpointIntegrationVersion,
   createAgentPolicyTask,
   enableAgentTamperProtectionFeatureFlagInPolicy,
-  changeAgentPolicy,
+  reAssignFleetAgentToPolicy,
   isAgentAndEndpointUninstalledFromHost,
   uninstallAgentFromHost,
 } from '../../../tasks/fleet';
@@ -80,7 +80,7 @@ describe(
     it('should uninstall from host without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
-      changeAgentPolicy(createdHost.agentId, policy.policy_id, 3).then((hasChanged) => {
+      reAssignFleetAgentToPolicy(createdHost.agentId, policy.policy_id).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         uninstallAgentFromHost(createdHost.hostname).then((responseWithoutToken) => {
           expect(responseWithoutToken).to.not.match(/(.*)Invalid uninstall token(.*)/);

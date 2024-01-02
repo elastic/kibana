@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { FieldValuePairCounts } from '../../../../common/types';
 
 /**
  * Get a nested record of field/value pairs with counts
  */
-export function getFieldValuePairCounts(cpgs: SignificantTermGroup[]): FieldValuePairCounts {
+export function getFieldValuePairCounts(cpgs: SignificantItemGroup[]): FieldValuePairCounts {
   return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
     group.forEach(({ fieldName, fieldValue }) => {
       if (p[fieldName] === undefined) {

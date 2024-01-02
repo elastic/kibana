@@ -12,7 +12,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common';
 import { canUserChangePassword } from '../../../common/model';
 import type { UserAPIClient } from '../../management/users';
 import { ChangePasswordForm } from '../../management/users/components/change_password_form';

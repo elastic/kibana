@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-expect-error
+import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
@@ -44,9 +46,6 @@ export const getCypressBaseConfig = (
       experimentalStudio: true,
 
       env: {
-        'cypress-react-selector': {
-          root: '#security-solution-app',
-        },
         KIBANA_URL: 'http://localhost:5601',
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
@@ -59,9 +58,15 @@ export const getCypressBaseConfig = (
         // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).
         TOOLING_LOG_LEVEL: 'info',
 
+        // Variable works in conjunction with the Cypress parallel runner. When set to true, fleet server
+        // will be setup right after the Kibana stack, so that by the time cypress tests `.run()`/`.open()`,
+        // the env. will be all setup and we don't have to explicitly setup fleet from a test file
+        WITH_FLEET_SERVER: true,
+
         // grep related configs
         grepFilterSpecs: true,
         grepOmitFiltered: true,
+        IS_CI: process.env.CI,
       },
 
       e2e: {
@@ -73,10 +78,12 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
 
           dataLoaders(on, config);
+
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 

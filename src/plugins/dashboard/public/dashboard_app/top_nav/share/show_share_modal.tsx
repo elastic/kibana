@@ -23,7 +23,8 @@ import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { convertPanelMapToSavedPanels } from '../../../../common';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator/locator';
+import { DASHBOARD_APP_LOCATOR } from '../../locator/locator';
+import { DashboardLocatorParams } from '../../../dashboard_container';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -120,7 +121,7 @@ export function ShowShareModal({
     );
   };
 
-  let unsavedStateForLocator: DashboardAppLocatorParams = {};
+  let unsavedStateForLocator: DashboardLocatorParams = {};
   const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
 
   if (unsavedDashboardState) {
@@ -131,7 +132,7 @@ export function ShowShareModal({
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
             unsavedDashboardState.panels
-          ) as DashboardAppLocatorParams['panels'])
+          ) as DashboardLocatorParams['panels'])
         : undefined,
 
       // options
@@ -143,7 +144,7 @@ export function ShowShareModal({
     };
   }
 
-  const locatorParams: DashboardAppLocatorParams = {
+  const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally

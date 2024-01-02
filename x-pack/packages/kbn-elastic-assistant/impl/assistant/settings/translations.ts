@@ -21,6 +21,13 @@ export const SETTINGS_TOOLTIP = i18n.translate(
   }
 );
 
+export const SETTINGS_UPDATED_TOAST_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsUpdatedToastTitle',
+  {
+    defaultMessage: 'Settings updated',
+  }
+);
+
 export const CONVERSATIONS_MENU_ITEM = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsConversationsMenuItemTitle',
   {

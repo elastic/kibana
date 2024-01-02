@@ -103,7 +103,7 @@ export function FieldButton({
     <>
       {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
       {fieldName && (
-        <span className="kbnFieldButton__name">
+        <span className="kbnFieldButton__name eui-textBreakAll">
           <span className="kbnFieldButton__nameInner">{fieldName}</span>
         </span>
       )}

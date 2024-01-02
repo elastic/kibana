@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
@@ -30,10 +31,6 @@ import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
 describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     // Make sure persisted rules table state is cleared

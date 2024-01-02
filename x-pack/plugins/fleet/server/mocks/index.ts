@@ -201,5 +201,7 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     generateTokensForPolicyIds: jest.fn(),
     generateTokensForAllPolicies: jest.fn(),
     encryptTokens: jest.fn(),
+    checkTokenValidityForAllPolicies: jest.fn(),
+    checkTokenValidityForPolicy: jest.fn(),
   };
 }

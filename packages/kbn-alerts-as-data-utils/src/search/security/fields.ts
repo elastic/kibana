@@ -11,6 +11,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_SEVERITY,
   ALERT_RULE_PARAMETERS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 
@@ -46,6 +47,7 @@ export const ALERT_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
   'kibana.alert.ancestors.index',
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   'kibana.alert.workflow_status',
   ALERT_WORKFLOW_TAGS,
   'kibana.alert.group.id',

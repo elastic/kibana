@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/reporting-common",
+    "@kbn/screenshotting-plugin",
+    "@kbn/reporting-server",
+    "@kbn/licensing-plugin",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-mocks-server",
+  ]
+}

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import * as z from 'zod';
 
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { WarningSchema } from '../../../../common/api/detection_engine';
 import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
@@ -49,11 +48,11 @@ export interface PatchRuleProps {
 
 export type Rule = RuleResponse;
 
-export type PaginationOptions = t.TypeOf<typeof PaginationOptions>;
-export const PaginationOptions = t.type({
-  page: PositiveInteger,
-  perPage: PositiveInteger,
-  total: PositiveInteger,
+export type PaginationOptions = z.infer<typeof PaginationOptions>;
+export const PaginationOptions = z.object({
+  page: z.number().int().min(0),
+  perPage: z.number().int().min(0),
+  total: z.number().int().min(0),
 });
 
 export interface FetchRulesProps {
@@ -81,8 +80,8 @@ export interface RulesSnoozeSettingsBatchResponse {
   data: RuleSnoozeSettingsResponse[];
 }
 
-export type SortingOptions = t.TypeOf<typeof SortingOptions>;
-export const SortingOptions = t.type({
+export type SortingOptions = z.infer<typeof SortingOptions>;
+export const SortingOptions = z.object({
   field: FindRulesSortField,
   order: SortOrder,
 });

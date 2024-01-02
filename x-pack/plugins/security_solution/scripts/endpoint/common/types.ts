@@ -14,8 +14,12 @@ export interface HostVm {
   exec: (command: string) => Promise<HostVmExecResponse>;
   mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
   unmount: (hostVmDir: string) => Promise<void>;
+  /** Uploads/copies a file from the local machine to the VM */
+  transfer: (localFilePath: string, destFilePath: string) => Promise<HostVmTransferResponse>;
   destroy: () => Promise<void>;
   info: () => string;
+  stop: () => void;
+  start: () => void;
 }
 
 export type SupportedVmManager = 'multipass' | 'vagrant';
@@ -27,4 +31,10 @@ export interface HostVmExecResponse {
 export interface HostVmMountResponse {
   hostDir: string;
   unmount: () => Promise<void>;
+}
+export interface HostVmTransferResponse {
+  /** The file path of the file on the host vm */
+  filePath: string;
+  /** Delete the file from the host VM */
+  delete: () => Promise<HostVmExecResponse>;
 }

@@ -12,10 +12,10 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useGetDashboard } from './use_get_dashboard';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('./use_get_dashboard');
+jest.mock('../lib/gen_ai/use_get_dashboard');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const mockDashboard = useGetDashboard as jest.Mock;
@@ -101,7 +101,7 @@ describe('ConnectorFields renders', () => {
       }));
       const { queryByTestId } = render(
         <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
       expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();

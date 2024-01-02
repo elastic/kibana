@@ -9,7 +9,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
@@ -44,10 +44,6 @@ import { TOOLTIP } from '../../../../../screens/common';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
 describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

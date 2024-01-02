@@ -32,9 +32,14 @@ import type {
   PackageSpecTags,
 } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import {
+  indexPatternTypes,
+  getIndexPatternSavedObjects,
+  makeManagedIndexPatternsGlobal,
+} from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { KibanaSOReferenceError } from '../../../../errors';
 
 import { withPackageSpan } from '../../packages/utils';
 
@@ -113,12 +118,14 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
+  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -150,6 +157,8 @@ export async function installKibanaAssets(options: {
     refresh: false,
     managed: true,
   });
+
+  await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
@@ -195,6 +204,7 @@ export async function installKibanaAssetsAndReferences({
   );
 
   const importedAssets = await installKibanaAssets({
+    savedObjectsClient,
     logger,
     savedObjectsImporter,
     pkgName,
@@ -340,7 +350,7 @@ export async function installKibanaSavedObjects({
     );
 
     if (otherErrors?.length) {
-      throw new Error(
+      throw new KibanaSOReferenceError(
         `Encountered ${
           otherErrors.length
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
@@ -383,7 +393,7 @@ export async function installKibanaSavedObjects({
         });
 
       if (resolveErrors?.length) {
-        throw new Error(
+        throw new KibanaSOReferenceError(
           `Encountered ${
             resolveErrors.length
           } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`

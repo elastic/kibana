@@ -64,17 +64,18 @@ export function buildCoverageOverviewMitreGraph(
   const tacticToTechniquesMap = new Map<string, CoverageOverviewMitreTechnique[]>(); // Map(kebabCase(tactic name) -> CoverageOverviewMitreTechnique)
 
   for (const technique of techniques) {
-    const coverageOverviewMitreTechnique: CoverageOverviewMitreTechnique = {
-      id: technique.id,
-      name: technique.name,
-      reference: technique.reference,
-      subtechniques: techniqueToSubtechniquesMap.get(technique.id) ?? [],
-      enabledRules: [],
-      disabledRules: [],
-      availableRules: [],
-    };
+    const relatedSubtechniques = techniqueToSubtechniquesMap.get(technique.id) ?? [];
 
     for (const kebabCaseTacticName of technique.tactics) {
+      const coverageOverviewMitreTechnique: CoverageOverviewMitreTechnique = {
+        id: technique.id,
+        name: technique.name,
+        reference: technique.reference,
+        subtechniques: relatedSubtechniques,
+        enabledRules: [],
+        disabledRules: [],
+        availableRules: [],
+      };
       const tacticTechniques = tacticToTechniquesMap.get(kebabCaseTacticName);
 
       if (!tacticTechniques) {

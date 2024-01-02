@@ -17,7 +17,7 @@ import {
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   expandFirstAlert,
@@ -39,7 +39,6 @@ const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 // FLAKY: https://github.com/elastic/kibana/issues/169154
 describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });

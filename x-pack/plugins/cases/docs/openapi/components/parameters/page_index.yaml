@@ -5,3 +5,5 @@ required: false
 schema:
   type: integer
   default: 1
+  examples:
+    - 1

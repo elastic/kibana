@@ -26,3 +26,9 @@ export interface Solution {
   label: string;
   iconType: string;
 }
+
+export interface CasesColumnSelection {
+  field: string;
+  name: string;
+  isChecked: boolean;
+}

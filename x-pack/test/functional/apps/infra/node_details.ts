@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, NODE_DETAILS_PATH, DATE_PICKER_FORMAT } from './constants';
 
@@ -65,6 +66,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
      */
     await pageObjects.common.sleep(1000);
     await browser.refresh();
+  };
+
+  const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('Node Details', () => {
@@ -169,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '13.9%' },
             { metric: 'normalizedLoad1m', value: '18.8%' },
             { metric: 'memoryUsage', value: '94.9%' },
-            { metric: 'diskSpaceUsage', value: 'N/A' },
+            { metric: 'diskUsage', value: 'N/A' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -189,6 +196,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+
+          it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(true);
+            await pageObjects.assetDetails.cpuProfilingPromptExists();
+          });
+
+          it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(false);
+            await pageObjects.assetDetails.cpuProfilingPromptMissing();
           });
         });
 
@@ -312,6 +329,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Profiling tab', () => {
+          it('shows the Profiling tab if Profiling integration UI setting is enabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(true);
+            await pageObjects.assetDetails.profilingTabExists();
+          });
+
+          it('hides the Profiling tab if Profiling integration UI setting is disabled', async () => {
+            await setInfrastructureProfilingIntegrationUiSetting(false);
+            await pageObjects.assetDetails.profilingTabMissing();
+          });
+        });
+
         describe('Host with alerts and no processes', () => {
           before(async () => {
             await navigateToNodeDetails('demo-stack-mysql-01', 'demo-stack-mysql-01');
@@ -366,7 +395,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '99.6%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
-              { metric: 'diskSpaceUsage', value: '36.0%' },
+              { metric: 'diskUsage', value: '36.0%' },
             ].forEach(({ metric, value }) => {
               it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(3 * 1000, async () => {

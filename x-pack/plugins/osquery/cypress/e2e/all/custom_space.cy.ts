@@ -100,9 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { name: packName } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

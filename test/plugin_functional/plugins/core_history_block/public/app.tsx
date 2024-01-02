@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Prompt } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 const HomePage = ({
   basePath,
@@ -22,7 +22,11 @@ const HomePage = ({
 }) => (
   <div data-test-subj="page-home">
     <Prompt message="Unsaved changes, are you sure you wanna leave?" />
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <h1>HOME PAGE</h1>
       <br /> <br />
       <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block/foo`)}>
@@ -44,7 +48,11 @@ const FooPage = ({
   application: ApplicationStart;
 }) => (
   <div data-test-subj="page-home">
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <h1>FOO PAGE</h1>
       <br /> <br />
       <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/core_history_block`)}>

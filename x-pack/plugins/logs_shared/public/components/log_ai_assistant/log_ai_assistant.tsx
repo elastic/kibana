@@ -8,10 +8,9 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
-  ContextualInsight,
   type Message,
-  ObservabilityAIAssistantPluginStart,
   MessageRole,
+  type ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
@@ -21,11 +20,14 @@ export interface LogAIAssistantDocument {
 }
 
 export interface LogAIAssistantProps {
-  aiAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   doc: LogAIAssistantDocument | undefined;
 }
 
-export function LogAIAssistant({ aiAssistant, doc }: LogAIAssistantProps) {
+export const LogAIAssistant = ({
+  doc,
+  observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+}: LogAIAssistantProps) => {
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;
@@ -68,19 +70,27 @@ export function LogAIAssistant({ aiAssistant, doc }: LogAIAssistantProps) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {aiAssistant.isEnabled() && explainLogMessageMessages ? (
+      {ObservabilityAIAssistantContextualInsight && explainLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={explainLogMessageTitle} messages={explainLogMessageMessages} />
+          <ObservabilityAIAssistantContextualInsight
+            title={explainLogMessageTitle}
+            messages={explainLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonExplainLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
-      {aiAssistant.isEnabled() && similarLogMessageMessages ? (
+      {ObservabilityAIAssistantContextualInsight && similarLogMessageMessages ? (
         <EuiFlexItem grow={false}>
-          <ContextualInsight title={similarLogMessagesTitle} messages={similarLogMessageMessages} />
+          <ObservabilityAIAssistantContextualInsight
+            title={similarLogMessagesTitle}
+            messages={similarLogMessageMessages}
+            dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
+          />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   );
-}
+};
 
 // eslint-disable-next-line import/no-default-export
 export default LogAIAssistant;

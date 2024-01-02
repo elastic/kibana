@@ -13,7 +13,7 @@ export const getRuleForAlertTestingWithTimestampOverride = (
   enabled = true,
   timestampOverride = 'event.ingested'
 ): QueryRuleCreateProps => ({
-  name: 'Signal Testing Query',
+  name: 'Alert Testing Query',
   description: 'Tests a simple query',
   enabled,
   risk_score: 1,

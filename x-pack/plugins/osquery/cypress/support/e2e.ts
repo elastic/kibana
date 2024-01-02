@@ -36,7 +36,6 @@ import { login } from '@kbn/security-solution-plugin/public/management/cypress/t
 
 import type { ServerlessRoleName } from './roles';
 
-import 'cypress-react-selector';
 import { waitUntil } from '../tasks/wait_until';
 import { isServerless } from '../tasks/serverless';
 

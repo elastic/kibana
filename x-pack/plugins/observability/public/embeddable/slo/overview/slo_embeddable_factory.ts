@@ -13,13 +13,27 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
+export const COMMON_SLO_GROUPING = [
+  {
+    id: 'slos',
+    getDisplayName: () => 'SLOs',
+    getIconType: () => {
+      return 'visGauge';
+    },
+  },
+];
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;
-export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class SloOverviewEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
+{
   public readonly type = SLO_EMBEDDABLE;
+
+  public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
     private getStartServices: CoreSetup<
@@ -41,6 +55,13 @@ export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactory
       return Promise.reject();
     }
   }
+
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+    SloEmbeddableInput,
+    unknown
+  >['getPanelPlacementSettings'] = () => {
+    return { width: 12, height: 8 };
+  };
 
   public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
     try {

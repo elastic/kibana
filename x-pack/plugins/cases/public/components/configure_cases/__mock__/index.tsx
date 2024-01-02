@@ -32,6 +32,7 @@ export const useCaseConfigureResponse = {
     id: '',
   },
   isLoading: false,
+  isFetching: false,
   refetch: jest.fn(),
 };
 

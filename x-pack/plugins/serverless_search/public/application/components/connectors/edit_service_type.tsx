@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -15,29 +15,32 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Connector } from '@kbn/search-connectors';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useShowErrorToast } from '../../hooks/use_error_toast';
+import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
-  connectorId: string;
-  serviceType: string;
-  onSuccess: () => void;
+  connector: Connector;
 }
 
-export const EditServiceType: React.FC<EditServiceTypeProps> = ({
-  connectorId,
-  serviceType,
-  onSuccess,
-}) => {
+export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
   const { http } = useKibanaServices();
   const { data: connectorTypes } = useConnectorTypes();
+  const showErrorToast = useShowErrorToast();
+  const queryClient = useQueryClient();
+  const { queryKey } = useConnector(connector.id);
 
   const options =
     connectorTypes?.connectors.map((connectorType) => ({
       inputDisplay: (
         <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`serverlessSearchConnectorServiceType-${connectorType.serviceType}`}
+          >
             <EuiIcon
               size="l"
               title={connectorType.name}
@@ -51,37 +54,42 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({
       value: connectorType.serviceType,
     })) || [];
 
-  const { isLoading, isSuccess, mutate } = useMutation({
+  const { isLoading, mutate } = useMutation({
     mutationFn: async (inputServiceType: string) => {
       const body = { service_type: inputServiceType };
-      const result = await http.post(
-        `/internal/serverless_search/connectors/${connectorId}/service_type`,
-        {
-          body: JSON.stringify(body),
-        }
-      );
-      return result;
+      await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
+        body: JSON.stringify(body),
+      });
+      return inputServiceType;
+    },
+    onError: (error) =>
+      showErrorToast(
+        error,
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorServiceTypeError', {
+          defaultMessage: 'Error updating service type',
+        })
+      ),
+    onSuccess: (successData) => {
+      queryClient.setQueryData(queryKey, {
+        connector: { ...connector, service_type: successData },
+      });
+      queryClient.invalidateQueries(queryKey);
     },
   });
 
-  useEffect(() => {
-    if (isSuccess) {
-      onSuccess();
-    }
-  }, [isSuccess, onSuccess]);
-
   return (
     <EuiForm>
-      <EuiFormLabel>
+      <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
         {i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
           defaultMessage: 'Connector type',
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}
         options={options}
-        valueOfSelected={serviceType ?? ''}
+        valueOfSelected={connector.service_type || undefined}
       />
     </EuiForm>
   );

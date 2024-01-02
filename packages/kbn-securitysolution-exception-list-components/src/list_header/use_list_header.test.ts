@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useExceptionListHeader } from './use_list_header';
 

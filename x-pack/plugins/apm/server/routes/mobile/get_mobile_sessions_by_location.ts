@@ -10,12 +10,13 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME, SESSION_ID } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Props {
   kuery: string;
@@ -65,7 +66,12 @@ export async function getSessionsByLocation({
 
   const response = await apmEventClient.search('get_mobile_location_sessions', {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

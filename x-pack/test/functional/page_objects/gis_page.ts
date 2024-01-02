@@ -444,6 +444,12 @@ export class GisPageObject extends FtrService {
     );
   }
 
+  async hasErrorIconExistsOrFail(layerName: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`layerTocErrorIcon${escapeLayerName(layerName)}`);
+    });
+  }
+
   /*
    * Layer panel utility functions
    */
@@ -569,12 +575,6 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click(`mapRemoveLayerButton`);
     await this.common.clickConfirmOnModal();
     await this.waitForLayerDeleted(layerName);
-  }
-
-  async getLayerErrorText(layerName: string) {
-    this.log.debug(`Remove layer ${layerName}`);
-    await this.openLayerPanel(layerName);
-    return await this.testSubjects.getVisibleText(`layerErrorMessage`);
   }
 
   async fullScreenModeMenuItemExists() {

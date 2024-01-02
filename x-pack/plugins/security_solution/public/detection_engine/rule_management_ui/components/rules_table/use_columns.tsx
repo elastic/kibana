@@ -16,10 +16,7 @@ import {
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
-import type {
-  DurationMetric,
-  RuleExecutionSummary,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
@@ -402,7 +399,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_indexing_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -419,7 +416,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_search_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -459,7 +456,7 @@ export const useMonitoringColumns = ({
             }
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="gap" size="s">
             {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>

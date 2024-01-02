@@ -9,10 +9,9 @@ import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { endpointPageHttpMock } from '../../../mocks';
-import { act, waitFor, cleanup } from '@testing-library/react';
+import { act, waitFor, cleanup, fireEvent } from '@testing-library/react';
 import { getEndpointListPath } from '../../../../../common/routing';
 import { AdminSearchBar } from '../search_bar';
-import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../../store/selectors';
 import type { EndpointIndexUIQueryParams } from '../../../types';
 

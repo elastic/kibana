@@ -31,7 +31,10 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  timezone?: string;
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // timezone?: string;
   timeField?: string;
   locale?: string;
 }
@@ -67,10 +70,6 @@ function normalizeType(type: string): DatatableColumnType {
   }
 }
 
-function sanitize(value: string) {
-  return value.replace(/[\(\)]/g, '_');
-}
-
 function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
   if (['type', 'reason'].every((prop) => prop in attributes)) {
     return attributes;
@@ -82,7 +81,10 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
 }
 
 interface ESQLSearchParams {
-  time_zone?: string;
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
   query: string;
   filter?: unknown;
   locale?: string;
@@ -112,15 +114,15 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'An ES|QL query.',
         }),
       },
-      timezone: {
-        aliases: ['tz'],
-        types: ['string'],
-        default: 'UTC',
-        help: i18n.translate('data.search.esql.timezone.help', {
-          defaultMessage:
-            'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
-        }),
-      },
+      // timezone: {
+      //   aliases: ['tz'],
+      //   types: ['string'],
+      //   default: 'UTC',
+      //   help: i18n.translate('data.search.esql.timezone.help', {
+      //     defaultMessage:
+      //       'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
+      //   }),
+      // },
       timeField: {
         aliases: ['timeField'],
         types: ['string'],
@@ -138,7 +140,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      { query, timezone, timeField, locale },
+      { query, /* timezone, */ timeField, locale },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -157,7 +159,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         switchMap(({ search, uiSettings }) => {
           const params: ESQLSearchParams = {
             query,
-            time_zone: timezone,
+            // time_zone: timezone,
             locale,
           };
           if (input) {
@@ -206,10 +208,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchReponse>
           >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = extractTypeAndReason(error.err.attributes);
+                const { type, reason } = extractTypeAndReason(error.attributes);
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {
@@ -249,8 +251,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         map(({ rawResponse: body, warning }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
-              id: sanitize(name),
-              name: sanitize(name),
+              id: name,
+              name,
               meta: { type: normalizeType(type) },
             })) ?? [];
           const columnNames = columns.map(({ name }) => name);

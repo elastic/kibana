@@ -32,7 +32,10 @@ export type SettingsApplicationServices = Services & FormServices;
 
 export interface KibanaDependencies {
   settings: {
-    client: Pick<IUiSettingsClient, 'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$'>;
+    client: Pick<
+      IUiSettingsClient,
+      'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
+    >;
   };
   history: ScopedHistory;
 }
@@ -52,6 +55,7 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
   const {
     saveChanges,
     showError,
+    validateChange,
     showReloadPagePrompt,
     links,
     showDanger,
@@ -72,7 +76,9 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
         addUrlToHistory,
       }}
     >
-      <FormProvider {...{ saveChanges, showError, showReloadPagePrompt, links, showDanger }}>
+      <FormProvider
+        {...{ saveChanges, showError, validateChange, showReloadPagePrompt, links, showDanger }}
+      >
         {children}
       </FormProvider>
     </SettingsApplicationContext.Provider>

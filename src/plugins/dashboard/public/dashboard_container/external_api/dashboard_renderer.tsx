@@ -8,48 +8,50 @@
 
 import '../_dashboard_container.scss';
 
+import classNames from 'classnames';
 import React, {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import classNames from 'classnames';
 import useUnmount from 'react-use/lib/useUnmount';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
-import {
-  DashboardAPI,
-  AwaitingDashboardAPI,
-  buildApiFromDashboardContainer,
-} from './dashboard_api';
-import {
-  DashboardCreationOptions,
-  DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-} from '../embeddable/dashboard_container_factory';
-import { DashboardRedirect } from '../types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
+import {
+  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
+  DashboardCreationOptions,
+} from '../embeddable/dashboard_container_factory';
+import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
+import {
+  AwaitingDashboardAPI,
+  buildApiFromDashboardContainer,
+  DashboardAPI,
+} from './dashboard_api';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner }, ref) => {
+  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner, locator }, ref) => {
     const dashboardRoot = useRef(null);
     const dashboardViewport = useRef(null);
     const [loading, setLoading] = useState(true);
@@ -76,6 +78,11 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     }, []);
 
     const id = useMemo(() => uuidv4(), []);
+
+    useEffect(() => {
+      /* In case the locator prop changes, we need to reassign the value in the container */
+      if (dashboardContainer) dashboardContainer.locator = locator;
+    }, [dashboardContainer, locator]);
 
     useEffect(() => {
       /**

@@ -27,3 +27,15 @@ export class SettingNotRegisteredError extends Error {
     );
   }
 }
+
+export class ValidationSettingNotFoundError extends Error {
+  constructor(key: string) {
+    super(`Setting with a key [${key}] does not exist.`);
+  }
+}
+
+export class ValidationBadValueError extends Error {
+  constructor() {
+    super('No value was specified.');
+  }
+}

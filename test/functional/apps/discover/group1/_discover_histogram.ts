@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
@@ -65,13 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
       let renderingCountInc = 1;
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await queryBar.submitQuery();
       await retry.waitFor('chart rendering complete', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
@@ -106,8 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should update correctly when switching data views and brushing the histogram', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -281,7 +277,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should recover from broken query search when clearing the query bar', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       // Make sure the chart is visible
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
       await testSubjects.click('unifiedHistogramChartToggle');
@@ -289,8 +284,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      // check the error state
-      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      await PageObjects.discover.showsErrorCallout();
 
       // now remove the query
       await queryBar.clearQuery();
@@ -320,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.revertUnsavedChanges();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
       expect(JSON.parse(requestData)).to.eql({

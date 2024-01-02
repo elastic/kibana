@@ -21,7 +21,7 @@ export function calculateHealthStatus(
 
   // if stats are empty, return a warning
   if (isEmpty(summarizedStats.stats)) {
-    return { status: HealthStatus.Warning, reason: `no health stats available` };
+    return { status: HealthStatus.Uninitialized, reason: `no health stats available` };
   }
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness
