@@ -341,8 +341,15 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(actionSelector).first().click({ force: true });
+  recurse(
+    () => {
+      cy.get(propertySelector).eq(rowIndex).realHover();
+      return cy.get(actionSelector).first();
+    },
+    ($el) => $el.is(':visible')
+  );
+
+  cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -358,7 +365,7 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
-  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click();
 };
 
 export const waitForAlerts = () => {
