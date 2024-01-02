@@ -23,7 +23,7 @@ export const useDataMetricsAdHocDataView = ({ metricAlias }: { metricAlias: stri
   } = useKibanaContextForPlugin();
 
   const state = useAsyncRetry(() => {
-    return dataViews.create({
+    return dataViews.createLegacy({
       id: generateDataViewId(metricAlias),
       title: metricAlias,
       timeFieldName: TIMESTAMP_FIELD,

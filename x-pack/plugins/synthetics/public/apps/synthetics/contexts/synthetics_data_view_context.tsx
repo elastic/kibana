@@ -16,7 +16,7 @@ export const SyntheticsDataViewContextProvider: React.FC<{
   dataViews: DataViewsPublicPluginStart;
 }> = ({ children, dataViews }) => {
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
-    return dataViews.create({ title: SYNTHETICS_INDEX_PATTERN });
+    return dataViews.createLegacy({ title: SYNTHETICS_INDEX_PATTERN });
   }, []);
 
   return <SyntheticsDataViewContext.Provider value={data!} children={children} />;

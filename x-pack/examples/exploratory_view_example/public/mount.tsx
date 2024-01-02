@@ -22,7 +22,7 @@ export const mount =
       plugins,
     };
 
-    const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+    const defaultIndexPattern = await plugins.data.indexPatterns.getDefaultLegacy();
 
     const i18nCore = core.i18n;
 

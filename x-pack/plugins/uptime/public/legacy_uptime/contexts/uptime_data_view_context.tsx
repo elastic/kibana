@@ -22,7 +22,7 @@ export const UptimeDataViewContextProvider: React.FC<{
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (heartbeatIndices && indexStatus?.indexExists) {
       // this only creates an dateView in memory, not as saved object
-      return dataViews.create({ title: heartbeatIndices });
+      return dataViews.createLegacy({ title: heartbeatIndices });
     }
   }, [heartbeatIndices, indexStatus?.indexExists]);
 

@@ -15,7 +15,7 @@ export const getSourcererDataView = async (
   dataViewsService: DataViewsServicePublic,
   refreshFields = false
 ): Promise<SourcererDataView> => {
-  const dataView = await dataViewsService.getLegacy(dataViewId, true, refreshFields);
+  const dataView = await dataViewsService.getLegacy(dataViewId, true);
   const dataViewData = dataView.toSpec();
   const defaultPatternsList = ensurePatternFormat(dataView.getIndexPattern().split(','));
   const patternList = await dataViewsService.getExistingIndices(defaultPatternsList);

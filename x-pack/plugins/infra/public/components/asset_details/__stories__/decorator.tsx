@@ -78,7 +78,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       },
     },
     dataViews: {
-      create: () => Promise.resolve(mockDataView),
+      createLegacy: () => Promise.resolve(mockDataView),
     },
     locators: {
       nodeLogsLocator: {
