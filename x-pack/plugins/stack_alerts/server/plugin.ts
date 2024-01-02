@@ -15,9 +15,11 @@ export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
 {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
@@ -29,7 +31,8 @@ export class AlertingBuiltinsPlugin
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
       core,
-    });
+    },
+    this.isServerless);
   }
 
   public start() {}

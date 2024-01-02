@@ -17,8 +17,10 @@ export function registerRuleTypes({
 }: {
   ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
   alerting: AlertingSetup;
-}) {
-  ruleTypeRegistry.register(getGeoContainmentRuleType());
+}, isServerless: boolean) {
+  if (!isServerless) {
+    ruleTypeRegistry.register(getGeoContainmentRuleType());
+  }
   ruleTypeRegistry.register(getThresholdRuleType());
   ruleTypeRegistry.register(getEsQueryRuleType(alerting));
 }
