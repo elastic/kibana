@@ -251,7 +251,7 @@ export class MapApp extends React.Component<Props, State> {
     if (nextIndexPatternIds.length === 0) {
       // Use default data view to always show filter bar when filters are present
       // Example scenario, global state has pinned filters and new map is created
-      const defaultDataView = await getIndexPatternService().getDefaultDataView();
+      const defaultDataView = await getIndexPatternService().getDefaultLegacy();
       if (defaultDataView) {
         indexPatterns = [defaultDataView];
       }

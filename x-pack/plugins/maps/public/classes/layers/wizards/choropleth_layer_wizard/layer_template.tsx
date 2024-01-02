@@ -102,7 +102,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(indexPatternId);
+      indexPattern = await getIndexPatternService().getLegacy(indexPatternId);
     } catch (err) {
       return;
     }

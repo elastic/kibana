@@ -134,7 +134,7 @@ export const getAlertUtils = (
     ) {
       query = alert.params.esqlQuery;
       const indexPattern: string = getIndexPatternFromESQLQuery(alert.params.esqlQuery.esql);
-      dataView = await dataViews.create({
+      dataView = await dataViews.createLegacy({
         title: indexPattern,
         timeFieldName: alert.params.timeField,
       });

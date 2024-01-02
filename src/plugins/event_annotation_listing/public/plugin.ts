@@ -66,7 +66,7 @@ export class EventAnnotationListingPlugin
         const eventAnnotationService = await pluginsStart.eventAnnotation.getService();
 
         const ids = await pluginsStart.dataViews.getIds();
-        const dataViews = await Promise.all(ids.map((id) => pluginsStart.dataViews.get(id)));
+        const dataViews = await Promise.all(ids.map((id) => pluginsStart.dataViews.getLegacy(id)));
 
         const services: EventAnnotationListingPageServices = {
           core: coreStart,
@@ -75,7 +75,7 @@ export class EventAnnotationListingPlugin
           eventAnnotationService,
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
           dataViews,
-          createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
+          createDataView: pluginsStart.dataViews.createLegacy.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
           queryInputServices: {
             http: coreStart.http,

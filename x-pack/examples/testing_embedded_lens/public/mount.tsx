@@ -21,7 +21,7 @@ export const mount =
     const preloadedVisualizationAttributes = history.location
       ?.state as TypedLensByValueInput['attributes'];
 
-    const dataView = await plugins.data.indexPatterns.getDefault();
+    const dataView = await plugins.data.indexPatterns.getDefaultLegacy();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;

@@ -394,7 +394,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
 
     try {
-      this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
+      this.indexPattern = await getIndexPatternService().getLegacy(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
       throw new Error(getDataViewNotFoundMessage(this.getIndexPatternId()));

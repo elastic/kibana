@@ -83,7 +83,7 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
 
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().getLegacy(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

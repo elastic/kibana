@@ -50,7 +50,7 @@ export function GeoIndexPatternSelect(props: Props) {
     dataViewIdRef.current = indexPatternId;
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(indexPatternId);
+      indexPattern = await getIndexPatternService().getLegacy(indexPatternId);
     } catch (err) {
       return;
     }

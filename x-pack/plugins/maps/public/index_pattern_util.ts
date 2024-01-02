@@ -39,7 +39,7 @@ export function getGeoTileAggNotSupportedReason(field: DataViewField): string | 
 export async function getIndexPatternsFromIds(indexPatternIds: string[] = []): Promise<DataView[]> {
   const results = await asyncMap(indexPatternIds, async (indexPatternId) => {
     try {
-      return (await getIndexPatternService().get(indexPatternId)) as DataView;
+      return (await getIndexPatternService().getLegacy(indexPatternId)) as DataView;
     } catch (error) {
       // Unable to load index pattern, better to not throw error so map can render
       // Error will be surfaced by layer since it too will be unable to locate the index pattern

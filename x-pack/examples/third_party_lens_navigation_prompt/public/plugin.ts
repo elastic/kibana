@@ -99,7 +99,7 @@ export class EmbeddedLensExamplePlugin
       mount: (params) => {
         (async () => {
           const [, { lens: lensStart, dataViews }] = await core.getStartServices();
-          const defaultDataView = await dataViews.getDefault();
+          const defaultDataView = await dataViews.getDefaultLegacy();
           lensStart.navigateToPrefilledEditor({
             id: '',
             timeRange: {
