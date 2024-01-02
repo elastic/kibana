@@ -35,6 +35,21 @@ export const ALERT_DETAILS = i18n.translate(
   }
 );
 
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
+export const TECHNICAL_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.technicalPreviewDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
 export const SHARE_ALERT = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.shareAlert',
   {
