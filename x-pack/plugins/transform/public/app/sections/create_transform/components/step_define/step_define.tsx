@@ -6,10 +6,12 @@
  */
 
 import React, { type FC } from 'react';
+import { useSelector } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { selectTransformConfigValid } from '../../state_management/step_define_selectors';
 import { WIZARD_STEPS } from '../../state_management/wizard_slice';
 
 import { WizardNav } from '../wizard_nav';
@@ -20,6 +22,7 @@ import { StepDefineSummary } from './step_define_summary';
 export const StepDefine: FC = () => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
+  const transformConfigValid = useSelector(selectTransformConfigValid);
 
   const { setCurrentStep } = useWizardActions();
 
@@ -30,7 +33,7 @@ export const StepDefine: FC = () => {
           <StepDefineForm />
           <WizardNav
             next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
-            nextActive={stepDefineState.valid}
+            nextActive={transformConfigValid}
           />
         </>
       ) : (

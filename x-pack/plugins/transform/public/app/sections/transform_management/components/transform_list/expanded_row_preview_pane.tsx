@@ -7,7 +7,6 @@
 
 import React, { useMemo, FC } from 'react';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataGrid } from '@kbn/ml-data-grid';
 
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
@@ -44,13 +43,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
-  const pivotPreviewProps = useTransformConfigData(
-    { getIndexPattern: () => dataViewTitle } as DataView,
-    transformConfigQuery,
-    validationStatus,
-    previewRequest,
-    runtimeMappings
-  );
+  const pivotPreviewProps = useTransformConfigData();
 
   return (
     <DataGrid

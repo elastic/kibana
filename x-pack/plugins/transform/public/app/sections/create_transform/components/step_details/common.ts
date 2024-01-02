@@ -33,7 +33,7 @@ export interface StepDetailsExposedState {
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
-  transformSettingsNumFailureRetries?: number;
+  transformSettingsNumFailureRetries?: number | string;
   valid: boolean;
   dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;

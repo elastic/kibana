@@ -7,6 +7,7 @@
 
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
@@ -32,16 +33,19 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
+import { getPreviewTransformRequestBody } from '../common';
 
-import { SearchItems } from './use_search_items';
 import { useGetTransformsPreview } from './use_get_transforms_preview';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
-import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
+import { useWizardContext } from '../sections/create_transform/components/wizard/wizard';
+import {
+  selectTransformConfigQuery,
+  selectValidatedRequestPayload,
+} from '../sections/create_transform/state_management/step_define_selectors';
+import { useWizardSelector } from '../sections/create_transform/state_management/create_transform_store';
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
@@ -101,14 +105,17 @@ export function getCombinedProperties(
   };
 }
 
-export const useTransformConfigData = (
-  dataView: SearchItems['dataView'],
-  query: TransformConfigQuery,
-  validationStatus: StepDefineExposedState['validationStatus'],
-  requestPayload: StepDefineExposedState['previewRequest'],
-  combinedRuntimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
-): UseIndexDataReturnType => {
+export const useTransformConfigData = (): UseIndexDataReturnType => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
+  const query = useSelector(selectTransformConfigQuery);
+  const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
+  const combinedRuntimeMappings = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.runtimeMappings
+  );
+  const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
+
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
 

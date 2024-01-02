@@ -7,23 +7,15 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { type TransformFunction, TRANSFORM_FUNCTION } from '../../../../../common/constants';
-import { dictionaryToArray } from '../../../../../common/types/common';
+import { type TransformFunction } from '../../../../../common/constants';
 
 import {
-  getRequestPayload,
   type PivotAggsConfigDict,
   type PivotGroupByConfigDict,
   type PivotAggsConfig,
   type PivotGroupByConfig,
 } from '../../../common';
 
-import { validatePivotConfig } from '../components/step_define/hooks/use_pivot_config';
-
-import {
-  latestConfigMapper,
-  validateLatestConfig,
-} from '../components/step_define/hooks/use_latest_function_config';
 import type { StepDefineExposedState } from '../components/step_define';
 import { getDefaultStepDefineState } from '../components/step_define/common';
 
@@ -66,26 +58,7 @@ export const stepDefineSlice = createSlice({
       state.timeRangeMs = action.payload;
     },
     setTransformFunction: (state, action: PayloadAction<TransformFunction>) => {
-      const pivotAggsArr = dictionaryToArray(state.aggList);
-      const pivotGroupByArr = dictionaryToArray(state.groupByList);
-      const pivotRequestPayload = getRequestPayload(pivotAggsArr, pivotGroupByArr);
-      const pivotValidationStatus = validatePivotConfig(pivotRequestPayload.pivot);
-
-      const latest = latestConfigMapper.toAPIConfig(state.latestConfig);
-      const latestRequestPayload = latest ? { latest } : undefined;
-      const latestValidationStatus = validateLatestConfig(latestRequestPayload?.latest);
-
       state.transformFunction = action.payload;
-      state.valid =
-        action.payload === TRANSFORM_FUNCTION.PIVOT
-          ? pivotValidationStatus.isValid
-          : latestValidationStatus.isValid;
-      state.validationStatus =
-        action.payload === TRANSFORM_FUNCTION.PIVOT
-          ? pivotValidationStatus
-          : latestValidationStatus;
-      state.previewRequest =
-        action.payload === TRANSFORM_FUNCTION.PIVOT ? pivotRequestPayload : latestRequestPayload;
     },
     rAddAggregation: (
       state,

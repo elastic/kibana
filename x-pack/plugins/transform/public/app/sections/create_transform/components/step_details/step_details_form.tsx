@@ -45,11 +45,7 @@ import {
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import {
-  getTransformConfigQuery,
-  getPreviewTransformRequestBody,
-  isTransformIdValid,
-} from '../../../../common';
+import { isTransformIdValid } from '../../../../common';
 import {
   isContinuousModeDelay,
   isRetentionPolicyMaxAge,
@@ -60,13 +56,14 @@ import {
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
 import { useWizardContext } from '../wizard/wizard';
 
 export const StepDetailsForm: FC = () => {
   const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const { application, i18n: i18nStart, theme } = useAppDependencies();
   const { capabilities } = application;
@@ -77,11 +74,34 @@ export const StepDetailsForm: FC = () => {
   const transformDescription = useWizardSelector((s) => s.stepDetails.transformDescription);
   const destinationIndex = useWizardSelector((s) => s.stepDetails.transformDescription);
   const destinationIngestPipeline = useWizardSelector((s) => s.stepDetails.transformDescription);
+  const createDataView = useWizardSelector((s) => s.stepDetails.createDataView);
+  const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
+  const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
+  const isRetentionPolicyEnabled = useWizardSelector((s) => s.stepDetails.isRetentionPolicyEnabled);
+  const retentionPolicyDateField = useWizardSelector((s) => s.stepDetails.retentionPolicyDateField);
+  const retentionPolicyMaxAge = useWizardSelector((s) => s.stepDetails.retentionPolicyMaxAge);
+  const transformFrequency = useWizardSelector((s) => s.stepDetails.transformFrequency);
+  const transformSettingsMaxPageSearchSize = useWizardSelector(
+    (s) => s.stepDetails.transformSettingsMaxPageSearchSize
+  );
+  const transformSettingsNumFailureRetries = useWizardSelector(
+    (s) => s.stepDetails.transformSettingsNumFailureRetries
+  );
   const {
     setTransformId,
     setTransformDescription,
     setDestinationIndex,
     setDestinationIngestPipeline,
+    setCreateDataView,
+    setContinuousModeEnabled,
+    setContinuousModeDelay,
+    setRetentionPolicyEnabled,
+    setRetentionPolicyDateField,
+    setRetentionPolicyMaxAge,
+    setTransformFrequency,
+    setTransformSettingsMaxPageSearchSize,
+    setTransformSettingsNumFailureRetries,
+    setValid,
   } = useWizardActions();
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
@@ -95,22 +115,15 @@ export const StepDetailsForm: FC = () => {
     [capabilities]
   );
 
-  // Index pattern state
-  const [createDataView, setCreateDataView] = useState(
-    canCreateDataView === false ? false : defaults.createDataView
-  );
+  useEffect(() => {
+    if (!canCreateDataView) {
+      setCreateDataView(false);
+    }
+  });
+
   const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
-  const previewRequest = useMemo(() => {
-    const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-    const transformConfigQuery = getTransformConfigQuery(searchQuery);
-    return getPreviewTransformRequestBody(
-      searchItems.dataView,
-      transformConfigQuery,
-      partialPreviewRequest,
-      runtimeMappings
-    );
-  }, [searchItems.dataView, stepDefineState, runtimeMappings]);
+  const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
   const { error: transformsPreviewError, data: transformPreview } = useGetTransformsPreview(
     previewRequest,
@@ -247,26 +260,19 @@ export const StepDetailsForm: FC = () => {
 
   // Continuous Mode
   const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
-  const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
-    defaults.isContinuousModeEnabled
-  );
   const [continuousModeDateField, setContinuousModeDateField] = useState(
     isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
   );
-  const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
   const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
 
   // Retention Policy
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
-  const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
-    defaults.isRetentionPolicyEnabled
-  );
-  const [retentionPolicyDateField, setRetentionPolicyDateField] = useState(
-    isRetentionPolicyAvailable ? defaults.retentionPolicyDateField : ''
-  );
-  const [retentionPolicyMaxAge, setRetentionPolicyMaxAge] = useState(
-    defaults.retentionPolicyMaxAge
-  );
+  useEffect(() => {
+    if (!isRetentionPolicyAvailable) {
+      setRetentionPolicyDateField('');
+    }
+  }, []);
+
   const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
   const isRetentionPolicyMaxAgeValid = isRetentionPolicyMaxAge(retentionPolicyMaxAge);
 
@@ -297,13 +303,7 @@ export const StepDetailsForm: FC = () => {
   const indexNameValid = isValidIndexName(destinationIndex);
   const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
-  const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
   const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
-
-  const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
-    number | undefined
-  >(defaults.transformSettingsMaxPageSearchSize);
-  const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
 
   const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
     transformSettingsMaxPageSearchSize
@@ -311,9 +311,6 @@ export const StepDetailsForm: FC = () => {
   const isTransformSettingsMaxPageSearchSizeValid =
     transformSettingsMaxPageSearchSizeErrors.length === 0;
 
-  const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
-    string | number | undefined
-  >(defaults.transformSettingsNumFailureRetries);
   const isTransformSettingsNumFailureRetriesValid =
     transformSettingsNumFailureRetries === undefined ||
     transformSettingsNumFailureRetries === '-' ||
@@ -336,62 +333,14 @@ export const StepDetailsForm: FC = () => {
         !retentionPolicyMaxAgeEmpty &&
         isRetentionPolicyMaxAgeValid));
 
-  // expose state to wizard
   useEffect(() => {
-    onChange({
-      continuousModeDateField,
-      continuousModeDelay,
-      createDataView,
-      isContinuousModeEnabled,
-      isRetentionPolicyEnabled,
-      retentionPolicyDateField,
-      retentionPolicyMaxAge,
-      transformId,
-      transformDescription,
-      transformFrequency,
-      transformSettingsMaxPageSearchSize,
-      transformSettingsDocsPerSecond,
-      transformSettingsNumFailureRetries:
-        transformSettingsNumFailureRetries === undefined ||
-        transformSettingsNumFailureRetries === ''
-          ? undefined
-          : typeof transformSettingsNumFailureRetries === 'number'
-          ? transformSettingsNumFailureRetries
-          : parseInt(transformSettingsNumFailureRetries, 10),
-      destinationIndex,
-      destinationIngestPipeline,
-      touched: true,
-      valid,
-      dataViewTimeField,
-      _meta: defaults._meta,
-    });
-    // custom comparison
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    continuousModeDateField,
-    continuousModeDelay,
-    createDataView,
-    isContinuousModeEnabled,
-    isRetentionPolicyEnabled,
-    retentionPolicyDateField,
-    retentionPolicyMaxAge,
-    transformId,
-    transformDescription,
-    transformFrequency,
-    transformSettingsMaxPageSearchSize,
-    transformSettingsNumFailureRetries,
-    destinationIndex,
-    destinationIngestPipeline,
-    valid,
-    dataViewTimeField,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+    setValid(valid);
+  }, [valid]);
 
   useEffect(() => {
     if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
       setDestinationIndex(transformId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, transformId]);
 
   return (

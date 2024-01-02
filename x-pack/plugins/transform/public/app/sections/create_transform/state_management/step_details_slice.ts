@@ -32,5 +32,44 @@ export const stepDetailsSlice = createSlice({
     setDestinationIngestPipeline: (state, action: PayloadAction<string>) => {
       state.destinationIngestPipeline = action.payload;
     },
+    setCreateDataView: (state, action: PayloadAction<boolean>) => {
+      state.createDataView = action.payload;
+    },
+    setContinuousModeEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isContinuousModeEnabled = action.payload;
+    },
+    setContinuousModeDelay: (state, action: PayloadAction<string>) => {
+      state.continuousModeDelay = action.payload;
+    },
+    setRetentionPolicyEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isRetentionPolicyEnabled = action.payload;
+    },
+    setRetentionPolicyDateField: (state, action: PayloadAction<string>) => {
+      state.retentionPolicyDateField = action.payload;
+    },
+    setRetentionPolicyMaxAge: (state, action: PayloadAction<string>) => {
+      state.retentionPolicyMaxAge = action.payload;
+    },
+    setTransformFrequency: (state, action: PayloadAction<string>) => {
+      state.transformFrequency = action.payload;
+    },
+    setTransformSettingsMaxPageSearchSize: (
+      state,
+      action: PayloadAction<StepDetailsExposedState['transformSettingsMaxPageSearchSize']>
+    ) => {
+      state.transformSettingsMaxPageSearchSize = action.payload;
+    },
+    setTransformSettingsDocsPerSecond: (state, action: PayloadAction<number>) => {
+      state.transformSettingsDocsPerSecond = action.payload;
+    },
+    setTransformSettingsNumFailureRetries: (
+      state,
+      action: PayloadAction<StepDetailsExposedState['transformSettingsNumFailureRetries']>
+    ) => {
+      state.transformSettingsNumFailureRetries = action.payload;
+    },
+    setValid: (state, action: PayloadAction<boolean>) => {
+      state.valid = action.payload;
+    },
   },
 });

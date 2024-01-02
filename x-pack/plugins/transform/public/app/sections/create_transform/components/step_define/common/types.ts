@@ -41,14 +41,9 @@ export interface StepDefineExposedState {
   searchLanguage: QUERY_LANGUAGE;
   searchString: string | undefined;
   searchQuery: string | SavedSearchQuery;
-  valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
   timeRangeMs?: TimeRangeMs;
   isDatePickerApplyEnabled: boolean;
-  /**
-   * Undefined when the form is incomplete or invalid
-   */
-  previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

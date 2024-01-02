@@ -56,7 +56,7 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { useWizardContext } from '../wizard/wizard';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import {
-  selectCopyToClipboardPreviewRequest,
+  selectPreviewRequest,
   selectTransformConfigQuery,
   selectValidatedRequestPayload,
 } from '../../state_management/step_define_selectors';
@@ -156,7 +156,7 @@ export const StepDefineForm: FC = () => {
     toastNotifications,
   };
 
-  const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
+  const { requestPayload } = useSelector(selectValidatedRequestPayload);
 
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
@@ -167,7 +167,7 @@ export const StepDefineForm: FC = () => {
   );
 
   const copyToClipboardPreviewRequest = useWizardSelector((state) =>
-    selectCopyToClipboardPreviewRequest(state, dataView)
+    selectPreviewRequest(state, dataView)
   );
 
   const copyToClipboard = getTransformPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
@@ -179,14 +179,7 @@ export const StepDefineForm: FC = () => {
   );
 
   const previewProps = {
-    ...useTransformConfigData(
-      dataView,
-      transformConfigQuery,
-      validationStatus,
-      requestPayload,
-      runtimeMappings,
-      timeRangeMs
-    ),
+    ...useTransformConfigData(),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
     ...(transformFunction === TRANSFORM_FUNCTION.LATEST

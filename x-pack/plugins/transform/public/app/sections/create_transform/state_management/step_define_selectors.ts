@@ -79,7 +79,7 @@ export const selectTransformConfigQuery = createSelector(
   (s) => getTransformConfigQuery(s)
 );
 
-export const selectCopyToClipboardPreviewRequest = createSelector(
+export const selectPreviewRequest = createSelector(
   [
     (_: StoreState, dataView: DataView) => dataView,
     selectTransformConfigQuery,
@@ -103,4 +103,17 @@ export const selectCopyToClipboardPreviewRequest = createSelector(
       runtimeMappings,
       isDatePickerApplyEnabled ? timeRangeMs : undefined
     )
+);
+
+export const selectTransformConfigValid = createSelector(
+  [
+    selectPivotValidationStatus,
+    selectLatestValidationStatus,
+    (state: StoreState) => state.stepDefine.transformFunction,
+  ],
+  (pivotValidationStatus, latestValidationStatus, transformFunction) => {
+    return transformFunction === TRANSFORM_FUNCTION.PIVOT
+      ? pivotValidationStatus.isValid
+      : latestValidationStatus.isValid;
+  }
 );

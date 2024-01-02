@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -99,6 +99,8 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     }
   }, [error, errorMessage, transformConfigs]);
 
+  const reduxStore = useMemo(() => getTransformWizardStore(), []);
+
   const docsLink = (
     <EuiButtonEmpty
       href={esTransform}
@@ -154,7 +156,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
         {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
           <WizardContext.Provider value={{ cloneConfig: transformConfig, searchItems }}>
-            <ReduxProvider store={getTransformWizardStore()}>
+            <ReduxProvider store={reduxStore}>
               <Wizard />
             </ReduxProvider>
           </WizardContext.Provider>

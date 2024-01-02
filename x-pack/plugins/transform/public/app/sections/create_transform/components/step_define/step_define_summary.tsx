@@ -21,7 +21,6 @@ import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
   getTransformPreviewDevConsoleStatement,
-  getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
@@ -35,6 +34,7 @@ import { GroupByListSummary } from '../group_by_list';
 import { isLatestPartialRequest } from './common/types';
 
 import { useWizardSelector } from '../../state_management/create_transform_store';
+import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
 export const StepDefineSummary: FC = () => {
   const {
@@ -45,31 +45,15 @@ export const StepDefineSummary: FC = () => {
     groupByList,
     aggList,
     transformFunction,
-    previewRequest: partialPreviewRequest,
-    validationStatus,
   } = useWizardSelector((s) => s.stepDefine);
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const { searchItems } = useWizardContext();
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
-  const previewRequest = getPreviewTransformRequestBody(
-    searchItems.dataView,
-    transformConfigQuery,
-    partialPreviewRequest,
-    runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
-  );
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, searchItems.dataView));
 
-  const pivotPreviewProps = useTransformConfigData(
-    searchItems.dataView,
-    transformConfigQuery,
-    validationStatus,
-    partialPreviewRequest,
-    runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
-  );
+  const pivotPreviewProps = useTransformConfigData();
 
   const isModifiedQuery =
     typeof searchString === 'undefined' &&

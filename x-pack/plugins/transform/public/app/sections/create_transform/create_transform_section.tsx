@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,6 +46,8 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
     </EuiButtonEmpty>
   );
 
+  const reduxStore = useMemo(() => getTransformWizardStore(), []);
+
   return (
     <CapabilitiesWrapper
       requiredCapabilities={[
@@ -82,7 +84,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
               searchItems,
             }}
           >
-            <ReduxProvider store={getTransformWizardStore()}>
+            <ReduxProvider store={reduxStore}>
               <Wizard />
             </ReduxProvider>
           </WizardContext.Provider>
