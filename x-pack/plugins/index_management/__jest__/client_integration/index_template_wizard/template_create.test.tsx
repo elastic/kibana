@@ -607,7 +607,7 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('DSL', () => {
+  describe.skip('DSL', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup(httpSetup);

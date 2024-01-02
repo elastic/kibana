@@ -67,6 +67,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.TooltipWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "TooltipWrapper",
+        "description": [],
+        "signature": [
+          "({ children, condition, tooltipContent, ...tooltipProps }: React.PropsWithChildren<TooltipWrapperProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.TooltipWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  condition,\n  tooltipContent,\n  ...tooltipProps\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<TooltipWrapperProps>"
+            ],
+            "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
