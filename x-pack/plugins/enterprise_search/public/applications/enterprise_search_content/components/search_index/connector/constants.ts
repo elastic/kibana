@@ -85,6 +85,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.jira_cloud,
     platinumOnly: true,
   },
+  microsoft_teams: {
+    docsUrl: docLinks.connectorsTeams,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.teams,
+    platinumOnly: true,
+  },
   mongodb: {
     docsUrl: docLinks.connectorsMongoDB,
     externalAuthDocsUrl: 'https://www.mongodb.com/docs/atlas/app-services/authentication/',
@@ -180,13 +187,6 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.slack,
-    platinumOnly: true,
-  },
-  teams: {
-    docsUrl: docLinks.connectorsTeams,
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.teams,
     platinumOnly: true,
   },
   zoom: {
