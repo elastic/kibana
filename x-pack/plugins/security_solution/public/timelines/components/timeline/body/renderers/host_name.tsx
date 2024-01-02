@@ -65,6 +65,7 @@ const HostNameComponent: React.FC<Props> = ({
       if (onClick) {
         onClick();
       }
+
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
 

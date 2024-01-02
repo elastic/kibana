@@ -28,20 +28,6 @@ export const LAST_SEEN = i18n.translate(
   }
 );
 
-export const HOST_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.hostRiskScoreTitle',
-  {
-    defaultMessage: 'Host risk score',
-  }
-);
-
-export const HOST_RISK_LEVEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.hostRiskLevel',
-  {
-    defaultMessage: 'Host risk level',
-  }
-);
-
 export const IP_ADDRESSES = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.ipAddressesTitle',
   {

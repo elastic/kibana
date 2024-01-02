@@ -11,12 +11,9 @@ import { EuiFlyout } from '@elastic/eui';
 import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import {
-  mockManagedUserData,
-  mockObservedUser,
-  mockRiskScoreState,
-} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { UserPanelContent } from './content';
+import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { HostPanelContent } from './content';
+import { mockObservedHostData } from '../mocks';
 
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
@@ -25,7 +22,7 @@ const flyoutContextValue = {
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/UserPanelContent', module)
+storiesOf('Components/HostPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
@@ -36,37 +33,8 @@ storiesOf('Components/UserPanelContent', module)
     </StorybookProviders>
   ))
   .add('default', () => (
-    <UserPanelContent
-      managedUser={mockManagedUserData}
-      observedUser={mockObservedUser}
-      riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
-      scopeId={'test-scopeId'}
-      isDraggable={false}
-    />
-  ))
-  .add('integration disabled', () => (
-    <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: false,
-      }}
-      observedUser={mockObservedUser}
-      riskScoreState={riskScoreData}
-      contextID={'test-user-details'}
-      scopeId={'test-scopeId'}
-      isDraggable={false}
-    />
-  ))
-  .add('no managed data', () => (
-    <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: true,
-      }}
-      observedUser={mockObservedUser}
+    <HostPanelContent
+      observedHost={mockObservedHostData}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
@@ -74,22 +42,9 @@ storiesOf('Components/UserPanelContent', module)
     />
   ))
   .add('no observed data', () => (
-    <UserPanelContent
-      managedUser={mockManagedUserData}
-      observedUser={{
-        details: {
-          user: {
-            id: [],
-            domain: [],
-          },
-          host: {
-            ip: [],
-            os: {
-              name: [],
-              family: [],
-            },
-          },
-        },
+    <HostPanelContent
+      observedHost={{
+        details: {},
         isLoading: false,
         firstSeen: {
           isLoading: false,
@@ -108,26 +63,9 @@ storiesOf('Components/UserPanelContent', module)
     />
   ))
   .add('loading', () => (
-    <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: true,
-        isIntegrationEnabled: true,
-      }}
-      observedUser={{
-        details: {
-          user: {
-            id: [],
-            domain: [],
-          },
-          host: {
-            ip: [],
-            os: {
-              name: [],
-              family: [],
-            },
-          },
-        },
+    <HostPanelContent
+      observedHost={{
+        details: {},
         isLoading: true,
         firstSeen: {
           isLoading: true,

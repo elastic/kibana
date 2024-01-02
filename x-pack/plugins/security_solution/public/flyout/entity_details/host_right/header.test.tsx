@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import {
-  managedUserDetails,
-  mockManagedUserData,
-  mockObservedUser,
-} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { UserPanelHeader } from './header';
+import { HostPanelHeader } from './header';
+import { mockObservedHostData } from '../mocks';
 
 const mockProps = {
-  userName: 'test',
-  managedUser: mockManagedUserData,
-  observedUser: mockObservedUser,
+  hostName: 'test',
+  observedHost: mockObservedHostData,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserDetailsContent', () => {
+describe('HostPanelHeader', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <HostPanelHeader {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('user-panel-header')).toBeInTheDocument();
+    expect(getByTestId('host-panel-header')).toBeInTheDocument();
   });
 
-  it('renders observed user date when it is bigger than managed user date', () => {
+  it('renders observed date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
+        <HostPanelHeader
           {...{
             ...mockProps,
-            observedUser: {
-              ...mockObservedUser,
+            observedHost: {
+              ...mockObservedHostData,
               lastSeen: {
                 isLoading: false,
                 date: futureDay,
@@ -54,56 +48,27 @@ describe('UserDetailsContent', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-panel-header-lastSeen').textContent).toContain('Mar 7, 2989');
+    expect(getByTestId('host-panel-header-lastSeen').textContent).toContain('Mar 7, 2989');
   });
 
-  it('renders managed user date when it is bigger than observed user date', () => {
-    const futureDay = '2989-03-07T20:00:00.000Z';
-    const entraManagedUser = managedUserDetails[ManagedUserDatasetKey.ENTRA]!;
+  it('renders observed badge when lastSeen is defined', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {
-                [ManagedUserDatasetKey.ENTRA]: {
-                  ...entraManagedUser,
-                  fields: {
-                    ...entraManagedUser.fields,
-                    '@timestamp': [futureDay],
-                  },
-                },
-              },
-            },
-          }}
-        />
+        <HostPanelHeader {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('user-panel-header-lastSeen').textContent).toContain('Mar 7, 2989');
-  });
-
-  it('renders observed and managed badges when lastSeen is defined', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanelHeader {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('user-panel-header-observed-badge')).toBeInTheDocument();
-    expect(getByTestId('user-panel-header-managed-badge')).toBeInTheDocument();
+    expect(getByTestId('host-panel-header-observed-badge')).toBeInTheDocument();
   });
 
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
+        <HostPanelHeader
           {...{
             ...mockProps,
-            observedUser: {
-              ...mockObservedUser,
+            observedHost: {
+              ...mockObservedHostData,
               lastSeen: {
                 isLoading: false,
                 date: undefined,
@@ -114,24 +79,6 @@ describe('UserDetailsContent', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('user-panel-header-observed-badge')).not.toBeInTheDocument();
-  });
-
-  it('does not render managed badge when managed data is undefined', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {},
-            },
-          }}
-        />
-      </TestProviders>
-    );
-
-    expect(queryByTestId('user-panel-header-managed-badge')).not.toBeInTheDocument();
+    expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 });

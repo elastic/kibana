@@ -125,7 +125,7 @@ const hostMetadata: HostMetadataInterface = {
     status: EndpointStatus.enrolled,
     policy: {
       applied: {
-        name: 'With Eventing',
+        name: 'policy-name',
         id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
         endpoint_policy_version: 3,
         version: 5,

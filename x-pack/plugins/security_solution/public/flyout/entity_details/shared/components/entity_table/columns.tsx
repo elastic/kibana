@@ -30,6 +30,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
     field: 'label',
     render: (label: string, { field }) => (
       <span
+        data-test-subj="entity-table-label"
         css={css`
           font-weight: ${euiLightVars.euiFontWeightMedium};
           color: ${euiLightVars.euiTitleColor};
@@ -59,6 +60,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
             isDraggable={isDraggable}
             sourcererScopeId={getSourcererScopeId(scopeId)}
             render={renderField}
+            data-test-subj="entity-table-value"
           />
         );
       }
