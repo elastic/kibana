@@ -23,6 +23,8 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -911,6 +913,53 @@ test('successfully authorize system actions', async () => {
   });
 });
 
+test('actionType Executor returns status "error" and an error message', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn().mockReturnValue({
+      actionId: 'test',
+      status: 'error',
+      message: 'test error message',
+      retry: true,
+    }),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  const result = await actionExecutor.execute(executeParams);
+
+  expect(result).toEqual({
+    actionId: 'test',
+    errorSource: TaskErrorSource.USER,
+    message: 'test error message',
+    retry: true,
+    status: 'error',
+  });
+});
+
 test('Execute of SentinelOne sub-actions require create privilege', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: '.sentinelone',
@@ -1130,6 +1179,7 @@ test('throws an error when config is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+    errorSource: TaskErrorSource.FRAMEWORK,
   });
 });
 
@@ -1169,6 +1219,7 @@ test('returns an error when connector is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type connector: config must be defined`,
+    errorSource: TaskErrorSource.FRAMEWORK,
   });
 });
 
@@ -1207,6 +1258,7 @@ test('throws an error when params is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+    errorSource: TaskErrorSource.FRAMEWORK,
   });
 });
 
@@ -1214,9 +1266,13 @@ test('throws an error when failing to load action through savedObjectsClient', a
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
     new Error('No access')
   );
-  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"No access"`
-  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('No access');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
 });
 
 test('throws an error if actionType is not enabled', async () => {
@@ -1246,9 +1302,13 @@ test('throws an error if actionType is not enabled', async () => {
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
   });
-  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"not enabled for test"`
-  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('not enabled for test');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
 
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
 });
@@ -1364,11 +1424,15 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     inMemoryConnectors: [],
     getActionsAuthorizationWithRequest,
   });
-  await expect(
-    customActionExecutor.execute(executeParams)
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
-  );
+
+  try {
+    await customActionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe(
+      'Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+    );
+    expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+  }
 });
 
 test('should not throw error if action is preconfigured and isESOCanEncrypt is false', async () => {
