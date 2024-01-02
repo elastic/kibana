@@ -111,6 +111,7 @@ import {
   inAppEmbeddableEditTrigger,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/in_app_embeddable_edit_trigger';
+import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -610,8 +611,14 @@ export class LensPlugin {
     );
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
+    // Allows the Lens embeddable to easily open the inapp editing flyout
+    const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
     // embeddable edit panel action
-    startDependencies.uiActions.addTriggerAction(IN_APP_EMBEDDABLE_EDIT_TRIGGER, editInLensAction);
+    startDependencies.uiActions.addTriggerAction(
+      IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+      editLensEmbeddableAction
+    );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
