@@ -15,7 +15,10 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -95,6 +98,17 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.literal('esqlQuery'),
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
+  ),
+  sourceFields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        label: schema.string(),
+        searchPath: schema.string(),
+      }),
+      {
+        maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+      }
+    )
   ),
 };
 
