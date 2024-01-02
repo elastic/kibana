@@ -159,7 +159,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
     });
-
+  const casesConfig = props.alertsTableConfiguration.cases;
   const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
     columns: props.columns,
@@ -174,7 +174,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
   } = useBulkActions({
     alerts,
-    casesConfig: props.alertsTableConfiguration.cases,
+    casesConfig,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
@@ -405,6 +405,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               cases={cases}
               maintenanceWindows={maintenanceWindows}
               showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+              caseAppId={casesConfig?.appId}
             />
           );
         }
@@ -422,6 +423,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [
       alerts,
       cases,
+      casesConfig?.appId,
       ecsAlertsData,
       isLoading,
       isLoadingCases,

@@ -208,10 +208,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchReponse>
           >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = extractTypeAndReason(error.err.attributes);
+                const { type, reason } = extractTypeAndReason(error.attributes);
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {
