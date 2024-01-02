@@ -6,7 +6,8 @@
  */
 
 import axios from 'axios';
-import { format } from 'url';
+import { format, parse } from 'url';
+import { castArray, first, pick, pickBy } from 'lodash';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
@@ -51,18 +52,14 @@ export function registerKibanaFunction({
     ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request } = resources;
 
-      const {
-        protocol,
-        host,
-        username,
-        password,
-        pathname: pathnameFromRequest,
-      } = request.rewrittenUrl!;
+      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
+
+      const origin = first(castArray(request.headers.origin));
+
       const nextUrl = {
         host,
         protocol,
-        username,
-        password,
+        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
         pathname: pathnameFromRequest.replace(
           '/internal/observability_ai_assistant/chat/complete',
           pathname
@@ -70,9 +67,30 @@ export function registerKibanaFunction({
         query,
       };
 
+      const copiedHeaderNames = [
+        'accept-encoding',
+        'accept-language',
+        'accept',
+        'content-type',
+        'cookie',
+        'kbn-build-number',
+        'kbn-version',
+        'origin',
+        'referer',
+        'user-agent',
+        'x-elastic-internal-origin',
+        'x-kbn-context',
+      ];
+
+      const headers = pickBy(request.headers, (value, key) => {
+        return (
+          copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
+        );
+      });
+
       return axios({
         method,
-        headers: request.headers,
+        headers,
         url: format(nextUrl),
         data: body ? JSON.stringify(body) : undefined,
         signal,

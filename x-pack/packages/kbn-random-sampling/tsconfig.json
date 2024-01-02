@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n-react",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

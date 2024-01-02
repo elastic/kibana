@@ -91,6 +91,9 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # Failing: See https://github.com/elastic/kibana/issues/174020
+  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -185,7 +188,6 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
@@ -341,6 +343,7 @@ enabled:
   - x-pack/test/observability_onboarding_api_integration/basic/config.ts
   - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
   - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
+  - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
