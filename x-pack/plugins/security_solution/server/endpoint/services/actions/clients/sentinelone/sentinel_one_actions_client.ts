@@ -168,7 +168,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return s1ApiResponse.data[0];
   }
 
-  private async validateRequest(payload: BaseActionRequestBody): Promise<void> {
+  private async validateSupport(payload: BaseActionRequestBody): Promise<void> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
       throw new ResponseActionsClientError(
@@ -179,7 +179,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateRequest(options);
+    await this.validateSupport(options);
     await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
 
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
@@ -199,7 +199,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateRequest(options);
+    await this.validateSupport(options);
     await this.sendAction(SUB_ACTION.RELEASE_HOST, {
       uuid: options.endpoint_ids[0],
     });
