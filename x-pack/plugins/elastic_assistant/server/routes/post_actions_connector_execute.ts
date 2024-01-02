@@ -46,6 +46,7 @@ export const postActionsConnectorExecuteRoute = (
       const assistantContext = await context.elasticAssistant;
       const logger: Logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
+      const config = assistantContext.config;
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -105,6 +106,7 @@ export const postActionsConnectorExecuteRoute = (
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           assistantTools,
           connectorId,
+          config,
           elserId,
           esClient,
           kbResource: ESQL_RESOURCE,
@@ -115,6 +117,10 @@ export const postActionsConnectorExecuteRoute = (
           replacements: request.body.replacements,
           size: request.body.size,
           telemetry,
+        });
+        console.log('helloworld, returning!!', langChainResponseBody);
+        return response.ok({
+          body: langChainResponseBody,
         });
 
         telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {

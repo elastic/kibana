@@ -113,19 +113,21 @@ export const fetchConnectorExecuteAction = async ({
       };
 
   try {
-    if (isStream) {
+    if (isStream || isEnabledKnowledgeBase || isEnabledRAGAlerts) {
       const response = await http.fetch(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
           method: 'POST',
           body: JSON.stringify(requestBody),
           signal,
-          asResponse: isStream,
-          rawResponse: isStream,
+          asResponse: true,
+          rawResponse: true,
         }
       );
 
+      console.log('dawg?', response);
       const reader = response?.response?.body?.getReader();
+      console.log('reader?', reader);
 
       if (!reader) {
         return {

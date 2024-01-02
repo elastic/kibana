@@ -42,6 +42,60 @@ export const getStreamObservable = ({
 
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
+
+    function readLangChain() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            console.log('WE ARE HERE reading langchain', { done, value });
+            if (done) {
+              console.log('WE ARE HERE done', chunks.join(''));
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+            const decoded = decoder.decode(value);
+            console.log('WE ARE HERE decoded value', decoded);
+            let nextChunks;
+            if (isError) {
+              nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
+            } else {
+              const output = decoded;
+              const lines = output.split('\n');
+              nextChunks = lines;
+              nextChunks.forEach((chunk: string) => {
+                chunks.push(chunk);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
+            }
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readLangChain();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
+
     function readOpenAI() {
       reader
         .read()
@@ -171,8 +225,8 @@ export const getStreamObservable = ({
       });
       observer.complete();
     }
-
-    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
+    if (true) readLangChain();
+    else if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     else badConnector();
 

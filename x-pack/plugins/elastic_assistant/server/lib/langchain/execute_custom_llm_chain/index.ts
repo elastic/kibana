@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Tool } from 'langchain/tools';
+import { ChatOpenAI } from '@langchain/openai';
 
+import { PassThrough, Readable } from 'stream';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -33,6 +34,7 @@ export const callAgentExecutor = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
+  config,
   elserId,
   esClient,
   kbResource,
@@ -46,13 +48,31 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
+  const azureCreds = config.preconfigured['my-gen-ai'];
+  console.log('helloworld config', azureCreds);
+  const llm2 = new ActionsClientLlm({
+    actions,
+    connectorId,
+    request,
+    llmType,
+    logger,
+    streaming: true,
+  });
+  const llm = new ChatOpenAI({
+    modelName: 'gpt-3.5-turbo-1106',
+    temperature: 0,
+    streaming: true,
+    azureOpenAIApiKey: azureCreds.secrets.apiKey,
+    azureOpenAIApiVersion: '2023-07-01-preview',
+    azureOpenAIApiInstanceName: 'jamesopenai',
+    azureOpenAIApiDeploymentName: 'James-security-gpt4',
+  });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
-
+  const chatHistory = new ChatMessageHistory(pastMessages);
   const memory = new BufferMemory({
-    chatHistory: new ChatMessageHistory(pastMessages),
+    chatHistory,
     memoryKey: 'chat_history', // this is the key expected by https://github.com/langchain-ai/langchainjs/blob/a13a8969345b0f149c1ca4a120d63508b06c52a5/langchain/src/agents/initialize.ts#L166
     inputKey: 'input',
     outputKey: 'output',
@@ -93,11 +113,52 @@ export const callAgentExecutor = async ({
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
-    agentType: 'chat-conversational-react-description',
+    // agentType: 'chat-conversational-react-description',
+    agentType: 'openai-functions',
     memory,
     verbose: false,
   });
 
+  if (true) {
+    /**
+     * Agent executors also allow you to stream back all generated tokens and steps
+     * from their runs.
+     *
+     * This contains a lot of data, so we do some filtering of the generated log chunks
+     * and only stream back the final response.
+     *
+     * This filtering is easiest with the OpenAI functions or tools agents, since final outputs
+     * are log chunk values from the model that contain a string instead of a function call object.
+     *
+     * See: https://js.langchain.com/docs/modules/agents/how_to/streaming#streaming-tokens
+     */
+    const logStream = await executor.streamLog({
+      input: latestMessage[0].content,
+      chat_history: [],
+    });
+    console.log('helloworld logStream', logStream);
+    const textEncoder = new TextEncoder();
+    const transformStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of logStream) {
+          if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
+            const addOp = chunk.ops[0];
+            if (
+              addOp.path.startsWith('/logs/ChatOpenAI') &&
+              typeof addOp.value === 'string' &&
+              addOp.value.length
+            ) {
+              console.log('helloworld value', addOp.value);
+              controller.enqueue(textEncoder.encode(addOp.value));
+            }
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return Readable.from(transformStream).pipe(new PassThrough()); // new StreamingTextResponse(transformStream);
+  }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);

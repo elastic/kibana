@@ -7,6 +7,10 @@
     "id": "elasticAssistant",
     "server": true,
     "browser": false,
+    "configPath": [
+      "xpack",
+      "actions"
+    ],
     "requiredPlugins": [
       "actions",
       "data",

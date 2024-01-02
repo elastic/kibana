@@ -22,6 +22,7 @@ interface ActionsClientLlmParams {
   llmType?: string;
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  streaming?: boolean;
   traceId?: string;
 }
 
@@ -31,6 +32,7 @@ export class ActionsClientLlm extends LLM {
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, RequestBody>;
   #actionResultData: string;
+  streaming = false;
   #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
@@ -44,6 +46,7 @@ export class ActionsClientLlm extends LLM {
     llmType,
     logger,
     request,
+    streaming,
   }: ActionsClientLlmParams) {
     super({});
 
@@ -54,6 +57,7 @@ export class ActionsClientLlm extends LLM {
     this.#logger = logger;
     this.#request = request;
     this.#actionResultData = '';
+    this.streaming = streaming ?? this.streaming;
   }
 
   getActionResultData(): string {
