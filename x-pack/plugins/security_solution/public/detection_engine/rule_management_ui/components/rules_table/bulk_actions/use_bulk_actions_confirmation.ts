@@ -11,11 +11,23 @@ import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 
+interface BulkActionsConfirmation {
+  bulkActionsDryRunResult: DryRunResult | undefined;
+  bulkAction: BulkActionForConfirmation | undefined;
+  isBulkActionConfirmationVisible: boolean;
+  showBulkActionConfirmation: (
+    result: DryRunResult | undefined,
+    action: BulkActionForConfirmation
+  ) => Promise<boolean>;
+  cancelBulkActionConfirmation: () => void;
+  approveBulkActionConfirmation: () => void;
+}
+
 /**
  * hook that controls bulk actions confirmation modal window and its content
  */
 // TODO Why does this hook exist? Consider removing it altogether
-export const useBulkActionsConfirmation = () => {
+export const useBulkActionsConfirmation = (): BulkActionsConfirmation => {
   const [bulkAction, setBulkAction] = useState<BulkActionForConfirmation>();
   const [dryRunResult, setDryRunResult] = useState<DryRunResult>();
   const [isBulkActionConfirmationVisible, showModal, hideModal] = useBoolState();

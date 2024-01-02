@@ -85,6 +85,10 @@ export const useRowHeightsOptions = ({
       defaultHeight,
       lineHeight: rowLineHeight,
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
+        if (newRowHeight === defaultHeight && typeof rowHeightState === 'undefined') {
+          // ignore, no changes required
+          return;
+        }
         const newSerializedRowHeight = serializeRowHeight(
           // pressing "Reset to default" triggers onChange with the same value
           newRowHeight === defaultHeight ? configRowHeight : newRowHeight

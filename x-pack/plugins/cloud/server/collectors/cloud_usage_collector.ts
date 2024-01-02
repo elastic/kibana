@@ -7,13 +7,14 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-interface Config {
+export interface CloudUsageCollectorConfig {
   isCloudEnabled: boolean;
-  trialEndDate?: string;
-  isElasticStaffOwned?: boolean;
-  deploymentId?: string;
-  projectId?: string;
-  projectType?: string;
+  // Using * | undefined instead of ?: to force the calling code to list all the options (even when they can be undefined)
+  trialEndDate: string | undefined;
+  isElasticStaffOwned: boolean | undefined;
+  deploymentId: string | undefined;
+  projectId: string | undefined;
+  projectType: string | undefined;
 }
 
 interface CloudUsage {
@@ -26,7 +27,10 @@ interface CloudUsage {
   projectType?: string;
 }
 
-export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
+export function createCloudUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  config: CloudUsageCollectorConfig
+) {
   const {
     isCloudEnabled,
     trialEndDate,
@@ -73,7 +77,7 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
 
 export function registerCloudUsageCollector(
   usageCollection: UsageCollectionSetup | undefined,
-  config: Config
+  config: CloudUsageCollectorConfig
 ) {
   if (!usageCollection) {
     return;

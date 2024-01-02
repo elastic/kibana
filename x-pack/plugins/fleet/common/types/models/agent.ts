@@ -443,9 +443,10 @@ export interface AgentUpgradeDetails {
   target_version: string;
   action_id: string;
   state: AgentUpgradeStateType;
-  metadata: {
+  metadata?: {
     scheduled_at?: string;
     download_percent?: number;
+    download_rate?: number; // bytes per second
     failed_state?: AgentUpgradeStateType;
     error_msg?: string;
   };

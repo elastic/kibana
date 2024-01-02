@@ -42,7 +42,7 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/linux.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/linux.svg'),
     artifacts: {
       dashboards: [
         {
@@ -58,7 +58,7 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iptables_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/iptables_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

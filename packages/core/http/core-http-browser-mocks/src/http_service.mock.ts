@@ -29,7 +29,10 @@ const createServiceMock = ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  basePath: new BasePath(basePath, undefined, publicBaseUrl),
+  basePath: new BasePath({
+    basePath,
+    publicBaseUrl,
+  }),
   anonymousPaths: {
     register: jest.fn(),
     isAnonymous: jest.fn(),
@@ -37,6 +40,9 @@ const createServiceMock = ({
   externalUrl: {
     isInternalUrl: jest.fn(),
     validateUrl: jest.fn(),
+  },
+  staticAssets: {
+    getPluginAssetHref: jest.fn(),
   },
   addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),

@@ -3,7 +3,7 @@
   "id": "@kbn/serverless-observability",
   "owner": [
     "@elastic/appex-sharedux",
-    "@elastic/apm-ui"
+    "@elastic/obs-ux-management-team"
   ],
   "description": "Serverless customizations for observability.",
   "plugin": {
@@ -20,7 +20,6 @@
       "serverless",
       "observability",
       "observabilityShared",
-      "kibanaReact",
       "management",
       "cloud"
     ],

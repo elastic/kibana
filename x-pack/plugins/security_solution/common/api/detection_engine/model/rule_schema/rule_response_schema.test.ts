@@ -40,7 +40,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+    );
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
@@ -68,7 +70,7 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"saved_id: Required"`);
   });
 
   test('it should validate a type of "timeline_id" if there is a "timeline_title" dependent', () => {
@@ -98,7 +100,9 @@ describe('Rule response schema', () => {
 
       const result = RuleResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"exceptions_list: Expected array, received string"`
+      );
     });
   });
 
@@ -232,6 +236,8 @@ describe('investigation_fields', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"investigation_fields: Expected object, received string"`
+    );
   });
 });

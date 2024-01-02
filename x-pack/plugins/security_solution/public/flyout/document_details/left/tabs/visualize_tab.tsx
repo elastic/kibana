@@ -13,7 +13,7 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLeftPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelVisualizeTab } from '..';
+import { DocumentDetailsLeftPanelKey, LeftPanelVisualizeTab } from '..';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -64,7 +64,7 @@ export const VisualizeTab: FC = memo(() => {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
       }
       openLeftPanel({
-        id: LeftPanelKey,
+        id: DocumentDetailsLeftPanelKey,
         path: {
           tab: LeftPanelVisualizeTab,
           subTab: optionId,

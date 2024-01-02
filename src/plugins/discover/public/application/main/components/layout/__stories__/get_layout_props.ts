@@ -15,7 +15,7 @@ import { createHashHistory } from 'history';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { FetchStatus } from '../../../../types';
+import { DiscoverCustomizationContext, FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -86,7 +86,6 @@ const getCommonProps = () => {
     inspectorAdapters: { requests: new RequestAdapter() },
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
-    resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
@@ -125,11 +124,17 @@ function getSavedSearch(dataView: DataView) {
   } as unknown as SavedSearch;
 }
 
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  showLogExplorerTabs: false,
+};
+
 export function getDocumentsLayoutProps(dataView: DataView) {
   const stateContainer = getDiscoverStateContainer({
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
+    customizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
@@ -154,6 +159,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
+    customizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],

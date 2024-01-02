@@ -10,7 +10,7 @@ import { ActionDefinition } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../context_menu');
 

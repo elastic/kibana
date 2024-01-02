@@ -20,11 +20,12 @@ import {
   TimeRange,
   isOfQueryType,
   getAggregateQueryMode,
+  ExecutionContextSearch,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
-  ExecutionContextSearch,
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
@@ -97,7 +98,7 @@ import {
   GetCompatibleCellValueActions,
   UserMessage,
   IndexPatternRef,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
@@ -176,7 +177,6 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type LensByValueInput = {
@@ -608,11 +608,14 @@ export class Embeddable
     userMessages.push(
       ...getApplicationUserMessages({
         visualizationType: this.savedVis?.visualizationType,
-        visualization: {
+        visualizationState: {
           state: this.activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
-        visualizationMap: this.deps.visualizationMap,
+        visualization:
+          this.activeVisualizationId && this.deps.visualizationMap[this.activeVisualizationId]
+            ? this.deps.visualizationMap[this.activeVisualizationId]
+            : undefined,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
           isLoading: !this.activeDatasourceState,
@@ -631,7 +634,7 @@ export class Embeddable
     }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    const frameDatasourceAPI: FrameDatasourceAPI = {
+    const framePublicAPI: FramePublicAPI = {
       dataViews: {
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
@@ -658,14 +661,14 @@ export class Embeddable
     userMessages.push(
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
           this.activeVisualizationState,
-          frameDatasourceAPI
+          framePublicAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
       }) ?? [])
     );
 
@@ -738,14 +741,18 @@ export class Embeddable
     }
     const query = this.savedVis?.state.query as unknown as AggregateQuery;
     const language = getAggregateQueryMode(query);
-    return String(language).toUpperCase();
+    return getLanguageDisplayName(language).toUpperCase();
   }
 
   /**
    * Gets the Lens embeddable's datasource and visualization states
    * updates the embeddable input
    */
-  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+  async updateVisualization(
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -767,7 +774,7 @@ export class Embeddable
         ),
         visualizationState,
         activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[this.activeVisualizationId]
+          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
       });
       const attrs = {
@@ -778,6 +785,7 @@ export class Embeddable
           datasourceStates,
         },
         references,
+        visualizationType: visualizationType ?? viz.visualizationType,
       };
 
       /**
@@ -791,6 +799,15 @@ export class Embeddable
        */
       this.renderUserMessages();
     }
+  }
+
+  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
   }
 
   /**
@@ -828,7 +845,11 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfingPanel(
+    startDependencies: LensPluginStartDependencies,
+    isNewPanel?: boolean,
+    deletePanel?: () => void
+  ) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -846,6 +867,7 @@ export class Embeddable
         <Component
           attributes={attributes}
           updatePanelState={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
           output$={this.getOutput$()}
@@ -856,6 +878,9 @@ export class Embeddable
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
           displayFlyoutHeader={true}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
+          isNewPanel={isNewPanel}
+          deletePanel={deletePanel}
         />
       );
     }
@@ -1101,13 +1126,11 @@ export class Embeddable
               style={input.style}
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
-              onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+              onRuntimeError={(error) => {
+                this.updateOutput({ error });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
-              docLinks={this.deps.coreStart.docLinks}
-              shouldShowLegendAction={input.shouldShowLegendAction}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1215,6 +1238,7 @@ export class Embeddable
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map((action) => ({
           id: action.id,
+          type: action.type,
           iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
           displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
           execute: (cellData) =>
@@ -1235,6 +1259,7 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
+      now: this.deps.data.nowProvider.get().getTime(),
       timeRange:
         input.timeslice !== undefined
           ? {

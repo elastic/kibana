@@ -10,11 +10,12 @@ import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
 import { flatten, random } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
-  const numServices = 500;
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services: 500 } }) => {
+  const numServices = scenarioOpts.services;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
   const agentVersions: Record<string, string[]> = {
@@ -25,7 +26,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
   };
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = flatten(
@@ -95,10 +96,13 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         return successfulTraceEvents;
       };
 
-      return logger.perf('generating_apm_events', () =>
-        instances
-          .flatMap((instance) => urls.map((url) => ({ instance, url })))
-          .map(({ instance, url }) => instanceSpans(instance, url))
+      return withClient(
+        apmEsClient,
+        logger.perf('generating_apm_events', () =>
+          instances
+            .flatMap((instance) => urls.map((url) => ({ instance, url })))
+            .map(({ instance, url }) => instanceSpans(instance, url))
+        )
       );
     },
   };

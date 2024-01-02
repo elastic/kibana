@@ -15,61 +15,6 @@ export const CLOSE_TIMELINE_OR_TEMPLATE = (isTimeline: boolean) =>
     },
   });
 
-export const UNSAVED = i18n.translate('xpack.securitySolution.timeline.properties.unsavedLabel', {
-  defaultMessage: 'Unsaved',
-});
-
-export const SAVED = i18n.translate('xpack.securitySolution.timeline.properties.savedLabel', {
-  defaultMessage: 'Saved',
-});
-
-export const UNSAVED_CHANGES = i18n.translate(
-  'xpack.securitySolution.timeline.properties.hasChangesLabel',
-  {
-    defaultMessage: 'Has unsaved changes',
-  }
-);
-
-export const INSPECT_TIMELINE_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.inspectTimelineTitle',
-  {
-    defaultMessage: 'Timeline',
-  }
-);
-
-export const PROCESS_KPI_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.kpis.processKpiTitle',
-  {
-    defaultMessage: 'Processes',
-  }
-);
-
-export const HOST_KPI_TITLE = i18n.translate('xpack.securitySolution.timeline.kpis.hostKpiTitle', {
-  defaultMessage: 'Hosts',
-});
-
-export const SOURCE_IP_KPI_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.kpis.sourceIpKpiTitle',
-  {
-    defaultMessage: 'Source IPs',
-  }
-);
-
-export const DESTINATION_IP_KPI_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.kpis.destinationKpiTitle',
-  {
-    defaultMessage: 'Destination IPs',
-  }
-);
-
-export const USER_KPI_TITLE = i18n.translate('xpack.securitySolution.timeline.kpis.userKpiTitle', {
-  defaultMessage: 'Users',
-});
-
-export const READ_MORE = i18n.translate('xpack.securitySolution.timeline.properties.readMore', {
-  defaultMessage: 'Read More',
-});
-
 export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({
   isOpen,
   title,

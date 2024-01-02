@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -28,7 +29,8 @@ export function registerOpenRoute({ router, lib: { handleEsError } }: RouteDepen
       };
 
       try {
-        await client.asCurrentUser.indices.open(params);
+        await executeAsyncByChunks(params, client, 'open');
+
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

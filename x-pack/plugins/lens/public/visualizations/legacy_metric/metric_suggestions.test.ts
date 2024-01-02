@@ -98,6 +98,7 @@ describe('metric_suggestions', () => {
       ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
+
   test('does not suggest for a static value', () => {
     const suggestion = getSuggestions({
       table: {
@@ -129,6 +130,29 @@ describe('metric_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
+    });
+
+    expect(suggestion).toHaveLength(0);
+  });
+
+  test('does not suggest for text based languages', () => {
+    const col = {
+      columnId: 'id',
+      operation: {
+        dataType: 'number',
+        label: `Top values`,
+        isBucketed: false,
+      },
+    } as const;
+    const suggestion = getSuggestions({
+      table: {
+        columns: [col],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
     });
 
     expect(suggestion).toHaveLength(0);

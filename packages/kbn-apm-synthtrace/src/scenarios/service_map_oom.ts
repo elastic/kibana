@@ -10,18 +10,18 @@ import { ApmFields, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { Transaction } from '@kbn/apm-synthtrace-client/src/lib/apm/transaction';
 import { Scenario } from '../cli/scenario';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const environment = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async () => {
   const numServices = 500;
 
   const tracesPerMinute = 10;
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const services = new Array(numServices)
         .fill(undefined)
         .map((_, idx) => {
@@ -29,34 +29,37 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         })
         .reverse();
 
-      return range.ratePerMinute(tracesPerMinute).generator((timestamp) => {
-        const rootTransaction = services.reduce((prev, currentService) => {
-          const tx = currentService
-            .transaction(`GET /my/function`, 'request')
-            .timestamp(timestamp)
-            .duration(1000)
-            .children(
-              ...(prev
-                ? [
-                    currentService
-                      .span(
-                        httpExitSpan({
-                          spanName: `exit-span-${currentService.fields['service.name']}`,
-                          destinationUrl: `http://address-to-exit-span-${currentService.fields['service.name']}`,
-                        })
-                      )
-                      .timestamp(timestamp)
-                      .duration(1000)
-                      .children(prev),
-                  ]
-                : [])
-            );
+      return withClient(
+        apmEsClient,
+        range.ratePerMinute(tracesPerMinute).generator((timestamp) => {
+          const rootTransaction = services.reduce((prev, currentService) => {
+            const tx = currentService
+              .transaction(`GET /my/function`, 'request')
+              .timestamp(timestamp)
+              .duration(1000)
+              .children(
+                ...(prev
+                  ? [
+                      currentService
+                        .span(
+                          httpExitSpan({
+                            spanName: `exit-span-${currentService.fields['service.name']}`,
+                            destinationUrl: `http://address-to-exit-span-${currentService.fields['service.name']}`,
+                          })
+                        )
+                        .timestamp(timestamp)
+                        .duration(1000)
+                        .children(prev),
+                    ]
+                  : [])
+              );
 
-          return tx;
-        }, undefined as Transaction | undefined);
+            return tx;
+          }, undefined as Transaction | undefined);
 
-        return rootTransaction!;
-      });
+          return rootTransaction!;
+        })
+      );
     },
   };
 };

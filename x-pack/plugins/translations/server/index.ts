@@ -15,4 +15,4 @@ class TranslationsPlugin {
   }
 }
 
-export const plugin = () => new TranslationsPlugin();
+export const plugin = async () => new TranslationsPlugin();

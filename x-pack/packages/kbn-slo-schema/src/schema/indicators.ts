@@ -136,22 +136,29 @@ const timesliceMetricIndicatorSchema = t.type({
   ]),
 });
 
-const metricCustomValidAggregations = t.keyof({
-  sum: true,
-});
+const metricCustomDocCountMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('doc_count'),
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const metricCustomBasicMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('sum'),
+    field: t.string,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
 const metricCustomMetricDef = t.type({
-  metrics: t.array(
-    t.intersection([
-      t.type({
-        name: t.string,
-        aggregation: metricCustomValidAggregations,
-        field: t.string,
-      }),
-      t.partial({
-        filter: t.string,
-      }),
-    ])
-  ),
+  metrics: t.array(t.union([metricCustomBasicMetric, metricCustomDocCountMetric])),
   equation: t.string,
 });
 const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
@@ -267,6 +274,8 @@ export {
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,
   metricCustomIndicatorTypeSchema,
+  metricCustomDocCountMetric,
+  metricCustomBasicMetric,
   timesliceMetricComparatorMapping,
   timesliceMetricIndicatorSchema,
   timesliceMetricIndicatorTypeSchema,

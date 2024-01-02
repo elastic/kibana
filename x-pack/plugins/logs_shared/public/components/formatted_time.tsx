@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 const getFormattedTime = (
-  time: number,
+  time: string,
   userFormat: string | undefined,
   fallbackFormat: string = 'Y-MM-DD HH:mm:ss.SSS'
 ) => {
@@ -26,7 +26,7 @@ interface UseFormattedTimeOptions {
 }
 
 export const useFormattedTime = (
-  time: number,
+  time: string,
   { format = 'dateTime', fallbackFormat }: UseFormattedTimeOptions = {}
 ) => {
   // `dateFormat:scaled` is an array of `[key, format]` tuples.

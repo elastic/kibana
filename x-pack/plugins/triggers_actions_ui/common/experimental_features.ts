@@ -19,6 +19,8 @@ export const allowedExperimentalValues = Object.freeze({
   rulesDetailLogs: true,
   ruleUseExecutionStatus: false,
   ruleKqlBar: false,
+  isMustacheAutocompleteOn: false,
+  showMustacheAutocompleteSwitch: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -29,7 +31,8 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
 
 /**
  * Parses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * which should be a string of values delimited by a comma (`,`):
+ * xpack.trigger_actions_ui.enableExperimental: ['ruleStatusFilter', 'ruleTagFilter']
  *
  * @param configValue
  * @throws TriggersActionsUIInvalidExperimentalValue

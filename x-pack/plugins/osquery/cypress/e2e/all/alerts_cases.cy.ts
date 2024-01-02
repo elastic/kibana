@@ -65,12 +65,15 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
 
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.wait(1000);
       cy.contains('Run a set of queries in a pack').click();
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();

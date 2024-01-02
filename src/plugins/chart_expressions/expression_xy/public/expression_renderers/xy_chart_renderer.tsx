@@ -277,7 +277,6 @@ export const getXyChartRenderer = ({
               syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
-              shouldShowLegendAction={handlers.shouldShowLegendAction}
             />
           </div>
         </I18nProvider>

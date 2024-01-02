@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
+import { subtractMillisecondsFromDate } from '../../../../common/utils';
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
@@ -73,7 +74,7 @@ export const useFetchLogEntriesAround = ({
         last(), // in the future we could start earlier if we receive partial results already
         map((lastBeforeSearchResponse) => {
           const cursorAfter = lastBeforeSearchResponse.response.data?.bottomCursor ?? {
-            time: cursor.time - 1,
+            time: subtractMillisecondsFromDate(cursor.time, 1),
             tiebreaker: 0,
           };
 

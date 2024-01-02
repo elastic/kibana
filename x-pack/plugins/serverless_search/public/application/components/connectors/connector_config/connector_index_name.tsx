@@ -7,8 +7,8 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
-import React, { useEffect, useState } from 'react';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import React, { useState } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';
@@ -16,16 +16,19 @@ import { useConnector } from '../../../hooks/api/use_connector';
 import { useKibanaServices } from '../../../hooks/use_kibana';
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
+import { useShowErrorToast } from '../../../hooks/use_error_toast';
+import { SyncScheduledCallOut } from './sync_scheduled_callout';
 
 interface ConnectorIndexNameProps {
   connector: Connector;
 }
 
 export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connector }) => {
-  const { http, notifications } = useKibanaServices();
+  const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const { data, error, isLoading, isSuccess, mutate, reset } = useMutation({
+  const showErrorToast = useShowErrorToast();
+  const { data, isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async ({ inputName, sync }: { inputName: string | null; sync?: boolean }) => {
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
@@ -38,25 +41,18 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       }
       return inputName;
     },
-  });
-
-  useEffect(() => {
-    if (isSuccess) {
+    onError: (error) =>
+      showErrorToast(
+        error,
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorIndexNameError', {
+          defaultMessage: 'Error updating index name',
+        })
+      ),
+    onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });
       queryClient.invalidateQueries(queryKey);
-      reset();
-    }
-  }, [data, isSuccess, connector, queryClient, queryKey, reset]);
-
-  useEffect(() => {
-    if (error) {
-      notifications.toasts.addError(error as Error, {
-        title: i18n.translate('xpack.serverlessSearch.connectors.config.connectorIndexNameError', {
-          defaultMessage: 'Error updating index name',
-        }),
-      });
-    }
-  }, [error, notifications]);
+    },
+  });
 
   const [newIndexName, setNewIndexname] = useState(connector.index_name);
 
@@ -96,6 +92,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="serverlessSearchConnectorIndexNameButton"
               color="primary"
               isDisabled={!isValidIndexName(newIndexName)}
               isLoading={isLoading}
@@ -108,8 +105,14 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
         <EuiFlexItem grow={false}>
           <span>
             <EuiButton
+              data-test-subj="serverlessSearchConnectorIndexNameSaveAndSyncButton"
               color="primary"
-              disabled={!isValidIndexName(newIndexName)}
+              disabled={
+                !(
+                  isValidIndexName(newIndexName) &&
+                  [ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
+                )
+              }
               fill
               isLoading={isLoading}
               onClick={() => mutate({ inputName: newIndexName, sync: true })}
@@ -121,6 +124,12 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isSuccess && (
+        <>
+          <EuiSpacer />
+          <SyncScheduledCallOut />
+        </>
+      )}
     </>
   );
 };

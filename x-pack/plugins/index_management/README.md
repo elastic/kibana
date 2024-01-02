@@ -34,14 +34,15 @@ interface IndexDetailsTab {
 
 An example of adding an ILM tab can be found in [this file](https://github.com/elastic/kibana/blob/main/x-pack/plugins/index_lifecycle_management/public/extend_index_management/components/index_lifecycle_summary.tsx#L250).
 
-- `setIndexOverviewContent(content: IndexOverviewContent)`: replaces the default content in the overview tab (code block describing adding documents to the index) with the custom content. The custom content has the following interface: 
+- `setIndexOverviewContent(content: IndexContent)`: replaces the default content in the overview tab (code block describing adding documents to the index) with the custom content. The custom content has the following interface: 
 ```ts
-interface IndexOverviewContent {
+interface IndexContent {
   renderContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReturnType<FunctionComponent>;
 ```
+- `setIndexMappingsContent(content: IndexContent)`: adds content to the mappings tab of the index details page. The content is displayed in the right bottom corner, below the mappings docs link. 
 
 ## Indices tab
 

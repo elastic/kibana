@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
-import {
-  CORRELATIONS_TEST_ID,
-  INSIGHTS_ENTITIES_TEST_ID,
-  PREVALENCE_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,
@@ -23,6 +16,11 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_ALERT_REASON_PREVIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
 } from '../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 /* About section */
@@ -61,36 +59,40 @@ export const toggleOverviewTabInsightsSection = () => {
  * Click on the header in the right section, Insights, Entities
  */
 export const navigateToEntitiesDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-  cy.get(TEST_ID).scrollIntoView();
-  cy.get(TEST_ID).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER)
+    .should('be.visible')
+    .click();
 };
 
 /**
  * Click on the header in the right section, Insights, Threat Intelligence
  */
 export const navigateToThreatIntelligenceDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
-  cy.get(TEST_ID).scrollIntoView();
-  cy.get(TEST_ID).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
+    .should('be.visible')
+    .click();
 };
 
 /**
  * Click on the header in the right section, Insights, Correlations
  */
 export const navigateToCorrelationsDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(CORRELATIONS_TEST_ID);
-  cy.get(TEST_ID).scrollIntoView();
-  cy.get(TEST_ID).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER)
+    .should('be.visible')
+    .click();
 };
 
 /**
  * Click on the view all button under the right section, Insights, Prevalence
  */
 export const navigateToPrevalenceDetails = () => {
-  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
-  cy.get(TEST_ID).scrollIntoView();
-  cy.get(TEST_ID).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER)
+    .should('be.visible')
+    .click();
 };
 
 /* Visualizations section */
@@ -149,4 +151,12 @@ export const clickAlertReasonButton = () => {
         .should('be.visible')
         .click();
     });
+};
+
+/**
+ * Click the Response button to open the response detail tab in the left section
+ */
+export const navigateToResponseDetails = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).should('be.visible').click();
 };

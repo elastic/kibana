@@ -38,8 +38,12 @@ const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technica
   defaultMessage: 'technical preview',
 });
 
-export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
-  docLinks: DocLinksServiceSetup
+export const getUiSettings: (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
+) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
@@ -51,7 +55,9 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: enableValidations
+      ? schema.arrayOf(schema.string(), { maxSize: 50 })
+      : schema.arrayOf(schema.string()),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {

@@ -10,6 +10,7 @@ import { FtrService } from '../ftr_provider_context';
 
 export class AnnotationEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
 
   /**
@@ -56,12 +57,20 @@ export class AnnotationEditorPageObject extends FtrService {
     const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
     await queryInput.type(config.query);
 
-    await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
+    const titles = await this.find.allByCssSelector(
+      '.euiFlyout h3.lnsDimensionEditorSection__heading'
+    );
+    const lastTitle = titles[titles.length - 1];
+    await lastTitle.click(); // close query input pop-up
+    await lastTitle.focus(); // scroll down to the bottom of the section
 
     await this.testSubjects.setValue(
       'euiColorPickerAnchor indexPattern-dimension-colorPicker',
       config.color
     );
+    await lastTitle.click(); // close color picker pop-up
+
+    await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
 
     await this.retry.waitFor('annotation editor UI to close', async () => {
       await this.testSubjects.click('backToGroupSettings');

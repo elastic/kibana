@@ -52,6 +52,26 @@ describe('getHitsTileRequest', () => {
     expect(path).toEqual('/my%20index/_mvt/my%20location/0/0/0');
   });
 
+  test(`Should use requestBody.size to set both track_total_hits and size parameters`, () => {
+    const searchRequest = {
+      size: 20000,
+      runtime_mappings: {},
+      query: {},
+    };
+    const { body } = getHitsTileRequest({
+      buffer: 5,
+      risonRequestBody: rison.encode(searchRequest),
+      geometryFieldName: 'my location',
+      hasLabels: true,
+      index: 'my index',
+      x: 0,
+      y: 0,
+      z: 0,
+    });
+    expect(body?.track_total_hits).toEqual(20001);
+    expect(body?.size).toEqual(20000);
+  });
+
   describe('sort', () => {
     test(`Should include sort`, () => {
       const searchRequest = {

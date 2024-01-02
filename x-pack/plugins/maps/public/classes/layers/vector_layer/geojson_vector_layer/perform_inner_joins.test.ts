@@ -81,8 +81,8 @@ const mockVectorSource = {
   },
 } as unknown as IVectorSource;
 const innerJoin = new InnerJoin(joinDescriptor, mockVectorSource);
-const propertiesMap = new Map<string, Record<string | number, unknown>>();
-propertiesMap.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
+const joinMetrics = new Map<string, Record<string | number, unknown>>();
+joinMetrics.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
 
 test('should skip join when no state has changed', async () => {
   const updateSourceData = sinon.spy();
@@ -170,7 +170,7 @@ test('should call updateSourceData with feature collection with updated feature 
         dataHasChanged: false,
         join: innerJoin,
         joinIndex: 0,
-        propertiesMap,
+        joinMetrics,
       },
     ],
     updateSourceData,
@@ -277,7 +277,7 @@ test('should call updateSourceData when no results returned from terms aggregati
         dataHasChanged: true,
         join: innerJoin,
         joinIndex: 0,
-        propertiesMap: new Map<string, Record<string | number, unknown>>(),
+        joinMetrics: new Map<string, Record<string | number, unknown>>(),
       },
     ],
     updateSourceData,
@@ -321,8 +321,8 @@ test('should call onJoinError when there are no matching features', async () => 
   const setJoinError = sinon.spy();
 
   // instead of returning military alphabet like "alpha" or "bravo", mismatched key returns numbers, like '1'
-  const propertiesMapFromMismatchedKey = new Map<string, Record<string | number, unknown>>();
-  propertiesMapFromMismatchedKey.set('1', { [COUNT_PROPERTY_NAME]: 1 });
+  const joinMetricsFromMismatchedKey = new Map<string, Record<string | number, unknown>>();
+  joinMetricsFromMismatchedKey.set('1', { [COUNT_PROPERTY_NAME]: 1 });
 
   await performInnerJoins(
     {
@@ -334,7 +334,7 @@ test('should call onJoinError when there are no matching features', async () => 
         dataHasChanged: true,
         join: innerJoin,
         joinIndex: 0,
-        propertiesMap: propertiesMapFromMismatchedKey,
+        joinMetrics: joinMetricsFromMismatchedKey,
       },
     ],
     updateSourceData,

@@ -16,6 +16,7 @@ export const getImportRulesSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
+  immutable: false,
 });
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
@@ -28,6 +29,7 @@ export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport 
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
+  immutable: false,
 });
 
 /**
@@ -79,6 +81,7 @@ export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): RuleToIm
       },
     },
   ],
+  immutable: false,
 });
 
 export const webHookConnector = {

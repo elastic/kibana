@@ -7,7 +7,7 @@
  */
 
 import { createInteractionPositionTracker } from './open_context_menu';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 let targetEl: Element;
 const top = 100;

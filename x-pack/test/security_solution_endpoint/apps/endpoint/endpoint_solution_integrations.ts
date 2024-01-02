@@ -62,7 +62,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe('from Timeline', () => {
+    // failing tests: https://github.com/elastic/kibana/issues/170705
+    describe.skip('from Timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {

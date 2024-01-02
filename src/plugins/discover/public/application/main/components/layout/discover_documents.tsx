@@ -37,7 +37,6 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -65,7 +64,6 @@ import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout'
 import { getRenderCustomToolbarWithElements } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 
 const containerStyles = css`
@@ -256,22 +254,11 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const dataState = useDataState(stateContainer.dataState.data$.main$);
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
     () => (
       <>
-        {dataState.error && (
-          <ErrorCallout
-            title={i18n.translate('discover.documentsErrorTitle', {
-              defaultMessage: 'Search error',
-            })}
-            error={dataState.error}
-            inline
-            data-test-subj="discoverMainError"
-          />
-        )}
         <SelectedVSAvailableCallout
           isPlainRecord={isTextBasedQuery}
           textBasedQueryColumns={documents?.textBasedQueryColumns}
@@ -281,7 +268,6 @@ function DiscoverDocumentsComponent({
       </>
     ),
     [
-      dataState.error,
       isTextBasedQuery,
       currentColumns,
       documents?.textBasedQueryColumns,

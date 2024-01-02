@@ -15,6 +15,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { CONNECTORS_LABEL } from '../../common/i18n_string';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -37,79 +38,60 @@ const navigationTree: NavigationTreeDefinition = {
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
+          spaceBefore: 'l',
         },
         {
-          id: 'explore',
-          title: i18n.translate('xpack.serverlessSearch.nav.explore', {
-            defaultMessage: 'Explore',
-          }),
-          children: [
-            {
-              link: 'discover',
-            },
-            {
-              link: 'dashboards',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
-            },
-            {
-              link: 'visualize',
-              title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
-                defaultMessage: 'Visualizations',
-              }),
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return (
-                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
-                  pathNameSerialized.startsWith(prepend('/app/maps'))
-                );
-              },
-            },
-            {
-              link: 'management:triggersActions',
-              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
-                defaultMessage: 'Alerts',
-              }),
-            },
-          ],
+          link: 'discover',
+          spaceBefore: 'm',
         },
         {
-          id: 'content',
-          title: i18n.translate('xpack.serverlessSearch.nav.content', {
-            defaultMessage: 'Content',
-          }),
-          children: [
-            {
-              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-                defaultMessage: 'Index Management',
-              }),
-              link: 'management:index_management',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
-            },
-            {
-              title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
-                defaultMessage: 'Pipelines',
-              }),
-              link: 'management:ingest_pipelines',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
-            },
-          ],
+          link: 'dashboards',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+          },
         },
         {
-          id: 'security',
-          title: i18n.translate('xpack.serverlessSearch.nav.security', {
-            defaultMessage: 'Security',
+          link: 'visualize',
+          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+            defaultMessage: 'Visualizations',
           }),
-          children: [
-            {
-              link: 'management:api_keys',
-              breadcrumbStatus:
-                'hidden' /* management sub-pages set their breadcrumbs themselves */,
-            },
-          ],
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+              pathNameSerialized.startsWith(prepend('/app/lens')) ||
+              pathNameSerialized.startsWith(prepend('/app/maps'))
+            );
+          },
+        },
+        {
+          link: 'management:triggersActions',
+          title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+            defaultMessage: 'Alerts',
+          }),
+        },
+        {
+          title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+            defaultMessage: 'Index Management',
+          }),
+          link: 'management:index_management',
+          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          spaceBefore: 'm',
+        },
+        {
+          title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
+            defaultMessage: 'Pipelines',
+          }),
+          link: 'management:ingest_pipelines',
+          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+        },
+        {
+          title: CONNECTORS_LABEL,
+          link: 'serverlessConnectors',
+        },
+        {
+          link: 'management:api_keys',
+          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          spaceBefore: 'm',
         },
       ],
     },

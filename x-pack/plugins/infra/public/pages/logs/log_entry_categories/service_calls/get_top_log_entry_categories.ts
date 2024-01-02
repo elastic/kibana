@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
   getLogEntryCategoriesRequestPayloadRT,
@@ -18,6 +19,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;
+  idFormat: IdFormat;
   startTime: number;
   endTime: number;
   categoryCount: number;
@@ -29,7 +31,8 @@ export const callGetTopLogEntryCategoriesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { logViewReference, startTime, endTime, categoryCount, datasets, sort } = requestArgs;
+  const { logViewReference, idFormat, startTime, endTime, categoryCount, datasets, sort } =
+    requestArgs;
   const intervalDuration = endTime - startTime;
 
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH, {
@@ -38,6 +41,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
       getLogEntryCategoriesRequestPayloadRT.encode({
         data: {
           logView: logViewReference,
+          idFormat,
           timeRange: {
             startTime,
             endTime,

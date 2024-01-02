@@ -152,7 +152,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {

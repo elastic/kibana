@@ -17,6 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./telemetry/telemetry.ts'),
       require.resolve('./routes/vulnerabilities_dashboard.ts'),
+      require.resolve('./routes/stats.ts'),
+      require.resolve('./routes/csp_benchmark_rules_bulk_update.ts'),
+      require.resolve('./routes/csp_benchmark_rules_get_states.ts'),
     ],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',

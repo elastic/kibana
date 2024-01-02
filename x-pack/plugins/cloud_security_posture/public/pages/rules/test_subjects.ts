@@ -13,5 +13,5 @@ export const CSP_RULES_TABLE = 'csp_rules_table';
 export const CSP_RULES_TABLE_ROW_ITEM_NAME = 'csp_rules_table_row_item_name';
 export const CSP_RULES_FLYOUT_CONTAINER = 'csp_rules_flyout_container';
 
-export const getCspRuleTemplatesTableRowItemTestId = (id: string) =>
+export const getCspBenchmarkRuleTableRowItemTestId = (id: string) =>
   `${CSP_RULES_TABLE_ROW_ITEM_NAME}_${id}`;

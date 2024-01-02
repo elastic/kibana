@@ -6,11 +6,9 @@
  */
 
 import {
-  INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
-  VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
-import {
   INSIGHTS_TAB_TEST_ID,
+  INVESTIGATION_TAB_TEST_ID,
+  RESPONSE_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/document_details/left/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
@@ -19,9 +17,7 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB =
   getDataTestSubjectSelector(INSIGHTS_TAB_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB =
   getDataTestSubjectSelector(VISUALIZE_TAB_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP = getDataTestSubjectSelector(
-  VISUALIZE_TAB_BUTTON_GROUP_TEST_ID
-);
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP = getDataTestSubjectSelector(
-  INSIGHTS_TAB_BUTTON_GROUP_TEST_ID
-);
+export const DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB =
+  getDataTestSubjectSelector(INVESTIGATION_TAB_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB =
+  getDataTestSubjectSelector(RESPONSE_TAB_TEST_ID);

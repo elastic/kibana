@@ -13,11 +13,13 @@ import { css } from '@emotion/react';
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
+  editorIsInline,
 }: {
   onMouseDownResizeHandler: (
     mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
   ) => void;
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
+  editorIsInline?: boolean;
 }) {
   return (
     <EuiResizableButton
@@ -26,7 +28,7 @@ export function ResizableButton({
       onKeyDown={onKeyDownResizeHandler}
       onTouchStart={onMouseDownResizeHandler}
       css={css`
-        position: absolute;
+        position: ${editorIsInline ? 'relative' : 'absolute'};
         bottom: 0;
         left: 0;
         right: 0;

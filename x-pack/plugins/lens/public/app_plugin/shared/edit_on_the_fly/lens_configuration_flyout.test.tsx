@@ -14,10 +14,8 @@ import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../.
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 
 const lensAttributes = {
   title: 'test',
@@ -29,14 +27,12 @@ const lensAttributes = {
     visualization: {},
     filters: [],
     query: {
-      language: 'lucene',
-      query: '',
+      esql: 'from index1 | limit 10',
     },
   },
   filters: [],
   query: {
-    language: 'lucene',
-    query: '',
+    esql: 'from index1 | limit 10',
   },
   references: [],
 } as unknown as TypedLensByValueInput['attributes'];
@@ -98,6 +94,16 @@ describe('LensEditConfigurationFlyout', () => {
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });
 
+  it('should display the header title correctly for a newly created panel', async () => {
+    renderConfigFlyout({
+      displayFlyoutHeader: true,
+      isNewPanel: true,
+    });
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
+      'Create ES|QL visualization'
+    );
+  });
+
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
 
@@ -107,6 +113,16 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
     userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
+  });
+
+  it('should call the updatePanelState callback if cancel button is clicked', async () => {
+    const updatePanelStateSpy = jest.fn();
+    renderConfigFlyout({
+      updatePanelState: updatePanelStateSpy,
+    });
+    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
   it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
@@ -134,5 +150,49 @@ describe('LensEditConfigurationFlyout', () => {
     userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
+    renderConfigFlyout({
+      canEditTextBasedQuery: false,
+    });
+    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
+    renderConfigFlyout({
+      canEditTextBasedQuery: true,
+      attributes: {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          query: {
+            type: 'kql',
+            query: '',
+          } as unknown as Query,
+        },
+      },
+    });
+    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+  });
+
+  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
+    renderConfigFlyout({
+      hidesSuggestions: true,
+    });
+    expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+  });
+
+  it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
+    renderConfigFlyout(
+      {
+        canEditTextBasedQuery: true,
+      },
+      {
+        esql: 'from index1 | limit 10',
+      }
+    );
+    expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 });

@@ -19,6 +19,7 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import type {
   CaseSeverity,
   CaseStatuses,
+  CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
 } from '../../common/types/domain';
 import {
@@ -31,7 +32,7 @@ import {
   UserCommentAttachmentPayloadRt,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
-import type { CasesFindQueryParams } from './types';
+import type { CasesSearchParams } from './types';
 
 import { decodeWithExcessOrThrow } from '../../common/api';
 import {
@@ -54,6 +55,8 @@ import {
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { ICasesCustomField } from '../custom_fields';
+import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
@@ -151,23 +154,36 @@ export const getAlertIds = (comment: AttachmentRequest): string[] => {
   return [];
 };
 
-const addStatusFilter = (status: CaseStatuses): KueryNode => {
+const addStatusFilter = (status: CaseStatuses | CaseStatuses[]): KueryNode | undefined => {
+  if (Array.isArray(status)) {
+    return buildFilter({
+      filters: status.map((_status) => `${STATUS_EXTERNAL_TO_ESMODEL[_status]}`),
+      field: 'status',
+      operator: 'or',
+    });
+  }
+
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.status`,
     `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
   );
 };
 
-const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
+const addSeverityFilter = (severity: CaseSeverity | CaseSeverity[]): KueryNode | undefined => {
+  if (Array.isArray(severity)) {
+    return buildFilter({
+      filters: severity.map((_severity) => `${SEVERITY_EXTERNAL_TO_ESMODEL[_severity]}`),
+      field: 'severity',
+      operator: 'or',
+    });
+  }
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.severity`,
     `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
 };
 
-const buildCategoryFilter = (
-  categories: CasesFindQueryParams['category']
-): KueryNode | undefined => {
+const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
   }
@@ -302,7 +318,7 @@ export const buildRangeFilter = ({
 export const buildAssigneesFilter = ({
   assignees,
 }: {
-  assignees: CasesFindQueryParams['assignees'];
+  assignees: CasesSearchParams['assignees'];
 }): KueryNode | undefined => {
   if (assignees === undefined) {
     return;
@@ -336,6 +352,64 @@ export const buildAssigneesFilter = ({
   return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
 };
 
+export const buildCustomFieldsFilter = ({
+  customFields,
+  customFieldsConfiguration,
+}: {
+  customFields: CasesSearchParams['customFields'];
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): KueryNode | undefined => {
+  if (!customFields || !customFieldsConfiguration?.length) {
+    return;
+  }
+
+  const customFieldsMappings: Array<Record<string, ICasesCustomField>> = [];
+
+  Object.keys(customFields).forEach((item: string) => {
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === item);
+
+    if (!customFieldConfig) {
+      return;
+    }
+
+    const mapping = casesCustomFields.get(customFieldConfig.type);
+
+    if (!mapping) {
+      return;
+    }
+
+    customFieldsMappings.push({ [item]: mapping });
+  });
+
+  if (!customFieldsMappings.length) {
+    return;
+  }
+
+  const customFieldsFilter = Object.entries(customFields).map(([key, value]) => {
+    const customFieldMapping = customFieldsMappings.find((mapping) => mapping[key]) ?? {};
+
+    if (!Object.values(value).length) {
+      return fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key}}`);
+    }
+
+    return nodeBuilder.or(
+      Object.values(value).map((filterValue) => {
+        if (filterValue === null) {
+          return fromKueryExpression(
+            `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and (not value:*)}`
+          );
+        }
+
+        return fromKueryExpression(
+          `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldMapping[key].savedObjectMappingType}: ${filterValue}}`
+        );
+      })
+    );
+  });
+
+  return nodeBuilder.and([...customFieldsFilter]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -348,7 +422,11 @@ export const constructQueryOptions = ({
   to,
   assignees,
   category,
-}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
+  customFields,
+  customFieldsConfiguration,
+}: CasesSearchParams & {
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortByField = convertSortField(sortField);
@@ -358,6 +436,7 @@ export const constructQueryOptions = ({
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
+  const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
 
   const filters = combineFilters([
     statusFilter,
@@ -368,6 +447,7 @@ export const constructQueryOptions = ({
     ownerFilter,
     assigneesFilter,
     categoryFilter,
+    customFieldsFilter,
   ]);
 
   return {

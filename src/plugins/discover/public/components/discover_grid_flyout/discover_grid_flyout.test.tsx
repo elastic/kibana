@@ -231,6 +231,19 @@ describe('Discover flyout', function () {
   });
 
   describe('with applied customizations', () => {
+    describe('when title is customized', () => {
+      it('should display the passed string as title', async () => {
+        const customTitle = 'Custom flyout title';
+        mockFlyoutCustomization.title = customTitle;
+
+        const { component } = await mountComponent({});
+
+        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
+
+        expect(titleNode.text()).toBe(customTitle);
+      });
+    });
+
     describe('when actions are customized', () => {
       it('should display actions added by getActionItems', async () => {
         mockFlyoutCustomization.actions = {
@@ -302,11 +315,14 @@ describe('Discover flyout', function () {
       it('should provide an actions prop collection to optionally update the grid content', async () => {
         mockFlyoutCustomization.Content = ({ actions }) => (
           <>
-            <button data-test-subj="addColumn" onClick={() => actions.addColumn('message')} />
-            <button data-test-subj="removeColumn" onClick={() => actions.removeColumn('message')} />
+            <button data-test-subj="addColumn" onClick={() => actions.onAddColumn?.('message')} />
+            <button
+              data-test-subj="removeColumn"
+              onClick={() => actions.onRemoveColumn?.('message')}
+            />
             <button
               data-test-subj="addFilter"
-              onClick={() => actions.addFilter?.('_exists_', 'message', '+')}
+              onClick={() => actions.filter?.('_exists_', 'message', '+')}
             />
           </>
         );

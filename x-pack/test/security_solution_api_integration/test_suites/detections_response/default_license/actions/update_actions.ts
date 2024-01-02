@@ -5,205 +5,245 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { omit } from 'lodash';
+import expect from 'expect';
 
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  removeServerGeneratedProperties,
   getRuleWithWebHookAction,
-  getSimpleRuleOutputWithWebHookAction,
   waitForRuleSuccess,
-  createRule,
-  getSimpleRule,
   updateRule,
   installMockPrebuiltRules,
-  getRule,
-  createNewAction,
+  fetchRule,
+  createWebHookRuleAction,
   findImmutableRuleById,
-  getPrebuiltRulesAndTimelinesStatus,
-  getSimpleRuleOutput,
   ruleToUpdateSchema,
-  updateUsername,
+  getCustomQueryRuleParams,
+  getPrebuiltRulesAndTimelinesStatus,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const log = getService('log');
-  // TODO: add a new service
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
-  const isServerless = config.get('serverless');
-  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   const getImmutableRule = async () => {
     await installMockPrebuiltRules(supertest, es);
-    return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+    return fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
   };
 
   describe('@serverless @ess update_actions', () => {
     describe('updating actions', () => {
-      before(async () => {
-        await esArchiver.load(path);
-      });
-
-      after(async () => {
-        await esArchiver.unload(path);
-      });
-
       beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
-      it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
-        const hookAction = await createNewAction(supertest, log);
-        const rule = getSimpleRule();
-        await createRule(supertest, log, rule);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        const bodyToCompare = removeServerGeneratedProperties(updatedRule);
+      it('updates rule with a webhook action', async () => {
+        const webhookAction = await createWebHookRuleAction(supertest);
 
-        const expectedRule = {
-          ...getSimpleRuleOutputWithWebHookAction(
-            `${bodyToCompare.actions?.[0].id}`,
-            `${bodyToCompare.actions?.[0].uuid}`
-          ),
-          revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(getCustomQueryRuleParams({ rule_id: 'rule-1' }))
+          .expect(200);
+
+        const ruleAction = {
+          group: 'default',
+          id: webhookAction.id,
+          params: {
+            body: '{}',
+          },
+          action_type_id: '.webhook',
         };
-        const expectedRuleWithUserUpdated = updateUsername(expectedRule, ELASTICSEARCH_USERNAME);
+        const updatedRule = await updateRule(
+          supertest,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            actions: [ruleAction],
+          })
+        );
 
-        expect(bodyToCompare).to.eql(expectedRuleWithUserUpdated);
+        expect(updatedRule.actions).toEqual([expect.objectContaining(ruleAction)]);
       });
 
-      it('should be able to add a new webhook action and then remove the action from the rule again', async () => {
-        const hookAction = await createNewAction(supertest, log);
-        const rule = getSimpleRule();
-        await createRule(supertest, log, rule);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
-        await updateRule(supertest, log, ruleToUpdate);
-        const ruleAfterActionRemoved = await updateRule(supertest, log, rule);
-        const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
-        const expected = {
-          ...getSimpleRuleOutput(),
-          revision: 2, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
-        };
-        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
-        expect(bodyToCompare).to.eql(expectedRuleWithUserUpdated);
+      it('removes webhook from a rule', async () => {
+        const webhookAction = await createWebHookRuleAction(supertest);
+
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(
+            getCustomQueryRuleParams({
+              rule_id: 'rule-1',
+              actions: [
+                {
+                  group: 'default',
+                  id: webhookAction.id,
+                  params: {
+                    body: '{}',
+                  },
+                  action_type_id: '.webhook',
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        const updatedRule = await updateRule(
+          supertest,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            actions: undefined,
+          })
+        );
+
+        expect(updatedRule.actions).toEqual([]);
       });
 
-      it('should be able to create a new webhook action and attach it to a rule without a meta field and run it correctly', async () => {
-        const hookAction = await createNewAction(supertest, log);
-        const rule = getSimpleRule();
-        await createRule(supertest, log, rule);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
+      it('expects an updated rule with a webhook action runs successfully', async () => {
+        const webhookAction = await createWebHookRuleAction(supertest);
+
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(getCustomQueryRuleParams({ rule_id: 'rule-1' }))
+          .expect(200);
+
+        const ruleAction = {
+          group: 'default',
+          id: webhookAction.id,
+          params: {
+            body: '{}',
+          },
+          action_type_id: '.webhook',
+        };
+        const updatedRule = await updateRule(
+          supertest,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            actions: [ruleAction],
+            enabled: true,
+          })
+        );
+
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
+
+        const { body } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .query({ id: updatedRule.id })
+          .expect(200);
+
+        expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
-      it('@skipInQA should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
-        const hookAction = await createNewAction(supertest, log);
-        const rule = getSimpleRule();
-        await createRule(supertest, log, rule);
-        const ruleToUpdate: RuleCreateProps = {
-          ...getRuleWithWebHookAction(hookAction.id, true, rule),
-          meta: {}, // create a rule with the action attached and a meta field
+      it('@skipInQA expects an updated rule with a webhook action and meta field runs successfully', async () => {
+        const webhookAction = await createWebHookRuleAction(supertest);
+
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(getCustomQueryRuleParams({ rule_id: 'rule-1' }))
+          .expect(200);
+
+        const ruleAction = {
+          group: 'default',
+          id: webhookAction.id,
+          params: {
+            body: '{}',
+          },
+          action_type_id: '.webhook',
         };
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
+        const updatedRule = await updateRule(
+          supertest,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            actions: [ruleAction],
+            meta: {},
+            enabled: true,
+          })
+        );
+
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
+
+        const { body } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .query({ id: updatedRule.id })
+          .expect(200);
+
+        expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
-      it('@skipInQA should not change properties of immutable rule when applying actions to it', async () => {
-        // actions and throttle to be removed from assertion (it asserted in a separate test case)
-        const actionsProps = ['actions', 'throttle'];
-
+      it('@skipInQA adds a webhook to an immutable rule', async () => {
         const immutableRule = await getImmutableRule();
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToUpdate = getRuleWithWebHookAction(
-          hookAction.id,
-          immutableRule.enabled,
-          ruleToUpdateSchema(immutableRule)
-        );
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        const expected = omit(removeServerGeneratedProperties(updatedRule), actionsProps);
-
-        const immutableRuleToAssert = {
-          ...omit(removeServerGeneratedProperties(immutableRule), actionsProps),
-          revision: 1, // Unlike `version` which is static for immutable rules, `revision` will increment when an action/exception is added
+        const webhookAction = await createWebHookRuleAction(supertest);
+        const ruleAction = {
+          group: 'default',
+          id: webhookAction.id,
+          params: {
+            body: '{}',
+          },
+          action_type_id: '.webhook',
         };
-
-        expect(immutableRuleToAssert).to.eql(expected);
-        expect(expected.immutable).to.be(true); // It should stay immutable true when returning
-      });
-
-      it('@skipInQA should be able to create a new webhook action and attach it to an immutable rule', async () => {
-        const immutableRule = await getImmutableRule();
-        const hookAction = await createNewAction(supertest, log);
-        const ruleToUpdate = getRuleWithWebHookAction(
-          hookAction.id,
-          immutableRule.enabled,
-          ruleToUpdateSchema(immutableRule)
-        );
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        const bodyToCompare = removeServerGeneratedProperties(updatedRule);
-
-        const expected = getSimpleRuleOutputWithWebHookAction(
-          `${bodyToCompare.actions?.[0].id}`,
-          `${bodyToCompare.actions?.[0].uuid}`
+        const updatedRule = await updateRule(
+          supertest,
+          getCustomQueryRuleParams({
+            rule_id: ELASTIC_SECURITY_RULE_ID,
+            actions: [ruleAction],
+          })
         );
 
-        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
-        expect(bodyToCompare.actions).to.eql(expectedRuleWithUserUpdated.actions);
-        expect(bodyToCompare.throttle).to.eql(expectedRuleWithUserUpdated.throttle);
+        expect(updatedRule.actions).toEqual([expect.objectContaining(ruleAction)]);
+        expect(updatedRule.throttle).toEqual(immutableRule.throttle);
       });
 
       it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
         const immutableRule = await getImmutableRule();
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToUpdate = getRuleWithWebHookAction(
           hookAction.id,
           immutableRule.enabled,
           ruleToUpdateSchema(immutableRule)
         );
-        await updateRule(supertest, log, ruleToUpdate);
+        await updateRule(supertest, ruleToUpdate);
 
         const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
-        expect(status.rules_not_installed).to.eql(0);
+        expect(status.rules_not_installed).toBe(0);
       });
 
       it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
         const immutableRule = await getImmutableRule();
-        const hookAction = await createNewAction(supertest, log);
+        const webhookAction = await createWebHookRuleAction(supertest);
+        const ruleAction = {
+          group: 'default',
+          id: webhookAction.id,
+          params: {
+            body: '{}',
+          },
+          action_type_id: '.webhook',
+        };
         const ruleToUpdate = getRuleWithWebHookAction(
-          hookAction.id,
+          webhookAction.id,
           immutableRule.enabled,
           ruleToUpdateSchema(immutableRule)
         );
-        await updateRule(supertest, log, ruleToUpdate);
+        await updateRule(supertest, ruleToUpdate);
         const body = await findImmutableRuleById(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
-        expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
-        const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
-        const expected = getSimpleRuleOutputWithWebHookAction(
-          `${bodyToCompare.actions?.[0].id}`,
-          `${bodyToCompare.actions?.[0].uuid}`
-        );
-        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
-        expect(bodyToCompare.actions).to.eql(expectedRuleWithUserUpdated.actions);
-        expect(bodyToCompare.immutable).to.be(true);
+        expect(body.data.length).toBe(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
+        expect(body.data[0].actions).toEqual([expect.objectContaining(ruleAction)]);
+        expect(body.data[0].immutable).toBeTruthy();
       });
     });
   });

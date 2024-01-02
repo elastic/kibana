@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_QUERY_BUTTON,
   customActionEditSavedQuerySelector,
@@ -142,7 +143,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
-
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('users_elastic{downArrow} {enter}');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();

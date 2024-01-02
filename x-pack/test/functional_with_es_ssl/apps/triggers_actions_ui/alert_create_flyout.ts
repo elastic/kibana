@@ -82,15 +82,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
-    before(async () => {
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('rulesTab');
-    });
-
-    afterEach(async () => {
-      // Reset the Rules tab without reloading the entire page
-      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
-      await testSubjects.click('logsTab');
       await testSubjects.click('rulesTab');
     });
 
@@ -155,6 +148,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
+
+      // Alerts search bar (conditional actions)
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('addFilter');
+      await testSubjects.click('filterFieldSuggestionList');
+      await comboBox.set('filterFieldSuggestionList', '_id');
+      await comboBox.set('filterOperatorList', 'is not');
+      await testSubjects.setValue('filterParams', 'fake-rule-id');
+      await testSubjects.click('saveFilter');
+      await testSubjects.setValue('queryInput', '_id: *');
+
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `Rule '{{rule.name}}' is active for group '{{context.group}}':

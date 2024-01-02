@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

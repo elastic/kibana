@@ -58,7 +58,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
     search: {
       logPosition: encode({
         end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        position: { tiebreaker, time: timestamp },
+        position: { tiebreaker, time: moment(timestamp).toISOString() },
         start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         streamLive: false,
       }),
@@ -128,7 +128,10 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                     id,
                     index: '', // TODO: use real index when loading via async search
                     context,
-                    cursor: { time: timestamp, tiebreaker },
+                    cursor: {
+                      time: moment(timestamp).toISOString(),
+                      tiebreaker,
+                    },
                     columns: [],
                   };
                   trackMetric({ metric: 'view_in_context__categories' });

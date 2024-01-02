@@ -14,8 +14,12 @@ import { useStartServices } from './hooks';
 import type { PackageAssetsComponent } from './types';
 
 export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
-  const { http } = useStartServices();
-  const logStreamUrl = http.basePath.prepend('/app/logs/stream');
+  const { http, cloud } = useStartServices();
+  const isLogsUIAvailable = !cloud?.isServerlessEnabled;
+  // if logs ui is not available, link to discover
+  const logStreamUrl = isLogsUIAvailable
+    ? http.basePath.prepend('/app/logs/stream')
+    : http.basePath.prepend('/app/discover');
 
   const views: CustomAssetsAccordionProps['views'] = [
     {

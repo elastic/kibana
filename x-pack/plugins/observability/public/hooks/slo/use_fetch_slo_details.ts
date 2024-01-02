@@ -12,6 +12,7 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -26,8 +27,6 @@ export interface UseFetchSloDetailsResponse {
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
-
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloDetails({
   sloId,
@@ -59,7 +58,7 @@ export function useFetchSloDetails({
       },
       keepPreviousData: true,
       enabled: Boolean(sloId),
-      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+      refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
     }
   );

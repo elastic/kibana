@@ -18,8 +18,8 @@ const stories: Meta = {
   title: 'infra/Asset Details View/Components/Metadata',
   decorators: [
     decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
     DecorateWithAssetDetailsStateContext,
+    DecorateWithKibanaContext,
   ],
   component: Metadata,
 };
@@ -29,11 +29,6 @@ const Template: Story = () => {
 };
 
 export const Default = Template.bind({});
-
-export const WithActions = Template.bind({});
-WithActions.args = {
-  showActionsColumn: true,
-};
 
 export const NoData = Template.bind({});
 NoData.parameters = {

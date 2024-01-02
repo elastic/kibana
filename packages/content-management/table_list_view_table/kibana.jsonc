@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/content-management-table-list-view-table",
   "owner": "@elastic/appex-sharedux"
 }
