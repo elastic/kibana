@@ -37,17 +37,14 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
     createRule(getNewRule());
+    login();
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
   });
 
   describe('Filter', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
     it('should filter for a non-empty property', () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES)
         .first()
@@ -94,12 +91,6 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Add to timeline', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
     it('should add a non-empty property to default timeline', () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES)
         .first()
@@ -127,12 +118,6 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Show Top N', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
     it('should show top for a property', () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES)
         .first()
@@ -146,12 +131,6 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Copy to clipboard', () => {
-    beforeEach(() => {
-      login();
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
-
     it('should copy to clipboard', () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES)
         .first()
