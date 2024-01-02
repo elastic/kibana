@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useMemo } from 'react';
+import React, { FC, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
