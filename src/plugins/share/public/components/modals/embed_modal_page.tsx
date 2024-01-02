@@ -8,6 +8,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCheckboxGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,17 +17,18 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiRadioGroup,
-  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
@@ -68,8 +70,8 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   } = props;
   const isMounted = useMountedState();
   const [useShortUrl, setUseShortUrl] = useState<boolean>(false);
-  const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean | string>(false);
-  const [urlParams] = useState<undefined | UrlParams>(undefined);
+  const [createShortUrl, isCreatingShortUrl] = useState<boolean>(false);
+  const [urlParams, setUrlParams] = useState<undefined | UrlParams>(undefined);
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState<Record<string, boolean>>({
@@ -82,6 +84,16 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
+
+  useEffect(() => {
+    isMounted();
+    setUrlHelper();
+    resetUrl();
+    return function cleanup() {
+      resetUrl();
+      !isMounted();
+    };
+  }, []);
 
   interface UrlParams {
     [extensionName: string]: {
@@ -119,51 +131,50 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     );
   };
 
-  const getUrlParamExtensions = useCallback(
-    (tempUrl: string): string => {
-      return urlParams
-        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-            const urlParam = urlParams[key];
-            return urlParam
-              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                  const isQueryParamEnabled = urlParam[queryParam];
-                  return isQueryParamEnabled
-                    ? queryAccumulator + `&${queryParam}=true`
-                    : queryAccumulator;
-                }, urlAccumulator)
-              : urlAccumulator;
-          }, tempUrl)
-        : tempUrl;
-    },
-    [urlParams]
-  );
+  const resetUrl = () => {
+    if (isMounted()) {
+      setShortUrlCache(undefined);
+      setUseShortUrl(false);
+      setUrlHelper();
+    }
+  };
 
-  const updateUrlParams = useCallback(
-    (tempUrl: string) => {
-      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
-      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
+  const getUrlParamExtensions = (tempUrl: string): string => {
+    return urlParams
+      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+          const urlParam = urlParams[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, tempUrl)
+      : tempUrl;
+  };
 
-      return tempUrl;
-    },
-    [getUrlParamExtensions, isEmbedded, urlParams]
-  );
+  const updateUrlParams = (tempUrl: string) => {
+    tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+    tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
 
-  const getSnapshotUrl = useCallback(
-    (forSavedObject?: boolean) => {
-      let tempUrl = '';
-      if (forSavedObject && shareableUrlForSavedObject) {
-        tempUrl = shareableUrlForSavedObject;
-      }
-      if (!tempUrl) {
-        tempUrl = shareableUrl || window.location.href;
-      }
-      return updateUrlParams(tempUrl);
-    },
-    [shareableUrlForSavedObject, shareableUrl, updateUrlParams]
-  );
+    return tempUrl;
+  };
+
+  const getSnapshotUrl = (forSavedObject?: boolean) => {
+    let tempUrl = '';
+    if (forSavedObject && shareableUrlForSavedObject) {
+      tempUrl = shareableUrlForSavedObject;
+    }
+    if (!tempUrl) {
+      tempUrl = shareableUrl || window.location.href;
+    }
+    return updateUrlParams(tempUrl);
+  };
 
   const createShortUrlHelper = async () => {
-    setIsCreatingShortUrl(true);
+    isCreatingShortUrl(true);
     setShortUrlErrorMsg(undefined);
 
     try {
@@ -185,7 +196,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
 
       setShortUrlCache(undefined);
       setShortUrl(false);
-      setIsCreatingShortUrl(false);
+      isCreatingShortUrl(false);
       setShortUrlErrorMsg(
         i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
           defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
@@ -195,12 +206,15 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
         })
       );
     }
-    setIsCreatingShortUrl(false);
     setUrlHelper();
   };
 
-  const getSavedObjectUrl = useCallback(() => {
-    if (objectId === undefined || objectId === '') {
+  const isNotSaved = () => {
+    return objectId === undefined || objectId === '';
+  };
+
+  const getSavedObjectUrl = () => {
+    if (isNotSaved()) {
       return;
     }
 
@@ -229,69 +243,43 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
       }),
     });
     return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, updateUrlParams, objectId]);
+  };
 
-  const addUrlAnonymousAccessParameters = useCallback(
-    (tempUrl: string): string => {
-      if (!anonymousAccessParameters || !usePublicUrl) {
-        return tempUrl;
-      }
+  const addUrlAnonymousAccessParameters = (tempUrl: string): string => {
+    if (!anonymousAccessParameters || !usePublicUrl) {
+      return tempUrl;
+    }
 
-      const parsedUrl = new URL(tempUrl);
+    const parsedUrl = new URL(tempUrl);
 
-      for (const [name, value] of Object.entries(anonymousAccessParameters)) {
-        parsedUrl.searchParams.set(name, value);
-      }
+    for (const [name, value] of Object.entries(anonymousAccessParameters)) {
+      parsedUrl.searchParams.set(name, value);
+    }
 
-      return parsedUrl.toString();
-    },
-    [anonymousAccessParameters, usePublicUrl]
-  );
+    return parsedUrl.toString();
+  };
 
-  const setUrlHelper = useCallback(() => {
+  const setUrlHelper = () => {
+    let tempUrl: string | undefined;
+
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      setUrl(getSavedObjectUrl()!);
-    } else if (useShortUrl !== undefined && shortUrlCache !== undefined) {
-      setUrl(shortUrlCache);
+      tempUrl = getSavedObjectUrl();
+    } else if (setShortUrl !== undefined) {
+      tempUrl = shortUrlCache;
     } else {
-      getSnapshotUrl(true);
+      tempUrl = getSnapshotUrl();
     }
-    if (url !== '') {
-      setUrl(addUrlAnonymousAccessParameters(url));
+
+    if (url) {
+      tempUrl = addUrlAnonymousAccessParameters(url);
     }
+
     if (isEmbedded) {
-      makeIframeTag(url);
+      tempUrl = makeIframeTag(url);
     }
 
-    setUrl(url);
-  }, [
-    useShortUrl,
-    addUrlAnonymousAccessParameters,
-    exportUrlAs,
-    getSavedObjectUrl,
-    getSnapshotUrl,
-    isEmbedded,
-    shortUrlCache,
-    url,
-  ]);
-
-  const resetUrl = useCallback(() => {
-    if (isMounted()) {
-      setShortUrlCache(undefined);
-      setUseShortUrl(false);
-      setUrlHelper();
-    }
-  }, [setUrlHelper, isMounted]);
-
-  useEffect(() => {
-    isMounted();
-    setUrlHelper();
-    resetUrl();
-    return function cleanup() {
-      isMounted() === false;
-      resetUrl();
-    };
-  }, [isMounted, resetUrl, setUrlHelper]);
+    if (tempUrl !== undefined) setUrl(tempUrl);
+  };
 
   const handleShortUrlChange = (evt: { target: { checked: React.SetStateAction<boolean> } }) => {
     setCheckShortUrlSwitch(evt.target.checked);
@@ -312,13 +300,14 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel = isCreatingShortUrl ? (
-      <span>
-        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-      </span>
-    ) : (
-      shortUrlLabel
-    );
+    const switchLabel =
+      isCreatingShortUrl !== undefined ? (
+        <span>
+          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+        </span>
+      ) : (
+        shortUrlLabel
+      );
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}
@@ -365,65 +354,66 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     { id: 'snapshot', label: 'Snapshot' },
   ];
 
+  const setParamValue =
+    (paramName: string) =>
+    (values: { [queryParam: string]: boolean } = {}): void => {
+      setUrlParams({ [paramName]: { ...values } });
+      useShortUrl ? createShortUrlHelper() : setUrlHelper();
+    };
+
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal maxWidth={false} onClose={onClose}>
       <I18nProvider>
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-          <EuiSpacer size="xs" />
-          <EuiTitle>
-            <EuiText>{`Share this ${props.objectType}`}</EuiText>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={1}>
-              <EuiCheckboxGroup
-                options={checkboxOptions}
-                idToSelectedMap={checkboxSelectedMap}
-                onChange={(id) => checkboxOnChangeHandler(id)}
-                compressed
-                data-test-subj="embed-radio-group"
-                legend={{
-                  children: <FormattedMessage id="share.embed.include" defaultMessage="Include" />,
-                }}
-              />
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{`Embed this ${props.objectType}`}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={1}>
+                <EuiCheckboxGroup
+                  options={checkboxOptions}
+                  idToSelectedMap={checkboxSelectedMap}
+                  onChange={(id) => checkboxOnChangeHandler(id)}
+                  data-test-subj="embed-radio-group"
+                  legend={{
+                    children: <span>Include</span>,
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiRadioGroup
+                  options={radioOptions}
+                  onChange={(id) => setSelectedRadio(id)}
+                  name="embed radio group"
+                  idSelected={selectedRadio}
+                  legend={{
+                    children: <span>Generate as</span>,
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  <EuiButtonEmpty onClick={onClose}>
+                    <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton fill onClick={() => setParamValue('embed')}>
+                    <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiRadioGroup
-                options={radioOptions}
-                onChange={(id) => setSelectedRadio(id)}
-                name="embed radio group"
-                idSelected={selectedRadio}
-                legend={{
-                  children: (
-                    <FormattedMessage
-                      id="share.urlPanel.generateLinkAsLabel"
-                      defaultMessage="Generate the link as"
-                    />
-                  ),
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            {}
-            <EuiButton
-              fill
-              onClick={() => {
-                
-              }}
-            >
-              <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
-            </EuiButton>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" justifyContent="flexEnd">
-            <EuiButton fill onClick={onClose}>
-              <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiForm>
+        </EuiModalFooter>
       </I18nProvider>
     </EuiModal>
   );

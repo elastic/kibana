@@ -8,7 +8,7 @@
 
 import {
   EuiButton,
-  EuiCopy,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -16,12 +16,14 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -83,7 +85,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const isMounted = useMountedState();
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
-    ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT
+    ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
   );
   const [useShortUrl] = useState<EuiSwitchEvent | string | boolean>(false);
   const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
@@ -94,9 +96,48 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [showWarningButton, setShowWarningButton] = useState<boolean>(
     Boolean(snapshotShareWarning)
   );
+
+  useEffect(() => {
+    isMounted();
+    setUrlHelper();
+
+    if (anonymousAccess) {
+      async () => {
+        const { accessURLParameters: anonymousAccessParameters } =
+          await anonymousAccess!.getState();
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (!anonymousAccessParameters) {
+          return;
+        }
+
+        const showPublicUrlSwitch: boolean = false;
+
+        if (showPublicUrlSwitch) {
+          const anonymousUserCapabilities = await anonymousAccess!.getCapabilities();
+
+          if (!isMounted()) {
+            return;
+          }
+
+          try {
+            setUsePublicUrl!(Boolean(anonymousUserCapabilities));
+          } catch {
+            setUsePublicUrl(false);
+          }
+        }
+        setAnonymousAccessParameters(anonymousAccessParameters);
+        setUsePublicUrl(true);
+      };
+    }
+  }, []);
+
   const [isCreatingShortUrl, setIsCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
-  const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
+  const [shortUrl, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
   const [checkShortUrlSwitch, setCheckShortUrlSwitch] = useState<boolean>(true);
@@ -379,71 +420,54 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
   return (
     <EuiModal onClose={onClose}>
-      <EuiForm className="kbnShareContextMenu__finalPanel">
-        <EuiSpacer size="xs" />
-        <EuiTitle>
-          <EuiText>{`Share this ${objectType}`}</EuiText>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiRadioGroup
-          options={[
-            { id: 'savedObject', label: 'Saved object' },
-            { id: 'snapshot', label: 'Snapshot' },
-          ]}
-          onChange={(id) => {
-            setSelectedRadio(id);
-            handleExportUrlAs(id);
-          }}
-          name="embed radio group"
-          idSelected={selectedRadio}
-          legend={{
-            children: (
-              <FormattedMessage
-                id="share.urlPanel.generateLinkAsLabel"
-                defaultMessage="Generate the link as"
-              />
-            ),
-          }}
-        />
-        <EuiSpacer size="m" />
-        {saveNeeded}
-        <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiCopy
-            beforeMessage={showWarningButton ? props.snapshotShareWarning : undefined}
-            textToCopy={url}
-            anchorClassName="eui-displayBlock"
-          >
-            {(copy) => (
-              <EuiButton
-                fill
-                fullWidth
-                onClick={copy}
-                data-share-url={url}
-                data-test-subj="copyShareUrlButton"
-                iconType={showWarningButton ? 'warning' : undefined}
-                color={showWarningButton ? 'warning' : 'primary'}
-              >
-                {isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
-                )}
-              </EuiButton>
-            )}
-          </EuiCopy>
-          <EuiButton fill onClick={onClose}>
-            <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
-          </EuiButton>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{`Get link to this ${objectType}`}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm className="kbnShareContextMenu__finalPanel">
+          <EuiRadioGroup
+            options={[
+              { id: 'savedObject', label: 'Saved object' },
+              { id: 'snapshot', label: 'Snapshot' },
+            ]}
+            onChange={(id) => {
+              setSelectedRadio(id);
+              handleExportUrlAs(id);
+            }}
+            name="embed radio group"
+            idSelected={selectedRadio}
+            legend={{
+              children: (
+                <FormattedMessage
+                  id="share.urlPanel.generateLinkAsLabel"
+                  defaultMessage="Generate the link as"
+                />
+              ),
+            }}
+          />
+          <EuiSpacer size="m" />
+          {saveNeeded}
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <EuiButtonEmpty onClick={onClose}>
+                  <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton fill onCopy={() => url}>
+                  <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiForm>
+      </EuiModalFooter>
     </EuiModal>
   );
 };
