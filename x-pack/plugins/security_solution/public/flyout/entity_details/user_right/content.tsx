@@ -13,8 +13,7 @@ import { RiskSummary } from '../../../entity_analytics/components/risk_summary_f
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
-import type { UserItem } from '../../../../common/search_strategy';
+import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
@@ -51,7 +50,6 @@ export const UserPanelContent = ({
             riskScoreData={riskScoreState}
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            entity={RiskScoreEntity.user}
           />
           <EuiHorizontalRule margin="m" />
         </>

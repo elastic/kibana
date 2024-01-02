@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine/types';
+import { mockRiskScoreState } from '../../../flyout/entity_details/mocks';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { mockRiskScoreState } from '../../../flyout/entity_details/user_right/mocks';
 import { RiskSummary } from './risk_summary';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -22,7 +21,6 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
-          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -39,7 +37,6 @@ describe('RiskSummary', () => {
           riskScoreData={{ ...mockRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
-          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -53,7 +50,6 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
-          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
@@ -68,7 +64,6 @@ describe('RiskSummary', () => {
           riskScoreData={mockRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
-          entity={RiskScoreEntity.user}
         />
       </TestProviders>
     );

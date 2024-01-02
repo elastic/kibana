@@ -39,7 +39,6 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   queryId: string;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
-  entity: T;
 }
 
 interface TableItem {
@@ -49,21 +48,25 @@ interface TableItem {
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
+function isUserRiskData(riskData: UserRiskScore | HostRiskScore): riskData is UserRiskScore {
+  return (riskData as UserRiskScore).user !== undefined;
+}
+
+const getEntityData = (riskData: UserRiskScore | HostRiskScore | undefined) => {
+  if (!riskData) return;
+  if (isUserRiskData(riskData)) return riskData.user;
+  return riskData.host;
+};
+
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
   queryId,
   openDetailsPanel,
-  entity,
 }: RiskSummaryProps<T>) => {
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
+  const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-
-  const entityData = (() => {
-    if (!riskData) return;
-    if (entity === RiskScoreEntity.user) return (riskData as UserRiskScore).user;
-    if (entity === RiskScoreEntity.host) return (riskData as HostRiskScore).host;
-  })();
 
   const lensAttributes = useMemo(() => {
     return getRiskScoreSummaryAttributes({

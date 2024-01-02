@@ -10,8 +10,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
-import type { HostItem } from '../../../../common/search_strategy';
+import type { RiskScoreEntity, HostItem } from '../../../../common/search_strategy';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
@@ -46,7 +45,6 @@ export const HostPanelContent = ({
             <RiskSummary
               riskScoreData={riskScoreState}
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-              entity={RiskScoreEntity.host}
               openDetailsPanel={openDetailsPanel}
             />
           }
