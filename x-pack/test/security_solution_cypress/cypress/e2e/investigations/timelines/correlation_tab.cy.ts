@@ -23,7 +23,8 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
-describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/173704
+describe.skip('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';
 
   beforeEach(() => {

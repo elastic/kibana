@@ -94,11 +94,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -126,11 +121,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
@@ -155,14 +145,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables SentinelOne manual host manipulation actions
    */
-  sentinelOneManualHostActionsEnabled: false,
+  sentinelOneManualHostActionsEnabled: true,
 
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

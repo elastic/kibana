@@ -464,6 +464,7 @@ export function getUiSettings(
             '</a>',
         },
       }),
+      requiresPageReload: true,
       schema: enableValidations
         ? schema.arrayOf(
             schema.object({

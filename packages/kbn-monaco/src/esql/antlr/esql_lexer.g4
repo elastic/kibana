@@ -168,6 +168,7 @@ MATH_FUNCTION
     | C O N C A T
     | C O A L E S C E
     | G R E A T E S T
+    | L E A S T
     | L E F T
     | N O W
     | R I G H T
@@ -209,6 +210,7 @@ MATH_FUNCTION
     | T O UNDERSCORE V E R S I O N
     | T O UNDERSCORE U N S I G N E D UNDERSCORE L O N G
     | T O UNDERSCORE G E O P O I N T
+    | T O UNDERSCORE C A R T E S I A N P O I N T
     ;
 
 UNARY_FUNCTION
