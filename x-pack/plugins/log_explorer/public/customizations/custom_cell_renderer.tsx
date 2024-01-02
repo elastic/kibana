@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTENT_FIELD } from '../../common/constants';
 import { renderContent } from '../components/virtual_columns/content';
 
-export const createCustomCellRenderer = () => {
+export const createCustomCellRenderer = ({ data }: { data: DataPublicPluginStart }) => {
   return {
-    [CONTENT_FIELD]: renderContent,
+    [CONTENT_FIELD]: renderContent({ data }),
   };
 };

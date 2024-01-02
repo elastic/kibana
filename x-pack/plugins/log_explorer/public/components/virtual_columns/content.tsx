@@ -16,6 +16,10 @@ import { FlyoutDoc, LogDocument } from '../../controller';
 import { LogLevel } from '../flyout_detail/sub_components/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
+import {
+  UseVirtualColumnServices,
+  VirtualColumnServiceProvider,
+} from '../../hooks/use_virtual_column_services';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/utils/render_source_document')
@@ -106,8 +110,6 @@ const Content = ({
         <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
           <LogLevel
             level={parsedDoc[constants.LOG_LEVEL_FIELD]}
-            iconType="arrowDown"
-            iconSide="right"
             dataTestSubj="logExplorerDataTableLogLevel"
           />
         </EuiFlexItem>
@@ -132,9 +134,14 @@ const Content = ({
   );
 };
 
-export const renderContent = (props: DataGridCellValueElementProps) => {
-  return <Content {...props} />;
-};
+export const renderContent =
+  (services: UseVirtualColumnServices['services']) => (props: DataGridCellValueElementProps) => {
+    return (
+      <VirtualColumnServiceProvider services={services}>
+        <Content {...props} />;
+      </VirtualColumnServiceProvider>
+    );
+  };
 
 const getMessageWithFallbacks = (doc: FlyoutDoc) => {
   const rankingOrder = [

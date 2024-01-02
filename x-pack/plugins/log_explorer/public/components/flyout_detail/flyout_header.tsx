@@ -12,7 +12,7 @@ import { getDocDetailHeaderRenderFlags } from './use_doc_detail';
 import { LogLevel } from './sub_components/log_level';
 import { Timestamp } from './sub_components/timestamp';
 import * as constants from '../../../common/constants';
-import { flyoutMessageLabel } from './translations';
+import { flyoutMessageLabel } from '../common/translations';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 
 export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
@@ -29,7 +29,7 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
               field={constants.LOG_LEVEL_FIELD}
             >
               <EuiFlexItem grow={false}>
-                <LogLevel level={doc[constants.LOG_LEVEL_FIELD]} />
+                <LogLevel level={doc[constants.LOG_LEVEL_FIELD]} renderInFlyout={true} />
               </EuiFlexItem>
             </HoverActionPopover>
           )}

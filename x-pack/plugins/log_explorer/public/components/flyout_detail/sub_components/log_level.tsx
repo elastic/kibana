@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiBadge, type EuiBadgeProps, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { FlyoutDoc } from '../types';
+import { ChipWithPopover } from '../../common/popover_chip';
+import * as constants from '../../../../common/constants';
 
 const LEVEL_DICT = {
   error: 'danger',
@@ -19,38 +20,41 @@ const LEVEL_DICT = {
 
 interface LogLevelProps {
   level: FlyoutDoc['log.level'];
-  iconType?: EuiBadgeProps['iconType'];
-  iconSide?: EuiBadgeProps['iconSide'];
   dataTestSubj?: string;
+  renderInFlyout?: boolean;
 }
 
 export function LogLevel({
   level,
-  iconType,
-  iconSide,
   dataTestSubj = 'logExplorerFlyoutLogLevel',
+  renderInFlyout = false,
 }: LogLevelProps) {
-  const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
   if (!level) return null;
   const levelColor = LEVEL_DICT[level as keyof typeof LEVEL_DICT]
     ? euiTheme.colors[LEVEL_DICT[level as keyof typeof LEVEL_DICT]]
     : null;
 
+  if (renderInFlyout) {
+    return (
+      <ChipWithPopover
+        property={constants.LOG_LEVEL_FIELD}
+        text={level}
+        borderColor={levelColor}
+        style={{ width: 'none' }}
+        dataTestSubj={dataTestSubj}
+        shouldRenderPopover={!renderInFlyout}
+      />
+    );
+  }
+
   return (
-    <EuiBadge
-      color="hollow"
-      iconType={iconType}
-      iconSide={iconSide}
-      data-test-subj={dataTestSubj}
-      css={css`
-        ${levelColor ? `border: 2px solid ${levelColor};` : ''}
-        font-size: ${xsFontSize};
-        display: flex;
-        justify-content: center;
-      `}
-    >
-      {level}
-    </EuiBadge>
+    <ChipWithPopover
+      property={constants.LOG_LEVEL_FIELD}
+      text={level}
+      rightSideIcon="arrowDown"
+      borderColor={levelColor}
+      style={{ width: '80px' }}
+    />
   );
 }

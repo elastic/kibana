@@ -84,7 +84,7 @@ export const createLogExplorerProfileCustomizations =
 
     customizations.set({
       id: 'cell_renderer',
-      customCellRenderer: createCustomCellRenderer(),
+      customCellRenderer: createCustomCellRenderer({ data }),
     });
 
     /**

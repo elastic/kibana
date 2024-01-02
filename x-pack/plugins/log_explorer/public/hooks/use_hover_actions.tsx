@@ -11,10 +11,10 @@ import { copyToClipboard, IconType } from '@elastic/eui';
 import {
   flyoutHoverActionCopyToClipboardText,
   flyoutHoverActionFilterForFieldPresentText,
-  flyoutHoverActionFilterForText,
-  flyoutHoverActionFilterOutText,
+  actionFilterForText,
+  actionFilterOutText,
   flyoutHoverActionToggleColumnText,
-} from '../components/flyout_detail/translations';
+} from '../components/common/translations';
 import { useDiscoverActionsContext } from './use_discover_action';
 import { LogDocument } from '../components/flyout_detail';
 
@@ -32,8 +32,8 @@ export interface HoverActionType {
 }
 
 export const useHoverActions = ({ field, value }: HoverActionProps): HoverActionType[] => {
-  const filterForText = flyoutHoverActionFilterForText(value);
-  const filterOutText = flyoutHoverActionFilterOutText(value);
+  const filterForText = actionFilterForText(value);
+  const filterOutText = actionFilterOutText(value);
   const actions = useDiscoverActionsContext();
   const [columnAdded, setColumnAdded] = useState<boolean>(false);
 

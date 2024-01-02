@@ -31,7 +31,7 @@ import {
   infraAccordionTitle,
   otherAccordionTitle,
   serviceAccordionTitle,
-} from './translations';
+} from '../common/translations';
 import { HighlightSection } from './sub_components/highlight_section';
 import { HighlightContainer } from './sub_components/highlight_container';
 import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
