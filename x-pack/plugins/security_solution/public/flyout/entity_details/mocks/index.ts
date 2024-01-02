@@ -98,21 +98,6 @@ export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
   loading: false,
 };
 
-export const mockRiskScoreState = {
-  data: [hostRiskScore],
-  inspect: {
-    dsl: [],
-    response: [],
-  },
-  isInspected: false,
-  refetch: () => {},
-  totalCount: 0,
-  isModuleEnabled: true,
-  isAuthorized: true,
-  isDeprecated: false,
-  loading: false,
-};
-
 const hostMetadata: HostMetadataInterface = {
   '@timestamp': 1036358673463478,
 

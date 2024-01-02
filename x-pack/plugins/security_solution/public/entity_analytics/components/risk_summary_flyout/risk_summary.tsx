@@ -48,8 +48,10 @@ interface TableItem {
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
-function isUserRiskData(riskData: UserRiskScore | HostRiskScore): riskData is UserRiskScore {
-  return (riskData as UserRiskScore).user !== undefined;
+function isUserRiskData(
+  riskData: UserRiskScore | HostRiskScore | undefined
+): riskData is UserRiskScore {
+  return !!riskData && (riskData as UserRiskScore).user !== undefined;
 }
 
 const getEntityData = (riskData: UserRiskScore | HostRiskScore | undefined) => {
@@ -69,13 +71,16 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   const { euiTheme } = useEuiTheme();
 
   const lensAttributes = useMemo(() => {
+    const entityName = entityData?.name ?? '';
+    const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
+
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
-      query: `user.name: ${entityData?.name}`,
+      query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
-      riskEntity: RiskScoreEntity.user,
+      riskEntity: isUserRiskData(riskData) ? RiskScoreEntity.user : RiskScoreEntity.host,
     });
-  }, [entityData]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
     () => [

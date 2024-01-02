@@ -5,20 +5,38 @@
  * 2.0.
  */
 
-import { mockRiskScoreState } from '../../../flyout/entity_details/mocks';
+import {
+  mockHostRiskScoreState,
+  mockUserRiskScoreState,
+} from '../../../flyout/entity_details/mocks';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { RiskSummary } from './risk_summary';
+import type {
+  LensAttributes,
+  VisualizationEmbeddableProps,
+} from '../../../common/components/visualization_actions/types';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+const mockVisualizationEmbeddable = jest
+  .fn()
+  .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
+
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
+  VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
+    mockVisualizationEmbeddable(props),
+}));
 
 describe('RiskSummary', () => {
+  beforeEach(() => {
+    mockVisualizationEmbeddable.mockClear();
+  });
+
   it('renders risk summary table', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskSummary
-          riskScoreData={mockRiskScoreState}
+          riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
         />
@@ -34,7 +52,7 @@ describe('RiskSummary', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskSummary
-          riskScoreData={{ ...mockRiskScoreState, data: undefined }}
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
         />
@@ -47,7 +65,7 @@ describe('RiskSummary', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskSummary
-          riskScoreData={mockRiskScoreState}
+          riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
         />
@@ -61,7 +79,7 @@ describe('RiskSummary', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskSummary
-          riskScoreData={mockRiskScoreState}
+          riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
         />
@@ -69,5 +87,53 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-updatedAt')).toHaveTextContent('Updated Nov 8, 1989');
+  });
+
+  it('builds lens attributes for host risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensAttributes: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
+    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const firstColumn = Object.values(datasourceLayers[0].columns)[0];
+
+    expect(lensAttributes.state.query.query).toEqual('host.name: test');
+    expect(firstColumn).toEqual(
+      expect.objectContaining({
+        sourceField: 'host.risk.calculated_score_norm',
+      })
+    );
+  });
+
+  it('builds lens attributes for user risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockUserRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensAttributes: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
+    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const firstColumn = Object.values(datasourceLayers[0].columns)[0];
+
+    expect(lensAttributes.state.query.query).toEqual('user.name: test');
+    expect(firstColumn).toEqual(
+      expect.objectContaining({
+        sourceField: 'user.risk.calculated_score_norm',
+      })
+    );
   });
 });
