@@ -48,9 +48,9 @@ export interface SearchResponse<T = unknown> {
 }
 
 export class ContentCrud<T = unknown> {
-  private storage: ContentStorage<T>;
-  private eventBus: EventBus;
-  public contentTypeId: string;
+  private readonly storage: ContentStorage<T>;
+  private readonly eventBus: EventBus;
+  public readonly contentTypeId: string;
 
   constructor(
     contentTypeId: string,

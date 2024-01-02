@@ -15,7 +15,7 @@ import type { ContentCrud } from './crud';
 export class ContentRegistry {
   private types = new Map<string, ContentType>();
 
-  constructor(private eventBus: EventBus) {}
+  constructor(private readonly eventBus: EventBus) {}
 
   /**
    * Register a new content in the registry.
