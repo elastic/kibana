@@ -22,6 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/171380
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
@@ -60,7 +61,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const bundledInstallResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        '99.0.0'
+        '99.0.0',
+        retry
       );
 
       // As opposed to "registry"

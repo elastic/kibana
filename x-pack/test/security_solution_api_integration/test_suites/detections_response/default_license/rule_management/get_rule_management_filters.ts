@@ -22,7 +22,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const retry = getService('retry');
 
   describe('@ess @serverless get_rule_management_filters', () => {
     beforeEach(async () => {

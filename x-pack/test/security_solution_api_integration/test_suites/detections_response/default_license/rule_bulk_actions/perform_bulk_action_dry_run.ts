@@ -29,7 +29,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const retry = getService('retry');
 
   const postDryRunBulkAction = () =>
     supertest

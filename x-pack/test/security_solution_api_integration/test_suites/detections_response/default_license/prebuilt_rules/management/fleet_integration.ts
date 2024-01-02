@@ -48,6 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         overrideExistingPackage: true,
+        retryService: retry,
       });
 
       // Verify that status is updated after package installation

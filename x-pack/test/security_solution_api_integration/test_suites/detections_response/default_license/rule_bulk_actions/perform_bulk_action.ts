@@ -43,7 +43,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   // TODO: add a new service
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');

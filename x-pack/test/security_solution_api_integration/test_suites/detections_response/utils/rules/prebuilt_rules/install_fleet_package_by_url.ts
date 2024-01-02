@@ -9,6 +9,8 @@ import type SuperTest from 'supertest';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import { retry } from '../..';
 
 /**
  * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
@@ -21,15 +23,26 @@ import { epmRouteService } from '@kbn/fleet-plugin/common';
 
 export const installPrebuiltRulesPackageViaFleetAPI = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await supertest
-    .post(`/api/fleet/epm/packages/security_detection_engine`)
-    .set('kbn-xsrf', 'xxxx')
-    .set('elastic-api-version', '2023-10-31')
-    .type('application/json')
-    .send({ force: true })
-    .expect(200);
+  const fleetResponse = await retry<InstallPackageResponse>({
+    test: async () => {
+      const testResponse = await supertest
+        .post(`/api/fleet/epm/packages/security_detection_engine`)
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31')
+        .type('application/json')
+        .send({ force: true })
+        .expect(200);
+      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+
+      return testResponse.body;
+    },
+    retryService,
+    retries: 2,
+  });
 
   // Before we proceed, we need to refresh saved object indices.
   // At the previous step we installed the Fleet package with prebuilt detection rules.
@@ -47,11 +60,11 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   // fix it deterministically we have to refresh saved object indices and wait until it's done.
   await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
-  return fleetResponse.body as InstallPackageResponse;
+  return fleetResponse as InstallPackageResponse;
 };
 /**
  * Installs prebuilt rules package `security_detection_engine`, passing in the version
- * of the package as a parameter to the utl.
+ * of the package as a parameter to the url.
  *
  * @param es Elasticsearch client
  * @param supertest SuperTest instance
@@ -62,17 +75,28 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 export const installPrebuiltRulesPackageByVersion = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  version: string
+  version: string,
+  retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await supertest
-    .post(epmRouteService.getInstallPath('security_detection_engine', version))
-    .set('kbn-xsrf', 'xxxx')
-    .set('elastic-api-version', '2023-10-31')
-    .type('application/json')
-    .send({ force: true })
-    .expect(200);
+  const fleetResponse = await retry<InstallPackageResponse>({
+    test: async () => {
+      const testResponse = await supertest
+        .post(epmRouteService.getInstallPath('security_detection_engine', version))
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31')
+        .type('application/json')
+        .send({ force: true })
+        .expect(200);
+      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+
+      return testResponse.body;
+    },
+    retryService,
+    retries: 2,
+  });
 
   await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
-  return fleetResponse.body as InstallPackageResponse;
+  return fleetResponse as InstallPackageResponse;
 };

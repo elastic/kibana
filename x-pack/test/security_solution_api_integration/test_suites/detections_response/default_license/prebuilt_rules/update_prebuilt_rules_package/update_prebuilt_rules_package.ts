@@ -29,6 +29,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   let currentVersion: string;
   let previousVersion: string;
@@ -105,7 +106,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const installPreviousPackageResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        previousVersion
+        previousVersion,
+        retry
       );
 
       expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
@@ -157,7 +159,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const installLatestPackageResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        currentVersion
+        currentVersion,
+        retry
       );
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 

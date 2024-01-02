@@ -77,7 +77,7 @@ export const installPrebuiltRulesFleetPackage = async ({
         // First and only item in the response should be the security_detection_engine package
         expect(body.items[0]).toBeDefined();
         expect((body.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
-        // Should have installed at least 1 security-rule asset
+        // Endpoint call should have installed at least 1 security-rule asset
         expect((body.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
 
         return body;
