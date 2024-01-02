@@ -35,6 +35,14 @@ export interface UseLensAttributesProps {
   title?: string;
 }
 
+export enum VisualizationContextMenuActions {
+  addToExistingCase = 'addToExistingCase',
+  addToNewCase = 'addToNewCase',
+  inspect = 'inspect',
+  openInLens = 'openInLens',
+  saveToLibrary = 'saveToLibrary',
+}
+
 export interface VisualizationActionsProps {
   applyGlobalQueriesAndFilters?: boolean;
   className?: string;
@@ -63,7 +71,7 @@ export interface EmbeddableData {
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
-export enum VisualizationContextMenuActions {
+export enum VisualizationContextMenuDefaultActionName {
   addToExistingCase = 'addToExistingCase',
   addToNewCase = 'addToNewCase',
   inspect = 'inspect',
