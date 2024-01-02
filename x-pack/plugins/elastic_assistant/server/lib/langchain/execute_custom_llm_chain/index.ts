@@ -148,7 +148,7 @@ export const callAgentExecutor = async ({
               typeof addOp.value === 'string' &&
               addOp.value.length
             ) {
-              console.log('helloworld value', addOp.value);
+              console.log('SERVER CHUNK', addOp.value);
               controller.enqueue(textEncoder.encode(addOp.value));
             }
           }
