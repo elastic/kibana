@@ -60,7 +60,7 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ co
       <EuiFlexItem>
         <EuiText color="subdued">
           <FormattedMessage
-            id="searchConnectors.configurationConnector.config.documentation.description"
+            id="xpack.serverlessSearch.searchConnectors.configurationConnector.config.documentation.description"
             defaultMessage="This connector supports several authentication methods. Ask your administrator for the correct connection credentials. {documentationUrl}"
             values={{
               documentationUrl: (
@@ -70,7 +70,7 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ co
                   href={docLinks.connectorClientAvailableConnectors}
                 >
                   {i18n.translate(
-                    'searchConnectors.configurationConnector.config.documentation.link',
+                    'xpack.serverlessSearch.searchConnectors.configurationConnector.config.documentation.link',
                     {
                       defaultMessage: 'Documentation',
                     }
