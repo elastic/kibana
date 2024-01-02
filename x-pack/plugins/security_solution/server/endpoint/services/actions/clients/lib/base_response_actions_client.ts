@@ -260,9 +260,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     ) {
       return {
         isValid: false,
-        error: new ResponseActionsClientError(
-          `Response action [${actionRequest.command}] is not supported for [${this.agentType}]`
-        ),
+        error: new ResponseActionsNotSupportedError(actionRequest.command),
       };
     }
 
