@@ -10,13 +10,23 @@ import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts
 import { OTHER_CATEGORY } from '../constants';
 
 describe('getEntitiesAndGenerateAlerts', () => {
-  const testAlertActionArr: unknown[] = [];
+  const alerts: unknown[] = [];
   const mockAlertsClient = {
-    report: jest.fn(),
+    report: ({ id, context }) => {
+      alerts.push({
+        context: {
+          containingBoundaryId: context.containingBoundaryId,
+          entityDocumentId: context.entityDocumentId,
+          entityId: context.entityId,
+          entityLocation: context.entityLocation,
+        },
+        instanceId: id,
+      });
+    },
   } as any;
   beforeEach(() => {
     jest.clearAllMocks();
-    testAlertActionArr.length = 0;
+    alerts.length = 0;
   });
 
   const currLocationMap = new Map([
@@ -60,7 +70,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
 
   const expectedAlertResults = [
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '123',
         entityDocumentId: 'docId1',
@@ -70,7 +79,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'a-123',
     },
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '456',
         entityDocumentId: 'docId2',
@@ -80,7 +88,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'b-456',
     },
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '789',
         entityDocumentId: 'docId3',
@@ -104,7 +111,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlertResults);
   });
 
   test('should overwrite older identical entity entries', () => {
@@ -130,7 +137,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlertResults);
   });
 
   test('should preserve older non-identical entity entries', () => {
@@ -148,19 +155,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
         ],
       ],
     ]);
-    const expectedAlertResultsPlusD = [
-      {
-        actionGroupId: 'Tracked entity contained',
-        context: {
-          containingBoundaryId: '999',
-          entityDocumentId: 'docId7',
-          entityId: 'd',
-          entityLocation: 'POINT (0 0)',
-        },
-        instanceId: 'd-999',
-      },
-      ...expectedAlertResults,
-    ];
 
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithNonIdenticalEntityEntry,
@@ -171,7 +165,18 @@ describe('getEntitiesAndGenerateAlerts', () => {
     );
     expect(activeEntities).not.toEqual(currLocationMap);
     expect(activeEntities.has('d')).toBeTruthy();
-    expect(testAlertActionArr).toMatchObject(expectedAlertResultsPlusD);
+    expect(alerts).toMatchObject([
+      {
+        context: {
+          containingBoundaryId: '999',
+          entityDocumentId: 'docId7',
+          entityId: 'd',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'd-999',
+      },
+      ...expectedAlertResults,
+    ]);
   });
 
   test('should remove "other" entries and schedule the expected number of actions', () => {
@@ -210,7 +215,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
         ],
       ])
     );
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlertResults);
   });
 
   test('should generate multiple alerts per entity if found in multiple shapes in interval', () => {
@@ -249,7 +254,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     currLocationMapWithThreeMore.forEach((v) => {
       numEntitiesInShapes += v.length;
     });
-    expect(testAlertActionArr.length).toEqual(numEntitiesInShapes);
+    expect(alerts.length).toEqual(numEntitiesInShapes);
   });
 
   test('should not return entity as active entry if most recent location is "other"', () => {
