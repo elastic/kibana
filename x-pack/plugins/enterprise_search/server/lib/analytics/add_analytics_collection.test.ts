@@ -27,6 +27,7 @@ describe('add analytics collection lib function', () => {
 
   const mockDataViewsService = {
     createAndSave: jest.fn(),
+    toDataView: jest.fn(),
   };
 
   beforeEach(() => {

@@ -26,7 +26,7 @@ describe('DatatableUtilitiesService', () => {
       types: { get: jest.fn() },
     } as unknown as typeof aggs;
     dataViews = {
-      get: jest.fn(),
+      getLegacy: jest.fn(),
     } as unknown as typeof dataViews;
 
     datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews, fieldFormatsMock);
@@ -58,14 +58,14 @@ describe('DatatableUtilitiesService', () => {
       dataViews.get.mockReturnValue(dataView);
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBe(dataView);
-      expect(dataViews.get).toHaveBeenCalledWith('index');
+      expect(dataViews.getLegacy).toHaveBeenCalledWith('index');
     });
 
     it('should return undefined when there is no index metadata', async () => {
       const column = { meta: {} } as DatatableColumn;
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBeUndefined();
-      expect(dataViews.get).not.toHaveBeenCalled();
+      expect(dataViews.getLegacy).not.toHaveBeenCalled();
     });
   });
 

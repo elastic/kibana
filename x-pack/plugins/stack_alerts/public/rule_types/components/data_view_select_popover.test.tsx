@@ -67,7 +67,7 @@ const dataViewOptions = [
 const mount = () => {
   const dataViewsMock = dataViewPluginMocks.createStartContract();
   dataViewsMock.getIds = jest.fn().mockImplementation(() => Promise.resolve(dataViewIds));
-  dataViewsMock.get = jest
+  dataViewsMock.getLegacy = jest
     .fn()
     .mockImplementation((id: string) =>
       Promise.resolve(dataViewOptions.find((current) => current.id === id))

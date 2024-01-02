@@ -37,7 +37,7 @@ describe('metricsVisDefinition', () => {
           if (id === '2') return indexPattern2;
           throw new Error();
         },
-      } as DataViewsPublicPluginStart);
+      } as unknown as DataViewsPublicPluginStart);
       defaultParams = (
         await metricsVisDefinition.setup!({
           params: cloneDeep(metricsVisDefinition.visConfig.defaults),

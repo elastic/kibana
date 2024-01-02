@@ -19,7 +19,7 @@ describe('External Links', () => {
 
   describe('getDeprecationDataView', () => {
     it('creates new data view if doesnt exist', async () => {
-      dataService.dataViews.find = jest.fn().mockResolvedValue([]);
+      dataService.dataViews.findLegacy = jest.fn().mockResolvedValue([]);
       dataService.dataViews.createAndSave = jest.fn().mockResolvedValue({ id: '123-456' });
 
       const dataViewId = (await getDeprecationDataView(dataService)).id;
@@ -33,7 +33,7 @@ describe('External Links', () => {
     });
 
     it('uses existing data view if it already exists', async () => {
-      dataService.dataViews.find = jest.fn().mockResolvedValue([
+      dataService.dataViews.findLegacy = jest.fn().mockResolvedValue([
         {
           id: '123-456',
           title: DEPRECATION_LOGS_INDEX_PATTERN,
@@ -43,7 +43,7 @@ describe('External Links', () => {
       const dataViewId = await (await getDeprecationDataView(dataService)).id;
 
       expect(dataViewId).toBe('123-456');
-      expect(dataService.dataViews.find).toHaveBeenCalledWith(DEPRECATION_LOGS_INDEX_PATTERN);
+      expect(dataService.dataViews.findLegacy).toHaveBeenCalledWith(DEPRECATION_LOGS_INDEX_PATTERN);
     });
   });
 });

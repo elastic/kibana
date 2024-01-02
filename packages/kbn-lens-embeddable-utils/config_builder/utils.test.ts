@@ -194,7 +194,7 @@ describe('buildDatasourceStates', () => {
       () => undefined,
       () => [],
       {
-        get: async () => ({ id: 'test' }),
+        getLegacy: async () => ({ id: 'test' }),
       } as any
     );
     expect(results).toMatchInlineSnapshot(`

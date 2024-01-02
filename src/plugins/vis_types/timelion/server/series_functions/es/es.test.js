@@ -26,12 +26,13 @@ describe('es', () => {
     return {
       context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
       getIndexPatternsService: () => ({
-        find: async () => [],
-        create: async () => ({
+        findLegacy: async () => [],
+        createLegacy: async () => ({
           getFieldByName: () => {
             return;
           },
-          getComputedFields: () => [],
+          getRuntimeFields: () => [],
+          getScriptedFields: () => [],
         }),
       }),
       request: {
