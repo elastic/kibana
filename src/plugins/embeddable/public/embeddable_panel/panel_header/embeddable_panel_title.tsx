@@ -13,6 +13,14 @@ import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { IEmbeddable, ViewMode } from '../../lib';
 import { CustomizePanelAction } from '../panel_actions';
 import { getEditTitleAriaLabel, placeholderTitle } from '../embeddable_panel_strings';
+import { EmbeddablePanelPopover } from './embeddable_panel_popover';
+
+const AI_SUPPORTED_INTEGRATIONS = ['[Metrics Oracle]', '[Metrics Kubernetes]'];
+
+const supportsAIPopover = (title?: string) => {
+  if (!title) return false;
+  return AI_SUPPORTED_INTEGRATIONS.some((integration) => title.includes(integration));
+};
 
 export const EmbeddablePanelTitle = ({
   viewMode,
@@ -28,6 +36,7 @@ export const EmbeddablePanelTitle = ({
   customizePanelAction?: CustomizePanelAction;
 }) => {
   const title = embeddable.getTitle();
+  const aiExplanationSupported = supportsAIPopover(title);
 
   const titleComponent = useMemo(() => {
     if (hideTitle) return null;
@@ -56,7 +65,13 @@ export const EmbeddablePanelTitle = ({
   }, [customizePanelAction, embeddable, title, viewMode, hideTitle]);
 
   const titleComponentWithDescription = useMemo(() => {
-    if (!description) return <span className="embPanel__titleInner">{titleComponent}</span>;
+    if (!description)
+      return (
+        <>
+          <span className="embPanel__titleInner">{titleComponent}</span>
+          {aiExplanationSupported ? <EmbeddablePanelPopover title={title} /> : null}
+        </>
+      );
     return (
       <EuiToolTip
         content={description}
@@ -74,7 +89,7 @@ export const EmbeddablePanelTitle = ({
         </span>
       </EuiToolTip>
     );
-  }, [description, titleComponent]);
+  }, [aiExplanationSupported, description, title, titleComponent]);
 
   return titleComponentWithDescription;
 };
