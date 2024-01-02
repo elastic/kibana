@@ -35,7 +35,7 @@ interface Props {
 }
 
 export const getDeprecationDataView = async (dataService: DataPublicPluginStart) => {
-  const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
+  const results = await dataService.dataViews.findLegacy(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
   const deprecationDataView = results.find(
@@ -59,7 +59,7 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
       allowNoIndex: true,
     }, override, skipFetchFields);
 
-    return newDataView;
+    return await dataService.dataViews.toDataView(newDataView);
   }
 };
 

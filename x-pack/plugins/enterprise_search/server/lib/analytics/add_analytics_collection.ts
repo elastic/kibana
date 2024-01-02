@@ -31,7 +31,7 @@ const createDataView = async (
   dataViewsService: DataViewsService,
   analyticsCollection: AnalyticsCollection
 ): Promise<DataView> => {
-  return dataViewsService.createAndSave(
+  const dataViewLazy = await dataViewsService.createAndSave(
     {
       allowNoIndex: true,
       name: `behavioral_analytics.events-${analyticsCollection.name}`,
@@ -40,6 +40,8 @@ const createDataView = async (
     },
     true
   );
+
+  return dataViewsService.toDataView(dataViewLazy);
 };
 
 export const addAnalyticsCollection = async (

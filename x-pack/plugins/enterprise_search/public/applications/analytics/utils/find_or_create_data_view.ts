@@ -10,14 +10,14 @@ import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 
 export const findOrCreateDataView = async (collection: AnalyticsCollection) => {
   const dataView = (
-    await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
+    await KibanaLogic.values.data.dataViews.findLegacy(collection.events_datastream, 1)
   ).find((result) => result.title === collection.events_datastream);
 
   if (dataView) {
     return dataView;
   }
 
-  return await KibanaLogic.values.data.dataViews.createAndSave(
+  const dataViewLazy = await KibanaLogic.values.data.dataViews.createAndSave(
     {
       allowNoIndex: true,
       name: `behavioral_analytics.events-${collection.name}`,
@@ -26,4 +26,6 @@ export const findOrCreateDataView = async (collection: AnalyticsCollection) => {
     },
     true
   );
+
+  return await KibanaLogic.values.data.dataViews.toDataView(dataViewLazy);
 };
