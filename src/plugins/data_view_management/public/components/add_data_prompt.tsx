@@ -26,7 +26,7 @@ export function DocumentationLink({ href }: DocumentationLinkProps) {
       <EuiTitle size="xxs">
         <dt className="eui-displayInline">
           <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.learnMore"
+            id="indexPatternManagement.noDataViewsPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </dt>
@@ -35,7 +35,7 @@ export function DocumentationLink({ href }: DocumentationLinkProps) {
       <dd className="eui-displayInline">
         <EuiLink href={href} target="_blank" external>
           <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.readDocumentation"
+            id="indexPatternManagement.noDataViewsPrompt.readDocumentation"
             defaultMessage="Read the docs"
           />
         </EuiLink>
@@ -59,7 +59,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   addDataHref,
   docLink: docLink,
 }) => {
-  const createDataViewText = i18n.translate('sharedUXPackages.addDataPrompt.addDataText', {
+  const createDataViewText = i18n.translate('indexPatternManagement.addDataPrompt.addDataText', {
     defaultMessage: 'Add data',
   });
 
@@ -77,7 +77,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   const title = (
     <h2>
       <FormattedMessage
-        id="sharedUXPackages.addDataPrompt.toCreateAddData"
+        id="indexPatternManagement.addDataPrompt.toCreateAddData"
         defaultMessage="To create a data view, add your data to Elasticsearch"
       />
     </h2>
@@ -86,7 +86,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   const body = (
     <p>
       <FormattedMessage
-        id="sharedUXPackages.addDataPrompt.dataViewExplanation"
+        id="indexPatternManagement.addDataPrompt.dataViewExplanation"
         defaultMessage="Data views identify the Elasticsearch data you want to explore.
           Once you add your data to Elasticsearch, you can point data views to one or
           more of the created indices, data streams, and index aliases. Add your data now
