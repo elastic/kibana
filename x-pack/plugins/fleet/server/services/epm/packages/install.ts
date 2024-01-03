@@ -16,25 +16,16 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
 import pRetry from 'p-retry';
-
 import { uniqBy } from 'lodash';
-
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { PackageDataStreamTypes } from '../../../../common/types';
-
+import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
-
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
-
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-
 import type {
   ArchivePackage,
   BulkInstallPackageInfo,
@@ -62,7 +53,6 @@ import {
   PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
-  PackageInvalidArchiveError,
   PackageNotFoundError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
@@ -72,29 +62,22 @@ import * as Registry from '../registry';
 import {
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
-  unpackBufferToCache,
   deleteVerificationResult,
-  getArchiveFilelist,
+  unpackBufferToAssetsMap,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
-
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
-
 import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
-
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
-
 import { auditLoggingService } from '../../audit_logging';
-
 import { getFilteredInstallPackages } from '../filtered_packages';
 
 import { formatVerificationResultForSO } from './package_verification';
-
 import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
-import { getPackageSavedObjects } from './get';
+import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
@@ -102,7 +85,6 @@ import { withPackageSpan } from './utils';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
 import { createAssets } from './custom_integrations';
-import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
@@ -417,12 +399,19 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
-      latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
-      Registry.getPackage(pkgName, pkgVersion, {
-        ignoreUnverified: force && !neverIgnoreVerificationError,
-      }),
-    ]);
+    const [latestPackage, { paths, packageInfo, assetsMap, verificationResult }] =
+      await Promise.all([
+        latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
+        Registry.getPackage(pkgName, pkgVersion, {
+          ignoreUnverified: force && !neverIgnoreVerificationError,
+        }),
+      ]);
+
+    const packageInstallContext: PackageInstallContext = {
+      packageInfo,
+      assetsMap,
+      paths,
+    };
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -453,7 +442,7 @@ async function installPackageFromRegistry({
       esClient,
       spaceId,
       force,
-      packageInfo,
+      packageInstallContext,
       paths,
       verificationResult,
       authorizationHeader,
@@ -489,7 +478,7 @@ async function installPackageCommon(options: {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
-  packageInfo: ArchivePackage;
+  packageInstallContext: PackageInstallContext;
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
@@ -497,6 +486,8 @@ async function installPackageCommon(options: {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
 }): Promise<InstallResult> {
+  const packageInfo = options.packageInstallContext.packageInfo;
+
   const {
     pkgName,
     pkgVersion,
@@ -507,12 +498,11 @@ async function installPackageCommon(options: {
     force,
     esClient,
     spaceId,
-    packageInfo,
-    paths,
     verificationResult,
     authorizationHeader,
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
+    packageInstallContext,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -578,13 +568,16 @@ async function installPackageCommon(options: {
       .getSavedObjects()
       .createImporter(savedObjectsClient, { importSizeLimit: 15_000 });
 
+    // Saved object client need to be scopped with the package space for saved object tagging
+    const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
     const savedObjectTagAssignmentService = appContextService
       .getSavedObjectsTagging()
-      .createInternalAssignmentService({ client: savedObjectsClient });
+      .createInternalAssignmentService({ client: savedObjectClientWithSpace });
 
     const savedObjectTagClient = appContextService
       .getSavedObjectsTagging()
-      .createTagClient({ client: savedObjectsClient });
+      .createTagClient({ client: savedObjectClientWithSpace });
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
@@ -596,8 +589,7 @@ async function installPackageCommon(options: {
       esClient,
       logger,
       installedPkg,
-      paths,
-      packageInfo,
+      packageInstallContext,
       installType,
       spaceId,
       verificationResult,
@@ -688,12 +680,6 @@ async function installPackageByUpload({
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
-    const paths = await unpackBufferToCache({
-      name: packageInfo.name,
-      version: pkgVersion,
-      archiveBuffer,
-      contentType,
-    });
 
     setPackageInfo({
       name: packageInfo.name,
@@ -701,7 +687,21 @@ async function installPackageByUpload({
       packageInfo,
     });
 
+    const { assetsMap, paths } = await unpackBufferToAssetsMap({
+      name: packageInfo.name,
+      version: pkgVersion,
+      archiveBuffer,
+      contentType,
+    });
+
+    const packageInstallContext: PackageInstallContext = {
+      packageInfo: { ...packageInfo, version: pkgVersion },
+      assetsMap,
+      paths,
+    };
+
     return await installPackageCommon({
+      packageInstallContext,
       pkgName,
       pkgVersion,
       installSource,
@@ -711,7 +711,6 @@ async function installPackageByUpload({
       esClient,
       spaceId,
       force: true, // upload has implicit force
-      packageInfo,
       paths,
       authorizationHeader,
       ignoreMappingUpdateErrors,
@@ -872,9 +871,20 @@ export async function installCustomPackage(
     datasets,
   });
 
-  const paths = cacheAssets(assets, pkgName, INITIAL_VERSION);
+  const assetsMap = assets.reduce((acc, asset) => {
+    acc.set(asset.path, asset.content);
+    return acc;
+  }, new Map<string, Buffer | undefined>());
+  const paths = [...Object.keys(assetsMap)];
+
+  const packageInstallContext: PackageInstallContext = {
+    assetsMap,
+    paths,
+    packageInfo,
+  };
 
   return await installPackageCommon({
+    packageInstallContext,
     pkgName,
     pkgVersion: INITIAL_VERSION,
     installSource: 'custom',
@@ -883,7 +893,6 @@ export async function installCustomPackage(
     esClient,
     spaceId,
     force,
-    packageInfo,
     paths,
     authorizationHeader,
   });
@@ -1216,8 +1225,7 @@ export async function ensurePackagesCompletedInstall(
 
 export async function installIndexTemplatesAndPipelines({
   installedPkg,
-  paths,
-  packageInfo,
+  packageInstallContext,
   esReferences,
   savedObjectsClient,
   esClient,
@@ -1225,8 +1233,7 @@ export async function installIndexTemplatesAndPipelines({
   onlyForDataStreams,
 }: {
   installedPkg?: Installation;
-  paths: string[];
-  packageInfo: PackageInfo | InstallablePackage;
+  packageInstallContext: PackageInstallContext;
   esReferences: EsAssetReference[];
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -1244,10 +1251,12 @@ export async function installIndexTemplatesAndPipelines({
    */
   const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
 
-  const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths, onlyForDataStreams);
+  const preparedIngestPipelines = prepareToInstallPipelines(
+    packageInstallContext,
+    onlyForDataStreams
+  );
   const preparedIndexTemplates = prepareToInstallTemplates(
-    packageInfo,
-    paths,
+    packageInstallContext,
     esReferences,
     experimentalDataStreamFeatures,
     onlyForDataStreams
@@ -1265,13 +1274,13 @@ export async function installIndexTemplatesAndPipelines({
     // so we need to use optimistic concurrency control
     newEsReferences = await optimisticallyAddEsAssetReferences(
       savedObjectsClient,
-      packageInfo.name,
+      packageInstallContext.packageInfo.name,
       [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
     );
   } else {
     newEsReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      packageInfo.name,
+      packageInstallContext.packageInfo.name,
       esReferences,
       {
         assetsToRemove: preparedIndexTemplates.assetsToRemove,
@@ -1311,9 +1320,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
   const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
 
   if (pkgInfo.type !== 'input') return;
-
-  const paths = await getArchiveFilelist(pkgInfo);
-  if (!paths) throw new PackageInvalidArchiveError(`No paths found for ${pkgInfo.name}`);
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
@@ -1370,20 +1376,39 @@ export async function installAssetsForInputPackagePolicy(opts: {
     }
   }
 
-  const installedPkg = await getInstallation({
+  const installedPkgWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient: soClient,
     pkgName: pkgInfo.name,
     logger,
   });
-  if (!installedPkg)
+  let packageInstallContext: PackageInstallContext | undefined;
+  if (!installedPkgWithAssets) {
     throw new PackageNotFoundError(
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
+  }
+  if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
+    const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
+      ignoreUnverified: force,
+    });
+
+    packageInstallContext = {
+      assetsMap: pkg.assetsMap,
+      packageInfo: pkg.packageInfo,
+      paths: pkg.paths,
+    };
+  } else {
+    packageInstallContext = {
+      assetsMap: installedPkgWithAssets.assetsMap,
+      packageInfo: installedPkgWithAssets.packageInfo,
+      paths: installedPkgWithAssets.paths,
+    };
+  }
+
   await installIndexTemplatesAndPipelines({
-    installedPkg,
-    paths,
-    packageInfo: pkgInfo,
-    esReferences: installedPkg.installed_es || [],
+    installedPkg: installedPkgWithAssets.installation,
+    packageInstallContext,
+    esReferences: installedPkgWithAssets.installation.installed_es || [],
     savedObjectsClient: soClient,
     esClient,
     logger,
