@@ -152,6 +152,8 @@ export class CspPlugin
           soClient: SavedObjectsClientContract
         ): Promise<UpdatePackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
+            const esClient = core.elasticsearch.client.asInternalUser;
+            await initializeCspIndices(esClient, this.config, this.logger);
             return cleanupCredentials(packagePolicy);
           }
 
