@@ -30,6 +30,7 @@ import { StepDefineForm } from './step_define_form';
 
 import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -81,6 +82,7 @@ describe('Transform: <DefinePivotForm />', () => {
     const services = {
       ...startMock,
       data: dataPluginMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       appName: 'the-test-app',
       storage: createMockStorage(),
     };

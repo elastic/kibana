@@ -348,7 +348,7 @@ export async function _installPackage({
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     logger.debug(`Package install - Updating install status`);
-    const updatedPackage = await withPackageSpan('Update install status', () =>
+    await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         version: pkgVersion,
         install_version: pkgVersion,
@@ -361,8 +361,13 @@ export async function _installPackage({
         ),
       })
     );
-    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
 
+    // Need to refetch the installation again to retrieve all the attributes
+    const updatedPackage = await savedObjectsClient.get<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName
+    );
+    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
     // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
     // associated package policies after installation
     if (updatedPackage.attributes.keep_policies_up_to_date) {
