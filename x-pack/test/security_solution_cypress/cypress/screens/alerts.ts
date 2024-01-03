@@ -228,3 +228,5 @@ export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
 export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+
+export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

@@ -141,14 +141,11 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Show Top N', () => {
     it('should show top for a property', () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
-          showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
-        });
+      cy.get(ALERT_TABLE_SEVERITY_VALUES);
+
+      scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
+      showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+      cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
     });
   });
 });
