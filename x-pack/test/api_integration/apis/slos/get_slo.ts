@@ -296,6 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('gets slos by query', async () => {
       const id = await createSLO();
+      const id2 = await createSLO({ name: 'test int' });
 
       await retry.tryForTime(300 * 1000, async () => {
         const response = await supertestAPI
@@ -307,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.results.length).eql(2);
 
         const searchResponse = await supertestAPI
-          .get(`/api/observability/slos?kqlQuery=slo.name%3A+api*`)
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Aapi*`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -315,7 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(searchResponse.body.results.length).eql(1);
 
         const searchResponse2 = await supertestAPI
-          .get(`/api/observability/slos?kqlQuery=slo.name%3A+int`)
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Aint`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -323,12 +324,20 @@ export default function ({ getService }: FtrProviderContext) {
         expect(searchResponse2.body.results.length).eql(1);
 
         const searchResponse3 = await supertestAPI
-          .get(`/api/observability/slos?kqlQuery=slo.name%3A+int*`)
+          .get(`/api/observability/slos?kqlQuery=slo.name%3Aint*`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
         expect(searchResponse3.body.results.length).eql(2);
+
+        const searchResponse4 = await supertestAPI
+          .get(`/api/observability/slos?kqlQuery=int*`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(searchResponse4.body.results.length).eql(2);
 
         const instanceResponse = await supertestAPI
           .get(`/internal/observability/slos/${id}/_instances`)
