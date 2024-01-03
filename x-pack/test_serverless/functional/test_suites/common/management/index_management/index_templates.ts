@@ -19,6 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
 
   const TEST_TEMPLATE = 'a_test_template';
+  const INDEX_PATTERN = `index_pattern_${Math.random()}`;
 
   describe('Index Templates', function () {
     before(async () => {
@@ -55,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.putIndexTemplate({
           name: TEST_TEMPLATE,
           body: {
-            index_patterns: ['test*'],
+            index_patterns: [INDEX_PATTERN],
           },
         });
       });
@@ -95,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createTemplateButton');
 
         await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', 'test*');
+        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
 
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5');
