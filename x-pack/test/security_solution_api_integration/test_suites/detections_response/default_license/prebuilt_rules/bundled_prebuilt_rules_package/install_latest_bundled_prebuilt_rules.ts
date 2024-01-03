@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe.skip('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should list `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {

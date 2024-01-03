@@ -16,10 +16,11 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const log = getService('log');
 
   describe('@ess @serverless @skipInQA get_prebuilt_timelines_status', () => {
     beforeEach(async () => {
-      await deleteAllTimelines(es);
+      await deleteAllTimelines(es, log);
     });
 
     it('should return the number of timeline templates available to install', async () => {

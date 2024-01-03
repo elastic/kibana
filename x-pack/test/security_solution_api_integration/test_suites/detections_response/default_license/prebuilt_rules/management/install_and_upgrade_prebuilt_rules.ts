@@ -30,8 +30,8 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA install and upgrade prebuilt rules with mock rule assets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllTimelines(es);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllTimelines(es, log);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     describe(`rule package without historical versions`, () => {
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
@@ -315,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
@@ -423,7 +423,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [

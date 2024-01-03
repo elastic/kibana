@@ -21,12 +21,12 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA install_large_prebuilt_rules_package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     afterEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should install a package containing 15000 prebuilt rules without crashing', async () => {

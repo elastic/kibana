@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA prerelease_packages', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
       await deletePrebuiltRulesFleetPackage(supertest);
     });
 
