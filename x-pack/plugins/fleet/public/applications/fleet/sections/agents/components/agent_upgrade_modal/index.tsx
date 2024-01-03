@@ -339,7 +339,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
       confirmButtonDisabled={
         isSubmitting ||
-        noVersions ||
         (isUpdating && updatingAgents === 0) ||
         (isSingleAgent &&
           !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value))
@@ -371,12 +370,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
     >
       <p>
-        {noVersions ? (
-          <FormattedMessage
-            id="xpack.fleet.upgradeAgents.noVersionsText"
-            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
-          />
-        ) : isSingleAgent ? (
+        {isSingleAgent ? (
           !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value) ? (
             <EuiCallOut
               data-test-subj="agentUpgradeModal.notUpgradeableCallout"
@@ -448,7 +442,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
-          isDisabled={noVersions}
           isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {

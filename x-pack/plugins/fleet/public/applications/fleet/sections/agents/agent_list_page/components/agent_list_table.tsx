@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import semverEq from 'semver/functions/eq';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
@@ -306,6 +307,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                   agentUpgradedAt={agent.upgraded_at}
                   agentUpgradeDetails={agent.upgrade_details}
                   notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
+                  isAgentOnLatestVersion={
+                    !!latestAgentVersion &&
+                    semverEq(agent.local_metadata?.elastic?.agent?.version, latestAgentVersion)
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

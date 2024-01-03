@@ -55,7 +55,7 @@ export function isAgentUpgradeable(
   if (versionToUpgrade !== undefined) {
     return isNotDowngrade(agentVersion, versionToUpgrade);
   }
-  return isAgentVersionLessThanLatest(agentVersion, latestAgentVersion);
+  return true;
 }
 
 // Based on the previous, returns a detailed message explaining why the agent is not upgradeable
@@ -105,22 +105,10 @@ export const getNotUpgradeableMessage = (
   const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
   if (!latestAgentVersionNumber) return LATEST_VERSION_NOT_VALID_ERROR;
 
-  if (semverEq(agentVersionNumber, latestAgentVersionNumber)) return AGENT_ALREADY_ON_LATEST_ERROR;
-
   if (semverGt(agentVersionNumber, latestAgentVersionNumber)) return AGENT_ON_GREATER_VERSION_ERROR;
 
   // in all the other cases, the agent is upgradeable; don't return any message.
   return undefined;
-};
-
-const isAgentVersionLessThanLatest = (agentVersion: string, latestAgentVersion: string) => {
-  // make sure versions are only the number before comparison
-  const agentVersionNumber = semverCoerce(agentVersion);
-  if (!agentVersionNumber) throw new Error(`${INVALID_VERSION_ERROR}`);
-  const latestAgentVersionNumber = semverCoerce(latestAgentVersion);
-  if (!latestAgentVersionNumber) throw new Error(`${LATEST_VERSION_NOT_VALID_ERROR}`);
-
-  return semverLt(agentVersionNumber, latestAgentVersionNumber);
 };
 
 const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {

@@ -271,12 +271,14 @@ export const AgentUpgradeStatus: React.FC<{
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
   notUpgradeableMessage?: string | null;
+  isAgentOnLatestVersion: boolean;
 }> = ({
   isAgentUpgradable,
   agentUpgradeStartedAt,
   agentUpgradedAt,
   agentUpgradeDetails,
   notUpgradeableMessage,
+  isAgentOnLatestVersion,
 }) => {
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
@@ -285,7 +287,7 @@ export const AgentUpgradeStatus: React.FC<{
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
   const minVersion = '8.12';
 
-  if (isAgentUpgradable) {
+  if (isAgentUpgradable && !isAgentOnLatestVersion) {
     return (
       <EuiBadge color="hollow" iconType="sortUp">
         <FormattedMessage
