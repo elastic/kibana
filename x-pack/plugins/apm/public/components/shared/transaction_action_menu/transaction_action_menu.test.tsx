@@ -23,7 +23,6 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
-import * as apmApi from '../../../services/rest/create_call_apm_api';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
@@ -61,14 +60,22 @@ history.replace(
 );
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
-  const mockSpaces = {
-    getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+  const mockServices = {
+    dataViews: {
+      get: async () => {},
+      create: jest.fn(),
+    },
+    spaces: {
+      getActiveSpace: jest
+        .fn()
+        .mockImplementation(() => ({ id: 'mockSpaceId' })),
+    },
   };
 
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={apmContextMock} history={history}>
-        <KibanaContextProvider services={{ spaces: mockSpaces }}>
+        <KibanaContextProvider services={mockServices}>
           {children}
         </KibanaContextProvider>
       </MockApmPluginContextWrapper>
@@ -99,24 +106,26 @@ const expectInfraLocatorsToBeCalled = () => {
   expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
 };
 
-describe('TransactionActionMenu component', () => {
-  beforeAll(() => {
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-      // return as Profiling had been initialized
-      data: { initialized: true },
-      status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
-    });
+describe('TransactionActionMenu ', () => {
+  jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    // return as Profiling had been initialized
+    data: {
+      initialized: true,
+      apmDataViewIndexPattern:
+        'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*',
+    },
+    status: hooks.FETCH_STATUS.SUCCESS,
+    refetch: jest.fn(),
   });
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('should always render the discover link', async () => {
-    const { queryByText } = await renderTransaction(
+  it('should render the discover link when there is adhoc data view', async () => {
+    const { findByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View transaction in Discover')).not.toBeNull();
+    expect(findByText('View transaction in Discover')).not.toBeNull();
   });
 
   it('should call infra locators getRedirectUrl function', async () => {
@@ -299,10 +308,6 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('Custom links', () => {
-    beforeAll(() => {
-      // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
-      jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
-    });
     afterAll(() => {
       jest.resetAllMocks();
     });
