@@ -17,7 +17,6 @@ import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './con
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { AlertStatus } from '../../../common/typings';
-import { useKibana } from '../../utils/kibana_react';
 
 const getAlertStatusQuery = (status: string): Query[] => {
   return ALERT_STATUS_QUERY[status]
@@ -39,11 +38,10 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
-  services: { AlertsSearchBar, timeFilterService, useToasts },
+  services: { AlertsSearchBar, timeFilterService, useToasts, uiSettings },
   status,
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
-  const { uiSettings } = useKibana().services;
 
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
