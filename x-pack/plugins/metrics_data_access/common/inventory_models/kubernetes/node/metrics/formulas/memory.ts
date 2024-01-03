@@ -6,17 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const nodeMemoryCapacity: FormulaValueConfig = {
+export const nodeMemoryCapacity: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
     defaultMessage: 'Capacity',
   }),
   value: 'max(kubernetes.node.memory.allocatable.bytes)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  format: 'bytes',
+  decimals: 1,
+};
+
+export const nodeMemoryUsed: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
+    defaultMessage: 'Used',
+  }),
+  value: 'average(kubernetes.node.memory.usage.bytes)',
+  format: 'bytes',
+  decimals: 1,
 };

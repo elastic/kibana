@@ -5,59 +5,73 @@
  * 2.0.
  */
 
-import {
-  type ChartModel,
-  type XYChartModel,
-  type MetricChartModel,
-  type XYLayerOptions,
-  type MetricLayerOptions,
-  type ChartTypes,
-  type XYVisualOptions,
-  XY_ID,
-} from '@kbn/lens-embeddable-utils';
+import { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigWithId } from '../../../types';
 import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
-type ChartByFormula<TType extends ChartTypes> = Record<
-  HostFormulaNames,
-  TType extends typeof XY_ID ? XYChartModel : MetricChartModel
->;
+type CustomLensConfig<T extends ChartType> = { id: string } & ChartTypeLensConfig<T>;
 
-type BaseArgs<TType extends ChartTypes> = Pick<ChartModel, 'dataView'> & {
-  formulaIds: HostFormulaNames[];
-  visualizationType: TType;
-  layerOptions?: TType extends typeof XY_ID ? XYLayerOptions : MetricLayerOptions;
-  visualOptions?: TType extends typeof XY_ID ? XYVisualOptions : never;
-};
+type Args<T extends ChartType> = T extends 'xy'
+  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'chartType'> & {
+      layerConfig?: Partial<ChartTypeLensConfig<'xy'>['layers'][number]>;
+    }
+  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'chartType'>;
 
-export const createBasicCharts = <TType extends ChartTypes>({
-  formulaIds,
-  visualizationType,
-  dataView,
-  layerOptions,
-  ...rest
-}: BaseArgs<TType>): ChartByFormula<TType> => {
-  return formulaIds.reduce((acc, curr) => {
-    const layers = {
-      data: visualizationType === XY_ID ? [formulas[curr]] : formulas[curr],
-      layerType: visualizationType === XY_ID ? 'data' : 'metricTrendline',
-      options: layerOptions,
-    };
-
-    const chartModel = {
+export const createBasicCharts = <T extends ChartType>({
+  chartType,
+  formFormulas,
+  chartConfig,
+}: {
+  chartType: T;
+  formFormulas: HostFormulaNames[];
+  chartConfig: Args<T>;
+}): Record<HostFormulaNames, CustomLensConfig<T>> => {
+  return formFormulas.reduce((acc, curr) => {
+    const baseConfig = {
+      ...chartConfig,
       id: curr,
-      title: formulas[curr].label,
-      dataView,
-      visualizationType,
-      layers: visualizationType === XY_ID ? [layers] : layers,
-      ...rest,
-    } as TType extends typeof XY_ID ? XYChartModel : MetricChartModel;
+      title: formulas[curr].label ?? chartConfig.title ?? '',
+    } as LensConfigWithId;
+
+    if (chartType === 'xy') {
+      const { layerConfig, legend, ...xyConfig } = baseConfig as Args<'xy'>;
+      return {
+        ...acc,
+        [curr]: {
+          ...xyConfig,
+          chartType,
+          legend: {
+            show: false,
+            position: 'bottom',
+            ...legend,
+          },
+          axisTitleVisibility: {
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          },
+          layers: [
+            {
+              seriesType: 'line',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas[curr]],
+              ...layerConfig,
+            },
+          ],
+        } as CustomLensConfig<'xy'>,
+      };
+    }
 
     return {
       ...acc,
-      [curr]: chartModel,
+      [curr]: {
+        ...baseConfig,
+        ...formulas[curr],
+        chartType,
+      },
     };
-  }, {} as ChartByFormula<TType>);
+  }, {} as Record<HostFormulaNames, CustomLensConfig<T>>);
 };
 
 // custom charts

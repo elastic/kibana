@@ -23,7 +23,7 @@ export const MetricsGrid = () => {
   });
 
   const charts = useMemo(
-    () => dashboards?.hostsView.get({ metricsDataView: dataView }).charts ?? [],
+    () => dashboards?.hostsView.get({ metricsDataViewId: dataView?.id }).charts ?? [],
     [dataView, dashboards]
   );
 

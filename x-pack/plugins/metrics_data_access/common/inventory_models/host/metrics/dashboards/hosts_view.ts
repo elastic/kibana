@@ -5,32 +5,14 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
-import { createBasicCharts } from '../charts';
+import { createBasicCharts, normalizedLoad1m } from '../charts';
 
 export const hostsView = {
-  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: XYChartModel['visualOptions'] = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
-
-    const layerOptions: XYLayerOptions = {
-      breakdown: {
-        type: 'top_values',
-        field: 'host.name',
-        params: {
-          size: 20,
-        },
-      },
-    };
-
+  get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
     const {
       memoryUsage,
       memoryFree,
-      diskUsage,
       diskSpaceAvailable,
       diskIORead,
       diskIOWrite,
@@ -39,13 +21,10 @@ export const hostsView = {
       rx,
       tx,
     } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: [
-        'cpuUsage',
+      chartType: 'xy',
+      formFormulas: [
         'memoryUsage',
-        'normalizedLoad1m',
         'memoryFree',
-        'diskUsage',
         'diskSpaceAvailable',
         'diskIORead',
         'diskIOWrite',
@@ -54,30 +33,56 @@ export const hostsView = {
         'rx',
         'tx',
       ],
-      dataView: metricsDataView,
-      layerOptions,
-      visualOptions: commonVisualOptions,
+      chartConfig: {
+        layerConfig: {
+          breakdown: {
+            field: 'host.name',
+            type: 'topValues',
+            size: 20,
+          },
+        },
+        fittingFunction: 'Linear',
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
+      },
     });
 
-    const { cpuUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['cpuUsage', 'normalizedLoad1m'],
-      layerOptions,
-      visualOptions: {
-        ...commonVisualOptions,
-        yLeftExtent: {
-          mode: 'dataBounds',
+    const { cpuUsage, diskUsage } = createBasicCharts({
+      chartType: 'xy',
+      formFormulas: ['cpuUsage', 'diskUsage'],
+      chartConfig: {
+        layerConfig: {
+          breakdown: {
+            field: 'host.name',
+            type: 'topValues',
+            size: 20,
+          },
+        },
+        yBounds: {
+          mode: 'custom',
           lowerBound: 0,
           upperBound: 1,
         },
+        fittingFunction: 'Linear',
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
       },
-      dataView: metricsDataView,
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        normalizedLoad1m,
+        normalizedLoad1m.get({ dataViewId: metricsDataViewId }),
         memoryUsage,
         memoryFree,
         diskUsage,

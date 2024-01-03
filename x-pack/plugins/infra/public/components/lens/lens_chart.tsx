@@ -21,6 +21,7 @@ export type LensChartProps = UseLensAttributesParams &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
     searchSessionId?: string;
+    description?: string;
   };
 
 export const LensChart = React.memo(

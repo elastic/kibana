@@ -8,10 +8,12 @@ import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { ChartModel } from '@kbn/lens-embeddable-utils';
+import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import useAsync from 'react-use/lib/useAsync';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
@@ -19,15 +21,28 @@ export const Kpi = ({
   height,
   assetName,
   dateRange,
-  dataView,
   ...chartProps
-}: ChartModel & {
+}: LensConfig & {
+  id: string;
   height: number;
   dataView?: DataView;
   assetName: string;
   dateRange: TimeRange;
 }) => {
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
   const { searchSessionId } = useLoadingStateContext();
+
+  const { value: dataView } = useAsync(async () => {
+    if (!chartProps.dataset) {
+      return undefined;
+    }
+    if ('index' in chartProps.dataset) {
+      return dataViews.get(chartProps.dataset.index, false);
+    }
+  }, [chartProps.dataset]);
+
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -50,7 +65,6 @@ export const Kpi = ({
     <LensChart
       {...chartProps}
       id={`infraAssetDetailsKPI${id}`}
-      dataView={dataView}
       dateRange={dateRange}
       height={height}
       filters={filters}
