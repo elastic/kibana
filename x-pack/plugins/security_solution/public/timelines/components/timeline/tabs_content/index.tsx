@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -283,6 +284,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -396,26 +398,28 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
-            onClick={setEsqlAsActiveTab}
-            isSelected={activeTab === TimelineTabs.esql}
-            disabled={false}
-            key={TimelineTabs.esql}
-          >
-            <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-            <StyledEuiBetaBadge
-              label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
-              size="s"
-              iconType="beaker"
-              tooltipContent={
-                <FormattedMessage
-                  id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                />
-              }
-            />
-          </StyledEuiTab>
+          {!isEsqlTabInTimelineDisabled && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
+              onClick={setEsqlAsActiveTab}
+              isSelected={activeTab === TimelineTabs.esql}
+              disabled={false}
+              key={TimelineTabs.esql}
+            >
+              <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
+              <StyledEuiBetaBadge
+                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
+                size="s"
+                iconType="beaker"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                  />
+                }
+              />
+            </StyledEuiTab>
+          )}
           {timelineType === TimelineType.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
