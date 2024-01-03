@@ -6,7 +6,14 @@
  */
 
 import { isEqual, merge } from 'lodash';
-import React, { createContext, useContext, useEffect, useMemo, type FC } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  type FC,
+  type PropsWithChildren,
+} from 'react';
 import { configureStore, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -358,7 +365,7 @@ const getFieldValues = (fields: FormFieldsState) => Object.values(fields).map((f
 const getSectionValues = (sections: FormSectionsState) =>
   Object.values(sections).map((s) => s.enabled);
 
-interface EditTransformFlyoutProviderProps {
+interface ProviderProps {
   config: TransformConfigUnion;
   dataViewId?: string;
 }
@@ -415,61 +422,70 @@ function getFormFieldErrorMessages(
     ? []
     : validators[validatorName](value, isOptional);
 }
+const initialize = (_: State, action: PayloadAction<ProviderProps>) =>
+  getDefaultState(action.payload.config);
+
+const setApiError = (state: State, action: PayloadAction<string | undefined>) => {
+  state.apiErrorMessage = action.payload;
+};
+
+const setFormField = (
+  state: State,
+  action: PayloadAction<{ field: FormFields; value: string }>
+) => {
+  const formField = state.formFields[action.payload.field];
+  const isOptional = isFormFieldOptional(state, action.payload.field);
+
+  formField.errorMessages = getFormFieldErrorMessages(
+    action.payload.value,
+    isOptional,
+    formField.validator
+  );
+
+  formField.value = action.payload.value;
+};
+
+const setFormSection = (
+  state: State,
+  action: PayloadAction<{ section: FormSections; enabled: boolean }>
+) => {
+  state.formSections[action.payload.section].enabled = action.payload.enabled;
+
+  // After a section change we re-evaluate all form fields, since optionality
+  // of a field could change if a section got toggled.
+  Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
+    const isOptional = isFormFieldOptional(state, formFieldName as FormFields);
+    formField.errorMessages = getFormFieldErrorMessages(
+      formField.value,
+      isOptional,
+      formField.validator
+    );
+  });
+};
 
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
   initialState: getDefaultState(),
   reducers: {
-    initialize: (_, action: PayloadAction<EditTransformFlyoutProviderProps>) =>
-      getDefaultState(action.payload.config),
-    setApiError: (state, action: PayloadAction<string | undefined>) => {
-      state.apiErrorMessage = action.payload;
-    },
-    // Updates a form field with its new value, runs validation and
-    // populates `errorMessages` if any errors occur.
-    setFormField: (state, action: PayloadAction<{ field: FormFields; value: string }>) => {
-      const formField = state.formFields[action.payload.field];
-      const isOptional = isFormFieldOptional(state, action.payload.field);
-
-      formField.errorMessages = getFormFieldErrorMessages(
-        action.payload.value,
-        isOptional,
-        formField.validator
-      );
-
-      formField.value = action.payload.value;
-    },
-    // Updates a form section.
-    setFormSection: (state, action: PayloadAction<{ section: FormSections; enabled: boolean }>) => {
-      state.formSections[action.payload.section].enabled = action.payload.enabled;
-
-      // After a section change we re-evaluate all form fields, since optionality
-      // of a field could change if a section got toggled.
-      Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
-        const isOptional = isFormFieldOptional(state, formFieldName as FormFields);
-
-        formField.errorMessages = getFormFieldErrorMessages(
-          formField.value,
-          isOptional,
-          formField.validator
-        );
-      });
-    },
+    initialize,
+    setApiError,
+    setFormField,
+    setFormSection,
   },
 });
 
-const EditTransformFlyoutContext = createContext<EditTransformFlyoutProviderProps | null>(null);
+const getReduxStore = () =>
+  configureStore({
+    reducer: editTransformFlyoutSlice.reducer,
+  });
 
-export const EditTransformFlyoutProvider: FC<
-  React.PropsWithChildren<EditTransformFlyoutProviderProps>
-> = ({ children, ...props }) => {
-  const store = useMemo(
-    () =>
-      configureStore({
-        reducer: editTransformFlyoutSlice.reducer,
-      }),
-    []
-  );
+const EditTransformFlyoutContext = createContext<ProviderProps | null>(null);
+
+export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> = ({
+  children,
+  ...props
+}) => {
+  const store = useMemo(getReduxStore, []);
 
   // Apply original transform config to redux form state.
   useEffect(() => {
