@@ -9,7 +9,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { FindingsBaseURLQuery } from '../../../common/types';
-import { Evaluation } from '../../../../common/types';
+import { Evaluation } from '../../../../common/types_old';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
 import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
 import { getFilters } from '../utils/get_filters';
@@ -28,7 +28,7 @@ export const useLatestFindingsTable = ({
   nonPersistedFilters?: Filter[];
   showDistributionBar?: boolean;
 }) => {
-  const cloudPostureTable = useCloudPostureDataTable({
+  const cloudPostureDataTable = useCloudPostureDataTable({
     dataView,
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
@@ -36,7 +36,7 @@ export const useLatestFindingsTable = ({
     nonPersistedFilters,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureTable;
+  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureDataTable;
 
   const {
     data,
@@ -72,7 +72,7 @@ export const useLatestFindingsTable = ({
   const canShowDistributionBar = showDistributionBar && total > 0;
 
   return {
-    cloudPostureTable,
+    cloudPostureDataTable,
     rows,
     error,
     isFetching,

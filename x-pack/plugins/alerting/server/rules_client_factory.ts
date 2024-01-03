@@ -28,6 +28,7 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -113,7 +114,7 @@ export class RulesClientFactory {
       maxScheduledPerMinute: this.maxScheduledPerMinute,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
       }),
       authorization: this.authorization.create(request),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),

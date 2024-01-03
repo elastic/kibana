@@ -17,7 +17,10 @@ const retryResponseStatuses = [
   410, // Gone
 ];
 
+const retryMessages = ['no_shard_available_action_exception'];
+
 const isRetryableError = (e: any, additionalResponseStatuses: number[] = []) =>
+  retryMessages.some((msg) => e.message.includes(msg)) ||
   e instanceof EsErrors.NoLivingConnectionsError ||
   e instanceof EsErrors.ConnectionError ||
   e instanceof EsErrors.TimeoutError ||

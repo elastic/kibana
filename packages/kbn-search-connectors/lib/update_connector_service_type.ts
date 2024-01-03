@@ -26,7 +26,10 @@ export const updateConnectorServiceType = async (
         ...connectorResult.value,
         configuration: {},
         service_type: serviceType,
-        status: ConnectorStatus.NEEDS_CONFIGURATION,
+        status:
+          connectorResult.value.status === ConnectorStatus.CREATED
+            ? ConnectorStatus.CREATED
+            : ConnectorStatus.NEEDS_CONFIGURATION,
       },
       id: connectorId,
       index: CONNECTORS_INDEX,

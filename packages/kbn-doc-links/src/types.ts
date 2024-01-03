@@ -351,7 +351,11 @@ export interface DocLinks {
     readonly createEsqlRuleType: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
+      readonly hostRiskScore: string;
+      readonly userRiskScore: string;
+      readonly entityRiskScoring: string;
     };
+    readonly detectionEngineOverview: string;
   };
   readonly query: {
     readonly eql: string;
@@ -387,6 +391,7 @@ export interface DocLinks {
     cronExpressions: string;
     executeWatchActionModes: string;
     indexExists: string;
+    inferTrainedModel: string;
     multiSearch: string;
     openIndex: string;
     putComponentTemplate: string;
@@ -470,6 +475,7 @@ export interface DocLinks {
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
+    definingRoles: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
@@ -531,6 +537,7 @@ export interface DocLinks {
     elasticAgentInputConfiguration: string;
     policySecrets: string;
     remoteESOoutput: string;
+    performancePresets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -616,6 +623,8 @@ export interface DocLinks {
     readonly integrations: string;
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
+    readonly integrationsConnectorClientRunFromSource: string;
+    readonly integrationsConnectorClientRunWithDocker: string;
     readonly integrationsLogstash: string;
   };
   readonly serverlessSecurity: {
@@ -628,3 +637,5 @@ export interface DocLinks {
     readonly settings: string;
   };
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

@@ -910,8 +910,8 @@
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
                 "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-server.SetupContract",
-                "text": "SetupContract"
+                "section": "def-server.UiActionsEnhancedServerSetup",
+                "text": "UiActionsEnhancedServerSetup"
               }
             ],
             "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",

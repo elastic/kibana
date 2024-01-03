@@ -36,6 +36,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
@@ -79,6 +80,8 @@ import {
   ALERT_RULE_THREAT,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -249,11 +252,15 @@ export const buildAlert = (
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
     [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
+    // asset criticality fields will be enriched before ingestion
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
   };
 };
 

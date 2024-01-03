@@ -15,7 +15,11 @@ import type {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import {
+  AlertsClientError,
+  IRuleTypeAlerts,
+  RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -166,7 +170,7 @@ export function registerAnomalyDetectionAlertType({
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
-      defaultMessage: 'Anomaly detection alert',
+      defaultMessage: 'Anomaly detection',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
@@ -249,7 +253,9 @@ export function registerAnomalyDetectionAlertType({
       );
 
       const { alertsClient } = services;
-      if (!alertsClient) return { state: {} };
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
       const executionResult = await execute(params, spaceId);
 
