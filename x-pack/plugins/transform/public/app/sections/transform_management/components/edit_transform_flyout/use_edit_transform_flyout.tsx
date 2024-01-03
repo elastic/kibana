@@ -6,8 +6,8 @@
  */
 
 import { isEqual, merge } from 'lodash';
-import React, { useEffect, useMemo, type FC } from 'react';
-import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import React, { createContext, useContext, useEffect, useMemo, type FC } from 'react';
+import { configureStore, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
@@ -131,11 +131,11 @@ type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSe
 export const initializeFormField = (
   formFieldName: EditTransformFormFields,
   configFieldName: string,
-  config: TransformConfigUnion,
+  config?: TransformConfigUnion,
   overloads?: Partial<FormField>
 ): FormField => {
   const defaultValue = overloads?.defaultValue !== undefined ? overloads.defaultValue : '';
-  const rawValue = getNestedProperty(config, configFieldName, undefined);
+  const rawValue = getNestedProperty(config ?? {}, configFieldName, undefined);
   const value = rawValue !== null && rawValue !== undefined ? rawValue.toString() : '';
 
   return {
@@ -156,11 +156,11 @@ export const initializeFormField = (
 export const initializeFormSection = (
   formSectionName: EditTransformFormSections,
   configFieldName: string,
-  config: TransformConfigUnion,
+  config?: TransformConfigUnion,
   overloads?: Partial<FormSection>
 ): FormSection => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
-  const rawEnabled = getNestedProperty(config, configFieldName, undefined);
+  const rawEnabled = getNestedProperty(config ?? {}, configFieldName, undefined);
   const enabled = rawEnabled !== undefined && rawEnabled !== null;
 
   return {
@@ -249,10 +249,22 @@ export const applyFormStateToTransformConfig = (
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
     {}
   );
+const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
+  createSelector(
+    (state: EditTransformFlyoutState) => state.formFields,
+    (state: EditTransformFlyoutState) => state.formSections,
+    (formFields, formSections) =>
+      applyFormStateToTransformConfig(originalConfig, formFields, formSections)
+  );
+export const useUpdatedTransformConfig = () => {
+  const { config } = useEditTransformFlyoutContext();
+  const selectTransformConfig = useMemo(() => createSelectTransformConfig(config), [config]);
+  return useSelector(selectTransformConfig);
+};
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
-export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyoutFormState => ({
+export const getDefaultState = (config?: TransformConfigUnion): EditTransformFlyoutFormState => ({
   formFields: {
     // top level attributes
     description: initializeFormField('description', 'description', config),
@@ -338,14 +350,17 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
   formSections: {
     retentionPolicy: initializeFormSection('retentionPolicy', 'retention_policy', config),
   },
-  isFormTouched: false,
-  isFormValid: true,
 });
 
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
 const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
   Object.values(fieldsState).every((d) => d.errorMessages.length === 0);
+const selectIsFormValid = createSelector(
+  (state: EditTransformFlyoutState) => state.formFields,
+  (formFields) => isFormValid(formFields)
+);
+export const useIsFormValid = () => useSelector(selectIsFormValid);
 
 const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
   Object.values(fields).map((f) => f.value);
@@ -361,24 +376,33 @@ interface EditTransformFlyoutFormState {
   apiErrorMessage?: string;
   formFields: EditTransformFlyoutFieldsState;
   formSections: EditTransformFlyoutSectionsState;
-  isFormTouched: boolean;
-  isFormValid: boolean;
 }
 
-const isFormTouched = (config: TransformConfigUnion, currentState: EditTransformFlyoutState) => {
+const isFormTouched = (
+  config: TransformConfigUnion,
+  formFields: EditTransformFlyoutFieldsState,
+  formSections: EditTransformFlyoutSectionsState
+) => {
   const defaultState = getDefaultState(config);
   return (
-    !isEqual(getFieldValues(defaultState.formFields), getFieldValues(currentState.formFields)) ||
-    !isEqual(
-      getSectionValues(defaultState.formSections),
-      getSectionValues(currentState.formSections)
-    )
+    !isEqual(getFieldValues(defaultState.formFields), getFieldValues(formFields)) ||
+    !isEqual(getSectionValues(defaultState.formSections), getSectionValues(formSections))
   );
+};
+const createSelectIsFormTouched = (originalConfig: TransformConfigUnion) =>
+  createSelector(
+    (state: EditTransformFlyoutState) => state.formFields,
+    (state: EditTransformFlyoutState) => state.formSections,
+    (formFields, formSections) => isFormTouched(originalConfig, formFields, formSections)
+  );
+export const useIsFormTouched = () => {
+  const { config } = useEditTransformFlyoutContext();
+  const selectIsFormTouched = useMemo(() => createSelectIsFormTouched(config), [config]);
+  return useSelector(selectIsFormTouched);
 };
 
 // The state we manage via redux combines the provider props and the form state.
-export type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
-  EditTransformFlyoutFormState;
+export type EditTransformFlyoutState = EditTransformFlyoutFormState;
 
 function isFormFieldOptional(state: EditTransformFlyoutState, field: EditTransformFormFields) {
   const formField = state.formFields[field];
@@ -406,16 +430,10 @@ function getFormFieldErrorMessages(
 
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
-  initialState: undefined as EditTransformFlyoutState | undefined,
+  initialState: getDefaultState(),
   reducers: {
-    initialize: (_, action: PayloadAction<EditTransformFlyoutProviderProps>) => {
-      const defaultState = getDefaultState(action.payload.config);
-      return {
-        ...defaultState,
-        config: action.payload.config,
-        dataViewId: action.payload.dataViewId,
-      };
-    },
+    initialize: (_, action: PayloadAction<EditTransformFlyoutProviderProps>) =>
+      getDefaultState(action.payload.config),
     setApiError: (state, action: PayloadAction<string | undefined>) => {
       if (!state) return;
       state.apiErrorMessage = action.payload;
@@ -438,9 +456,6 @@ const editTransformFlyoutSlice = createSlice({
       );
 
       formField.value = action.payload.value;
-
-      state.isFormTouched = isFormTouched(state.config, state);
-      state.isFormValid = isFormValid(state.formFields);
     },
     // Updates a form section.
     setFormSection: (
@@ -462,12 +477,11 @@ const editTransformFlyoutSlice = createSlice({
           formField.validator
         );
       });
-
-      state.isFormTouched = isFormTouched(state.config, state);
-      state.isFormValid = isFormValid(state.formFields);
     },
   },
 });
+
+const EditTransformFlyoutContext = createContext<EditTransformFlyoutProviderProps | null>(null);
 
 export const EditTransformFlyoutProvider: FC<
   React.PropsWithChildren<EditTransformFlyoutProviderProps>
@@ -480,21 +494,38 @@ export const EditTransformFlyoutProvider: FC<
     []
   );
 
-  // Initialize redux state. The store's `initialState` is `undefined` since
-  // we only get the transform config and data view id during runtime.
+  // Apply original transform config to redux form state.
   useEffect(() => {
     store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <EditTransformFlyoutContext.Provider value={props}>
+      <Provider store={store}>{children}</Provider>
+    </EditTransformFlyoutContext.Provider>
+  );
 };
 
-export function useEditTransformFlyoutActions() {
+export const useEditTransformFlyoutContext = () => {
+  const c = useContext(EditTransformFlyoutContext);
+  if (c === null) throw new Error('EditTransformFlyoutContext not set.');
+  return c;
+};
+
+export const useEditTransformFlyoutActions = () => {
   const dispatch = useDispatch();
   return bindActionCreators(editTransformFlyoutSlice.actions, dispatch);
-}
+};
 
-export function useEditTransformFlyoutSelector<T>(selector: (s: EditTransformFlyoutState) => T) {
-  return useSelector<EditTransformFlyoutState, T>(selector);
-}
+const createSelectFormField = (field: EditTransformFormFields) => (s: EditTransformFlyoutState) =>
+  s.formFields[field];
+export const useFormField = (field: EditTransformFormFields) => {
+  const selectFormField = useMemo(() => createSelectFormField(field), [field]);
+  return useSelector(selectFormField);
+};
+
+export const selectApiErrorMessage = (s: EditTransformFlyoutState) => s.apiErrorMessage;
+export const selectFormSections = (s: EditTransformFlyoutState) => s.formSections;
+export const selectRetentionPolicyField = (s: EditTransformFlyoutState) =>
+  s.formFields.retentionPolicyField;

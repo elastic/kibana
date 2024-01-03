@@ -6,35 +6,31 @@
  */
 
 import React, { type FC } from 'react';
+import { useSelector } from 'react-redux';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useEditTransformFlyoutSelector } from './use_edit_transform_flyout';
+import { selectApiErrorMessage } from './use_edit_transform_flyout';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const apiErrorMessage = useEditTransformFlyoutSelector((s) => s.apiErrorMessage);
+  const apiErrorMessage = useSelector(selectApiErrorMessage);
+
+  if (apiErrorMessage === undefined) return null;
 
   return (
     <>
-      {apiErrorMessage !== undefined && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.transform.transformList.editTransformGenericErrorMessage',
-              {
-                defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
-              }
-            )}
-            color="danger"
-            iconType="warning"
-          >
-            <p>{apiErrorMessage}</p>
-          </EuiCallOut>
-        </>
-      )}
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        title={i18n.translate('xpack.transform.transformList.editTransformGenericErrorMessage', {
+          defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
+        })}
+        color="danger"
+        iconType="warning"
+      >
+        <p>{apiErrorMessage}</p>
+      </EuiCallOut>
     </>
   );
 };

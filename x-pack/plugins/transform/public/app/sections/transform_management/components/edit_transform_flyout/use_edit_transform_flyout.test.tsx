@@ -14,7 +14,9 @@ import {
   applyFormStateToTransformConfig,
   getDefaultState,
   useEditTransformFlyoutActions,
-  useEditTransformFlyoutSelector,
+  useFormField,
+  useIsFormTouched,
+  useIsFormValid,
   EditTransformFlyoutProvider,
 } from './use_edit_transform_flyout';
 
@@ -229,13 +231,15 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
     );
 
     // As we want to test how actions affect the state,
-    // we set up this custom hook that combines both the hooks for
+    // we set up this custom hook that combines hooks for
     // actions and state selection, so they react to the same redux store.
     const { result } = renderHook(
       () => {
         return {
           actions: useEditTransformFlyoutActions(),
-          state: useEditTransformFlyoutSelector((d) => d),
+          isFormTouched: useIsFormTouched(),
+          isFormValid: useIsFormValid(),
+          frequency: useFormField('frequency'),
         };
       },
       { wrapper }
@@ -248,8 +252,8 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
       });
     });
 
-    expect(result.current.state.isFormTouched).toBe(true);
-    expect(result.current.state.isFormValid).toBe(true);
+    expect(result.current.isFormTouched).toBe(true);
+    expect(result.current.isFormValid).toBe(true);
 
     act(() => {
       result.current.actions.setFormField({
@@ -258,8 +262,8 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
       });
     });
 
-    expect(result.current.state.isFormTouched).toBe(false);
-    expect(result.current.state.isFormValid).toBe(true);
+    expect(result.current.isFormTouched).toBe(false);
+    expect(result.current.isFormValid).toBe(true);
 
     act(() => {
       result.current.actions.setFormField({
@@ -268,9 +272,9 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
       });
     });
 
-    expect(result.current.state.isFormTouched).toBe(true);
-    expect(result.current.state.isFormValid).toBe(false);
-    expect(result.current.state.formFields.frequency.errorMessages).toStrictEqual([
+    expect(result.current.isFormTouched).toBe(true);
+    expect(result.current.isFormValid).toBe(false);
+    expect(result.current.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
   });

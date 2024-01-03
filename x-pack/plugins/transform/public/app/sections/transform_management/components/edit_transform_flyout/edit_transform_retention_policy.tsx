@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, type FC } from 'react';
+import { useSelector } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 
@@ -19,8 +20,10 @@ import { useGetTransformsPreview } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import {
+  selectFormSections,
+  selectRetentionPolicyField,
   useEditTransformFlyoutActions,
-  useEditTransformFlyoutSelector,
+  useEditTransformFlyoutContext,
 } from './use_edit_transform_flyout';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
@@ -29,12 +32,9 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   const toastNotifications = useToastNotifications();
 
-  const dataViewId = useEditTransformFlyoutSelector((s) => s.dataViewId);
-  const formSections = useEditTransformFlyoutSelector((s) => s.formSections);
-  const retentionPolicyField = useEditTransformFlyoutSelector(
-    (s) => s.formFields.retentionPolicyField
-  );
-  const config = useEditTransformFlyoutSelector((s) => s.config);
+  const { config, dataViewId } = useEditTransformFlyoutContext();
+  const formSections = useSelector(selectFormSections);
+  const retentionPolicyField = useSelector(selectRetentionPolicyField);
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {

@@ -16,9 +16,11 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 import { useUpdateTransform } from '../../../../hooks';
 
 import {
-  applyFormStateToTransformConfig,
   useEditTransformFlyoutActions,
-  useEditTransformFlyoutSelector,
+  useEditTransformFlyoutContext,
+  useIsFormValid,
+  useIsFormTouched,
+  useUpdatedTransformConfig,
 } from './use_edit_transform_flyout';
 
 interface EditTransformUpdateButtonProps {
@@ -26,9 +28,10 @@ interface EditTransformUpdateButtonProps {
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const { config, formFields, formSections, isFormValid, isFormTouched } =
-    useEditTransformFlyoutSelector((d) => d);
-  const requestConfig = applyFormStateToTransformConfig(config, formFields, formSections);
+  const { config } = useEditTransformFlyoutContext();
+  const isFormValid = useIsFormValid();
+  const isFormTouched = useIsFormTouched();
+  const requestConfig = useUpdatedTransformConfig();
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
 
   const { setApiError } = useEditTransformFlyoutActions();
