@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 // xml-crypto is part of devDependencies
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { SignedXml } from 'xml-crypto';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 import { readFile } from 'fs/promises';
