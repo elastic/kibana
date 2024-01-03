@@ -15,11 +15,10 @@ import { TemplateContext } from '../template_context';
 function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
-  const ubi = Boolean(options.ubi8 || options.ubi9);
   return Mustache.render(template.toString(), {
-    packageManager: ubi ? 'microdnf' : 'apt-get',
+    packageManager: options.ubi ? 'microdnf' : 'apt-get',
     opensslLegacyProvider: !options.cloud,
-    ubi,
+    ubi: options.ubi,
     ...options,
   });
 }
