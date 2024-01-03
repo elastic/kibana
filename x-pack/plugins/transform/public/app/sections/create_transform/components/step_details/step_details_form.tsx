@@ -72,7 +72,7 @@ export const StepDetailsForm: FC = () => {
 
   const transformId = useWizardSelector((s) => s.stepDetails.transformId);
   const transformDescription = useWizardSelector((s) => s.stepDetails.transformDescription);
-  const destinationIndex = useWizardSelector((s) => s.stepDetails.transformDescription);
+  const destinationIndex = useWizardSelector((s) => s.stepDetails.destinationIndex);
   const destinationIngestPipeline = useWizardSelector(
     (s) => s.stepDetails.destinationIngestPipeline
   );

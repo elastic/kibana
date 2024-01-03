@@ -7,19 +7,14 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-
 import type { StoreState } from './create_transform_store';
 
 import { getCreateTransformRequestBody } from '../../../common';
 
+import { selectPreviewRequest } from './step_define_selectors';
+
 export const selectCreateTransformRequestBody = createSelector(
-  [
-    (_: StoreState, dataView: DataView) => dataView,
-    (state: StoreState) => state.stepDefine,
-    (state: StoreState) => state.stepDetails,
-    (state: StoreState) => state.advancedRuntimeMappingsEditor.runtimeMappings,
-  ],
-  (dataView, stepDefineState, stepDetailsState, runtimeMappings) =>
-    getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState, runtimeMappings)
+  [selectPreviewRequest, (state: StoreState) => state.stepDetails],
+  (previewRequest, stepDetailsState) =>
+    getCreateTransformRequestBody(previewRequest, stepDetailsState)
 );

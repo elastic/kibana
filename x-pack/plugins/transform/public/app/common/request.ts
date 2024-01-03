@@ -10,6 +10,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
+import type { PivotConfigDefinition } from '../../../common/types/transform';
+import type { LatestFunctionConfig } from '../../../common/api_schemas/transforms';
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
@@ -41,6 +43,8 @@ import {
 } from '.';
 
 import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
+
+type PreviewRequest = { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition };
 
 export interface SimpleQuery {
   query_string: {
@@ -168,7 +172,7 @@ export const getRequestPayload = (
 export function getPreviewTransformRequestBody(
   dataView: DataView,
   transformConfigQuery: TransformConfigQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'],
+  partialRequest?: PreviewRequest,
   runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
   timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
@@ -229,20 +233,10 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  dataView: DataView,
-  transformConfigState: StepDefineExposedState,
-  transformDetailsState: StepDetailsExposedState,
-  runtimeMappings: AdvancedRuntimeMappingsEditorState['runtimeMappings']
+  previewRequest: PostTransformsPreviewRequestSchema,
+  transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
-  ...getPreviewTransformRequestBody(
-    dataView,
-    getTransformConfigQuery(transformConfigState.searchQuery),
-    transformConfigState.previewRequest,
-    runtimeMappings,
-    transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
-      ? transformConfigState.timeRangeMs
-      : undefined
-  ),
+  ...previewRequest,
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
     ? { description: transformDetailsState.transformDescription }

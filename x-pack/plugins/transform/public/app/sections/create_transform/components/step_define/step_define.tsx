@@ -11,11 +11,11 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 
-import { getCreateTransformRequestBody } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectTransformConfigValid } from '../../state_management/step_define_selectors';
+import { selectCreateTransformRequestBody } from '../../state_management/step_create_selectors';
 import { WIZARD_STEPS } from '../../state_management/wizard_slice';
 
 import { WizardNav } from '../wizard_nav';
@@ -38,9 +38,10 @@ export const StepDefine: FC = () => {
 
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
-  const stepDetailsState = useWizardSelector((s) => s.stepDetails);
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const transformConfigValid = useSelector(selectTransformConfigValid);
+  const createTransformRequestBody = useWizardSelector((s) =>
+    selectCreateTransformRequestBody(s, dataView)
+  );
 
   const { setCurrentStep } = useWizardActions();
 
@@ -63,14 +64,7 @@ export const StepDefine: FC = () => {
             dataView={dataView}
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={stepDefineState.timeRangeMs}
-            dslQuery={
-              getCreateTransformRequestBody(
-                dataView,
-                stepDefineState,
-                stepDetailsState,
-                runtimeMappings
-              ).source.query
-            }
+            dslQuery={createTransformRequestBody.source.query}
           >
             <StepDefineForm />
           </FieldStatsFlyoutProvider>
