@@ -38,12 +38,20 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
       id: 'aaa',
       actionTypeId: 'bbb',
       params: {},
+      type: 'default',
       frequency: {
         summary: false,
         notifyWhen: 'onThrottleInterval',
         throttle: '1m',
       },
       alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+    },
+    {
+      id: 'ccc',
+      actionTypeId: 'ddd',
+      params: {},
+      type: 'system',
+      useAlertDataForTemplate: true,
     },
   ],
   scheduledTaskId: 'xyz456',
@@ -78,13 +86,15 @@ describe('rewriteRule', () => {
   });
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
-    for (const action of rewritten.actions) {
-      expect(Object.keys(action)).toEqual(
-        expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
-      );
-      expect(Object.keys(action.frequency!)).toEqual(
-        expect.arrayContaining(['summary', 'notify_when', 'throttle'])
-      );
-    }
+    const [rewrittenDefaultAction, rewrittenSystemAction] = rewritten.actions;
+    expect(Object.keys(rewrittenDefaultAction)).toEqual(
+      expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
+    );
+    expect(Object.keys(rewrittenDefaultAction.frequency!)).toEqual(
+      expect.arrayContaining(['summary', 'notify_when', 'throttle'])
+    );
+    expect(Object.keys(rewrittenSystemAction)).toEqual(
+      expect.arrayContaining(['use_alert_data_for_template', 'connector_type_id'])
+    );
   });
 });

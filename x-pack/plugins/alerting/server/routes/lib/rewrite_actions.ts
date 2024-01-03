@@ -7,12 +7,12 @@
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
-import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
 import { RuleActionTypes } from '../../../common';
 
 export const rewriteActionsReq = (
-  actions?: TypeOf<typeof actionsSchema>
+  actions: TypeOf<typeof actionsSchema>,
+  isSystemAction: (connectorId: string) => boolean
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
@@ -23,78 +23,35 @@ export const rewriteActionsReq = (
       use_alert_data_for_template: useAlertDataForTemplate,
       ...action
     }) => {
+      if (isSystemAction(action.id)) {
+        return {
+          id: action.id,
+          params: action.params,
+          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+          ...(action.uuid ? { uuid: action.uuid } : {}),
+          type: RuleActionTypes.SYSTEM,
+        };
+      }
+
       return {
-        ...action,
+        group: action.group ?? 'default',
+        id: action.id,
+        params: action.params,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(frequency
           ? {
               frequency: {
                 ...omit(frequency, 'notify_when'),
+                summary: frequency.summary,
+                throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
               },
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
+        type: RuleActionTypes.DEFAULT,
       };
     }
-  );
-};
-
-export const rewriteActionsReqWithSystemActions = (
-  actions: TypeOf<typeof actionsSchema>,
-  isSystemAction: (connectorId: string) => boolean
-): NormalizedAlertAction[] => {
-  if (!actions) return [];
-
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
-    if (isSystemAction(action.id)) {
-      return {
-        id: action.id,
-        params: action.params,
-        ...(action.uuid ? { uuid: action.uuid } : {}),
-        type: RuleActionTypes.SYSTEM,
-      };
-    }
-
-    return {
-      group: action.group ?? 'default',
-      id: action.id,
-      params: action.params,
-      ...(action.uuid ? { uuid: action.uuid } : {}),
-      ...(frequency
-        ? {
-            frequency: {
-              summary: frequency.summary,
-              throttle: frequency.throttle,
-              notifyWhen: frequency.notify_when,
-            },
-          }
-        : {}),
-      ...(alertsFilter ? { alertsFilter } : {}),
-      type: RuleActionTypes.DEFAULT,
-    };
-  });
-};
-
-export const rewriteActionsRes = (actions?: RuleAction[]) => {
-  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
-    ...rest,
-    notify_when: notifyWhen,
-  });
-  if (!actions) return [];
-  return actions.map(
-    ({ actionTypeId, frequency, alertsFilter, useAlertDataForTemplate, ...action }) => ({
-      ...action,
-      connector_type_id: actionTypeId,
-      ...(typeof useAlertDataForTemplate !== 'undefined'
-        ? { use_alert_data_for_template: useAlertDataForTemplate }
-        : {}),
-      ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-      ...(alertsFilter
-        ? {
-            alerts_filter: alertsFilter,
-          }
-        : {}),
-    })
   );
 };

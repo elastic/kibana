@@ -141,6 +141,7 @@ export interface RuleSystemAction {
   actionTypeId: string;
   params: RuleActionParams;
   type: typeof RuleActionTypes.SYSTEM;
+  useAlertDataForTemplate?: boolean;
 }
 
 export type RuleAction = RuleDefaultAction | RuleSystemAction;

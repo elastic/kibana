@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
+import { RuleActionTypes } from '../../../common';
+import { rewriteActionsReq } from './rewrite_actions';
 
-describe('rewrite Actions', () => {
-  describe('rewriteActionsRes', () => {
-    it('rewrites the actions response correctly', () => {
-      expect(
-        rewriteActionsRes([
+describe('rewriteActionsReq', () => {
+  it('should rewrite actions correctly', () => {
+    expect(
+      rewriteActionsReq(
+        [
           {
             uuid: '111',
             group: 'default',
             id: '1',
-            actionTypeId: '2',
             params: { foo: 'bar' },
             frequency: {
               summary: true,
-              notifyWhen: 'onThrottleInterval',
+              notify_when: 'onThrottleInterval',
               throttle: '1h',
             },
-            alertsFilter: {
+            alerts_filter: {
               query: {
                 kql: 'test:1s',
                 dsl: '{test:1}',
@@ -39,60 +39,12 @@ describe('rewrite Actions', () => {
               },
             },
           },
-        ])
-      ).toEqual([
-        {
-          alerts_filter: {
-            query: { dsl: '{test:1}', kql: 'test:1s', filters: [] },
-            timeframe: {
-              days: [1, 2, 3],
-              hours: { end: '15:00', start: '00:00' },
-              timezone: 'UTC',
-            },
-          },
-          connector_type_id: '2',
-          frequency: { notify_when: 'onThrottleInterval', summary: true, throttle: '1h' },
-          group: 'default',
-          id: '1',
-          params: { foo: 'bar' },
-          uuid: '111',
-        },
-      ]);
-    });
-  });
-
-  describe('rewriteActionsReq', () => {
-    expect(
-      rewriteActionsReq([
-        {
-          uuid: '111',
-          group: 'default',
-          id: '1',
-          params: { foo: 'bar' },
-          frequency: {
-            summary: true,
-            notify_when: 'onThrottleInterval',
-            throttle: '1h',
-          },
-          alerts_filter: {
-            query: {
-              kql: 'test:1s',
-              dsl: '{test:1}',
-              filters: [],
-            },
-            timeframe: {
-              days: [1, 2, 3],
-              timezone: 'UTC',
-              hours: {
-                start: '00:00',
-                end: '15:00',
-              },
-            },
-          },
-        },
-      ])
+        ],
+        () => false
+      )
     ).toEqual([
       {
+        type: RuleActionTypes.DEFAULT,
         uuid: '111',
         group: 'default',
         id: '1',
@@ -117,6 +69,56 @@ describe('rewrite Actions', () => {
             },
           },
         },
+      },
+    ]);
+  });
+  it('should rewrite system actions correctly', () => {
+    expect(
+      rewriteActionsReq(
+        [
+          {
+            uuid: '111',
+            group: 'default',
+            id: '1',
+            params: { foo: 'bar' },
+            frequency: {
+              summary: true,
+              notify_when: 'onThrottleInterval',
+              throttle: '1h',
+            },
+          },
+          {
+            uuid: '111',
+            group: 'default',
+            id: 'system-1',
+            params: { foo: 'bar' },
+            frequency: {
+              summary: true,
+              notify_when: 'onThrottleInterval',
+              throttle: '1h',
+            },
+          },
+        ],
+        (id) => id.startsWith('system')
+      )
+    ).toEqual([
+      {
+        type: RuleActionTypes.DEFAULT,
+        uuid: '111',
+        group: 'default',
+        id: '1',
+        params: { foo: 'bar' },
+        frequency: {
+          summary: true,
+          notifyWhen: 'onThrottleInterval',
+          throttle: '1h',
+        },
+      },
+      {
+        type: RuleActionTypes.SYSTEM,
+        uuid: '111',
+        id: 'system-1',
+        params: { foo: 'bar' },
       },
     ]);
   });

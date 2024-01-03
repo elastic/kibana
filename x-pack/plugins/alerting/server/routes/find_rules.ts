@@ -10,12 +10,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
-import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  verifyAccessAndContext,
-  rewriteRule,
-} from './lib';
+import { RewriteRequestCase, verifyAccessAndContext, rewriteRule } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -69,11 +64,7 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
-  perPage,
-  data,
-  ...restOfResult
-}) => {
+const rewriteBodyRes = ({ perPage, data, ...restOfResult }: FindResult<RuleTypeParams>) => {
   return {
     ...restOfResult,
     per_page: perPage,
