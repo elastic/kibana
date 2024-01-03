@@ -38,7 +38,10 @@ export function QueryBuilder({
   } = useKibana().services;
 
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  const { dataView } = useCreateDataView({ indexPatternString });
+
+  const { dataView } = useCreateDataView({
+    indexPatternString,
+  });
 
   return (
     <EuiFormRow
@@ -69,7 +72,7 @@ export function QueryBuilder({
             disableAutoFocus
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
-            isDisabled={!indexPatternString}
+            isDisabled={!dataView}
             isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
