@@ -20,7 +20,7 @@
   > .tvbVis {
     // Apply the minimum height on the vis itself so it doesn't interfere with flex calculations
     // Gauges are not completely square, so the height is just slightly less than the width
-    min-height: $tvbSplitBlockVisMinSize / 1.25;
+    min-height: calc($tvbSplitBlockVisMinSize / 1.25);
   }
 }
 
