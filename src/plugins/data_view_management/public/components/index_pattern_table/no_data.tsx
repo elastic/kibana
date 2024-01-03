@@ -10,7 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { NoDataPagePublicStart } from '@kbn/no-data-page-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { AddDataPrompt } from '@kbn/shared-ux-prompt-add-data';
 import React from 'react';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
@@ -25,7 +25,7 @@ export interface NoDataProps {
   application: ApplicationStart;
   dataViewController: DataViewTableController;
   setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  noDataPage?: NoDataPagePublicStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 const NoDataServerlessSearch: React.FC<
