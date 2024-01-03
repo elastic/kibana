@@ -46,10 +46,9 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     return 'pencil';
   }
 
-  public async isCompatible() {
-    // compatible only when ES|QL advanced setting is enabled
+  public async isCompatible({ attributes }: InlineEditLensEmbeddableContext) {
     const { isEmbeddableEditActionCompatible } = await getAsyncHelpers();
-    return isEmbeddableEditActionCompatible(this.core);
+    return isEmbeddableEditActionCompatible(this.core, attributes);
   }
 
   public async execute({

@@ -14,8 +14,13 @@ import type { LensPluginStartDependencies } from '../../plugin';
 import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
 import { extractReferencesFromState } from '../../utils';
 
-export function isEmbeddableEditActionCompatible(core: CoreStart) {
-  return core.uiSettings.get('discover:enableESQL');
+export function isEmbeddableEditActionCompatible(
+  core: CoreStart,
+  attributes: TypedLensByValueInput['attributes']
+) {
+  // for ES|QL is compatible only when advanced setting is enabled
+  const query = attributes.state.query;
+  return isOfAggregateQueryType(query) ? core.uiSettings.get('discover:enableESQL') : true;
 }
 
 export async function executeEditEmbeddableAction({
@@ -33,7 +38,7 @@ export async function executeEditEmbeddableAction({
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onApply?: () => void;
 }) {
-  const isCompatibleAction = isEmbeddableEditActionCompatible(core);
+  const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
   }
