@@ -9,11 +9,12 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FilterAggForm } from './filter_agg_form';
-import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
+import { WizardContext } from '../../../../wizard';
+import type { SearchItems } from '../../../../../../../hooks/use_search_items';
 
 describe('FilterAggForm', () => {
   const runtimeMappings: RuntimeMappings = {
@@ -42,14 +43,16 @@ describe('FilterAggForm', () => {
     },
   } as unknown as DataView;
 
+  const searchItems = { dataView } as unknown as SearchItems;
+
   test('should render only select dropdown on empty configuration', async () => {
     const onChange = jest.fn();
 
     const { getByLabelText, findByTestId, container } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ dataView, runtimeMappings }}>
+        <WizardContext.Provider value={{ searchItems }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
-        </CreateTransformWizardContext.Provider>
+        </WizardContext.Provider>
       </I18nProvider>
     );
 
@@ -72,9 +75,9 @@ describe('FilterAggForm', () => {
 
     const { findByTestId } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ dataView, runtimeMappings }}>
+        <WizardContext.Provider value={{ searchItems }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
-        </CreateTransformWizardContext.Provider>
+        </WizardContext.Provider>
       </I18nProvider>
     );
 
@@ -100,18 +103,18 @@ describe('FilterAggForm', () => {
 
     const { rerender, findByTestId } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ dataView, runtimeMappings }}>
+        <WizardContext.Provider value={{ searchItems }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
-        </CreateTransformWizardContext.Provider>
+        </WizardContext.Provider>
       </I18nProvider>
     );
 
     // re-render the same component with different props
     rerender(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ dataView, runtimeMappings }}>
+        <WizardContext.Provider value={{ searchItems }}>
           <FilterAggForm aggConfig={{}} selectedField="test_number_field" onChange={onChange} />
-        </CreateTransformWizardContext.Provider>
+        </WizardContext.Provider>
       </I18nProvider>
     );
 
@@ -137,7 +140,7 @@ describe('FilterAggForm', () => {
 
     const { findByTestId, container } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ dataView, runtimeMappings }}>
+        <WizardContext.Provider value={{ searchItems }}>
           <FilterAggForm
             aggConfig={{
               filterAgg: 'term',
@@ -149,7 +152,7 @@ describe('FilterAggForm', () => {
             selectedField="test_text_field"
             onChange={onChange}
           />
-        </CreateTransformWizardContext.Provider>
+        </WizardContext.Provider>
       </I18nProvider>
     );
 
