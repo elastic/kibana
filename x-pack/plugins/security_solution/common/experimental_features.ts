@@ -99,11 +99,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
    *
@@ -163,6 +158,11 @@ export const allowedExperimentalValues = Object.freeze({
    * version and the latest available version.
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

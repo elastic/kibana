@@ -89,7 +89,6 @@ export interface AssistantProviderProps {
   getInitialConversations: () => Record<string, Conversation>;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
-  ragOnAlerts?: boolean;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
@@ -141,7 +140,6 @@ export interface UseAssistantContext {
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
-  ragOnAlerts: boolean;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
@@ -183,7 +181,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getInitialConversations,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  ragOnAlerts = false,
   setConversations,
   setDefaultAllow,
   setDefaultAllowReplacement,
@@ -324,11 +321,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
-      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
@@ -374,7 +370,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       nameSpace,
       onConversationsUpdated,
       promptContexts,
-      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setDefaultAllow,
