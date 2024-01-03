@@ -18,6 +18,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  isFormulaValue,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -47,9 +48,7 @@ function buildFormulaLayer(
     [DEFAULT_LAYER_ID]: {
       ...getFormulaColumn(
         ACCESSOR,
-        {
-          value: layer.value,
-        },
+        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
         dataView,
         formulaAPI
       ),
@@ -103,7 +102,7 @@ function getValueColumns(layer: LensTableConfig) {
           return getValueColumn(`${ACCESSOR}_splitby_${i}`, b as string);
         })
       : []),
-    getValueColumn(ACCESSOR, layer.value),
+    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.value : layer.value),
   ];
 }
 

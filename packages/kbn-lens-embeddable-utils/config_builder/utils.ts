@@ -14,6 +14,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type {
+  FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -23,6 +24,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import {
+  FormulaValueConfig,
   LensAnnotationLayer,
   LensAttributes,
   LensBaseConfig,
@@ -74,6 +76,22 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 
   return adHocDataViews;
 };
+
+export function isFormulaValue(value: unknown): value is FormulaValueConfig {
+  if (value && typeof value === 'object' && 'value' in value) {
+    return true;
+  }
+  return false;
+}
+
+export function isPersistedIndexPatternLayer(
+  layer: unknown
+): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
+  if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {
+    return true;
+  }
+  return false;
+}
 
 export function isFormulaDataset(dataset?: LensDataset) {
   if (dataset && 'index' in dataset) {
@@ -134,11 +152,16 @@ function buildDatasourceStatesLayer(
     config: unknown,
     i: number,
     dataView: DataView
-  ) => PersistedIndexPatternLayer | undefined,
+  ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): [
   'textBased' | 'formBased',
-  PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] | undefined
+  (
+    | FormBasedPersistedState['layers']
+    | PersistedIndexPatternLayer
+    | TextBasedPersistedState['layers'][0]
+    | undefined
+  )
 ] {
   function buildValueLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
@@ -187,12 +210,12 @@ export const buildDatasourceStates = async (
     config: unknown,
     i: number,
     dataView: DataView
-  ) => PersistedIndexPatternLayer | undefined,
+  ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
   const layers: LensAttributes['state']['datasourceStates'] = {
-    textBased: { layers: {} },
+    // textBased: { layers: {} },
     formBased: { layers: {} },
   };
 
@@ -226,13 +249,24 @@ export const buildDatasourceStates = async (
         getValueColumns
       );
       if (layerConfig) {
-        layers[type]!.layers[layerId] = layerConfig;
+        if (isPersistedIndexPatternLayer(layerConfig)) {
+          layers[type]!.layers[layerId] = layerConfig;
+        } else {
+          layers[type]!.layers = { ...layerConfig };
+        }
+      }
+
+      if (dataView) {
+        Object.keys(layers[type]!.layers).forEach((id) => {
+          dataviews[id] = dataView;
+        });
       }
     }
   }
 
   return layers;
 };
+
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
