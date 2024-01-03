@@ -18,7 +18,11 @@ import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
 
-export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
+export const LatestFindingsContainer = ({
+  dataView,
+  dataViewRefetch,
+  dataViewIsRefetching,
+}: FindingsBaseProps) => {
   const renderChildComponent = useCallback(
     (groupFilters: Filter[]) => {
       return (
@@ -27,10 +31,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           nonPersistedFilters={groupFilters}
           height={DEFAULT_TABLE_HEIGHT}
           showDistributionBar={false}
+          dataViewRefetch={dataViewRefetch}
+          dataViewIsRefetching={dataViewIsRefetching}
         />
       );
     },
-    [dataView]
+    [dataView, dataViewIsRefetching, dataViewRefetch]
   );
 
   const {
@@ -94,7 +100,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   return (
     <>
       <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-      <LatestFindingsTable dataView={dataView} groupSelectorComponent={grouping.groupSelector} />
+      <LatestFindingsTable
+        dataView={dataView}
+        groupSelectorComponent={grouping.groupSelector}
+        dataViewRefetch={dataViewRefetch}
+        dataViewIsRefetching={dataViewIsRefetching}
+      />
     </>
   );
 };
