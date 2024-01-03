@@ -31,6 +31,7 @@ import {
 } from './use_data_drift_result';
 import type { DataDriftField, Feature, TimeRange } from './types';
 import { DataDriftOverviewTable } from './data_drift_overview_table';
+import { DataDriftPromptHint } from './data_drift_hint';
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
   'xpack.dataVisualizer.dataDrift.showOnlyDriftedFieldsOptionLabel',
@@ -191,44 +192,7 @@ export const DataDriftView = ({
     );
   }
   if (showRunAnalysisHint) {
-    return (
-      <EuiEmptyPrompt
-        color="subdued"
-        hasShadow={false}
-        hasBorder={false}
-        css={{ minWidth: '100%' }}
-        body={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
-                defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
-              />
-            </p>
-
-            <EuiButton
-              fill
-              size="m"
-              onClick={refresh}
-              iconType="visTagCloud"
-              data-test-subj="analyzeDataDriftWithoutSavingButton"
-              aria-label={i18n.translate(
-                'xpack.dataVisualizer.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
-                {
-                  defaultMessage: 'Analyze data drift',
-                }
-              )}
-            >
-              <FormattedMessage
-                id="xpack.dataVisualizer.dataDrift.indexPatternsEditor.analyzeDataDriftLabel"
-                defaultMessage="Analyze data drift"
-              />
-            </EuiButton>
-          </>
-        }
-        data-test-subj="dataDriftRunAnalysisEmptyPrompt"
-      />
-    );
+    return <DataDriftPromptHint refresh={refresh} />;
   }
   return (
     <div>

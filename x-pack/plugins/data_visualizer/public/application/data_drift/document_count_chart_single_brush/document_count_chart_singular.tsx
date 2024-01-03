@@ -437,13 +437,13 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
             locale={i18n.getLocale()}
           />
           <Axis
-            id="data-drift-histogram-left-axis"
+            id={`data-drift-histogram-left-axis-${id}`}
             position={Position.Left}
             ticks={2}
             integersOnly
           />
           <Axis
-            id="data-drift-histogram-bottom-axis"
+            id={`data-drift-histogram-bottom-axis-${id}`}
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}

@@ -155,7 +155,7 @@ interface SingleBrushProps {
 
 /**
  * SingleBrush React Component
- * Dual brush component that overlays the document count chart
+ * Single brush component that overlays the document count chart
  *
  * @param props SingleBrushProps component props
  * @returns The SingleBrush component.
