@@ -144,7 +144,7 @@ export interface ReportSource {
    */
   output: ReportOutput | null;
   /**
-   * Execution error durin one of the task runs.
+   * Execution error during one of the execute task runs.
    */
   error?: ExecutionError | unknown;
 
