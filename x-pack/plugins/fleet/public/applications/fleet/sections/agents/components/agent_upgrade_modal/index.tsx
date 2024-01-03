@@ -178,11 +178,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: option,
     }));
     if (options.length === 0) {
-      return [{ label: '', value: '' }];
+      return [{ label: kibanaVersion, value: kibanaVersion }];
     }
     return options;
-  }, [availableVersions, minVersion]);
-  const noVersions = !availableVersions || versionOptions[0]?.value === '';
+  }, [availableVersions, minVersion, kibanaVersion]);
 
   const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({
