@@ -8,6 +8,10 @@
 
 /**
  * @internal
+ *
+ * TODO: consider moving this to a package under the
+ * Security domain as it is tied to a Security API
+ * endpoint.
  */
 export const NO_DATA_API_PATHS: Record<string, Record<string, string>> = {
   internal: {
