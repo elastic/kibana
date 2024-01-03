@@ -12,6 +12,7 @@ import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
 import { DatePicker } from '../../date_picker/date_picker';
@@ -44,20 +45,24 @@ export function Profiling() {
       append: (
         <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
           <EuiText size="xs">
-            {i18n.translate('xpack.infra.profiling.flamegraphInfoPopoverBody', {
-              defaultMessage:
-                'The flamegraph is a visual representation of the functions that are consuming the most resources. Each function is represented by a rectangle, where the width of the rectangle represents the amount of time spent in the function, and the number of stacked rectangles represents the stack depth. The stack depth is the number of functions that were called to reach the current function.',
-            })}{' '}
-            <EuiLink
-              data-test-subj="infraProfilingFlamegraphTabLearnMoreLink"
-              href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-flamegraphs-intro"
-              external
-              target="_blank"
-            >
-              {i18n.translate('xpack.infra.profiling.flamegraphTabLearnMoreLink', {
-                defaultMessage: 'Learn more',
-              })}
-            </EuiLink>
+            <FormattedMessage
+              id="xpack.infra.profiling.flamegraphInfoPopoverBody"
+              defaultMessage="The flamegraph is a visual representation of the functions that are consuming the most resources. Each function is represented by a rectangle, where the width of the rectangle represents the amount of time spent in the function, and the number of stacked rectangles represents the stack depth. The stack depth is the number of functions that were called to reach the current function. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    data-test-subj="infraProfilingFlamegraphTabLearnMoreLink"
+                    href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-flamegraphs-intro"
+                    external
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.infra.profiling.flamegraphTabLearnMoreLink', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiText>
         </Popover>
       ),
@@ -76,20 +81,24 @@ export function Profiling() {
       append: (
         <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
           <EuiText size="xs">
-            {i18n.translate('xpack.infra.profiling.functionsInfoPopoverBody', {
-              defaultMessage:
-                'The TopN functions view shows the most frequently sampled functions, broken down by CPU time, annualized CO2, and annualized cost estimates. You can use this view to identify the most expensive line of code on your host.',
-            })}{' '}
-            <EuiLink
-              data-test-subj="infraProfilingFunctionsTabLearnMoreLink"
-              href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-functions-intro"
-              external
-              target="_blank"
-            >
-              {i18n.translate('xpack.infra.profiling.functionsTabLearnMoreLink', {
-                defaultMessage: 'Learn more',
-              })}
-            </EuiLink>
+            <FormattedMessage
+              id="xpack.infra.profiling.functionsInfoPopoverBody"
+              defaultMessage="The TopN functions view shows the most frequently sampled functions, broken down by CPU time, annualized CO2, and annualized cost estimates. You can use this view to identify the most expensive line of code on your host. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    data-test-subj="infraProfilingFunctionsTabLearnMoreLink"
+                    href="https://www.elastic.co/guide/en/observability/current/universal-profiling.html#profiling-functions-intro"
+                    external
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.infra.profiling.functionsTabLearnMoreLink', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiText>
         </Popover>
       ),

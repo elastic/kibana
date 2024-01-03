@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const LOCAL_STORAGE_KEY = 'infra-profiling-description-callout-dismissed';
@@ -22,17 +22,19 @@ export function DescriptionCallout() {
   }
 
   return (
-    <EuiCallOut
-      title={i18n.translate('xpack.infra.profiling.descriptionCallout.title', {
-        defaultMessage: 'Displaying Resource Consumption for this Host',
-      })}
-      iconType="iInCircle"
-    >
-      <p>
-        {i18n.translate('xpack.infra.profiling.descriptionCallout.body', {
-          defaultMessage:
-            'Universal Profiling allows you to see what is consuming resource on your host, right down to the application code, kernel and third-party-libraries, to help you identify resource bottlenecks and optimise usage.',
-        })}{' '}
+    <>
+      <EuiCallOut
+        title={i18n.translate('xpack.infra.profiling.descriptionCallout.title', {
+          defaultMessage: 'Displaying Resource Consumption for this Host',
+        })}
+        iconType="iInCircle"
+      >
+        <EuiText>
+          {i18n.translate('xpack.infra.profiling.descriptionCallout.body', {
+            defaultMessage:
+              'Universal Profiling allows you to see what is consuming resource on your host, right down to the application code, kernel and third-party-libraries, to help you identify resource bottlenecks and optimise usage.',
+          })}
+        </EuiText>
         <EuiSpacer />
         <EuiFlexGroup alignItems="center">
           <EuiLink
@@ -51,7 +53,8 @@ export function DescriptionCallout() {
             })}
           </EuiButton>
         </EuiFlexGroup>
-      </p>
-    </EuiCallOut>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
   );
 }
