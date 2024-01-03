@@ -44,14 +44,21 @@ interface Options<T> {
   onFailureBlock?: () => Promise<T>;
   onFailure?: ReturnType<typeof defaultOnFailure>;
   accept?: (v: T) => boolean;
+  retryDelay?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
-  const { timeout, methodName, block, onFailureBlock, accept = returnTrue } = options;
+  const {
+    timeout,
+    methodName,
+    block,
+    onFailureBlock,
+    accept = returnTrue,
+    retryDelay = 502,
+  } = options;
   const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
-  const retryDelay = 502;
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;
 

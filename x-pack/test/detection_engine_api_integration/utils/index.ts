@@ -14,6 +14,7 @@ export * from './create_signals_index';
 export * from './delete_all_rules';
 export * from './delete_all_alerts';
 export * from './delete_all_timelines';
+export * from './es_indices';
 export * from './get_complex_rule';
 export * from './get_complex_rule_output';
 export * from './get_simple_rule';

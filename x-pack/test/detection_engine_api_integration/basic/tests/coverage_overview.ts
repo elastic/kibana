@@ -27,6 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('coverage_overview', () => {
     beforeEach(async () => {
@@ -438,7 +439,7 @@ export default ({ getService }: FtrProviderContext): void => {
               threat: generateThreatArray(1),
             }),
           ]);
-          await installPrebuiltRulesAndTimelines(es, supertest);
+          await installPrebuiltRulesAndTimelines(es, supertest, retry);
 
           const expectedRule = await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
