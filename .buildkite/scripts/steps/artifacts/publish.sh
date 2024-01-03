@@ -18,7 +18,7 @@ cd target
 
 download "kibana-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
@@ -27,7 +27,7 @@ download "kibana-$FULL_VERSION-aarch64.rpm"
 
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
 download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
