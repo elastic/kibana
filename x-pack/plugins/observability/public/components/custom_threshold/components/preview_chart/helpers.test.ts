@@ -8,7 +8,7 @@ import {
   Aggregators,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
-import { getLensOperationFromRuleMetric } from './helpers';
+import { getBufferThreshold, getLensOperationFromRuleMetric } from './helpers';
 const useCases = [
   [
     {
@@ -106,4 +106,19 @@ test.each(useCases)('returns the correct operation from %p. =>  %p', (metric, ex
   return expect(getLensOperationFromRuleMetric(metric as CustomThresholdExpressionMetric)).toEqual(
     expectedValue
   );
+});
+
+describe('getBufferThreshold', () => {
+  const testData = [
+    { threshold: undefined, buffer: '0.00' },
+    { threshold: 0.1, buffer: '0.12' },
+    { threshold: 0.01, buffer: '0.02' },
+    { threshold: 0.001, buffer: '0.01' },
+    { threshold: 0.00098, buffer: '0.01' },
+    { threshold: 130, buffer: '143.00' },
+  ];
+
+  it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ threshold, buffer }) => {
+    expect(getBufferThreshold(threshold)).toBe(buffer);
+  });
 });

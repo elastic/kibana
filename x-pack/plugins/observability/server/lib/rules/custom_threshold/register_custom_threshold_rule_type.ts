@@ -76,7 +76,10 @@ export function thresholdRuleType(
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };
-
+  const allowedAggregators = Object.values(Aggregators).splice(
+    Object.values(Aggregators).indexOf(Aggregators.COUNT),
+    1
+  );
   const customCriterion = schema.object({
     ...baseCriterion,
     aggType: schema.maybe(schema.literal('custom')),
@@ -85,7 +88,7 @@ export function thresholdRuleType(
       schema.oneOf([
         schema.object({
           name: schema.string(),
-          aggType: oneOfLiterals(Object.values(Aggregators)),
+          aggType: oneOfLiterals(allowedAggregators),
           field: schema.string(),
           filter: schema.never(),
         }),

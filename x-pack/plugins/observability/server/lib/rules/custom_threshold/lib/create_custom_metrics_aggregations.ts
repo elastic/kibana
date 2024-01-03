@@ -22,7 +22,7 @@ export const createCustomMetricsAggregations = (
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
-    const key: string = `${id}_${metric.name}`;
+    const key = `${id}_${metric.name}`;
     const aggregation = metric.aggType;
 
     if (aggregation === 'count') {
