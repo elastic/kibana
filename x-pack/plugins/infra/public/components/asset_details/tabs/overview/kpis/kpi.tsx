@@ -8,20 +8,19 @@ import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { ChartModel } from '@kbn/lens-embeddable-utils';
+import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
-  id,
   height,
   assetName,
   dateRange,
   dataView,
   ...chartProps
-}: ChartModel & {
+}: LensConfig & {
   height: number;
   dataView?: DataView;
   assetName: string;
@@ -39,17 +38,14 @@ export const Kpi = ({
   }, [dataView, assetName]);
 
   const tooltipContent = useMemo(
-    () =>
-      id in METRICS_TOOLTIP ? (
-        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
-      ) : undefined,
-    [id]
+    () => <TooltipContent description={METRICS_TOOLTIP.cpuUsage} />,
+    []
   );
 
   return (
     <LensChart
       {...chartProps}
-      id={`infraAssetDetailsKPI${id}`}
+      id={`infraAssetDetailsKPI1`}
       dataView={dataView}
       dateRange={dateRange}
       height={height}

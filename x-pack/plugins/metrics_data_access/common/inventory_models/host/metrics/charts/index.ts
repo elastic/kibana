@@ -5,59 +5,47 @@
  * 2.0.
  */
 
-import {
-  type ChartModel,
-  type XYChartModel,
-  type MetricChartModel,
-  type XYLayerOptions,
-  type MetricLayerOptions,
-  type ChartTypes,
-  type XYVisualOptions,
-  XY_ID,
-} from '@kbn/lens-embeddable-utils';
+import { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
-type ChartByFormula<TType extends ChartTypes> = Record<
-  HostFormulaNames,
-  TType extends typeof XY_ID ? XYChartModel : MetricChartModel
->;
-
-type BaseArgs<TType extends ChartTypes> = Pick<ChartModel, 'dataView'> & {
-  formulaIds: HostFormulaNames[];
-  visualizationType: TType;
-  layerOptions?: TType extends typeof XY_ID ? XYLayerOptions : MetricLayerOptions;
-  visualOptions?: TType extends typeof XY_ID ? XYVisualOptions : never;
-};
-
-export const createBasicCharts = <TType extends ChartTypes>({
+export const createBasicCharts = <T extends ChartType>({
   formulaIds,
-  visualizationType,
-  dataView,
-  layerOptions,
-  ...rest
-}: BaseArgs<TType>): ChartByFormula<TType> => {
+  chartType,
+  options,
+}: {
+  formulaIds: HostFormulaNames[];
+  chartType: T;
+  options?: Partial<ChartTypeLensConfig<T>>;
+}): Record<HostFormulaNames, ChartTypeLensConfig<T>> => {
   return formulaIds.reduce((acc, curr) => {
-    const layers = {
-      data: visualizationType === XY_ID ? [formulas[curr]] : formulas[curr],
-      layerType: visualizationType === XY_ID ? 'data' : 'metricTrendline',
-      options: layerOptions,
-    };
-
-    const chartModel = {
-      id: curr,
-      title: formulas[curr].label,
-      dataView,
-      visualizationType,
-      layers: visualizationType === XY_ID ? [layers] : layers,
-      ...rest,
-    } as TType extends typeof XY_ID ? XYChartModel : MetricChartModel;
+    const chart =
+      chartType === 'xy'
+        ? ({
+            ...options,
+            chartType,
+            layers: [
+              {
+                seriesType: 'line',
+                type: 'series',
+                xAxis: '@timestamp',
+                value: formulas[curr],
+              },
+            ],
+          } as ChartTypeLensConfig<'xy'>)
+        : ({
+            ...options,
+            title: formulas[curr].label ?? '',
+            value: formulas[curr],
+            xAxis: '@timestamp',
+            chartType,
+          } as ChartTypeLensConfig<T>);
 
     return {
       ...acc,
-      [curr]: chartModel,
+      [curr]: chart,
     };
-  }, {} as ChartByFormula<TType>);
+  }, {} as Record<HostFormulaNames, ChartTypeLensConfig<T>>);
 };
 
 // custom charts

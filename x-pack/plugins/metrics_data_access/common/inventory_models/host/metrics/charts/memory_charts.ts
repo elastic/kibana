@@ -6,66 +6,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const memoryUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'memoryUsageBreakdown',
+  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
     layers: [
       {
-        data: [
-          {
-            ...formulas.memoryCache,
-            label: i18n.translate(
-              'xpack.metricsData.assetDetails.metricsCharts.metric.label.cache',
-              {
-                defaultMessage: 'Cache',
-              }
-            ),
-          },
-          {
-            ...formulas.memoryUsed,
-            label: i18n.translate(
-              'xpack.metricsData.assetDetails.metricsCharts.metric.label.used',
-              {
-                defaultMessage: 'Used',
-              }
-            ),
-          },
-          {
-            ...formulas.memoryFreeExcludingCache,
-            label: i18n.translate(
-              'xpack.metricsData.assetDetails.metricsCharts.metric.label.free',
-              {
-                defaultMessage: 'Free',
-              }
-            ),
-          },
-        ],
-        options: {
-          seriesType: 'area_stacked',
-        },
-        layerType: 'data',
+        ...formulas.memoryCache,
+        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.cache', {
+          defaultMessage: 'Cache',
+        }),
       },
-    ],
-    visualOptions: {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
-        legendSize: 50 as any,
+      {
+        ...formulas.memoryUsed,
+        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.used', {
+          defaultMessage: 'Used',
+        }),
       },
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
+      {
+        ...formulas.memoryFreeExcludingCache,
+        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.free', {
+          defaultMessage: 'Free',
+        }),
       },
+    ].map((formula) => ({
+      seriesType: 'area',
+      type: 'series',
+      xAxis: '@timestamp',
+      value: formula,
+    })),
+    legend: {
+      position: 'bottom',
+      show: true,
     },
-    visualizationType: 'lnsXY',
-    dataView,
   }),
 };

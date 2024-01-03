@@ -48,7 +48,7 @@ export const MetricsGrid = () => {
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {charts.map((chartProp, index) => (
           <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} />
+            <Chart {...chartProp} dataView={dataView} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

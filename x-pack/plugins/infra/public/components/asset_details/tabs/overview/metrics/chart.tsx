@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import type { ChartModel } from '@kbn/lens-embeddable-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
 import { METRIC_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
@@ -14,19 +15,17 @@ import { useDatePickerContext } from '../../../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
-export type ChartProps = ChartModel &
+export type ChartProps = LensConfig &
   Pick<LensChartProps, 'overrides'> & {
     filterFieldName: string;
     dateRange: TimeRange;
     assetName: string;
-    dataViewOrigin?: 'metrics' | 'logs';
+    dataView: DataView;
     ['data-test-subj']: string;
   };
 
 export const Chart = ({
-  id,
   filterFieldName,
-  dataViewOrigin,
   overrides,
   dateRange,
   assetName,
@@ -76,7 +75,7 @@ export const Chart = ({
   return (
     <LensChart
       {...chartProps}
-      id={`${dataTestSubj}${id}`}
+      id={`${dataTestSubj}`}
       borderRadius="m"
       dataView={dataView}
       dateRange={dateRange}

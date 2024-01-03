@@ -6,47 +6,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const rxTx = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'rxTx',
+  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
       defaultMessage: 'Network',
     }),
     layers: [
       {
-        data: [
-          {
-            ...formulas.rx,
-            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
-              defaultMessage: 'Inbound (RX)',
-            }),
-          },
-          {
-            ...formulas.tx,
-            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
-              defaultMessage: 'Outbound (TX)',
-            }),
-          },
-        ],
-        options: {
-          seriesType: 'area',
-        },
-
-        layerType: 'data',
+        ...formulas.rx,
+        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
+          defaultMessage: 'Inbound (RX)',
+        }),
       },
-    ],
-    visualOptions: {
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
+      {
+        ...formulas.tx,
+        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
+          defaultMessage: 'Outbound (TX)',
+        }),
       },
-    },
-    visualizationType: 'lnsXY',
-    dataView,
+    ].map((formula) => ({
+      seriesType: 'area',
+      type: 'series',
+      xAxis: '@timestamp',
+      value: formula,
+    })),
   }),
 };

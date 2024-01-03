@@ -6,26 +6,26 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
+// import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
 export const hostsView = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: XYChartModel['visualOptions'] = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
+    // const commonVisualOptions: XYChartModel['visualOptions'] = {
+    //   showDottedLine: true,
+    //   missingValues: 'Linear',
+    // };
 
-    const layerOptions: XYLayerOptions = {
-      breakdown: {
-        type: 'top_values',
-        field: 'host.name',
-        params: {
-          size: 20,
-        },
-      },
-    };
+    // const layerOptions: XYLayerOptions = {
+    //   breakdown: {
+    //     type: 'top_values',
+    //     field: 'host.name',
+    //     params: {
+    //       size: 20,
+    //     },
+    //   },
+    // };
 
     const {
       memoryUsage,
@@ -39,7 +39,7 @@ export const hostsView = {
       rx,
       tx,
     } = createBasicCharts({
-      visualizationType: 'lnsXY',
+      chartType: 'xy',
       formulaIds: [
         'cpuUsage',
         'memoryUsage',
@@ -54,24 +54,23 @@ export const hostsView = {
         'rx',
         'tx',
       ],
-      dataView: metricsDataView,
-      layerOptions,
-      visualOptions: commonVisualOptions,
+      options: {
+        dataset: {
+          timeFieldName: metricsDataView?.getTimeField()?.displayName ?? '@timestamp',
+          index: metricsDataView?.getIndexPattern() ?? 'metrics-*',
+        },
+      },
     });
 
     const { cpuUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
+      chartType: 'xy',
       formulaIds: ['cpuUsage', 'normalizedLoad1m'],
-      layerOptions,
-      visualOptions: {
-        ...commonVisualOptions,
-        yLeftExtent: {
-          mode: 'dataBounds',
-          lowerBound: 0,
-          upperBound: 1,
+      options: {
+        dataset: {
+          timeFieldName: metricsDataView?.getTimeField()?.displayName ?? '@timestamp',
+          index: metricsDataView?.getIndexPattern() ?? 'metrics-*',
         },
       },
-      dataView: metricsDataView,
     });
 
     return createDashboardModel({

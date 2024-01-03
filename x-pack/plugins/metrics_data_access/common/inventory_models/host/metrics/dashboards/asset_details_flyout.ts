@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import {
   createBasicCharts,
@@ -24,30 +23,26 @@ export const assetDetailsFlyout = {
     metricsDataView?: DataView;
     logsDataView?: DataView;
   }) => {
-    const commonVisualOptions: XYVisualOptions = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
+    // const commonVisualOptions: XYVisualOptions = {
+    //   showDottedLine: true,
+    //   missingValues: 'Linear',
+    // };
 
-    const legend: XYVisualOptions = {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
-      },
-    };
+    // const legend: XYVisualOptions = {
+    //   legend: {
+    //     isVisible: true,
+    //     position: 'bottom',
+    //   },
+    // };
 
     const { cpuUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
+      chartType: 'xy',
       formulaIds: ['cpuUsage', 'memoryUsage', 'normalizedLoad1m'],
-      dataView: metricsDataView,
-      visualOptions: commonVisualOptions,
     });
 
     const { logRate } = createBasicCharts({
-      visualizationType: 'lnsXY',
+      chartType: 'xy',
       formulaIds: ['logRate'],
-      dataView: logsDataView,
-      visualOptions: commonVisualOptions,
     });
 
     return createDashboardModel({
@@ -58,23 +53,23 @@ export const assetDetailsFlyout = {
         logRate,
         {
           ...diskSpaceUsageAvailable.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
+          // visualOptions: { ...commonVisualOptions, ...legend },
         },
         {
           ...diskUsageByMountPoint.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
+          // visualOptions: { ...commonVisualOptions, ...legend },
         },
         {
           ...diskThroughputReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
+          // visualOptions: { ...commonVisualOptions, ...legend },
         },
         {
           ...diskIOReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
+          // visualOptions: { ...commonVisualOptions, ...legend },
         },
         {
           ...rxTx.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
+          // visualOptions: { ...commonVisualOptions, ...legend },
         },
       ],
     });

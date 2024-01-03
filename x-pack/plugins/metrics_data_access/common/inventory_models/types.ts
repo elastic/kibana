@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChartModel, FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { FormulaValueConfig, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
@@ -420,10 +420,10 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
 }
 
 export interface DashboardFn {
-  get: (...args: any[]) => DashboardModel;
+  get: (...args: any[]) => LensConfig;
 }
 
 export interface DashboardModel {
-  charts: ChartModel[];
+  charts: LensConfig[];
   dependsOn?: string[];
 }

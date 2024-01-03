@@ -6,80 +6,57 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { StaticValueConfig, XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
-export const REFERENCE_LINE: StaticValueConfig = {
-  value: '1',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
-  color: '#6092c0',
-};
-
 export const cpuUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'cpuUsageBreakdown',
+  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
     layers: [
-      {
-        data: [
-          formulas.cpuUsageIowait,
-          formulas.cpuUsageIrq,
-          formulas.cpuUsageNice,
-          formulas.cpuUsageSoftirq,
-          formulas.cpuUsageSteal,
-          formulas.cpuUsageUser,
-          formulas.cpuUsageSystem,
-        ],
-        options: {
-          seriesType: 'area_stacked',
-        },
-        layerType: 'data',
-      },
-    ],
-    visualizationType: 'lnsXY',
-    dataView,
+      formulas.cpuUsageUser,
+      formulas.cpuUsageIrq,
+      formulas.cpuUsageNice,
+      formulas.cpuUsageSoftirq,
+      formulas.cpuUsageSteal,
+      formulas.cpuUsageUser,
+      formulas.cpuUsageSystem,
+    ].map((formula) => ({
+      seriesType: 'area',
+      type: 'series',
+      xAxis: '@timestamp',
+      value: formula,
+    })),
   }),
 };
 
 export const normalizedLoad1m = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'normalizedLoad1m',
+  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
     }),
     layers: [
-      { data: [formulas.normalizedLoad1m], layerType: 'data' },
-      { data: [REFERENCE_LINE], layerType: 'referenceLine' },
+      { seriesType: 'line', type: 'series', xAxis: '@timestamp', value: formulas.normalizedLoad1m },
+      { type: 'reference', value: '1', color: '#6092c0' },
     ],
-    visualizationType: 'lnsXY',
-    dataView,
   }),
 };
 
 export const loadBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'loadBreakdown',
+  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
       defaultMessage: 'Load',
     }),
-    layers: [
-      {
-        data: [formulas.load1m, formulas.load5m, formulas.load15m],
-        options: {
-          seriesType: 'area',
-        },
-        layerType: 'data',
-      },
-    ],
-    visualizationType: 'lnsXY',
-    dataView,
+    layers: ['formulas.load1m', formulas.load5m, formulas.load15m].map((formula) => ({
+      seriesType: 'area',
+      type: 'series',
+      xAxis: '@timestamp',
+      value: formula,
+    })),
   }),
 };

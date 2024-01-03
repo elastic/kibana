@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
 
 export const diskIOWrite: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskIOWrite', {

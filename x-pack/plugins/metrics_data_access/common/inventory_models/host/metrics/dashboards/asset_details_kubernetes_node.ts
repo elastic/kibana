@@ -6,107 +6,82 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
   get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: XYVisualOptions = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-      legend: {
-        isVisible: true,
-        position: 'bottom',
-      },
-    };
+    // const commonVisualOptions: XYVisualOptions = {
+    //   showDottedLine: true,
+    //   missingValues: 'Linear',
+    //   legend: {
+    //     isVisible: true,
+    //     position: 'bottom',
+    //   },
+    // };
 
     return createDashboardModel({
       dependsOn: ['kubernetes.node'],
       charts: [
         {
-          id: 'nodeCpuCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
             {
               defaultMessage: 'Node CPU Capacity',
             }
           ),
-          layers: [
-            {
-              data: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
-            },
-          ],
-          dataView: metricsDataView,
-          visualizationType: 'lnsXY',
-          visualOptions: commonVisualOptions,
+          layers: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed].map((formula) => ({
+            seriesType: 'area',
+            type: 'series',
+            xAxis: '@timestamp',
+            value: formula,
+          })),
         },
         {
-          id: 'nodeMemoryCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
             {
               defaultMessage: 'Node Memory Capacity',
             }
           ),
-          layers: [
-            {
-              data: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
-            },
-          ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          layers: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed].map((formula) => ({
+            seriesType: 'area',
+            type: 'series',
+            xAxis: '@timestamp',
+            value: formula,
+          })),
         },
         {
-          id: 'nodeDiskCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
             {
               defaultMessage: 'Node Disk Capacity',
             }
           ),
-          layers: [
-            {
-              data: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
-            },
-          ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          layers: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed].map((formula) => ({
+            seriesType: 'area',
+            type: 'series',
+            xAxis: '@timestamp',
+            value: formula,
+          })),
         },
         {
-          id: 'nodePodCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
             {
               defaultMessage: 'Node Pod Capacity',
             }
           ),
-          layers: [
-            {
-              data: [formulas.nodePodCapacity, formulas.nodePodUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
-            },
-          ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          layers: [formulas.nodePodCapacity, formulas.nodePodUsed].map((formula) => ({
+            seriesType: 'area',
+            type: 'series',
+            xAxis: '@timestamp',
+            value: formula,
+          })),
         },
       ],
     });

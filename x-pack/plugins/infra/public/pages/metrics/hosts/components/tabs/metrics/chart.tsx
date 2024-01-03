@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { ChartModel, XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -14,9 +15,9 @@ import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build'
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
-export interface ChartProps extends Omit<ChartModel, 'visualOptions'> {
-  visualOptions?: XYVisualOptions;
-}
+export type ChartProps = LensConfig & {
+  dataView?: DataView;
+};
 
 export const Chart = ({ dataView, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
@@ -44,14 +45,13 @@ export const Chart = ({ dataView, ...chartProps }: ChartProps) => {
             dataView,
           }),
         ];
-  }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
+  }, [shouldUseSearchCriteria, searchCriteria.filters, currentPage, dataView]);
 
   return (
     <LensChart
       {...chartProps}
-      id={`hostsView-metricChart-${chartProps.id}`}
+      id={`hostsView-metricChart-1`}
       borderRadius="m"
-      dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_HEIGHT}
       loading={loading}
