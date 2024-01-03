@@ -131,10 +131,12 @@ describe('AgentUpgradeStatus', () => {
   describe('with agent upgrade details', () => {
     it('should render UPG_REQUESTED state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_REQUESTED',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_REQUESTED',
+          },
         },
       });
 
@@ -144,12 +146,14 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_SCHEDULED state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_SCHEDULED',
-          metadata: {
-            scheduled_at: getDateString(200),
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_SCHEDULED',
+            metadata: {
+              scheduled_at: getDateString(200),
+            },
           },
         },
       });
@@ -163,12 +167,14 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_DOWNLOADING state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_DOWNLOADING',
-          metadata: {
-            download_percent: 16.4,
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_DOWNLOADING',
+            metadata: {
+              download_percent: 16.4,
+            },
           },
         },
       });
@@ -179,14 +185,16 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_DOWNLOADING with a warning if agent has a retry_message and retry_until', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_DOWNLOADING',
-          metadata: {
-            download_percent: 16.4,
-            retry_error_msg: 'unable to download',
-            retry_until: `${moment().add(10, 'minutes').toISOString()}`,
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_DOWNLOADING',
+            metadata: {
+              download_percent: 16.4,
+              retry_error_msg: 'unable to download',
+              retry_until: `${moment().add(10, 'minutes').toISOString()}`,
+            },
           },
         },
       });
@@ -202,14 +210,16 @@ describe('AgentUpgradeStatus', () => {
 
     it('should not render retry_until if the remaining time is negative', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_DOWNLOADING',
-          metadata: {
-            download_percent: 16.4,
-            retry_error_msg: 'unable to download',
-            retry_until: `${moment().subtract(10, 'minutes').toISOString()}`,
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_DOWNLOADING',
+            metadata: {
+              download_percent: 16.4,
+              retry_error_msg: 'unable to download',
+              retry_until: `${moment().subtract(10, 'minutes').toISOString()}`,
+            },
           },
         },
       });
@@ -225,13 +235,15 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_DOWNLOADING with a warning if agent has a retry_message', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_DOWNLOADING',
-          metadata: {
-            download_percent: 16.4,
-            retry_error_msg: 'unable to download',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_DOWNLOADING',
+            metadata: {
+              download_percent: 16.4,
+              retry_error_msg: 'unable to download',
+            },
           },
         },
       });
@@ -242,10 +254,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_EXTRACTING state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_EXTRACTING',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_EXTRACTING',
+          },
         },
       });
 
@@ -255,10 +269,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_REPLACING state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_REPLACING',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_REPLACING',
+          },
         },
       });
 
@@ -268,10 +284,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_RESTARTING state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_RESTARTING',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_RESTARTING',
+          },
         },
       });
 
@@ -281,10 +299,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_WATCHING state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_WATCHING',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_WATCHING',
+          },
         },
       });
 
@@ -294,10 +314,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_ROLLBACK state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_ROLLBACK',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_ROLLBACK',
+          },
         },
       });
 
@@ -307,13 +329,15 @@ describe('AgentUpgradeStatus', () => {
 
     it('should render UPG_FAILED state correctly', async () => {
       const results = render({
-        agentUpgradeDetails: {
-          target_version: 'XXX',
-          action_id: 'xxx',
-          state: 'UPG_FAILED',
-          metadata: {
-            failed_state: 'UPG_DOWNLOADING',
-            error_msg: 'Something went wrong',
+        agent: {
+          upgrade_details: {
+            target_version: 'XXX',
+            action_id: 'xxx',
+            state: 'UPG_FAILED',
+            metadata: {
+              failed_state: 'UPG_DOWNLOADING',
+              error_msg: 'Something went wrong',
+            },
           },
         },
       });
@@ -327,6 +351,8 @@ describe('AgentUpgradeStatus', () => {
     it('should render a badge with no tooltip if the agent is upgradable', () => {
       const results = render({
         isAgentUpgradable: true,
+        agent: { local_metadata: { elastic: { agent: { version: '8.11.0', upgradeable: true } } } },
+        latestAgentVersion: '8.12.0',
       });
 
       expectNoUpgradeStatusBadges(results);
@@ -334,10 +360,31 @@ describe('AgentUpgradeStatus', () => {
       expect(results.queryAllByText('Info')).toEqual([]);
     });
 
+    it('should not render a badge if the agent is on latest version', () => {
+      const results = render({
+        isAgentUpgradable: true,
+        agent: { local_metadata: { elastic: { agent: { version: '8.12.0', upgradeable: true } } } },
+        latestAgentVersion: '8.12.0',
+      });
+
+      expectNoUpgradeStatusBadges(results);
+      expect(results.queryByText('Upgrade available')).not.toBeInTheDocument();
+    });
+
+    it('should not render a badge if the agent is version is newer than latest version', () => {
+      const results = render({
+        isAgentUpgradable: true,
+        agent: { local_metadata: { elastic: { agent: { version: '8.12.0', upgradeable: true } } } },
+        latestAgentVersion: '8.11.0',
+      });
+
+      expectNoUpgradeStatusBadges(results);
+      expect(results.queryByText('Upgrade available')).not.toBeInTheDocument();
+    });
+
     it('should render an icon with tooltip if the agent is upgrading', async () => {
       const results = render({
-        agentUpgradeStartedAt: '2023-10-03T14:34:12Z',
-        agentUpgradedAt: null,
+        agent: { upgrade_started_at: '2023-10-03T14:34:12Z', upgraded_at: null },
       });
 
       expectNoUpgradeStatusBadges(results);
@@ -351,8 +398,12 @@ describe('AgentUpgradeStatus', () => {
 
     it('should not render anything if the agent is neither upgrading nor upgradable', () => {
       const results = render({
-        agentUpgradeStartedAt: null,
-        agentUpgradedAt: '2023-10-03T14:34:12Z',
+        agent: {
+          upgrade_started_at: null,
+          upgraded_at: '2023-10-03T14:34:12Z',
+          local_metadata: { elastic: { agent: { version: '8.12.0', upgradeable: true } } },
+        },
+        latestAgentVersion: '8.12.0',
       });
       expectNoUpgradeStatusBadges(results);
       expect(

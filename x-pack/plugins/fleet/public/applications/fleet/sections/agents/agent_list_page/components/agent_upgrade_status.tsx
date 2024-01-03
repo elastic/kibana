@@ -9,8 +9,11 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import moment from 'moment';
+import semverLt from 'semver/functions/lt';
 
+import type { Agent } from '../../../../types';
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
+import { getNotUpgradeableMessage } from '../../../../../../../common/services';
 
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
@@ -267,27 +270,21 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
 
 export const AgentUpgradeStatus: React.FC<{
   isAgentUpgradable: boolean;
-  agentUpgradeStartedAt?: string | null;
-  agentUpgradedAt?: string | null;
-  agentUpgradeDetails?: AgentUpgradeDetails;
-  notUpgradeableMessage?: string | null;
-  isAgentOnLatestVersion: boolean;
-}> = ({
-  isAgentUpgradable,
-  agentUpgradeStartedAt,
-  agentUpgradedAt,
-  agentUpgradeDetails,
-  notUpgradeableMessage,
-  isAgentOnLatestVersion,
-}) => {
+  agent: Agent;
+  latestAgentVersion?: string;
+}> = ({ isAgentUpgradable, agent, latestAgentVersion }) => {
   const isAgentUpgrading = useMemo(
-    () => agentUpgradeStartedAt && !agentUpgradedAt,
-    [agentUpgradeStartedAt, agentUpgradedAt]
+    () => agent.upgrade_started_at && !agent.upgraded_at,
+    [agent.upgrade_started_at, agent.upgraded_at]
   );
-  const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
+  const status = useMemo(() => getStatusComponents(agent.upgrade_details), [agent.upgrade_details]);
   const minVersion = '8.12';
+  const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
+  const isAgentLessThanLatestVersion =
+    !!latestAgentVersion &&
+    semverLt(agent.local_metadata?.elastic?.agent?.version, latestAgentVersion);
 
-  if (isAgentUpgradable && !isAgentOnLatestVersion) {
+  if (isAgentUpgradable && isAgentLessThanLatestVersion) {
     return (
       <EuiBadge color="hollow" iconType="sortUp">
         <FormattedMessage
@@ -298,7 +295,7 @@ export const AgentUpgradeStatus: React.FC<{
     );
   }
 
-  if (agentUpgradeDetails && status) {
+  if (agent.upgrade_details && status) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{status.Badge}</EuiFlexItem>

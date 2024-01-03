@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import semverEq from 'semver/functions/eq';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
@@ -31,8 +30,6 @@ import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
-
-import { getNotUpgradeableMessage } from '../../../../../../../common/services/is_agent_upgradeable';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -303,14 +300,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                       isAgentUpgradeable(agent, latestAgentVersion)
                     )
                   }
-                  agentUpgradeStartedAt={agent.upgrade_started_at}
-                  agentUpgradedAt={agent.upgraded_at}
-                  agentUpgradeDetails={agent.upgrade_details}
-                  notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
-                  isAgentOnLatestVersion={
-                    !!latestAgentVersion &&
-                    semverEq(agent.local_metadata?.elastic?.agent?.version, latestAgentVersion)
-                  }
+                  agent={agent}
+                  latestAgentVersion={latestAgentVersion}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
