@@ -10,14 +10,21 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiHorizontalRule, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
+import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
-import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -33,7 +40,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   } = useKibana().services;
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
-  
+
   const handleUntrackAlert = useCallback(async () => {
     if (alert) {
       await untrackAlerts({
@@ -41,8 +48,8 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         alertUuids: [alert.fields[ALERT_UUID]],
       });
     }
-  }, [untrackAlerts]);
-  
+  }, [alert, untrackAlerts]);
+
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
