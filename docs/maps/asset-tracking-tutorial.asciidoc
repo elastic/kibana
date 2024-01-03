@@ -40,7 +40,7 @@ To get to the fun of visualizing and alerting on Portland public transport vehic
 . In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted. 
 +
 .ILM policy definition
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
@@ -84,7 +84,7 @@ PUT _ilm/policy/tri_met_tracks
 . In **Console**, add the `tri_met_tracks_for_elastic_agent` ingest pipeline. 
 +
 .Ingest policy definition
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
@@ -147,7 +147,7 @@ PUT _ingest/pipeline/tri_met_tracks_for_elastic_agent
 . In *Console*, create the component and index template, which is configured to use datastreams and the previous ILM policy and ingest pipeline:
 +
 .Index component template
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
@@ -334,7 +334,7 @@ PUT _component_template/logs-httpjson.trimet@package
 ====
 +
 .Index template
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
@@ -424,7 +424,7 @@ POST kbn:/api/fleet/agent_policies?sys_monitoring=true
 Execute the following request from the **Console** to install a new Custom API integration. Put the corresponding values for the `policy_id` and `tri_met_app_id`.
 
 .Create a new Custom API integration
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
@@ -625,7 +625,7 @@ NOTE: For this example, you will set the rule to check every minute. However, wh
 . In the {kib} **Console** create a new index and Data view
 +
 .Create an index and Data View for the alerts
-[%collapsible]
+[%collapsible%open]
 ====
 [source,js]
 ----------------------------------
