@@ -15,13 +15,13 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/core-ui-settings-browser",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/visualization-utils",
   ]
 }
