@@ -113,6 +113,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            sortField: 'throughput',
+            sortDirection: 'desc',
           },
         },
       }),
