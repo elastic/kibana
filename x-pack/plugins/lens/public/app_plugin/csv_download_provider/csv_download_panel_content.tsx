@@ -13,6 +13,7 @@ export interface DownloadPanelContentProps {
   isDisabled: boolean;
   onClick: () => void;
   warnings?: React.ReactNode[];
+  onClose: () => void;
 }
 
 export function DownloadPanelContent({

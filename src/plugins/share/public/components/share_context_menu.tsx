@@ -152,6 +152,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
       });
     }
 
+    // licensing issue
     shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
       menuItems.push({

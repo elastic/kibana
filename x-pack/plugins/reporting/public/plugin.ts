@@ -236,7 +236,8 @@ export class ReportingPublicPlugin
     const reportingStart = this.getContract(shareSetup, core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([core, { licensing }]) => {
+    startServices$.subscribe(([coreStart, { licensing }]) => {
+      const { application, overlays, i18n: i18nStart } = coreStart;
       licensing.license$.subscribe((license) => {
         shareSetup.register(
           reportingCsvShareProvider({
@@ -244,11 +245,11 @@ export class ReportingPublicPlugin
             toasts,
             uiSettings,
             license,
-            application: core.application,
+            application,
             usesUiCapabilities,
             theme: core.theme,
-            overlays: core.overlays,
-            i18nStart: core.i18n,
+            overlays,
+            i18nStart,
             urlService: urlSetup,
           })
         );
@@ -260,11 +261,11 @@ export class ReportingPublicPlugin
               toasts,
               uiSettings,
               license,
-              application: core.application,
+              application,
               usesUiCapabilities,
               theme: core.theme,
-              overlays: core.overlays,
-              i18nStart: core.i18n,
+              overlays,
+              i18nStart,
               urlService: urlSetup,
             })
           );

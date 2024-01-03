@@ -7,6 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { ReportingPublicPlugin } from './plugin';
+import type { ReportingPublicComponents } from './shared/get_shared_components';
 
 /**
  * Setup contract for the Reporting plugin.
@@ -17,6 +18,12 @@ export interface ReportingSetup {
    *
    * @returns boolean
    */
+  usesUiCapabilities: () => boolean;
+
+  /**
+   * A set of React components for displaying a Reporting share menu in an application
+   */
+  components: ReportingPublicComponents;
 }
 
 /**
@@ -28,6 +35,7 @@ export type ReportingStart = ReportingSetup;
  * Public interface needed for shared components
  */
 export type { ApplicationProps } from './shared';
+export type { ReportingPublicComponents };
 
 /**
  * @internal

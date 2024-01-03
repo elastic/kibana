@@ -14,7 +14,7 @@ import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { checkLicense } from '../lib/license_check';
-import { ExportPanelShareOpts, JobParamsProviderOptions } from '.';
+import { ExportPanelShareOpts } from '.';
 import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
@@ -122,37 +122,8 @@ export const reportingCsvShareProvider = ({
     return shareActions;
   };
 
-  const getJobsParams = ({ objectType, sharingData }: ShareContext) => {
-    const getSearchSource = sharingData.getSearchSource as ({
-      addGlobalTimeFilter,
-      absoluteTime,
-    }: {
-      addGlobalTimeFilter?: boolean;
-      absoluteTime?: boolean;
-    }) => SearchSourceFields;
-
-    const jobParams = {
-      title: sharingData.title as string,
-      objectType,
-      columns: sharingData.columns as string[] | undefined,
-    };
-
-    const getJobParams = (forShareUrl?: boolean) => {
-      return {
-        ...jobParams,
-        searchSource: getSearchSource({
-          addGlobalTimeFilter: true,
-          absoluteTime: !forShareUrl,
-        }),
-      };
-    };
-    console.log({ getJobParams });
-    return getJobParams;
-  };
-
   return {
     id: 'csvReports',
     getShareMenuItems,
-    jobProviderOptions: getJobsParams as unknown as JobParamsProviderOptions,
   };
 };
