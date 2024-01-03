@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -53,9 +53,11 @@ export const postEvaluateRoute = (
         query: buildRouteValidation(PostEvaluatePathQuery),
       },
     },
+    // TODO: Limit route based on experimental feature
     async (context, request, response) => {
-      // TODO: Limit route based on experimental feature
-      const logger: Logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
       try {
         const evaluationId = uuidv4();
         const {
@@ -112,7 +114,8 @@ export const postEvaluateRoute = (
         // Default ELSER model
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-        // Skeleton request to satisfy `subActionParams` spread in `ActionsClientLlm`
+        // Skeleton request from route to pass to the agents
+        // params will be passed to the actions executor
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
@@ -127,7 +130,8 @@ export const postEvaluateRoute = (
             },
             replacements: {},
             size: DEFAULT_SIZE,
-            assistantLangChain: true,
+            isEnabledKnowledgeBase: true,
+            isEnabledRAGAlerts: true,
           },
         };
 
@@ -146,7 +150,7 @@ export const postEvaluateRoute = (
               agentEvaluator: (langChainMessages, exampleId) =>
                 AGENT_EXECUTOR_MAP[agentName]({
                   actions,
-                  assistantLangChain: true,
+                  isEnabledKnowledgeBase: true,
                   assistantTools,
                   connectorId,
                   esClient,
@@ -156,6 +160,7 @@ export const postEvaluateRoute = (
                   logger,
                   request: skeletonRequest,
                   kbResource: ESQL_RESOURCE,
+                  telemetry,
                   traceOptions: {
                     exampleId,
                     projectName,
