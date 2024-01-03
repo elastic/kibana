@@ -118,7 +118,6 @@ export class ElasticAssistantPlugin
     postActionsConnectorExecuteRoute(router, getElserId);
     // Evaluate
     postEvaluateRoute(router, getElserId);
-    console.log('helloworld config', this.config);
     return {
       actions: plugins.actions,
       getRegisteredTools: (pluginName: string) => {

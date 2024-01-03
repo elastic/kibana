@@ -63,9 +63,9 @@ export const callAgentExecutor = async ({
     temperature: 0,
     streaming: true,
     azureOpenAIApiKey: azureCreds.secrets.apiKey,
-    azureOpenAIApiVersion: '2023-07-01-preview',
-    azureOpenAIApiInstanceName: 'jamesopenai',
-    azureOpenAIApiDeploymentName: 'James-security-gpt4',
+    azureOpenAIApiVersion: azureCreds.secrets.apiVersion,
+    azureOpenAIApiInstanceName: azureCreds.secrets.apiInstanceName,
+    azureOpenAIApiDeploymentName: azureCreds.secrets.apiDeploymentName,
   });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
@@ -136,7 +136,7 @@ export const callAgentExecutor = async ({
       input: latestMessage[0].content,
       chat_history: [],
     });
-    console.log('helloworld logStream', logStream);
+
     const textEncoder = new TextEncoder();
     const transformStream = new ReadableStream({
       async start(controller) {
