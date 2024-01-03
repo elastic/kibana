@@ -68,6 +68,7 @@ export const EditWarning: FunctionComponent = () => {
     indexTemplatesLink
   );
   const isManagedPolicy = policy?._meta?.managed;
+  const isDeprecatedPolicy = policy?.deprecated;
 
   return (
     <>
@@ -102,6 +103,30 @@ export const EditWarning: FunctionComponent = () => {
             <EuiSpacer />
           </>
         )}
+        {isDeprecatedPolicy && (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyTitle"
+                  defaultMessage="This policy is deprecated"
+                />
+              }
+              color="warning"
+              iconType="warning"
+              data-test-subj="editManagedPolicyWithDeprecation"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyDescription"
+                  defaultMessage="This policy is deprecated and should not be relied on."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
         <p>
           <strong>
             <FormattedMessage

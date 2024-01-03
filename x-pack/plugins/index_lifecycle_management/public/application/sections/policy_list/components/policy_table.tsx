@@ -69,6 +69,18 @@ const managedPolicyTooltips = {
   ),
 };
 
+const deprecatedPolicyTooltips = {
+  badge: i18n.translate('xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedLabel', {
+    defaultMessage: 'Deprecated',
+  }),
+  badgeTooltip: i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedDescription',
+    {
+      defaultMessage: 'This policy is deprecated and should not be relied on.',
+    }
+  ),
+};
+
 interface Props {
   policies: PolicyFromES[];
 }
@@ -124,6 +136,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       sortable: true,
       render: (value: string, item) => {
         const isManaged = item.policy?._meta?.managed;
+        const isDeprecated = item.policy?.deprecated;
+
         return (
           <>
             <EuiLink
@@ -135,6 +149,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             >
               {value}
             </EuiLink>
+
+            {isDeprecated && (
+              <>
+                &nbsp;
+                <EuiToolTip content={deprecatedPolicyTooltips.badgeTooltip}>
+                  <EuiBadge color="warning" data-test-subj="deprecatedPolicyBadge">
+                    {deprecatedPolicyTooltips.badge}
+                  </EuiBadge>
+                </EuiToolTip>
+              </>
+            )}
 
             {isManaged && (
               <>
