@@ -86,7 +86,7 @@ export async function getDocumentSources({
     ApmDocumentType.TransactionMetric as const,
   ];
 
-  const documentsAvailability = await getDocumentsAvailability({
+  const documentTypesInfo = await getDocumentTypesInfo({
     apmEventClient,
     start,
     end,
@@ -95,14 +95,12 @@ export async function getDocumentSources({
     documentTypesToCheck,
   });
 
-  const sources = documentTypesToCheck.flatMap((documentType) =>
-    getDocumentTypeInfo(documentType, documentsAvailability)
+  const hasAnySourceDocBefore = documentTypesInfo.some(
+    (source) => source.hasDocBefore
   );
 
-  const hasAnySourceDocBefore = sources.some((source) => source.hasDocBefore);
-
   return [
-    ...mapToSources(sources, hasAnySourceDocBefore),
+    ...mapToSources(documentTypesInfo, hasAnySourceDocBefore),
     {
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
@@ -112,7 +110,7 @@ export async function getDocumentSources({
   ];
 }
 
-const getDocumentsAvailability = async ({
+const getDocumentTypesInfo = async ({
   apmEventClient,
   start,
   end,
@@ -127,14 +125,14 @@ const getDocumentsAvailability = async ({
   enableContinuousRollups: boolean;
   documentTypesToCheck: ApmDocumentType[];
 }) => {
-  const getQueries = getDocumentTypeQueriesFn({
+  const getRequests = getDocumentTypeRequestsFn({
     enableContinuousRollups,
     start,
     end,
     kuery,
   });
 
-  const sourceRequests = documentTypesToCheck.flatMap(getQueries);
+  const sourceRequests = documentTypesToCheck.flatMap(getRequests);
 
   const allSearches = sourceRequests
     .flatMap(({ before, current, durationSummaryCheck }) => [
@@ -153,6 +151,7 @@ const getDocumentsAvailability = async ({
 
   return sourceRequests.map(({ documentType, rollupInterval, ...queries }) => {
     const numberOfQueries = Object.values(queries).filter(Boolean).length;
+    // allResponses is sorted by the order of the requests in sourceRequests
     const docTypeResponses = allResponses.splice(0, numberOfQueries);
 
     return {
@@ -160,19 +159,14 @@ const getDocumentsAvailability = async ({
       rollupInterval,
       hasDocBefore: docTypeResponses[QUERY_INDEX.BEFORE].hits.total.value > 0,
       hasDocAfter: docTypeResponses[QUERY_INDEX.CURRENT].hits.total.value > 0,
-      hasDurationSummary: !!docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
+      hasDurationSummary: docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
         ? docTypeResponses[QUERY_INDEX.DURATION_SUMMARY].hits.total.value === 0
         : true,
     };
   });
 };
 
-const getDocumentTypeInfo = (
-  documentType: ApmDocumentType,
-  allDocuments: DocumentTypeData[]
-) => allDocuments.filter((doc) => doc.documentType === documentType);
-
-const getDocumentTypeQueriesFn =
+const getDocumentTypeRequestsFn =
   ({
     enableContinuousRollups,
     start,
