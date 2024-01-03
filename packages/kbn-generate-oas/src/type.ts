@@ -13,7 +13,7 @@ export interface OpenAPIConverter {
     schema: unknown,
     pathParameters: string[],
     inType: 'path' | 'query'
-  ): OpenAPIV3.ParameterObject[];
+  ): OpenAPIV3.ParameterObject[] | undefined;
 
   convert(schema: unknown): OpenAPIV3.BaseSchemaObject;
 
