@@ -21,11 +21,27 @@ export const ASK_QUESTIONS_ABOUT = i18n.translate(
   }
 );
 
-export const LATEST_AND_RISKIEST_OPEN_ALERTS = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
+export const LATEST_AND_RISKIEST_OPEN_ALERTS = (alertsCount: number) =>
+  i18n.translate(
+    'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
+    {
+      defaultMessage:
+        'Send AI Assistant information about your {alertsCount} newest and riskiest open or acknowledged alerts.',
+      values: { alertsCount },
+    }
+  );
+
+export const YOUR_ANONYMIZATION_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.yourAnonymizationSettingsLabel',
   {
-    defaultMessage:
-      'latest and riskiest open alerts in your environment. Your Anonymization settings will be applied to the alerts',
+    defaultMessage: 'Your anonymization settings will apply to these alerts.',
+  }
+);
+
+export const SELECT_FEWER_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.selectFewerAlertsLabel',
+  {
+    defaultMessage: "Send fewer alerts if the model's context window is too small.",
   }
 );
 

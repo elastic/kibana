@@ -23,12 +23,17 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion } from '../../../../../hooks';
-import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
+import {
+  ExperimentalFeaturesService,
+  isAgentUpgradeable,
+  getNotUpgradeableMessage,
+} from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
+import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -173,18 +178,21 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>
-                    {latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion) ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          position="right"
-                          content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
-                            defaultMessage: 'Upgrade available',
-                          })}
-                        >
-                          <EuiIcon type="warning" color="warning" />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <AgentUpgradeStatus
+                        isAgentUpgradable={
+                          !!(
+                            agentPolicy?.is_managed !== true &&
+                            latestAgentVersion &&
+                            isAgentUpgradeable(agent, latestAgentVersion)
+                          )
+                        }
+                        agentUpgradeStartedAt={agent.upgrade_started_at}
+                        agentUpgradedAt={agent.upgraded_at}
+                        agentUpgradeDetails={agent.upgrade_details}
+                        notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
                   '-'

@@ -38,6 +38,7 @@ export const ConnectorsOverview = () => {
         pageTitle={i18n.translate('xpack.serverlessSearch.connectors.title', {
           defaultMessage: 'Connectors',
         })}
+        data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
         rightSideItems={[
           <EuiFlexGroup direction="row" alignItems="flexStart">
