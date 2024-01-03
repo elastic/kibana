@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiIconTip,
   EuiSwitchEvent,
+  EuiCopy,
 } from '@elastic/eui';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
@@ -440,9 +441,16 @@ export class LinkModal extends Component<LinkModalProps, State> {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButton fill onClick={() => this.state.url}>
-                    <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
-                  </EuiButton>
+                  <EuiCopy textToCopy={this.state.url ?? ''}>
+                    {(copy) => (
+                      <EuiButton fill onClick={copy}>
+                        <FormattedMessage
+                          id="share.link.copyLinkButton"
+                          defaultMessage="Copy link"
+                        />
+                      </EuiButton>
+                    )}
+                  </EuiCopy>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
