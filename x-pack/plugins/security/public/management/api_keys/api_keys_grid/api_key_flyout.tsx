@@ -302,7 +302,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     <EuiTitle size="xs">
                       <h4>
                         <FormattedMessage
-                          id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                          id="xpack.security.accountManagement.apiKeyFlyout.overviewLabel"
                           defaultMessage="Overview"
                         />
                       </h4>
@@ -462,16 +462,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       />
                     </FormRow>
                     {canManageCrossClusterApiKeys ? (
-                      <FormRow
-                        name="type"
-                        label={
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                            defaultMessage="Type"
-                          />
-                        }
-                        fullWidth
-                      >
+                      <FormRow name="type" label={<TypeLabel />} fullWidth>
                         <EuiFlexGroup gutterSize="m">
                           <EuiFlexItem>
                             <EuiCheckableCard
@@ -528,14 +519,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         </EuiFlexGroup>
                       </FormRow>
                     ) : (
-                      <EuiFormRow
-                        label={
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                            defaultMessage="Type"
-                          />
-                        }
-                      >
+                      <EuiFormRow label={<TypeLabel />}>
                         <ApiKeyBadge type="rest" />
                       </EuiFormRow>
                     )}
@@ -929,6 +913,13 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     </FormikProvider>
   );
 };
+
+const TypeLabel = () => (
+  <FormattedMessage
+    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+    defaultMessage="Type"
+  />
+);
 
 export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateAPIKeyParams {
   const { type, name } = values;
