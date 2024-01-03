@@ -358,6 +358,74 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
     }
   };
 
+  private renderShortUrlSwitch = () => {
+    if (
+      this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
+      !this.props.allowShortUrl
+    ) {
+      return null;
+    }
+    const shortUrlLabel = (
+      <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
+    );
+
+    const switchLabel = this.state.isCreatingShortUrl ? (
+      <span>
+        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+      </span>
+    ) : (
+      shortUrlLabel
+    );
+
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.useShortUrl}
+        onChange={this.handleShortUrlChange}
+        data-test-subj="useShortUrl"
+      />
+    );
+
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.shortUrlHelpText"
+        defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+          Internet Explorer has URL length restrictions,
+          and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+          but the short URL should work great."
+      />
+    );
+
+    return (
+      <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private handleExportUrlAs = (optionId: string) => {
+    this.setState(
+      {
+        showWarningButton:
+          Boolean(this.props.snapshotShareWarning) &&
+          (optionId as ExportUrlAsType) === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
+        exportUrlAs: optionId as ExportUrlAsType,
+      },
+      this.setUrl
+    );
+  };
+
+  private renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   public render() {
     const dashboardUrlParams = {
       showTopMenu: 'show-top-menu',
@@ -412,63 +480,6 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
       },
     ];
 
-    const renderShortUrlSwitch = () => {
-      if (
-        this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
-        !this.props.allowShortUrl
-      ) {
-        return null;
-      }
-
-      const shortUrlLabel = (
-        <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
-      );
-
-      const switchLabel = this.state.isCreatingShortUrl ? (
-        <span>
-          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-        </span>
-      ) : (
-        shortUrlLabel
-      );
-
-      const switchComponent = (
-        <EuiSwitch
-          label={switchLabel}
-          checked={this.state.useShortUrl}
-          onChange={this.handleShortUrlChange}
-          data-test-subj="useShortUrl"
-        />
-      );
-
-      const tipContent = (
-        <FormattedMessage
-          id="share.urlPanel.shortUrlHelpText"
-          defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
-            Internet Explorer has URL length restrictions,
-            and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-            but the short URL should work great."
-        />
-      );
-
-      return (
-        <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
-          {renderWithIconTip(switchComponent, tipContent)}
-        </EuiFormRow>
-      );
-    };
-
-    const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-      return (
-        <EuiFlexGroup gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={tipContent} position="bottom" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    };
-
     const handleChange = (param: string): void => {
       const newSelectedMap = {
         ...this.state.urlParamsSelectedMap,
@@ -512,9 +523,9 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                 <EuiFlexItem grow={0}>
                   <EuiRadioGroup
                     options={radioOptions}
-                    onChange={(id) => this.setState({ selectedRadio: id })}
+                    onChange={this.handleExportUrlAs}
                     name="embed radio group"
-                    idSelected={this.state.selectedRadio}
+                    idSelected={this.state.exportUrlAs}
                     legend={{
                       children: <span>Generate as</span>,
                     }}
@@ -525,7 +536,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
           </EuiModalBody>
           <EuiModalFooter>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>{this.props.allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
+              <EuiFlexItem>{this.props.allowShortUrl && this.renderShortUrlSwitch()}</EuiFlexItem>
               <EuiFlexItem grow={0}>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
