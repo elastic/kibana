@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { hostSnapshotMetricTypes } from '../../../../../../common/inventory_models/host';
+import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 

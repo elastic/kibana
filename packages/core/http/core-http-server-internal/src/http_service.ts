@@ -71,7 +71,7 @@ export class HttpService
     this.env = env;
     this.log = logger.get('http');
     this.config$ = combineLatest([
-      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
@@ -85,7 +85,9 @@ export class HttpService
     this.log.debug('setting up preboot server');
     const config = await firstValueFrom(this.config$);
 
-    const prebootSetup = await this.prebootServer.setup(config);
+    const prebootSetup = await this.prebootServer.setup({
+      config$: this.config$,
+    });
     prebootSetup.server.route({
       path: '/{p*}',
       method: '*',
@@ -102,7 +104,7 @@ export class HttpService
       },
     });
 
-    registerCoreHandlers(prebootSetup, config, this.env);
+    registerCoreHandlers(prebootSetup, config, this.env, this.log);
 
     if (this.shouldListen(config)) {
       this.log.debug('starting preboot server');
@@ -157,12 +159,12 @@ export class HttpService
 
     const config = await firstValueFrom(this.config$);
 
-    const { registerRouter, ...serverContract } = await this.httpServer.setup(
-      config,
-      deps.executionContext
-    );
+    const { registerRouter, ...serverContract } = await this.httpServer.setup({
+      config$: this.config$,
+      executionContext: deps.executionContext,
+    });
 
-    registerCoreHandlers(serverContract, config, this.env);
+    registerCoreHandlers(serverContract, config, this.env, this.log);
 
     this.internalSetup = {
       ...serverContract,
@@ -199,7 +201,7 @@ export class HttpService
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
-      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo']),
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       isListening: () => this.httpServer.isListening(),
     };
   }

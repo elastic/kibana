@@ -39,7 +39,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/traefik.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/traefik.svg'),
     artifacts: {
       dashboards: [
         {

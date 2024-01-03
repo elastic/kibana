@@ -40,6 +40,7 @@ import {
   CasesFindRequestSortFieldsRt,
   CasesFindResponseRt,
   CasesPatchRequestRt,
+  CasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
@@ -457,6 +458,50 @@ describe('CasesFindRequestRt', () => {
       expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
         'The length of the field reporters is too long. Array must be of length <= 100.'
       );
+    });
+  });
+});
+
+describe('CasesSearchRequestRt', () => {
+  const defaultRequest = {
+    tags: ['new', 'case'],
+    status: CaseStatuses.open,
+    severity: CaseSeverity.LOW,
+    assignees: ['damaged_racoon'],
+    reporters: ['damaged_racoon'],
+    defaultSearchOperator: 'AND',
+    from: 'now',
+    page: '1',
+    perPage: '10',
+    search: 'search text',
+    searchFields: ['title', 'description'],
+    to: '1w',
+    sortOrder: 'desc',
+    sortField: 'createdAt',
+    owner: 'cases',
+    customFields: {
+      toggle_custom_field_key: [true],
+      another_custom_field: [null, false],
+      text_custom_field: ['hello'],
+      number_custom_field: [1234],
+    },
+  };
+
+  it('has expected attributes in request', () => {
+    const query = CasesSearchRequestRt.decode(defaultRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
+    });
+  });
+
+  it('removes foo:bar attributes from request', () => {
+    const query = CasesSearchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
     });
   });
 });

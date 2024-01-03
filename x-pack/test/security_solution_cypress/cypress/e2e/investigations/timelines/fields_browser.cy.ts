@@ -18,7 +18,6 @@ import {
   FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import {
   addsHostGeoCityNameToTimeline,
@@ -53,10 +52,6 @@ const defaultHeaders = [
 // Flaky in serverless tests
 // FLAKY: https://github.com/elastic/kibana/issues/169363
 describe.skip('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   context('Fields Browser rendering', () => {
     beforeEach(() => {
       login();

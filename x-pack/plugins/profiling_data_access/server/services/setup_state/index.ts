@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { CloudSetupStateType } from '../../../common/cloud_setup';
 import { SetupStateType } from '../../../common/setup';
@@ -14,7 +14,7 @@ import { selfManagedSetupState } from './self_managed_setup_state';
 
 export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   spaceId?: string;
 }
 
@@ -26,12 +26,12 @@ export async function getSetupState({
   soClient,
   spaceId,
 }: RegisterServicesParams & SetupStateParams): Promise<CloudSetupStateType | SetupStateType> {
-  const clientWithDefaultAuth = createProfilingEsClient({
-    esClient,
-    useDefaultAuth: true,
+  const kibanaInternalProfilingESClient = createProfilingEsClient({
+    esClient: esClient.asInternalUser,
+    useDefaultAuth: false,
   });
-  const clientWithProfilingAuth = createProfilingEsClient({
-    esClient,
+  const profilingESClient = createProfilingEsClient({
+    esClient: esClient.asCurrentUser,
     useDefaultAuth: false,
   });
 
@@ -42,8 +42,8 @@ export async function getSetupState({
     }
 
     const setupState = await cloudSetupState({
-      client: clientWithDefaultAuth,
-      clientWithProfilingAuth,
+      client: kibanaInternalProfilingESClient,
+      clientWithProfilingAuth: profilingESClient,
       logger,
       soClient,
       spaceId: spaceId ?? DEFAULT_SPACE_ID,
@@ -58,8 +58,8 @@ export async function getSetupState({
   }
 
   const setupState = await selfManagedSetupState({
-    client: clientWithDefaultAuth,
-    clientWithProfilingAuth,
+    client: kibanaInternalProfilingESClient,
+    clientWithProfilingAuth: profilingESClient,
     logger,
     soClient,
     spaceId: spaceId ?? DEFAULT_SPACE_ID,

@@ -103,6 +103,22 @@ Based on the criteria above, define the following rule details:
 * **Group alerts by** - `service.name` `service.environment`
 * **Check every** - `1 minute`
 
+[NOTE]
+====
+Alternatively, you can use a KQL filter to limit the scope of the alert:
+
+. Toggle on *Use KQL Filter*.
+. Add a filter, for example to achieve the same effect as the example above:
++
+[source,txt]
+------
+service.name:"{your_service.name}" and service.environment:"{your_service.environment}" and error.grouping_key:"{your_error.ID}"
+------
+
+Using a KQL Filter to limit the scope is available for _Latency threshold_, _Failed transaction rate threshold_, and
+_Error count threshold_ rules.
+====
+
 Select the **Email** connector and click **Create a connector**.
 Fill out the required details: sender, host, port, etc., and click **save**.
 

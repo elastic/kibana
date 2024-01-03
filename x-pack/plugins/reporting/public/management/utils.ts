@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { JOB_STATUSES } from '../../common/constants';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '../lib/job';
 
 /**
@@ -35,6 +35,6 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const jobHasIssues = (job: Job): boolean => {
   return (
     Boolean(job.getWarnings()) ||
-    [JOB_STATUSES.WARNINGS, JOB_STATUSES.FAILED].some((status) => job.status === status)
+    [JOB_STATUS.WARNINGS, JOB_STATUS.FAILED].some((status) => job.status === status)
   );
 };

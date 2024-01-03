@@ -10,14 +10,15 @@ import { i18n } from '@kbn/i18n';
 export const INSTALL_PREBUILT_RULES_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.installPrebuiltRules.title',
   {
-    defaultMessage: 'Load the Elastic prebuilt rules',
+    defaultMessage: 'Install your first prebuilt rule',
   }
 );
 
 export const INSTALL_PREBUILT_RULES_CONTENT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.installPrebuiltRules.content',
   {
-    defaultMessage: 'To get started you need to load the Elastic prebuilt rules.',
+    defaultMessage:
+      'Navigate to the Add Elastic Rules page and install the example "My First Rule".',
   }
 );
 

@@ -16,6 +16,7 @@ export interface InjectedMetadataClusterInfo {
   cluster_uuid?: string;
   cluster_name?: string;
   cluster_version?: string;
+  cluster_build_flavor?: string;
 }
 
 /** @internal */
@@ -42,6 +43,7 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
+  assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
   env: {
     mode: EnvironmentMode;

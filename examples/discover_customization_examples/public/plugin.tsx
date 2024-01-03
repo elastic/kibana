@@ -163,6 +163,17 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               order: 300,
             },
           ],
+          getBadges: () => {
+            return [
+              {
+                data: {
+                  badgeText: 'Example badge',
+                  color: 'warning',
+                },
+                order: 10,
+              },
+            ];
+          },
         });
 
         customizations.set({
@@ -202,7 +213,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}
@@ -269,7 +279,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       {currentSavedSearch.title ?? 'None selected'}
                     </EuiButton>
                   }
-                  anchorClassName="eui-fullWidth"
                   isOpen={isPopoverOpen}
                   panelPaddingSize="none"
                   closePopover={closePopover}

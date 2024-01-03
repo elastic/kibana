@@ -6,6 +6,8 @@
  */
 
 import {
+  metricCustomBasicMetric,
+  metricCustomDocCountMetric,
   MetricCustomIndicator,
   timesliceMetricBasicMetricWithField,
   TimesliceMetricIndicator,
@@ -31,7 +33,16 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const data = getValues('indicator.params.good') as MetricCustomIndicator['params']['good'];
         const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
         const areMetricsValid =
-          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
+          isObject(data) &&
+          (data.metrics ?? []).every((metric) => {
+            if (metricCustomDocCountMetric.is(metric)) {
+              return true;
+            }
+            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+              return true;
+            }
+            return false;
+          });
         return isEquationValid && areMetricsValid;
       };
 
@@ -41,7 +52,16 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         ) as MetricCustomIndicator['params']['total'];
         const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
         const areMetricsValid =
-          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
+          isObject(data) &&
+          (data.metrics ?? []).every((metric) => {
+            if (metricCustomDocCountMetric.is(metric)) {
+              return true;
+            }
+            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+              return true;
+            }
+            return false;
+          });
         return isEquationValid && areMetricsValid;
       };
 

@@ -6,23 +6,25 @@
  */
 
 import moment from 'moment';
+import { omit } from 'lodash';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -36,8 +38,20 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const MOCKED_AD_HOC_DATA_VIEW = {
+      id: DATA_VIEW_ID,
+      title: DATE_VIEW_TITLE,
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: DATE_VIEW_NAME,
+      allowHidden: false,
+    };
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
@@ -46,12 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
-        name: DATE_VIEW,
-        id: DATA_VIEW_ID,
-        title: DATE_VIEW,
-      });
     });
 
     after(async () => {
@@ -64,10 +72,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
-      });
-      await deleteDataView({
-        supertest,
-        id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
       await cleanup({ esClient, logger });
@@ -90,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
@@ -107,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
                 query: '',
                 language: 'kuery',
               },
-              index: DATA_VIEW_ID,
+              index: MOCKED_AD_HOC_DATA_VIEW,
             },
           },
           actions: [
@@ -122,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
                     host: '{{context.host}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -157,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold (Beta)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -187,7 +191,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>',
                 threshold: [0.5],
                 timeSize: 5,
@@ -197,7 +200,10 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: MOCKED_AD_HOC_DATA_VIEW,
+              query: { query: '', language: 'kuery' },
+            },
           });
       });
 
@@ -213,9 +219,21 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW})`
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
+
+        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATE_VIEW_TITLE,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

@@ -135,7 +135,7 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     }
   }
 
-  async createJob(
+  private async createJob(
     chartInfo: ChartInfo,
     startString: string,
     endString: string,

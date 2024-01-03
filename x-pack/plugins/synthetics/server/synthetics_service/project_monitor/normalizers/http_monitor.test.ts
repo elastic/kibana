@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -37,7 +37,6 @@ describe('http normalizers', () => {
         id: 'germany',
         label: 'Germany',
         isServiceManaged: false,
-        concurrentMonitors: 1,
         agentPolicyId: 'germany',
       },
     ];
@@ -139,7 +138,7 @@ describe('http normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -196,7 +195,7 @@ describe('http normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -279,7 +278,7 @@ describe('http normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -336,7 +335,7 @@ describe('http normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: false,
             },

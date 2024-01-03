@@ -120,6 +120,7 @@ export interface VisualizationType {
 
 export interface CellValueAction {
   id: string;
+  type?: string;
   iconType: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

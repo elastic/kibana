@@ -34,5 +34,6 @@
       "file": "datafeed_k8s_network_out.json",
       "job_id": "k8s_network_out"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

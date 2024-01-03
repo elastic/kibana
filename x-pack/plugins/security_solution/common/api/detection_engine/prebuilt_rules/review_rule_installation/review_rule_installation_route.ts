@@ -6,7 +6,7 @@
  */
 
 import type { RuleTagArray } from '../../model';
-import type { RuleResponse } from '../../model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../model/rule_schema';
 
 export interface ReviewRuleInstallationResponseBody {
   /** Aggregated info about all rules available for installation */

@@ -1,8 +1,8 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
-  version: "1.0.1"
+  version: "1.0.2"
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
@@ -10,7 +10,7 @@ tags:
   - name: ml
     description: Machine learning
 servers:
-  - url: https://localhost:5601
+  - url: /
 paths:
   /api/ml/saved_objects/sync:
     get:
@@ -82,7 +82,8 @@ components:
     required: false
     schema:
       type: boolean
-    example: 'true'
+      examples:
+        - true
  securitySchemes:
   basicAuth:
     type: http
@@ -187,12 +188,14 @@ components:
       properties:
         error:
           type: string
-          example: Unauthorized
+          examples:
+            - Unauthorized
         message:
           type: string 
         statusCode:
           type: integer
-          example: 401
+          examples:
+            - 401
  examples:
    mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.

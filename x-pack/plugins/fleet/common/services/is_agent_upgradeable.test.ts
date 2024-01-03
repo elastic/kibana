@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import type { Agent } from '../types/models/agent';
+import type { Agent, AgentUpgradeDetails } from '../types/models/agent';
 
-import { getRecentUpgradeInfoForAgent, isAgentUpgradeable } from './is_agent_upgradeable';
+import {
+  getRecentUpgradeInfoForAgent,
+  isAgentUpgradeable,
+  isAgentUpgrading,
+  getNotUpgradeableMessage,
+} from './is_agent_upgradeable';
 
 const getAgent = ({
   version,
   upgradeable = false,
   unenrolling = false,
   unenrolled = false,
-  updating = false,
+  upgrading = false,
+  upgradeDetails,
   minutesSinceUpgrade,
 }: {
   version: string;
   upgradeable?: boolean;
   unenrolling?: boolean;
   unenrolled?: boolean;
-  updating?: boolean;
+  upgrading?: boolean;
+  upgradeDetails?: AgentUpgradeDetails;
   minutesSinceUpgrade?: number;
 }): Agent => {
   const agent: Agent = {
@@ -98,8 +105,11 @@ const getAgent = ({
   if (unenrolled) {
     agent.unenrolled_at = '2020-10-01T14:43:27.255Z';
   }
-  if (updating) {
+  if (upgrading) {
     agent.upgrade_started_at = new Date(Date.now()).toISOString();
+  }
+  if (upgradeDetails) {
+    agent.upgrade_details = upgradeDetails;
   }
   if (minutesSinceUpgrade) {
     agent.upgraded_at = new Date(Date.now() - minutesSinceUpgrade * 6e4).toISOString();
@@ -171,10 +181,48 @@ describe('Fleet - isAgentUpgradeable', () => {
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.9.0')
     ).toBe(false);
   });
-  it('returns false if agent reports upgradeable, but is already updating', () => {
+  it('returns false if agent with no upgrade details reports upgradeable, but is already upgrading', () => {
     expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, updating: true }), '8.0.0')
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true, upgrading: true }),
+        '8.0.0'
+      )
     ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, but has an upgrade status other than failed', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({
+          version: '7.9.0',
+          upgradeable: true,
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_REQUESTED',
+          },
+        }),
+        '8.0.0'
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable and has a failed upgrade status', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({
+          version: '7.9.0',
+          upgradeable: true,
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Upgrade timed out',
+            },
+          },
+        }),
+        '8.0.0'
+      )
+    ).toBe(true);
   });
   it('returns false if the agent reports upgradeable but was upgraded less than 10 minutes ago', () => {
     expect(
@@ -191,6 +239,154 @@ describe('Fleet - isAgentUpgradeable', () => {
         '8.0.0'
       )
     ).toBe(true);
+  });
+});
+
+describe('Fleet - getNotUpgradeableMessage', () => {
+  it('if agent reports not upgradeable with agent version < latest agent version', () => {
+    expect(getNotUpgradeableMessage(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
+    );
+  });
+
+  it('if agent reports not upgradeable with agent version > latest agent version', () => {
+    expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
+    );
+  });
+
+  it('returns false if agent reports not upgradeable with agent version === latest agent version', () => {
+    expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(
+      'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
+    );
+  });
+
+  it('if agent reports upgradeable, with agent version === latest agent version', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '8.0.0')
+    ).toBe('agent is already running on the latest available version.');
+  });
+
+  it('if agent reports upgradeable, with agent version > latest agent version', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '7.9.0')
+    ).toBe('agent is running on a version greater than the latest available version.');
+  });
+
+  it('if agent reports upgradeable, but agent is unenrolling', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true, unenrolling: true }),
+        '8.0.0'
+      )
+    ).toBe('agent is being unenrolled.');
+  });
+
+  it('if agent reports upgradeable, but agent is unenrolled', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true, unenrolled: true }),
+        '8.0.0'
+      )
+    ).toBe('agent has been unenrolled.');
+  });
+
+  it('Returns no error message if agent reports upgradeable, with agent version < latest agent version', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0')
+    ).toBeUndefined();
+  });
+
+  it('if agent reports upgradeable, with agent snapshot version === latest agent version', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }), '7.9.0')
+    ).toBe('agent is already running on the latest available version.');
+  });
+
+  it('it does not return message if agent reports upgradeable, with upgrade to agent snapshot version newer than latest agent version', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '8.10.2', upgradeable: true }),
+        '8.10.2',
+        '8.11.0-SNAPSHOT'
+      )
+    ).toBeUndefined();
+  });
+
+  it('if agent reports upgradeable, with target version < current agent version ', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.8.0')
+    ).toBe('agent does not support downgrades.');
+  });
+
+  it('if agent reports upgradeable, with target version == current agent version ', () => {
+    expect(
+      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.9.0')
+    ).toBe('agent is already running on the selected version.');
+  });
+
+  it('if agent with no upgrade details reports upgradeable, but is already upgrading', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true, upgrading: true }),
+        '8.0.0'
+      )
+    ).toBe('agent is already being upgraded.');
+  });
+
+  it('if agent reports upgradeable, but has an upgrade status other than failed', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({
+          version: '7.9.0',
+          upgradeable: true,
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_REQUESTED',
+          },
+        }),
+        '8.0.0'
+      )
+    ).toBe('agent is already being upgraded.');
+  });
+
+  it('it does not return a message if agent reports upgradeable and has a failed upgrade status', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({
+          version: '7.9.0',
+          upgradeable: true,
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Upgrade timed out',
+            },
+          },
+        }),
+        '8.0.0'
+      )
+    ).toBeUndefined();
+  });
+
+  it('if the agent reports upgradeable but was upgraded less than 10 minutes ago', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 9 }),
+        '8.0.0'
+      )
+    ).toContain('please wait');
+  });
+
+  it('if agent reports upgradeable and was upgraded more than 10 minutes ago', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 11 }),
+        '8.0.0'
+      )
+    ).toBeUndefined();
   });
 });
 
@@ -213,5 +409,51 @@ describe('hasAgentBeenUpgradedRecently', () => {
     expect(
       getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0' })).hasBeenUpgradedRecently
     ).toBe(false);
+  });
+});
+
+describe('isAgentUpgrading', () => {
+  it('returns true if the agent has an upgrade status other than failed', () => {
+    expect(
+      isAgentUpgrading(
+        getAgent({
+          version: '7.9.0',
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_REQUESTED',
+          },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false if the agent has a failed upgrade status', () => {
+    expect(
+      isAgentUpgrading(
+        getAgent({
+          version: '7.9.0',
+          upgradeDetails: {
+            target_version: '8.0.0',
+            action_id: 'XXX',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Upgrade timed out',
+            },
+          },
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('returns true if the agent is upgrading but has no upgrade details', () => {
+    expect(
+      isAgentUpgrading(
+        getAgent({
+          version: '7.9.0',
+          upgrading: true,
+        })
+      )
+    ).toBe(true);
   });
 });

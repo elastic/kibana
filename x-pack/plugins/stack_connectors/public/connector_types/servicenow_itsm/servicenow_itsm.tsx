@@ -13,7 +13,11 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
 import { ServiceNowITSMActionParams } from './types';
-import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
+import {
+  DEFAULT_CORRELATION_ID,
+  getConnectorDescriptiveTitle,
+  getSelectedConnectorIcon,
+} from '../lib/servicenow/helpers';
 
 export const SERVICENOW_ITSM_DESC = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITSM.selectMessageText',
@@ -46,6 +50,7 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       const translations = await import('../lib/servicenow/translations');
       const errors = {
         'subActionParams.incident.short_description': new Array<string>(),
+        'subActionParams.incident.correlation_id': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -53,9 +58,19 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
+        actionParams.subAction !== 'closeIncident' &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
         errors['subActionParams.incident.short_description'].push(translations.TITLE_REQUIRED);
+      }
+
+      if (
+        actionParams.subAction === 'closeIncident' &&
+        !actionParams?.subActionParams?.incident?.correlation_id?.length
+      ) {
+        errors['subActionParams.incident.correlation_id'].push(
+          translations.CORRELATION_ID_REQUIRED
+        );
       }
       return validationResult;
     },
@@ -63,6 +78,19 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
     customConnectorSelectItem: {
       getText: getConnectorDescriptiveTitle,
       getComponent: getSelectedConnectorIcon,
+    },
+    defaultActionParams: {
+      subAction: 'pushToService',
+      subActionParams: {
+        incident: { correlation_id: DEFAULT_CORRELATION_ID },
+        comments: [],
+      },
+    },
+    defaultRecoveredActionParams: {
+      subAction: 'closeIncident',
+      subActionParams: {
+        incident: { correlation_id: DEFAULT_CORRELATION_ID },
+      },
     },
   };
 }

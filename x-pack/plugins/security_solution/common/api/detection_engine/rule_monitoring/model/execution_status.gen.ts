@@ -28,5 +28,8 @@ export const RuleExecutionStatus = z.enum([
   'failed',
   'succeeded',
 ]);
-export const RuleExecutionStatusEnum = RuleExecutionStatus.enum;
 export type RuleExecutionStatusEnum = typeof RuleExecutionStatus.enum;
+export const RuleExecutionStatusEnum = RuleExecutionStatus.enum;
+
+export type RuleExecutionStatusOrder = z.infer<typeof RuleExecutionStatusOrder>;
+export const RuleExecutionStatusOrder = z.number().int();

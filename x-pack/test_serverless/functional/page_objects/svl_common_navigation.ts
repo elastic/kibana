@@ -65,6 +65,17 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
       },
+      async expectLinkMissing(
+        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+      ) {
+        if ('deepLinkId' in by) {
+          await testSubjects.missingOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          await testSubjects.missingOrFail(`~nav-item-id-${by.navId}`);
+        } else {
+          expect(await getByVisibleText('~nav-item', by.text)).be(null);
+        }
+      },
       async expectLinkActive(
         by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
       ) {
@@ -92,6 +103,19 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           await retry.try(async () => {
             const link = await getByVisibleText('~nav-item', by.text);
             await link!.click();
+          });
+        }
+      },
+      async findLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
+        await this.expectLinkExists(by);
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          return testSubjects.find(`~nav-item-id-${by.navId}`);
+        } else {
+          return retry.try(async () => {
+            const link = await getByVisibleText('~nav-item', by.text);
+            return link;
           });
         }
       },
@@ -142,8 +166,19 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async expectExists() {
         await testSubjects.existOrFail('breadcrumbs');
       },
-      async clickHome() {
-        await testSubjects.click('~breadcrumb-home');
+      async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          (await getByVisibleText('~breadcrumb', by.text))?.click();
+        }
+      },
+      getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          return getByVisibleText('~breadcrumb', by.text);
+        }
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         log.debug(

@@ -16,8 +16,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverCustomization } from '../../customizations';
+import { FlyoutCustomization } from '../../customizations';
 import { UseNavigationProps, useNavigationProps } from '../../hooks/use_navigation_props';
+
+interface UseFlyoutActionsParams extends UseNavigationProps {
+  actions?: FlyoutCustomization['actions'];
+}
 
 interface FlyoutActionProps {
   onClick: React.MouseEventHandler<Element>;
@@ -30,18 +34,16 @@ const staticViewDocumentItem = {
   Content: () => <ViewDocument />,
 };
 
-export const useFlyoutActions = (navigationProps: UseNavigationProps) => {
-  const { dataView } = navigationProps;
+export const useFlyoutActions = ({ actions, ...props }: UseFlyoutActionsParams) => {
+  const { dataView } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
-    useNavigationProps(navigationProps);
-
-  const flyoutCustomization = useDiscoverCustomization('flyout');
+    useNavigationProps(props);
 
   const {
     viewSingleDocument = { disabled: false },
     viewSurroundingDocument = { disabled: false },
-  } = flyoutCustomization?.actions?.defaultActions ?? {};
-  const customActions = [...(flyoutCustomization?.actions?.getActionItems?.() ?? [])];
+  } = actions?.defaultActions ?? {};
+  const customActions = [...(actions?.getActionItems?.() ?? [])];
 
   const flyoutActions = [
     {

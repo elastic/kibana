@@ -132,6 +132,7 @@ export const ManagementApp = ({
                 setBreadcrumbs={setBreadcrumbsScoped}
                 onAppMounted={onAppMounted}
                 sections={sections}
+                analytics={dependencies.coreStart.analytics}
               />
             </KibanaPageTemplate>
           </KibanaThemeProvider>

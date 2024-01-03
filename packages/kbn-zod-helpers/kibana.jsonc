@@ -1,0 +1,6 @@
+{
+  "devOnly": false,
+  "id": "@kbn/zod-helpers",
+  "owner": "@elastic/security-detection-rule-management",
+  "type": "shared-common"
+}

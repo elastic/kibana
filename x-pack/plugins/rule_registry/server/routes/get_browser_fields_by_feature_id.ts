@@ -53,6 +53,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
 
         const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
+          featureIds: onlyO11yFeatureIds,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });

@@ -80,7 +80,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
               uiSettings,
             }}
           >
-            <CreateDataViewButton onDataViewCreated={onObjectSelection} />
+            <CreateDataViewButton onDataViewCreated={onObjectSelection} allowAdHocDataView={true} />
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>

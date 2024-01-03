@@ -26,10 +26,10 @@ import {
   KibanaThemeProvider,
   toMountPoint,
 } from '@kbn/kibana-react-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
-import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 import type { BreadcrumbsChangeHandler } from '../components/breadcrumb';

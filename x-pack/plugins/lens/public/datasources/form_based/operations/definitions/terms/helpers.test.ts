@@ -7,7 +7,7 @@
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import type { FrameDatasourceAPI } from '../../../../../types';
+import type { FramePublicAPI } from '../../../../../types';
 import type { CountIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { GenericIndexPatternColumn } from '../../../form_based';
@@ -245,7 +245,7 @@ describe('getDisallowedTermsMessage()', () => {
           fromDate: '2020',
           toDate: '2021',
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -299,7 +299,7 @@ describe('getDisallowedTermsMessage()', () => {
             rows: [{ col1: 'myTerm' }, { col1: 'myOtherTerm' }],
           },
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -335,7 +335,7 @@ describe('getDisallowedTermsMessage()', () => {
           fromDate: '2020',
           toDate: '2021',
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -385,7 +385,7 @@ describe('getDisallowedTermsMessage()', () => {
             ],
           },
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 

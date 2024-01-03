@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
@@ -31,7 +32,7 @@ import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
@@ -44,7 +45,7 @@ import {
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
-import { initializeTimelineSettings } from '../../../store/timeline/actions';
+import { initializeTimelineSettings } from '../../../store/actions';
 import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
@@ -108,6 +109,7 @@ const AssistantTab: React.FC<{
     <AssistantTabContainer>
       <Assistant
         conversationId={TIMELINE_CONVERSATION_TITLE}
+        embeddedLayout
         setConversationId={setConversationId}
         shouldRefocusPrompt={shouldRefocusPrompt}
       />
@@ -181,9 +183,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {isEsqlSettingEnabled && (
+        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
-            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />
@@ -275,6 +277,10 @@ const StyledEuiTab = styled(EuiTab)`
   }
 `;
 
+const StyledEuiTabs = styled(EuiTabs)`
+  padding-inline: ${(props) => props.theme.eui.euiSizeM};
+`;
+
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   renderCellValue,
   rowRenderers,
@@ -285,6 +291,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
@@ -388,7 +395,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   return (
     <>
       {!timelineFullScreen && (
-        <EuiTabs>
+        <StyledEuiTabs className="eui-scrollBar">
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.query}`}
             onClick={setQueryAsActiveTab}
@@ -399,7 +406,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {isEsqlSettingEnabled && (
+          {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
@@ -415,7 +422,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
                 tooltipContent={
                   <FormattedMessage
                     id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
                   />
                 }
               />
@@ -492,7 +499,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.SECURITY_ASSISTANT}</span>
             </StyledEuiTab>
           )}
-        </EuiTabs>
+        </StyledEuiTabs>
       )}
 
       <ActiveTimelineTab

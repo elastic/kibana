@@ -33,7 +33,16 @@ export const createGetLogEntryQuery = (
     },
     fields: ['*'],
     runtime_mappings: runtimeMappings,
-    sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
+    sort: [
+      {
+        [timestampField]: {
+          order: 'desc',
+          format: 'strict_date_optional_time_nanos',
+          numeric_type: 'date_nanos',
+        },
+      },
+      { [tiebreakerField]: 'desc' },
+    ],
     _source: false,
   },
 });
@@ -41,7 +50,7 @@ export const createGetLogEntryQuery = (
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
-    sort: rt.tuple([rt.number, rt.number]),
+    sort: rt.tuple([rt.string, rt.number]),
   }),
   rt.partial({
     fields: rt.record(rt.string, jsonArrayRT),

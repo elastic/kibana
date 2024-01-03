@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import moment from 'moment';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { NO_DATA_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { NO_DATA_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
@@ -22,7 +24,8 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -33,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATA_VIEW = 'no-data-pattern';
     const DATA_VIEW_ID = 'data-view-id-no-data';
     let actionId: string;
     let ruleId: string;
@@ -42,9 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await createDataView({
         supertest,
-        name: 'no-data-pattern',
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: 'no-data-pattern',
+        title: DATA_VIEW,
       });
     });
 
@@ -83,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
@@ -114,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
                     alertDetailsUrl: '{{context.alertDetailsUrl}}',
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -149,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold (Beta)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -179,7 +183,6 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
                 comparator: '>',
                 threshold: [0.5],
                 timeSize: 5,
@@ -211,6 +214,18 @@ export default function ({ getService }: FtrProviderContext) {
           'Average system.cpu.user.pct reported no data in the last 5m'
         );
         expect(resp.hits.hits[0]._source?.value).eql('[NO DATA]');
+
+        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

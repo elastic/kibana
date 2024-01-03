@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -28,6 +29,7 @@ describe('ALL - Custom space', () => {
       let spaceId: string;
 
       before(() => {
+        initializeDataViews();
         cy.wrap(
           new Promise<string>((resolve) => {
             if (testSpace.name !== 'default') {
@@ -98,9 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { name: packName } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

@@ -32,7 +32,7 @@ describe('Data stream helpers', () => {
           enabled: true,
           data_retention: '2d',
         })
-      ).toBe('2d');
+      ).toBe('2 days');
     });
   });
 });

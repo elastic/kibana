@@ -6,15 +6,8 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SubscriptionLink } from '@kbn/subscription-tracking';
-import type { SubscriptionContextData } from '@kbn/subscription-tracking';
-
-const subscriptionContext: SubscriptionContextData = {
-  feature: 'cloud-security-posture',
-  source: 'security__cloud-security-posture',
-};
 
 export const SubscriptionNotAllowed = ({
   licenseManagementLocator,
@@ -41,12 +34,12 @@ export const SubscriptionNotAllowed = ({
                 defaultMessage="To use these cloud security features, you must {link}."
                 values={{
                   link: (
-                    <SubscriptionLink subscriptionContext={subscriptionContext}>
+                    <EuiLink href={licenseManagementLocator}>
                       <FormattedMessage
                         id="xpack.csp.subscriptionNotAllowed.promptLinkText"
                         defaultMessage="start a trial or upgrade your subscription"
                       />
-                    </SubscriptionLink>
+                    </EuiLink>
                   ),
                 }}
               />

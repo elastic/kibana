@@ -17,16 +17,19 @@ properties:
     properties:
       issueType:
         description: The type of issue.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
       parent:
         description: The key of the parent issue, when the issue type is sub-task.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
       priority:
         description: The priority of the issue.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
   id:
     description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
     type: string
@@ -36,6 +39,7 @@ properties:
   type:
     description: The type of connector.
     type: string
-    example: .jira
+    examples:
+      - .jira
     enum:
       - .jira

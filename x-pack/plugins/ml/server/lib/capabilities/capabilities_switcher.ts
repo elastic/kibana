@@ -23,7 +23,9 @@ export const setupCapabilitiesSwitcher = (
   enabledFeatures: MlFeatures,
   logger: Logger
 ) => {
-  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures));
+  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures), {
+    capabilityPath: 'ml.*',
+  });
 };
 
 function getSwitcher(

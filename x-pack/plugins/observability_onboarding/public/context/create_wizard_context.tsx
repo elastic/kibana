@@ -174,16 +174,17 @@ export function createWizardContext<
             }
           },
           goBack() {
-            if (history.length === 1 || pathRef.current.length === 1) {
-              return;
-            }
-            if (transitionDuration) {
-              setTimeout(() => {
-                history.goBack();
-              }, transitionDuration);
-            } else {
+            if (
+              history.length === 1 ||
+              pathRef.current.length === 1 ||
+              !transitionDuration
+            ) {
               history.goBack();
             }
+
+            setTimeout(() => {
+              history.goBack();
+            }, transitionDuration);
           },
           getState: () => state as T,
           setState: (_state: T | ((prevState: T) => T)) => {

@@ -11,8 +11,8 @@ import { EuiCallOut } from '@elastic/eui';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { useForm, UseField } from '../../../../../../shared_imports';
 import { PickTimeline } from '../../../../../../detections/components/rules/pick_timeline';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkApplyTimelineTemplate as i18n } from '../translations';
@@ -62,7 +62,7 @@ const TimelineTemplateFormComponent = (props: TimelineTemplateFormProps) => {
     const timelineTitle = timelineId ? data.timeline.title : '';
 
     onConfirm({
-      type: BulkActionEditType.set_timeline,
+      type: BulkActionEditTypeEnum.set_timeline,
       value: {
         timeline_id: timelineId,
         timeline_title: timelineTitle,

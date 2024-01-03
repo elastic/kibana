@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import {
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
@@ -182,7 +183,7 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab when clicking on button', () => {
     const flyoutContextValue = {
       openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <TestProviders>
@@ -196,7 +197,7 @@ describe('<CorrelationsOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
       params: {
         id: panelContextValue.eventId,

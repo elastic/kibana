@@ -42,10 +42,10 @@ export function useTabs({
   end: string;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { infra } = services;
-  const HostMetricsTable = infra?.HostMetricsTable;
-  const ContainerMetricsTable = infra?.ContainerMetricsTable;
-  const PodMetricsTable = infra?.PodMetricsTable;
+  const { metricsDataAccess } = services;
+  const HostMetricsTable = metricsDataAccess?.HostMetricsTable;
+  const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
+  const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
 
   const timerange = useMemo(
     () => ({
@@ -91,7 +91,10 @@ export function useTabs({
     <>
       <EuiSpacer />
       {ContainerMetricsTable &&
-        ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter })}
+        ContainerMetricsTable({
+          timerange,
+          filterClauseDsl: containersFilter,
+        })}
     </>
   );
 
@@ -99,7 +102,10 @@ export function useTabs({
     <>
       <EuiSpacer />
       {PodMetricsTable &&
-        PodMetricsTable({ timerange, filterClauseDsl: podsFilter })}
+        PodMetricsTable({
+          timerange,
+          filterClauseDsl: podsFilter,
+        })}
     </>
   );
 
@@ -107,7 +113,10 @@ export function useTabs({
     <>
       <EuiSpacer />
       {HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter })}
+        HostMetricsTable({
+          timerange,
+          filterClauseDsl: hostsFilter,
+        })}
     </>
   );
 

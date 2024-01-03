@@ -209,7 +209,7 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <KibanaErrorBoundaryProvider>
+              <KibanaErrorBoundaryProvider analytics={services.analytics}>
                 <KibanaErrorBoundary>
                   <KibanaPageTemplate.Section
                     component="div"

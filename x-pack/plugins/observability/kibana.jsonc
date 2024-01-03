@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/actionable-observability",
+  "owner": "@elastic/obs-ux-management-team",
   "plugin": {
     "id": "observability",
     "server": true,
@@ -20,30 +20,35 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "uiActions",
+      "presentationUtil",
       "exploratoryView",
       "features",
       "files",
-      "guidedOnboarding",
       "inspector",
       "lens",
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
       "security",
       "share",
       "unifiedSearch",
       "visualizations",
       "dashboard",
-      "expressions"
+      "expressions",
+      "logExplorer",
+      "licensing"
     ],
     "optionalPlugins": [
       "discover",
       "home",
-      "licensing",
       "usageCollection",
       "cloud",
-      "spaces"
+      "spaces",
+      "serverless",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "data",
@@ -51,7 +56,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "embeddable"
     ],
     "extraPublicDirs": [
       "common"

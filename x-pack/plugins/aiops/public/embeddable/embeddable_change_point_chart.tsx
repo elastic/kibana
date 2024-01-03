@@ -113,6 +113,9 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
+    // test subject selector for functional tests
+    this.node.setAttribute('data-test-subj', 'aiopsEmbeddableChangePointChart');
+
     const I18nContext = this.deps.i18n.Context;
 
     const datePickerDeps = {

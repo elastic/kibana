@@ -6,29 +6,23 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchDataViewsResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: DataView[] | undefined;
+  data: DataViewListItem[] | undefined;
 }
 
-interface Params {
-  name?: string;
-  size?: number;
-}
-
-export function useFetchDataViews({ name = '', size = 10 }: Params): UseFetchDataViewsResponse {
+export function useFetchDataViews(): UseFetchDataViewsResponse {
   const { dataViews } = useKibana().services;
-  const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: ['fetchDataViews', search],
+    queryKey: ['fetchDataViewsList'],
     queryFn: async () => {
-      return dataViews.find(search, size);
+      return dataViews.getIdsWithTitle();
     },
     retry: false,
     keepPreviousData: true,

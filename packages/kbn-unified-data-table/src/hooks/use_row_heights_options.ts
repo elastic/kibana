@@ -34,6 +34,8 @@ const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
     return ROWS_HEIGHT_OPTIONS.auto;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
     return rowHeight.lineCount; // custom
+  } else if (typeof rowHeight === 'number') {
+    return rowHeight;
   }
 
   return ROWS_HEIGHT_OPTIONS.single;
@@ -83,6 +85,10 @@ export const useRowHeightsOptions = ({
       defaultHeight,
       lineHeight: rowLineHeight,
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
+        if (newRowHeight === defaultHeight && typeof rowHeightState === 'undefined') {
+          // ignore, no changes required
+          return;
+        }
         const newSerializedRowHeight = serializeRowHeight(
           // pressing "Reset to default" triggers onChange with the same value
           newRowHeight === defaultHeight ? configRowHeight : newRowHeight

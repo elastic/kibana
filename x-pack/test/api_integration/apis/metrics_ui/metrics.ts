@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
 import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { InventoryMetric } from '@kbn/infra-plugin/common/inventory_models/types';
+import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
@@ -15,7 +16,6 @@ import {
 } from '../../../../../lib/lib';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;

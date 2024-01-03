@@ -14,7 +14,8 @@ post:
       required: true
       schema:
         type: string
-        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+        examples:
+          - 41893910-6bca-11eb-9e0d-85d233e3ee35
   responses:
     '204':
       description: Indicates a successful call.
@@ -24,7 +25,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

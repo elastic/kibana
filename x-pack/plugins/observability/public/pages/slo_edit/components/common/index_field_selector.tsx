@@ -6,20 +6,21 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 
 interface Props {
-  indexFields: Field[];
+  indexFields: FieldSpec[];
   name: 'groupBy' | 'indicator.params.timestampField';
-  label: React.ReactNode | string;
+  label: ReactNode | string;
   placeholder: string;
   isDisabled: boolean;
   isLoading: boolean;
   isRequired?: boolean;
+  defaultValue?: string;
 }
 export function IndexFieldSelector({
   indexFields,
@@ -29,6 +30,7 @@ export function IndexFieldSelector({
   isDisabled,
   isLoading,
   isRequired = false,
+  defaultValue = '',
 }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(indexFields));
@@ -41,10 +43,10 @@ export function IndexFieldSelector({
     <EuiFlexItem>
       <EuiFormRow label={label} isInvalid={getFieldState(name).invalid}>
         <Controller
-          defaultValue=""
+          defaultValue={defaultValue}
           name={name}
           control={control}
-          rules={{ required: isRequired }}
+          rules={{ required: isRequired && !isDisabled }}
           render={({ field, fieldState }) => (
             <EuiComboBox<string>
               {...field}
@@ -60,7 +62,7 @@ export function IndexFieldSelector({
                   return field.onChange(selected[0].value);
                 }
 
-                field.onChange('');
+                field.onChange(defaultValue);
               }}
               options={options}
               onSearchChange={(searchValue: string) => {

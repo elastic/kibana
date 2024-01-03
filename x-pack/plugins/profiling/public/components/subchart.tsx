@@ -20,9 +20,11 @@ import {
 } from '@elastic/charts';
 import {
   EuiAccordion,
+  EuiAccordionProps,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
+  EuiFlexGroupProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
@@ -32,19 +34,16 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { groupBy } from 'lodash';
-import React, { Fragment } from 'react';
-import { css } from '@emotion/react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
-import { useProfilingParams } from '../hooks/use_profiling_params';
-import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
-import { getTracesViewRouteParams } from '../views/stack_traces_view/utils';
 import { StackFrameSummary } from './stack_frame_summary';
 
 export interface SubChartProps {
@@ -57,9 +56,9 @@ export interface SubChartProps {
   percentage: number;
   data: CountPerTime[];
   showAxes: boolean;
-  metadata: StackFrameMetadata[];
-  onShowMoreClick: (() => void) | null;
-  style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
+  metadata?: StackFrameMetadata[];
+  onClick?: () => void;
+  style?: EuiFlexGroupProps['style'];
   showFrames: boolean;
   padTitle: boolean;
   sample: TopNSample | null;
@@ -90,38 +89,38 @@ export function SubChart({
   data,
   width,
   showAxes,
-  metadata,
-  onShowMoreClick,
+  metadata = [],
+  onClick,
   style,
   showFrames,
   padTitle,
   sample,
 }: SubChartProps) {
   const theme = useEuiTheme();
-
-  const profilingRouter = useProfilingRouter();
-
-  const { path, query } = useProfilingParams('/stacktraces/{topNType}');
-
-  const href = profilingRouter.link(
-    '/stacktraces/{topNType}',
-    getTracesViewRouteParams({ query, topNType: path.topNType, category })
-  );
+  const [accordionState, setAccordionState] = useState<
+    Record<string, EuiAccordionProps['forceState']>
+  >({});
 
   const timeZone = useKibanaTimeZoneSetting();
 
   const { chartsTheme, chartsBaseTheme } = useProfilingChartsTheme();
 
-  const compact = !!onShowMoreClick;
+  const compact = !!onClick;
 
-  const groupedMetadata = groupBy(metadata, 'AddressOrLine');
-  const parentsMetadata = Object.values(groupedMetadata)
-    .map((items) => items.shift())
-    .filter((_) => _) as StackFrameMetadata[];
-
+  const parentsMetadata = metadata.filter((item) => item.Inline === false);
   const displayedFrames = compact
     ? parentsMetadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
     : parentsMetadata.concat().reverse();
+
+  const childrenMetadata = useMemo(() => {
+    const groupedMetadata = groupBy(metadata, 'AddressOrLine');
+    return Object.keys(groupedMetadata).reduce<Record<string, StackFrameMetadata[]>>((acc, key) => {
+      // Removes the first item as it will always be the parent item.
+      const [_, ...children] = groupedMetadata[key];
+      acc[key] = children;
+      return acc;
+    }, {});
+  }, [metadata]);
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -139,12 +138,23 @@ export function SubChart({
           <EuiFlexGroup direction="column" gutterSize="none">
             {displayedFrames.map((frame, frameIndex) => {
               const parentIndex = parentsMetadata.indexOf(frame) + 1;
-              const children = groupedMetadata[frame.AddressOrLine].concat().reverse();
-
+              const children = childrenMetadata[frame.AddressOrLine].concat().reverse();
+              const key = [frameIndex, frame.FrameID].join('|');
+              const currentAccordionState = accordionState[key];
               return (
-                <>
+                <Fragment key={key}>
                   {children.length > 0 ? (
                     <EuiAccordion
+                      // taking over the control of the EuiAccordion state
+                      // to avoid rendering the children items when the accordion is closed.
+                      // This renders the page way faster as it avoids unnecessary render of items that might never be visible
+                      forceState={currentAccordionState || 'closed'}
+                      onToggle={(isOpen) => {
+                        setAccordionState((state) => ({
+                          ...state,
+                          [key]: isOpen ? 'open' : 'closed',
+                        }));
+                      }}
                       css={css`
                         display: flex;
                         flex-direction: column-reverse;
@@ -171,22 +181,24 @@ export function SubChart({
                         </EuiToolTip>
                       }
                     >
-                      <EuiFlexGroup
-                        direction="column"
-                        gutterSize="s"
-                        style={{ marginLeft: '12px' }}
-                      >
-                        {children.map((child, childIndex) => {
-                          return (
-                            <Fragment key={child.FrameID}>
-                              {renderFrameItem(
-                                child,
-                                `${parentIndex}.${children.length - childIndex} ->`
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </EuiFlexGroup>
+                      {currentAccordionState === 'open' ? (
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="s"
+                          style={{ marginLeft: '12px' }}
+                        >
+                          {children.map((child, childIndex) => {
+                            return (
+                              <Fragment key={[key, childIndex].join('|')}>
+                                {renderFrameItem(
+                                  child,
+                                  `${parentIndex}.${children.length - childIndex} ->`
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                      ) : null}
                     </EuiAccordion>
                   ) : (
                     renderFrameItem(frame, parentIndex)
@@ -196,13 +208,13 @@ export function SubChart({
                       <EuiHorizontalRule size="full" margin="s" />
                     </EuiFlexItem>
                   ) : null}
-                </>
+                </Fragment>
               );
             })}
           </EuiFlexGroup>
 
-          {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
+          {hasMoreFrames && !!onClick && (
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -251,14 +263,10 @@ export function SubChart({
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
-            {showFrames ? (
-              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
-                <EuiText size="s">{label}</EuiText>
-              </EuiLink>
-            ) : category === OTHER_BUCKET_LABEL ? (
+            {category === OTHER_BUCKET_LABEL || onClick === undefined ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={onClick}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}

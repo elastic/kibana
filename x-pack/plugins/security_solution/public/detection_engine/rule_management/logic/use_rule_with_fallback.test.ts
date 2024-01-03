@@ -84,7 +84,7 @@ describe('use_rule_with_fallback', () => {
   });
 });
 
-const getMockRule = (overwrites: Partial<Rule>): Rule => ({
+const getMockRule = (overwrites: Pick<Rule, 'investigation_fields'>): Rule => ({
   id: 'myfakeruleid',
   author: [],
   severity_mapping: [],
@@ -97,6 +97,7 @@ const getMockRule = (overwrites: Partial<Rule>): Rule => ({
   name: 'some-name',
   severity: 'low',
   type: 'query',
+  language: 'kuery',
   query: 'some query',
   index: ['index-1'],
   interval: '5m',
@@ -107,8 +108,8 @@ const getMockRule = (overwrites: Partial<Rule>): Rule => ({
   max_signals: 100,
   tags: [],
   threat: [],
-  throttle: null,
   version: 1,
+  revision: 1,
   exceptions_list: [],
   created_at: '2020-04-09T09:43:51.778Z',
   created_by: 'elastic',

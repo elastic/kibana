@@ -15,7 +15,7 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -43,7 +43,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             // Use non-exact validation because everything is optional in patch - since everything is optional,
             // io-ts can't find the right schema from the type specific union and the exact check breaks.
             // We do type specific validation after fetching the existing rule so we know the rule type.
-            body: buildRouteValidationNonExact(PatchRuleRequestBody),
+            body: buildRouteValidationWithZod(PatchRuleRequestBody),
           },
         },
       },
@@ -93,12 +93,9 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             nextParams: params,
           });
           if (rule != null && rule.enabled != null && rule.name != null) {
-            const [validated, errors] = transformValidate(rule);
-            if (errors != null) {
-              return siemResponse.error({ statusCode: 500, body: errors });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({
+              body: transformValidate(rule),
+            });
           } else {
             const error = getIdError({ id: params.id, ruleId: params.rule_id });
             return siemResponse.error({

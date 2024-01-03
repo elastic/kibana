@@ -61,7 +61,7 @@ export interface CapabilitiesSetup {
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
-   *    core.capabilities.registerSwitcher((request, capabilities, useDefaultCapabilities) => {
+   *    core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
    *      // useDefaultCapabilities is a special case that switchers typically don't have to concern themselves with.
    *      // The default capabilities are typically the ones you provide in your CapabilitiesProvider, but this flag
    *      // gives each switcher an opportunity to change the default capabilities of other plugins' capabilities.
@@ -74,7 +74,7 @@ export interface CapabilitiesSetup {
    *          }
    *        }
    *      }
-   *      if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
+   *      if(await myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
    *        return {
    *          somePlugin: {
    *            featureEnabledByDefault: false // `featureEnabledByDefault` will be disabled. All other capabilities will remain unchanged.
@@ -82,23 +82,14 @@ export interface CapabilitiesSetup {
    *        }
    *      }
    *      return {}; // All capabilities will remain unchanged.
+   *    }, {
+   *      // the switcher only toggles capabilities under the 'somePlugin' path
+   *      capabilityPath: 'somePlugin',
    *    });
    * }
    * ```
    */
-  registerSwitcher(switcher: CapabilitiesSwitcher): void;
-}
-
-/**
- * Defines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.
- *
- * @public
- */
-export interface ResolveCapabilitiesOptions {
-  /**
-   * Indicates if capability switchers are supposed to return a default set of capabilities.
-   */
-  useDefaultCapabilities: boolean;
+  registerSwitcher(switcher: CapabilitiesSwitcher, options: CapabilitiesSwitcherOptions): void;
 }
 
 /**
@@ -109,9 +100,55 @@ export interface ResolveCapabilitiesOptions {
 export interface CapabilitiesStart {
   /**
    * Resolve the {@link Capabilities} to be used for given request
+   *
+   * @param request The request to resolve capabilities for
+   * @param options.capabilityPath The path(s) of the capabilities that needs to be retrieved. Use '*' to retrieve all paths.
+   * Used to avoid unnecessarily running switched on parts of the capabilities that won't be used by the API consumer.
+   *
+   * @example
+   * ```ts
+   * const mlCapabilities = (await coreStart.capabilities.resolveCapabilities(request, 'ml')).ml;
+   * ```
    */
   resolveCapabilities(
     request: KibanaRequest,
-    options?: ResolveCapabilitiesOptions
+    options: ResolveCapabilitiesOptions
   ): Promise<Capabilities>;
+}
+
+/**
+ * Options for {@link CapabilitiesStart.resolveCapabilities}.
+ *
+ * @public
+ */
+export interface ResolveCapabilitiesOptions {
+  /**
+   * The path(s) of capabilities that the API consumer is interested in. The '*' wildcard is supported as a suffix only.
+   *
+   * E.g. capabilityPath: "*" or capabilityPath: "myPlugin.*" or capabilityPath: "myPlugin.myKey"
+   *
+   * @remark All the capabilities will be returned, but the ones not matching the specified path(s) may not have been processed
+   *        by the capability switchers and should not be used.
+   */
+  capabilityPath: string | string[];
+  /**
+   * Indicates if capability switchers are supposed to return a default set of capabilities.
+   *
+   * Defaults to `false`
+   */
+  useDefaultCapabilities?: boolean;
+}
+
+/**
+ * Options for the {@link CapabilitiesSetup.registerSwitcher} API.
+ *
+ * @public
+ */
+export interface CapabilitiesSwitcherOptions {
+  /**
+   * The path(s) of capabilities the switcher may alter. The '*' wildcard is supported as a suffix only.
+   *
+   * E.g. capabilityPath: "myPlugin.*" or capabilityPath: "myPlugin.myKey"
+   */
+  capabilityPath: string | string[];
 }

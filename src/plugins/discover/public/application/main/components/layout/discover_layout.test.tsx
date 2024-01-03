@@ -119,7 +119,6 @@ async function mountComponent(
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),
     onUpdateQuery: jest.fn(),
-    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },

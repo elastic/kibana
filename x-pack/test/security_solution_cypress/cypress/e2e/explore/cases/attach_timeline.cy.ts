@@ -17,15 +17,11 @@ import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_ne
 import { getCase1 } from '../../../objects/case';
 import { getTimeline } from '../../../objects/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { createCase } from '../../../tasks/api_calls/cases';
 
 describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
   context('without cases created', () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       deleteTimelines();
@@ -92,7 +88,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
     it('modal can be re-opened once closed', function () {
       visitTimeline(this.timelineId);
       attachTimelineToExistingCase();
-      cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click({ force: true });
+      cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click();
 
       cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
       attachTimelineToExistingCase();

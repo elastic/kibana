@@ -10,6 +10,8 @@
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+  {{~#if (eq x-modify "partial")}}.partial(){{/if~}}
+  {{~#if (eq x-modify "required")}}.required(){{/if~}}
 {{~/if~}}
 
 {{~#if allOf~}}
@@ -17,25 +19,37 @@
     {{~#if @first~}}
       {{> zod_schema_item }}
     {{~else~}}
-      .and({{> zod_schema_item }})
+      .merge({{> zod_schema_item }})
     {{~/if~}}
   {{~/each~}}
 {{~/if~}}
 
 {{~#if anyOf~}}
-  z.union([
-    {{~#each anyOf~}}
+  {{#if discriminator}}
+    z.discriminatedUnion('{{discriminator.propertyName}}', [
+  {{else}}
+    z.union([ 
+  {{/if}}
+  {{~#each anyOf~}}
     {{~> zod_schema_item ~}},
-    {{~/each~}}
+  {{~/each~}}
   ])
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
 {{~/if~}}
 
 {{~#if oneOf~}}
-  z.union([
-    {{~#each oneOf~}}
+  {{#if discriminator}}
+    z.discriminatedUnion('{{discriminator.propertyName}}', [
+  {{else}}
+    z.union([ 
+  {{/if}}
+  {{~#each oneOf~}}
     {{~> zod_schema_item ~}},
-    {{~/each~}}
+  {{~/each~}}
   ])
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
 {{~/if~}}
 
 {{#if (isUnknown .)}}
@@ -73,25 +87,44 @@ z.unknown()
       * {{{description}}} 
       */
       {{/if}}
-      {{@key}}: {{> zod_schema_item requiredBool=(includes ../required @key)}},
+      {{#if (startsWithSpecialChar @key)}}
+        '{{@key}}': {{> zod_schema_item requiredBool=(includes ../required @key)}},
+      {{else}}
+        {{@key}}: {{> zod_schema_item requiredBool=(includes ../required @key)}},
+      {{/if}}
     {{/each}}
   })
-  {{#if (eq additionalProperties false)}}.strict(){{/if}}
+  {{~#if (eq additionalProperties false)}}.strict(){{/if~}}
+  {{~#if additionalProperties}}
+    {{~#if (eq additionalProperties true)~}}
+      .catchall(z.unknown())
+    {{~else~}}
+      .catchall({{> zod_schema_item additionalProperties}})
+    {{~/if~}}
+  {{~/if~}}
+  {{~#if (eq x-modify "partial")}}.partial(){{/if~}}
+  {{~#if (eq x-modify "required")}}.required(){{/if~}}
 {{~/inline~}}
 
 {{~#*inline "type_string"~}}
   {{~#if enum~}}
-  z.enum([
-    {{~#each enum~}}
-      "{{.}}",
-    {{~/each~}}
-  ])
+    {{~#if (isSingle enum)~}}
+      z.literal("{{first enum}}")
+    {{~else~}}
+      z.enum([
+        {{~#each enum~}}
+          "{{.}}",
+        {{~/each~}}
+      ])
+    {{~/if~}}
   {{~else~}}
   z.string()
   {{~#if minLength}}.min({{minLength}}){{/if~}}
   {{~#if maxLength}}.max({{maxLength}}){{/if~}}
   {{~#if (eq format 'date-time')}}.datetime(){{/if~}}
+  {{~#if (eq format 'date-math')}}.superRefine(isValidDateMath){{/if~}}
+  {{~#if (eq format 'uuid')}}.uuid(){{/if~}}
+  {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
   {{~/if~}}
-  {{#if transform}}.transform({{{transform}}}){{/if~}}
 {{~/inline~}}
 

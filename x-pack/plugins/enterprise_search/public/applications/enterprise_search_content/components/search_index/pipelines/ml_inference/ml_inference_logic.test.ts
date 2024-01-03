@@ -550,10 +550,55 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'Name already used by another pipeline.',
         });
       });
+      it('has errors when non-deployed model is selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
+          isModelPlaceholderSelected: true,
+        });
+
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          modelStatus: 'Model must be deployed before use.',
+        });
+      });
     });
   });
 
   describe('listeners', () => {
+    describe('clearModelPlaceholderFlag', () => {
+      it('sets placeholder flag false for selected model', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          isModelPlaceholderSelected: true,
+        });
+        MLInferenceLogic.actions.clearModelPlaceholderFlag('unit-test-model');
+
+        expect(
+          MLInferenceLogic.values.addInferencePipelineModal.configuration.isModelPlaceholderSelected
+        ).toBe(false);
+      });
+      it('leaves placeholder flag unmodified if another model was selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          isModelPlaceholderSelected: true,
+        });
+        MLInferenceLogic.actions.clearModelPlaceholderFlag('some-other-model-id');
+
+        expect(
+          MLInferenceLogic.values.addInferencePipelineModal.configuration.isModelPlaceholderSelected
+        ).toBe(true);
+      });
+    });
     describe('createPipeline', () => {
       const mockModelConfiguration = {
         ...DEFAULT_VALUES.addInferencePipelineModal,
@@ -620,7 +665,7 @@ describe('MlInferenceLogic', () => {
           AddInferencePipelineSteps.Fields
         );
       });
-      it('triggers pipeline fetch when moving from configuration step', () => {
+      it('triggers pipeline and model fetch when moving from configuration step', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           pipelineName: 'unit-test-pipeline',
@@ -628,12 +673,14 @@ describe('MlInferenceLogic', () => {
           existingPipeline: false,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
           pipelineName: 'ml-inference-unit-test-pipeline',
         });
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
       });
-      it('does not trigger pipeline fetch existing pipeline is selected', () => {
+      it('does not trigger pipeline and model fetch existing pipeline is selected', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
           pipelineName: 'unit-test-pipeline',
@@ -641,8 +688,10 @@ describe('MlInferenceLogic', () => {
           existingPipeline: true,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).not.toHaveBeenCalled();
       });
     });
     describe('fetchPipelineSuccess', () => {

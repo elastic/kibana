@@ -7,7 +7,6 @@
 
 import { ProfilingSetupOptions, SetupState } from '@kbn/profiling-data-access-plugin/common/setup';
 import { enableResourceManagement, setMaximumBuckets } from '../../lib/setup/cluster_settings';
-import { setSecurityRole } from '../../lib/setup/security_role';
 
 export async function setupSelfManaged({
   setupState,
@@ -18,7 +17,6 @@ export async function setupSelfManaged({
 }) {
   const executeFunctions = [
     ...(setupState.resource_management.enabled ? [] : [enableResourceManagement]),
-    ...(setupState.permissions.configured ? [] : [setSecurityRole]),
     ...(setupState.settings.configured ? [] : [setMaximumBuckets]),
   ];
 

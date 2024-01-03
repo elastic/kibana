@@ -33,7 +33,7 @@ import {
   operationDefinitionMap,
 } from '..';
 import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
-import { FrameDatasourceAPI } from '../../../../../types';
+import { FramePublicAPI } from '../../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
@@ -2867,7 +2867,7 @@ describe('terms', () => {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown as FrameDatasourceAPI,
+          } as unknown as FramePublicAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

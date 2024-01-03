@@ -14,7 +14,7 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
 
@@ -33,7 +33,7 @@ export const PrevalenceOverview: FC = () => {
 
   const goPrevalenceTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInsightsTab,
         subTab: PREVALENCE_TAB_ID,

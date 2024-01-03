@@ -460,10 +460,10 @@
                 "pluginId": "exploratoryView",
                 "scope": "public",
                 "docId": "kibExploratoryViewPluginApi",
-                "section": "def-public.AllSeries",
-                "text": "AllSeries"
+                "section": "def-public.SeriesUrl",
+                "text": "SeriesUrl"
               },
-              " | undefined"
+              "[]"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -520,20 +520,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryEmbeddableProps.customLensAttrs",
-            "type": "Any",
-            "tags": [],
-            "label": "customLensAttrs",
-            "description": [],
-            "signature": [
-              "any"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1169,26 +1155,6 @@
           },
           {
             "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryViewPublicPluginsStart.guidedOnboarding",
-            "type": "Object",
-            "tags": [],
-            "label": "guidedOnboarding",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "guidedOnboarding",
-                "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
-              }
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
             "id": "def-public.ExploratoryViewPublicPluginsStart.lens",
             "type": "Object",
             "tags": [],
@@ -1235,7 +1201,7 @@
             "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ navigation: { PageTemplate: (pageTemplateProps: ",
+              "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
               ") => JSX.Element; registerSections: (sections$: ",
               "Observable",
@@ -1552,7 +1518,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,

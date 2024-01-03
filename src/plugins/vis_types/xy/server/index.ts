@@ -8,7 +8,6 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, XyConfig } from '../config';
-import { VisTypeXYServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<XyConfig> = {
   exposeToBrowser: {
@@ -17,5 +16,7 @@ export const config: PluginConfigDescriptor<XyConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new VisTypeXYServerPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypeXYServerPlugin } = await import('./plugin');
+  return new VisTypeXYServerPlugin(initializerContext);
+};

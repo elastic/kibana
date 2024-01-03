@@ -15,4 +15,4 @@ import {
 export const plugin: PluginInitializer<
   FeatureUsageTestPluginSetup,
   FeatureUsageTestPluginStart
-> = () => new FeatureUsageTestPlugin();
+> = async () => new FeatureUsageTestPlugin();

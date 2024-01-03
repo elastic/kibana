@@ -9,26 +9,26 @@ import { partition } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
-import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
-import type {
-  FindRulesResponse,
-  RuleToImport,
-} from '../../../../../common/api/detection_engine/rule_management';
 import type {
   AlertSuppression,
   AlertSuppressionCamel,
   InvestigationFields,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  FindRulesResponse,
+  RuleToImport,
+} from '../../../../../common/api/detection_engine/rule_management';
 
-import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
-import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
+import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
+import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
 type PromiseFromStreams = RuleToImport | Error;
@@ -126,7 +126,7 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
 };
 
 export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null => {
-  if (isAlertType(rule)) {
+  if (hasValidRuleType(rule)) {
     return internalRuleToAPIResponse(rule);
   }
 
@@ -248,7 +248,7 @@ export const migrateLegacyActionsIds = async (
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
-          rule.actions ?? [],
+          (rule.actions as RuleAction[]) ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );

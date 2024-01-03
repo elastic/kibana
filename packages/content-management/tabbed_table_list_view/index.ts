@@ -7,5 +7,3 @@
  */
 
 export { TabbedTableListView, type TableListTab, type TableListTabParentProps } from './src';
-
-export type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-table';

@@ -16,11 +16,13 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
+  use_alert_data_for_template: useAlertDataForTemplate,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
   ...(frequency
     ? {
         frequency: {

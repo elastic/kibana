@@ -19,6 +19,12 @@ import { useUiSetting$ } from '../../../lib/kibana';
 
 jest.mock('./use_set_alert_tags');
 jest.mock('../../../lib/kibana');
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  })
+);
 
 const defaultProps: UseBulkAlertTagsItemsProps = {
   refetch: () => {},

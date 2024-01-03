@@ -17,11 +17,13 @@ import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
 
 interface Props {
+  analytics: AnalyticsServiceStart;
   mounters: Map<string, Mounter>;
   history: History;
   theme$: Observable<CoreTheme>;
@@ -38,6 +40,7 @@ interface Params {
 
 export const AppRouter: FunctionComponent<Props> = ({
   history,
+  analytics,
   mounters,
   theme$,
   setAppLeaveHandler,
@@ -55,7 +58,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
 
   return (
-    <KibanaErrorBoundaryProvider>
+    <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
         <Router history={history}>
           <Routes>

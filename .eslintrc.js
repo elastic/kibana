@@ -921,6 +921,7 @@ module.exports = {
         'x-pack/plugins/profiling/**/*.tsx',
         'x-pack/plugins/synthetics/**/*.tsx',
         'x-pack/plugins/ux/**/*.tsx',
+        'src/plugins/ai_assistant_management/**/*.tsx',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -928,21 +929,21 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/apm/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/exploratory_view/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/infra/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/observability/**/!(*.test.tsx)',
-        'x-pack/plugins/observability_ai_assistant/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/observability_onboarding/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/observability_shared/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/profiling/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/synthetics/**/!(*.test.tsx).tsx',
-        'x-pack/plugins/ux/**/!(*.test.tsx).tsx',
+        'x-pack/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
       },
     },
     {
@@ -1012,6 +1013,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
@@ -1045,6 +1047,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1056,6 +1059,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1073,6 +1077,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1109,6 +1114,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
@@ -1505,6 +1511,8 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
       },
     },
     /**
@@ -1537,6 +1545,17 @@ module.exports = {
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Serverless Search overrides
+     */
+    {
+      // All files
+      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 

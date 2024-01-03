@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 import {
@@ -21,26 +20,20 @@ import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
 export type APMInternalESClient = Awaited<
-  ReturnType<typeof createInternalESClientWithContext>
+  ReturnType<typeof createInternalESClientWithResources>
 >;
 
-export async function createInternalESClientWithContext({
-  debug,
-  apmIndices,
+export async function createInternalESClientWithResources({
+  params,
   request,
   context,
-}: {
-  debug: boolean;
-  apmIndices: APMIndices;
-  request: APMRouteHandlerResources['request'];
-  context: APMRouteHandlerResources['context'];
-}) {
+}: APMRouteHandlerResources) {
   const coreContext = await context.core;
   const { asInternalUser } = coreContext.elasticsearch.client;
+  const debug = params.query._inspect;
 
   return createInternalESClient({
     debug,
-    apmIndices,
     request,
     elasticsearchClient: asInternalUser,
   });
@@ -48,12 +41,10 @@ export async function createInternalESClientWithContext({
 
 export async function createInternalESClient({
   debug,
-  apmIndices,
   request,
   elasticsearchClient,
 }: {
   debug: boolean;
-  apmIndices: APMIndices;
   request?: APMRouteHandlerResources['request'];
   elasticsearchClient: ElasticsearchClient;
 }) {
@@ -92,7 +83,6 @@ export async function createInternalESClient({
   }
 
   return {
-    apmIndices,
     search: async <
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest

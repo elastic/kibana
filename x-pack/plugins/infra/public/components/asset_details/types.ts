@@ -7,7 +7,7 @@
 
 import { TimeRange } from '@kbn/es-query';
 import { Search } from 'history';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../lib/lib';
 
 export type { AssetDetailsUrlState } from './hooks/use_asset_details_url_state';
@@ -21,6 +21,7 @@ export enum ContentTabIds {
   OVERVIEW = 'overview',
   METADATA = 'metadata',
   PROCESSES = 'processes',
+  PROFILING = 'profiling',
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',

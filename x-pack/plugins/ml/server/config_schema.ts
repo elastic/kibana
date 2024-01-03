@@ -12,8 +12,17 @@ const enabledSchema = schema.maybe(
   })
 );
 
+const compatibleModuleTypeSchema = schema.maybe(
+  schema.oneOf([
+    schema.literal('observability'),
+    schema.literal('security'),
+    schema.literal('search'),
+  ])
+);
+
 export const configSchema = schema.object({
   ad: enabledSchema,
   dfa: enabledSchema,
   nlp: enabledSchema,
+  compatibleModuleType: compatibleModuleTypeSchema,
 });

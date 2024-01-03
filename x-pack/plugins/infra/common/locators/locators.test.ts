@@ -8,12 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
-import type { LogsLocatorParams } from './logs_locator';
-import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
-import { findInventoryFields } from '../inventory_models';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  LogViewReference,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
   const deps: LogsLocatorDependencies = {
@@ -230,7 +233,7 @@ const constructLogView = (logView?: LogViewReference) => {
 };
 
 const constructLogPosition = (time: number = 1550671089404) => {
-  return `(position:(tiebreaker:0,time:${time}))`;
+  return `(position:(tiebreaker:0,time:'${moment(time).toISOString()}'))`;
 };
 
 const constructLogFilter = ({

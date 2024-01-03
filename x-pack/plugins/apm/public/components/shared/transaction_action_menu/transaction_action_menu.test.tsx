@@ -10,11 +10,16 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
+import {
+  LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  infraLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
@@ -25,12 +30,28 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
   core: {
     ...mockApmPluginContextValue.core,
     application: { capabilities: { apm: { save: true }, ml: {} } },
+  },
+  share: {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.logsLocator;
+          }
+
+          if (id === NODE_LOGS_LOCATOR_ID) {
+            return infraLocatorsMock.nodeLogsLocator;
+          }
+        },
+      },
+    },
   },
 } as unknown as ApmPluginContextValue;
 
@@ -40,10 +61,16 @@ history.replace(
 );
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
+  const mockSpaces = {
+    getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+  };
+
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={apmContextMock} history={history}>
-        {children}
+        <KibanaContextProvider services={{ spaces: mockSpaces }}>
+          {children}
+        </KibanaContextProvider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -68,12 +95,8 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 const expectInfraLocatorsToBeCalled = () => {
-  expect(
-    apmContextMock.infra?.locators.nodeLogsLocator.getRedirectUrl
-  ).toBeCalled();
-  expect(
-    apmContextMock.infra?.locators.logsLocator.getRedirectUrl
-  ).toBeCalled();
+  expect(infraLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
+  expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
 };
 
 describe('TransactionActionMenu component', () => {
@@ -396,9 +419,9 @@ describe('TransactionActionMenu component', () => {
             component
               .getByTestId(`${key}.value`)
               .querySelector(
-                '[data-test-subj="comboBoxInput"] span'
-              ) as HTMLSpanElement
-          ).textContent,
+                '[data-test-subj="comboBoxSearchInput"]'
+              ) as HTMLInputElement
+          ).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({

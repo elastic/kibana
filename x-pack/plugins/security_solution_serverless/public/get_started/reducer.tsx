@@ -89,23 +89,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
   }
 
   if (
-    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
-    action.payload.isCardExpanded != null
-  ) {
-    return {
-      ...state,
-      expandedCardSteps: {
-        ...state.expandedCardSteps,
-        [action.payload.cardId]: {
-          expandedSteps: state.expandedCardSteps[action.payload.cardId]?.expandedSteps ?? [],
-          isExpanded: action.payload.isCardExpanded,
-        },
-      },
-    };
-  }
-
-  if (
-    action.type === GetStartedPageActions.ToggleExpandedCardStep &&
+    action.type === GetStartedPageActions.ToggleExpandedStep &&
     action.payload.isStepExpanded != null
   ) {
     // It allows Only One step open at a time
@@ -114,18 +98,18 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       return {
         ...state,
         expandedCardSteps: Object.entries(state.expandedCardSteps).reduce((acc, [cardId, card]) => {
-          if (action.payload.stepId != null && cardId === action.payload.cardId) {
+          if (cardId === action.payload.cardId) {
             expandedSteps.add(action.payload.stepId);
 
             acc[action.payload.cardId] = {
               expandedSteps: [...expandedSteps],
-              isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+              isExpanded: true,
             };
           } else {
             // Remove all other expanded steps in other cards
             acc[cardId as CardId] = {
               expandedSteps: [],
-              isExpanded: card.isExpanded,
+              isExpanded: false,
             };
           }
           return acc;
@@ -133,15 +117,15 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
       };
     }
 
-    if (action.payload.isStepExpanded === false && action.payload.stepId) {
+    if (action.payload.isStepExpanded === false) {
       expandedSteps.delete(action.payload.stepId);
       return {
         ...state,
         expandedCardSteps: {
           ...state.expandedCardSteps,
           [action.payload.cardId]: {
-            expandedSteps: [...expandedSteps],
-            isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+            expandedSteps: [],
+            isExpanded: false,
           },
         },
       };

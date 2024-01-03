@@ -18,7 +18,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep, set } from 'lodash';
-import { within } from '@testing-library/dom';
+import { within } from '@testing-library/react';
 
 describe('Policy Event Collection Card common component', () => {
   let formProps: EventCollectionCardProps<OperatingSystem.WINDOWS>;
