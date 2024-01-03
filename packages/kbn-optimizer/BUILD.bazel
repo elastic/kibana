@@ -49,7 +49,7 @@ RUNTIME_DEPS = [
   "@npm//json-stable-stringify",
   "@npm//lmdb",
   "@npm//loader-utils",
-  "@npm//node-sass",
+  "@npm//sass-embedded",
   "@npm//normalize-path",
   "@npm//pirates",
   "@npm//rxjs",
