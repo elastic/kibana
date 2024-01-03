@@ -6502,11 +6502,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod@link:packages/kbn-zod":
+"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+"@kbn/zod@link:packages/kbn-zod":
   version "0.0.0"
   uid ""
 
@@ -31450,6 +31450,11 @@ zip-stream@^4.1.0:
     archiver-utils "^2.1.0"
     compress-commons "^4.1.0"
     readable-stream "^3.6.0"
+
+zod-to-json-schema@3.20.4:
+  version "3.20.4"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.20.4.tgz#155f687c5a059fdc0f1bb3ff32d6e9200036b6f4"
+  integrity sha512-Un9+kInJ2Zt63n6Z7mLqBifzzPcOyX+b+Exuzf7L1+xqck9Q2EPByyTRduV3kmSPaXaRer1JCsucubpgL1fipg==
 
 zod-to-json-schema@^3.20.4:
   version "3.21.4"

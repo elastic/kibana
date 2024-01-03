@@ -860,8 +860,6 @@
       "@kbn/generate-console-definitions/*": ["packages/kbn-generate-console-definitions/*"],
       "@kbn/generate-csv": ["packages/kbn-generate-csv"],
       "@kbn/generate-csv/*": ["packages/kbn-generate-csv/*"],
-      "@kbn/generate-csv-types": ["packages/kbn-generate-csv-types"],
-      "@kbn/generate-csv-types/*": ["packages/kbn-generate-csv-types/*"],
       "@kbn/generate-oas": ["packages/kbn-generate-oas"],
       "@kbn/generate-oas/*": ["packages/kbn-generate-oas/*"],
       "@kbn/get-repo-files": ["packages/kbn-get-repo-files"],
