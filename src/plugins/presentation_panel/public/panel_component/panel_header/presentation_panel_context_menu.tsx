@@ -152,7 +152,7 @@ export const PresentationPanelContextMenu = ({
       {menuPanelsLoading ? (
         <EuiContextMenuPanel
           className="embPanel__optionsMenuPopover-loading"
-          title={i18n.translate('embeddableApi.panel.contextMenu.loadingTitle', {
+          title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
             defaultMessage: 'Options',
           })}
         >

@@ -18,7 +18,6 @@ import { Subscription } from 'rxjs';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
-import { core } from '../kibana_services';
 
 interface EmbeddablePanelErrorProps {
   error: ErrorLike;
@@ -63,10 +62,7 @@ export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps
     };
   }, [api]);
 
-  const searchErrorDisplay = renderSearchError({
-    error,
-    application: core.application,
-  });
+  const searchErrorDisplay = renderSearchError(error);
 
   const actions = searchErrorDisplay?.actions ?? [];
   if (isEditable) {

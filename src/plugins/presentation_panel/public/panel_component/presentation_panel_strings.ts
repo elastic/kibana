@@ -8,48 +8,48 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const placeholderTitle = i18n.translate('presentation.placeholderTitle', {
+export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
   defaultMessage: '[No Title]',
 });
 
 export const getAriaLabelForTitle = (title?: string) => {
   if (title) {
-    return i18n.translate('presentation.panel.enhancedAriaLabel', {
+    return i18n.translate('presentationPanel.enhancedAriaLabel', {
       defaultMessage: 'Panel: {title}',
       values: { title: title || placeholderTitle },
     });
   }
-  return i18n.translate('presentation.panel.ariaLabel', {
+  return i18n.translate('presentationPanel.ariaLabel', {
     defaultMessage: 'Panel',
   });
 };
 
 export const getErrorCallToAction = (title: string) =>
-  i18n.translate('presentation.panelError.editButton', {
+  i18n.translate('presentationPanel.error.editButton', {
     defaultMessage: 'Edit {value}',
     values: { value: title },
   });
 
 export const getEditTitleAriaLabel = (title?: string) =>
-  i18n.translate('presentation.panel.header.titleAriaLabel', {
+  i18n.translate('presentationPanel.header.titleAriaLabel', {
     defaultMessage: 'Click to edit title: {title}',
     values: { title: title || placeholderTitle },
   });
 
 export const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
-    return i18n.translate('presentation.panel.contextMenu.ariaLabelWithTitle', {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithTitle', {
       defaultMessage: 'Panel options for {title}',
       values: { title },
     });
   }
   if (index) {
-    return i18n.translate('presentation.panel.contextMenu.ariaLabelWithIndex', {
+    return i18n.translate('presentationPanel.contextMenu.ariaLabelWithIndex', {
       defaultMessage: 'Options for panel {index}',
       values: { index },
     });
   }
-  return i18n.translate('presentation.panel.contextMenu.ariaLabel', {
+  return i18n.translate('presentationPanel.contextMenu.ariaLabel', {
     defaultMessage: 'Panel options',
   });
 };

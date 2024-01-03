@@ -49,7 +49,7 @@ export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   constructor() {}
 
   public getDisplayName({ embeddable }: EmbeddableApiContext): string {
-    return i18n.translate('presentation.action.customizePanel.displayName', {
+    return i18n.translate('presentationPanel.action.customizePanel.displayName', {
       defaultMessage: 'Panel settings',
     });
   }

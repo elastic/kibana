@@ -40,7 +40,7 @@ export class EditPanelAction
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return i18n.translate('presentation.action.editPanel.displayName', {
+    return i18n.translate('presentationPanel.action.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
       values: {
         value: embeddable.getTypeDisplayName(),

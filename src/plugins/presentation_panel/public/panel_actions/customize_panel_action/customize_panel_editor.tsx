@@ -114,7 +114,7 @@ export const CustomizePanelEditor = ({
             label={
               <FormattedMessage
                 defaultMessage="Show title"
-                id="presentation.action.customizePanel.flyout.optionsMenuForm.showTitle"
+                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.showTitle"
               />
             }
             onChange={(e) => setHideTitle(!e.target.checked)}
@@ -123,7 +123,7 @@ export const CustomizePanelEditor = ({
         <EuiFormRow
           label={
             <FormattedMessage
-              id="presentation.action.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel"
+              id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel"
               defaultMessage="Title"
             />
           }
@@ -134,14 +134,14 @@ export const CustomizePanelEditor = ({
               onClick={() => setPanelTitle(api.defaultPanelTitle?.value)}
               disabled={hideTitle || !editMode || api?.defaultPanelTitle?.value === panelTitle}
               aria-label={i18n.translate(
-                'presentation.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
+                'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
                 {
                   defaultMessage: 'Reset title',
                 }
               )}
             >
               <FormattedMessage
-                id="presentation.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
+                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonLabel"
                 defaultMessage="Reset"
               />
             </EuiButtonEmpty>
@@ -157,7 +157,7 @@ export const CustomizePanelEditor = ({
             value={panelTitle ?? ''}
             onChange={(e) => setPanelTitle(e.target.value)}
             aria-label={i18n.translate(
-              'presentation.action.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
+              'presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
               {
                 defaultMessage: 'Enter a custom title for your panel',
               }
@@ -167,7 +167,7 @@ export const CustomizePanelEditor = ({
         <EuiFormRow
           label={
             <FormattedMessage
-              id="presentation.action.customizePanel.flyout.optionsMenuForm.panelDescriptionFormRowLabel"
+              id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelDescriptionFormRowLabel"
               defaultMessage="Description"
             />
           }
@@ -180,14 +180,14 @@ export const CustomizePanelEditor = ({
                 hideTitle || !editMode || api.defaultPanelDescription?.value === panelDescription
               }
               aria-label={i18n.translate(
-                'presentation.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
+                'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
                 {
                   defaultMessage: 'Reset description',
                 }
               )}
             >
               <FormattedMessage
-                id="presentation.action.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
+                id="presentationPanel.action.customizePanel.modal.optionsMenuForm.resetCustomDescriptionButtonLabel"
                 defaultMessage="Reset"
               />
             </EuiButtonEmpty>
@@ -202,7 +202,7 @@ export const CustomizePanelEditor = ({
             value={panelDescription ?? ''}
             onChange={(e) => setPanelDescription(e.target.value)}
             aria-label={i18n.translate(
-              'presentation.action.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
+              'presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
               {
                 defaultMessage: 'Enter a custom description for your panel',
               }
@@ -230,7 +230,7 @@ export const CustomizePanelEditor = ({
             label={
               <FormattedMessage
                 defaultMessage="Apply custom time range"
-                id="presentation.action.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
+                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
               />
             }
             onChange={(e) => setHasOwnTimeRange(e.target.checked)}
@@ -240,7 +240,7 @@ export const CustomizePanelEditor = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="presentation.action.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
+                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
                 defaultMessage="Time range"
               />
             }
@@ -277,7 +277,7 @@ export const CustomizePanelEditor = ({
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="presentation.action.customizePanel.flyout.title"
+              id="presentationPanel.action.customizePanel.flyout.title"
               defaultMessage="Panel settings"
             />
           </h2>
@@ -295,7 +295,7 @@ export const CustomizePanelEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="cancelCustomizePanelButton" onClick={onClose}>
               <FormattedMessage
-                id="presentation.action.customizePanel.flyout.cancelButtonTitle"
+                id="presentationPanel.action.customizePanel.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -303,7 +303,7 @@ export const CustomizePanelEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton data-test-subj="saveCustomizePanelButton" onClick={save} fill>
               <FormattedMessage
-                id="presentation.action.customizePanel.flyout.saveButtonTitle"
+                id="presentationPanel.action.customizePanel.flyout.saveButtonTitle"
                 defaultMessage="Apply"
               />
             </EuiButton>
