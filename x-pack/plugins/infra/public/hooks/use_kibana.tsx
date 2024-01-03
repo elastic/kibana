@@ -6,7 +6,7 @@
  */
 
 import type { PropsOf } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, createElement, createContext } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import {
   createKibanaReactContext,
@@ -17,23 +17,24 @@ import { InfraClientCoreSetup, InfraClientStartDeps, InfraClientStartExports } f
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;
 
+interface KibanaEnvContext {
+  kibanaVersion?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+}
+
 export const createKibanaContextForPlugin = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports
 ) =>
-  createKibanaReactContext<PluginKibanaContextValue>(
-    {
-      ...core,
-      ...plugins,
-      ...pluginStart,
-    },
-    {
-      kibanaVersion: plugins.kibanaVersion,
-      isCloudEnv: plugins.isCloudEnv,
-      isServerlessEnv: plugins.isServerlessEnv,
-    }
-  );
+  createKibanaReactContext<PluginKibanaContextValue>({
+    ...core,
+    ...plugins,
+    ...pluginStart,
+  });
+
+export const KibanaEnvironmentContext = createContext<KibanaEnvContext>({});
 
 export const useKibanaContextForPlugin =
   useKibana as () => KibanaReactContextValue<PluginKibanaContextValue>;
@@ -47,6 +48,31 @@ export const useKibanaContextForPluginProvider = (
     () => createKibanaContextForPlugin(core, plugins, pluginStart),
     [core, pluginStart, plugins]
   );
+  return Provider;
+};
+
+export const useKibanaEnvironmentContextProvider = (plugins: InfraClientStartDeps) => {
+  const value = useMemo(
+    () => ({
+      kibanaVersion: plugins.kibanaVersion,
+      isCloudEnv: plugins.isCloudEnv,
+      isServerlessEnv: plugins.isServerlessEnv,
+    }),
+    [plugins]
+  );
+
+  const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({
+    kibanaEnvironment = {},
+    children,
+  }) => {
+    const newProvider = createElement(KibanaEnvironmentContext.Provider, {
+      value: { ...kibanaEnvironment, ...value },
+      children,
+    });
+
+    return newProvider;
+  };
+
   return Provider;
 };
 

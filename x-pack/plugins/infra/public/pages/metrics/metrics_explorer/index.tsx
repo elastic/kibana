@@ -7,9 +7,9 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
@@ -52,9 +52,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
   const { currentView } = useMetricsExplorerViews();
   const { source: sourceContext, metricIndicesExist } = useSourceContext();
-  const {
-    kibanaEnvironment: { kibanaVersion, isCloudEnv, isServerlessEnv },
-  } = useKibanaContextForPlugin();
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });

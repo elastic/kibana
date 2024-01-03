@@ -13,7 +13,10 @@ import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
+import {
+  useKibanaContextForPluginProvider,
+  useKibanaEnvironmentContextProvider,
+} from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
@@ -70,11 +73,15 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
     pluginStart
   );
 
+  const MyEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(plugins);
+
   return (
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-      <core.i18n.Context>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-      </core.i18n.Context>
+      <MyEnvContextForPluginProvider kibanaEnvironment={{ ...plugins }}>
+        <core.i18n.Context>
+          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+        </core.i18n.Context>
+      </MyEnvContextForPluginProvider>
     </KibanaContextProviderForPlugin>
   );
 };

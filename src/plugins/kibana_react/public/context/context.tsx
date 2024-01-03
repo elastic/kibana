@@ -7,12 +7,7 @@
  */
 
 import * as React from 'react';
-import type {
-  KibanaEnvironment,
-  KibanaReactContext,
-  KibanaReactContextValue,
-  KibanaServices,
-} from './types';
+import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
 
@@ -20,7 +15,6 @@ const { useMemo, useContext, createElement, createContext } = React;
 
 const defaultContextValue = {
   services: {},
-  kibanaEnvironment: {},
   overlays: createReactOverlays({}),
   notifications: createNotifications({}),
 };
@@ -43,29 +37,22 @@ export const withKibana = <Props extends { kibana: KibanaReactContextValue<{}> }
 };
 
 export const createKibanaReactContext = <Services extends KibanaServices>(
-  services: Services,
-  kibanaEnvironment?: KibanaEnvironment
+  services: Services
 ): KibanaReactContext<Services> => {
   const value: KibanaReactContextValue<Services> = {
     services,
     overlays: createReactOverlays(services),
     notifications: createNotifications(services),
-    kibanaEnvironment: kibanaEnvironment ?? {},
   };
 
-  const Provider: React.FC<{ services?: Services; kibanaEnvironment?: KibanaEnvironment }> = ({
+  const Provider: React.FC<{ services?: Services }> = ({
     services: newServices = {},
-    kibanaEnvironment: newKibanaEnvironment = {},
     children,
   }) => {
     const oldValue = useKibana();
     const { value: newValue } = useMemo(
-      () =>
-        createKibanaReactContext(
-          { ...services, ...oldValue.services, ...newServices },
-          { ...kibanaEnvironment, ...oldValue.kibanaEnvironment, ...newKibanaEnvironment }
-        ),
-      [services, oldValue, newServices, kibanaEnvironment, newKibanaEnvironment]
+      () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),
+      [services, oldValue, newServices]
     );
 
     const newProvider = createElement(context.Provider, {
@@ -83,4 +70,4 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
   };
 };
 
-export const { Provider: KibanaContextProvider } = createKibanaReactContext({}, {});
+export const { Provider: KibanaContextProvider } = createKibanaReactContext({});

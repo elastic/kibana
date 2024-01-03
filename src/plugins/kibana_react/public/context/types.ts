@@ -12,21 +12,15 @@ import { KibanaReactOverlays } from '../overlays';
 import { KibanaReactNotifications } from '../notifications';
 
 export type KibanaServices = Partial<CoreStart>;
-export interface KibanaEnvironment {
-  kibanaVersion?: string;
-  isCloudEnv?: boolean;
-  isServerlessEnv?: boolean;
-}
 
 export interface KibanaReactContextValue<Services extends KibanaServices> {
   readonly services: Services;
-  readonly kibanaEnvironment: KibanaEnvironment;
   readonly overlays: KibanaReactOverlays;
   readonly notifications: KibanaReactNotifications;
 }
 
 export interface KibanaReactContext<T extends KibanaServices> {
   value: KibanaReactContextValue<T>;
-  Provider: React.FC<{ services?: T; kibanaEnvironment?: KibanaEnvironment }>;
+  Provider: React.FC<{ services?: T }>;
   Consumer: React.Consumer<KibanaReactContextValue<T>>;
 }

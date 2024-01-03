@@ -9,9 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -58,7 +59,8 @@ export function ApmMainTemplate({
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
 
-  const { services, kibanaEnvironment } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps>();
+  const kibanaEnvironment = useContext(KibanaEnvironmentContext);
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
