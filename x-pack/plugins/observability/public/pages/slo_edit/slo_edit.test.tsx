@@ -9,6 +9,7 @@ import { fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
@@ -74,7 +75,6 @@ const mockKibana = () => {
       },
       charts: {
         theme: {
-          useChartsTheme: () => {},
           useChartsBaseTheme: () => {},
         },
       },
@@ -82,10 +82,13 @@ const mockKibana = () => {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
           get: jest.fn().mockReturnValue([]),
+          getDefault: jest.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        create: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('some-index'),
+        }),
       },
       docLinks: {
         links: {
@@ -103,13 +106,13 @@ const mockKibana = () => {
           addSuccess: mockAddSuccess,
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       storage: {
         get: () => {},
       },
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {
@@ -128,6 +131,8 @@ describe('SLO Edit Page', () => {
   const mockCreate = jest.fn();
   const mockUpdate = jest.fn();
 
+  const history = createBrowserHistory();
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
@@ -136,9 +141,8 @@ describe('SLO Edit Page', () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const history = createBrowserHistory();
     history.replace('');
-    jest.spyOn(Router, 'useHistory').mockReturnValueOnce(history);
+    jest.spyOn(Router, 'useHistory').mockReturnValue(history);
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
@@ -256,11 +260,9 @@ describe('SLO Edit Page', () => {
       it('prefills the form with values from URL', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
 
-        const history = createBrowserHistory();
         history.replace(
           '/slos/create?_a=(indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
         );
-        jest.spyOn(Router, 'useHistory').mockReturnValueOnce(history);
         jest
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
@@ -336,11 +338,9 @@ describe('SLO Edit Page', () => {
         const slo = buildSlo({ id: '123' });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
-        const history = createBrowserHistory();
         history.push(
           '/slos/123/edit?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
         );
-        jest.spyOn(Router, 'useHistory').mockReturnValueOnce(history);
         jest
           .spyOn(Router, 'useLocation')
           .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });

@@ -58,7 +58,7 @@ export {
 export type { TrackEvent } from './hooks/use_track_metric';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useTimeZone } from './hooks/use_time_zone';
-export { useChartTheme } from './hooks/use_chart_theme';
+export { useChartThemes } from './hooks/use_chart_theme';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor, Options as UseLinkPropsOptions } from './hooks/use_link_props';
 export { NavigationWarningPromptProvider, Prompt } from './components/navigation_warning_prompt';
@@ -83,9 +83,11 @@ export {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
+  EMBEDDABLE_STACK_TRACES,
   EmbeddableFlamegraph,
   EmbeddableFunctions,
   EmbeddableProfilingSearchBar,
+  EmbeddableStackTraces,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
 

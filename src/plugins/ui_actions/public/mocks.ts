@@ -8,11 +8,12 @@
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action, FrequentCompatibilityChangeAction, UiActionsSetup, UiActionsStart } from '.';
+import { Action, FrequentCompatibilityChangeAction } from '.';
+import { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 
-export type Setup = jest.Mocked<UiActionsSetup>;
-export type Start = jest.Mocked<UiActionsStart>;
+export type Setup = jest.Mocked<UiActionsPublicSetup>;
+export type Start = jest.Mocked<UiActionsPublicStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {

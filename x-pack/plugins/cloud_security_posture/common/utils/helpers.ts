@@ -31,6 +31,7 @@ import type {
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
+import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
@@ -171,4 +172,49 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
 
   // nothing to do, return unmutated policy
   return packagePolicy;
+};
+
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'CIS Kubernetes';
+    case 'cis_azure':
+      return 'CIS Azure';
+    case 'cis_aws':
+      return 'CIS AWS';
+    case 'cis_eks':
+      return 'CIS EKS';
+    case 'cis_gcp':
+      return 'CIS GCP';
+  }
+};
+
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'Kubernetes';
+    case 'cis_azure':
+      return 'Microsoft Azure';
+    case 'cis_aws':
+      return 'Amazon Web Services';
+    case 'cis_eks':
+      return 'Amazon Elastic Kubernetes Service';
+    case 'cis_gcp':
+      return 'Google Cloud Provider';
+  }
+};
+
+export const getBenchmarkFilterQuery = (
+  id: BenchmarkId,
+  version?: string,
+  selectParams?: BenchmarkRuleSelectParams
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
+  const sectionQuery = selectParams?.section
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams.section}"`
+    : '';
+  const ruleNumberQuery = selectParams?.ruleNumber
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams.ruleNumber}"`
+    : '';
+  return baseQuery + sectionQuery + ruleNumberQuery;
 };

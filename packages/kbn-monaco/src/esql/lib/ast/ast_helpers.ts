@@ -162,23 +162,24 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 // Note: do not import esql_parser or bundle size will grow up by ~500 kb
 function getQuotedText(ctx: ParserRuleContext) {
-  return (
-    ctx.tryGetToken(73 /* esql_parser.SRC_QUOTED_IDENTIFIER*/, 0) ||
-    ctx.tryGetToken(64 /* esql_parser.QUOTED_IDENTIFIER */, 0)
-  );
+  return [66 /* esql_parser.QUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_QUOTED_IDENTIFIER */]
+    .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+    .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return (
-    ctx.tryGetToken(72 /* esql_parser.SRC_UNQUOTED_IDENTIFIER */, 0) ||
-    ctx.tryGetToken(63 /* esql_parser.UNQUOTED_IDENTIFIER */, 0)
-  );
+  return [
+    65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
+    76 /* esql_parser.PROJECT_UNQUOTED_IDENTIFIER */,
+  ]
+    .map((keyCode) => ctx.tryGetToken(keyCode, 0))
+    .filter(nonNullable)[0];
 }
 
 const TICKS_REGEX = /(`)/g;
 
 function isQuoted(text: string | undefined) {
-  return text && TICKS_REGEX.test(text);
+  return text && /^(`)/.test(text);
 }
 
 export function sanifyIdentifierString(ctx: ParserRuleContext) {
@@ -187,6 +188,10 @@ export function sanifyIdentifierString(ctx: ParserRuleContext) {
     getQuotedText(ctx)?.text.replace(TICKS_REGEX, '') ||
     ctx.text.replace(TICKS_REGEX, '') // for some reason some quoted text is not detected correctly by the parser
   );
+}
+
+export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
+  return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
 export function createSource(
@@ -219,9 +224,9 @@ export function createColumn(ctx: ParserRuleContext): ESQLColumn {
   const text = sanifyIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.text));
   return {
-    type: 'column',
+    type: 'column' as const,
     name: text,
-    text,
+    text: ctx.text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
     quoted: hasQuotes,
