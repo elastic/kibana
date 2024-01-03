@@ -17,7 +17,7 @@ import type { NoDataPageConfig } from '../config';
 import type { NoDataPagePublicSetup, NoDataPagePublicStart } from './types';
 import { createUseHasApiKeys } from './lib/use_has_api_keys';
 
-export class NoDataPagePublic implements Plugin<NoDataPagePublicSetup> {
+export class NoDataPagePlugin implements Plugin<NoDataPagePublicSetup> {
   constructor(private initializerContext: PluginInitializerContext<NoDataPageConfig>) {}
 
   public setup(core: CoreSetup): NoDataPagePublicSetup {
