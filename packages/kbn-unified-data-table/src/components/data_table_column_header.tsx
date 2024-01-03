@@ -8,10 +8,11 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTextBlockTruncate } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { EuiIcon, EuiTextBlockTruncate, EuiToolTip } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
 import type { DataTableColumnTypes } from '../types';
 
 interface DataTableColumnHeaderProps {
@@ -34,19 +35,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
   } = props;
 
   return (
-    <EuiTextBlockTruncate
-      lines={headerRowHeight}
-      css={css`
-        overflow-wrap: anywhere;
-        overflow: auto;
-        white-space: normal;
-        word-break: break-all;
-        line-height: 16px;
-        .euiDataGridHeaderCell--numeric & {
-          justify-content: flex-end;
-        }
-      `}
-    >
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
         <DataTableColumnToken
           columnName={columnName}
@@ -55,7 +44,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
         />
       )}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
-    </EuiTextBlockTruncate>
+    </ColumnHeaderTruncateContainer>
   );
 };
 
@@ -115,3 +104,61 @@ function getRenderedToken({
 
   return null;
 }
+
+const ColumnHeaderTruncateContainer = ({
+  headerRowHeight = 1,
+  children,
+}: {
+  headerRowHeight: number;
+  children: React.ReactNode;
+}) => {
+  return (
+    <EuiTextBlockTruncate
+      lines={headerRowHeight}
+      css={css`
+        overflow-wrap: anywhere;
+        overflow: auto;
+        white-space: normal;
+        word-break: break-all;
+        line-height: 16px;
+        .euiDataGridHeaderCell--numeric & {
+          text-align: right;
+        }
+      `}
+    >
+      {children}
+    </EuiTextBlockTruncate>
+  );
+};
+
+export const DataTableTimeColumnHeader = ({
+  dataView,
+  dataViewField,
+  headerRowHeight = 1,
+}: {
+  dataView: DataView;
+  dataViewField?: DataViewField;
+  headerRowHeight?: number;
+}) => {
+  const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
+  const primaryTimeAriaLabel = i18n.translate(
+    'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
+    {
+      defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
+      values: { timeFieldName },
+    }
+  );
+  const primaryTimeTooltip = i18n.translate('unifiedDataTable.tableHeader.timeFieldIconTooltip', {
+    defaultMessage: 'This field represents the time that events occurred.',
+  });
+
+  return (
+    <div aria-label={primaryTimeAriaLabel}>
+      <EuiToolTip content={primaryTimeTooltip}>
+        <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+          {timeFieldName} <EuiIcon type="clock" />
+        </ColumnHeaderTruncateContainer>
+      </EuiToolTip>
+    </div>
+  );
+};

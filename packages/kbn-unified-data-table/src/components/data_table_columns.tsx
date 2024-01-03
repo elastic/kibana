@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiIcon,
   EuiScreenReaderOnly,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
@@ -27,9 +25,10 @@ import { SelectButton } from './data_table_document_selection';
 import { defaultTimeColumnWidth } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
-import { DataTableColumnHeader } from './data_table_column_header';
+import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
+const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 
 const openDetails = {
   id: 'openDetails',
@@ -181,29 +180,16 @@ function buildEuiGridColumn({
   };
 
   if (column.id === dataView.timeFieldName) {
-    const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
-    const primaryTimeAriaLabel = i18n.translate(
-      'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
-      {
-        defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
-        values: { timeFieldName },
-      }
-    );
-    const primaryTimeTooltip = i18n.translate('unifiedDataTable.tableHeader.timeFieldIconTooltip', {
-      defaultMessage: 'This field represents the time that events occurred.',
-    });
-
     column.display = (
-      <div aria-label={primaryTimeAriaLabel}>
-        <EuiToolTip content={primaryTimeTooltip}>
-          <>
-            {timeFieldName} <EuiIcon type="clock" />
-          </>
-        </EuiToolTip>
-      </div>
+      <DataTableTimeColumnHeaderMemoized
+        dataView={dataView}
+        dataViewField={dataViewField}
+        headerRowHeight={headerRowHeight}
+      />
     );
     column.initialWidth = defaultTimeColumnWidth;
   }
+
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);
   }
