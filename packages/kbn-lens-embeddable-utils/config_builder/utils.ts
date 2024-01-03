@@ -223,7 +223,6 @@ export const buildDatasourceStates = async (
         getValueColumns
       );
       if (layerConfig) {
-        // layers[type]!.layers[layerId] = layerConfig;
         layers = {
           ...layers,
           [type]: {
