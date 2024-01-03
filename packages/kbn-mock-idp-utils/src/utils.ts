@@ -7,6 +7,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+// xml-crypto is part of devDependencies
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { SignedXml } from 'xml-crypto';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 import { readFile } from 'fs/promises';
@@ -142,19 +144,19 @@ export async function createSAMLResponse(options: {
     </saml:Assertion>
   `;
 
-  const signature = new SignedXml();
+  const signature = new SignedXml({ privateKey: await readFile(KBN_KEY_PATH) });
   signature.signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
-  signature.signingKey = await readFile(KBN_KEY_PATH);
+  signature.canonicalizationAlgorithm = 'http://www.w3.org/2001/10/xml-exc-c14n#';
 
   // Adds a reference to a `Assertion` xml element and an array of transform algorithms to be used during signing.
-  signature.addReference(
-    `//*[local-name(.)='Assertion']`,
-    [
+  signature.addReference({
+    xpath: `//*[local-name(.)='Assertion']`,
+    digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+    transforms: [
       'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
       'http://www.w3.org/2001/10/xml-exc-c14n#',
     ],
-    'http://www.w3.org/2001/04/xmlenc#sha256'
-  );
+  });
 
   signature.computeSignature(samlAssertionTemplateXML, {
     location: { reference: `//*[local-name(.)='Issuer']`, action: 'after' },

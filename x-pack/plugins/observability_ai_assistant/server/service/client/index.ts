@@ -53,7 +53,10 @@ export class ObservabilityAIAssistantClient {
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
       namespace: string;
-      esClient: ElasticsearchClient;
+      esClient: {
+        asInternalUser: ElasticsearchClient;
+        asCurrentUser: ElasticsearchClient;
+      };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user: {
@@ -67,7 +70,7 @@ export class ObservabilityAIAssistantClient {
   private getConversationWithMetaFields = async (
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       query: {
         bool: {
@@ -113,7 +116,7 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
-    await this.dependencies.esClient.delete({
+    await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id,
       index: conversation._index,
       refresh: true,
@@ -406,6 +409,9 @@ export class ObservabilityAIAssistantClient {
       function_call: functionCall ? { name: functionCall } : undefined,
     };
 
+    this.dependencies.logger.debug(`Sending conversation to connector`);
+    this.dependencies.logger.trace(JSON.stringify(request, null, 2));
+
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
@@ -425,17 +431,15 @@ export class ObservabilityAIAssistantClient {
       ? (executeResult.data as Readable)
       : (executeResult.data as CreateChatCompletionResponse);
 
-    if (response instanceof PassThrough) {
-      signal.addEventListener('abort', () => {
-        response.end();
-      });
+    if (response instanceof Readable) {
+      signal.addEventListener('abort', () => response.destroy());
     }
 
     return response as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       allow_no_indices: true,
       query: {
@@ -472,7 +476,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: updatedConversation,
@@ -544,7 +548,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: { conversation: { title } },
@@ -567,7 +571,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(now)
     );
 
-    await this.dependencies.esClient.index({
+    await this.dependencies.esClient.asInternalUser.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
       refresh: true,
@@ -588,6 +592,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       contexts,
+      asCurrentUser: this.dependencies.esClient.asCurrentUser,
     });
   };
 

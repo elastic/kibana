@@ -57,6 +57,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
+  sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {

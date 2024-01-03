@@ -106,8 +106,37 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [createDataView, setCreateDataView] = useState(
       canCreateDataView === false ? false : defaults.createDataView
     );
-    const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
+
+    const previewRequest = useMemo(() => {
+      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const transformConfigQuery = getTransformConfigQuery(searchQuery);
+      return getPreviewTransformRequestBody(
+        searchItems.dataView,
+        transformConfigQuery,
+        partialPreviewRequest,
+        stepDefineState.runtimeMappings
+      );
+    }, [searchItems.dataView, stepDefineState]);
+
+    const { error: transformsPreviewError, data: transformPreview } =
+      useGetTransformsPreview(previewRequest);
+
+    const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+      if (!transformPreview) return [];
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
+      return timeFields;
+    }, [transformPreview]);
+
+    useEffect(
+      function resetDataViewTimeField() {
+        setDataViewTimeField(destIndexAvailableTimeFields[0]);
+      },
+      [destIndexAvailableTimeFields]
+    );
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -118,11 +147,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         }
         // Find the time field based on the selected value
         // this is to account for undefined when user chooses not to use a date field
-        const timeField = dataViewAvailableTimeFields.find((col) => col === value);
+        const timeField = destIndexAvailableTimeFields.find((col) => col === value);
 
         setDataViewTimeField(timeField);
       },
-      [setDataViewTimeField, dataViewAvailableTimeFields]
+      [setDataViewTimeField, destIndexAvailableTimeFields]
     );
 
     const {
@@ -145,31 +174,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [transformsError]);
-
-    const previewRequest = useMemo(() => {
-      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-      const transformConfigQuery = getTransformConfigQuery(searchQuery);
-      return getPreviewTransformRequestBody(
-        searchItems.dataView,
-        transformConfigQuery,
-        partialPreviewRequest,
-        stepDefineState.runtimeMappings
-      );
-    }, [searchItems.dataView, stepDefineState]);
-    const { error: transformsPreviewError, data: transformPreview } =
-      useGetTransformsPreview(previewRequest);
-
-    useEffect(() => {
-      if (transformPreview) {
-        const properties = transformPreview.generated_dest_index.mappings.properties;
-        const timeFields: string[] = Object.keys(properties).filter(
-          (col) => properties[col].type === 'date'
-        );
-
-        setDataViewAvailableTimeFields(timeFields);
-        setDataViewTimeField(timeFields[0]);
-      }
-    }, [transformPreview]);
 
     useEffect(() => {
       if (transformsPreviewError !== null) {
@@ -242,24 +246,24 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       }
     }, [dataViewTitlesError]);
 
-    const dateFieldNames = searchItems.dataView.fields
+    const sourceIndexDateFieldNames = searchItems.dataView.fields
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
       .map((f) => f.name)
       .sort();
 
     // Continuous Mode
-    const isContinuousModeAvailable = dateFieldNames.length > 0;
+    const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
     );
     const [continuousModeDateField, setContinuousModeDateField] = useState(
-      isContinuousModeAvailable ? dateFieldNames[0] : ''
+      isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
     const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
 
     // Retention Policy
-    const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+    const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
     const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
       defaults.isRetentionPolicyEnabled
     );
@@ -272,15 +276,27 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
     const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
 
-    // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
+      // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
         setRetentionPolicyDateField(
-          isRetentionPolicyAvailable ? dataViewAvailableTimeFields[0] : ''
+          isRetentionPolicyAvailable ? destIndexAvailableTimeFields[0] : ''
         );
         setRetentionPolicyMaxAge('');
       }
-    }, [isRetentionPolicyEnabled]);
+
+      // When retention policy is first enabled, pick a default option
+      if (
+        isRetentionPolicyAvailable &&
+        isRetentionPolicyEnabled &&
+        retentionPolicyDateField === ''
+      ) {
+        // If a time field '@timestamp' exists, prioritize that
+        const prioritizeTimestamp = destIndexAvailableTimeFields.find((d) => d === '@timestamp');
+        // else pick the first available option
+        setRetentionPolicyDateField(prioritizeTimestamp ?? destIndexAvailableTimeFields[0]);
+      }
+    }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
@@ -537,7 +553,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             createDataView={createDataView}
             dataViewTitleExists={dataViewTitleExists}
             setCreateDataView={setCreateDataView}
-            dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+            dataViewAvailableTimeFields={destIndexAvailableTimeFields}
             dataViewTimeField={dataViewTimeField}
             onTimeFieldChanged={onTimeFieldChanged}
           />
@@ -582,7 +598,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text, value: text }))}
+                  options={sourceIndexDateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
@@ -652,7 +668,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               data-test-subj="transformRetentionPolicySwitch"
             />
           </EuiFormRow>
-          {isRetentionPolicyEnabled && (
+          {isRetentionPolicyEnabled && isRetentionPolicyAvailable && (
             <>
               <EuiFormRow
                 label={i18n.translate(
@@ -670,7 +686,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dataViewAvailableTimeFields.map((text: string) => ({ text }))}
+                  options={destIndexAvailableTimeFields.map((text: string) => ({ text }))}
                   value={retentionPolicyDateField}
                   onChange={(e) => setRetentionPolicyDateField(e.target.value)}
                   data-test-subj="transformRetentionPolicyDateFieldSelect"

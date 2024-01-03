@@ -9,6 +9,7 @@ import { fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
@@ -74,7 +75,6 @@ const mockKibana = () => {
       },
       charts: {
         theme: {
-          useChartsTheme: () => {},
           useChartsBaseTheme: () => {},
         },
       },
@@ -103,6 +103,7 @@ const mockKibana = () => {
           addSuccess: mockAddSuccess,
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       storage: {
         get: () => {},
       },

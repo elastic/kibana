@@ -27,8 +27,8 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
 });
 
 const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
-  const { isLoading, alert, cases } = props;
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { isLoading, alert, cases, caseAppId } = props;
+  const { navigateToCaseView } = useCaseViewNavigation(caseAppId);
 
   const caseIds = alert[ALERT_CASE_IDS] ?? [];
 
