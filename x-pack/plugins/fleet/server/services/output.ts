@@ -576,6 +576,7 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
+    // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
@@ -584,6 +585,26 @@ class OutputService {
       });
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
+    } else {
+      if (output.type === outputType.Logstash && data.type === outputType.Logstash) {
+        if (!output.ssl?.key && output.secrets?.ssl?.key) {
+          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+        }
+      } else if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+        if (!output.password && output.secrets?.password) {
+          data.password = output.secrets?.password as string;
+        }
+        if (!output.ssl?.key && output.secrets?.ssl?.key) {
+          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+        }
+      } else if (
+        output.type === outputType.RemoteElasticsearch &&
+        data.type === outputType.RemoteElasticsearch
+      ) {
+        if (!output.service_token && output.secrets?.service_token) {
+          data.service_token = output.secrets?.service_token as string;
+        }
+      }
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -768,7 +789,9 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = {
+      ...omit(data, ['ssl', 'secrets', 'password', 'service_token']),
+    };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
@@ -782,17 +805,7 @@ class OutputService {
         );
       }
     }
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
-      const secretsRes = await extractAndUpdateOutputSecrets({
-        oldOutput: originalOutput,
-        outputUpdate: data,
-        esClient,
-        secretHashes: data.is_preconfigured ? secretHashes : undefined,
-      });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
-      secretsToDelete = secretsRes.secretsToDelete;
-    }
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
     await validateTypeChanges(
@@ -972,6 +985,39 @@ class OutputService {
 
       if (isShipperDisabled && data.shipper) {
         updateData.shipper = null;
+      }
+    }
+
+    // Store secret values if enabled; if not, store plain text values
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+      const secretsRes = await extractAndUpdateOutputSecrets({
+        oldOutput: originalOutput,
+        outputUpdate: data,
+        esClient,
+        secretHashes: data.is_preconfigured ? secretHashes : undefined,
+      });
+
+      updateData.secrets = secretsRes.outputUpdate.secrets;
+      secretsToDelete = secretsRes.secretsToDelete;
+    } else {
+      if (originalOutput.type === outputType.Logstash && data.type === outputType.Logstash) {
+        if (!data.ssl?.key && data.secrets?.ssl?.key) {
+          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+        }
+      } else if (originalOutput.type === outputType.Kafka && data.type === outputType.Kafka) {
+        if (!data.password && data.secrets?.password) {
+          updateData.password = data.secrets?.password as string;
+        }
+        if (!data.ssl?.key && data.secrets?.ssl?.key) {
+          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+        }
+      } else if (
+        originalOutput.type === outputType.RemoteElasticsearch &&
+        data.type === outputType.RemoteElasticsearch
+      ) {
+        if (!data.service_token && data.secrets?.service_token) {
+          updateData.service_token = data.secrets?.service_token as string;
+        }
       }
     }
 
