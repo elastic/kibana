@@ -45,18 +45,10 @@ const validators = {
 };
 type ValidatorName = keyof typeof validators;
 
-type DefaultParser = (v: string) => string;
-type NullableNumberParser = (v: string) => number | null;
-type NumberParser = (v: string) => number;
-
-const defaultParser: DefaultParser = (v) => v;
-const nullableNumberParser: NullableNumberParser = (v) => (v === '' ? null : +v);
-const numberParser: NumberParser = (v) => +v;
-
 const valueParsers = {
-  defaultParser,
-  nullableNumberParser,
-  numberParser,
+  defaultParser: (v: string) => v,
+  nullableNumberParser: (v: string) => (v === '' ? null : +v),
+  numberParser: (v: string) => +v,
 };
 type ValueParserName = keyof typeof valueParsers;
 
@@ -251,8 +243,8 @@ export const applyFormStateToTransformConfig = (
   );
 const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
   createSelector(
-    (state: EditTransformFlyoutState) => state.formFields,
-    (state: EditTransformFlyoutState) => state.formSections,
+    (state: State) => state.formFields,
+    (state: State) => state.formSections,
     (formFields, formSections) =>
       applyFormStateToTransformConfig(originalConfig, formFields, formSections)
   );
@@ -264,7 +256,7 @@ export const useUpdatedTransformConfig = () => {
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
-export const getDefaultState = (config?: TransformConfigUnion): EditTransformFlyoutFormState => ({
+export const getDefaultState = (config?: TransformConfigUnion): State => ({
   formFields: {
     // top level attributes
     description: initializeFormField('description', 'description', config),
@@ -357,7 +349,7 @@ export const getDefaultState = (config?: TransformConfigUnion): EditTransformFly
 const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
   Object.values(fieldsState).every((d) => d.errorMessages.length === 0);
 const selectIsFormValid = createSelector(
-  (state: EditTransformFlyoutState) => state.formFields,
+  (state: State) => state.formFields,
   (formFields) => isFormValid(formFields)
 );
 export const useIsFormValid = () => useSelector(selectIsFormValid);
@@ -372,7 +364,7 @@ interface EditTransformFlyoutProviderProps {
   dataViewId?: string;
 }
 
-interface EditTransformFlyoutFormState {
+interface State {
   apiErrorMessage?: string;
   formFields: EditTransformFlyoutFieldsState;
   formSections: EditTransformFlyoutSectionsState;
@@ -391,8 +383,8 @@ const isFormTouched = (
 };
 const createSelectIsFormTouched = (originalConfig: TransformConfigUnion) =>
   createSelector(
-    (state: EditTransformFlyoutState) => state.formFields,
-    (state: EditTransformFlyoutState) => state.formSections,
+    (state: State) => state.formFields,
+    (state: State) => state.formSections,
     (formFields, formSections) => isFormTouched(originalConfig, formFields, formSections)
   );
 export const useIsFormTouched = () => {
@@ -401,10 +393,7 @@ export const useIsFormTouched = () => {
   return useSelector(selectIsFormTouched);
 };
 
-// The state we manage via redux combines the provider props and the form state.
-export type EditTransformFlyoutState = EditTransformFlyoutFormState;
-
-function isFormFieldOptional(state: EditTransformFlyoutState, field: EditTransformFormFields) {
+function isFormFieldOptional(state: State, field: EditTransformFormFields) {
   const formField = state.formFields[field];
 
   let isOptional = formField.isOptional;
@@ -518,14 +507,12 @@ export const useEditTransformFlyoutActions = () => {
   return bindActionCreators(editTransformFlyoutSlice.actions, dispatch);
 };
 
-const createSelectFormField = (field: EditTransformFormFields) => (s: EditTransformFlyoutState) =>
-  s.formFields[field];
+const createSelectFormField = (field: EditTransformFormFields) => (s: State) => s.formFields[field];
 export const useFormField = (field: EditTransformFormFields) => {
   const selectFormField = useMemo(() => createSelectFormField(field), [field]);
   return useSelector(selectFormField);
 };
 
-export const selectApiErrorMessage = (s: EditTransformFlyoutState) => s.apiErrorMessage;
-export const selectFormSections = (s: EditTransformFlyoutState) => s.formSections;
-export const selectRetentionPolicyField = (s: EditTransformFlyoutState) =>
-  s.formFields.retentionPolicyField;
+export const selectApiErrorMessage = (s: State) => s.apiErrorMessage;
+export const selectFormSections = (s: State) => s.formSections;
+export const selectRetentionPolicyField = (s: State) => s.formFields.retentionPolicyField;
