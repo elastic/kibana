@@ -90,6 +90,33 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
+  const createFleetServerAgent = async (
+    agentPolicyId: string,
+    hostname: string,
+    agentVersion: string
+  ) => {
+    const agentResponse = await es.index({
+      index: '.fleet-agents',
+      refresh: true,
+      body: {
+        access_api_key_id: 'api-key-3',
+        active: true,
+        policy_id: agentPolicyId,
+        type: 'PERMANENT',
+        local_metadata: {
+          host: { hostname },
+          elastic: { agent: { version: agentVersion } },
+        },
+        user_provided_metadata: {},
+        enrolled_at: '2022-06-21T12:14:25Z',
+        last_checkin: '2022-06-27T12:28:29Z',
+        tags: ['tag1'],
+      },
+    });
+
+    return agentResponse._id;
+  };
+
   describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
@@ -1337,6 +1364,54 @@ export default function (providerContext: FtrProviderContext) {
         expect(secret._source.value).to.equal('token');
       });
 
+      it('should store secrets if fleet server meets minimum version', async function () {
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await es.index({
+          index: '.fleet-agents',
+          refresh: true,
+          body: {
+            access_api_key_id: 'api-key-3',
+            active: true,
+            policy_id: fleetServerPolicyId,
+            type: 'PERMANENT',
+            local_metadata: {
+              host: { hostname: 'server_3' },
+              elastic: { agent: { version: '8.12.0' } },
+            },
+            user_provided_metadata: {},
+            enrolled_at: '2022-06-21T12:14:25Z',
+            last_checkin: '2022-06-27T12:28:29Z',
+            tags: ['tag1'],
+          },
+        });
+
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(200);
+
+        expect(Object.keys(res.body.item)).to.contain('ssl');
+        expect(Object.keys(res.body.item.ssl)).not.to.contain('key');
+        expect(Object.keys(res.body.item)).to.contain('secrets');
+        expect(Object.keys(res.body.item.secrets)).to.contain('ssl');
+        expect(Object.keys(res.body.item.secrets.ssl)).to.contain('key');
+        const secretId = res.body.item.secrets.ssl.key.id;
+        const secret = await getSecretById(secretId);
+        // @ts-ignore _source unknown type
+        expect(secret._source.value).to.equal('KEY');
+      });
+
       it('should not store secrets if fleet server does not meet minimum version', async function () {
         await disableOutputSecrets();
         await es.index({
@@ -1375,6 +1450,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(Object.keys(res.body.item)).not.to.contain('secrets');
+        expect(Object.keys(res.body.item)).to.contain('ssl');
+        expect(Object.keys(res.body.item.ssl)).to.contain('key');
+        expect(res.body.item.ssl.key).to.equal('KEY');
       });
     });
 
@@ -1499,6 +1577,8 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should delete secrets when deleting an output', async function () {
+          // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
           const res = await supertest
             .post(`/api/fleet/outputs`)
             .set('kbn-xsrf', 'xxxx')
