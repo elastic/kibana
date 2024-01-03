@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { TopNFunctions } from '@kbn/profiling-utils';
 import React from 'react';
-import { EMBEDDABLE_FUNCTIONS } from '.';
+import { TopNType } from '@kbn/profiling-utils';
+import { EMBEDDABLE_STACK_TRACES } from '.';
 import { ProfilingEmbeddable } from './profiling_embeddable';
 
 interface Props {
-  data?: TopNFunctions;
-  isLoading: boolean;
+  type: TopNType;
+  kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  onClick: (category: string) => void;
+  onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }
 
-export function EmbeddableFunctions(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FUNCTIONS} />;
+export function EmbeddableStackTraces(props: Props) {
+  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_STACK_TRACES} />;
 }
