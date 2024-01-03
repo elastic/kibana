@@ -33,8 +33,6 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { getPreviewTransformRequestBody } from '../common';
-
 import { useGetTransformsPreview } from './use_get_transforms_preview';
 import {
   isLatestPartialRequest,
@@ -44,6 +42,7 @@ import { useWizardContext } from '../sections/create_transform/components/wizard
 import {
   selectTransformConfigQuery,
   selectValidatedRequestPayload,
+  selectPreviewRequest,
 } from '../sections/create_transform/state_management/step_define_selectors';
 import { useWizardSelector } from '../sections/create_transform/state_management/create_transform_store';
 
@@ -111,10 +110,6 @@ export const useTransformConfigData = (): UseIndexDataReturnType => {
 
   const query = useSelector(selectTransformConfigQuery);
   const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
-  const combinedRuntimeMappings = useWizardSelector(
-    (s) => s.advancedRuntimeMappingsEditor.runtimeMappings
-  );
-  const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
 
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
@@ -153,17 +148,7 @@ export const useTransformConfigData = (): UseIndexDataReturnType => {
     tableItems,
   } = dataGrid;
 
-  const previewRequest = useMemo(
-    () =>
-      getPreviewTransformRequestBody(
-        dataView,
-        query,
-        requestPayload,
-        combinedRuntimeMappings,
-        timeRangeMs
-      ),
-    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs]
-  );
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
 
   const {
     error: previewError,

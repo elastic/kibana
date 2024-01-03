@@ -83,7 +83,7 @@ export const selectPreviewRequest = createSelector(
   [
     (_: StoreState, dataView: DataView) => dataView,
     selectTransformConfigQuery,
-    selectPivotRequestPayload,
+    selectValidatedRequestPayload,
     (state: StoreState) => state.advancedRuntimeMappingsEditor.runtimeMappings,
     (state: StoreState) => state.stepDefine.isDatePickerApplyEnabled,
     (state: StoreState) => state.stepDefine.timeRangeMs,
@@ -91,7 +91,7 @@ export const selectPreviewRequest = createSelector(
   (
     dataView,
     transformConfigQuery,
-    requestPayload,
+    { requestPayload },
     runtimeMappings,
     isDatePickerApplyEnabled,
     timeRangeMs

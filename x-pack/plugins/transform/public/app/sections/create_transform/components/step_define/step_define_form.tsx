@@ -47,7 +47,6 @@ import {
   getIndexDevConsoleStatement,
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
@@ -58,7 +57,6 @@ import { useWizardActions, useWizardSelector } from '../../state_management/crea
 import {
   selectPreviewRequest,
   selectTransformConfigQuery,
-  selectValidatedRequestPayload,
 } from '../../state_management/step_define_selectors';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
@@ -156,8 +154,6 @@ export const StepDefineForm: FC = () => {
     toastNotifications,
   };
 
-  const { requestPayload } = useSelector(selectValidatedRequestPayload);
-
   const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
@@ -238,17 +234,7 @@ export const StepDefineForm: FC = () => {
     };
   });
 
-  const previewRequest = useMemo(
-    () =>
-      getPreviewTransformRequestBody(
-        dataView,
-        transformConfigQuery,
-        requestPayload,
-        runtimeMappings
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [transformConfigQuery, requestPayload, runtimeMappings]
-  );
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
 
   useEffect(() => {
     if (!isAdvancedPivotEditorEnabled) {
