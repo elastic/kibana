@@ -82,7 +82,7 @@ export const useRiskContributingAlerts = ({
         fields,
       })
     );
-  }, [setQuery, riskScore, riskEngineSettings?.range?.start]);
+  }, [setQuery, riskScore, riskEngineSettings?.range?.start, fields]);
 
   const error = !loading && data === undefined;
 
