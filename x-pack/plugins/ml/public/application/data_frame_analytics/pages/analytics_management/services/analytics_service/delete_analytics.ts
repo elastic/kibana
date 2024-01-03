@@ -18,11 +18,11 @@ import {
 
 export const deleteAnalytics = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],
-  analyticsStats: DataFrameAnalyticsListRow['stats'],
+  analyticsStats: DataFrameAnalyticsListRow['stats'] | undefined = undefined,
   toastNotificationService: ToastNotificationService
 ) => {
   try {
-    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
+    if (analyticsStats && isDataFrameAnalyticsFailed(analyticsStats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
     }
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(analyticsConfig.id);
@@ -46,14 +46,14 @@ export const deleteAnalytics = async (
 
 export const deleteAnalyticsAndDestIndex = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],
-  analyticsStats: DataFrameAnalyticsListRow['stats'],
+  analyticsStats: DataFrameAnalyticsListRow['stats'] | undefined = undefined,
   deleteDestIndex: boolean,
   deleteDestDataView: boolean,
   toastNotificationService: ToastNotificationService
 ) => {
   const destinationIndex = analyticsConfig.dest.index;
   try {
-    if (isDataFrameAnalyticsFailed(analyticsStats.state)) {
+    if (analyticsStats && isDataFrameAnalyticsFailed(analyticsStats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(analyticsConfig.id, true);
     }
     const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndDestIndex(
