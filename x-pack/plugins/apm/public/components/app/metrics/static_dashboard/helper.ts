@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,
@@ -32,7 +32,7 @@ function getDashboardFileName({ agentName }: DashboardFileProps) {
   return dashboardFile;
 }
 
-const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
+const getAdhocDataView = (dataView: DataView) => {
   return {
     [dataView.id!]: {
       ...dataView,
