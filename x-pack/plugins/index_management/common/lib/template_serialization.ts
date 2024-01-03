@@ -67,7 +67,6 @@ export function deserializeTemplate(
     type = 'managed';
   }
 
-
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
