@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiHorizontalRule, EuiPopover, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
+import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -38,6 +32,17 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
     http,
   } = useKibana().services;
 
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  
+  const handleUntrackAlert = useCallback(async () => {
+    if (alert) {
+      await untrackAlerts({
+        indices: ['.internal.alerts-observability.threshold.alerts-*'],
+        alertUuids: [alert.fields[ALERT_UUID]],
+      });
+    }
+  }, [untrackAlerts]);
+  
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
@@ -148,7 +153,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
             size="s"
             color="text"
             iconType="eyeClosed"
-            onClick={() => {}}
+            onClick={handleUntrackAlert}
             data-test-subj="untrack-alert-button"
           >
             <EuiText size="s">
