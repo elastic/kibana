@@ -33,7 +33,7 @@ import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
-const MAX_BUCKETS = 10000;
+const MAX_ITEMS = 1500;
 export const getStats = async ({
   apmEventClient,
   start,
@@ -55,7 +55,7 @@ export const getStats = async ({
     offset,
   });
 
-  const response = await getAllConnectionStats({
+  const response = await getConnectionStats({
     apmEventClient,
     startWithOffset,
     endWithOffset,
@@ -66,8 +66,8 @@ export const getStats = async ({
   return (
     response.aggregations?.connections.buckets.map((bucket) => {
       const sample = bucket.sample.top[0].metrics;
-      const serviceName = bucket.key.serviceName as string;
-      const dependencyName = bucket.key.dependencyName as string;
+      const serviceName = bucket.key[0] as string;
+      const dependencyName = bucket.key[1] as string;
 
       return {
         from: {
@@ -119,69 +119,12 @@ export const getStats = async ({
   );
 };
 
-async function getAllConnectionStats({
-  apmEventClient,
-  startWithOffset,
-  endWithOffset,
-  filter,
-  numBuckets,
-  after,
-  size = 0,
-}: {
-  apmEventClient: APMEventClient;
-  startWithOffset: number;
-  endWithOffset: number;
-  filter: QueryDslQueryContainer[];
-  numBuckets: number;
-  after?: { serviceName: string | number; dependencyName: string | number };
-  size?: number;
-}): Promise<ReturnType<typeof getConnectionStats>> {
-  const response = await getConnectionStats({
-    apmEventClient,
-    startWithOffset,
-    endWithOffset,
-    filter,
-    numBuckets,
-    after,
-  });
-
-  const afterKey = response.aggregations?.connections.after_key;
-
-  if (afterKey && size < MAX_BUCKETS) {
-    const currentResponse = await getAllConnectionStats({
-      apmEventClient,
-      startWithOffset,
-      endWithOffset,
-      filter,
-      numBuckets,
-      after: afterKey,
-      size: size + (response.aggregations?.connections.buckets.length ?? 0),
-    });
-
-    const buckets = [
-      ...(response.aggregations?.connections.buckets ?? []),
-      ...(currentResponse.aggregations?.connections.buckets ?? []),
-    ];
-
-    return {
-      ...response,
-      aggregations: {
-        ...response.aggregations,
-        connections: { after_key: afterKey, buckets },
-      },
-    };
-  }
-
-  return response;
-}
-
 async function getConnectionStats({
   apmEventClient,
   startWithOffset,
   endWithOffset,
   filter,
   numBuckets,
-  after,
 }: {
   apmEventClient: APMEventClient;
   startWithOffset: number;
@@ -214,25 +157,16 @@ async function getConnectionStats({
       },
       aggs: {
         connections: {
-          composite: {
-            size: 1000,
-            sources: asMutableArray([
+          multi_terms: {
+            size: MAX_ITEMS,
+            terms: asMutableArray([
               {
-                serviceName: {
-                  terms: {
-                    field: SERVICE_NAME,
-                  },
-                },
+                field: SERVICE_NAME,
               },
               {
-                dependencyName: {
-                  terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                  },
-                },
+                field: SPAN_DESTINATION_SERVICE_RESOURCE,
               },
             ] as const),
-            after,
           },
           aggs: {
             sample: {
