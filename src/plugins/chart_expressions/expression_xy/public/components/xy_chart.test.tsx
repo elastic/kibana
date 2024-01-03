@@ -2510,6 +2510,7 @@ describe('XYChart component', () => {
 
     const args: XYProps = {
       showTooltip: true,
+      minBarHeight: 1,
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       yAxisConfigs: [
@@ -2618,6 +2619,7 @@ describe('XYChart component', () => {
     const args: XYProps = {
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
+      minBarHeight: 1,
       yAxisConfigs: [
         {
           type: 'yAxisConfig',
@@ -2706,6 +2708,7 @@ describe('XYChart component', () => {
 
     const args: XYProps = {
       showTooltip: true,
+      minBarHeight: 1,
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
       yAxisConfigs: [

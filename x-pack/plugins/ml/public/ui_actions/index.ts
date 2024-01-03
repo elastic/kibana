@@ -8,9 +8,14 @@
 import { CoreSetup } from '@kbn/core/public';
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
 import { createVisToADJobAction } from './open_vis_in_ml_action';
+import {
+  createCategorizationADJobAction,
+  createCategorizationADJobTrigger,
+} from './open_create_categorization_job_action';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import {
@@ -45,6 +50,7 @@ export function registerMlUiActions(
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
   const visToAdJobAction = createVisToADJobAction(core.getStartServices);
+  const categorizationADJobAction = createCategorizationADJobAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);
@@ -54,6 +60,7 @@ export function registerMlUiActions(
   uiActions.registerAction(applyTimeRangeSelectionAction);
   uiActions.registerAction(clearSelectionAction);
   uiActions.registerAction(editExplorerPanelAction);
+  uiActions.registerAction(categorizationADJobAction);
 
   // Assign triggers
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction.id);
@@ -62,6 +69,7 @@ export function registerMlUiActions(
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
   uiActions.registerTrigger(entityFieldSelectionTrigger);
+  uiActions.registerTrigger(createCategorizationADJobTrigger);
 
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
@@ -69,4 +77,8 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
+  uiActions.addTriggerAction(
+    CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+    categorizationADJobAction
+  );
 }

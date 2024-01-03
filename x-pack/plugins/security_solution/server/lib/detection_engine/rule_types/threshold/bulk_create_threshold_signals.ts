@@ -38,6 +38,46 @@ interface BulkCreateThresholdSignalsParams {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
+export const transformBucketIntoHit = (
+  bucket: ThresholdBucket,
+  inputIndex: string,
+  startedAt: Date,
+  from: Date,
+  threshold: ThresholdNormalized,
+  ruleId: string
+) => {
+  // In case of absent threshold fields, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
+  // so the below logic works in either case (whether `terms` or `composite`).
+  return {
+    _index: inputIndex,
+    _id: calculateThresholdSignalUuid(
+      ruleId,
+      startedAt,
+      threshold.field,
+      Object.values(bucket.key).sort().join(',')
+    ),
+    _source: {
+      [TIMESTAMP]: bucket.max_timestamp.value_as_string,
+      ...bucket.key,
+      threshold_result: {
+        cardinality: threshold.cardinality?.length
+          ? [
+              {
+                field: threshold.cardinality[0].field,
+                value: bucket.cardinality_count?.value,
+              },
+            ]
+          : undefined,
+        count: bucket.doc_count,
+        from: bucket.min_timestamp.value_as_string
+          ? new Date(bucket.min_timestamp.value_as_string)
+          : from,
+        terms: Object.entries(bucket.key).map(([key, val]) => ({ field: key, value: val })),
+      },
+    },
+  };
+};
+
 export const getTransformedHits = (
   buckets: ThresholdBucket[],
   inputIndex: string,
@@ -47,36 +87,7 @@ export const getTransformedHits = (
   ruleId: string
 ) =>
   buckets.map((bucket, i) => {
-    // In case of absent threshold fields, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
-    // so the below logic works in either case (whether `terms` or `composite`).
-    return {
-      _index: inputIndex,
-      _id: calculateThresholdSignalUuid(
-        ruleId,
-        startedAt,
-        threshold.field,
-        Object.values(bucket.key).sort().join(',')
-      ),
-      _source: {
-        [TIMESTAMP]: bucket.max_timestamp.value_as_string,
-        ...bucket.key,
-        threshold_result: {
-          cardinality: threshold.cardinality?.length
-            ? [
-                {
-                  field: threshold.cardinality[0].field,
-                  value: bucket.cardinality_count?.value,
-                },
-              ]
-            : undefined,
-          count: bucket.doc_count,
-          from: bucket.min_timestamp.value_as_string
-            ? new Date(bucket.min_timestamp.value_as_string)
-            : from,
-          terms: Object.entries(bucket.key).map(([key, val]) => ({ field: key, value: val })),
-        },
-      },
-    };
+    return transformBucketIntoHit(bucket, inputIndex, startedAt, from, threshold, ruleId);
   });
 
 export const bulkCreateThresholdSignals = async (

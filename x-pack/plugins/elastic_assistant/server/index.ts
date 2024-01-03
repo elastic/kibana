@@ -6,13 +6,17 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ElasticAssistantPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ElasticAssistantPlugin } = await import('./plugin');
   return new ElasticAssistantPlugin(initializerContext);
 }
 
 export type {
-  ElasticAssistantPluginSetup as EcsDataQualityDashboardPluginSetup,
-  ElasticAssistantPluginStart as EcsDataQualityDashboardPluginStart,
+  ElasticAssistantPluginSetup,
+  ElasticAssistantPluginStart,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantPluginStartDependencies,
+  AssistantTool,
+  AssistantToolParams,
 } from './types';

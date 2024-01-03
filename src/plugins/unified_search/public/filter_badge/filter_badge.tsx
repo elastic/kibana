@@ -63,6 +63,7 @@ function FilterBadge({
       <span
         css={css`
           white-space: normal;
+          overflow-wrap: break-word;
         `}
       >
         <EuiTextBlockTruncate lines={10}>

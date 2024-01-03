@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityNavControlServiceStart } from './nav_control_service';
+import type { SecurityNavControlServiceStart } from '@kbn/security-plugin-types-public';
 
 export const navControlServiceMock = {
   createStart: (): jest.Mocked<SecurityNavControlServiceStart> => ({

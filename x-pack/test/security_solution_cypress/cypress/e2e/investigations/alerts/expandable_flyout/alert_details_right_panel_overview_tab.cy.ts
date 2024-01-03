@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
@@ -334,7 +334,7 @@ describe(
 
       // TODO work on getting proper data to make the prevalence section work here
       //  we need to generate enough data to have at least one field with prevalence
-      it('should display prevalence section', () => {
+      it.skip('should display prevalence section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabInsightsSection();

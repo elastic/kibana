@@ -5,18 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useNodeDetailsRedirect } from '../../../../link_to';
-import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-
-const cloudIcons: Record<CloudProvider, IconType> = {
-  gcp: 'logoGCP',
-  aws: 'logoAWS',
-  azure: 'logoAzure',
-  unknownProvider: 'cloudSunny',
-};
 
 interface EntryTitleProps {
   onClick: () => void;
@@ -40,7 +34,6 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
     }),
   });
 
-  const iconType = (cloudProvider && cloudIcons[cloudProvider]) || cloudIcons.unknownProvider;
   const providerName = cloudProvider ?? 'Unknown';
 
   return (
@@ -52,7 +45,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip delay="long" content={providerName}>
-          <EuiIcon type={iconType} size="m" title={name} />
+          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={name} />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>

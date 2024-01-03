@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Detection exceptions data types and operators', function () {
+  describe('Detection exceptions data and numeric types', function () {
     loadTestFile(require.resolve('./date'));
     loadTestFile(require.resolve('./double'));
     loadTestFile(require.resolve('./float'));

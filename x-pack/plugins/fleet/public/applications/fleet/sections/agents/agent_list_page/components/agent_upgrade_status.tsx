@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import moment from 'moment';
 
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 
@@ -35,13 +36,43 @@ export function getUpgradeStartDelay(scheduledAt?: string): string {
   return ` The upgrade will start in less than ${Math.ceil(timeDiffMillis / 36e5)} hours.`;
 }
 
-export function getDownloadEstimate(downloadPercent?: number): string {
-  if (!downloadPercent || downloadPercent === 0) {
+export function getDownloadEstimate(metadata?: AgentUpgradeDetails['metadata']): string {
+  if (
+    !metadata ||
+    (metadata.download_percent === undefined && metadata.download_rate === undefined)
+  ) {
     return '';
   }
+  let tooltip = '';
+  if (metadata.download_percent !== undefined) {
+    tooltip = `${metadata.download_percent}%`;
+  }
+  if (metadata.download_rate !== undefined) {
+    tooltip += ` at ${formatRate(metadata.download_rate)}`;
+  }
 
-  return ` (${downloadPercent}%)`;
+  return ` (${tooltip.trim()})`;
 }
+
+const formatRate = (downloadRate: number) => {
+  let i = 0;
+  const byteUnits = [' Bps', ' kBps', ' MBps', ' GBps'];
+  for (; i < byteUnits.length - 1; i++) {
+    if (downloadRate < 1024) break;
+    downloadRate = downloadRate / 1024;
+  }
+  return downloadRate.toFixed(1) + byteUnits[i];
+};
+const formatRetryUntil = (retryUntil: string | undefined) => {
+  if (!retryUntil) return '';
+  const eta = new Date(retryUntil).toISOString();
+  const remainingTime = Date.parse(retryUntil) - Date.now();
+  const duration = moment
+    .utc(moment.duration(remainingTime, 'milliseconds').asMilliseconds())
+    .format('HH:mm');
+
+  return remainingTime > 0 ? `Retrying until: ${eta} (${duration} remaining)` : '';
+};
 
 function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   switch (agentUpgradeDetails?.state) {
@@ -77,12 +108,34 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeScheduled"
             defaultMessage="The agent has been instructed to upgrade.{upgradeStartDelay}"
             values={{
-              upgradeStartDelay: getUpgradeStartDelay(agentUpgradeDetails.metadata.scheduled_at),
+              upgradeStartDelay: getUpgradeStartDelay(agentUpgradeDetails.metadata?.scheduled_at),
             }}
           />
         ),
       };
     case 'UPG_DOWNLOADING':
+      if (agentUpgradeDetails?.metadata?.retry_error_msg) {
+        return {
+          Badge: (
+            <EuiBadge color="accent" iconType="download">
+              <FormattedMessage
+                id="xpack.fleet.agentUpgradeStatusBadge.upgradeDownloading"
+                defaultMessage="Upgrade downloading"
+              />
+            </EuiBadge>
+          ),
+          WarningTooltipText: (
+            <FormattedMessage
+              id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloadingFailed"
+              defaultMessage="Upgrade failing: {retryMsg}. {retryUntil}"
+              values={{
+                retryMsg: agentUpgradeDetails?.metadata?.retry_error_msg,
+                retryUntil: formatRetryUntil(agentUpgradeDetails?.metadata?.retry_until),
+              }}
+            />
+          ),
+        };
+      }
       return {
         Badge: (
           <EuiBadge color="accent" iconType="download">
@@ -97,7 +150,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
             defaultMessage="Downloading the new agent artifact version{downloadEstimate}."
             values={{
-              downloadEstimate: getDownloadEstimate(agentUpgradeDetails?.metadata.download_percent),
+              downloadEstimate: getDownloadEstimate(agentUpgradeDetails?.metadata),
             }}
           />
         ),
@@ -202,7 +255,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeFailed"
             defaultMessage="Upgrade failed: {errorMsg}."
             values={{
-              errorMsg: agentUpgradeDetails?.metadata.error_msg,
+              errorMsg: agentUpgradeDetails?.metadata?.error_msg,
             }}
           />
         ),
@@ -217,13 +270,20 @@ export const AgentUpgradeStatus: React.FC<{
   agentUpgradeStartedAt?: string | null;
   agentUpgradedAt?: string | null;
   agentUpgradeDetails?: AgentUpgradeDetails;
-}> = ({ isAgentUpgradable, agentUpgradeStartedAt, agentUpgradedAt, agentUpgradeDetails }) => {
+  notUpgradeableMessage?: string | null;
+}> = ({
+  isAgentUpgradable,
+  agentUpgradeStartedAt,
+  agentUpgradedAt,
+  agentUpgradeDetails,
+  notUpgradeableMessage,
+}) => {
   const isAgentUpgrading = useMemo(
     () => agentUpgradeStartedAt && !agentUpgradedAt,
     [agentUpgradeStartedAt, agentUpgradedAt]
   );
   const status = useMemo(() => getStatusComponents(agentUpgradeDetails), [agentUpgradeDetails]);
-  const minVersion = undefined; // Change this to a string in order for a tooltip to render for upgrading agents with no upgrade details.
+  const minVersion = '8.12';
 
   if (isAgentUpgradable) {
     return (
@@ -240,14 +300,21 @@ export const AgentUpgradeStatus: React.FC<{
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{status.Badge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip type="iInCircle" content={status.TooltipText} color="subdued" />
-        </EuiFlexItem>
+        {status.TooltipText && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="iInCircle" content={status.TooltipText} color="subdued" />
+          </EuiFlexItem>
+        )}
+        {status.WarningTooltipText && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="warning" content={status.WarningTooltipText} color="warning" />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
 
-  if (minVersion && isAgentUpgrading) {
+  if (isAgentUpgrading) {
     return (
       <EuiIconTip
         type="iInCircle"
@@ -257,6 +324,24 @@ export const AgentUpgradeStatus: React.FC<{
             defaultMessage="Detailed upgrade status is available for Elastic Agents on version {minVersion} and higher."
             values={{
               minVersion,
+            }}
+          />
+        }
+        color="subdued"
+      />
+    );
+  }
+
+  if (!isAgentUpgradable && notUpgradeableMessage) {
+    return (
+      <EuiIconTip
+        type="iInCircle"
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentUpgradeStatusBadge.notUpgradeable"
+            defaultMessage="Agent not upgradeable: {reason}"
+            values={{
+              reason: notUpgradeableMessage,
             }}
           />
         }

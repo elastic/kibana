@@ -193,7 +193,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         action.requestToken,
         undefined, // responseMeta meta
         undefined, // response data
-        action.errorMessage
+        action.error
       );
     case LAYER_DATA_LOAD_ENDED:
       return stopDataRequest(

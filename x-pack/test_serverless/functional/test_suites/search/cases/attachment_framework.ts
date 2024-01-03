@@ -39,7 +39,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await lens.createAndAddLensFromDashboard({});
+        await lens.createAndAddLensFromDashboard({ ignoreTimeFilter: true });
       });
 
       after(async () => {

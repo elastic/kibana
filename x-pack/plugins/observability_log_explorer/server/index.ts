@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ObservabilityLogExplorerServerPlugin } from './plugin';
-
 export { config } from './config';
 
-export const plugin = () => new ObservabilityLogExplorerServerPlugin();
+export const plugin = async () => {
+  const { ObservabilityLogExplorerServerPlugin } = await import('./plugin');
+  return new ObservabilityLogExplorerServerPlugin();
+};

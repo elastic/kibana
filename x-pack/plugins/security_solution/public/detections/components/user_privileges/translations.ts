@@ -17,6 +17,6 @@ export const LISTS_PRIVILEGES_FETCH_FAILURE = i18n.translate(
 export const DETECTION_ENGINE_PRIVILEGES_FETCH_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.alerts.detectionEnginePrivileges.errorFetching',
   {
-    defaultMessage: 'Failed to retreive detection engine privileges',
+    defaultMessage: 'Failed to retrieve detection engine privileges',
   }
 );

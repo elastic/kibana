@@ -15,5 +15,6 @@
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
+    "@kbn/security-plugin-types-server",
   ]
 }

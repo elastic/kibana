@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 
 import { configSchema, InputControlConfig } from '../config';
@@ -22,7 +22,7 @@ interface PluginSetupDependencies {
   visualizations: VisualizationsServerSetup;
 }
 
-export const plugin = (initializerContext: PluginInitializerContext) => ({
+export const plugin = async (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<InputControlConfig>();
     if (readOnly) {

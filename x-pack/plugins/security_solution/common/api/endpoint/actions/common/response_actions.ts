@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { UploadActionRequestSchema } from '../..';
 import { ExecuteActionRequestSchema } from '../execute_route';
 import { EndpointActionGetFileSchema } from '../get_file_route';
 import { KillOrSuspendProcessRequestSchema, NoParametersRequestSchema } from './base';
@@ -15,4 +17,7 @@ export const ResponseActionBodySchema = schema.oneOf([
   KillOrSuspendProcessRequestSchema.body,
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
+  UploadActionRequestSchema.body,
 ]);
+
+export type ResponseActionsRequestBody = TypeOf<typeof ResponseActionBodySchema>;

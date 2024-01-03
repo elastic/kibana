@@ -69,7 +69,7 @@ function Window({
   onDelete,
   errors,
   disableDelete,
-  budgetMode = false,
+  budgetMode = true,
 }: WindowProps) {
   const onLongWindowDurationChange = (duration: Duration) => {
     const longWindowDurationInMinutes = toMinutes(duration);
@@ -268,7 +268,7 @@ interface WindowsProps {
 }
 
 export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }: WindowsProps) {
-  const [budgetMode, setBudgetMode] = useState<boolean>(false);
+  const [budgetMode, setBudgetMode] = useState<boolean>(true);
   const handleWindowChange = (windowDef: WindowSchema) => {
     onChange(windows.map((def) => (windowDef.id === def.id ? windowDef : def)));
   };
@@ -336,9 +336,9 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
           <EuiSwitch
             compressed
             onChange={handleModeChange}
-            checked={budgetMode}
-            label={i18n.translate('xpack.observability.slo.rules.useBudgetConsumedModeLabel', {
-              defaultMessage: 'Budget consumed mode',
+            checked={!budgetMode}
+            label={i18n.translate('xpack.observability.slo.rules.useBurnRateModeLabel', {
+              defaultMessage: 'Burn rate mode',
             })}
           />
         </EuiFlexItem>

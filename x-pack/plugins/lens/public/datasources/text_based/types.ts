@@ -13,6 +13,7 @@ export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
   meta?: DatatableColumn['meta'];
+  inMetricDimension?: boolean;
 }
 
 export interface TextBasedField {

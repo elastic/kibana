@@ -42,12 +42,14 @@ export function useModelActions({
   isLoading,
   fetchModels,
   modelAndDeploymentIds,
+  onModelDownloadRequest,
 }: {
   isLoading: boolean;
   onDfaTestAction: (model: ModelItem) => void;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (models: ModelItem[]) => void;
   onModelDeployRequest: (model: ModelItem) => void;
+  onModelDownloadRequest: (modelId: string) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
@@ -130,18 +132,19 @@ export function useModelActions({
   return useMemo(
     () => [
       {
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
           defaultMessage: 'View training data',
         }),
         description: i18n.translate(
           'xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel',
           {
-            defaultMessage: 'View training data',
+            defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
         icon: 'visTable',
         type: 'icon',
         available: (item) => !!item.metadata?.analytics_config?.id,
+        enabled: (item) => item.origin_job_exists === true,
         onClick: async (item) => {
           if (item.metadata?.analytics_config === undefined) return;
 
@@ -164,7 +167,6 @@ export function useModelActions({
 
           await navigateToUrl(url);
         },
-        isPrimary: true,
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
@@ -410,31 +412,7 @@ export function useModelActions({
           item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
-          try {
-            onLoading(true);
-            await trainedModelsApiService.installElasticTrainedModelConfig(item.model_id);
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
-                defaultMessage: '"{modelId}" model download has been started successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-            // Need to fetch model state updates
-            await fetchModels();
-          } catch (e) {
-            displayErrorToast(
-              e,
-              i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
-                defaultMessage: 'Failed to download "{modelId}"',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
-            onLoading(false);
-          }
+          onModelDownloadRequest(item.model_id);
         },
       },
       {
@@ -481,7 +459,7 @@ export function useModelActions({
           );
         },
         enabled: (item) => {
-          return item.state !== MODEL_STATE.STARTED;
+          return canStartStopTrainedModels && item.state !== MODEL_STATE.STARTED;
         },
       },
       {
@@ -614,6 +592,7 @@ export function useModelActions({
       onTestAction,
       trainedModelsApiService,
       urlLocator,
+      onModelDownloadRequest,
     ]
   );
 }

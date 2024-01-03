@@ -11,7 +11,5 @@ export const reportingMock = {
   createStart: (): ReportingStart => ({
     usesUiCapabilities: () => false,
     registerExportTypes: () => {},
-    getSpaceId: jest.fn(),
-    getScreenshots: jest.fn(),
   }),
 };

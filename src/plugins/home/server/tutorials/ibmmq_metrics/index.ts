@@ -38,7 +38,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/ibmmq.svg'),
     isBeta: true,
     artifacts: {
       application: {
@@ -53,7 +53,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/ibmmq_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/ibmmq_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -444,6 +443,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
+      it('filter multiple status', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 1);
+        await cases.casesTable.refreshTable();
+
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+
+        await cases.casesTable.filterByStatus(CaseStatuses.open);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.validateCasesTableHasNthRows(3);
+
+        await cases.casesTable.filterByStatus(CaseStatuses.closed);
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
       it('persists status filters', async () => {
         await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
@@ -451,11 +469,35 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
       });
 
+      it('persists multiple status filters', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 1);
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.filterByStatus(CaseStatuses.closed);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+      });
+
       it('persists severity filters', async () => {
         await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
         await browser.refresh();
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+      });
+
+      it('persists multiple severity filters', async () => {
+        await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
+        await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 1);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.filterBySeverity(CaseSeverity.MEDIUM);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
       });
 
       describe('assignees filtering', () => {
@@ -529,21 +571,41 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(5);
 
-        // low
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+      });
+
+      it('filter multiple severities', async () => {
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
 
-        // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
-        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await cases.casesTable.validateCasesTableHasNthRows(4);
 
-        // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-
-        // back to all
-        await cases.casesTable.filterBySeverity(SeverityAll);
         await cases.casesTable.validateCasesTableHasNthRows(5);
+
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
       });
     });
 
@@ -654,6 +716,82 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.waitForTableToFinishLoading();
           await cases.casesTable.validateCasesTableHasNthRows(0);
         });
+      });
+    });
+
+    describe('Column Selection', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
+      before(async () => {
+        await cases.api.createNthRandomCases(1);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+        await browser.clearLocalStorage();
+      });
+
+      it('column selection popover button exists', async () => {
+        await testSubjects.existOrFail('column-selection-popover-button');
+      });
+
+      it('selecting a column works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(false);
+
+        await cases.casesTable.toggleColumnInPopover('closedAt');
+
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('deselecting columns works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+
+        await cases.casesTable.toggleColumnInPopover('title');
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+      });
+
+      it('"Hide All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-hide-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(false);
+      });
+
+      it('"Show All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-show-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('search and toggle column works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        const input = await testSubjects.find('column-selection-popover-search');
+        await input.type('name');
+
+        await testSubjects.existOrFail('column-selection-switch-title');
+        await testSubjects.missingOrFail('column-selection-switch-closedAt');
+        await testSubjects.missingOrFail('column-selection-switch-category');
       });
     });
   });

@@ -8,10 +8,10 @@ import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/co
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
-} from '../../../common/schemas/benchmark';
+} from '../../../common/types/benchmarks/v1';
 import { getCspAgentPolicies } from '../../lib/fleet_util';
-import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
-
+import { defineGetBenchmarksRoute } from './benchmarks';
+import { getRulesCountForPolicy } from './utilities';
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
@@ -57,7 +57,6 @@ describe('benchmarks API', () => {
     defineGetBenchmarksRoute(router);
 
     const versionedRouter = router.versioned.get.mock.results[0].value;
-
     const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
@@ -174,7 +173,7 @@ describe('benchmarks API', () => {
       });
     });
 
-    describe('test addPackagePolicyCspRuleTemplates', () => {
+    describe('test addPackagePolicyCspBenchmarkRule', () => {
       it('should retrieve the rules count by the filtered benchmark type', async () => {
         const benchmark = 'cis_k8s';
         mockSoClient.find.mockResolvedValueOnce({
