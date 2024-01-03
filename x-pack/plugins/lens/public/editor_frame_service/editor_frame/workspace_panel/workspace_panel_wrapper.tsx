@@ -245,7 +245,9 @@ export function WorkspacePanelWrapper({
           alignItems="center"
           justifyContent="center"
           direction="column"
-          css={{ height: '100%' }}
+          css={css`
+            height: 100%;
+          `}
         >
           <EuiFlexItem
             data-test-subj="lnsWorkspacePanelWrapper__innerContent"
