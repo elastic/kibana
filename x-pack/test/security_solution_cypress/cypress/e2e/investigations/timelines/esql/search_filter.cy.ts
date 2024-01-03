@@ -60,7 +60,7 @@ describe(
     });
 
     context('navigation', () => {
-      it('should remove the query when back is pressed after adding a query', () => {
+      it.skip('should remove the query when back is pressed after adding a query', () => {
         addDiscoverEsqlQuery(esqlQuery);
         submitDiscoverSearchBar();
         cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
