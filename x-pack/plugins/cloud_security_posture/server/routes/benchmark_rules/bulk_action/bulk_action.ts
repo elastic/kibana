@@ -10,7 +10,8 @@ import {
   CspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
-} from '../../../../common/types/rules/v3';
+  CspBenchmarkRulesBulkActionResponse,
+} from '../../../../common/types/rules/v4';
 import { CspRouter } from '../../../types';
 
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
@@ -79,13 +80,16 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
           const updatedBenchmarkRules: CspBenchmarkRulesStates =
             handlerResponse.newCspSettings.attributes.rules!;
 
-          return response.ok({
-            body: {
-              updated_benchmark_rules: updatedBenchmarkRules,
-              detection_rules: `disabled ${handlerResponse.disabledRulesCounter} detections rules.`,
-              message: 'The bulk operation has been executed successfully.',
-            },
-          });
+          const body: CspBenchmarkRulesBulkActionResponse = {
+            updated_benchmark_rules: updatedBenchmarkRules,
+            message: 'The bulk operation has been executed successfully.',
+          };
+
+          if (requestBody.action === 'mute' && handlerResponse.disabledRules) {
+            body.disabled_detection_rules = handlerResponse.disabledRules;
+          }
+
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
 
