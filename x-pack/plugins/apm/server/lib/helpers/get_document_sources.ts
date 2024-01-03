@@ -158,11 +158,11 @@ const getDocumentsAvailability = async ({
     return {
       documentType,
       rollupInterval,
-      hasDocBefore: docTypeResponses[QUERY_INDEX.BEFORE]?.hits.total.value > 0,
-      hasDocAfter: docTypeResponses[QUERY_INDEX.CURRENT]?.hits.total.value > 0,
-      hasDurationSummary:
-        documentType === ApmDocumentType.ServiceTransactionMetric ||
-        docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]?.hits.total.value === 0,
+      hasDocBefore: docTypeResponses[QUERY_INDEX.BEFORE].hits.total.value > 0,
+      hasDocAfter: docTypeResponses[QUERY_INDEX.CURRENT].hits.total.value > 0,
+      hasDurationSummary: !!docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
+        ? docTypeResponses[QUERY_INDEX.DURATION_SUMMARY].hits.total.value === 0
+        : true,
     };
   });
 };
