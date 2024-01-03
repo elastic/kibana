@@ -21,7 +21,8 @@ import { getStartDateFromRiskScore } from '../common/get_start_date_from_risk_sc
 import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
 
 interface UseRiskContributingAlerts {
-  riskScore: UserRiskScore | HostRiskScore;
+  riskScore: UserRiskScore | HostRiskScore | undefined;
+  fields?: string[];
 }
 
 interface Hit {
@@ -43,6 +44,7 @@ const ALERTS_SIZE = 100;
  */
 export const useRiskContributingAlerts = ({
   riskScore,
+  fields,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
   const { data: riskEngineSettings } = useRiskEngineSettings();
 
@@ -53,7 +55,7 @@ export const useRiskContributingAlerts = ({
   });
 
   useEffect(() => {
-    if (!riskEngineSettings?.range?.start) return;
+    if (!riskEngineSettings?.range?.start || !riskScore) return;
 
     let entityField: string;
     let entityValue: string;
@@ -77,6 +79,7 @@ export const useRiskContributingAlerts = ({
         to: riskScoreTimestamp,
         entityField,
         entityValue,
+        fields,
       })
     );
   }, [setQuery, riskScore, riskEngineSettings?.range?.start]);
@@ -95,14 +98,16 @@ const getQuery = ({
   to,
   entityField,
   entityValue,
+  fields,
 }: {
   from: string;
   to: string;
   entityField: string;
   entityValue: string;
+  fields?: string[];
 }) => {
   return {
-    fields: ['*'],
+    fields: fields || ['*'],
     size: ALERTS_SIZE,
     _source: false,
     query: {

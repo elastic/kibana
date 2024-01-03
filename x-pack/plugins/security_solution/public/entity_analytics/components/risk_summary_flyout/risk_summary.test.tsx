@@ -11,6 +11,14 @@ import { TestProviders } from '../../../common/mock';
 import { mockRiskScoreState } from '../../../flyout/entity_details/user_right/mocks';
 import { RiskSummary } from './risk_summary';
 
+// we need just array size to be 6
+const mockUseRiskContributingAlerts = jest
+  .fn()
+  .mockReturnValue({ loading: false, data: [{}, {}, {}, {}, {}, {}] });
+
+jest.mock('../../hooks/use_risk_contributing_alerts', () => ({
+  useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
+}));
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('RiskSummary', () => {
@@ -26,7 +34,7 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs1');
+    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs6');
     expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
   });
 

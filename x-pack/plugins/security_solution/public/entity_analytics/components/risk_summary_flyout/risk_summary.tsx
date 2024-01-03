@@ -30,6 +30,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
@@ -49,6 +50,7 @@ export const RiskSummary = React.memo(
     const { data: userRisk } = riskScoreData;
     const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
     const { euiTheme } = useEuiTheme();
+    const { data: alertsData } = useRiskContributingAlerts({ riskScore: userRiskData, fields: [] });
 
     const lensAttributes = useMemo(() => {
       return getRiskScoreSummaryAttributes({
@@ -98,10 +100,10 @@ export const RiskSummary = React.memo(
           category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
             defaultMessage: 'Alerts',
           }),
-          count: userRiskData?.user.risk.inputs?.length ?? 0,
+          count: alertsData?.length ?? 0,
         },
       ],
-      [userRiskData?.user.risk.inputs?.length]
+      [alertsData?.length]
     );
 
     return (
