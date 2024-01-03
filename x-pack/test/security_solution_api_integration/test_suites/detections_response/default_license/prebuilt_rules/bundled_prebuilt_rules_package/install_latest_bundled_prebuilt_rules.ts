@@ -24,7 +24,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171380
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
   /* We first download the package from the registry as done during build time, and then
   /* attempt to install it from the local file system. The API response from EPM provides
