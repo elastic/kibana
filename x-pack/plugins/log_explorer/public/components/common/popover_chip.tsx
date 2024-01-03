@@ -50,7 +50,7 @@ const convertStyleToString = (style: React.CSSProperties) => {
 export function ChipWithPopover({
   property,
   text,
-  dataTestSubj = `dataTablePopoverChip_${property}_${text.replace(/ +/g, '')}`,
+  dataTestSubj = `${property}_${text.replace(/ +/g, '')}`,
   leftSideIcon,
   rightSideIcon,
   borderColor,
@@ -72,7 +72,7 @@ export function ChipWithPopover({
       color="hollow"
       iconType={rightSideIcon}
       iconSide="right"
-      data-test-subj={dataTestSubj}
+      data-test-subj={`dataTablePopoverChip_${dataTestSubj}`}
       onClick={handleChipClick}
       onClickAriaLabel={openCellActionPopoverAriaText}
       css={css`
