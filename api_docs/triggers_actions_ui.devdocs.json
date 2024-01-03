@@ -1026,7 +1026,7 @@
         "label": "JsonEditorWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, areaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, euiCodeEditorProps, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
         "deprecated": false,
@@ -1037,7 +1037,7 @@
             "id": "def-public.JsonEditorWithMessageVariables.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  areaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  euiCodeEditorProps = {},\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<Props>"
@@ -5760,7 +5760,7 @@
               "AlertsTableConfigurationRegistryWithActions",
               ")[]; register: (objectType: ",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; getAlertConfigIdPerRuleTypes: (ruleTypeIds: string[]) => string; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6218,7 +6218,7 @@
           "AlertsTableConfigurationRegistryWithActions",
           ")[]; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; getAlertConfigIdPerRuleTypes: (ruleTypeIds: string[]) => string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6474,7 +6474,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
+          "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,
@@ -9108,7 +9108,7 @@
         "label": "buildAggregation",
         "description": [],
         "signature": [
-          "({ timeSeries, aggType, aggField, termField, termSize, condition, topHitsSize, }: ",
+          "({ timeSeries, aggType, aggField, termField, termSize, sourceFieldsParams, condition, topHitsSize, }: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -9129,7 +9129,7 @@
             "id": "def-common.buildAggregation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  condition,\n  topHitsSize,\n}",
+            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  sourceFieldsParams,\n  condition,\n  topHitsSize,\n}",
             "description": [],
             "signature": [
               {
@@ -9392,7 +9392,7 @@
         "label": "parseAggregationResults",
         "description": [],
         "signature": [
-          "({ isCountAgg, isGroupAgg, esResult, resultLimit, }: ParseAggregationResultsOpts) => ",
+          "({ isCountAgg, isGroupAgg, esResult, resultLimit, sourceFieldsParams, generateSourceFieldsFromHits, }: ParseAggregationResultsOpts) => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -9410,7 +9410,7 @@
             "id": "def-common.parseAggregationResults.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isCountAgg,\n  isGroupAgg,\n  esResult,\n  resultLimit,\n}",
+            "label": "{\n  isCountAgg,\n  isGroupAgg,\n  esResult,\n  resultLimit,\n  sourceFieldsParams = [],\n  generateSourceFieldsFromHits = false,\n}",
             "description": [],
             "signature": [
               "ParseAggregationResultsOpts"
@@ -9569,6 +9569,20 @@
             "description": [],
             "signature": [
               "string | string[] | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.BuildAggregationOpts.sourceFieldsParams",
+            "type": "Array",
+            "tags": [],
+            "label": "sourceFieldsParams",
+            "description": [],
+            "signature": [
+              "{ label: string; searchPath: string; }[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
@@ -9808,6 +9822,20 @@
             "signature": [
               "SearchHit",
               "<unknown>[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParsedAggregationGroup.sourceFields",
+            "type": "Array",
+            "tags": [],
+            "label": "sourceFields",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
@@ -10066,6 +10094,21 @@
           "1000"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.MAX_SOURCE_FIELDS_TO_COPY",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_SOURCE_FIELDS_TO_COPY",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -280,6 +280,31 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts[0]?._source?.['kibana.alert.host.criticality_level']).to.eql(
+          'important'
+        );
+        expect(previewAlerts[0]?._source?.['kibana.alert.user.criticality_level']).to.eql(
+          'very_important'
+        );
+      });
+    });
+
     /**
      * Here we test the functionality of Severity and Risk Score overrides (also called "mappings"
      * in the code). If the rule specifies a mapping, then the final Severity or Risk Score
