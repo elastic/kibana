@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,
   loadDashboardFile,
 } from './dashboards/dashboard_catalog';
 
-export interface MetricsDashboardProps {
+interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
+}
+
+export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
 }
 
-export function hasDashboardFile(props: MetricsDashboardProps) {
+export function hasDashboardFile(props: DashboardFileProps) {
   return !!getDashboardFileName(props);
 }
 
-function getDashboardFileName({ agentName }: MetricsDashboardProps) {
+function getDashboardFileName({ agentName }: DashboardFileProps) {
   const dashboardFile =
     agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
   return dashboardFile;
@@ -31,7 +34,7 @@ function getDashboardFileName({ agentName }: MetricsDashboardProps) {
 
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
-    [dataView.id]: {
+    [dataView.id!]: {
       ...dataView,
     },
   };
