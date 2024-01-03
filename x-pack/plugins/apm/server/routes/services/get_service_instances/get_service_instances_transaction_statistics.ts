@@ -29,6 +29,7 @@ import {
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { InstancesSortField } from '../../../../common/instances';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -48,6 +49,27 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   ? ServiceInstanceTransactionComparisonStatistics
   : ServiceInstanceTransactionPrimaryStatistics;
 
+export function getOrderInstructions(
+  sortField: InstancesSortField,
+  sortDirection: 'asc' | 'desc'
+): Record<string, 'asc' | 'desc'> {
+  switch (sortField) {
+    case 'errorRate':
+      // To correct order by error rate we need to combine both the 'failures._count' and 'terms._count' fields.
+      // Docs with high failure._count and low terms._count have a high failure rate.
+      return {
+        failures: sortDirection,
+        _count: sortDirection === 'desc' ? 'asc' : 'desc',
+      };
+    case 'latency':
+      return { latency: sortDirection };
+    case 'serviceNodeName':
+      return { _key: sortDirection };
+    default:
+      return { _count: sortDirection };
+  }
+}
+
 export async function getServiceInstancesTransactionStatistics<
   T extends true | false
 >({
@@ -65,6 +87,8 @@ export async function getServiceInstancesTransactionStatistics<
   numBuckets,
   isComparisonSearch,
   offset,
+  sortField,
+  sortDirection = 'desc',
 }: {
   latencyAggregationType: LatencyAggregationType;
   apmEventClient: APMEventClient;
@@ -80,6 +104,8 @@ export async function getServiceInstancesTransactionStatistics<
   size?: number;
   numBuckets?: number;
   offset?: string;
+  sortField?: InstancesSortField;
+  sortDirection?: 'asc' | 'desc';
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -123,7 +149,7 @@ export async function getServiceInstancesTransactionStatistics<
         ...getBackwardCompatibleDocumentTypeFilter(
           searchAggregatedTransactions
         ),
-        ...(isComparisonSearch && serviceNodeIds
+        ...(serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
       ],
@@ -136,7 +162,10 @@ export async function getServiceInstancesTransactionStatistics<
         field: SERVICE_NODE_NAME,
         missing: SERVICE_NODE_NAME_MISSING,
         ...(size ? { size } : {}),
-        ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+        ...(serviceNodeIds ? { include: serviceNodeIds } : {}),
+        ...(sortField
+          ? { order: getOrderInstructions(sortField, sortDirection) }
+          : {}),
       },
       aggs: isComparisonSearch
         ? {

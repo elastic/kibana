@@ -24,6 +24,7 @@ import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
+import { instancesSortFieldRt } from '../../../common/instances';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
@@ -613,6 +614,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       t.type({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
+        sortField: instancesSortFieldRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       offsetRt,
       environmentRt,
@@ -638,6 +641,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       offset,
       start,
       end,
+      sortField,
+      sortDirection,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -648,33 +653,24 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       end,
     });
 
+    const commonParams = {
+      environment,
+      kuery,
+      latencyAggregationType,
+      serviceName,
+      apmEventClient,
+      transactionType,
+      searchAggregatedTransactions,
+      start,
+      end,
+      sortField,
+      sortDirection,
+    };
+
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceInstancesMainStatistics({
-        environment,
-        kuery,
-        latencyAggregationType,
-        serviceName,
-        apmEventClient,
-        transactionType,
-        searchAggregatedTransactions,
-        start,
-        end,
-      }),
+      getServiceInstancesMainStatistics(commonParams),
       ...(offset
-        ? [
-            getServiceInstancesMainStatistics({
-              environment,
-              kuery,
-              latencyAggregationType,
-              serviceName,
-              apmEventClient,
-              transactionType,
-              searchAggregatedTransactions,
-              start,
-              end,
-              offset,
-            }),
-          ]
+        ? [getServiceInstancesMainStatistics({ ...commonParams, offset })]
         : []),
     ]);
 

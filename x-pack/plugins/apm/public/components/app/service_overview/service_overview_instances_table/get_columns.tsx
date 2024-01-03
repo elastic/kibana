@@ -45,7 +45,6 @@ type ServiceInstanceDetailedStatistics =
 export function getColumns({
   serviceName,
   kuery,
-  agentName,
   latencyAggregationType,
   detailedStatsLoading,
   detailedStatsData,
@@ -59,7 +58,6 @@ export function getColumns({
 }: {
   serviceName: string;
   kuery: string;
-  agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
@@ -241,7 +239,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       field: 'memoryUsage',
@@ -277,7 +274,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       width: '40px',
@@ -292,7 +288,10 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
-                aria-label="Edit"
+                aria-label={i18n.translate(
+                  'xpack.apm.getColumns.euiButtonIcon.editLabel',
+                  { defaultMessage: 'Edit' }
+                )}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
                 onClick={() =>
