@@ -7,8 +7,7 @@
  */
 import mockFs from 'mock-fs';
 
-import { existsSync } from 'fs';
-import { stat } from 'fs/promises';
+import Fsp from 'fs/promises';
 import { basename } from 'path';
 
 import {
@@ -115,7 +114,7 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
-  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
+  expect((await Fsp.stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
 
 describe('resolveDockerImage()', () => {
@@ -508,7 +507,7 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(serverlessObjectStorePath)).toBe(true);
+    await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
   test('should use an existing object store', async () => {
@@ -517,7 +516,9 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(true);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).resolves.not.toThrow();
   });
 
   test('should remove an existing object store when clean is passed', async () => {
@@ -526,7 +527,9 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, clean: true });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).rejects.toThrowError();
   });
 
   test('should add SSL and IDP metadata volumes when ssl and kibanaUrl are passed', async () => {
