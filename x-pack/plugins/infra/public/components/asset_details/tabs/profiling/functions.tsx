@@ -17,6 +17,7 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
+import { EmptyDataPrompt } from './empty_data_prompt';
 
 export function Functions() {
   const { services } = useKibanaContextForPlugin();
@@ -48,6 +49,10 @@ export function Functions() {
 
   if (error !== null) {
     return <ErrorPrompt />;
+  }
+
+  if (!loading && response?.TotalCount === 0) {
+    return <EmptyDataPrompt />;
   }
 
   return (
