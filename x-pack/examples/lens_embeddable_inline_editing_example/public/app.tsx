@@ -20,7 +20,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StartDependencies } from './plugin';
-import { DataViewChart } from './dataview_embeddable';
+import { LensChart } from './embeddable';
 
 export const App = (props: {
   core: CoreStart;
@@ -56,7 +56,7 @@ export const App = (props: {
               responsive={false}
             >
               <EuiFlexItem className="eui-fullHeight">
-                <DataViewChart
+                <LensChart
                   configBuilder={configBuilder}
                   plugins={props.plugins}
                   defaultDataView={props.defaultDataView}
@@ -64,7 +64,7 @@ export const App = (props: {
                 />
               </EuiFlexItem>
               <EuiFlexItem className="eui-fullHeight">
-                <DataViewChart
+                <LensChart
                   configBuilder={configBuilder}
                   plugins={props.plugins}
                   defaultDataView={props.defaultDataView}

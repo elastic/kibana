@@ -14,7 +14,7 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/con
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
 
-export const DataViewChart = (props: {
+export const LensChart = (props: {
   configBuilder: LensConfigBuilder;
   plugins: StartDependencies;
   defaultDataView: DataView;
@@ -80,7 +80,9 @@ export const DataViewChart = (props: {
 
   return (
     <EuiPanel hasShadow={false}>
-      <p>Inline editing of a dataview chart.</p>
+      <p>
+        {props.isESQL ? 'Inline editing of an ES|QL chart.' : 'Inline editing of a dataview chart.'}
+      </p>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
