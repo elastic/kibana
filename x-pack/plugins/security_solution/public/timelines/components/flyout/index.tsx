@@ -16,7 +16,7 @@ import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
 import { useTimelineSavePrompt } from '../../../common/hooks/timeline/use_timeline_save_prompt';
-import { timelineActions } from '../../store/timeline';
+import { timelineActions } from '../../store';
 import { focusActiveTimelineButton } from '../timeline/helpers';
 
 interface OwnProps {

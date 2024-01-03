@@ -18,12 +18,14 @@ import {
   LineAnnotation,
   AnnotationDomainType,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { getMemoryItemColor } from '../memory_item_colors';
+import { useMlKibana } from '../../contexts/kibana';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
@@ -31,6 +33,9 @@ interface MemoryPreviewChartProps {
 
 export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const {
+    services: { charts: chartsService },
+  } = useMlKibana();
 
   const groups = useMemo(
     () => ({
@@ -117,7 +122,8 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         }
       />
       <Settings
-        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+        theme={{ chartMargins: LEGACY_LIGHT_THEME.chartMargins }}
+        baseTheme={chartsService.theme.useChartsBaseTheme()}
         rotation={90}
         locale={i18n.getLocale()}
       />

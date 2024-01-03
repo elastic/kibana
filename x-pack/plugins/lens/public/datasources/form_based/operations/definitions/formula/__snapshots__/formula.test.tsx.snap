@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`formula getErrorMessage returns an error if the field is missing 1`] = `
+exports[`[Lens] formula getErrorMessage returns an error if the field is missing 1`] = `
 Array [
   Object {
     "displayLocations": Array [
@@ -36,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`formula getErrorMessage returns an error if the field is missing 2`] = `
+exports[`[Lens] formula getErrorMessage returns an error if the field is missing 2`] = `
 Array [
   Object {
     "displayLocations": Array [
@@ -72,7 +72,7 @@ Array [
 ]
 `;
 
-exports[`formula getErrorMessage returns an error if the field is missing 3`] = `
+exports[`[Lens] formula getErrorMessage returns an error if the field is missing 3`] = `
 Array [
   Object {
     "displayLocations": Array [
@@ -108,7 +108,7 @@ Array [
 ]
 `;
 
-exports[`formula getErrorMessage returns an error if the field is missing 4`] = `
+exports[`[Lens] formula getErrorMessage returns an error if the field is missing 4`] = `
 Array [
   Object {
     "displayLocations": Array [
@@ -144,7 +144,7 @@ Array [
 ]
 `;
 
-exports[`formula getErrorMessage returns an error with plural form correctly handled 1`] = `
+exports[`[Lens] formula getErrorMessage returns an error with plural form correctly handled 1`] = `
 Array [
   Object {
     "displayLocations": Array [
@@ -186,7 +186,7 @@ Array [
 ]
 `;
 
-exports[`formula getErrorMessage returns an error with plural form correctly handled 2`] = `
+exports[`[Lens] formula getErrorMessage returns an error with plural form correctly handled 2`] = `
 Array [
   Object {
     "displayLocations": Array [

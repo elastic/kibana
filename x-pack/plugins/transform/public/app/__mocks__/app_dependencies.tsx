@@ -23,7 +23,6 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
@@ -32,6 +31,7 @@ import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -93,7 +93,7 @@ const appDependencies: AppDependencies = {
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
-  unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
   settings: settingsServiceMock.createStartContract(),
   savedSearch: savedSearchPluginMock.createStartContract(),

@@ -3698,8 +3698,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsSetup",
-          "text": "UiActionsSetup"
+          "section": "def-public.UiActionsPublicSetup",
+          "text": "UiActionsPublicSetup"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3732,8 +3732,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsStart",
-          "text": "UiActionsStart"
+          "section": "def-public.UiActionsPublicStart",
+          "text": "UiActionsPublicStart"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3825,10 +3825,12 @@
             "pluginId": "uiActionsEnhanced",
             "scope": "server",
             "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-server.SetupContract",
-            "text": "SetupContract"
+            "section": "def-server.UiActionsEnhancedServerSetup",
+            "text": "UiActionsEnhancedServerSetup"
           },
-          ", void, SetupDependencies, object>"
+          ", void, UiActionsEnhancedServerSetupDependencies, ",
+          "UiActionsEnhancedServerStartDependencies",
+          ">"
         ],
         "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
         "deprecated": false,
@@ -3888,7 +3890,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(core: ",
+              "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "common",
@@ -3896,7 +3898,7 @@
                 "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { embeddable }: SetupDependencies) => { registerActionFactory: (definition: ",
+              "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
@@ -3923,7 +3925,7 @@
                 "id": "def-server.AdvancedUiActionsServerPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "core",
+                "label": "_core",
                 "description": [],
                 "signature": [
                   {
@@ -3948,7 +3950,7 @@
                 "label": "{ embeddable }",
                 "description": [],
                 "signature": [
-                  "SetupDependencies"
+                  "UiActionsEnhancedServerSetupDependencies"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
@@ -4246,10 +4248,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.SetupContract",
+      "id": "def-server.UiActionsEnhancedServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "SetupContract",
+      "label": "UiActionsEnhancedServerSetup",
       "description": [],
       "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
@@ -4257,7 +4259,7 @@
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
-          "id": "def-server.SetupContract.registerActionFactory",
+          "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory",
           "type": "Function",
           "tags": [],
           "label": "registerActionFactory",
@@ -4287,7 +4289,7 @@
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-server.SetupContract.registerActionFactory.$1",
+              "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory.$1",
               "type": "Object",
               "tags": [],
               "label": "definition",
@@ -4324,10 +4326,10 @@
     },
     "start": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.StartContract",
+      "id": "def-server.UiActionsEnhancedServerStart",
       "type": "Type",
       "tags": [],
-      "label": "StartContract",
+      "label": "UiActionsEnhancedServerStart",
       "description": [],
       "signature": [
         "void"

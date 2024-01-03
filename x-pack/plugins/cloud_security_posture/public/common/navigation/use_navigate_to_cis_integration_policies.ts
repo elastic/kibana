@@ -8,7 +8,7 @@
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
-import { useCspBenchmarkIntegrations } from '../../pages/benchmarks/use_csp_benchmark_integrations';
+import { useCspBenchmarkIntegrationsV1 } from '../../pages/benchmarks/use_csp_benchmark_integrations';
 import { PostureTypes } from '../../../common/types_old';
 
 export const useCISIntegrationPoliciesLink = ({
@@ -19,7 +19,7 @@ export const useCISIntegrationPoliciesLink = ({
   const { http } = useKibana().services;
   const cisIntegration = useCisKubernetesIntegration();
   // using an existing hook to get agent id and package policy id
-  const cspBenchmarkIntegrations = useCspBenchmarkIntegrations({
+  const cspBenchmarkIntegrations = useCspBenchmarkIntegrationsV1({
     name: '',
     page: 1,
     perPage: 100,
@@ -29,6 +29,7 @@ export const useCISIntegrationPoliciesLink = ({
   if (!cisIntegration.isSuccess) return;
 
   const intergrations = cspBenchmarkIntegrations.data?.items;
+
   const matchedIntegration = intergrations?.find(
     (integration) =>
       integration?.package_policy?.inputs?.find((input) => input?.enabled)?.policy_template ===

@@ -9,6 +9,7 @@ import { fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
@@ -74,7 +75,6 @@ const mockKibana = () => {
       },
       charts: {
         theme: {
-          useChartsTheme: () => {},
           useChartsBaseTheme: () => {},
         },
       },
@@ -82,10 +82,13 @@ const mockKibana = () => {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
           get: jest.fn().mockReturnValue([]),
+          getDefault: jest.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        create: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('some-index'),
+        }),
       },
       docLinks: {
         links: {
@@ -103,19 +106,22 @@ const mockKibana = () => {
           addSuccess: mockAddSuccess,
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       storage: {
         get: () => {},
       },
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {
         get: () => {},
       },
       unifiedSearch: {
+        ui: {
+          QueryStringInput: () => <div>Query String Input</div>,
+        },
         autocomplete: {
           hasQuerySuggestions: () => {},
         },
