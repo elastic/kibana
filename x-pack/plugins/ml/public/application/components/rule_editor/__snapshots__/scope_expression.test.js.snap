@@ -101,6 +101,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
     >
       <div>
         <EuiPopoverTitle>
@@ -246,6 +247,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
     >
       <div>
         <EuiPopoverTitle>
@@ -391,6 +393,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
     >
       <div>
         <EuiPopoverTitle>

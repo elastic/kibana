@@ -7,27 +7,28 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import { DashboardContainerInput } from '../../../common';
-import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
-import { pluginServices } from '../../services/plugin_services';
+import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
-import { DashboardItem } from '../../../common/content_management';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
-import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { DashboardContainerInput } from '../../../common';
 import { DashboardSavedObjectUserContent } from '../types';
+import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardItem } from '../../../common/content_management';
+import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -42,6 +43,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     id: hit.id,
     updatedAt: hit.updatedAt!,
     references: hit.references,
+    managed: hit.managed,
     attributes: {
       title,
       description,
@@ -50,14 +52,16 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
   };
 };
 
+type DashboardListingViewTableProps = Omit<
+  TableListViewTableProps<DashboardSavedObjectUserContent>,
+  'tableCaption'
+> & { title: string };
+
 interface UseDashboardListingTableReturnType {
   hasInitialFetchReturned: boolean;
   pageDataTestSubject: string | undefined;
   refreshUnsavedDashboards: () => void;
-  tableListViewTableProps: Omit<
-    TableListViewTableProps<DashboardSavedObjectUserContent>,
-    'tableCaption'
-  > & { title: string };
+  tableListViewTableProps: DashboardListingViewTableProps;
   unsavedDashboardIds: string[];
 }
 
@@ -70,6 +74,7 @@ export const useDashboardListingTable = ({
   initialFilter,
   urlStateEnabled,
   useSessionStorageIntegration,
+  showCreateDashboardButton = true,
 }: {
   dashboardListingId?: string;
   disableCreateDashboardButton?: boolean;
@@ -79,9 +84,10 @@ export const useDashboardListingTable = ({
   initialFilter?: string;
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
+  showCreateDashboardButton?: boolean;
 }): UseDashboardListingTableReturnType => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     dashboardCapabilities: { showWriteControls },
     settings: { uiSettings },
     dashboardContentManagement: {
@@ -100,30 +106,30 @@ export const useDashboardListingTable = ({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
-    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
+    dashboardBackup.getDashboardIdsWithUnsavedChanges()
   );
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const createItem = useCallback(() => {
-    if (useSessionStorageIntegration && dashboardSessionStorage.dashboardHasUnsavedEdits()) {
+    if (useSessionStorageIntegration && dashboardBackup.dashboardHasUnsavedEdits()) {
       confirmCreateWithUnsaved(() => {
-        dashboardSessionStorage.clearState();
+        dashboardBackup.clearState();
         goToDashboard();
       }, goToDashboard);
       return;
     }
     goToDashboard();
-  }, [dashboardSessionStorage, goToDashboard, useSessionStorageIntegration]);
+  }, [dashboardBackup, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
     async (props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>) => {
       await updateDashboardMeta(props);
 
-      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardSessionStorage, updateDashboardMeta]
+    [dashboardBackup, updateDashboardMeta]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -226,7 +232,7 @@ export const useDashboardListingTable = ({
 
         await deleteDashboards(
           dashboardsToDelete.map(({ id }) => {
-            dashboardSessionStorage.clearState(id);
+            dashboardBackup.clearState(id);
             return id;
           })
         );
@@ -246,9 +252,9 @@ export const useDashboardListingTable = ({
         });
       }
 
-      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+      setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardSessionStorage, deleteDashboards, toasts]
+    [dashboardBackup, deleteDashboards, toasts]
   );
 
   const editItem = useCallback(
@@ -267,16 +273,17 @@ export const useDashboardListingTable = ({
     [getDashboardUrl]
   );
 
-  const tableListViewTableProps = useMemo(
+  const tableListViewTableProps: DashboardListingViewTableProps = useMemo(
     () => ({
       contentEditor: {
         isReadonly: !showWriteControls,
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
       },
-      createItem: !showWriteControls ? undefined : createItem,
+      createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
+      itemIsEditable: () => showWriteControls,
       emptyPrompt,
       entityName,
       entityNamePlural,
@@ -308,6 +315,7 @@ export const useDashboardListingTable = ({
       initialPageSize,
       listingLimit,
       onFetchSuccess,
+      showCreateDashboardButton,
       showWriteControls,
       title,
       updateItemMeta,
@@ -316,8 +324,8 @@ export const useDashboardListingTable = ({
   );
 
   const refreshUnsavedDashboards = useCallback(
-    () => setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()),
-    [dashboardSessionStorage]
+    () => setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges()),
+    [dashboardBackup]
   );
 
   return {

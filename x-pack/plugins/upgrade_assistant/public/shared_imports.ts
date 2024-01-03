@@ -30,9 +30,10 @@ export { Storage } from '@kbn/kibana-utils-plugin/public';
 export {
   KibanaContextProvider,
   reactRouterNavigate,
-  RedirectAppLinks,
   KibanaThemeProvider,
 } from '@kbn/kibana-react-plugin/public';
+
+export { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 

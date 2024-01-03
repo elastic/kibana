@@ -34,7 +34,7 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
-  'discover:enableSql': boolean;
+  'discover:enableESQL': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
@@ -46,6 +46,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
+  'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:apmAgentExplorerView': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -64,6 +65,7 @@ export interface UsageStats {
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableExpandableFlyout': boolean;
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
@@ -135,8 +137,8 @@ export interface UsageStats {
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:linksPanel': boolean;
   'labs:dashboard:deferBelowFold': boolean;
-  'labs:dashboard:dashboardControls': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
@@ -154,4 +156,10 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'observability:profilingPerVCPUWattX86': number;
+  'observability:profilingPervCPUWattArm64': number;
+  'observability:profilingCo2PerKWH': number;
+  'observability:profilingDatacenterPUE': number;
+  'observability:profilingCostPervCPUPerHour': number;
+  'observability:profilingAWSCostDiscountRate': number;
 }

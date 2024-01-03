@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export type {
-  HostsLensFormulas,
-  HostsLensMetricChartFormulas,
-  HostsLensLineChartFormulas,
-} from './types';
-
-export * from './lens/dashboards';
-export { hostLensFormulas } from './constants';
+export { METRICS_TOOLTIP } from './translations';
+export {
+  HOST_METRICS_DOC_HREF,
+  HOST_METRICS_DOTTED_LINES_DOC_HREF,
+  KPI_CHART_HEIGHT,
+} from './constants';

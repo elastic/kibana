@@ -6,19 +6,20 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { BehaviorSubject } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
 
 jest.mock('../breadcrumbs', () => ({
   useBreadcrumbsNav: () => jest.fn(),
 }));
 
-const mockIsSidebarEnabled$ = new BehaviorSubject(true);
+const mockIsSideNavEnabled = jest.fn(() => true);
 jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
-        isSidebarEnabled$: mockIsSidebarEnabled$.asObservable(),
+        configSettings: {
+          sideNavEnabled: mockIsSideNavEnabled(),
+        },
       },
     }),
   };
@@ -26,7 +27,6 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
 
 describe('Security Solution Navigation', () => {
   beforeEach(() => {
-    mockIsSidebarEnabled$.next(true);
     jest.clearAllMocks();
   });
 
@@ -44,7 +44,7 @@ describe('Security Solution Navigation', () => {
   });
 
   it('should return undefined props when disabled', () => {
-    mockIsSidebarEnabled$.next(false);
+    mockIsSideNavEnabled.mockReturnValueOnce(false);
     const { result } = renderHook(useSecuritySolutionNavigation);
     expect(result.current).toEqual(undefined);
   });

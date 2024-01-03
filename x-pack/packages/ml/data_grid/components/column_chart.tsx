@@ -8,11 +8,12 @@
 import React, { type FC } from 'react';
 import { css } from '@emotion/react';
 
-import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
+import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { i18n } from '@kbn/i18n';
 import { isUnsupportedChartData, ChartData } from '../lib/field_histograms';
 
 import { useColumnChart } from '../hooks/use_column_chart';
@@ -80,8 +81,10 @@ export const ColumnChart: FC<Props> = ({
         <div css={cssHistogram} data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
             <Settings
-              // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
               theme={columnChartTheme}
+              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+              baseTheme={LEGACY_LIGHT_THEME}
+              locale={i18n.getLocale()}
             />
             <BarSeries
               id="histogram"

@@ -14,7 +14,11 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors, isSparseDataJob } from './util/general';
 

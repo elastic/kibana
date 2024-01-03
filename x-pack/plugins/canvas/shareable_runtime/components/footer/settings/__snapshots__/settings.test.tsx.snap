@@ -9,7 +9,7 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -28,68 +28,61 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       </p>
       <div>
         <div
-          class="euiContextMenu"
+          class="euiContextMenu emotion-euiContextMenu"
           style="height: 0px;"
         >
           <div
-            class="euiContextMenuPanel euiContextMenu__panel"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
             tabindex="-1"
           >
             <div
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+              data-test-subj="contextMenuPanelTitle"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
                 Settings
               </span>
             </div>
             <div>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="play"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="play"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Auto Play
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Auto Play
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Toolbar
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Toolbar
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
             </div>
           </div>
@@ -109,7 +102,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-isOpen-hasTransform-top"
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
@@ -129,92 +122,82 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       </p>
       <div>
         <div
-          class="euiContextMenu"
+          class="euiContextMenu emotion-euiContextMenu"
           style="height: 0px;"
         >
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-out-euiContextMenu__panel"
             tabindex="-1"
           >
             <div
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+              data-test-subj="contextMenuPanelTitle"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
                 Settings
               </span>
             </div>
             <div>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="play"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="play"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Auto Play
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Auto Play
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Toolbar
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Toolbar
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
             </div>
           </div>
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-in-euiContextMenu__panel"
             tabindex="-1"
           >
             <button
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
               data-test-subj="contextMenuPanelTitleButton"
               type="button"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+              <span
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
-                <span
-                  class="euiContextMenu__icon"
-                  data-euiicon-type="arrowLeft"
-                />
-                <span
-                  class="euiContextMenu__text"
-                >
-                  Auto Play
-                </span>
+                Auto Play
               </span>
             </button>
             <div>
@@ -362,7 +345,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -381,68 +364,61 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       </p>
       <div>
         <div
-          class="euiContextMenu"
+          class="euiContextMenu emotion-euiContextMenu"
           style="height: 0px;"
         >
           <div
-            class="euiContextMenuPanel euiContextMenu__panel"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
             tabindex="-1"
           >
             <div
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+              data-test-subj="contextMenuPanelTitle"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
                 Settings
               </span>
             </div>
             <div>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="play"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="play"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Auto Play
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Auto Play
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Toolbar
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Toolbar
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
             </div>
           </div>
@@ -462,7 +438,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-isOpen-hasTransform-top"
       data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
@@ -482,92 +458,82 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       </p>
       <div>
         <div
-          class="euiContextMenu"
+          class="euiContextMenu emotion-euiContextMenu"
           style="height: 0px;"
         >
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-out-euiContextMenu__panel"
             tabindex="-1"
           >
             <div
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+              data-test-subj="contextMenuPanelTitle"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
                 Settings
               </span>
             </div>
             <div>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="play"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="play"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Auto Play
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Auto Play
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Toolbar
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Toolbar
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
             </div>
           </div>
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-in-euiContextMenu__panel"
             tabindex="-1"
           >
             <button
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
               data-test-subj="contextMenuPanelTitleButton"
               type="button"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+              <span
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
-                <span
-                  class="euiContextMenu__icon"
-                  data-euiicon-type="arrowLeft"
-                />
-                <span
-                  class="euiContextMenu__text"
-                >
-                  Toolbar
-                </span>
+                Toolbar
               </span>
             </button>
             <div>
@@ -649,7 +615,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-light-hasTransform"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
@@ -668,92 +634,82 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       </p>
       <div>
         <div
-          class="euiContextMenu"
+          class="euiContextMenu emotion-euiContextMenu"
           style="height: 0px;"
         >
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-out-euiContextMenu__panel"
             tabindex="-1"
           >
             <div
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+              data-test-subj="contextMenuPanelTitle"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
                 Settings
               </span>
             </div>
             <div>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="play"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="play"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Auto Play
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Auto Play
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
               <button
-                class="euiContextMenuItem"
+                class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
                 type="button"
               >
                 <span
-                  class="euiContextMenu__itemLayout"
+                  class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+                <span
+                  class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
                 >
-                  <span
-                    class="euiContextMenu__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                  <span
-                    class="euiContextMenuItem__text"
-                  >
-                    Toolbar
-                  </span>
-                  <span
-                    class="euiContextMenu__arrow"
-                    data-euiicon-type="arrowRight"
-                  />
+                  Toolbar
                 </span>
+                <span
+                  class="euiContextMenu__arrow emotion-euiContextMenuItem__arrow"
+                  data-euiicon-type="arrowRight"
+                />
               </button>
             </div>
           </div>
           <div
-            class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft"
+            class="euiContextMenuPanel emotion-euiContextMenuPanel-transitioning-in-euiContextMenu__panel"
             tabindex="-1"
           >
             <button
-              class="euiContextMenuPanelTitle"
+              class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
               data-test-subj="contextMenuPanelTitleButton"
               type="button"
             >
               <span
-                class="euiContextMenu__itemLayout"
+                class="euiContextMenu__icon emotion-euiContextMenu__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+              <span
+                class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
               >
-                <span
-                  class="euiContextMenu__icon"
-                  data-euiicon-type="arrowLeft"
-                />
-                <span
-                  class="euiContextMenu__text"
-                >
-                  Toolbar
-                </span>
+                Toolbar
               </span>
             </button>
             <div>

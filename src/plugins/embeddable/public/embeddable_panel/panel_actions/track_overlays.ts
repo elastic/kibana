@@ -8,8 +8,12 @@
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 
+interface TracksOverlaysOptions {
+  focusedPanelId?: string;
+}
+
 interface TracksOverlays {
-  openOverlay: (ref: OverlayRef) => void;
+  openOverlay: (ref: OverlayRef, options?: TracksOverlaysOptions) => void;
   clearOverlays: () => void;
 }
 

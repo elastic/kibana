@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +16,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const containerClassName = css`
@@ -33,8 +35,9 @@ const panelClassName = css`
   max-height: 100%;
 `;
 
-const overflowScrollClassName = css`
+const overflowScrollClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  ${scrollBarStyles}
 `;
 
 const newChatButtonWrapperClassName = css`
@@ -43,24 +46,25 @@ const newChatButtonWrapperClassName = css`
 
 export function ConversationList({
   selected,
-  onClickNewChat,
   loading,
   error,
   conversations,
+  onClickNewChat,
   onClickDeleteConversation,
 }: {
   selected: string;
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
-  onClickConversation: (conversationId: string) => void;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
   return (
     <EuiPanel paddingSize="s" hasShadow={false} className={panelClassName}>
       <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-        <EuiFlexItem grow className={overflowScrollClassName}>
+        <EuiFlexItem grow className={overflowScrollClassName(scrollBarStyles)}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
@@ -120,6 +124,12 @@ export function ConversationList({
                         conversation.id
                           ? {
                               iconType: 'trash',
+                              'aria-label': i18n.translate(
+                                'xpack.observabilityAiAssistant.conversationList.deleteConversationIconLabel',
+                                {
+                                  defaultMessage: 'Delete',
+                                }
+                              ),
                               onClick: () => {
                                 onClickDeleteConversation(conversation.id);
                               },

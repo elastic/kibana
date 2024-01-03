@@ -16,26 +16,32 @@ import { AsDuration, AsPercent } from '../../common/utils/formatters';
 export type ObservabilityRuleTypeFormatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
-}) => { reason: string; link?: string };
+}) => { reason: string; link?: string; hasBasePath?: boolean };
 
 export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
   extends RuleTypeModel<Params> {
   format: ObservabilityRuleTypeFormatter;
+  priority?: number;
 }
 
 export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
-  const formatters: Array<{ typeId: string; fn: ObservabilityRuleTypeFormatter }> = [];
+  const formatters: Array<{
+    typeId: string;
+    priority: number;
+    fn: ObservabilityRuleTypeFormatter;
+  }> = [];
 
   return {
     register: (type: ObservabilityRuleTypeModel<any>) => {
-      const { format, ...rest } = type;
-      formatters.push({ typeId: type.id, fn: format });
+      const { format, priority, ...rest } = type;
+      formatters.push({ typeId: type.id, priority: priority || 0, fn: format });
       ruleTypeRegistry.register(rest);
     },
     getFormatter: (typeId: string) => {
       return formatters.find((formatter) => formatter.typeId === typeId)?.fn;
     },
-    list: () => formatters.map((formatter) => formatter.typeId),
+    list: () =>
+      formatters.sort((a, b) => b.priority - a.priority).map((formatter) => formatter.typeId),
   };
 }
 

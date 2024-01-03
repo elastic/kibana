@@ -26,7 +26,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-update-settings.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

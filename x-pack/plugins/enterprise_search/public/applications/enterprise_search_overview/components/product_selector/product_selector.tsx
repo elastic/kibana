@@ -17,31 +17,32 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { WelcomeBanner } from '@kbn/search-api-panels';
 
+import { ApiKeyPanel } from '../../../shared/api_key/api_key_panel';
 import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SearchLabsBanner } from '../../../shared/search_labs_banner/search_labs_banner';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import headerImage from '../../assets/search_header.svg';
+import headerImage from '../../assets/search_header.png';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
+import { WelcomeBanner } from './welcome_banner';
 
 export const ProductSelector: React.FC = () => {
-  const { config, userProfile } = useValues(KibanaLogic);
+  const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
+  const { user } = useValues(KibanaLogic);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
@@ -52,17 +53,13 @@ export const ProductSelector: React.FC = () => {
       <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0} customPageSections>
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
-          <EuiText color="ghost">
-            <WelcomeBanner userProfile={userProfile} image={headerImage} showDescription={false} />
-          </EuiText>
-        </EuiPageTemplate.Section>
-
-        <EuiPageTemplate.Section>
+          <WelcomeBanner user={user || undefined} image={headerImage} />
           <SetPageChrome />
           <SendTelemetry action="viewed" metric="overview" />
         </EuiPageTemplate.Section>
 
-        <EuiPageTemplate.Section>
+        <EuiPageTemplate.Section color="subdued">
+          <ApiKeyPanel />
           <EuiSpacer size="xl" />
           <EuiTitle>
             <h4>
@@ -122,7 +119,7 @@ export const ProductSelector: React.FC = () => {
               <ElasticsearchProductCard />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EnterpriseSearchProductCard />
+              <SearchLabsBanner />
             </EuiFlexItem>
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
@@ -130,7 +127,6 @@ export const ProductSelector: React.FC = () => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <Chat />
         </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>
     </>

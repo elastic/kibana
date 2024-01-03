@@ -35,6 +35,7 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
           {
             label: strings.getMyWorkpadsTabLabel(),
             id: 'myWorkpads',
+            'data-test-subj': 'workpadListing',
             isSelected: tab === 'workpads',
             onClick: () => setTab('workpads'),
           },

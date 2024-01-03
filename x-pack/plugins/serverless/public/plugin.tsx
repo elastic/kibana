@@ -49,7 +49,6 @@ export class ServerlessPlugin
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
     const { developer } = this.config;
-    const { management } = dependencies;
 
     if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
@@ -61,12 +60,17 @@ export class ServerlessPlugin
     }
 
     core.chrome.setChromeStyle('project');
-    management.setIsSidebarEnabled(false);
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
     if (dependencies.cloud.projectsUrl) {
       project.setProjectsUrl(dependencies.cloud.projectsUrl);
+    }
+    if (dependencies.cloud.serverless.projectName) {
+      project.setProjectName(dependencies.cloud.serverless.projectName);
+    }
+    if (dependencies.cloud.deploymentUrl) {
+      project.setProjectUrl(dependencies.cloud.deploymentUrl);
     }
 
     return {

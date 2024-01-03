@@ -155,8 +155,11 @@ include::data-views.asciidoc[]
 
 include::set-time-filter.asciidoc[]
 
+include::esql.asciidoc[]
+
 include::kuery.asciidoc[]
 
 include::lucene.asciidoc[]
 
 include::save-query.asciidoc[]
+

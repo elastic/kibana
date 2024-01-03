@@ -8,7 +8,7 @@
 import {
   BrowserFields,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   ProjectMonitor,
   ThrottlingConfig,
@@ -35,7 +35,7 @@ export const getNormalizeBrowserFields = ({
   namespace,
   version,
 }: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.BROWSER];
 
   const { errors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
@@ -50,7 +50,7 @@ export const getNormalizeBrowserFields = ({
 
   const normalizedFields = {
     ...commonFields,
-    [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
@@ -80,7 +80,7 @@ export const getNormalizeBrowserFields = ({
 export const normalizeThrottling = (
   monitorThrottling: ProjectMonitor['throttling']
 ): ThrottlingConfig => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.BROWSER];
 
   let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
   if (typeof monitorThrottling === 'boolean' && !monitorThrottling) {

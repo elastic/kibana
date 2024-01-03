@@ -37,7 +37,7 @@ export * from './significant_text_fn';
 export * from './significant_text';
 export * from './terms_fn';
 export * from './terms';
-export { MultiFieldKey } from './multi_field_key';
+export { MultiFieldKey, isMultiFieldKey, MULTI_FIELD_KEY_SEPARATOR } from './multi_field_key';
 export * from './multi_terms_fn';
 export * from './multi_terms';
 export * from './rare_terms_fn';

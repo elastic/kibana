@@ -95,6 +95,7 @@ export interface RuleEventLogListCommonProps {
   hasAllSpaceSwitch?: boolean;
   filteredRuleTypes?: string[];
   setHeaderActions?: (components?: React.ReactNode[]) => void;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -116,6 +117,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     hasAllSpaceSwitch = false,
     setHeaderActions,
     filteredRuleTypes,
+    getRuleDetailsRoute,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -629,6 +631,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           onFlyoutOpen={onFlyoutOpen}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
+          getRuleDetailsRoute={getRuleDetailsRoute}
         />
       </>
     );
@@ -668,7 +671,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
               isClearable

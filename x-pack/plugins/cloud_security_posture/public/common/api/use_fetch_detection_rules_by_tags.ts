@@ -8,8 +8,10 @@
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
 import { RuleResponse } from '../types';
 import { DETECTION_ENGINE_RULES_KEY } from '../constants';
+import { convertRuleTagsToKQL } from '../../../common/utils/detection_rules';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -25,15 +27,9 @@ export interface FetchRulesResponse {
   data: RuleResponse[];
 }
 
-export const TAGS_FIELD = 'alert.attributes.tags';
-
 const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
 const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
 export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
-
-export function convertRuleTagsToKQL(tags: string[]): string {
-  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(' AND ')})`;
-}
 
 export const useFetchDetectionRulesByTags = (tags: string[]) => {
   const { http } = useKibana<CoreStart>().services;
@@ -47,6 +43,7 @@ export const useFetchDetectionRulesByTags = (tags: string[]) => {
   return useQuery([DETECTION_ENGINE_RULES_KEY, tags], () =>
     http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
       method: 'GET',
+      version: DETECTION_RULE_RULES_API_CURRENT_VERSION,
       query,
     })
   );

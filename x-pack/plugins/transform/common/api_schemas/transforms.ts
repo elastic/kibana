@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -151,13 +151,14 @@ export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 
 interface TransformCreated {
   transform: TransformId;
 }
-interface TransformCreatedError {
-  id: TransformId;
+interface CreatedError {
+  id: string;
   error: any;
 }
-export interface PutTransformsResponseSchema {
+
+export interface PutTransformsResponseSchema extends CreateDataViewApiResponseSchema {
   transformsCreated: TransformCreated[];
-  errors: TransformCreatedError[];
+  errors: CreatedError[];
 }
 
 // POST transforms/_preview

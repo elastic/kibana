@@ -26,6 +26,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
+import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -67,7 +72,6 @@ import type {
   GlobalRuleEventLogListProps,
   RulesListProps,
   RulesListNotifyBadgePropsWithApi,
-  AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   ConnectorServices,
@@ -89,17 +93,18 @@ import { RuleSnoozeModalProps } from './application/sections/rules_list/componen
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   getActionForm: (
     props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
   ) => ReactElement<ActionAccordionFormProps>;
@@ -116,6 +121,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
+    props: P
+  ) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: (
     props: AlertsTableStateProps & LazyLoadProps
   ) => ReactElement<AlertsTableStateProps>;
@@ -161,8 +169,11 @@ interface PluginsStart {
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
+  serverless?: ServerlessPluginStart;
+  fieldFormats: FieldFormatsRegistry;
 }
 
 export class Plugin
@@ -176,7 +187,7 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
-  private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  private alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
@@ -184,7 +195,7 @@ export class Plugin
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-    this.alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+    this.alertsTableConfigurationRegistry = new AlertTableConfigRegistry();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
@@ -287,6 +298,9 @@ export class Plugin
           alertsTableConfigurationRegistry,
           kibanaFeatures,
           licensing: pluginsStart.licensing,
+          expressions: pluginsStart.expressions,
+          isServerless: !!pluginsStart.serverless,
+          fieldFormats: pluginsStart.fieldFormats,
         });
       },
     });
@@ -352,7 +366,15 @@ export class Plugin
     };
   }
 
-  public start(): TriggersAndActionsUIPublicPluginStart {
+  public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    import('./application/sections/alerts_table/configuration').then(
+      ({ getAlertsTableConfiguration }) => {
+        this.alertsTableConfigurationRegistry.register(
+          getAlertsTableConfiguration(plugins.fieldFormats)
+        );
+      }
+    );
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -404,6 +426,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+        return getAlertsTableDefaultAlertActionsLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldBrowserLazy(props);

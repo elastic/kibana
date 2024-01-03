@@ -16,34 +16,53 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantAvatar } from '../assistant_avatar';
-import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { KnowledgeBaseCallout } from './knowledge_base_callout';
-import { TechnicalPreviewBadge } from '../technical_preview_badge';
+import { ChatActionsMenu } from './chat_actions_menu';
+import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { useUnmountAndRemountWhenPropChanges } from '../../hooks/use_unmount_and_remount_when_prop_changes';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
+// needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
   min-width: 0;
+`;
+
+const chatHeaderClassName = css`
+  padding-top: 12px;
+  padding-bottom: 12px;
 `;
 
 export function ChatHeader({
   title,
   loading,
-  knowledgeBase,
+  licenseInvalid,
   connectors,
+  connectorsManagementHref,
+  conversationId,
+  knowledgeBase,
+  startedFrom,
   onSaveTitle,
+  onCopyConversation,
 }: {
   title: string;
   loading: boolean;
-  knowledgeBase: UseKnowledgeBaseResult;
+  licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
+  connectorsManagementHref: string;
+  conversationId?: string;
+  knowledgeBase: UseKnowledgeBaseResult;
+  startedFrom?: StartedFrom;
+  onCopyConversation: () => void;
   onSaveTitle?: (title: string) => void;
 }) {
   const hasTitle = !!title;
 
-  const displayedTitle = title || EMPTY_CONVERSATION_TITLE;
+  const displayedTitle = !connectors.selectedConnector
+    ? ASSISTANT_SETUP_TITLE
+    : licenseInvalid
+    ? UPGRADE_LICENSE_TITLE
+    : title || EMPTY_CONVERSATION_TITLE;
 
   const theme = useEuiTheme();
 
@@ -54,53 +73,49 @@ export function ChatHeader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} borderRadius="none">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+    <EuiPanel
+      borderRadius="none"
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="m"
+      className={chatHeaderClassName}
+    >
+      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="xl" /> : <AssistantAvatar size="m" />}
+          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="s" />}
         </EuiFlexItem>
+
         <EuiFlexItem grow className={minWidthClassName}>
-          <EuiFlexGroup direction="column" gutterSize="none" className={minWidthClassName}>
-            <EuiFlexItem grow={false} className={minWidthClassName}>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="m"
-                className={minWidthClassName}
-                alignItems="center"
-              >
-                <EuiFlexItem grow className={minWidthClassName}>
-                  {shouldRender ? (
-                    <EuiInlineEditTitle
-                      heading="h2"
-                      size="s"
-                      defaultValue={displayedTitle}
-                      className={css`
-                        color: ${hasTitle
-                          ? theme.euiTheme.colors.text
-                          : theme.euiTheme.colors.subduedText};
-                      `}
-                      inputAriaLabel={i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
-                        { defaultMessage: 'Edit conversation' }
-                      )}
-                      editModeProps={{ inputProps: { inputRef } }}
-                      isReadOnly={!Boolean(onSaveTitle)}
-                      onSave={onSaveTitle}
-                    />
-                  ) : null}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} className={minWidthClassName}>
-                  <TechnicalPreviewBadge />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <KnowledgeBaseCallout knowledgeBase={knowledgeBase} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {shouldRender ? (
+            <EuiInlineEditTitle
+              heading="h2"
+              size="s"
+              defaultValue={displayedTitle}
+              className={css`
+                color: ${hasTitle ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+              `}
+              inputAriaLabel={i18n.translate(
+                'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
+                { defaultMessage: 'Edit conversation' }
+              )}
+              editModeProps={{ inputProps: { inputRef } }}
+              isReadOnly={
+                !conversationId ||
+                !connectors.selectedConnector ||
+                licenseInvalid ||
+                !Boolean(onSaveTitle)
+              }
+              onSave={onSaveTitle}
+            />
+          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ConnectorSelectorBase {...connectors} />
+          <ChatActionsMenu
+            connectors={connectors}
+            disabled={licenseInvalid}
+            conversationId={conversationId}
+            onCopyConversationClick={onCopyConversation}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

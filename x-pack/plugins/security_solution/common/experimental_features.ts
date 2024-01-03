@@ -47,6 +47,11 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
+   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
+   */
+  assistantStreamingEnabled: false,
+
+  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -62,26 +67,37 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: true,
 
   /**
-   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
-   */
-  alertDetailsPageEnabled: false,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
 
   /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+  /**
+   * Enables the alert type column in KPI visualizations on Alerts Page
+   */
   alertTypeEnabled: false,
-
+  /**
+   * Enables expandable flyout in create rule page, alert preview
+   */
+  expandableFlyoutInCreateRuleEnabled: true,
   /*
    * Enables new Set of filters on the Alerts page.
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
+   */
+  assistantModelEvaluation: false,
 
   /*
    * Enables the new user details flyout displayed on the Alerts page and timeline.
@@ -90,29 +106,63 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyout: false,
 
   /**
-   * Enables Protections/Detections Coverage Overview page (Epic link https://github.com/elastic/security-team/issues/2905)
-   *
-   * This flag aims to facilitate the development process as the feature may not make it to 8.10 release.
-   *
-   * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
-   */
-  detectionsCoverageOverview: true,
-
-  /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
    */
-  riskScoringPersistence: false,
+  riskScoringPersistence: true,
 
   /**
    * Enables experimental Entity Analytics HTTP endpoints
    */
-  riskScoringRoutesEnabled: false,
+  riskScoringRoutesEnabled: true,
+
+  /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
+
+  /**
+   * Enables Protection Updates tab in the Endpoint Policy Details page
+   */
+  protectionUpdatesEnabled: true,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: true,
+
   /*
+   * Enables experimental Entity Analytics Asset Criticality feature
+   */
+  entityAnalyticsAssetCriticalityEnabled: false,
+
+  /*
+   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   */
+  sentinelOneDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables SentinelOne manual host manipulation actions
+   */
+  sentinelOneManualHostActionsEnabled: false,
+
+  /*
+   * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
+   * This tab shows the JSON diff between the installed prebuilt rule
+   * version and the latest available version.
+   */
+  jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
    *
-   * Enables Discover embedded within timeline
-   *
-   * */
-  discoverInTimeline: false,
+   */
+  timelineEsqlTabDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

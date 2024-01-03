@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
 import {
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
@@ -13,8 +12,9 @@ import {
 import { openInvestigationTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_investigation_tab';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -22,10 +22,10 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout left panel investigation',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
+      deleteAlertsAndRules();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);
@@ -37,10 +37,13 @@ describe(
 
     it('should display investigation guide', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
-        .should('be.visible')
-        .and('have.text', 'Investigation');
+        .should('have.text', 'Investigation')
+        .and('have.class', 'euiTab-isSelected');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should(
+        'contain.text',
+        'test markdown'
+      );
     });
   }
 );

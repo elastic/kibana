@@ -295,6 +295,7 @@ export const Criterion: React.FC<Props> = ({
       {canDelete && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="infraCriterionButton"
             aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
               defaultMessage: 'Remove condition',
             })}

@@ -10,12 +10,12 @@ import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@k
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { MetricCustomIndicator, SLO } from '../../../domain/models';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 
@@ -43,11 +43,23 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: MetricCustomIndicator) {
-    const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
-      index: indicator.params.index,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
-      query: filter,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                [indicator.params.timestampField]: {
+                  gte: `now-${slo.timeWindow.duration.format()}/d`,
+                },
+              },
+            },
+            getElastichsearchQueryOrThrow(indicator.params.filter),
+          ],
+        },
+      },
     };
   }
 

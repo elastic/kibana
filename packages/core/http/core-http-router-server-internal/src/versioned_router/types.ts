@@ -15,15 +15,15 @@ import type {
 
 export type Method = Exclude<RouteMethod, 'options'>;
 
-/** @experimental */
+/** @internal */
 export interface VersionedRouterRoute {
-  /** @experimental */
-  method: Method;
-  /** @experimental */
+  /** @internal */
+  method: string;
+  /** @internal */
   path: string;
-  /** @experimental */
+  /** @internal */
   options: VersionedRouteConfig<RouteMethod>;
-  /** @experimental */
+  /** @internal */
   handlers: Array<{
     fn: RequestHandler;
     options: AddVersionOpts<unknown, unknown, unknown>;

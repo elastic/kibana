@@ -8,6 +8,7 @@
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
@@ -40,7 +41,6 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -260,7 +260,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
-              urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
+              urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -276,7 +276,8 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
-            loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+            loggedOut: (request: KibanaRequest) =>
+              this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })
       );

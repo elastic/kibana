@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   FIELDS_BROWSER_CATEGORIES_COUNT,
@@ -19,7 +18,6 @@ import {
   FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import {
   addsHostGeoCityNameToTimeline,
@@ -33,11 +31,12 @@ import {
   activateViewSelected,
   activateViewAll,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -50,15 +49,13 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-describe('Fields Browser', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+// Flaky in serverless tests
+// FLAKY: https://github.com/elastic/kibana/issues/169363
+describe.skip('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   context('Fields Browser rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
@@ -125,7 +122,7 @@ describe('Fields Browser', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   context('Editing the timeline', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

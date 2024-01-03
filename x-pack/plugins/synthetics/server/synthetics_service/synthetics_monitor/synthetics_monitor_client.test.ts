@@ -97,7 +97,6 @@ describe('SyntheticsMonitorClient', () => {
       },
       isServiceManaged: false,
       agentPolicyId: `loc-${n}`,
-      concurrentMonitors: 1,
     };
   });
 
@@ -207,6 +206,7 @@ describe('SyntheticsMonitorClient', () => {
         params: {
           username: 'elastic',
         },
+        spaceId: 'test-space',
       },
     ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);

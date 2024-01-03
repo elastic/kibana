@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -331,14 +331,15 @@ export const buildXYExpression = (
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction || 'None',
-    endValue: state.endValue || 'None',
-    emphasizeFitting: state.emphasizeFitting || false,
-    fillOpacity: state.fillOpacity || 0.3,
-    valueLabels: state?.valueLabels || 'hide',
-    hideEndzones: state?.hideEndzones || false,
-    addTimeMarker: state?.showCurrentTimeMarker || false,
-    valuesInLegend: state?.valuesInLegend || false,
+    fittingFunction: state.fittingFunction ?? 'None',
+    endValue: state.endValue ?? 'None',
+    emphasizeFitting: state.emphasizeFitting ?? false,
+    minBarHeight: state.minBarHeight ?? 1,
+    fillOpacity: state.fillOpacity ?? 0.3,
+    valueLabels: state.valueLabels ?? 'hide',
+    hideEndzones: state.hideEndzones ?? false,
+    addTimeMarker: state.showCurrentTimeMarker ?? false,
+    valuesInLegend: state.valuesInLegend ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],
@@ -511,6 +512,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
   return {

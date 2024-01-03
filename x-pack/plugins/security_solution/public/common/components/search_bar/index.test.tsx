@@ -68,6 +68,7 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
+    sourcererDataView: {},
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),
@@ -86,7 +87,7 @@ describe('SearchBarComponent', () => {
 
   const pollForSignalIndex = jest.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('calls pollForSignalIndex on Refresh button click', () => {

@@ -7,18 +7,21 @@
 import { TooltipContainer } from '@elastic/charts';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
@@ -26,37 +29,50 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 
 interface Props {
-  isRoot: boolean;
-  label: string;
-  countInclusive: number;
-  countExclusive: number;
-  totalSamples: number;
-  totalSeconds: number;
+  annualCO2KgsInclusive: number;
+  annualCostsUSDInclusive: number;
   baselineScaleFactor?: number;
-  comparisonScaleFactor?: number;
-  comparisonCountInclusive?: number;
+  comparisonAnnualCO2KgsInclusive?: number;
+  comparisonAnnualCostsUSDInclusive?: number;
   comparisonCountExclusive?: number;
+  comparisonCountInclusive?: number;
+  comparisonScaleFactor?: number;
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
+  countExclusive: number;
+  countInclusive: number;
+  inline: boolean;
+  isRoot: boolean;
+  label: string;
   onShowMoreClick?: () => void;
+  parentLabel?: string;
+  totalSamples: number;
+  totalSeconds: number;
 }
 
 export function FlameGraphTooltip({
-  isRoot,
-  label,
-  countInclusive,
-  countExclusive,
-  totalSamples,
-  totalSeconds,
+  annualCO2KgsInclusive,
+  annualCostsUSDInclusive,
   baselineScaleFactor,
-  comparisonScaleFactor,
-  comparisonCountInclusive,
+  comparisonAnnualCO2KgsInclusive,
+  comparisonAnnualCostsUSDInclusive,
   comparisonCountExclusive,
+  comparisonCountInclusive,
+  comparisonScaleFactor,
   comparisonTotalSamples,
   comparisonTotalSeconds,
+  countExclusive,
+  countInclusive,
+  inline,
+  isRoot,
+  label,
   onShowMoreClick,
+  parentLabel,
+  totalSamples,
+  totalSeconds,
 }: Props) {
   const theme = useEuiTheme();
+  const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const impactEstimates = calculateImpactEstimates({
     countExclusive,
@@ -82,8 +98,33 @@ export function FlameGraphTooltip({
     <TooltipContainer>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <EuiText>{label}</EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
+          {inline && (
+            <EuiCallOut
+              css={css`
+                p {
+                  display: flex;
+                }
+              `}
+              color="primary"
+              title={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.profiling.flameGraphTooltip.inlineCallout', {
+                    defaultMessage: 'This function has been inlined by {parentLabel}',
+                    values: { parentLabel },
+                  })}
+                </EuiText>
+              }
+              size="s"
+              iconType="iInCircle"
+            />
+          )}
           {isRoot === false && (
             <>
               <TooltipRow
@@ -137,9 +178,9 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={impactEstimates.totalCPU.annualizedCo2}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedCo2}
-            formatValue={asWeight}
+            value={annualCO2KgsInclusive}
+            comparison={comparisonAnnualCO2KgsInclusive}
+            formatValue={(value) => asWeight(value, 'kgs')}
             showDifference
             formatDifferenceAsPercentage={false}
           />
@@ -147,8 +188,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={impactEstimates.totalCPU.annualizedDollarCost}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedDollarCost}
+            value={annualCostsUSDInclusive}
+            comparison={comparisonAnnualCostsUSDInclusive}
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}
@@ -160,7 +201,12 @@ export function FlameGraphTooltip({
                 style={{ background: theme.euiTheme.border.color }}
               />
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                <EuiButtonEmpty
+                  data-test-subj="profilingFlameGraphTooltipButton"
+                  size="s"
+                  iconType="inspect"
+                  onClick={onShowMoreClick}
+                >
                   <EuiText size="xs">
                     {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
                       defaultMessage: `Show more information`,

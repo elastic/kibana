@@ -7,11 +7,11 @@
 
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 
-import type { SignificantTerm, SignificantTermGroupItem } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroupItem } from '@kbn/ml-agg-utils';
 
 export type GroupTableItemGroup = Pick<
-  SignificantTermGroupItem,
-  'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
+  SignificantItemGroupItem,
+  'key' | 'type' | 'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
 >;
 
 export interface GroupTableItem {
@@ -20,9 +20,9 @@ export interface GroupTableItem {
   pValue: number | null;
   uniqueItemsCount: number;
   groupItemsSortedByUniqueness: GroupTableItemGroup[];
-  histogram: SignificantTerm['histogram'];
+  histogram: SignificantItem['histogram'];
 }
 
 export type TableItemAction = EuiTableActionsColumnType<
-  SignificantTerm | GroupTableItem
+  SignificantItem | GroupTableItem
 >['actions'][number];

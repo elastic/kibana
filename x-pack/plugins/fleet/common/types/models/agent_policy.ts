@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
@@ -50,6 +52,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   revision: number;
   agents?: number;
   is_protected: boolean;
+  keep_monitoring_alive?: boolean;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -77,21 +80,21 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
-export interface FullAgentPolicyOutputPermissions {
-  [packagePolicyName: string]: {
-    cluster?: string[];
-    indices?: Array<{
-      names: string[];
-      privileges: string[];
-    }>;
-  };
-}
+export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;
   proxy_headers?: any;
   [key: string]: any;
 };
+
+export interface FullAgentPolicyMonitoring {
+  namespace?: string;
+  use_output?: string;
+  enabled: boolean;
+  metrics: boolean;
+  logs: boolean;
+}
 
 export interface FullAgentPolicy {
   id: string;
@@ -109,13 +112,7 @@ export interface FullAgentPolicy {
   inputs: FullAgentPolicyInput[];
   revision?: number;
   agent?: {
-    monitoring: {
-      namespace?: string;
-      use_output?: string;
-      enabled: boolean;
-      metrics: boolean;
-      logs: boolean;
-    };
+    monitoring: FullAgentPolicyMonitoring;
     download: { sourceURI: string };
     features: Record<string, { enabled: boolean }>;
     protection?: {

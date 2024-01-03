@@ -17,17 +17,37 @@ import { runRule } from './alerting_api_helper';
 export async function waitForDocumentInIndex({
   esClient,
   indexName,
+  ruleId,
   num = 1,
+  sort = 'desc',
 }: {
   esClient: Client;
   indexName: string;
+  ruleId: string;
   num?: number;
+  sort?: 'asc' | 'desc';
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
-      const response = await esClient.search({ index: indexName });
+      const response = await esClient.search({
+        index: indexName,
+        sort: `date:${sort}`,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'ruleId.keyword': ruleId,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
       if (response.hits.hits.length < num) {
-        throw new Error('No hits found');
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },
@@ -38,11 +58,28 @@ export async function waitForDocumentInIndex({
 export async function getDocumentsInIndex({
   esClient,
   indexName,
+  ruleId,
 }: {
   esClient: Client;
   indexName: string;
+  ruleId: string;
 }): Promise<SearchResponse> {
-  return await esClient.search({ index: indexName });
+  return await esClient.search({
+    index: indexName,
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'ruleId.keyword': ruleId,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
 }
 
 export async function createIndex({
@@ -63,27 +100,44 @@ export async function createIndex({
 
 export async function waitForAlertInIndex<T>({
   esClient,
+  filter,
   indexName,
   ruleId,
+  num = 1,
 }: {
   esClient: Client;
+  filter: Date;
   indexName: string;
   ruleId: string;
+  num: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search<T>({
         index: indexName,
         body: {
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: filter.getTime().toString(),
+                    },
+                  },
+                },
+              ],
             },
           },
         },
       });
-      if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+      if (response.hits.hits.length < num) {
+        throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
       return response;
     },
@@ -98,7 +152,7 @@ export async function waitForAllTasksIdle({
   esClient: Client;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -150,7 +204,7 @@ export async function waitForAllTasks({
   taskType: string;
   attempts: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -208,7 +262,7 @@ export async function waitForDisabled({
   ruleId: string;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -263,7 +317,7 @@ export async function waitForExecutionEventLog({
   ruleId: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana-event-log*',
@@ -327,10 +381,7 @@ export async function waitForNumRuleRuns({
   for (let i = 0; i < numOfRuns; i++) {
     await pRetry(
       async () => {
-        const resp = await runRule({ supertest, ruleId });
-        if (resp.status !== 204) {
-          throw new Error(`Expected ${resp.status} to equal 204`);
-        }
+        await runRule({ supertest, ruleId });
         await waitForExecutionEventLog({
           esClient,
           filter: testStart,

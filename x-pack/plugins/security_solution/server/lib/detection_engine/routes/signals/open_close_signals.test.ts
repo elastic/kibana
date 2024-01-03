@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import {
   getSetSignalStatusByIdsRequest,
@@ -15,17 +17,25 @@ import {
   getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import type { SetupPlugins } from '../../../../plugin';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let mockCore: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
+    mockCore = coreMock.createSetup({
+      pluginStartDeps: {
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
+          },
+        },
+      },
+    });
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
@@ -34,12 +44,7 @@ describe('set signal status', () => {
       getSuccessfulSignalUpdateResponse()
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
-    const securityMock = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-      },
-    } as unknown as SetupPlugins['security'];
-    setSignalsStatusRoute(server.router, logger, securityMock, telemetrySenderMock);
+    setSignalsStatusRoute(server.router, logger, telemetrySenderMock, mockCore.getStartServices);
   });
 
   describe('status on signal', () => {
@@ -101,33 +106,16 @@ describe('set signal status', () => {
       );
     });
 
-    test('calls "esClient.bulk" with signalIds when ids are defined', async () => {
+    test('calls "esClient.updateByQuery" with signalIds when ids are defined', async () => {
       await server.inject(
         getSetSignalStatusByIdsRequest(),
         requestContextMock.convertContext(context)
       );
-      expect(context.core.elasticsearch.client.asCurrentUser.bulk).toHaveBeenCalledWith(
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.arrayContaining([
-            {
-              update: {
-                _id: 'somefakeid1',
-                _index: '.alerts-security.alerts-default',
-              },
-            },
-            {
-              script: expect.anything(),
-            },
-            {
-              update: {
-                _id: 'somefakeid2',
-                _index: '.alerts-security.alerts-default',
-              },
-            },
-            {
-              script: expect.anything(),
-            },
-          ]),
+          body: expect.objectContaining({
+            query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
+          }),
         })
       );
     });

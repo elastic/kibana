@@ -8,10 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { getBasePath, getEditPath } from '../common/constants';
+import { getLensClient } from './persistence/lens_client';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
-  aliasPath: getBasePath(),
-  aliasApp: 'lens',
+  alias: {
+    path: getBasePath(),
+    app: 'lens',
+  },
   name: 'lens',
   promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
@@ -30,6 +33,8 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
     visualizations: {
       docTypes: ['lens'],
       searchFields: ['title^3'],
+      clientOptions: { update: { overwrite: true } },
+      client: getLensClient,
       toListItem(savedObject) {
         const { id, type, updatedAt, attributes } = savedObject;
         const { title, description } = attributes as { title: string; description?: string };
@@ -38,8 +43,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
           title,
           description,
           updatedAt,
-          editUrl: getEditPath(id),
-          editApp: 'lens',
+          editor: { editUrl: getEditPath(id), editApp: 'lens' },
           icon: 'lensApp',
           stage: 'production',
           savedObjectType: type,

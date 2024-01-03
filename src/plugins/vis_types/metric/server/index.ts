@@ -22,7 +22,7 @@ interface PluginSetupDependencies {
   visualizations: VisualizationsServerSetup;
 }
 
-export const plugin = (initializerContext: PluginInitializerContext) => ({
+export const plugin = async (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<MetricConfig>();
     if (readOnly) {

@@ -27,6 +27,7 @@ import {
   TaskManagerStat,
   asTaskManagerStatEvent,
   EphemeralTaskRejectedDueToCapacity,
+  TaskManagerMetric,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -40,7 +41,12 @@ import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
-import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { TaskClaiming } from './queries/task_claiming';
+import { ClaimOwnershipResult } from './task_claimers';
+
+export interface ITaskEventEmitter<T> {
+  get events(): Observable<T>;
+}
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -61,12 +67,13 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
+  | TaskManagerMetric
   | EphemeralTaskRejectedDueToCapacity;
 
 /**
  * The public interface into the task manager system.
  */
-export class TaskPollingLifecycle {
+export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEvent> {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
@@ -126,6 +133,7 @@ export class TaskPollingLifecycle {
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
+      strategy: config.claim_strategy,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
@@ -210,6 +218,7 @@ export class TaskPollingLifecycle {
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
       requeueInvalidTasksConfig: this.config.requeue_invalid_tasks,
+      allowReadingInvalidState: this.config.allow_reading_invalid_state,
     });
   };
 

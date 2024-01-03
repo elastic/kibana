@@ -18,7 +18,11 @@ const mockTelemetryEvents = {
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={true}
+  >
     {children}
   </DataQualityProvider>
 );
@@ -51,5 +55,12 @@ describe('DataQualityContext', () => {
     const telemetryEvents = await result.current.telemetryEvents;
 
     expect(telemetryEvents).toEqual(mockTelemetryEvents);
+  });
+
+  test('it should return the isILMAvailable param', async () => {
+    const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
+    const isILMAvailable = await result.current.isILMAvailable;
+
+    expect(isILMAvailable).toEqual(true);
   });
 });

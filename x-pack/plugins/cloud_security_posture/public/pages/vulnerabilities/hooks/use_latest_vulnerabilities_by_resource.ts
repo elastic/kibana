@@ -21,7 +21,6 @@ import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
 } from '../../../../common/constants';
-import { getSafeVulnerabilitiesQueryFilter } from '../../../../common/utils/get_safe_vulnerabilities_query_filter';
 
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -60,7 +59,7 @@ export const getQuery = ({
   pageSize,
 }: VulnerabilitiesQuery) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: getSafeVulnerabilitiesQueryFilter(query),
+  query,
   aggs: {
     total: { cardinality: { field: 'resource.id' } },
     resources: {

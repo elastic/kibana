@@ -44,6 +44,7 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   attributesToExcludeFromAAD: new Set([
     ConfigKey.ALERT_CONFIG,
     ConfigKey.METADATA,
+    ConfigKey.MAX_ATTEMPTS,
     ...legacyConfigKeys,
   ]),
 };
@@ -190,8 +191,8 @@ export const getSyntheticsMonitorSavedObjectType = (
       getTitle: (savedObject) =>
         savedObject.attributes.name +
         ' - ' +
-        i18n.translate('xpack.synthetics.syntheticsMonitors', {
-          defaultMessage: 'Uptime - Monitor',
+        i18n.translate('xpack.synthetics.syntheticsMonitors.label', {
+          defaultMessage: 'Synthetics - Monitor',
         }),
     },
   };

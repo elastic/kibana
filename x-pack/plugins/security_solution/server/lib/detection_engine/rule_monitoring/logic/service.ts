@@ -27,6 +27,7 @@ import { registerEventLogProvider } from './event_log/register_event_log_provide
 import { createDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client';
 import { createEventLogHealthClient } from './detection_engine_health/event_log/event_log_health_client';
 import { createRuleObjectsHealthClient } from './detection_engine_health/rule_objects/rule_objects_health_client';
+import { createRuleSpacesClient } from './detection_engine_health/rule_spaces/rule_spaces_client';
 import { createEventLogReader } from './rule_execution_log/event_log/event_log_reader';
 import { createEventLogWriter } from './rule_execution_log/event_log/event_log_writer';
 import { fetchRuleExecutionSettings } from './rule_execution_log/execution_settings/fetch_rule_execution_settings';
@@ -71,23 +72,43 @@ export const createRuleMonitoringService = (
       const { rulesClient, eventLogClient, currentSpaceId } = params;
       const { savedObjects } = coreStart;
 
-      const ruleObjectsHealthClient = createRuleObjectsHealthClient(rulesClient);
-      const eventLogHealthClient = createEventLogHealthClient(eventLogClient);
+      // Create a saved objects client and an importer that can work with saved objects on behalf
+      // of the internal Kibana user. This is important because we want to let users with access
+      // to only Security Solution to be able to:
+      //   1. Install our internal assets like rule monitoring dashboard without the need to
+      //      configure the additional `Saved Objects Management: All` privilege.
+      //   2. Aggregate rules in all Kibana spaces to get a health overview of the whole cluster -
+      //      without having explicit access to every existing space.
+      const internalSavedObjectsRepository = savedObjects.createInternalRepository([
+        // Note: we include the "alert" hidden SO type here otherwise we would not be able to query it.
+        // If at some point it is not considered a hidden type this can be removed.
+        'alert',
+      ]);
+      const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+      const internalSavedObjectsImporter = savedObjects.createImporter(internalSavedObjectsClient);
 
-      // Create an importer that can import saved objects on behalf of the internal Kibana user.
-      // This is important because we want to let users with access to Security Solution
-      // to be able to install our internal assets like rule monitoring dashboard without
-      // the need to configure the additional `Saved Objects Management: All` privilege.
-      const savedObjectsRepository = savedObjects.createInternalRepository();
-      const savedObjectsClient = new SavedObjectsClient(savedObjectsRepository);
-      const savedObjectsImporter = savedObjects.createImporter(savedObjectsClient);
+      const ruleSpacesClient = createRuleSpacesClient(
+        currentSpaceId,
+        internalSavedObjectsClient,
+        logger
+      );
+      const ruleObjectsHealthClient = createRuleObjectsHealthClient(
+        rulesClient,
+        internalSavedObjectsClient,
+        logger
+      );
+      const eventLogHealthClient = createEventLogHealthClient(
+        eventLogClient,
+        ruleSpacesClient,
+        logger
+      );
 
       return createDetectionEngineHealthClient(
+        ruleSpacesClient,
         ruleObjectsHealthClient,
         eventLogHealthClient,
-        savedObjectsImporter,
-        logger,
-        currentSpaceId
+        internalSavedObjectsImporter,
+        logger
       );
     },
 

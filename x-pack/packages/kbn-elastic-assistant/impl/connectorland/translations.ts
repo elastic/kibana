@@ -31,6 +31,13 @@ export const WELCOME_SECURITY = i18n.translate(
   }
 );
 
+export const PRECONFIGURED_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.preconfiguredTitle',
+  {
+    defaultMessage: 'Preconfigured',
+  }
+);
+
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {
@@ -112,6 +119,13 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
     defaultMessage: 'Click to skip...',
+  }
+);
+
+export const CONNECTOR_SETUP_COMPLETE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.setup.complete',
+  {
+    defaultMessage: 'Connector setup complete!',
   }
 );
 

@@ -10,12 +10,16 @@ import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { DetectionRuleCounter } from '../../../components/detection_rule_counter';
 import { createDetectionRuleFromFinding } from '../utils/create_detection_rule_from_finding';
+import { getFindingsDetectionRuleSearchTags } from '../../../../common/utils/detection_rules';
 
 export const FindingsDetectionRuleCounter = ({ finding }: { finding: CspFinding }) => {
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
     await createDetectionRuleFromFinding(http, finding);
 
   return (
-    <DetectionRuleCounter tags={finding.rule.tags} createRuleFn={createMisconfigurationRuleFn} />
+    <DetectionRuleCounter
+      tags={getFindingsDetectionRuleSearchTags(finding.rule)}
+      createRuleFn={createMisconfigurationRuleFn}
+    />
   );
 };

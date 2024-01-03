@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
 export const getSLOSummarySettingsTemplate = (name: string) => ({
   name,
   template: {
     settings: {
-      auto_expand_replicas: '0-all',
+      auto_expand_replicas: '0-1',
       hidden: true,
     },
   },

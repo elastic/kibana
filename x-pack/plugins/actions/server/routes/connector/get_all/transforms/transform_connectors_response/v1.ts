@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FindConnectorResult } from '../../../../../application/connector/types';
-import { ConnectorResponseV1 } from '../../../../../../common/routes/connector/response';
+import { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
+import { AllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export const transformGetAllConnectorsResponse = (
-  results: FindConnectorResult[]
-): ConnectorResponseV1[] => {
+  results: ConnectorWithExtraFindData[]
+): AllConnectorsResponseV1[] => {
   return results.map(
     ({
       id,

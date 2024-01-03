@@ -5,102 +5,96 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Subscription } from 'rxjs';
+import { last } from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
+import { sendEvent, TELEMETRY } from '../../analytics';
+import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { ChatState, useChat } from '../../hooks/use_chat';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import type { PendingMessage } from '../../types';
-import { ChatFlyout } from '../chat/chat_flyout';
-import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
-import { MessagePanel } from '../message_panel/message_panel';
-import { MessageText } from '../message_panel/message_text';
+import { useKibana } from '../../hooks/use_kibana';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
-import { InsightBase } from './insight_base';
+import { ChatFlyout } from '../chat/chat_flyout';
+import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { FeedbackButtons } from '../feedback_buttons';
+import { MessagePanel } from '../message_panel/message_panel';
+import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
-import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { InsightBase } from './insight_base';
 
 function ChatContent({
-  title,
-  messages,
+  title: defaultTitle,
+  initialMessages,
   connectorId,
 }: {
   title: string;
-  messages: Message[];
+  initialMessages: Message[];
   connectorId: string;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
 
-  const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
-  const [loading, setLoading] = useState(false);
-  const [subscription, setSubscription] = useState<Subscription | undefined>();
+  const initialMessagesRef = useRef(initialMessages);
 
-  const reloadReply = useCallback(() => {
-    setLoading(true);
+  const { messages, next, state, stop } = useChat({
+    chatService,
+    connectorId,
+    initialMessages,
+    persist: false,
+  });
 
-    const nextSubscription = chatService.chat({ messages, connectorId }).subscribe({
-      next: (msg) => {
-        setPendingMessage(() => msg);
-      },
-      complete: () => {
-        setLoading(false);
-      },
-    });
-
-    setSubscription(nextSubscription);
-  }, [messages, connectorId, chatService]);
+  const lastAssistantResponse = last(
+    messages.filter((message) => message.message.role === MessageRole.Assistant)
+  );
 
   useEffect(() => {
-    reloadReply();
-  }, [reloadReply]);
+    next(initialMessagesRef.current);
+  }, [next]);
 
   const [isOpen, setIsOpen] = useState(false);
-
-  const displayedMessages = useMemo(() => {
-    return pendingMessage
-      ? messages.concat({
-          '@timestamp': new Date().toISOString(),
-          message: {
-            ...pendingMessage.message,
-          },
-        })
-      : messages;
-  }, [pendingMessage, messages]);
 
   return (
     <>
       <MessagePanel
-        body={<MessageText content={pendingMessage?.message.content ?? ''} loading={loading} />}
-        error={pendingMessage?.error}
+        body={
+          <MessageText
+            content={lastAssistantResponse?.message.content ?? ''}
+            loading={state === ChatState.Loading}
+            onActionClick={async () => {}}
+          />
+        }
+        error={state === ChatState.Error}
         controls={
-          loading ? (
+          state === ChatState.Loading ? (
             <StopGeneratingButton
               onClick={() => {
-                subscription?.unsubscribe();
-                setLoading(false);
-                setPendingMessage((prev) => ({
-                  message: {
-                    role: MessageRole.Assistant,
-                    ...prev?.message,
-                  },
-                  aborted: true,
-                  error: new AbortError(),
-                }));
+                stop();
               }}
             />
           ) : (
             <EuiFlexGroup direction="row">
+              <FeedbackButtons
+                onClickFeedback={(feedback) => {
+                  if (lastAssistantResponse) {
+                    sendEvent(chatService.analytics, {
+                      type: TELEMETRY.observability_ai_assistant_insight_feedback,
+                      payload: {
+                        feedback,
+                        message: lastAssistantResponse,
+                      },
+                    });
+                  }
+                }}
+              />
               <EuiFlexItem grow={false}>
                 <RegenerateResponseButton
                   onClick={() => {
-                    reloadReply();
+                    next(initialMessages);
                   }}
                 />
               </EuiFlexItem>
@@ -116,18 +110,25 @@ function ChatContent({
         }
       />
       <ChatFlyout
-        title={title}
         isOpen={isOpen}
         onClose={() => {
-          setIsOpen(() => false);
+          setIsOpen(false);
         }}
-        messages={displayedMessages}
+        initialMessages={messages}
+        initialTitle={defaultTitle}
+        startedFrom="contextualInsight"
       />
     </>
   );
 }
 
-export function Insight({ messages, title }: { messages: Message[]; title: string }) {
+export interface InsightProps {
+  messages: Message[];
+  title: string;
+  dataTestSubj?: string;
+}
+
+export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [hasOpened, setHasOpened] = useState(false);
 
   const connectors = useGenAIConnectors();
@@ -149,7 +150,11 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
 
   if (hasOpened && connectors.selectedConnector) {
     children = (
-      <ChatContent title={title} messages={messages} connectorId={connectors.selectedConnector} />
+      <ChatContent
+        title={title}
+        initialMessages={messages}
+        connectorId={connectors.selectedConnector}
+      />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
@@ -165,6 +170,7 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
       }}
       controls={<ConnectorSelectorBase {...connectors} />}
       loading={connectors.loading || chatService.loading}
+      dataTestSubj={dataTestSubj}
     >
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>

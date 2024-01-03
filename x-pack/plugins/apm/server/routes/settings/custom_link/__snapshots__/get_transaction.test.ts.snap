@@ -3,8 +3,11 @@
 exports[`custom link get transaction fetches with all filter 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "transaction",
+    "sources": Array [
+      Object {
+        "documentType": "transactionEvent",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {
@@ -52,8 +55,11 @@ Object {
 exports[`custom link get transaction fetches without filter 1`] = `
 Object {
   "apm": Object {
-    "events": Array [
-      "transaction",
+    "sources": Array [
+      Object {
+        "documentType": "transactionEvent",
+        "rollupInterval": "none",
+      },
     ],
   },
   "body": Object {

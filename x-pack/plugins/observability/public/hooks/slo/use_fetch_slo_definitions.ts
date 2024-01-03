@@ -5,52 +5,51 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
-import { SLOResponse } from '@kbn/slo-schema';
+import { FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDefinitionsResponse {
+  data: FindSLODefinitionsResponse | undefined;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: SLOResponse[] | undefined;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<SLOResponse[], unknown>>;
+  refetch: () => void;
 }
 
 interface Params {
   name?: string;
-  size?: number;
+  includeOutdatedOnly?: boolean;
+  page?: number;
+  perPage?: number;
 }
 
 export function useFetchSloDefinitions({
   name = '',
-  size = 10,
+  includeOutdatedOnly = false,
+  page = 1,
+  perPage = 100,
 }: Params): UseFetchSloDefinitionsResponse {
-  const { savedObjects } = useKibana().services;
+  const { http } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchSloDefinitions', search],
-    queryFn: async () => {
+    queryKey: sloKeys.definitions(search, page, perPage, includeOutdatedOnly),
+    queryFn: async ({ signal }) => {
       try {
-        const response = await savedObjects.client.find<SLOResponse>({
-          type: 'slo',
-          search,
-          searchFields: ['name'],
-          perPage: size,
-        });
-        return response.savedObjects.map((so) => so.attributes);
+        const response = await http.get<FindSLODefinitionsResponse>(
+          '/api/observability/slos/_definitions',
+          { query: { search, includeOutdatedOnly, page, perPage }, signal }
+        );
+
+        return response;
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   return { isLoading, isError, isSuccess, data, refetch };

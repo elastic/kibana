@@ -27,6 +27,7 @@ const createClientMock = () => {
     removeMany: jest.fn(),
     isOverridden: jest.fn(),
     isSensitive: jest.fn(),
+    validate: jest.fn(),
   };
   mocked.get.mockResolvedValue(false);
   mocked.getAll.mockResolvedValue({});
@@ -49,6 +50,7 @@ const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     register: jest.fn(),
     registerGlobal: jest.fn(),
+    setAllowlist: jest.fn(),
   };
 
   return mocked;

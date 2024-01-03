@@ -89,7 +89,7 @@ describe('Hosts Table', () => {
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
     });
 
-    test('it renders "Host Risk classification" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
+    test('it renders "Host Risk level" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
@@ -113,7 +113,7 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classification' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+    test("it doesn't renders 'Host Risk level' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
@@ -137,7 +137,7 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classification' column when user doesn't has entity-analytics capabilities", () => {
+    test("it doesn't renders 'Host Risk level' column when user doesn't has entity-analytics capabilities", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(false);
 

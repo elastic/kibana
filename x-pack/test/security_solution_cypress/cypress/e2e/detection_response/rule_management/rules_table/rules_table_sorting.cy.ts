@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import {
   FIRST_RULE,
   RULE_NAME,
@@ -20,11 +18,11 @@ import {
   getRulesManagementTableRows,
   waitForRuleToUpdate,
 } from '../../../../tasks/alerts_detection_rules';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
@@ -38,9 +36,8 @@ import {
 } from '../../../../tasks/table_pagination';
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
 
-describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Rules table: sorting', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
     createRule(getExistingRule({ rule_id: '2', enabled: false }));
@@ -53,7 +50,7 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   it('Sorts by enabled rules', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
 
     enableRule(SECOND_RULE);
     waitForRuleToUpdate();
@@ -73,7 +70,7 @@ describe('Rules table: sorting', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     createRule(getNewRule({ name: 'Test a rule', rule_id: '5', enabled: false }));
     createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6', enabled: false }));
 
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
     setRowsPerPageTo(5);
 
     cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');

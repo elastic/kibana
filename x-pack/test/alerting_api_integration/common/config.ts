@@ -10,6 +10,8 @@ import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
+import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -28,10 +30,13 @@ interface CreateTestConfigOptions {
   reportName?: string;
   useDedicatedTaskRunner: boolean;
   enableFooterInEmail?: boolean;
+  maxScheduledPerMinute?: number;
+  experimentalFeatures?: ExperimentalConfigKeys;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.bedrock',
   '.cases-webhook',
   '.email',
   '.index',
@@ -46,6 +51,7 @@ const enabledActionTypes = [
   '.resilient',
   '.gen-ai',
   '.d3security',
+  SENTINELONE_CONNECTOR_ID,
   '.slack',
   '.slack_api',
   '.tines',
@@ -82,6 +88,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     reportName = undefined,
     useDedicatedTaskRunner,
     enableFooterInEmail = true,
+    maxScheduledPerMinute,
+    experimentalFeatures = [],
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -151,6 +159,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
       : [];
 
+    const maxScheduledPerMinuteSettings =
+      typeof maxScheduledPerMinute === 'number'
+        ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
+        : [];
+
     return {
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
@@ -187,7 +200,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',
-          '--xpack.observability.unsafe.thresholdRule.enabled=true',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -199,6 +211,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
+          ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
@@ -335,6 +348,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--notifications.connectors.default.email=notification-email',
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
+          '--xpack.actions.queued.max=500',
+          `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
         ],
       },
     };

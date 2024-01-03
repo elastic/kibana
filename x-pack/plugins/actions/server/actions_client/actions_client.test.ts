@@ -37,13 +37,13 @@ import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
-  getBulkAuthorizationModeBySource,
+  bulkGetAuthorizationModeBySource,
 } from '../authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -71,7 +71,7 @@ jest.mock('../authorization/get_authorization_mode_by_source', () => {
     getAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
-    getBulkAuthorizationModeBySource: jest.fn(() => {
+    bulkGetAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
     AuthorizationMode: {
@@ -97,7 +97,6 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
@@ -120,6 +119,14 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
 
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+
+const actionTypeIdFromSavedObjectMock = (actionTypeId: string = 'my-action-type') => {
+  return {
+    attributes: {
+      actionTypeId,
+    },
+  } as SavedObject;
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -144,7 +151,6 @@ beforeEach(() => {
     kibanaIndices,
     inMemoryConnectors: [],
     actionExecutor,
-    executionEnqueuer,
     ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
@@ -612,7 +618,6 @@ describe('create()', () => {
       kibanaIndices,
       inMemoryConnectors: [],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -739,7 +744,6 @@ describe('create()', () => {
       ],
 
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -802,7 +806,6 @@ describe('create()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -864,7 +867,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -902,7 +904,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -960,7 +961,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1004,7 +1004,6 @@ describe('get()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1127,7 +1126,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1172,7 +1170,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1207,7 +1204,6 @@ describe('get()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1279,7 +1275,6 @@ describe('getBulk()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -1418,7 +1413,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1514,7 +1508,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1589,7 +1582,6 @@ describe('getBulk()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -1675,7 +1667,6 @@ describe('getOAuthAccessToken()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2058,7 +2049,6 @@ describe('delete()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2095,7 +2085,6 @@ describe('delete()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2611,7 +2600,6 @@ describe('update()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2655,7 +2643,6 @@ describe('update()', () => {
         },
       ],
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -2685,6 +2672,7 @@ describe('execute()', () => {
       (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return AuthorizationMode.RBAC;
       });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
@@ -2693,6 +2681,7 @@ describe('execute()', () => {
         source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2706,6 +2695,8 @@ describe('execute()', () => {
         new Error(`Unauthorized to execute all actions`)
       );
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await expect(
         actionsClient.execute({
           actionId: 'action-id',
@@ -2717,6 +2708,7 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2764,7 +2756,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -2790,12 +2781,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'system-connector-.cases',
         params: {},
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -2829,7 +2823,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -2855,12 +2848,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'testPreconfigured',
         params: {},
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2893,7 +2889,6 @@ describe('execute()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        executionEnqueuer,
         ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
@@ -2919,12 +2914,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'system-connector-.cases',
         params: { foo: 'bar' },
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -3029,89 +3027,10 @@ describe('execute()', () => {
   });
 });
 
-describe('enqueueExecution()', () => {
-  describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      await actionsClient.enqueueExecution({
-        id: uuidv4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-        source: asHttpRequestExecutionSource(request),
-      });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-      });
-    });
-
-    test('throws when user is not authorised to create the type of action', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to execute all actions`)
-      );
-
-      await expect(
-        actionsClient.enqueueExecution({
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-      });
-    });
-
-    test('tracks legacy RBAC', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.Legacy;
-      });
-
-      await actionsClient.enqueueExecution({
-        id: uuidv4(),
-        params: {},
-        spaceId: 'default',
-        executionId: '123abc',
-        apiKey: null,
-        source: asHttpRequestExecutionSource(request),
-      });
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
-        'enqueueExecution',
-        mockUsageCounter
-      );
-    });
-  });
-
-  test('calls the executionEnqueuer with the appropriate parameters', async () => {
-    const opts = {
-      id: uuidv4(),
-      params: { baz: false },
-      spaceId: 'default',
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-      source: asHttpRequestExecutionSource(request),
-    };
-    await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
-
-    expect(executionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
-  });
-});
-
 describe('bulkEnqueueExecution()', () => {
   describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+    test('ensures user is authorised to execute actions', async () => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       await actionsClient.bulkEnqueueExecution([
@@ -3122,6 +3041,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3130,15 +3050,17 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
       });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       authorization.ensureAuthorized.mockRejectedValue(
@@ -3154,6 +3076,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
           {
             id: uuidv4(),
@@ -3162,6 +3085,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
+            actionTypeId: 'my-action-type',
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -3172,7 +3096,7 @@ describe('bulkEnqueueExecution()', () => {
     });
 
     test('tracks legacy RBAC', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
       });
 
@@ -3184,6 +3108,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
         {
           id: uuidv4(),
@@ -3192,6 +3117,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'my-action-type',
         },
       ]);
 
@@ -3204,7 +3130,7 @@ describe('bulkEnqueueExecution()', () => {
   });
 
   test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
-    (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+    (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
       return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
     });
     const opts = [
@@ -3215,6 +3141,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
       {
         id: uuidv4(),
@@ -3223,6 +3150,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'my-action-type',
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
@@ -3230,172 +3158,6 @@ describe('bulkEnqueueExecution()', () => {
     );
 
     expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
-  });
-});
-
-describe('listType()', () => {
-  it('filters action types by feature ID', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-    ]);
-  });
-
-  it('filters out system action types when not defining options', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type-2',
-      name: 'My action type 2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
-
-    expect(await actionsClient.listTypes()).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-      {
-        id: 'my-action-type-2',
-        name: 'My action type 2',
-        isSystemActionType: false,
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['cases'],
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    ]);
-  });
-
-  it('return system action types when defining options', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
-
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
-
-    expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
-      {
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-      {
-        id: '.cases',
-        name: 'Cases',
-        isSystemActionType: true,
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    ]);
   });
 });
 
@@ -3442,7 +3204,6 @@ describe('isPreconfigured()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3493,7 +3254,6 @@ describe('isPreconfigured()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3546,7 +3306,6 @@ describe('isSystemAction()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -3597,7 +3356,6 @@ describe('isSystemAction()', () => {
       scopedClusterClient,
       kibanaIndices,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,

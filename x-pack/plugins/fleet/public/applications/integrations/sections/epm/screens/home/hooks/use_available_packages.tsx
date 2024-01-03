@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import { uniq } from 'lodash';
 
@@ -13,8 +13,8 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
-  useGetAppendCustomIntegrations,
-  useGetReplacementCustomIntegrations,
+  useGetAppendCustomIntegrationsQuery,
+  useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -103,11 +103,13 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
-export const useAvailablePackages = () => {
+export const useAvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
-    boolean | undefined
-  >(undefined);
+
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
@@ -146,10 +148,13 @@ export const useAvailablePackages = () => {
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-  const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
+  const {
+    data: replacementCustomIntegrations,
+    isInitialLoading: isLoadingReplacmentCustomIntegrations,
+  } = useGetReplacementCustomIntegrationsQuery();
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+  const { isInitialLoading: isLoadingAppendCustomIntegrations, data: appendCustomIntegrations } =
+    useGetAppendCustomIntegrationsQuery();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
@@ -231,12 +236,16 @@ export const useAvailablePackages = () => {
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    isLoading:
+      isLoadingReplacmentCustomIntegrations ||
+      isLoadingAppendCustomIntegrations ||
+      isLoadingCategories ||
+      isLoadingAllPackages,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
-    setPrereleaseIntegrationsEnabled,
   };
 };

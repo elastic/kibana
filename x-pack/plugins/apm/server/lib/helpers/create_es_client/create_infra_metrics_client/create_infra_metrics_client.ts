@@ -7,7 +7,6 @@
 
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
-import { getInfraMetricIndices } from '../../get_infra_metric_indices';
 
 type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
   size: number;
@@ -17,6 +16,8 @@ type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
 export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
 
 export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
+  const metricsClient = resources.plugins.metricsDataAccess.setup.client;
+
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(
       opts: TParams
@@ -26,8 +27,7 @@ export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
         elasticsearch: { client: esClient },
       } = await resources.context.core;
 
-      const indexName = await getInfraMetricIndices({
-        infraPlugin: resources.plugins.infra,
+      const indexName = await metricsClient.getMetricIndices({
         savedObjectsClient,
       });
 

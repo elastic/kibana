@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionTagcloudPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionTagcloudPlugin } = await import('./plugin');
   return new ExpressionTagcloudPlugin();
 }

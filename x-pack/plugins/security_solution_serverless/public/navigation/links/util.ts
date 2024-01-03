@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { ProjectPageName } from './types';
+import { ExternalPageName } from './constants';
+import type { GetCloudUrl, ProjectPageName } from './types';
+import { SECURITY_PROJECT_TYPE } from '../../../common';
 
 export const getNavLinkIdFromProjectPageName = (projectNavLinkId: ProjectPageName): string => {
   const cleanId = projectNavLinkId.replace(/\/(.*)$/, ''); // remove any trailing path
@@ -23,7 +25,8 @@ export const getProjectPageNameFromNavLinkId = (navLinkId: string): ProjectPageN
 
 export const isCloudLink = (linkId: string): boolean => linkId.startsWith('cloud:');
 export const getCloudLinkKey = (linkId: string): string => linkId.replace('cloud:', '');
-export const getCloudUrl = (cloudUrlKey: string, cloud: CloudStart): string | undefined => {
+
+export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
   switch (cloudUrlKey) {
     case 'billing':
       return cloud.billingUrl;
@@ -37,7 +40,31 @@ export const getCloudUrl = (cloudUrlKey: string, cloud: CloudStart): string | un
       return cloud.profileUrl;
     case 'usersAndRoles':
       return cloud.usersAndRolesUrl;
+    case 'projects':
+      return cloud.projectsUrl;
     default:
       return undefined;
   }
 };
+
+export const getProjectDetails = (cloud: CloudStart) => cloud.serverless;
+export const getProjectFeaturesUrl = (cloud: CloudStart): string | undefined => {
+  const projectsBaseUrl = getCloudUrl('projects', cloud);
+  const projectId = getProjectDetails(cloud)?.projectId;
+  if (!projectsBaseUrl || !projectId) {
+    return undefined;
+  }
+  return `${projectsBaseUrl}/${SECURITY_PROJECT_TYPE}/${projectId}?open=securityProjectFeatures`;
+};
+
+/**
+ * Defines the navigation items that should be in the footer of the side navigation.
+ * @todo Make it a new property in the `NavigationLink` type `position?: 'top' | 'bottom' (default: 'top')`
+ */
+export const isBottomNavItemId = (id: string) =>
+  id === SecurityPageName.landing ||
+  id === ExternalPageName.devTools ||
+  id === ExternalPageName.management ||
+  id === ExternalPageName.integrationsSecurity ||
+  id === ExternalPageName.cloudUsersAndRoles ||
+  id === ExternalPageName.cloudBilling;

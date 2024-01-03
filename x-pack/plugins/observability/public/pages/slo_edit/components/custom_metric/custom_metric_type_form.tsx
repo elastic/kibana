@@ -6,37 +6,48 @@
  */
 
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
-import { GroupByFieldSelector } from '../common/group_by_field_selector';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
-export function CustomMetricIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
+const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
 
+export function CustomMetricIndicatorTypeForm() {
+  const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
-  const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
+  const timestampField = watch('indicator.params.timestampField');
+  const groupByField = watch('groupBy');
+
+  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
+    useFetchIndexPatternFields(index);
+  const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
+    useFetchGroupByCardinality(index, timestampField, groupByField);
+
+  const timestampFields = indexFields.filter((field) => field.type === 'date');
+  const groupByFields = indexFields.filter((field) => field.aggregatable);
+  const metricFields = indexFields.filter((field) =>
+    SUPPORTED_METRIC_FIELD_TYPES.includes(field.type)
+  );
 
   return (
     <>
@@ -55,61 +66,20 @@ export function CustomMetricIndicatorTypeForm() {
             <IndexSelection />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.label',
-                { defaultMessage: 'Timestamp field' }
+            <IndexFieldSelector
+              indexFields={timestampFields}
+              name="indicator.params.timestampField"
+              label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+                defaultMessage: 'Timestamp field',
+              })}
+              placeholder={i18n.translate(
+                'xpack.observability.slo.sloEdit.timestampField.placeholder',
+                { defaultMessage: 'Select a timestamp field' }
               )}
-              isInvalid={getFieldState('indicator.params.timestampField').invalid}
-            >
-              <Controller
-                name="indicator.params.timestampField"
-                defaultValue=""
-                rules={{ required: true }}
-                control={control}
-                render={({ field: { ref, ...field }, fieldState }) => (
-                  <EuiComboBox
-                    {...field}
-                    async
-                    placeholder={i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.placeholder',
-                      { defaultMessage: 'Select a timestamp field' }
-                    )}
-                    aria-label={i18n.translate(
-                      'xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.placeholder',
-                      { defaultMessage: 'Select a timestamp field' }
-                    )}
-                    data-test-subj="customMetricIndicatorFormTimestampFieldSelect"
-                    isClearable
-                    isDisabled={!watch('indicator.params.index')}
-                    isInvalid={fieldState.invalid}
-                    isLoading={!!watch('indicator.params.index') && isLoading}
-                    onChange={(selected: EuiComboBoxOptionOption[]) => {
-                      if (selected.length) {
-                        return field.onChange(selected[0].value);
-                      }
-
-                      field.onChange('');
-                    }}
-                    options={createOptionsFromFields(timestampFields)}
-                    selectedOptions={
-                      !!watch('indicator.params.index') &&
-                      !!field.value &&
-                      timestampFields.some((timestampField) => timestampField.name === field.value)
-                        ? [
-                            {
-                              value: field.value,
-                              label: field.value,
-                              'data-test-subj': `customMetricIndicatorFormTimestampFieldSelectedValue`,
-                            },
-                          ]
-                        : []
-                    }
-                    singleSelection={{ asPlainText: true }}
-                  />
-                )}
-              />
-            </EuiFormRow>
+              isLoading={!!index && isIndexFieldsLoading}
+              isDisabled={!index}
+              isRequired
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -157,7 +127,11 @@ export function CustomMetricIndicatorTypeForm() {
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <MetricIndicator type="good" indexFields={indexFields} isLoadingIndex={isLoading} />
+          <MetricIndicator
+            type="good"
+            metricFields={metricFields}
+            isLoadingIndex={isIndexFieldsLoading}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -174,14 +148,53 @@ export function CustomMetricIndicatorTypeForm() {
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <MetricIndicator type="total" indexFields={indexFields} isLoadingIndex={isLoading} />
+          <MetricIndicator
+            type="total"
+            metricFields={metricFields}
+            isLoadingIndex={isIndexFieldsLoading}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
 
-        <GroupByFieldSelector index={index} />
+        <IndexFieldSelector
+          indexFields={groupByFields}
+          name="groupBy"
+          defaultValue={ALL_VALUE}
+          label={
+            <span>
+              {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+                defaultMessage: 'Group by',
+              })}{' '}
+              <EuiIconTip
+                content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+                  defaultMessage: 'Create individual SLOs for each value of the selected field.',
+                })}
+                position="top"
+              />
+            </span>
+          }
+          placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+            defaultMessage: 'Select an optional field to group by',
+          })}
+          isLoading={!!index && isIndexFieldsLoading}
+          isDisabled={!index}
+        />
+
+        {!isGroupByCardinalityLoading && !!groupByCardinality && (
+          <EuiCallOut
+            size="s"
+            iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
+            color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
+            title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
+              defaultMessage:
+                "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
+              values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+            })}
+          />
+        )}
 
         <DataPreviewChart />
       </EuiFlexGroup>

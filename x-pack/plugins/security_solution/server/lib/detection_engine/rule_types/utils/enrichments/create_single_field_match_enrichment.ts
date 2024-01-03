@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, chunk } from 'lodash';
+import { chunk } from 'lodash';
 import { searchEnrichments } from './search_enrichments';
 import { makeSingleFieldMatchQuery } from './utils/requests';
 import { getEventValue, getFieldValue } from './utils/events';
@@ -22,12 +22,14 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
   createEnrichmentFunction,
   name,
   enrichmentResponseFields,
+  extraFilters,
 }) => {
   try {
     logger.debug(`Enrichment ${name}: started`);
 
-    const eventsWithField = events.filter((event) => getEventValue(event, mappingField.eventField));
-    const eventsMapByFieldValue = eventsWithField.reduce((acc, event) => {
+    const eventsToEnrich = events.filter((event) => getEventValue(event, mappingField.eventField));
+
+    const eventsMapByFieldValue = eventsToEnrich.reduce((acc, event) => {
       const eventFieldValue = getEventValue(event, mappingField.eventField);
 
       if (!eventFieldValue) return {};
@@ -39,6 +41,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     }, {} as { [key: string]: typeof events });
 
     const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
+
     const chunksUniqueEventsValuesToSearchBy = chunk(uniqueEventsValuesToSearchBy, MAX_CLAUSES);
 
     const getAllEnrichment = chunksUniqueEventsValuesToSearchBy
@@ -46,6 +49,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
         makeSingleFieldMatchQuery({
           values: enrichmentValuesChunk,
           searchByField: mappingField.enrichmentField,
+          extraFilters,
         })
       )
       .filter((query) => query.query?.bool?.should?.length > 0)
@@ -59,11 +63,9 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
         })
       );
 
-    const enrichmentsResults = (await Promise.allSettled(getAllEnrichment))
+    const enrichments = (await Promise.allSettled(getAllEnrichment))
       .filter((result) => result.status === 'fulfilled')
-      .map((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
-
-    const enrichments = flatten(enrichmentsResults);
+      .flatMap((result) => (result as PromiseFulfilledResult<EnrichmentType[]>)?.value);
 
     if (enrichments.length === 0) {
       logger.debug(`Enrichment ${name}: no enrichment found`);
@@ -89,7 +91,7 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
     );
     return eventsMapById;
   } catch (error) {
-    logger.error(`Enrichment ${name}: throw error ${error}`);
+    logger.error(`Enrichment ${name} failed: ${error}`);
     return {};
   }
 };

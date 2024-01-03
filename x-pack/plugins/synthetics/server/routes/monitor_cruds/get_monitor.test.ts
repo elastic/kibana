@@ -83,6 +83,7 @@ const attributes = {
   __ui: { is_tls_enabled: false },
   urls: 'https://simonhearne.com/',
   max_redirects: '0',
+  max_attempts: 2,
   'url.port': null,
   proxy_url: '',
   'response.include_body': 'on_error',

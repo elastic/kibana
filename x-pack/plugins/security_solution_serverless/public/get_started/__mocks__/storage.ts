@@ -10,6 +10,7 @@ export const getStartedStorage = {
   getFinishedStepsFromStorageByCardId: jest.fn(() => []),
   getActiveProductsFromStorage: jest.fn(() => []),
   toggleActiveProductsInStorage: jest.fn(() => []),
+  resetAllExpandedCardStepsToStorage: jest.fn(),
   addFinishedStepToStorage: jest.fn(),
   removeFinishedStepFromStorage: jest.fn(),
   addExpandedCardStepToStorage: jest.fn(),

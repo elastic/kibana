@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -14,8 +15,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 
@@ -83,11 +83,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               // Ensure task still exists and is still enabled
@@ -123,7 +119,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 await checkAAD({
                   supertest,
                   spaceId: space.id,
-                  type: 'alert',
+                  type: RULE_SAVED_OBJECT_TYPE,
                   id: createdAlert.id,
                 });
               });
@@ -158,7 +154,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'disable',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -210,7 +206,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'disable',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -220,17 +216,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -273,7 +258,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('disable', 'test.noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -281,11 +266,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -344,11 +325,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'disable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('disable', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               // Ensure task still exists and is still enabled

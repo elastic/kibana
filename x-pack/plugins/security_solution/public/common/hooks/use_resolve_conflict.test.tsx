@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../../timelines/store/timeline', () => ({
+jest.mock('../../timelines/store', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
   },
@@ -29,7 +29,7 @@ jest.mock('../../timelines/store/timeline', () => ({
 describe('useResolveConflict', () => {
   const mockGetLegacyUrlConflict = jest.fn().mockReturnValue('Test!');
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
       pathname: 'my/cool/path',

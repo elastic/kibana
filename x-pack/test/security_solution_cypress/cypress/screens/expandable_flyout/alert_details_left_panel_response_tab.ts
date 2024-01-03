@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { RESPONSE_TAB_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/test_ids';
-import { RESPONSE_EMPTY_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
+import { RESPONSE_TAB_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/test_ids';
+import {
+  RESPONSE_DETAILS_TEST_ID,
+  RESPONSE_NO_DATA_TEST_ID,
+} from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB =
   getDataTestSubjectSelector(RESPONSE_TAB_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_RESPONSE_DETAILS =
+  getDataTestSubjectSelector(RESPONSE_DETAILS_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY =
-  getDataTestSubjectSelector(RESPONSE_EMPTY_TEST_ID);
+  getDataTestSubjectSelector(RESPONSE_NO_DATA_TEST_ID);

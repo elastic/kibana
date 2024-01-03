@@ -67,7 +67,6 @@ export function NoDataPopover({
       }
       minWidth={300}
       anchorPosition="downCenter"
-      anchorClassName="eui-displayBlock"
       step={1}
       stepsTotal={1}
       isStepOpen={noDataPopoverVisible}

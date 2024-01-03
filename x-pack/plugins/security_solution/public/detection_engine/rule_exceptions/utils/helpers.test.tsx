@@ -1416,7 +1416,7 @@ describe('Exception helpers', () => {
       'execute',
       'upload_file',
     ];
-    const alertData = {
+    const alertData: AlertData = {
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
       'kibana.alert.rule.execution.uuid': '28b687e3-8e16-48aa-91b8-bf044d366c2d',
@@ -1467,6 +1467,17 @@ describe('Exception helpers', () => {
         capabilities: endpointCapabilties,
       },
       _id: 'b9edb05a090729be2077b99304542d6844973843dec43177ac618f383df44a6d',
+      destination: {
+        port: 443,
+      },
+      source: {
+        // @ts-expect-error
+        ports: [1, 2, 4],
+      },
+      flow: {
+        final: false,
+        skip: true,
+      },
     };
     const expectedHighlightedFields = [
       {
@@ -1645,6 +1656,68 @@ describe('Exception helpers', () => {
         });
         expect(entries).toEqual(expectedExceptionEntries);
       });
+      it('should build exception entries with "match" operator and  ensure that integer value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'destination.port',
+            },
+          ],
+          alertData,
+        });
+        expect(alertData).toEqual(
+          expect.objectContaining({
+            destination: {
+              port: 443,
+            },
+          })
+        );
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'destination.port',
+            operator: 'included',
+            type: 'match',
+            value: '443',
+          },
+        ]);
+      });
+      it('should build exception entries with "match" operator and ensure that boolean value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'flow.final',
+            },
+            { id: 'flow.skip' },
+          ],
+          alertData,
+        });
+        expect(alertData).toEqual(
+          expect.objectContaining({
+            flow: {
+              final: false,
+              skip: true,
+            },
+          })
+        );
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'flow.final',
+            operator: 'included',
+            type: 'match',
+            value: 'false',
+          },
+          {
+            field: 'flow.skip',
+            operator: 'included',
+            type: 'match',
+            value: 'true',
+          },
+        ]);
+      });
       it('should build the exception entries with "match_any" in case the field key has multiple values', () => {
         const entries = buildExceptionEntriesFromAlertFields({
           highlightedFields: [
@@ -1656,6 +1729,26 @@ describe('Exception helpers', () => {
           alertData,
         });
         expect(entries).toEqual([...expectedExceptionEntries, entriesWithMatchAny]);
+      });
+      it('should build the exception entries with "match_any" in case the field key has multiple values and ensure that the array value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'source.ports',
+            },
+          ],
+          alertData,
+        });
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'source.ports',
+            operator,
+            type: ListOperatorTypeEnum.MATCH_ANY,
+            value: ['1', '2', '4'],
+          },
+        ]);
       });
     });
 
@@ -1683,6 +1776,10 @@ describe('Exception helpers', () => {
               label: 'Agent status',
             },
             {
+              id: 'observer.serial_number',
+              label: 'Agent status',
+            },
+            {
               id: 'cloud.provider',
             },
             {
@@ -1701,6 +1798,10 @@ describe('Exception helpers', () => {
           id: 'agent.id',
           label: 'Agent status',
           overrideField: 'agent.status',
+        },
+        {
+          id: 'observer.serial_number',
+          label: 'Agent status',
         },
         {
           id: 'user.name',

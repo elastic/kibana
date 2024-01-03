@@ -20,12 +20,14 @@ import {
   MetricWTrend,
   MetricWNumber,
   SettingsProps,
+  MetricWText,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
+  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -64,6 +66,28 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
   }
   return serializedFieldFormat ?? { id: formatId };
 }
+
+const renderSecondaryMetric = (
+  columns: DatatableColumn[],
+  row: DatatableRow,
+  config: Pick<VisParams, 'metric' | 'dimensions'>
+) => {
+  let secondaryMetricColumn: DatatableColumn | undefined;
+  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
+  if (config.dimensions.secondaryMetric) {
+    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
+    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, columns);
+  }
+  const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+  return (
+    <span>
+      {secondaryPrefix}
+      {secondaryMetricColumn
+        ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(row[secondaryMetricColumn.id])}`
+        : undefined}
+    </span>
+  );
+};
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
@@ -130,14 +154,10 @@ export const MetricVis = ({
   filterable,
   overrides,
 }: MetricVisComponentProps) => {
-  const chartTheme = getThemeService().useChartsTheme();
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          renderComplete();
-        });
+        renderComplete();
       }
     },
     [renderComplete]
@@ -146,18 +166,10 @@ export const MetricVis = ({
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
-
-  const baseTheme = getThemeService().useChartsBaseTheme();
+  const chartBaseTheme = getThemeService().useChartsBaseTheme();
 
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
-
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
-  }
 
   let breakdownByColumn: DatatableColumn | undefined;
   let formatBreakdownValue: FieldFormatConvertFunction;
@@ -175,28 +187,32 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
+    const value: number | string =
+      row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+
+    if (typeof value !== 'number') {
+      const nonNumericMetric: MetricWText = {
+        value: formatPrimaryMetric(value),
+        title: String(title),
+        subtitle,
+        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+        extra: renderSecondaryMetric(data.columns, row, config),
+        color: config.metric.color ?? defaultColor,
+      };
+      return nonNumericMetric;
+    }
+
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: (
-        <span>
-          {secondaryPrefix}
-          {secondaryMetricColumn
-            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
-                row[secondaryMetricColumn.id]
-              )}`
-            : undefined}
-        </span>
-      ),
+      extra: renderSecondaryMetric(data.columns, row, config),
       color:
         config.metric.palette && value != null
           ? getColor(
@@ -257,7 +273,7 @@ export const MetricVis = ({
   } = config;
   const numRows = metricConfigs.length / maxCols;
 
-  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+  const minHeight = chartBaseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
@@ -306,20 +322,21 @@ export const MetricVis = ({
       >
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            locale={i18n.getLocale()}
             theme={[
               {
-                background: { color: 'transparent' },
+                background: { color: defaultColor },
                 metric: {
-                  background: defaultColor,
                   barBackground: euiThemeVars.euiColorLightShade,
+                  emptyBackground: euiThemeVars.euiColorEmptyShade,
+                  blendingBackground: euiThemeVars.euiColorEmptyShade,
                 },
-                ...chartTheme,
               },
               ...(Array.isArray(settingsThemeOverrides)
                 ? settingsThemeOverrides
                 : [settingsThemeOverrides]),
             ]}
-            baseTheme={baseTheme}
+            baseTheme={chartBaseTheme}
             onRenderChange={onRenderChange}
             onElementClick={
               filterable

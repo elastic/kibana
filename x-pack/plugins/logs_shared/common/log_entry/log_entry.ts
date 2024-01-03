@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TimeKey } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { TimeKey } from '../time';
 import { jsonArrayRT } from '../typed_json';
 import { logEntryCursorRT } from './log_entry_cursor';
 
@@ -34,7 +34,7 @@ export type LogMessagePart = rt.TypeOf<typeof logMessagePartRT>;
  * columns
  */
 
-export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt.number });
+export const logTimestampColumnRT = rt.type({ columnId: rt.string, time: rt.string });
 export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
 
 export const logFieldColumnRT = rt.type({

@@ -35,7 +35,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -69,6 +69,7 @@ import type {
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
@@ -82,9 +83,8 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
-
+import { ITelemetryClient, TelemetryService } from './services/telemetry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -106,6 +106,10 @@ export interface ApmPluginSetupDeps {
   profiling?: ProfilingPluginSetup;
 }
 
+export interface ApmServices {
+  telemetry: ITelemetryClient;
+}
+
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
@@ -124,7 +128,6 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -132,6 +135,8 @@ export interface ApmPluginStartDeps {
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  dashboard: DashboardStart;
+  metricsDataAccess: MetricsDataPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -181,16 +186,17 @@ const apmTutorialTitle = i18n.translate(
 );
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
+  private telemetry: TelemetryService;
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
+    this.telemetry = new TelemetryService();
   }
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
-
     const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
@@ -273,6 +279,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       };
     };
 
+    this.telemetry.setup({ analytics: core.analytics });
+
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
@@ -332,6 +340,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
+    // Register APM telemetry based events
+    const telemetry = this.telemetry.start();
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -388,7 +399,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps,
@@ -396,6 +406,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
+          apmServices: {
+            telemetry,
+          },
         });
       },
     });
@@ -414,16 +427,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
-    plugins.observabilityAIAssistant.register(
-      async ({ signal, registerContext, registerFunction }) => {
+    plugins.observabilityAIAssistant.service.register(
+      async ({ registerRenderFunction }) => {
         const mod = await import('./assistant_functions');
 
         mod.registerAssistantFunctions({
-          coreStart: core,
-          pluginsStart: plugins,
-          registerContext,
-          registerFunction,
-          signal,
+          registerRenderFunction,
         });
       }
     );

@@ -38,13 +38,9 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   },
   latest: {
     sort: '@timestamp',
-    unique_key: [
-      'vulnerability.id',
-      'resource.id',
-      'vulnerability.package.name',
-      'vulnerability.package.version',
-    ],
+    unique_key: ['vulnerability.id', 'resource.id', 'package.name', 'package.version'],
   },
+  settings: { unattended: true },
   _meta: {
     package: {
       name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,

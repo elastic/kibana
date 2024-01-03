@@ -47,12 +47,15 @@ import type { DataView } from '@kbn/data-views-plugin/public';
  * issue: https://github.com/elastic/kibana/issues/54957
  */
 export function isNestedFieldParent(fieldName: string, dataView: DataView): boolean {
+  const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
   return (
     !dataView.fields.getByName(fieldName) &&
     !!dataView.fields.getAll().find((patternField) => {
       // We only want to match a full path segment
-      const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
       const subTypeNested = getDataViewFieldSubtypeNested(patternField);
+      if (!subTypeNested) {
+        return false;
+      }
       return nestedRootRegex.test(subTypeNested?.nested.path ?? '');
     })
   );

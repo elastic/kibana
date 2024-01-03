@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,12 +27,14 @@ import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
     start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
+  const { setProfilingSetupStatus } = useProfilingSetupStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
   const history = useHistory();
@@ -46,6 +49,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     },
     [fetchHasSetup]
   );
+
+  if (status === AsyncStatus.Settled) {
+    setProfilingSetupStatus(data);
+  }
 
   const http = useAutoAbortedHttpClient([]);
 
@@ -79,9 +86,13 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   }
 
   const displaySetupScreen =
-    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
+    (status === AsyncStatus.Settled &&
+      data?.has_setup !== true &&
+      data?.pre_8_9_1_data === false) ||
+    !!error;
 
   if (displaySetupScreen) {
+    const isButtonDisabled = postSetupLoading || data?.has_required_role === false;
     return (
       <ProfilingAppPageTemplate
         tabs={[]}
@@ -121,6 +132,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           values={{
                             dataRetentionLink: (
                               <EuiLink
+                                data-test-subj="profilingCheckSetupControllingDataRetentionLink"
                                 href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
                                 target="_blank"
                               >
@@ -142,43 +154,54 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 event.preventDefault();
               },
               button: (
-                <EuiButton
-                  disabled={postSetupLoading}
-                  onClick={(event) => {
-                    event.preventDefault();
-
-                    setPostSetupLoading(true);
-
-                    postSetupResources({ http })
-                      .then(() => refresh())
-                      .catch((err) => {
-                        const message = err?.body?.message ?? err.message ?? String(err);
-
-                        notifications.toasts.addError(err, {
-                          title: i18n.translate(
-                            'xpack.profiling.checkSetup.setupFailureToastTitle',
-                            {
-                              defaultMessage: 'Failed to complete setup',
-                            }
-                          ),
-                          toastMessage: message,
-                        });
-                      })
-                      .finally(() => {
-                        setPostSetupLoading(false);
-                      });
-                  }}
-                  fill
-                  isLoading={postSetupLoading}
+                <EuiToolTip
+                  content={
+                    data?.has_required_role === false
+                      ? i18n.translate('xpack.profiling.checkSetup.tooltip', {
+                          defaultMessage: 'You must be logged in as a superuser',
+                        })
+                      : ''
+                  }
                 >
-                  {!postSetupLoading
-                    ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                        defaultMessage: 'Set up Universal Profiling',
-                      })
-                    : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                        defaultMessage: 'Setting up Universal Profiling...',
-                      })}
-                </EuiButton>
+                  <EuiButton
+                    data-test-subj="profilingCheckSetupButton"
+                    disabled={isButtonDisabled}
+                    onClick={(event) => {
+                      event.preventDefault();
+
+                      setPostSetupLoading(true);
+
+                      postSetupResources({ http })
+                        .then(() => refresh())
+                        .catch((err) => {
+                          const message = err?.body?.message ?? err.message ?? String(err);
+
+                          notifications.toasts.addError(err, {
+                            title: i18n.translate(
+                              'xpack.profiling.checkSetup.setupFailureToastTitle',
+                              {
+                                defaultMessage: 'Failed to complete setup',
+                              }
+                            ),
+                            toastMessage: message,
+                          });
+                        })
+                        .finally(() => {
+                          setPostSetupLoading(false);
+                        });
+                    }}
+                    fill
+                    isLoading={postSetupLoading}
+                  >
+                    {!postSetupLoading
+                      ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
+                          defaultMessage: 'Set up Universal Profiling',
+                        })
+                      : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
+                          defaultMessage: 'Setting up Universal Profiling...',
+                        })}
+                  </EuiButton>
+                </EuiToolTip>
               ),
             },
           },
@@ -193,19 +216,27 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displayAddDataInstructions =
-    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
-
   const displayUi =
     // Display UI if there's data or if the user is opening the add data instruction page.
     // does not use profiling router because that breaks as at this point the route might not have all required params
-    data?.has_data === true || history.location.pathname === '/add-data-instructions';
+    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
+    history.location.pathname === '/add-data-instructions' ||
+    history.location.pathname === '/delete_data_instructions';
 
   if (displayUi) {
     return children;
   }
 
-  if (displayAddDataInstructions) {
+  if (data?.pre_8_9_1_data === true) {
+    // If the cluster still has data pre 8.9.1 version, redirect to deleting instructions
+    router.push('/delete_data_instructions', {
+      path: {},
+      query: {},
+    });
+    return null;
+  }
+
+  if (status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},

@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
   title: Prebuilt Rules Status API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules/prepackaged/_status:
     get:
-      operationId: GetPrebuiltRulesStatus
-      x-codegen-enabled: false
+      operationId: GetPrebuiltRulesAndTimelinesStatus
+      x-codegen-enabled: true
       summary: Get the status of Elastic prebuilt rules
       tags:
         - Prebuilt Rules API
@@ -17,6 +17,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   rules_custom_installed:
                     type: integer

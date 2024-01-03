@@ -39,7 +39,7 @@ export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, toYaml: typeof sa
   return _formatSecrets(policy.secret_references, yaml);
 };
 
-function _sortYamlKeys(keyA: string, keyB: string) {
+export function _sortYamlKeys(keyA: string, keyB: string) {
   const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
   const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
   if (indexA >= 0 && indexB < 0) {

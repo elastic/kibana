@@ -8,8 +8,8 @@
   line-height: $euiSize;
   border: none;
   color: $euiTextColor;
-  padding-top: $euiSizeM / 2 + 1px;
-  padding-bottom: $euiSizeM / 2 + 1px;
+  padding-top: calc($euiSizeM / 2) + 1px;
+  padding-bottom: calc($euiSizeM / 2) + 1px;
   white-space: normal; /* 1 */
 
   &:not(.globalFilterItem-isDisabled) {
@@ -54,8 +54,8 @@
     left: 0;
     width: $euiSizeXS;
     background-color: $kbnGlobalFilterItemBorderColor;
-    border-top-left-radius: $euiBorderRadius / 2;
-    border-bottom-left-radius: $euiBorderRadius / 2;
+    border-top-left-radius: calc($euiBorderRadius / 2);
+    border-bottom-left-radius: calc($euiBorderRadius / 2);
   }
 }
 
@@ -71,11 +71,6 @@
 
 .globalFilterItem__editorForm {
   padding: $euiSizeM;
-}
-
-.globalFilterItem__popover,
-.globalFilterItem__popoverAnchor {
-  display: block;
 }
 
 .globalFilterItem__readonlyPanel {

@@ -1,6 +1,10 @@
 @import '../../mixins';
 @import '../../variables';
 
+.lnsSuggestionPanel .euiAccordion__buttonContent {
+  width: 100%;
+}
+
 .lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
@@ -16,18 +20,14 @@
   margin-right: -$euiSizeXS;
 }
 
-.lnsSuggestionPanel {
-  padding-bottom: $euiSizeS;
-}
-
 .lnsSuggestionPanel__button {
   position: relative; // Let the expression progress indicator position itself against the button
   flex: 0 0 auto;
-  width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
   height: $lnsSuggestionHeight;
   margin-right: $euiSizeS;
-  margin-left: $euiSizeXS / 2;
-  margin-bottom: $euiSizeXS / 2;
+  margin-left: calc($euiSizeXS / 2);
+  margin-bottom: calc($euiSizeXS / 2);
+  padding: 0 $euiSizeS;
   box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {
@@ -55,6 +55,10 @@
   &:hover {
     transform: none !important; // sass-lint:disable-line no-important
   }
+}
+
+.lnsSuggestionPanel__button-fixedWidth {
+  width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
 }
 
 .lnsSuggestionPanel__suggestionIcon {

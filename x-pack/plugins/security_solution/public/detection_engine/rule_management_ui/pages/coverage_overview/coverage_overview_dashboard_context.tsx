@@ -14,11 +14,11 @@ import React, {
   useReducer,
 } from 'react';
 import { invariant } from '../../../../../common/utils/invariant';
-import type {
+import {
+  BulkActionTypeEnum,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
-import { BulkActionType } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
 import {
   SET_SHOW_EXPANDED_CELLS,
@@ -27,7 +27,7 @@ import {
   SET_RULE_SEARCH_FILTER,
   createCoverageOverviewDashboardReducer,
 } from './coverage_overview_dashboard_reducer';
-import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
+import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 
 export interface CoverageOverviewDashboardActions {
@@ -53,7 +53,10 @@ interface CoverageOverviewDashboardContextProviderProps {
 
 export const initialState: CoverageOverviewDashboardState = {
   showExpandedCells: false,
-  filter: {},
+  filter: {
+    activity: [CoverageOverviewRuleActivity.Enabled],
+    source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
+  },
   data: undefined,
   isLoading: false,
 };
@@ -111,7 +114,7 @@ export const CoverageOverviewDashboardContextProvider = ({
 
   const enableAllDisabled = useCallback(
     async (ruleIds: string[]) => {
-      await executeBulkAction({ type: BulkActionType.enable, ids: ruleIds });
+      await executeBulkAction({ type: BulkActionTypeEnum.enable, ids: ruleIds });
     },
     [executeBulkAction]
   );

@@ -11,19 +11,11 @@ import {
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 
 /**
  * To avoid expensive changes to the DOM, delay showing the popover menu
  */
 const HOVER_INTENT_DELAY = 100; // ms
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WithHoverActionsPopover = styled(EuiPopover as any)`
-  .euiPopover__anchor {
-    width: 100%;
-  }
-` as unknown as typeof EuiPopover;
 
 interface Props {
   /**
@@ -93,7 +85,9 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
 
       if (onCloseRequested != null) {
-        onCloseRequested();
+        setTimeout(() => {
+          onCloseRequested();
+        });
       }
     }, [onCloseRequested]);
 
@@ -155,7 +149,7 @@ export const WithHoverActions = React.memo<Props>(
         className={alwaysShow ? HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME : ''}
         onMouseLeave={onMouseLeave}
       >
-        <WithHoverActionsPopover
+        <EuiPopover
           ref={popoverRef}
           anchorPosition={'downCenter'}
           button={content}
@@ -168,7 +162,7 @@ export const WithHoverActions = React.memo<Props>(
           repositionOnScroll={true}
         >
           {isOpen ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
-        </WithHoverActionsPopover>
+        </EuiPopover>
       </div>
     );
   }

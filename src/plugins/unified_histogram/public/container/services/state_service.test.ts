@@ -9,7 +9,7 @@
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramFetchStatus } from '../..';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
-import { lensTablesAdapterMock } from '../../__mocks__/lens_table_adapter';
+import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import {
   getChartHidden,
   getTopPanelHeight,
@@ -47,7 +47,7 @@ describe('UnifiedHistogramStateService', () => {
     breakdownField: 'bytes',
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
-    lensTablesAdapter: lensTablesAdapterMock,
+    lensAdapters: lensAdaptersMock,
     timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
@@ -136,8 +136,11 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(newState);
     stateService.setLensRequestAdapter(undefined);
     newState = { ...newState, lensRequestAdapter: undefined };
-    stateService.setLensTablesAdapter(undefined);
-    newState = { ...newState, lensTablesAdapter: undefined };
+    stateService.setLensAdapters(undefined);
+    newState = { ...newState, lensAdapters: undefined };
+    expect(state).toEqual(newState);
+    stateService.setLensEmbeddableOutput$(undefined);
+    newState = { ...newState, lensEmbeddableOutput$: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,

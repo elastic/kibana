@@ -29,7 +29,7 @@ export const getSinglePercentileRankMetricAgg = () => {
     expressionName: aggSinglePercentileRankFnName,
     dslName: 'percentile_ranks',
     title: singlePercentileTitle,
-    valueType: 'number',
+    getValueType: () => 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.singlePercentileRankLabel', {
         defaultMessage: 'Percentile rank of {field}',

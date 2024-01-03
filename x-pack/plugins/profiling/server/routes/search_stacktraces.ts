@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { decodeStackTraceResponse } from '../../common/stack_traces';
+import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { ProjectTimeQuery } from './query';
 
@@ -13,12 +12,18 @@ export async function searchStackTraces({
   client,
   filter,
   sampleSize,
+  durationSeconds,
 }: {
   client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
+  durationSeconds: number;
 }) {
-  const response = await client.profilingStacktraces({ query: filter, sampleSize });
+  const response = await client.profilingStacktraces({
+    query: filter,
+    sampleSize,
+    durationSeconds,
+  });
 
   return decodeStackTraceResponse(response);
 }

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
+import type { AiOpsIndexBasedAppState } from '../application/url_state/common';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useSearch = (
@@ -24,12 +26,16 @@ export const useSearch = (
     },
   } = useAiopsAppContext();
 
-  const searchData = getEsQueryFromSavedSearch({
-    dataView,
-    uiSettings,
-    savedSearch,
-    filterManager,
-  });
+  const searchData = useMemo(
+    () =>
+      getEsQueryFromSavedSearch({
+        dataView,
+        uiSettings,
+        savedSearch,
+        filterManager,
+      }),
+    [dataView, uiSettings, savedSearch, filterManager]
+  );
 
   if (searchData === undefined || (aiopsListState && aiopsListState.searchString !== '')) {
     if (aiopsListState?.filters && readOnly === false) {

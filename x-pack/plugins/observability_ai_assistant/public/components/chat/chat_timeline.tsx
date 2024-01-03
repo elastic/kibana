@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { css } from '@emotion/react';
-import { compact } from 'lodash';
+import React, { ReactNode, useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { ChatItem } from './chat_item';
+import { omit } from 'lodash';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import type { ChatActionClickHandler } from './types';
+import type { ObservabilityAIAssistantChatService } from '../../types';
+import type { TelemetryEventTypeWithPayload } from '../../analytics';
+import { ChatItem } from './chat_item';
+import { ChatConsolidatedItems } from './chat_consolidated_items';
+import { ChatState } from '../../hooks/use_chat';
+import {
+  getTimelineItemsfromConversation,
+  StartedFrom,
+} from '../../utils/get_timeline_items_from_conversation';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -32,50 +42,110 @@ export interface ChatTimelineItem
   element?: React.ReactNode;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   error?: any;
+  message: Message;
+  functionCall?: Message['message']['function_call'];
 }
 
 export interface ChatTimelineProps {
-  items: ChatTimelineItem[];
-  onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
-  onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
-  onRegenerate: (item: ChatTimelineItem) => void;
+  messages: Message[];
+  knowledgeBase: UseKnowledgeBaseResult;
+  chatService: ObservabilityAIAssistantChatService;
+  hasConnector: boolean;
+  chatState: ChatState;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  startedFrom?: StartedFrom;
+  onEdit: (message: Message, messageAfterEdit: Message) => void;
+  onFeedback: (message: Message, feedback: Feedback) => void;
+  onRegenerate: (message: Message) => void;
+  onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGenerating: () => void;
+  onActionClick: ChatActionClickHandler;
 }
 
 export function ChatTimeline({
-  items = [],
+  messages,
+  chatService,
+  hasConnector,
+  currentUser,
+  startedFrom,
   onEdit,
   onFeedback,
   onRegenerate,
+  onSendTelemetry,
   onStopGenerating,
+  onActionClick,
+  chatState,
 }: ChatTimelineProps) {
+  const items = useMemo(() => {
+    const timelineItems = getTimelineItemsfromConversation({
+      chatService,
+      hasConnector,
+      messages,
+      currentUser,
+      startedFrom,
+      chatState,
+    });
+
+    const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
+    let currentGroup: ChatTimelineItem[] | null = null;
+
+    for (const item of timelineItems) {
+      if (item.display.hide || !item) continue;
+
+      if (item.display.collapsed) {
+        if (currentGroup) {
+          currentGroup.push(item);
+        } else {
+          currentGroup = [item];
+          consolidatedChatItems.push(currentGroup);
+        }
+      } else {
+        consolidatedChatItems.push(item);
+        currentGroup = null;
+      }
+    }
+
+    return consolidatedChatItems;
+  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState]);
+
   return (
     <EuiCommentList
-      css={css`
+      className={css`
         padding-bottom: 32px;
       `}
     >
-      {compact(
-        items.map((item, index) =>
-          !item.display.hide ? (
-            <ChatItem
-              // use index, not id to prevent unmounting of component when message is persisted
-              key={index}
-              {...item}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item, feedback);
-              }}
-              onRegenerateClick={() => {
-                onRegenerate(item);
-              }}
-              onEditSubmit={(message) => {
-                return onEdit(item, message);
-              }}
-              onStopGeneratingClick={onStopGenerating}
-            />
-          ) : null
-        )
-      )}
+      {items.map((item, index) => {
+        return Array.isArray(item) ? (
+          <ChatConsolidatedItems
+            key={index}
+            consolidatedItem={item}
+            onActionClick={onActionClick}
+            onFeedback={onFeedback}
+            onRegenerate={onRegenerate}
+            onEditSubmit={onEdit}
+            onSendTelemetry={onSendTelemetry}
+            onStopGenerating={onStopGenerating}
+          />
+        ) : (
+          <ChatItem
+            // use index, not id to prevent unmounting of component when message is persisted
+            key={index}
+            {...omit(item, 'message')}
+            onActionClick={onActionClick}
+            onFeedbackClick={(feedback) => {
+              onFeedback(item.message, feedback);
+            }}
+            onRegenerateClick={() => {
+              onRegenerate(item.message);
+            }}
+            onEditSubmit={(message) => {
+              onEdit(item.message, message);
+            }}
+            onSendTelemetry={onSendTelemetry}
+            onStopGeneratingClick={onStopGenerating}
+          />
+        );
+      })}
     </EuiCommentList>
   );
 }

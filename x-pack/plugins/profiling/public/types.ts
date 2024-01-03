@@ -24,6 +24,11 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
+} from '@kbn/unified-search-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
@@ -34,6 +39,8 @@ export interface ProfilingPluginPublicSetupDeps {
   charts: ChartsPluginSetup;
   licensing: LicensingPluginSetup;
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
+  unifiedSearch: UnifiedSearchPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
@@ -44,4 +51,5 @@ export interface ProfilingPluginPublicStartDeps {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   share: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

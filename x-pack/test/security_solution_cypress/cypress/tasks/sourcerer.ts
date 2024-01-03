@@ -7,10 +7,9 @@
 
 import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/constants';
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
-import { HOSTS_URL } from '../urls/navigation';
-import { visit, waitForPage } from './login';
+import { hostsUrl } from '../urls/navigation';
 import { openTimelineUsingToggle } from './security_main';
-import { rootRequest } from './common';
+import { visitWithTimeRange } from './navigation';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -97,7 +96,7 @@ export const resetSourcerer = () => {
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
 export const addIndexToDefault = (index: string) => {
-  visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
+  visitWithTimeRange(`/app/management/kibana/settings?query=category:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)
     .invoke('val')
     .then((patterns) => {
@@ -110,7 +109,7 @@ export const addIndexToDefault = (index: string) => {
 
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
       cy.get('button[data-test-subj="windowReloadButton"]').click();
-      waitForPage(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
     });
 };
 
@@ -129,15 +128,4 @@ export const refreshUntilAlertsIndexExists = async () => {
     },
     { interval: 500, timeout: 12000 }
   );
-};
-
-export const deleteRuntimeField = (dataView: string, fieldName: string) => {
-  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
-
-  rootRequest({
-    url: deleteRuntimeFieldPath,
-    method: 'DELETE',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-    failOnStatusCode: false,
-  });
 };

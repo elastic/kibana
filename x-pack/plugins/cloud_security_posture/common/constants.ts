@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { PostureTypes, VulnSeverity, AwsCredentialsTypeFieldMap } from './types';
+import {
+  PostureTypes,
+  VulnSeverity,
+  AwsCredentialsTypeFieldMap,
+  GcpCredentialsTypeFieldMap,
+} from './types_old';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
@@ -18,13 +23,21 @@ export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const BENCHMARKS_API_CURRENT_VERSION = '1';
 
-export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
-export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
+export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
+export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
-export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_bulk_action';
+export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
+
+export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_get_states';
+export const CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION = '1';
 
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
+export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 // TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
@@ -59,6 +72,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
+export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
+
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
   'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
@@ -70,14 +85,18 @@ export const RULE_FAILED = `failed`;
 
 export const POSTURE_TYPE_ALL = 'all';
 
+export const CSPM_FINDINGS_STATS_INTERVAL = 5;
+
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
-  showFindingFlyoutEvidence: false,
+  showFindingFlyoutEvidence: true,
 } as const;
 
-export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE = 'cloud-security-posture-settings';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID = 'csp-internal-settings';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';
@@ -91,6 +110,9 @@ export const CLOUDBEAT_VULN_MGMT_GCP = 'cloudbeat/vuln_mgmt_gcp';
 export const CLOUDBEAT_VULN_MGMT_AZURE = 'cloudbeat/vuln_mgmt_azure';
 export const CIS_AWS = 'cis_aws';
 export const CIS_GCP = 'cis_gcp';
+export const CIS_K8S = 'cis_k8s';
+export const CIS_EKS = 'cis_eks';
+export const CIS_AZURE = 'cis_azure';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
@@ -143,3 +165,31 @@ export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
 export const SETUP_ACCESS_MANUAL = 'manual';
 
 export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
+
+export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
+  'credentials-file': ['gcp.credentials.file'],
+  'credentials-json': ['gcp.credentials.json'],
+};
+
+export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
+  arm_template: [],
+  service_principal_with_client_secret: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_secret',
+  ],
+  service_principal_with_client_certificate: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_certificate_path',
+    'azure.credentials.client_certificate_password',
+  ],
+  service_principal_with_client_username_and_password: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_username',
+    'azure.credentials.client_password',
+  ],
+  managed_identity: [],
+  manual: [],
+};

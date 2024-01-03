@@ -20,18 +20,25 @@ const date = {
   type: 'date' as const,
 };
 
+const dynamic = {
+  type: 'object' as const,
+  dynamic: true,
+};
+
 export const kbComponentTemplate: ClusterComponentTemplate['component_template']['template'] = {
   mappings: {
     dynamic: false,
     properties: {
       '@timestamp': date,
       id: keyword,
+      doc_id: { type: 'text', fielddata: true },
       user: {
         properties: {
           id: keyword,
           name: keyword,
         },
       },
+      labels: dynamic,
       conversation: {
         properties: {
           id: keyword,

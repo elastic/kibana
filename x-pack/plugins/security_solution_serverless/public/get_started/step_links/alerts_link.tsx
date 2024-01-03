@@ -5,37 +5,52 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { LinkAnchor, useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React, { useCallback } from 'react';
+import { useStepContext } from '../context/step_context';
+import {
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  GetStartedWithAlertsCardsId,
+  SectionId,
+  ViewAlertsSteps,
+} from '../types';
+import { AddIntegrationCallout } from './add_integration_callout';
+import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';
 
-const AlertsLinkComponent = () => {
-  const getLinkProps = useGetLinkProps();
-  const onClick = useCallback((e) => {
-    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
-  }, []);
-  const { onClick: onLinkClicked } = getLinkProps({
-    id: SecurityPageName.alerts,
-    onClick,
-  });
+const AlertsButtonComponent = () => {
+  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const isIntegrationsStepComplete = finishedSteps[
+    AddAndValidateYourDataCardsId.addIntegrations
+  ]?.has(AddIntegrationsSteps.connectToDataSources);
+
+  const onClick = useCallback(() => {
+    toggleTaskCompleteStatus({
+      stepId: ViewAlertsSteps.viewAlerts,
+      cardId: GetStartedWithAlertsCardsId.viewAlerts,
+      sectionId: SectionId.getStartedWithAlerts,
+      undo: false,
+    });
+  }, [toggleTaskCompleteStatus]);
+
   return (
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.linkText"
-      defaultMessage="Visit the {link} now to confirm your organization is secure!"
-      values={{
-        link: (
-          <LinkAnchor onClick={onLinkClicked} id={SecurityPageName.alerts}>
-            <FormattedMessage
-              id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.link"
-              defaultMessage="alerts page"
-            />
-          </LinkAnchor>
-        ),
-      }}
-    />
+    <>
+      {!isIntegrationsStepComplete && (
+        <AddIntegrationCallout stepName={VIEW_ALERTS_CALLOUT_TITLE} />
+      )}
+      <LinkButton
+        className="step-paragraph"
+        disabled={!isIntegrationsStepComplete}
+        fill
+        id={SecurityPageName.alerts}
+        onClick={onClick}
+      >
+        {VIEW_ALERTS}
+      </LinkButton>
+    </>
   );
 };
 
-export const AlertsLink = React.memo(AlertsLinkComponent);
+export const AlertsButton = React.memo(AlertsButtonComponent);

@@ -26,6 +26,8 @@ import {
   HOST_NAME,
   HOST_OS_PLATFORM,
   KUBERNETES_POD_NAME,
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
   OBSERVER_HOSTNAME,
   PARENT_ID,
   PROCESSOR_EVENT,
@@ -39,11 +41,12 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/es_fields/apm';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
@@ -56,9 +59,22 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
+import {
+  APMDataTelemetry,
+  APMPerService,
+  APMTelemetry,
+  DataStreamStats,
+  MetricNotSupportingRollup,
+  MetricRollupIntervals,
+  MetricSupportingRollUp,
+} from '../types';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
-import { TelemetryClient } from '../telemetry_client';
+import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
+import { RollupInterval } from '../../../../common/rollup';
+import {
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+  SavedApmCustomDashboard,
+} from '../../../../common/custom_dashboards';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -578,6 +594,43 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
+    name: 'global_labels',
+    executor: async ({ telemetryClient }) => {
+      const metricConsistingGlobalLabels = [
+        'service_summary',
+        'service_transaction',
+        'transaction',
+        'service_destination',
+      ];
+
+      const index = metricConsistingGlobalLabels
+        .map((metric) => `metrics-apm.${metric}*`)
+        .join(',');
+
+      const response = await telemetryClient.fieldCaps({
+        index,
+        fields: 'labels.*',
+        expand_wildcards: 'all',
+        index_filter: range1d,
+      });
+
+      const globalLabelCount = Object.keys(response.fields).length;
+
+      // Skip the top level Labels field which is sometimes present in the response
+      const count = response.fields?.labels
+        ? globalLabelCount - 1
+        : globalLabelCount;
+
+      return {
+        counts: {
+          global_labels: {
+            '1d': count,
+          },
+        },
+      };
+    },
+  },
+  {
     name: 'services',
     executor: async ({ indices, telemetryClient }) => {
       const servicesPerAgent = await AGENT_NAMES.reduce(
@@ -625,8 +678,37 @@ export const tasks: TelemetryTask[] = [
         Promise.resolve({} as Record<AgentName, number>)
       );
 
+      const services = await telemetryClient.search({
+        index: [
+          indices.error,
+          indices.span,
+          indices.metric,
+          indices.transaction,
+        ],
+        body: {
+          size: 0,
+          track_total_hits: true,
+          terminate_after: 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: SERVICE_NAME,
+                  },
+                },
+                range1d,
+              ],
+            },
+          },
+          timeout,
+        },
+      });
+
       return {
-        has_any_services: sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services_per_official_agent:
+          sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services: services?.hits?.total?.value > 0,
         services_per_agent: servicesPerAgent,
       };
     },
@@ -1081,6 +1163,163 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'indices_stats',
     executor: async ({ indices, telemetryClient }) => {
+      const dataStreamStatsDictionary = {} as DataStreamStats;
+
+      const metricSetsSupportingRollUps: MetricSupportingRollUp[] = [
+        'service_destination',
+        'service_transaction',
+        'service_summary',
+        'transaction',
+        'span_breakdown',
+      ];
+
+      const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = [
+        'app',
+      ];
+
+      const rollUpIntervals: MetricRollupIntervals[] = [
+        RollupInterval.OneMinute,
+        RollupInterval.TenMinutes,
+        RollupInterval.SixtyMinutes,
+      ];
+
+      const populateDataStreamStatsDict = (
+        ds: DataStreamStats,
+        key: string,
+        response: IndicesStatsResponse
+      ) => {
+        ds[key] = ds[key] || {};
+        ds[key].all = {
+          total: {
+            shards: response?._shards?.total ?? 0,
+            docs: {
+              count: response?._all?.primaries?.docs?.count ?? 0,
+            },
+            store: {
+              size_in_bytes:
+                response?._all?.primaries?.store?.size_in_bytes ?? 0,
+            },
+          },
+        };
+
+        return ds;
+      };
+
+      // The API calls must be done in series rather than in parallel due to the nature
+      // of how tasks are executed. We don't want to burden the customers instances
+      // which could directly impact the performance on the UI.
+      const fetchRollupMetrics = async () => {
+        for (const metricSet of metricSetsSupportingRollUps) {
+          for (const bucketSize of rollUpIntervals) {
+            const datastream = `metrics-apm.${metricSet}.${bucketSize}-*`;
+            const response = await telemetryClient.indicesStats({
+              index: [datastream],
+              expand_wildcards: 'all',
+              filter_path: [
+                '_all.primaries.docs',
+                '_all.primaries.store',
+                '_shards',
+              ],
+            });
+            populateDataStreamStatsDict(
+              dataStreamStatsDictionary,
+              `${metricSet}-${bucketSize}`,
+              response
+            );
+          }
+        }
+      };
+
+      const fetchMetricWithoutRollup = async () => {
+        for (const metricSet of metricSetsNotSupportingRollUps) {
+          const datastream = `metrics-apm.${metricSet}*`;
+          const response = await telemetryClient.indicesStats({
+            index: [datastream],
+            expand_wildcards: 'all',
+            filter_path: [
+              '_all.primaries.docs',
+              '_all.primaries.store',
+              '_shards',
+            ],
+          });
+          populateDataStreamStatsDict(
+            dataStreamStatsDictionary,
+            metricSet,
+            response
+          );
+        }
+      };
+
+      await fetchRollupMetrics();
+      await fetchMetricWithoutRollup();
+
+      const lastDayStatsResponse = await telemetryClient.search({
+        index: [indices.metric],
+        expand_wildcards: 'all',
+        body: {
+          track_total_hits: false,
+          size: 0,
+          timeout,
+          query: range1d,
+          aggs: {
+            metricsets: {
+              terms: {
+                field: METRICSET_NAME,
+              },
+              aggs: {
+                rollup_interval: {
+                  terms: {
+                    field: METRICSET_INTERVAL,
+                  },
+                  aggs: {
+                    metrics_value_count: {
+                      value_count: {
+                        field: METRICSET_INTERVAL,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      for (const metricSet of metricSetsSupportingRollUps) {
+        const metricSetData =
+          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+            (bucket) => bucket.key === metricSet
+          );
+
+        rollUpIntervals.forEach((interval) => {
+          const key = `${metricSet}-${interval}`;
+          dataStreamStatsDictionary[key]['1d'] = {
+            doc_count: 0,
+          };
+        });
+
+        if (metricSetData?.rollup_interval?.buckets) {
+          for (const intervalBucket of metricSetData.rollup_interval.buckets) {
+            const intervalKey = intervalBucket.key as MetricRollupIntervals;
+            const intervalDocCount = intervalBucket.metrics_value_count.value;
+            dataStreamStatsDictionary[`${metricSet}-${intervalKey}`]['1d'] = {
+              doc_count: intervalDocCount,
+            };
+          }
+        }
+      }
+
+      for (const metricSet of metricSetsNotSupportingRollUps) {
+        const metricSetData =
+          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+            (bucket) => bucket.key === metricSet
+          );
+
+        dataStreamStatsDictionary[metricSet]['1d'] = {
+          doc_count: metricSetData?.doc_count || 0,
+        };
+      }
+
       const response = await telemetryClient.indicesStats({
         index: [
           APM_AGENT_CONFIGURATION_INDEX,
@@ -1117,6 +1356,9 @@ export const tasks: TelemetryTask[] = [
                     0,
                 },
               },
+            },
+            metricset: {
+              ...dataStreamStatsDictionary,
             },
           },
           traces: {
@@ -1276,6 +1518,32 @@ export const tasks: TelemetryTask[] = [
 
       return {
         service_groups: {
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
+        },
+      };
+    },
+  },
+  {
+    name: 'custom_dashboards',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedApmCustomDashboard>({
+        type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 500,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery ?? '')
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        custom_dashboards: {
           kuery_fields: uniq(kueryFields),
           total: response.total ?? 0,
         },
@@ -1481,6 +1749,50 @@ export const tasks: TelemetryTask[] = [
       });
       return {
         per_service: data,
+      };
+    },
+  },
+  {
+    name: 'top_traces',
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
+        index: [indices.transaction, indices.span, indices.error],
+        body: {
+          size: 0,
+          track_total_hits: false,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            top_traces: {
+              terms: {
+                field: TRACE_ID,
+                size: 100,
+              },
+            },
+            max: {
+              max_bucket: {
+                buckets_path: 'top_traces>_count',
+              },
+            },
+            median: {
+              percentiles_bucket: {
+                buckets_path: 'top_traces>_count',
+                percents: [50],
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        top_traces: {
+          max: response.aggregations?.max.value ?? 0,
+          median: response.aggregations?.median.values['50.0'] ?? 0,
+        },
       };
     },
   },

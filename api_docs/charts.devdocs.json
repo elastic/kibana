@@ -15,6 +15,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "ColorPickerProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
@@ -357,6 +365,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LegendToggleProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
@@ -1657,7 +1673,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -2223,19 +2239,9 @@
           "label": "theme",
           "description": [],
           "signature": [
-            "{ readonly chartsDefaultTheme: ",
-            "RecursivePartial",
-            "<",
+            "{ readonly chartsDefaultBaseTheme: ",
             "Theme",
-            ">; readonly chartsDefaultBaseTheme: ",
-            "Theme",
-            "; chartsTheme$: ",
-            "Observable",
-            "<",
-            "RecursivePartial",
-            "<",
-            "Theme",
-            ">>; chartsBaseTheme$: ",
+            "; chartsBaseTheme$: ",
             "Observable",
             "<",
             "Theme",
@@ -3369,7 +3375,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; debug?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; locale?: string | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
@@ -3387,7 +3393,7 @@
           "CustomXDomain",
           " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
+          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
         ],
         "path": "src/plugins/charts/common/static/overrides/settings.ts",
         "deprecated": false,
@@ -3559,14 +3565,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -3599,7 +3597,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,

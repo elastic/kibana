@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server/types';
+import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
-import type { ObservabilityAIAssistantService } from '../service';
+
+export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandlerContext<{
+  rac: RacApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+}>;
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;
-  context: RequestHandlerContext;
+  context: ObservabilityAIAssistantRequestHandlerContext;
   logger: Logger;
   service: ObservabilityAIAssistantService;
   plugins: {

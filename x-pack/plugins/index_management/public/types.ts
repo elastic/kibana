@@ -7,7 +7,8 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ExtensionsSetup, PublicApiServiceSetup } from './services';
 
 export interface IndexManagementPluginSetup {
@@ -15,10 +16,16 @@ export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
+export interface IndexManagementPluginStart {
+  extensionsService: ExtensionsSetup;
+}
+
 export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface StartDependencies {
@@ -32,7 +39,6 @@ export interface ClientConfigType {
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
-  dev: {
-    enableIndexDetailsPage?: boolean;
-  };
+  editableIndexSettings?: 'all' | 'limited';
+  enableDataStreamsStorageColumn?: boolean;
 }

@@ -4,72 +4,86 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import { notImplemented } from '@hapi/boom';
+import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import {
+  ContextDefinition,
+  FunctionDefinition,
+  KnowledgeBaseEntryRole,
+} from '../../../common/types';
+import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { KnowledgeBaseEntry } from '../../../common/types';
 
-const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
+const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions',
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        method: t.union([
-          t.literal('GET'),
-          t.literal('POST'),
-          t.literal('PATCH'),
-          t.literal('PUT'),
-          t.literal('DELETE'),
-        ]),
-        path: t.string,
-      }),
-      t.partial({
-        body: t.any,
-      }),
-    ]),
-  }),
-  handler: async (resources): Promise<unknown> => {
-    const { method, path, body } = resources.params.body;
+  handler: async (
+    resources
+  ): Promise<{
+    functionDefinitions: FunctionDefinition[];
+    contextDefinitions: ContextDefinition[];
+  }> => {
+    const { service, request } = resources;
 
-    const response = await (
-      await resources.context.core
-    ).elasticsearch.client.asCurrentUser.transport.request({
-      method,
-      path,
-      body,
+    const controller = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
     });
 
-    return response;
+    const client = await service.getClient({ request });
+
+    const functionClient = await service.getFunctionClient({
+      signal: controller.signal,
+      resources,
+      client,
+    });
+
+    return {
+      functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
+      contextDefinitions: functionClient.getContexts(),
+    };
   },
 });
 
 const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
-    body: t.type({
-      query: nonEmptyStringRt,
-    }),
+    body: t.intersection([
+      t.type({
+        queries: t.array(nonEmptyStringRt),
+      }),
+      t.partial({
+        contexts: t.array(t.string),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  handler: async (
+    resources
+  ): Promise<{
+    entries: RecalledEntry[];
+  }> => {
     const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      body: { queries, contexts },
+    } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall(resources.params.body.query);
+    return client.recall({ queries, contexts });
   },
 });
 
 const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/summarise',
+  endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
   params: t.type({
     body: t.type({
       id: t.string,
@@ -77,6 +91,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
       public: toBooleanRt,
+      labels: t.record(t.string, t.string),
     }),
   }),
   options: {
@@ -95,68 +110,26 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       is_correction: isCorrection,
       text,
       public: isPublic,
+      labels,
     } = resources.params.body;
 
-    return client.summarise({
+    return client.createKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
+        doc_id: id,
         is_correction: isCorrection,
         text,
         public: isPublic,
+        labels,
+        role: KnowledgeBaseEntryRole.AssistantSummarization,
       },
     });
   },
 });
 
-const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/functions/kb_status',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    ready: boolean;
-    error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    return await client.getKnowledgeBaseStatus();
-  },
-});
-
-const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/setup_kb',
-  options: {
-    tags: ['access:ai_assistant'],
-    timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
-    },
-  },
-  handler: async (resources): Promise<{}> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    await client.setupKnowledgeBase();
-
-    return {};
-  },
-});
-
 export const functionRoutes = {
-  ...functionElasticsearchRoute,
+  ...getFunctionsRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
-  ...setupKnowledgeBaseRoute,
-  ...getKnowledgeBaseStatus,
 };

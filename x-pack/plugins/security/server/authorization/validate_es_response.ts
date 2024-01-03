@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import type { HasPrivilegesResponse } from './types';
+import type { HasPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 const baseResponseSchema = schema.object({
   username: schema.string(),

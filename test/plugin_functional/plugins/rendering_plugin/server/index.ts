@@ -8,4 +8,4 @@
 
 import { RenderingPlugin } from './plugin';
 
-export const plugin = () => new RenderingPlugin();
+export const plugin = async () => new RenderingPlugin();

@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useCallback, useState } from 'react';
 
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { paths } from '../../../../common/locators/paths';
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
-import { isApmIndicatorType } from '../../../utils/slo/indicator';
-import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../../common/locators/paths';
-import {
-  transformSloResponseToCreateSloForm,
-  transformCreateSLOFormToCreateSLOInput,
-} from '../../slo_edit/helpers/process_slo_form_values';
-import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
 import type { RulesParams } from '../../../locators/rules';
+import { useKibana } from '../../../utils/kibana_react';
+import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
+import { isApmIndicatorType } from '../../../utils/slo/indicator';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -33,20 +29,20 @@ export interface Props {
 
 export function HeaderControl({ isLoading, slo }: Props) {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, capabilities },
     http: { basePath },
     share: {
       url: { locators },
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const { mutate: cloneSlo } = useCloneSlo();
   const { mutate: deleteSlo } = useDeleteSlo();
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
@@ -76,41 +72,22 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleNavigateToApm = () => {
-    if (
-      slo?.indicator.type === 'sli.apm.transactionDuration' ||
-      slo?.indicator.type === 'sli.apm.transactionErrorRate'
-    ) {
-      const {
-        indicator: {
-          params: { environment, filter, service, transactionName, transactionType },
-        },
-        timeWindow: { duration },
-      } = slo;
+    if (!slo) {
+      return undefined;
+    }
 
-      const url = convertSliApmParamsToApmAppDeeplinkUrl({
-        duration,
-        environment,
-        filter,
-        service,
-        transactionName,
-        transactionType,
-      });
-
-      navigate(basePath.prepend(url));
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(slo);
+    if (url) {
+      navigateToUrl(basePath.prepend(url));
     }
   };
+
+  const navigateToClone = useCloneSlo();
 
   const handleClone = async () => {
     if (slo) {
       setIsPopoverOpen(false);
-
-      const newSlo = transformCreateSLOFormToCreateSLOInput(
-        transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
-      );
-
-      cloneSlo({ slo: newSlo, originalSloId: slo.id });
-
-      navigate(basePath.prepend(paths.observability.slos));
+      navigateToClone(slo);
     }
   };
 
@@ -198,10 +175,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
           ]
             .concat(
-              !!slo && isApmIndicatorType(slo.indicator.type) ? (
+              !!slo && isApmIndicatorType(slo.indicator) ? (
                 <EuiContextMenuItem
                   key="exploreInApm"
                   icon="bullseye"
+                  disabled={!hasApmReadCapabilities}
                   onClick={handleNavigateToApm}
                   data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
                 >
@@ -250,6 +228,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
+          useRuleProducer
         />
       ) : null}
 

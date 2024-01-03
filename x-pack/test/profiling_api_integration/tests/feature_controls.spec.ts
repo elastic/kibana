@@ -10,6 +10,8 @@ import { getRoutePaths } from '@kbn/profiling-plugin/common';
 import { ProfilingApiError } from '../common/api_supertest';
 import { getProfilingApiClient } from '../common/config';
 import { FtrProviderContext } from '../common/ftr_provider_context';
+import { setupProfiling } from '../utils/profiling_data';
+import { getBettertest } from '../common/bettertest';
 
 const profilingRoutePaths = getRoutePaths();
 
@@ -17,7 +19,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const registry = getService('registry');
   const profilingApiClient = getService('profilingApiClient');
   const log = getService('log');
-
+  const supertest = getService('supertest');
+  const bettertest = getBettertest(supertest);
   const start = encodeURIComponent(new Date(Date.now() - 10000).valueOf());
   const end = encodeURIComponent(new Date().valueOf());
 
@@ -66,7 +69,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
     },
     { url: profilingRoutePaths.SetupDataCollectionInstructions },
-    { url: profilingRoutePaths.HasSetupESResources },
   ];
 
   async function executeRequests({
@@ -112,7 +114,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   registry.when('Profiling feature controls', { config: 'cloud' }, () => {
-    before(async () => {});
+    before(async () => {
+      await setupProfiling(bettertest, log);
+    });
     it(`returns forbidden for users with no access to profiling APIs`, async () => {
       await executeRequests({
         runAsUser: profilingApiClient.noAccessUser,

@@ -10,6 +10,7 @@ import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timel
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([
@@ -81,7 +82,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe('Response Actions Responder', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/153071
+  describe.skip('Response Actions Responder', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -142,6 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
+            savedSearchId: null,
           },
           timeline.data.persistTimeline.timeline.version
         );
@@ -182,13 +187,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
 
+        // TODO: The index already exists error toast should not show up
+        // close and dismiss it if it does
+        if (await testSubjects.exists('globalToastList')) {
+          await testSubjects.click('toastCloseButton');
+        }
         // Click responder from the take action button
         await testSubjects.click('take-action-dropdown-btn');
         await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
         await testSubjects.existOrFail('consolePageOverlay');
 
-        await performResponderSanityChecks();
+        // close tour popup
+        if (await testSubjects.exists('timeline-save-tour-close-button')) {
+          await testSubjects.click('timeline-save-tour-close-button');
+        }
 
+        await performResponderSanityChecks();
         await pageObjects.timeline.closeTimeline();
       });
     });

@@ -7,26 +7,59 @@
  */
 import mockFs from 'mock-fs';
 
-import { existsSync } from 'fs';
-import { stat } from 'fs/promises';
+import Fsp from 'fs/promises';
+import { basename } from 'path';
 
 import {
   DOCKER_IMG,
+  detectRunningNodes,
   maybeCreateDockerNetwork,
+  maybePullDockerImage,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
+  resolvePort,
   runDockerContainer,
   runServerlessCluster,
   runServerlessEsNode,
-  SERVERLESS_IMG,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   setupServerlessVolumes,
+  stopServerlessCluster,
+  teardownServerlessClusterSync,
   verifyDockerInstalled,
+  getESp12Volume,
+  ServerlessOptions,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
+import {
+  SERVERLESS_CONFIG_PATH,
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
+} from '../paths';
+import * as waitClusterUtil from './wait_until_cluster_ready';
+import * as waitForSecurityIndexUtil from './wait_for_security_index';
+import * as mockIdpPluginUtil from '@kbn/mock-idp-plugin/common';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+jest.mock('@elastic/elasticsearch', () => {
+  return {
+    Client: jest.fn(),
+  };
+});
+
+jest.mock('./wait_until_cluster_ready', () => ({
+  waitUntilClusterReady: jest.fn(),
+}));
+
+jest.mock('./wait_for_security_index', () => ({
+  waitForSecurityIndex: jest.fn(),
+}));
+
+jest.mock('@kbn/mock-idp-plugin/common');
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -36,6 +69,11 @@ const KIBANA_ROOT = process.cwd();
 const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
+
+const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
+const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
+const ensureSAMLRoleMappingMock = jest.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleMapping');
+const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -56,13 +94,27 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  acc.push(`${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+
+  return acc;
+}, []);
+
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(2);
-  expect(volumeCmd).toEqual(expect.arrayContaining(['--volume', `${baseEsPath}:/objectstore:z`]));
+  expect(volumeCmd).toHaveLength(20);
+  expect(volumeCmd).toEqual(
+    expect.arrayContaining([
+      ...getESp12Volume(),
+      ...serverlessResources,
+      `${baseEsPath}:/objectstore:z`,
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
+    ])
+  );
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
-  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o766);
+  expect((await Fsp.stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
 
 describe('resolveDockerImage()', () => {
@@ -99,6 +151,60 @@ describe('resolveDockerImage()', () => {
     ).toThrowErrorMatchingInlineSnapshot(`
       "Only verified images from docker.elastic.co are currently allowed.
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
+    `);
+  });
+});
+
+describe('resolvePort()', () => {
+  test('should return default port when no options', () => {
+    const port = resolvePort({});
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+      ]
+    `);
+  });
+
+  test('should return default port when custom host passed in options', () => {
+    const port = resolvePort({ host: '192.168.25.1' } as ServerlessOptions);
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+        "-p",
+        "192.168.25.1:9200:9200",
+      ]
+    `);
+  });
+
+  test('should return custom port when passed in options', () => {
+    const port = resolvePort({ port: 9220 });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
+    `);
+  });
+
+  test('should return custom port and host when passed in options', () => {
+    const port = resolvePort({ port: 9220, host: '192.168.25.1' });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "-p",
+        "192.168.25.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
     `);
   });
 });
@@ -190,6 +296,55 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 });
 
+describe('maybePullDockerImage()', () => {
+  test('should pull the passed image', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+    await maybePullDockerImage(log, DOCKER_IMG);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+});
+
+describe('detectRunningNodes()', () => {
+  const nodes = ['es01', 'es02', 'es03'];
+
+  test('should not error if no nodes detected', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+
+    await detectRunningNodes(log, {});
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['ps', '--quiet', '--filter']));
+  });
+
+  test('should kill nodes if detected and kill passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await detectRunningNodes(log, { kill: true });
+
+    expect(execa.mock.calls).toHaveLength(2);
+    expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(nodes.concat('kill')));
+  });
+
+  test('should error if nodes detected and kill not passed', async () => {
+    execa.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: nodes.join('\n'),
+      })
+    );
+
+    await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
+    );
+  });
+});
+
 describe('resolveEsArgs()', () => {
   const defaultEsArgs: Array<[string, string]> = [
     ['foo', 'bar'],
@@ -253,6 +408,86 @@ describe('resolveEsArgs()', () => {
       ]
     `);
   });
+
+  test('should add SSL args when SSL is passed', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
+
+    expect(esArgs).toHaveLength(10);
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "foo=bar",
+        "--env",
+        "qux=zip",
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+      ]
+    `);
+  });
+
+  test('should add SAML realm args when kibanaUrl and SSL are passed', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(esArgs).toHaveLength(26);
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.entity_id=https://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.acs=https://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.sp.logout=https://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.mock-idp.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+      ]
+    `);
+  });
+
+  test('should not add SAML realm args when security is disabled', () => {
+    const esArgs = resolveEsArgs([['xpack.security.enabled', 'false']], {
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(esArgs).toHaveLength(8);
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.enabled=false",
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+      ]
+    `);
+  });
 });
 
 describe('setupServerlessVolumes()', () => {
@@ -272,7 +507,7 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(serverlessObjectStorePath)).toBe(true);
+    await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
   test('should use an existing object store', async () => {
@@ -281,7 +516,9 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(true);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).resolves.not.toThrow();
   });
 
   test('should remove an existing object store when clean is passed', async () => {
@@ -290,7 +527,64 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, clean: true });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).rejects.toThrowError();
+  });
+
+  test('should add SSL and IDP metadata volumes when ssl and kibanaUrl are passed', async () => {
+    mockFs(existingObjectStore);
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      basePath: baseEsPath,
+      ssl: true,
+      kibanaUrl: 'https://localhost:5603/',
+    });
+
+    expect(createMockIdpMetadataMock).toHaveBeenCalledTimes(1);
+    expect(createMockIdpMetadataMock).toHaveBeenCalledWith('https://localhost:5603/');
+
+    const requiredPaths = [
+      `${baseEsPath}:/objectstore:z`,
+      SERVERLESS_IDP_METADATA_PATH,
+      ES_P12_PATH,
+      ...SERVERLESS_RESOURCES_PATHS,
+    ];
+    const pathsNotIncludedInCmd = requiredPaths.filter(
+      (path) => !volumeCmd.some((cmd) => cmd.includes(path))
+    );
+    expect(volumeCmd).toHaveLength(22);
+    expect(pathsNotIncludedInCmd).toEqual([]);
+  });
+
+  test('should use resource overrides', async () => {
+    mockFs(existingObjectStore);
+    const volumeCmd = await setupServerlessVolumes(log, {
+      basePath: baseEsPath,
+      resources: ['./relative/path/users', '/absolute/path/users_roles'],
+    });
+
+    expect(volumeCmd).toContain(
+      '/absolute/path/users_roles:/usr/share/elasticsearch/config/users_roles'
+    );
+    expect(volumeCmd).toContain(
+      `${process.cwd()}/relative/path/users:/usr/share/elasticsearch/config/users`
+    );
+  });
+
+  test('should throw if an unknown resource override is used', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(async () => {
+      await setupServerlessVolumes(log, {
+        basePath: baseEsPath,
+        resources: ['/absolute/path/invalid'],
+      });
+    }).rejects.toThrow(
+      'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
+        'Valid resources: operator_users.yml | role_mapping.yml | roles.yml | service_tokens | users | users_roles'
+    );
   });
 });
 
@@ -298,7 +592,7 @@ describe('runServerlessEsNode()', () => {
   const node = {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
-    image: SERVERLESS_IMG,
+    image: ES_SERVERLESS_DEFAULT_IMAGE,
   };
 
   test('should call the correct Docker command', async () => {
@@ -309,7 +603,7 @@ describe('runServerlessEsNode()', () => {
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining([
-        SERVERLESS_IMG,
+        ES_SERVERLESS_DEFAULT_IMAGE,
         ...node.params,
         '--name',
         node.name,
@@ -326,6 +620,7 @@ describe('runServerlessEsNode()', () => {
 
 describe('runServerlessCluster()', () => {
   test('should start 3 serverless nodes', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
     });
@@ -333,8 +628,111 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { basePath: baseEsPath });
 
-    // Verify Docker and network then run three nodes
-    expect(execa.mock.calls).toHaveLength(5);
+    // setupDocker execa calls then run three nodes and attach logger
+    expect(execa.mock.calls).toHaveLength(8);
+  });
+
+  test(`should wait for serverless nodes to return 'green' status`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should create SAML role mapping when ssl and kibanaUrl are passed`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [CA_CERT_PATH]: '',
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      ssl: true,
+      kibanaUrl: 'https://localhost:5601/',
+    });
+
+    expect(ensureSAMLRoleMappingMock).toHaveBeenCalledTimes(1);
+  });
+
+  test(`should wait for the security index`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should not wait for the security index when security is disabled`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      esArgs: ['xpack.security.enabled=false'],
+    });
+    expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('stopServerlessCluster()', () => {
+  test('should stop passed in nodes', async () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, nodes);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(
+      expect.arrayContaining(['container', 'stop'].concat(nodes))
+    );
+  });
+});
+
+describe('teardownServerlessClusterSync()', () => {
+  const defaultOptions = { basePath: 'foo/bar' };
+
+  test('should kill running serverless nodes', () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: nodes.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+    );
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should not kill if no serverless nodes', () => {
+    execa.commandSync.mockImplementation(() => ({
+      stdout: '\n',
+    }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(1);
   });
 });
 
@@ -362,9 +760,8 @@ describe('resolveDockerCmd()', () => {
 describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-
-    await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
-    // Verify Docker and network then run container
-    expect(execa.mock.calls).toHaveLength(3);
+    await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
+    // setupDocker execa calls then run container
+    expect(execa.mock.calls).toHaveLength(5);
   });
 });

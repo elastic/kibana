@@ -8,17 +8,25 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { extractFieldValue } from '../utils';
 
 export async function collectContainers({
   client,
   from,
   to,
   sourceIndices,
+  filters = [],
   afterKey,
 }: CollectorOptions) {
-  const { metrics, logs, traces } = sourceIndices;
+  if (!sourceIndices?.metrics || !sourceIndices?.logs) {
+    throw new Error('missing required metrics/logs indices');
+  }
+
+  const musts = [...filters, { exists: { field: 'container.id' } }];
+
+  const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [traces, logs, metrics],
+    index: [metrics, logs],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'container.id',
@@ -26,6 +34,7 @@ export async function collectContainers({
     sort: [{ 'container.id': 'asc' }],
     _source: false,
     fields: [
+      '@timestamp',
       'kubernetes.*',
       'cloud.provider',
       'orchestrator.cluster.name',
@@ -44,6 +53,7 @@ export async function collectContainers({
             },
           },
         ],
+        must: musts,
         should: [
           { exists: { field: 'kubernetes.container.id' } },
           { exists: { field: 'kubernetes.pod.uid' } },
@@ -62,14 +72,14 @@ export async function collectContainers({
 
   const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const { fields = {} } = hit;
-    const containerId = fields['container.id'];
-    const podUid = fields['kubernetes.pod.uid'];
-    const nodeName = fields['kubernetes.node.name'];
+    const containerId = extractFieldValue(fields['container.id']);
+    const podUid = extractFieldValue(fields['kubernetes.pod.uid']);
+    const nodeName = extractFieldValue(fields['kubernetes.node.name']);
 
     const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
 
     const container: Asset = {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': extractFieldValue(fields['@timestamp']),
       'asset.kind': 'container',
       'asset.id': containerId,
       'asset.ean': `container:${containerId}`,

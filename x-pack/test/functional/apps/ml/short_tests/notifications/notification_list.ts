@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Notifications list', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spacesService.delete(idSpace1);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     it('displays a generic notification indicator', async () => {

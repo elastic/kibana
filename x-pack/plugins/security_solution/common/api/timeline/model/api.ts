@@ -14,12 +14,14 @@ import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../../detection_engine/model/rule_schema';
-import { errorSchema, success, success_count as successCount } from '../../detection_engine';
+} from '../../detection_engine/model/rule_schema_legacy';
+import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -336,6 +338,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
+  savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
@@ -438,10 +441,16 @@ export const TimelineResponseType = runtimeTypes.type({
   }),
 });
 
-export const TimelineErrorResponseType = runtimeTypes.type({
-  status_code: runtimeTypes.number,
-  message: runtimeTypes.string,
-});
+export const TimelineErrorResponseType = runtimeTypes.union([
+  runtimeTypes.type({
+    status_code: runtimeTypes.number,
+    message: runtimeTypes.string,
+  }),
+  runtimeTypes.type({
+    statusCode: runtimeTypes.number,
+    message: runtimeTypes.string,
+  }),
+]);
 
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
@@ -494,11 +503,11 @@ export interface ExportTimelineNotFoundError {
 
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
-    success,
-    success_count: successCount,
+    success: runtimeTypes.boolean,
+    success_count: PositiveInteger,
     timelines_installed: PositiveInteger,
     timelines_updated: PositiveInteger,
-    errors: runtimeTypes.array(errorSchema),
+    errors: runtimeTypes.array(ErrorSchema),
   })
 );
 
@@ -666,6 +675,7 @@ export interface TimelineResult {
   updated?: Maybe<number>;
   updatedBy?: Maybe<string>;
   version: string;
+  savedSearchId?: Maybe<string>;
 }
 
 export interface ResponseTimeline {

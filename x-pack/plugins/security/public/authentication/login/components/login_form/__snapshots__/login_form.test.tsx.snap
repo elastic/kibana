@@ -102,12 +102,10 @@ exports[`LoginForm renders as expected 1`] = `
         <EuiFieldPassword
           aria-required={true}
           autoComplete="off"
-          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
           id="password"
           isInvalid={false}
-          isLoading={false}
           name="password"
           onChange={[Function]}
           type="dual"
@@ -130,7 +128,6 @@ exports[`LoginForm renders as expected 1`] = `
             isDisabled={false}
             isLoading={false}
             onClick={[Function]}
-            size="m"
             type="submit"
           >
             <FormattedMessage

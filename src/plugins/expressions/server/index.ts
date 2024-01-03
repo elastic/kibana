@@ -7,13 +7,14 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ExpressionsServerPlugin } from './plugin';
+import type { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ExpressionsServerPlugin } = await import('./plugin');
   return new ExpressionsServerPlugin(initializerContext);
 }
 

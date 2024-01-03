@@ -1,8 +1,8 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Alerting
   description: OpenAPI schema for alerting endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Alerting Team
   license:
@@ -12,8 +12,7 @@ tags:
   - name: alerting
     description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
   '/s/{spaceId}/api/alerting/rule':
     $ref: 'paths/s@{spaceid}@api@alerting@rule.yaml'
@@ -33,6 +32,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_mute_all.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_unmute_all.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_update_api_key.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
   '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
@@ -67,7 +68,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
 security:
   - basicAuth: []
   - apiKeyAuth: []

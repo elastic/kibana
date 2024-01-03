@@ -53,6 +53,7 @@ describe('loadRuleTypes', () => {
               "read": true,
             },
           },
+          "category": "management",
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "id": ".index-threshold",
@@ -152,6 +153,7 @@ function getApiRuleType() {
   return {
     id: '.index-threshold',
     name: 'Index threshold',
+    category: 'management',
     producer: 'stackAlerts',
     enabled_in_license: true,
     recovery_action_group: {
@@ -202,6 +204,7 @@ function getRuleType(): RuleType {
   return {
     id: '.index-threshold',
     name: 'Index threshold',
+    category: 'management',
     producer: 'stackAlerts',
     enabledInLicense: true,
     recoveryActionGroup: {

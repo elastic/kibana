@@ -7,7 +7,6 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
@@ -18,20 +17,19 @@ import {
   getApmCorrelationValues,
 } from './get_apm_correlation_values';
 import {
-  type APMDownstreamDependency,
   downstreamDependenciesRouteRt,
   getAssistantDownstreamDependencies,
+  type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
-import { errorRouteRt, getApmErrorDocument } from './get_apm_error_document';
 import {
   getApmServiceSummary,
-  type ServiceSummary,
   serviceSummaryRouteRt,
+  type ServiceSummary,
 } from './get_apm_service_summary';
 import {
-  type ApmTimeseries,
   getApmTimeseries,
   getApmTimeseriesRt,
+  type ApmTimeseries,
 } from './get_apm_timeseries';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
@@ -160,34 +158,9 @@ const getApmCorrelationValuesRoute = createApmServerRoute({
   },
 });
 
-const getApmErrorDocRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assistant/get_error_document',
-  params: t.type({
-    query: errorRouteRt,
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (
-    resources
-  ): Promise<{ content: Partial<APMError> | undefined }> => {
-    const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
-    const { query } = params;
-
-    return {
-      content: await getApmErrorDocument({
-        apmEventClient,
-        arguments: query,
-      }),
-    };
-  },
-});
-
 export const assistantRouteRepository = {
   ...getApmTimeSeriesRoute,
   ...getApmServiceSummaryRoute,
-  ...getApmErrorDocRoute,
   ...getApmCorrelationValuesRoute,
   ...getDownstreamDependenciesRoute,
 };

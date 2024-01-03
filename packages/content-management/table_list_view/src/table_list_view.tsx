@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { ReactNode, useCallback, useState } from 'react';
+
 import {
   TableListViewTable,
   type TableListViewTableProps,
-  type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -36,7 +37,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 > & {
   title: string;
   description?: string;
@@ -73,6 +74,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
+  itemIsEditable,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -118,6 +120,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
+          itemIsEditable={itemIsEditable}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}

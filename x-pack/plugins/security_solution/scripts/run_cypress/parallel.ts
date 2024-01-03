@@ -10,20 +10,13 @@ import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
-import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
-import minimatch from 'minimatch';
 import path from 'path';
+import grep from '@cypress/grep/src/plugin';
 
-import {
-  EsVersion,
-  FunctionalTestRunner,
-  readConfigFile,
-  runElasticsearch,
-  runKibanaServer,
-} from '@kbn/test';
+import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
 import {
   Lifecycle,
@@ -33,78 +26,115 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { createKbnClient } from '../endpoint/common/stack_services';
+import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
-
-/**
- * Retrieve test files using a glob pattern.
- * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
- */
-const retrieveIntegrations = (
-  /** Pattern passed to globby to find spec files. */ specPattern: string[]
-) => {
-  const integrationsPaths = globby.sync(specPattern);
-
-  if (process.env.RUN_ALL_TESTS === 'true') {
-    return integrationsPaths;
-  } else {
-    // The number of instances of this job were created
-    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-      : 1;
-    // An index which uniquely identifies this instance of the job
-    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-      : 0;
-
-    const integrationsPathsForChunk: string[] = [];
-
-    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-      integrationsPathsForChunk.push(integrationsPaths[i]);
-    }
-
-    return integrationsPathsForChunk;
-  }
-};
+import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { getFTRConfig } from './get_ftr_config';
 
 export const cli = () => {
   run(
-    async () => {
-      const { argv } = yargs(process.argv.slice(2)).coerce('env', (arg: string) =>
-        arg.split(',').reduce((acc, curr) => {
-          const [key, value] = curr.split('=');
-          if (key === 'burn') {
-            acc[key] = parseInt(value, 10);
-          } else {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as Record<string, string | number>)
-      );
+    async ({ log: _cliLogger }) => {
+      const { argv } = yargs(process.argv.slice(2))
+        .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
+        .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
+        .coerce('env', (arg: string) =>
+          arg.split(',').reduce((acc, curr) => {
+            const [key, value] = curr.split('=');
+            if (key === 'burn') {
+              acc[key] = parseInt(value, 10);
+            } else {
+              acc[key] = value;
+            }
+            return acc;
+          }, {} as Record<string, string | number>)
+        )
+        .boolean('inspect');
 
-      const isOpen = argv._[0] === 'open';
-      const cypressConfigFilePath = require.resolve(
-        `../../${_.isArray(argv.configFile) ? _.last(argv.configFile) : argv.configFile}`
-      ) as string;
+      _cliLogger.info(`
+----------------------------------------------
+Script arguments:
+----------------------------------------------
+
+${JSON.stringify(argv, null, 2)}
+
+----------------------------------------------
+`);
+
+      const isOpen = argv._.includes('open');
+      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-      const spec: string | undefined = argv?.spec as string;
-      let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
+
+      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      }
+
+      const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
+
+      log.info(`
+----------------------------------------------
+Cypress config for file: ${cypressConfigFilePath}:
+----------------------------------------------
+
+${JSON.stringify(cypressConfigFile, null, 2)}
+
+----------------------------------------------
+`);
+
+      const specConfig = cypressConfigFile.e2e.specPattern;
+      const specArg = argv.spec;
+      const specPattern = specArg ?? specConfig;
+
+      log.info('Config spec pattern:', specConfig);
+      log.info('Arguments spec pattern:', specArg);
+      log.info('Resulting spec pattern:', specPattern);
+
+      // The grep function will filter Cypress specs by tags: it will include and exclude
+      // spec files according to the tags configuration.
+      const grepSpecPattern = grep({
+        ...cypressConfigFile,
+        specPattern,
+        excludeSpecPattern: [],
+      }).specPattern;
+
+      log.info('Resolved spec files or pattern after grep:', grepSpecPattern);
+
+      const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
+      const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
+
+      // IMPORTANT!
+      // When grep returns the same spec pattern as it gets in its arguments, we treat it as
+      // it couldn't find any concrete specs to execute (maybe because all of them are skipped).
+      // In this case, we do an early return - it's important to do that.
+      // If we don't return early, these specs will start executing, and Cypress will be skipping
+      // tests at runtime: those that should be excluded according to the tags passed in the config.
+      // This can take so much time that the job can fail by timeout in CI.
+      if (grepFilterSpecs && isGrepReturnedSpecPattern) {
+        log.info('No tests found - all tests could have been skipped via Cypress tags');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
+      }
+
+      const concreteFilePaths = isGrepReturnedFilePaths
+        ? grepSpecPattern // use the returned concrete file paths
+        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+
+      let files = retrieveIntegrations(concreteFilePaths);
+
+      log.info('Resolved spec files after retrieveIntegrations:', files);
 
       if (argv.changedSpecsOnly) {
-        const basePath = process.cwd().split('kibana/')[1];
-        files = findChangedFiles('main', false)
-          .filter(
-            minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
-              matchBase: true,
-            })
-          )
-          .map((filePath: string) => filePath.replace(basePath, '.'));
-
-        if (!files?.length) {
-          // eslint-disable-next-line no-process-exit
-          return process.exit(0);
-        }
+        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
+          const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
+          if (existing) {
+            acc.push(existing);
+          }
+          return acc;
+        }, [] as string[]);
 
         // to avoid running too many tests, we limit the number of files to 3
         // we may extend this in the future
@@ -112,7 +142,9 @@ export const cli = () => {
       }
 
       if (!files?.length) {
-        throw new Error('No files found');
+        log.info('No tests found');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const esPorts: number[] = [9200, 9220];
@@ -120,6 +152,10 @@ export const cli = () => {
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9220;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -168,13 +204,6 @@ export const cli = () => {
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
-
-      const hostRealIp = getLocalhostRealIp();
-
       await pMap(
         files,
         async (filePath) => {
@@ -193,177 +222,21 @@ export const cli = () => {
             const esPort: number = getEsPort();
             const kibanaPort: number = getKibanaPort();
             const fleetServerPort: number = getFleetServerPort();
-            const configFromTestFile = parseTestFileConfig(filePath);
+            const specFileFTRConfig = parseTestFileConfig(filePath);
+            const ftrConfigFilePath = path.resolve(
+              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
+            );
 
-            const config = await readConfigFile(
+            const config = await getFTRConfig({
               log,
-              EsVersion.getDefault(),
-              path.resolve(
-                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
-              ),
-              {
-                servers: {
-                  elasticsearch: {
-                    port: esPort,
-                  },
-                  kibana: {
-                    port: kibanaPort,
-                  },
-                  fleetserver: {
-                    port: fleetServerPort,
-                  },
-                },
-                kbnTestServer: {
-                  serverArgs: [
-                    `--server.port=${kibanaPort}`,
-                    `--elasticsearch.hosts=http://localhost:${esPort}`,
-                  ],
-                },
-              },
-              (vars) => {
-                const hasFleetServerArgs = _.some(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                    value.includes('--xpack.fleet.agents.elasticsearch.host')
-                );
-
-                vars.kbnTestServer.serverArgs = _.filter(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    !(
-                      value.includes('--elasticsearch.hosts=http://localhost:9220') ||
-                      value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                      value.includes('--xpack.fleet.agents.elasticsearch.host')
-                    )
-                );
-
-                if (
-                  configFromTestFile?.enableExperimental?.length &&
-                  _.some(vars.kbnTestServer.serverArgs, (value) =>
-                    value.includes('--xpack.securitySolution.enableExperimental')
-                  )
-                ) {
-                  vars.kbnTestServer.serverArgs = _.filter(
-                    vars.kbnTestServer.serverArgs,
-                    (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-                  );
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-                      configFromTestFile?.enableExperimental
-                    )}`
-                  );
-                }
-
-                if (configFromTestFile?.license) {
-                  if (vars.serverless) {
-                    log.warning(
-                      `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
-                    );
-                  } else {
-                    vars.esTestCluster.license = configFromTestFile.license;
-                  }
-                }
-
-                if (hasFleetServerArgs) {
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
-                  );
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
-                  );
-
-                  if (vars.serverless) {
-                    vars.kbnTestServer.serverArgs.push(
-                      `--xpack.fleet.internal.fleetServerStandalone=false`
-                    );
-                  }
-                }
-
-                // Serverless Specific
-                if (vars.serverless) {
-                  log.info(`Serverless mode detected`);
-
-                  if (configFromTestFile?.productTypes) {
-                    vars.kbnTestServer.serverArgs.push(
-                      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-                        ...configFromTestFile.productTypes,
-                        // Why spread it twice?
-                        // The `serverless.security.yml` file by default includes two product types as of this change.
-                        // Because it's an array, we need to ensure that existing values are "removed" and the ones
-                        // defined here are added. To do that, we duplicate the `productTypes` passed so that all array
-                        // elements in that YAML file are updated. The Security serverless plugin has code in place to
-                        // dedupe.
-                        ...configFromTestFile.productTypes,
-                      ])}`
-                    );
-                  }
-                } else if (configFromTestFile?.productTypes) {
-                  log.warning(
-                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
-                  );
-                }
-
-                return vars;
-              }
-            );
-
-            log.info(`
-----------------------------------------------
-Cypress FTR setup for file: ${filePath}:
-----------------------------------------------
-
-${JSON.stringify(config.getAll(), null, 2)}
-
-----------------------------------------------
-`);
-
-            const lifecycle = new Lifecycle(log);
-
-            const providers = new ProviderCollection(log, [
-              ...readProviderSpec('Service', {
-                lifecycle: () => lifecycle,
-                log: () => log,
-                config: () => config,
-              }),
-              ...readProviderSpec('Service', config.get('services')),
-            ]);
-
-            const options = {
-              installDir: process.env.KIBANA_INSTALL_DIR,
-              ci: process.env.CI,
-            };
-
-            const shutdownEs = await pRetry(
-              async () =>
-                runElasticsearch({
-                  config,
-                  log,
-                  name: `ftr-${esPort}`,
-                  esFrom: 'snapshot',
-                  onEarlyExit,
-                }),
-              { retries: 2, forever: false }
-            );
-
-            await runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci || !isOpen
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
+              esPort,
+              kibanaPort,
+              fleetServerPort,
+              ftrConfigFilePath,
+              specFilePath: filePath,
+              specFileFTRConfig,
+              isOpen,
             });
-
-            await providers.loadAll();
-
-            const functionalTestRunner = new FunctionalTestRunner(
-              log,
-              config,
-              EsVersion.getDefault()
-            );
 
             const createUrlFromFtrConfig = (
               type: 'elasticsearch' | 'kibana' | 'fleetserver',
@@ -392,6 +265,99 @@ ${JSON.stringify(config.getAll(), null, 2)}
             };
 
             const baseUrl = createUrlFromFtrConfig('kibana');
+
+            log.info(`
+----------------------------------------------
+Cypress FTR setup for file: ${filePath}:
+----------------------------------------------
+
+${JSON.stringify(
+  config.getAll(),
+  (key, v) => {
+    if (Array.isArray(v) && v.length > 32) {
+      return v.slice(0, 32).concat('... trimmed after 32 items.');
+    } else {
+      return v;
+    }
+  },
+  2
+)}
+
+----------------------------------------------
+`);
+
+            const lifecycle = new Lifecycle(log);
+
+            const providers = new ProviderCollection(log, [
+              ...readProviderSpec('Service', {
+                lifecycle: () => lifecycle,
+                log: () => log,
+                config: () => config,
+              }),
+              ...readProviderSpec('Service', config.get('services')),
+            ]);
+
+            const options = {
+              installDir: process.env.KIBANA_INSTALL_DIR,
+              ci: process.env.CI,
+            };
+
+            const shutdownEs = await pRetry(
+              async () =>
+                runElasticsearch({
+                  config,
+                  log,
+                  name: `ftr-${esPort}`,
+                  esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                  onEarlyExit,
+                }),
+              { retries: 2, forever: false }
+            );
+
+            await runKibanaServer({
+              procs,
+              config,
+              installDir: options?.installDir,
+              extraKbnOpts:
+                options?.installDir || options?.ci || !isOpen
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              onEarlyExit,
+              inspect: argv.inspect,
+            });
+
+            // Setup fleet if Cypress config requires it
+            let fleetServer: void | StartedFleetServer;
+            if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
+              log.info(`Setting up fleet-server for this Cypress config`);
+
+              const kbnClient = createKbnClient({
+                url: baseUrl,
+                username: config.get('servers.kibana.username'),
+                password: config.get('servers.kibana.password'),
+                log,
+              });
+
+              fleetServer = await startFleetServer({
+                kbnClient,
+                logger: log,
+                port:
+                  fleetServerPort ?? config.has('servers.fleetserver.port')
+                    ? (config.get('servers.fleetserver.port') as number)
+                    : undefined,
+                // `force` is needed to ensure that any currently running fleet server (perhaps left
+                // over from an interrupted run) is killed and a new one restarted
+                force: true,
+              });
+            }
+
+            await providers.loadAll();
+
+            const functionalTestRunner = new FunctionalTestRunner(
+              log,
+              config,
+              EsVersion.getDefault()
+            );
 
             const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
@@ -424,6 +390,8 @@ ${JSON.stringify(config.getAll(), null, 2)}
               KIBANA_USERNAME: config.get('servers.kibana.username'),
               KIBANA_PASSWORD: config.get('servers.kibana.password'),
 
+              IS_SERVERLESS: config.get('serverless'),
+
               ...argv.env,
             };
 
@@ -450,7 +418,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -469,6 +437,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               }
             }
 
+            if (fleetServer) {
+              await fleetServer.stop();
+            }
+
             await procs.stop('kibana');
             await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
@@ -478,17 +450,15 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           return result;
         },
         {
-          concurrency: (argv.concurrency as number | undefined)
-            ? (argv.concurrency as number)
-            : !isOpen
-            ? 2
-            : 1,
+          concurrency: 1,
         }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult)?.totalFailed
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');

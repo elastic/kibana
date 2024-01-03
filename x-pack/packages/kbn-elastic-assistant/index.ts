@@ -11,7 +11,7 @@
 // happens in the root of your app. Optionally provide a custom title for the assistant:
 
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
-export { AssistantProvider } from './impl/assistant_context';
+export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
 
 // Step 2: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
@@ -70,6 +70,9 @@ export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
+
+/** Default Elastic AI Assistant logo, can be removed once included in EUI **/
+export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
 
 export {
   ELASTIC_AI_ASSISTANT_TITLE,
@@ -130,3 +133,10 @@ export type { PromptContextTemplate } from './impl/assistant/prompt_context/type
  * can be displayed when corresponding PromptContext's are registered.
  */
 export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
+
+/**
+ * Knowledge Base API Responses
+ */
+export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
+export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
+export type { PostKnowledgeBaseResponse } from './impl/assistant/api';

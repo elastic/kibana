@@ -299,6 +299,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             onElementClick={onClickPoint}
             baseTheme={chartTheme.baseTheme}
             theme={chartTheme.theme}
+            locale={i18n.getLocale()}
           />
         </Chart>
       </TimelineChartContainer>

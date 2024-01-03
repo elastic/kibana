@@ -38,7 +38,9 @@
         "-1",
         "0"
       ],
-      "scroll_size": "",
+      "scroll_size": [
+        "1000"
+      ],
       "search_timeout": [
         "-1",
         "0"
@@ -48,17 +50,20 @@
         "dfs_query_then_fetch"
       ],
       "slices": [
+        "1",
         "auto"
       ],
       "sort": "",
       "stats": "",
       "terminate_after": "",
       "timeout": [
+        "1m",
         "-1",
         "0"
       ],
       "version": "__flag__",
       "wait_for_active_shards": [
+        "1",
         "all",
         "index-setting"
       ],

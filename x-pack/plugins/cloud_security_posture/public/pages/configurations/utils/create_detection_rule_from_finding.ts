@@ -12,6 +12,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
+import { generateBenchmarkRuleTags } from '../../../../common/utils/detection_rules';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';
@@ -21,6 +22,9 @@ const DEFAULT_RULE_LICENSE = 'Elastic License v2';
 const DEFAULT_MAX_ALERTS_PER_RULE = 100;
 const ALERT_SUPPRESSION_FIELD = 'resource.id';
 const ALERT_TIMESTAMP_FIELD = 'event.ingested';
+const DEFAULT_INVESTIGATION_FIELDS = {
+  field_names: ['resource.name', 'resource.id', 'resource.type', 'resource.sub_type'],
+};
 
 enum AlertSuppressionMissingFieldsStrategy {
   // per each document a separate alert will be created
@@ -42,29 +46,6 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
 
   // Remove the numbers and new lines
   return matches.map((link) => link.replace(/^\d+\. /, '').replace(/\n/g, ''));
-};
-
-const CSP_RULE_TAG = 'Cloud Security';
-const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
-const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
-
-const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
-
-const generateFindingsTags = (finding: CspFinding) => {
-  return [STATIC_RULE_TAGS]
-    .concat(finding.rule.tags)
-    .concat(
-      finding.rule.benchmark.posture_type
-        ? [
-            finding.rule.benchmark.posture_type.toUpperCase(),
-            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
-          ]
-        : []
-    )
-    .concat(
-      finding.rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
-    )
-    .flat();
 };
 
 const generateFindingsRuleQuery = (finding: CspFinding) => {
@@ -111,7 +92,9 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
       description: finding.rule.rationale,
-      tags: generateFindingsTags(finding),
+      tags: generateBenchmarkRuleTags(finding.rule),
+      investigation_fields: DEFAULT_INVESTIGATION_FIELDS,
+      note: finding.rule.remediation,
     },
   });
 };

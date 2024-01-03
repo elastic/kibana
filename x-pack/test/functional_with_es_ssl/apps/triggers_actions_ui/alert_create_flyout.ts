@@ -14,6 +14,7 @@ import { generateUniqueKey } from '../../lib/get_test_data';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const comboBox = getService('comboBox');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
@@ -39,17 +40,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function deleteConnectorByName(connectorName: string) {
+    const { body: connectors } = await supertest.get(`/api/actions/connectors`).expect(200);
+    const connector = connectors?.find((c: { name: string }) => c.name === connectorName);
+    if (!connector) {
+      return;
+    }
+    await supertest
+      .delete(`/api/actions/connector/${connector.id}`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204, '');
+  }
+
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
+    await comboBox.set('thresholdIndexesComboBox', 'k');
     await testSubjects.click('thresholdAlertTimeFieldSelect');
     await retry.try(async () => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
@@ -73,15 +82,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
-    before(async () => {
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('rulesTab');
-    });
-
-    afterEach(async () => {
-      // Reset the Rules tab without reloading the entire page
-      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
-      await testSubjects.click('logsTab');
       await testSubjects.click('rulesTab');
     });
 
@@ -118,6 +120,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertsToDelete = await getAlertsByName(ruleName);
       await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
       expect(true).to.eql(true);
+      // Additional cleanup step to prevent
+      // FLAKY: https://github.com/elastic/kibana/issues/167443
+      // FLAKY: https://github.com/elastic/kibana/issues/167444
+      await deleteConnectorByName('webhook-test');
     });
 
     it('should create an alert', async () => {
@@ -142,6 +148,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
+
+      // Alerts search bar (conditional actions)
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('addFilter');
+      await testSubjects.click('filterFieldSuggestionList');
+      await comboBox.set('filterFieldSuggestionList', '_id');
+      await comboBox.set('filterOperatorList', 'is not');
+      await testSubjects.setValue('filterParams', 'fake-rule-id');
+      await testSubjects.click('saveFilter');
+      await testSubjects.setValue('queryInput', '_id: *');
+
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `Rule '{{rule.name}}' is active for group '{{context.group}}':
@@ -323,7 +342,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('ruleNameInput', 'alertName');
-      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="ruleSearchField"]');
+      const ruleTypeSearchBox = await testSubjects.find('ruleSearchField');
       await ruleTypeSearchBox.type('notexisting rule type');
       await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
 

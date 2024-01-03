@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
@@ -21,6 +21,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_SEVERITY,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -43,7 +44,7 @@ import {
 } from '../../../../../common/environment_filter_values';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
-  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
@@ -93,10 +94,17 @@ export function registerAnomalyRuleType({
           apmActionVariables.viewInAppUrl,
         ],
       },
-      producer: 'apm',
+      category: DEFAULT_APP_CATEGORIES.observability.id,
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId, startedAt }) => {
+      executor: async ({
+        params,
+        services,
+        spaceId,
+        startedAt,
+        getTimeRange,
+      }) => {
         if (!ml) {
           return { state: {} };
         }
@@ -142,13 +150,17 @@ export function registerAnomalyRuleType({
           return { state: {} };
         }
 
-        // start time must be at least 30, does like this to support rules created before this change where default was 15
-        const startTime = Math.min(
-          datemath.parse('now-30m')!.valueOf(),
-          datemath
-            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
-            ?.valueOf() || 0
-        );
+        // Lookback window must be at least 30m to support rules created before this change where default was 15m
+        const minimumWindow = '30m';
+        const requestedWindow = `${ruleParams.windowSize}${ruleParams.windowUnit}`;
+
+        const window =
+          datemath.parse(`now-${minimumWindow}`)!.valueOf() <
+          datemath.parse(`now-${requestedWindow}`)!.valueOf()
+            ? minimumWindow
+            : requestedWindow;
+
+        const { dateStart } = getTimeRange(window);
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -164,8 +176,7 @@ export function registerAnomalyRuleType({
                   {
                     range: {
                       timestamp: {
-                        gte: startTime,
-                        format: 'epoch_millis',
+                        gte: dateStart,
                       },
                     },
                   },

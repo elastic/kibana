@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageSection, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SubscriptionNotAllowed = ({
   licenseManagementLocator,

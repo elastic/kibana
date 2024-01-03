@@ -258,7 +258,7 @@ export const getTopNavConfig = (
 
   const navigateToOriginatingApp = () => {
     if (originatingApp) {
-      application.navigateToApp(originatingApp);
+      application.navigateToApp(originatingApp, { path: originatingPath });
     }
   };
 
@@ -309,6 +309,8 @@ export const getTopNavConfig = (
                 vis,
                 data.query.timefilter.timefilter
               );
+              const searchFilters = data.query.filterManager.getAppFilters();
+              const searchQuery = data.query.queryString.getQuery();
               const updatedWithMeta = {
                 ...navigateToLensConfig,
                 embeddableId,
@@ -319,6 +321,8 @@ export const getTopNavConfig = (
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
                 isEmbeddable: Boolean(originatingApp),
+                ...(searchFilters && { searchFilters }),
+                ...(searchQuery && { searchQuery }),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();

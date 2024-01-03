@@ -6,9 +6,11 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs';
 
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -17,7 +19,6 @@ import type {
 import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
-import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
@@ -90,13 +91,20 @@ export class SessionManagementService {
       auditLogger: audit.withoutRequest,
     });
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await Promise.all([this.sessionIndex.initialize(), this.scheduleCleanupTask(taskManager)]);
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        switchMap(async ({ scheduleRetry }) => {
+          try {
+            await Promise.all([
+              this.sessionIndex.initialize(),
+              this.scheduleCleanupTask(taskManager),
+            ]);
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       session: new Session({

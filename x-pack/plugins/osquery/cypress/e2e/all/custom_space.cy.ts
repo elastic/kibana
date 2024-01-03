@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
+import { initializeDataViews } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -18,8 +18,8 @@ import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_
 import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
-  { name: 'default', tags: [tag.ESS, tag.SERVERLESS] },
-  { name: 'custom-spaces', tags: [tag.ESS] },
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { name: 'custom-spaces', tags: ['@ess'] },
 ];
 describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
@@ -29,6 +29,7 @@ describe('ALL - Custom space', () => {
       let spaceId: string;
 
       before(() => {
+        initializeDataViews();
         cy.wrap(
           new Promise<string>((resolve) => {
             if (testSpace.name !== 'default') {
@@ -72,7 +73,7 @@ describe('ALL - Custom space', () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', { tags: [tag.ESS] }, () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
@@ -91,7 +92,7 @@ describe('ALL - Custom space', () => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });
@@ -99,9 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { name: packName } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

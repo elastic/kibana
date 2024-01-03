@@ -28,14 +28,18 @@ import {
   LANDING_PATH,
   OVERVIEW_PATH,
   ROOT_PATH,
+  RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
+  SLOS_OUTDATED_DEFINITIONS_PATH,
   SLOS_PATH,
   SLOS_WELCOME_PATH,
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
 } from '../../common/locators/paths';
+import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
+import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -64,7 +68,11 @@ export const routes = {
   },
   [LANDING_PATH]: {
     handler: () => {
-      return <LandingPage />;
+      return (
+        <HasDataContextProvider>
+          <LandingPage />
+        </HasDataContextProvider>
+      );
     },
     params: {},
     exact: true,
@@ -72,9 +80,11 @@ export const routes = {
   [OVERVIEW_PATH]: {
     handler: () => {
       return (
-        <DatePickerContextProvider>
-          <OverviewPage />
-        </DatePickerContextProvider>
+        <HasDataContextProvider>
+          <DatePickerContextProvider>
+            <OverviewPage />
+          </DatePickerContextProvider>
+        </HasDataContextProvider>
       );
     },
     params: {},
@@ -104,6 +114,13 @@ export const routes = {
   [RULES_PATH]: {
     handler: () => {
       return <RulesPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [RULES_LOGS_PATH]: {
+    handler: () => {
+      return <RulesPage activeTab="logs" />;
     },
     params: {},
     exact: true,
@@ -139,6 +156,13 @@ export const routes = {
   [SLOS_WELCOME_PATH]: {
     handler: () => {
       return <SlosWelcomePage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [SLOS_OUTDATED_DEFINITIONS_PATH]: {
+    handler: () => {
+      return <SlosOutdatedDefinitions />;
     },
     params: {},
     exact: true,

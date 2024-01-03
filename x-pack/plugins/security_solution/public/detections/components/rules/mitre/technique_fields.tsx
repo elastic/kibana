@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { kebabCase, camelCase } from 'lodash/fp';
+import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
@@ -23,7 +23,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreSubtechniquesOptions, MitreTechniquesOptions } from '../../../mitre/types';
+import type { MitreTechnique, MitreSubTechnique } from '../../../mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -37,7 +37,7 @@ const lazyMitreConfiguration = () => {
 };
 
 const hasSubtechniqueOptions = (
-  subtechniquesOptions: MitreSubtechniquesOptions[],
+  subtechniquesOptions: MitreSubTechnique[],
   technique: ThreatTechnique
 ) => subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
 
@@ -66,14 +66,14 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 }): JSX.Element => {
   const values = field.value as Threats;
 
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+      setTechniquesOptions(mitreConfig.techniques);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
     }
     getMitre();
   }, []);
@@ -105,9 +105,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   }, [field, threatIndex, onFieldChange]);
 
   const updateTechnique = useCallback(
-    (index: number, value: string) => {
+    (index: number, optionId: string) => {
       const threats = [...(field.value as Threats)];
-      const { id, reference, name } = techniquesOptions.find((t) => t.value === value) || {
+      const { id, reference, name } = techniquesOptions.find((t) => t.id === optionId) ?? {
         id: '',
         name: '',
         reference: '',
@@ -153,7 +153,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                 : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
-                value: option.value,
+                value: option.id,
                 disabled,
               })),
             ]}
@@ -161,7 +161,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
             aria-label=""
             onChange={updateTechnique.bind(null, index)}
             fullWidth={true}
-            valueOfSelected={camelCase(technique.name)}
+            valueOfSelected={technique.id}
             data-test-subj="mitreAttackTechnique"
             disabled={disabled}
             placeholder={i18n.TECHNIQUE_PLACEHOLDER}

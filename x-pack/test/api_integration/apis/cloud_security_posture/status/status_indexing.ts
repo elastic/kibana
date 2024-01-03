@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -41,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test policy',

@@ -143,3 +143,5 @@ export type {
   VersionedRouter,
   VersionedSpecValidation,
 } from './src/versioning';
+
+export type { IStaticAssets } from './src/static_assets';

@@ -38,7 +38,8 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  describe('EPM - get', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/163203
+  describe.skip('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -200,7 +201,10 @@ export default function (providerContext: FtrProviderContext) {
     it('returns package info in item field when calling without version', async function () {
       // this will install through the registry by default
       await installPackage(testPkgName, testPkgVersion);
-      const res = await supertest.get(`/api/fleet/epm/packages/${testPkgName}`).expect(200);
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
       const packageInfo = res.body.item;
       // the uploaded version will have this description
       expect(packageInfo.name).to.equal('apache');

@@ -19,7 +19,7 @@ export const WELCOME_GENERAL_2 = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneral2Prompt',
   {
     defaultMessage:
-      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going! With the Generative AI Connector, you'll be able to configure access to either an Azure OpenAI Service or OpenAI API account, but you better believe you'll be able to deploy your own models within your Elastic Cloud instance and use those here in the future... 😉",
+      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going! With the Generative AI Connector, you'll be able to configure access to either an OpenAI service or an Amazon Bedrock service, but you better believe you'll be able to deploy your own models within your Elastic Cloud instance and use those here in the future... 😉",
   }
 );
 

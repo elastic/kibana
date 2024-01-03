@@ -117,8 +117,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               gutterSize="m"
               data-test-subj="productCard-rightPanelItems"
             >
-              {rightPanelItems.map((rightPanelItem) => {
-                return <EuiFlexItem>{rightPanelItem}</EuiFlexItem>;
+              {rightPanelItems.map((rightPanelItem, id) => {
+                return <EuiFlexItem key={id}>{rightPanelItem}</EuiFlexItem>;
               })}
             </EuiFlexGroup>
           </EuiFlexItem>

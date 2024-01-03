@@ -52,7 +52,7 @@ export const ListConnectors = ({
           label={i18n.translate(
             'genAiStreamingResponseExample.app.component.selectConnectorLabel',
             {
-              defaultMessage: 'Select a Generative AI Connector',
+              defaultMessage: 'Select an OpenAI Connector',
             }
           )}
           labelAppend={

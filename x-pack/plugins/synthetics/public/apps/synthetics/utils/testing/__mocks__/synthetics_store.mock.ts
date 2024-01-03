@@ -8,7 +8,7 @@
 import { SyntheticsAppState } from '../../../state/root_reducer';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   DEFAULT_THROTTLING,
   LocationStatus,
   ScheduleUnit,
@@ -16,6 +16,7 @@ import {
   VerificationMode,
   TLSVersion,
 } from '../../../../../../common/runtime_types';
+import { MonitorDetailsState } from '../../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -199,7 +200,15 @@ function getMonitorDetailsMockSlice() {
       loading: false,
       loaded: true,
       data: {
-        summary: { up: 1, down: 0 },
+        summary: {
+          up: 1,
+          down: 0,
+          status: 'up',
+          attempt: 1,
+          max_attempts: 1,
+          final_attempt: true,
+          retry_group: 'retry-1',
+        },
         agent: {
           name: 'cron-b010e1cc9518984e-27644714-4pd4h',
           id: 'f8721d90-5aec-4815-a6f1-f4d4a6fb7482',
@@ -218,7 +227,7 @@ function getMonitorDetailsMockSlice() {
           check_group: '051aba1c-0b74-11ed-9f0e-ba4e6fa109d5',
           id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           timespan: { lt: '2022-07-24T17:24:06.094Z', gte: '2022-07-24T17:14:06.094Z' },
-          type: DataStream.BROWSER,
+          type: MonitorTypeEnum.BROWSER,
           status: 'up',
         },
         url: {
@@ -257,7 +266,15 @@ function getMonitorDetailsMockSlice() {
       total: 3,
       data: [
         {
-          summary: { up: 1, down: 0 },
+          summary: {
+            up: 1,
+            down: 0,
+            status: 'up',
+            attempt: 1,
+            max_attempts: 1,
+            final_attempt: true,
+            retry_group: 'retry-1',
+          },
           agent: {
             name: 'cron-b010e1cc9518984e-27644714-4pd4h',
             id: 'f8721d90-5aec-4815-a6f1-f4d4a6fb7482',
@@ -266,7 +283,7 @@ function getMonitorDetailsMockSlice() {
             version: '8.3.0',
           },
           synthetics: {
-            journey: { name: 'inline', id: 'inline', tags: null },
+            journey: { name: 'inline', id: 'inline' },
             type: 'heartbeat/summary',
           },
           monitor: {
@@ -276,7 +293,7 @@ function getMonitorDetailsMockSlice() {
             check_group: '051aba1c-0b74-11ed-9f0e-ba4e6fa109d5',
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
             timespan: { lt: '2022-07-24T17:24:06.094Z', gte: '2022-07-24T17:14:06.094Z' },
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -300,18 +317,19 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          'event.type': 'journey/end',
-          event: {
-            agent_id_status: 'auth_metadata_missing',
-            ingested: '2022-07-24T17:14:07Z',
-            type: 'heartbeat/summary',
-            dataset: 'browser',
-          },
           timestamp: '2022-07-24T17:14:05.079Z',
           docId: 'AkYzMYIBqL6WCtugsFck',
         },
         {
-          summary: { up: 1, down: 0 },
+          summary: {
+            up: 1,
+            down: 0,
+            status: 'up',
+            attempt: 1,
+            max_attempts: 1,
+            final_attempt: true,
+            retry_group: 'retry-1',
+          },
           agent: {
             name: 'cron-b010e1cc9518984e-27644704-zs98t',
             id: 'a9620214-591d-48e7-9e5d-10b7a9fb1a03',
@@ -330,7 +348,7 @@ function getMonitorDetailsMockSlice() {
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
             check_group: '9eb87e53-0b72-11ed-b34f-aa618b4334ae',
             timespan: { lt: '2022-07-24T17:14:05.020Z', gte: '2022-07-24T17:04:05.020Z' },
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -354,18 +372,19 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          'event.type': 'journey/end',
-          event: {
-            agent_id_status: 'auth_metadata_missing',
-            ingested: '2022-07-24T17:04:06Z',
-            type: 'heartbeat/summary',
-            dataset: 'browser',
-          },
           timestamp: '2022-07-24T17:04:03.769Z',
           docId: 'mkYqMYIBqL6WCtughFUq',
         },
         {
-          summary: { up: 1, down: 0 },
+          summary: {
+            up: 1,
+            down: 0,
+            status: 'up',
+            attempt: 1,
+            max_attempts: 1,
+            final_attempt: true,
+            retry_group: 'retry-1',
+          },
           agent: {
             name: 'job-b010e1cc9518984e-dkw5k',
             id: 'e3a4e3a8-bdd1-44fe-86f5-e451b80f80c5',
@@ -384,7 +403,7 @@ function getMonitorDetailsMockSlice() {
             timespan: { lt: '2022-07-24T17:11:49.702Z', gte: '2022-07-24T17:01:49.702Z' },
             check_group: '4e00ac5a-0b72-11ed-a97e-5203642c687d',
             id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
-            type: DataStream.BROWSER,
+            type: MonitorTypeEnum.BROWSER,
             status: 'up',
           },
           url: {
@@ -408,13 +427,6 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          'event.type': 'journey/end',
-          event: {
-            agent_id_status: 'auth_metadata_missing',
-            ingested: '2022-07-24T17:01:50Z',
-            type: 'heartbeat/summary',
-            dataset: 'browser',
-          },
           timestamp: '2022-07-24T17:01:48.326Z',
           docId: 'kUYoMYIBqL6WCtugc1We',
         },
@@ -424,7 +436,7 @@ function getMonitorDetailsMockSlice() {
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
-      type: DataStream.BROWSER,
+      type: MonitorTypeEnum.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
       'service.name': '',
@@ -434,6 +446,7 @@ function getMonitorDetailsMockSlice() {
       locations: [{ isServiceManaged: true, id: 'us_central' }],
       namespace: 'default',
       origin: SourceType.UI,
+      max_attempts: 2,
       journey_id: '',
       project_id: '',
       playwright_options: '',
@@ -475,7 +488,7 @@ function getMonitorDetailsMockSlice() {
     syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
-  };
+  } as MonitorDetailsState;
 }
 
 function getPingStatusesMockSlice() {
@@ -483,21 +496,22 @@ function getPingStatusesMockSlice() {
 
   return {
     pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
+      const geoName = cur.observer.geo?.name!;
       if (!acc[cur.monitor.id]) {
         acc[cur.monitor.id] = {};
       }
 
-      if (!acc[cur.monitor.id][cur.observer.geo.name]) {
-        acc[cur.monitor.id][cur.observer.geo.name] = {};
+      if (!acc[cur.monitor.id][geoName]) {
+        acc[cur.monitor.id][geoName] = {};
       }
 
-      acc[cur.monitor.id][cur.observer.geo.name][cur.timestamp] = {
+      acc[cur.monitor.id][geoName][cur.timestamp] = {
         timestamp: cur.timestamp,
         error: undefined,
-        locationId: cur.observer.geo.name,
-        config_id: cur.config_id,
+        locationId: geoName,
+        config_id: cur.config_id!,
         docId: cur.docId,
-        summary: cur.summary,
+        summary: cur.summary!,
       };
 
       return acc;

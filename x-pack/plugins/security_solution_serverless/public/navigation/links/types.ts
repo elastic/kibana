@@ -11,6 +11,7 @@ import type {
   NavigationLink,
   LinkCategory,
 } from '@kbn/security-solution-navigation';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ExternalPageName } from './constants';
 
 export type ProjectPageName = SecurityPageName | ExternalPageName | 'root';
@@ -18,3 +19,4 @@ export type ProjectPageName = SecurityPageName | ExternalPageName | 'root';
 export type ProjectNavigationLink = NavigationLink<ProjectPageName>;
 export type ProjectLinkCategory = LinkCategory<ProjectPageName>;
 export type ProjectNavLinks = Observable<ProjectNavigationLink[]>;
+export type GetCloudUrl = (cloudUrlKey: string, cloud: CloudStart) => string | undefined;

@@ -29,6 +29,13 @@ export const DATA_QUALITY_TITLE = i18n.translate(
   }
 );
 
+export const DATE_PICKER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.datePicker.tooltip',
+  {
+    defaultMessage: `Data quality checks are ran on data that was ingested during the Search Boost window. The default window range is 7 days.`,
+  }
+);
+
 export const ELASTIC_COMMON_SCHEMA = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
   {

@@ -5,107 +5,136 @@
  * 2.0.
  */
 
+import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { cloneDeep, pick } from 'lodash';
 import {
   BehaviorSubject,
-  map,
-  filter as rxJsFilter,
-  scan,
   catchError,
-  of,
   concatMap,
-  shareReplay,
-  finalize,
   delay,
+  finalize,
+  of,
+  scan,
+  shareReplay,
+  Subject,
+  timestamp,
+  map,
   tap,
 } from 'rxjs';
-import { HttpResponse } from '@kbn/core/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import {
-  type RegisterContextDefinition,
-  type RegisterFunctionDefinition,
-  Message,
+  ChatCompletionErrorCode,
+  ConversationCompletionError,
+  type StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
+} from '../../common/conversation_complete';
+import {
+  FunctionVisibility,
   MessageRole,
-  ContextRegistry,
-  FunctionRegistry,
+  type FunctionRegistry,
+  type FunctionResponse,
+  type Message,
 } from '../../common/types';
-import { ObservabilityAIAssistantAPIClient } from '../api';
+import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
+import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import type { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
-  ChatRegistrationFunction,
-  CreateChatCompletionResponseChunk,
+  ChatRegistrationRenderFunction,
   ObservabilityAIAssistantChatService,
   PendingMessage,
+  RenderFunction,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 
-class TokenLimitReachedError extends Error {
-  constructor() {
-    super(`Token limit reached`);
+const MIN_DELAY = 35;
+
+function toObservable(response: HttpResponse<IncomingMessage>) {
+  const status = response.response?.status;
+
+  if (!status || status >= 400) {
+    throw new Error(response.response?.statusText || 'Unexpected error');
   }
+
+  const reader = response.response.body?.getReader();
+
+  if (!reader) {
+    throw new Error('Could not get reader from response');
+  }
+
+  return readableStreamReaderIntoObservable(reader).pipe(
+    // append a timestamp of when each value was emitted
+    timestamp(),
+    // use the previous timestamp to calculate a target
+    // timestamp for emitting the next value
+    scan((acc, value) => {
+      const lastTimestamp = acc.timestamp || 0;
+      const emitAt = Math.max(lastTimestamp + MIN_DELAY, value.timestamp);
+      return {
+        timestamp: emitAt,
+        value: value.value,
+      };
+    }),
+    // add the delay based on the elapsed time
+    // using concatMap(of(value).pipe(delay(50))
+    // leads to browser issues because timers
+    // are throttled when the tab is not active
+    concatMap((value) => {
+      const now = Date.now();
+      const delayFor = value.timestamp - now;
+
+      if (delayFor <= 0) {
+        return of(value.value);
+      }
+
+      return of(value.value).pipe(delay(delayFor));
+    })
+  );
 }
 
 export async function createChatService({
+  analytics,
   signal: setupAbortSignal,
   registrations,
   client,
 }: {
+  analytics: AnalyticsServiceStart;
   signal: AbortSignal;
-  registrations: ChatRegistrationFunction[];
+  registrations: ChatRegistrationRenderFunction[];
   client: ObservabilityAIAssistantAPIClient;
 }): Promise<ObservabilityAIAssistantChatService> {
-  const contextRegistry: ContextRegistry = new Map();
   const functionRegistry: FunctionRegistry = new Map();
 
-  const registerContext: RegisterContextDefinition = (context) => {
-    contextRegistry.set(context.name, context);
+  const renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>> = new Map();
+
+  const [{ functionDefinitions, contextDefinitions }] = await Promise.all([
+    client('GET /internal/observability_ai_assistant/functions', {
+      signal: setupAbortSignal,
+    }),
+    ...registrations.map((registration) => {
+      return registration({
+        registerRenderFunction: (name, renderFn) => {
+          renderFunctionRegistry.set(name, renderFn);
+        },
+      });
+    }),
+  ]);
+
+  functionDefinitions.forEach((fn) => {
+    functionRegistry.set(fn.name, fn);
+  });
+
+  const getFunctions = (options?: { contexts?: string[]; filter?: string }) => {
+    return filterFunctionDefinitions({
+      ...options,
+      definitions: functionDefinitions,
+    });
   };
-
-  const registerFunction: RegisterFunctionDefinition = (def, respond, render) => {
-    functionRegistry.set(def.name, { options: def, respond, render });
-  };
-
-  const getContexts: ObservabilityAIAssistantChatService['getContexts'] = () => {
-    return Array.from(contextRegistry.values());
-  };
-  const getFunctions: ObservabilityAIAssistantChatService['getFunctions'] = ({
-    contexts,
-    filter,
-  } = {}) => {
-    const allFunctions = Array.from(functionRegistry.values());
-
-    return contexts || filter
-      ? allFunctions.filter((fn) => {
-          const matchesContext =
-            !contexts || fn.options.contexts.some((context) => contexts.includes(context));
-          const matchesFilter =
-            !filter || fn.options.name.includes(filter) || fn.options.description.includes(filter);
-
-          return matchesContext && matchesFilter;
-        })
-      : allFunctions;
-  };
-
-  await Promise.all(
-    registrations.map((fn) => fn({ signal: setupAbortSignal, registerContext, registerFunction }))
-  );
 
   return {
-    executeFunction: async (name, args, signal) => {
-      const fn = functionRegistry.get(name);
-
-      if (!fn) {
-        throw new Error(`Function ${name} not found`);
-      }
-
-      const parsedArguments = args ? JSON.parse(args) : {};
-
-      // validate
-
-      return await fn.respond({ arguments: parsedArguments }, signal);
-    },
+    analytics,
     renderFunction: (name, args, response) => {
-      const fn = functionRegistry.get(name);
+      const fn = renderFunctionRegistry.get(name);
 
       if (!fn) {
         throw new Error(`Function ${name} not found`);
@@ -118,16 +147,67 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      // validate
-
-      return fn.render?.({ response: parsedResponse, arguments: parsedArguments });
+      return fn?.({ response: parsedResponse, arguments: parsedArguments });
     },
-    getContexts,
+    getContexts: () => contextDefinitions,
     getFunctions,
-    hasRenderFunction: (name: string) => {
-      return !!getFunctions().find((fn) => fn.options.name === name)?.render;
+    hasFunction: (name: string) => {
+      return functionRegistry.has(name);
     },
-    chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
+    hasRenderFunction: (name: string) => {
+      return renderFunctionRegistry.has(name);
+    },
+    complete({ connectorId, messages, conversationId, persist, signal }) {
+      const subject = new Subject<StreamingChatResponseEvent>();
+
+      client('POST /internal/observability_ai_assistant/chat/complete', {
+        params: {
+          body: {
+            messages,
+            connectorId,
+            conversationId,
+            persist,
+          },
+        },
+        signal,
+        asResponse: true,
+        rawResponse: true,
+      })
+        .then((_response) => {
+          const response = _response as unknown as HttpResponse<IncomingMessage>;
+          const response$ = toObservable(response)
+            .pipe(
+              map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+              tap((event) => {
+                if (event.type === StreamingChatResponseEventType.ConversationCompletionError) {
+                  const code = event.error.code ?? ChatCompletionErrorCode.InternalError;
+                  const message = event.error.message;
+                  throw new ConversationCompletionError(code, message);
+                }
+              })
+            )
+            .subscribe(subject);
+
+          signal.addEventListener('abort', () => {
+            response$.unsubscribe();
+          });
+        })
+        .catch((err) => {
+          subject.error(err);
+          subject.complete();
+        });
+
+      return subject;
+    },
+    chat({
+      connectorId,
+      messages,
+      function: callFunctions = 'auto',
+    }: {
+      connectorId: string;
+      messages: Message[];
+      function?: 'none' | 'auto';
+    }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {
           role: MessageRole.Assistant,
@@ -145,7 +225,12 @@ export async function createChatService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+            functions:
+              callFunctions === 'none'
+                ? []
+                : functions
+                    .filter((fn) => fn.visibility !== FunctionVisibility.User)
+                    .map((fn) => pick(fn, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,
@@ -155,29 +240,10 @@ export async function createChatService({
         .then((_response) => {
           const response = _response as unknown as HttpResponse<IncomingMessage>;
 
-          const status = response.response?.status;
-
-          if (!status || status >= 400) {
-            throw new Error(response.response?.statusText || 'Unexpected error');
-          }
-
-          const reader = response.response.body?.getReader();
-
-          if (!reader) {
-            throw new Error('Could not get reader from response');
-          }
-
-          const subscription = readableStreamReaderIntoObservable(reader)
+          const subscription = toObservable(response)
             .pipe(
-              map((line) => line.substring(6)),
-              rxJsFilter((line) => !!line && line !== '[DONE]'),
-              map((line) => JSON.parse(line) as CreateChatCompletionResponseChunk),
-              rxJsFilter((line) => line.object === 'chat.completion.chunk'),
-              tap((choice) => {
-                if (choice.choices[0].finish_reason === 'length') {
-                  throw new TokenLimitReachedError();
-                }
-              }),
+              processOpenAiStream(),
+              // merge the messages
               scan(
                 (acc, { choices }) => {
                   acc.message.content += choices[0].delta.content ?? '';
@@ -198,6 +264,7 @@ export async function createChatService({
                   },
                 }
               ),
+              // convert an error into state
               catchError((error) =>
                 of({
                   ...subject.value,
@@ -208,6 +275,7 @@ export async function createChatService({
             )
             .subscribe(subject);
 
+          // if the request is aborted, convert that into state as well
           controller.signal.addEventListener('abort', () => {
             subscription.unsubscribe();
             subject.next({
@@ -216,6 +284,16 @@ export async function createChatService({
             });
             subject.complete();
           });
+        })
+        .catch(async (err) => {
+          if ('response' in err) {
+            const body = await (err.response as HttpResponse['response'])?.json();
+            err.body = body;
+            if (body.message) {
+              err.message = body.message;
+            }
+          }
+          throw err;
         })
         .catch((err) => {
           subject.next({
@@ -226,13 +304,18 @@ export async function createChatService({
           subject.complete();
         });
 
-      return subject.pipe(
-        concatMap((value) => of(value).pipe(delay(50))),
+      const pendingMessages$ = subject.pipe(
+        // make sure the request is only triggered once,
+        // even with multiple subscribers
         shareReplay(1),
+        // if the Observable is no longer subscribed,
+        // abort the running request
         finalize(() => {
           controller.abort();
         })
       );
+
+      return pendingMessages$;
     },
   };
 }

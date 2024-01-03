@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   TIMELINE_DROPPED_DATA_PROVIDERS,
@@ -16,28 +15,27 @@ import {
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   addDataProvider,
   updateDataProviderbyDraggingField,
   addNameAndDescriptionToTimeline,
   populateTimeline,
-  waitForTimelineChanges,
   createNewTimeline,
   updateDataProviderByFieldHoverAction,
+  saveTimeline,
 } from '../../../tasks/timeline';
 import { getTimeline } from '../../../objects/timeline';
-import { HOSTS_URL } from '../../../urls/navigation';
-import { cleanKibana, scrollToBottom } from '../../../tasks/common';
+import { hostsUrl } from '../../../urls/navigation';
+import { scrollToBottom } from '../../../tasks/common';
 
-describe('timeline data providers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+// Failing in serverless
+// FLAKY: https://github.com/elastic/kibana/issues/169396
+describe.skip('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
     scrollToBottom();
     createNewTimeline();
@@ -58,22 +56,26 @@ describe('timeline data providers', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
-  it('persists timeline when data provider is updated by dragging a field from data grid', () => {
-    updateDataProviderbyDraggingField('host.name', 0);
-    waitForTimelineChanges();
-    cy.reload();
-    cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
-      .first()
-      .then((hostname) => {
-        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
-      });
-  });
+  it(
+    'persists timeline when data provider is updated by dragging a field from data grid',
+    { tags: ['@brokenInServerless'] },
+    () => {
+      updateDataProviderbyDraggingField('host.name', 0);
+      saveTimeline();
+      cy.reload();
+      cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
+        .first()
+        .then((hostname) => {
+          cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
+        });
+    }
+  );
 
   it('persists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     addDataProvider({ field: 'host.name', operator: 'exists' });
-    waitForTimelineChanges();
+    saveTimeline();
     updateDataProviderByFieldHoverAction('host.name', 0);
-    waitForTimelineChanges();
+    saveTimeline();
     cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()

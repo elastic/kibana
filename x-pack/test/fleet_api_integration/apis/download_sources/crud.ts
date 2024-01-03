@@ -357,7 +357,7 @@ export default function (providerContext: FtrProviderContext) {
           'https://some.source.proxy:3232'
         );
 
-        const res = await supertest
+        await supertest
           .put(`/api/fleet/agent_download_sources/${downloadSourceId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({

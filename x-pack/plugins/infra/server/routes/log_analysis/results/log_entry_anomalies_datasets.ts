@@ -15,6 +15,9 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBackendLibs) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -36,6 +39,7 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
         const {
           data: {
             logView,
+            idFormats,
             timeRange: { startTime, endTime },
           },
         } = request.body;
@@ -46,6 +50,7 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
           const { datasets, timing } = await getLogEntryAnomaliesDatasets(
             { infra: await infraMlContext.infra },
             logView,
+            idFormats,
             startTime,
             endTime
           );

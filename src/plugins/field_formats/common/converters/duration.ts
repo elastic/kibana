@@ -99,6 +99,12 @@ export class DurationFormat extends FieldFormat {
     const human = this.isHuman();
     const humanPrecise = this.isHumanPrecise();
 
+    if (human && val === 0) {
+      return i18n.translate('fieldFormats.duration.zeroSecondsLabel', {
+        defaultMessage: '0 seconds',
+      }); // Handle the case of 0 value for "Human Friendly"
+    }
+
     const prefix =
       val < 0 && human
         ? i18n.translate('fieldFormats.duration.negativeLabel', {

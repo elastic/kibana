@@ -24,6 +24,7 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorService } from './data_view_editor_service';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -74,12 +75,20 @@ export interface DataViewEditorProps {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
 
+export type { DataViewEditorService };
 export interface PluginStart {
   openEditor(options: DataViewEditorProps): () => void;
   IndexPatternEditorComponent: FC<DataViewEditorProps>;
   userPermissions: {
     editDataView: () => boolean;
   };
+  /**
+   * Helper method to generate a new data view editor service.
+   * @param requireTimestampField - whether service requires requireTimestampField
+   * @param initialValues - initial type, indexPattern, and name to populate service
+   * @returns DataViewEditorService
+   */
+  dataViewEditorServiceFactory: () => Promise<typeof import('./data_view_editor_service_lazy')>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

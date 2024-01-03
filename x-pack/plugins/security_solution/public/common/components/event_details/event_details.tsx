@@ -55,7 +55,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
-import { useRiskScoreData } from './use_risk_score_data';
+import { useRiskScoreData } from '../../../entity_analytics/api/hooks/use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -171,8 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
-  const { ruleId } = useBasicDataFromDetailsData(data);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -222,6 +222,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -288,7 +289,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     isReadOnly,
                   }}
                   goToTable={goToTableTab}
-                  investigationFields={maybeRule?.investigation_fields ?? []}
+                  investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
                 />
                 <EuiSpacer size="xl" />
                 <Insights
@@ -319,7 +320,9 @@ const EventDetailsComponent: React.FC<Props> = ({
                   </>
                 )}
 
-                <InvestigationGuideView data={data} />
+                {basicAlertData.ruleId && maybeRule?.note && (
+                  <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
+                )}
               </>
             ),
           }
@@ -332,17 +335,19 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       handleOnEventClosed,
       isReadOnly,
+      threatDetails,
       renderer,
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
+      maybeRule?.investigation_fields,
+      maybeRule?.note,
       showThreatSummary,
       hostRisk,
       userRisk,
       allEnrichments,
       isEnrichmentsLoading,
-      maybeRule,
+      basicAlertData,
     ]
   );
 

@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
@@ -50,6 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '14,005',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -62,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.ram', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -80,6 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,104,036,080.615',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -91,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Max Bucket', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -110,6 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '1,437',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -146,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await backgroundButton.click();
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -164,6 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,228,964,670.613',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -173,6 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,186,695,551.251',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -182,6 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,073,190,186.423',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -191,6 +197,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,031,579,645.108',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -200,6 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: '',
           value: '13,009,497,206.823',
           color: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -208,7 +216,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: undefined,
           value: undefined,
-          color: 'rgba(0, 0, 0, 0)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },

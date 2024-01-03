@@ -24,12 +24,13 @@ import type { CloudLinks } from '../src/cloud_links';
 export interface NavigationServices {
   basePath: BasePathService;
   recentlyAccessed$: Observable<RecentItem[]>;
-  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
+  deepLinks$: Observable<Readonly<Record<string, ChromeNavLink>>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   cloudLinks: CloudLinks;
+  isSideNavCollapsed: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ export interface NavigationKibanaDependencies {
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
+      getIsSideNavCollapsed$: () => Observable<boolean>;
     };
     http: {
       basePath: BasePathService;

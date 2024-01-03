@@ -23,7 +23,8 @@ import {
   timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
-  lensTablesAdapterSelector,
+  lensAdaptersSelector,
+  lensEmbeddableOutputSelector$,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
@@ -45,7 +46,11 @@ export const useStateProps = ({
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
-  const lensTablesAdapter = useStateSelector(stateService?.state$, lensTablesAdapterSelector);
+  const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
+  const lensEmbeddableOutput$ = useStateSelector(
+    stateService?.state$,
+    lensEmbeddableOutputSelector$
+  );
   /**
    * Contexts
    */
@@ -140,7 +145,8 @@ export const useStateProps = ({
     (event: UnifiedHistogramChartLoadEvent) => {
       // We need to store the Lens request adapter in order to inspect its requests
       stateService?.setLensRequestAdapter(event.adapters.requests);
-      stateService?.setLensTablesAdapter(event.adapters.tables?.tables);
+      stateService?.setLensAdapters(event.adapters);
+      stateService?.setLensEmbeddableOutput$(event.embeddableOutput$);
     },
     [stateService]
   );
@@ -176,7 +182,8 @@ export const useStateProps = ({
     breakdown,
     request,
     isPlainRecord,
-    lensTablesAdapter,
+    lensAdapters,
+    lensEmbeddableOutput$,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,

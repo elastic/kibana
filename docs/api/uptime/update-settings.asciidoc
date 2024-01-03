@@ -1,0 +1,117 @@
+[[update-settings-api]]
+== Update settings API
+++++
+<titleabbrev>Update settings</titleabbrev>
+++++
+
+Updates uptime settings attributes like heartbeatIndices, certExpirationThreshold, certAgeThreshold, defaultConnectors or defaultEmail
+
+=== {api-request-title}
+
+`PUT <kibana host>:<port>/api/uptime/settings`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/uptime/settings`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *uptime* feature in *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[[settings-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[api-update-request-body]]
+==== Request body
+
+A partial update is supported, provided settings keys will be merged with existing settings.
+
+`heartbeatIndices`::
+(Optional, string) index pattern string to be used within uptime app/alerts to query heartbeat data. Defaults to `heartbeat-*`.
+
+
+`certExpirationThreshold`::
+(Optional, number) Number of days before a certificate expires to trigger an alert. Defaults to `30`.
+
+`certAgeThreshold`::
+(Optional, number) Number of days after a certificate is created to trigger an alert. Defaults to `730`.
+
+`defaultConnectors`::
+(Optional, array) List of connector IDs to be used as default connectors for new alerts. Defaults to `[]`.
+
+`defaultEmail`::
+(Optional, object) Default email configuration for new alerts. Defaults to `{"to": [], "cc": [], "bcc": []}`.
+
+[[settings-api-update-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+PUT api/uptime/settings
+{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}
+--------------------------------------------------
+[[settings-api-partial-update-example]]
+==== Partial update example
+
+[source,sh]
+--------------------------------------------------
+PUT api/uptime/settings
+{
+    "heartbeatIndices": "heartbeat-8*",
+}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+    "heartbeatIndices": "heartbeat-8*",
+    "certExpirationThreshold": 30,
+    "certAgeThreshold": 730,
+    "defaultConnectors": [
+        "08990f40-09c5-11ee-97ae-912b222b13d4",
+        "db25f830-2318-11ee-9391-6b0c030836d6"
+    ],
+    "defaultEmail": {
+        "to": [],
+        "cc": [],
+        "bcc": []
+    }
+}
+--------------------------------------------------

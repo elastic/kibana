@@ -13,23 +13,23 @@ import {
 } from '../../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
-import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { USERS_URL } from '../../../urls/navigation';
+import { waitForTabToBeLoaded } from '../../../tasks/common';
 
-describe('Users stats and tables', () => {
+describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-    cy.task('esArchiverLoad', 'users');
+    cy.task('esArchiverLoad', { archiveName: 'users' });
 
-    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   beforeEach(() => {
     login();
-    visit(USERS_URL);
+    visitWithTimeRange(USERS_URL);
   });
 
   after(() => {
@@ -49,7 +49,7 @@ describe('Users stats and tables', () => {
     it(`renders all authentications`, () => {
       const totalUsers = 1;
 
-      cy.get(AUTHENTICATIONS_TAB).click();
+      waitForTabToBeLoaded(AUTHENTICATIONS_TAB);
 
       cy.get(AUTHENTICATIONS_TABLE)
         .find(HEADER_SUBTITLE)
@@ -57,19 +57,19 @@ describe('Users stats and tables', () => {
     });
 
     it(`renders anomalies tab`, () => {
-      cy.get(ANOMALIES_TAB).click({ force: true });
+      waitForTabToBeLoaded(ANOMALIES_TAB);
 
       cy.get(ANOMALIES_TAB_CONTENT).should('exist');
     });
 
     it(`renders events tab`, () => {
-      cy.get(EVENTS_TAB).click({ force: true });
+      waitForTabToBeLoaded(EVENTS_TAB);
 
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
     it(`renders users risk tab`, () => {
-      cy.get(RISK_SCORE_TAB).click({ force: true });
+      waitForTabToBeLoaded(RISK_SCORE_TAB);
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
     });

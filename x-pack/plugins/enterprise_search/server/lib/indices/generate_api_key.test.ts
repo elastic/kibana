@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { generateApiKey } from './generate_api_key';
 
@@ -94,7 +94,7 @@ describe('generateApiKey lib function', () => {
           cluster: ['monitor'],
           index: [
             {
-              names: ['search-test', '.search-acl-filter-test', `${CONNECTORS_INDEX}*`],
+              names: ['search-test', '.search-acl-filter-search-test', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],

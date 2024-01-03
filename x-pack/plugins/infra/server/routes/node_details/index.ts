@@ -34,30 +34,46 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      const { nodeId, cloudId, nodeType, metrics, timerange, sourceId } = pipe(
-        NodeDetailsRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-      const soClient = (await requestContext.core).savedObjects.client;
-      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
+      try {
+        const { nodeId, cloudId, nodeType, metrics, timerange, sourceId } = pipe(
+          NodeDetailsRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const soClient = (await requestContext.core).savedObjects.client;
+        const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
-      UsageCollector.countNode(nodeType);
+        UsageCollector.countNode(nodeType);
 
-      const options: InfraMetricsRequestOptions = {
-        nodeIds: {
-          nodeId,
-          cloudId,
-        },
-        nodeType,
-        sourceConfiguration: source.configuration,
-        metrics,
-        timerange,
-      };
-      return response.ok({
-        body: NodeDetailsMetricDataResponseRT.encode({
-          metrics: await libs.metrics.getMetrics(requestContext, options, request),
-        }),
-      });
+        const options: InfraMetricsRequestOptions = {
+          nodeIds: {
+            nodeId,
+            cloudId,
+          },
+          nodeType,
+          sourceConfiguration: source.configuration,
+          metrics,
+          timerange,
+        };
+        return response.ok({
+          body: NodeDetailsMetricDataResponseRT.encode({
+            metrics: await libs.metrics.getMetrics(requestContext, options, request),
+          }),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 };

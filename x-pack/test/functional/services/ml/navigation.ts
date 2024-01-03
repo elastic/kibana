@@ -200,6 +200,10 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
+    async navigateToDataDrift() {
+      await this.navigateToArea('~mlMainTab & ~dataDrift', 'mlPageDataDrift');
+    },
+
     async navigateToJobManagement() {
       await this.navigateToAnomalyDetection();
     },

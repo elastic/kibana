@@ -13,7 +13,7 @@ import {
   deleteAgentPolicy,
   deletePackagePolicy,
   setupFleet,
-} from './apm_package_policy_setup';
+} from './helpers';
 import { getBettertest } from '../../common/bettertest';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
@@ -76,7 +76,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
       describe('with Cloud agent policy', () => {
         before(async () => {
-          await createAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
+          await createAgentPolicy({ bettertest, id: 'policy-elastic-agent-on-cloud' });
         });
         after(async () => {
           await deleteAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
@@ -92,7 +92,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     describe('has_cloud_apm_package_policy', () => {
       before(async () => {
-        await createAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
+        await createAgentPolicy({ bettertest, id: 'policy-elastic-agent-on-cloud' });
       });
       after(async () => {
         await deleteAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
@@ -107,7 +107,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
       describe('with Cloud APM package policy', () => {
         before(async () => {
-          await createPackagePolicy(bettertest, 'policy-elastic-agent-on-cloud', 'apm');
+          await createPackagePolicy({
+            bettertest,
+            agentPolicyId: 'policy-elastic-agent-on-cloud',
+            id: 'apm',
+          });
         });
         after(async () => {
           await deletePackagePolicy(bettertest, 'apm');
@@ -125,7 +129,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     describe('has_apm_integrations', () => {
       before(async () => {
-        await createAgentPolicy(bettertest, 'test-agent-policy');
+        await createAgentPolicy({ bettertest, id: 'test-agent-policy' });
       });
       after(async () => {
         await deleteAgentPolicy(bettertest, 'test-agent-policy');
@@ -139,7 +143,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
       describe('with custom APM package policy', () => {
         before(async () => {
-          await createPackagePolicy(bettertest, 'test-agent-policy', 'test-apm-package-policy');
+          await createPackagePolicy({
+            bettertest,
+            agentPolicyId: 'test-agent-policy',
+            id: 'test-apm-package-policy',
+          });
         });
         after(async () => {
           await deletePackagePolicy(bettertest, 'test-apm-package-policy');

@@ -399,6 +399,7 @@ export class JobsList extends Component {
         rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
+        css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
       />
     );
   }

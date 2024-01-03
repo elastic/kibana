@@ -13,5 +13,3 @@ export function plugin() {
 }
 
 export type { ProfilingPluginSetup, ProfilingPluginStart };
-
-export type ProfilingLocators = ProfilingPluginSetup['locators'];

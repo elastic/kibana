@@ -22,7 +22,6 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./execute'));
-    loadTestFile(require.resolve('./enqueue'));
     loadTestFile(require.resolve('./bulk_enqueue'));
     loadTestFile(require.resolve('./connector_types/stack/email'));
     loadTestFile(require.resolve('./connector_types/stack/email_html'));
@@ -32,6 +31,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./type_not_enabled'));
     loadTestFile(require.resolve('./schedule_unsecured_action'));
     loadTestFile(require.resolve('./check_registered_connector_types'));
+    loadTestFile(require.resolve('./max_queued_actions_circuit_breaker'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

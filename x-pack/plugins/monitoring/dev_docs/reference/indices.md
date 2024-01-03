@@ -24,8 +24,8 @@ And finally if using the standalone metricbeat modules with `xpack.enabled: fals
 
 The index templates for `.monitoring-*` are shipped with and managed by Elasticsearch itself and can be found in that code repository. For example:
 
-- [monitoring-es.json](https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/resources/monitoring-es.json) - for internal collection or standalone metricbeat prior to 8.0
-- [monitoring-es-mb.json](https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/resources/monitoring-es-mb.json) - for standalone metricbeat after 8.0
+- [monitoring-es.json](https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/core/template-resources/src/main/resources/monitoring-es.json) - for internal collection or standalone metricbeat prior to 8.0
+- [monitoring-es-mb.json](https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/core/template-resources/src/main/resources/monitoring-es-mb.json) - for standalone metricbeat after 8.0
 
 To verify changes to these templates, either make them in place on a running cluster or run elasticsearch from source.
 

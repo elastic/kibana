@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
@@ -144,6 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show the full screen button', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.missingOrFail('dataGridFullScreenButton');
+    });
+
+    it('should show the the grid toolbar', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.existOrFail('dscGridToolbar');
     });
   });
 }

@@ -10,10 +10,9 @@ import { useMemo, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../types';
-import { getFieldIconType } from '../utils/field_types';
-import { fieldNameWildcardMatcher } from '../utils/field_name_wildcard_matcher';
+import { type FieldListItem, GetCustomFieldType } from '../types';
 
 const htmlId = htmlIdGenerator('fieldList');
 
@@ -58,7 +57,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   const docLinks = services.core.docLinks;
 
   return useMemo(() => {
-    const fieldSearchHighlight = nameFilter.toLowerCase();
+    const fieldSearchHighlight = nameFilter.trim().toLowerCase();
     return {
       fieldSearchHighlight,
       fieldListFiltersProps: {

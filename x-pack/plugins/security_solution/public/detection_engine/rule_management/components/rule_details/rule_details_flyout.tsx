@@ -7,8 +7,9 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiTitle,
   EuiFlyout,
@@ -20,11 +21,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
+import {
+  DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
+  LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
+} from './constants';
 
 import * as i18n from './translations';
 
@@ -37,7 +42,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} ${theme.eui.euiSizeM}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeL} 0`};
     }
   }
 `;
@@ -79,19 +84,40 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
+/*
+ * Fixes tabs to the top and allows the content to scroll.
+ */
+const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
+  <StyledFlexGroup direction="column" gutterSize="none">
+    <StyledEuiFlexItem grow={true}>
+      <StyledEuiTabbedContent {...props} />
+    </StyledEuiFlexItem>
+  </StyledFlexGroup>
+);
+
+const tabPaddingClassName = css`
+  padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
+`;
+
+export const TabContentPadding: React.FC = ({ children }) => (
+  <div className={tabPaddingClassName}>{children}</div>
+);
+
 interface RuleDetailsFlyoutProps {
-  rule: Partial<RuleResponse>;
-  actionButtonLabel: string;
-  isActionButtonDisabled: boolean;
-  onActionButtonClick: (ruleId: string) => void;
+  rule: RuleResponse;
+  ruleActions?: React.ReactNode;
+  size?: EuiFlyoutProps['size'];
+  extraTabs?: EuiTabbedContentTab[];
+  dataTestSubj?: string;
   closeFlyout: () => void;
 }
 
 export const RuleDetailsFlyout = ({
   rule,
-  actionButtonLabel,
-  isActionButtonDisabled,
-  onActionButtonClick,
+  ruleActions,
+  size = 'm',
+  extraTabs = [],
+  dataTestSubj,
   closeFlyout,
 }: RuleDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
@@ -101,32 +127,43 @@ export const RuleDetailsFlyout = ({
       id: 'overview',
       name: i18n.OVERVIEW_TAB_LABEL,
       content: (
-        <RuleOverviewTab
-          rule={rule}
-          expandedOverviewSections={expandedOverviewSections}
-          toggleOverviewSection={toggleOverviewSection}
-        />
+        <TabContentPadding>
+          <RuleOverviewTab
+            rule={rule}
+            columnWidths={
+              size === 'l'
+                ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
+                : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
+            }
+            expandedOverviewSections={expandedOverviewSections}
+            toggleOverviewSection={toggleOverviewSection}
+          />
+        </TabContentPadding>
       ),
     }),
-    [rule, expandedOverviewSections, toggleOverviewSection]
+    [rule, size, expandedOverviewSections, toggleOverviewSection]
   );
 
   const investigationGuideTab: EuiTabbedContentTab = useMemo(
     () => ({
       id: 'investigationGuide',
       name: i18n.INVESTIGATION_GUIDE_TAB_LABEL,
-      content: <RuleInvestigationGuideTab note={rule.note ?? ''} />,
+      content: (
+        <TabContentPadding>
+          <RuleInvestigationGuideTab note={rule.note ?? ''} />
+        </TabContentPadding>
+      ),
     }),
     [rule.note]
   );
 
   const tabs = useMemo(() => {
     if (rule.note) {
-      return [overviewTab, investigationGuideTab];
+      return [...extraTabs, overviewTab, investigationGuideTab];
     } else {
-      return [overviewTab];
+      return [...extraTabs, overviewTab];
     }
-  }, [overviewTab, investigationGuideTab, rule.note]);
+  }, [overviewTab, investigationGuideTab, rule.note, extraTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
@@ -144,24 +181,25 @@ export const RuleDetailsFlyout = ({
 
   return (
     <EuiFlyout
-      size="m"
+      size={size}
       onClose={closeFlyout}
       ownFocus={false}
       key="prebuilt-rules-flyout"
       paddingSize="l"
+      data-test-subj={dataTestSubj}
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m" data-test-subj="rulesBulkEditFormTitle">
+        <EuiTitle size="m">
           <h2>{rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <StyledFlexGroup direction="column" gutterSize="none">
-          <StyledEuiFlexItem grow={true}>
-            <StyledEuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-          </StyledEuiFlexItem>
-        </StyledFlexGroup>
+        <ScrollableFlyoutTabbedContent
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={onTabClick}
+        />
       </StyledEuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -170,18 +208,7 @@ export const RuleDetailsFlyout = ({
               {i18n.DISMISS_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={isActionButtonDisabled}
-              onClick={() => {
-                onActionButtonClick(rule.rule_id ?? '');
-                closeFlyout();
-              }}
-              fill
-            >
-              {actionButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

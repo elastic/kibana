@@ -14,7 +14,7 @@ import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { TemplateForm } from '../../components';
@@ -46,7 +46,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('templateEdit');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templateEdit);
   }, []);
 
   const onSave = async (updatedTemplate: TemplateDeserialized) => {

@@ -6,24 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+import type { EnrichSummary } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '../../common/types';
-
-const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
-  if (policy.config.match) {
-    return 'match';
-  }
-
-  if (policy.config.geo_match) {
-    return 'geo_match';
-  }
-
-  if (policy.config.range) {
-    return 'range';
-  }
-
-  throw new Error('Unknown policy type');
-};
+import { getPolicyType } from '../../common/lib';
 
 export const serializeEnrichmentPolicies = (
   policies: EnrichSummary[]
@@ -37,6 +22,7 @@ export const serializeEnrichmentPolicies = (
       sourceIndices: policy.config[policyType].indices,
       matchField: policy.config[policyType].match_field,
       enrichFields: policy.config[policyType].enrich_fields,
+      query: policy.config[policyType].query,
     };
   });
 };
@@ -47,6 +33,33 @@ const fetchAll = async (client: IScopedClusterClient) => {
   return serializeEnrichmentPolicies(res.policies);
 };
 
+const create = (
+  client: IScopedClusterClient,
+  policyName: string,
+  serializedPolicy: EnrichSummary['config']
+) => {
+  return client.asCurrentUser.enrich.putPolicy({
+    name: policyName,
+    ...serializedPolicy,
+  });
+};
+
+const execute = (client: IScopedClusterClient, policyName: string) => {
+  // Enrich policy executions can last as short as a few seconds to as long as half and hour or longer.
+  // In order to prevent the enrich policies UI from timing out, we are disabling `waitForCompletion`.
+  return client.asCurrentUser.enrich.executePolicy({
+    name: policyName,
+    wait_for_completion: false,
+  });
+};
+
+const remove = (client: IScopedClusterClient, policyName: string) => {
+  return client.asCurrentUser.enrich.deletePolicy({ name: policyName });
+};
+
 export const enrichPoliciesActions = {
   fetchAll,
+  create,
+  execute,
+  remove,
 };

@@ -9,7 +9,6 @@
         "title": "hidden object 1"
       },
       "type": "test-actions-export-hidden",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
   }
@@ -26,7 +25,6 @@
         "title": "hidden object 2"
       },
       "type": "test-actions-export-hidden",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
   }

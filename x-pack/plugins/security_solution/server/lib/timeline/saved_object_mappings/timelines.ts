@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { timelinesMigrations } from './migrations/timelines';
@@ -316,7 +317,23 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     updatedBy: {
       type: 'text',
     },
+    savedSearchId: {
+      type: 'text',
+    },
   },
+};
+
+const timelineSOVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        savedSearchId: {
+          type: 'text',
+        },
+      },
+    },
+  ],
 };
 
 export const timelineType: SavedObjectsType = {
@@ -327,4 +344,7 @@ export const timelineType: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: timelineSavedObjectMappings,
   migrations: timelinesMigrations,
+  modelVersions: {
+    1: timelineSOVersion1,
+  },
 };

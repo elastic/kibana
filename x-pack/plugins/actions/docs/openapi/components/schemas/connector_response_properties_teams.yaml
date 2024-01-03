@@ -7,6 +7,8 @@ required:
   - is_preconfigured
   - name
 properties:
+  config:
+    type: object
   connector_type_id:
     type: string
     description: The type of connector.
@@ -26,3 +28,5 @@ properties:
   name:
     type: string
     description: The display name for the connector.
+  referenced_by_count:
+    $ref: 'referenced_by_count.yaml'

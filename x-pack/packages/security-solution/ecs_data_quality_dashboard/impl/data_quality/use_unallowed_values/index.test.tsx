@@ -25,7 +25,11 @@ const mockTelemetryEvents = {
 };
 
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={true}
+  >
     {children}
   </DataQualityProvider>
 );

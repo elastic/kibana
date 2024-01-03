@@ -40,6 +40,9 @@
     "@kbn/text-based-languages",
     "@kbn/text-based-editor",
     "@kbn/core-doc-links-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/ml-string-hash",
+    "@kbn/calculate-width-from-char-count"
   ],
   "exclude": [
     "target/**/*",

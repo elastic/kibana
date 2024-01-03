@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
-import { tag } from '../../../tags';
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
@@ -22,17 +21,16 @@ import {
   goToStep,
   startTour,
 } from '../../../tasks/guided_onboarding';
-import { cleanKibana } from '../../../tasks/common';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
-describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     createRule(getNewRule({ query: 'user.name:*' }));
   });
@@ -70,49 +68,37 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
     assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
   });
 
-  describe.skip(
-    'persists tour steps in flyout on flyout toggle',
-    { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
-    () => {
-      const stepsInAlertsFlyout = [
-        AlertsCasesTourSteps.reviewAlertDetailsFlyout,
-        AlertsCasesTourSteps.addAlertToCase,
-        AlertsCasesTourSteps.viewCase,
-      ];
+  describe('persists tour steps in flyout on flyout toggle', () => {
+    const stepsInAlertsFlyout = [
+      AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+      AlertsCasesTourSteps.addAlertToCase,
+      AlertsCasesTourSteps.viewCase,
+    ];
 
-      const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
+    const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
-      stepsInAlertsFlyout.forEach((step) => {
-        it(
-          `step: ${step}, resets to ${step}`,
-          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
-          () => {
-            startTour();
-            goToStep(step);
-            assertTourStepExist(step);
-            closeAlertFlyout();
-            assertTourStepNotExist(step);
-            expandFirstAlert();
-            assertTourStepExist(step);
-          }
-        );
+    stepsInAlertsFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${step}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeAlertFlyout();
+        assertTourStepNotExist(step);
+        expandFirstAlert();
+        assertTourStepExist(step);
       });
+    });
 
-      stepsInCasesFlyout.forEach((step) => {
-        it(
-          `step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`,
-          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
-          () => {
-            startTour();
-            goToStep(step);
-            assertTourStepExist(step);
-            closeCreateCaseFlyout();
-            assertTourStepNotExist(step);
-            addToCase();
-            assertTourStepExist(AlertsCasesTourSteps.createCase);
-          }
-        );
+    stepsInCasesFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeCreateCaseFlyout();
+        assertTourStepNotExist(step);
+        addToCase();
+        assertTourStepExist(AlertsCasesTourSteps.createCase);
       });
-    }
-  );
+    });
+  });
 });

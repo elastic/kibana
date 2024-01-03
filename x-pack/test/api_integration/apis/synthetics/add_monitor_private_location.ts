@@ -7,7 +7,13 @@
 import moment from 'moment';
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  HTTPFields,
+  LocationStatus,
+  PrivateLocation,
+  ServiceLocation,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
@@ -17,7 +23,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  INSTALLED_VERSION,
+  PrivateLocationTestService,
+} from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -57,18 +66,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
-      expect(apiResponse.body.locations).eql([
+      const testResponse: Array<PrivateLocation | ServiceLocation> = [
         {
           id: 'localhost',
           label: 'Local Synthetics Service',
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
-          status: 'experimental',
+          status: LocationStatus.EXPERIMENTAL,
           isInvalid: false,
         },
         {
-          concurrentMonitors: 1,
           id: testFleetPolicyID,
           isServiceManaged: false,
           isInvalid: false,
@@ -78,8 +86,11 @@ export default function ({ getService }: FtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
+          namespace: 'default',
         },
-      ]);
+      ];
+
+      expect(apiResponse.body.locations).eql(testResponse);
     });
 
     it('does not add a monitor if there is an error in creating integration', async () => {
@@ -387,6 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: monitorId,
             location: { id: testFleetPolicyID },
             namespace: formatKibanaNamespace(SPACE_ID),
+            spaceId: SPACE_ID,
           })
         );
         await supertestWithoutAuth
@@ -537,7 +549,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('1.0.4');
+        expect(packagePolicy.package.version).eql(INSTALLED_VERSION);
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -547,7 +559,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '1.0.4')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, INSTALLED_VERSION)).eql(true);
       } finally {
         await supertestAPI
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

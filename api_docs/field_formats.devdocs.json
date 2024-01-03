@@ -5538,16 +5538,16 @@
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.HtmlContextTypeConvert",
-            "text": "HtmlContextTypeConvert"
+            "section": "def-common.TextContextTypeConvert",
+            "text": "TextContextTypeConvert"
           },
           " | ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.TextContextTypeConvert",
-            "text": "TextContextTypeConvert"
+            "section": "def-common.HtmlContextTypeConvert",
+            "text": "HtmlContextTypeConvert"
           }
         ],
         "path": "src/plugins/field_formats/common/types.ts",

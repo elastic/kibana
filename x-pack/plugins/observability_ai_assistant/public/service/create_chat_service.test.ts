@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { ReadableStream } from 'stream/web';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
@@ -39,7 +39,18 @@ describe('createChatService', () => {
     }
 
     beforeEach(async () => {
+      clientSpy.mockImplementationOnce(async () => {
+        return {
+          functionDefinitions: [],
+          contextDefinitions: [],
+        };
+      });
       service = await createChatService({
+        analytics: {
+          optIn: () => {},
+          reportEvent: () => {},
+          telemetryCounter$: new Observable(),
+        },
         client: clientSpy,
         registrations: [],
         signal: new AbortController().signal,
@@ -142,6 +153,26 @@ describe('createChatService', () => {
 
     it('propagates JSON parsing errors', async () => {
       respondWithChunks({ chunks: ['data: {}', 'data: invalid json'] });
+
+      const response$ = chat();
+
+      const value = await lastValueFrom(response$);
+
+      expect(value).toEqual({
+        aborted: false,
+        error: expect.any(Error),
+        message: {
+          role: 'assistant',
+        },
+      });
+    });
+
+    it('propagates content errors', async () => {
+      respondWithChunks({
+        chunks: [
+          `data: {"error":{"message":"The server had an error while processing your request. Sorry about that!","type":"server_error","param":null,"code":null}}`,
+        ],
+      });
 
       const response$ = chat();
 

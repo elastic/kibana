@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getTestRuleData,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../common/lib';
@@ -50,11 +50,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'runSoon',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('runSoon', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

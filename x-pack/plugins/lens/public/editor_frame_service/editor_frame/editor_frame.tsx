@@ -186,6 +186,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
                 core={props.core}
+                showOnlyIcons
               />
             </ErrorBoundary>
           )

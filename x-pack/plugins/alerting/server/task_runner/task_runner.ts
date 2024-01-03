@@ -6,13 +6,19 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  createTaskRunError,
+  TaskErrorSource,
+  throwUnrecoverableError,
+} from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -20,40 +26,40 @@ import {
   ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
-  ruleExecutionStatusToRaw,
+  getNextRun,
   isRuleSnoozed,
   lastRunFromError,
-  getNextRun,
+  ruleExecutionStatusToRaw,
 } from '../lib';
 import {
-  RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   IntervalSchedule,
   RawRuleExecutionStatus,
+  RawRuleLastRun,
   RawRuleMonitoring,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   RuleTaskState,
   RuleTypeRegistry,
-  RawRuleLastRun,
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateAlert } from '../saved_objects';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  RuleTypeParams,
-  RuleTypeState,
   parseDuration,
   RawAlertInstance,
-  RuleLastRunOutcomeOrderMap,
-  MaintenanceWindow,
   RuleAlertData,
+  RuleLastRunOutcomeOrderMap,
+  RuleNotifyWhen,
+  RuleTypeParams,
+  RuleTypeState,
   SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import {
   RuleTaskInstance,
   RuleTaskRunResult,
@@ -79,6 +85,8 @@ import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getTimeRange } from '../lib/get_time_range';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -214,7 +222,7 @@ export class TaskRunner<
       // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateAlert(
+      await partiallyUpdateRule(
         client,
         ruleId,
         { ...attributes, running: false },
@@ -323,6 +331,7 @@ export class TaskRunner<
 
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
 
     const alertsClientParams = {
       logger: this.logger,
@@ -378,6 +387,7 @@ export class TaskRunner<
       maxAlerts: this.maxAlerts,
       ruleLabel,
       flappingSettings,
+      startedAt: this.taskInstance.startedAt!,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
@@ -413,11 +423,29 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows.map(
-      (maintenanceWindow) => maintenanceWindow.id
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(ruleType.category)) {
+        return true;
+      }
+      return false;
+    });
+
+    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => !scopedQuery
     );
-    if (maintenanceWindowIds.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
+      ({ id }) => id
+    );
+
+    // Set the event log MW Id field the first time with MWs without scoped queries
+    if (maintenanceWindowsWithoutScopedQuery.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
     }
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
@@ -446,7 +474,7 @@ export class TaskRunner<
           };
 
           const savedObjectsClient = this.context.savedObjects.getScopedClient(fakeRequest, {
-            includedHiddenTypes: ['alert', 'action'],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
           });
 
           const dataViews = await this.context.dataViews.dataViewsServiceFactory(
@@ -500,7 +528,11 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              ...(maintenanceWindowsWithoutScopedQueryIds.length
+                ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                : {}),
+              getTimeRange: (timeWindow) =>
+                getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
           );
 
@@ -521,7 +553,10 @@ export class TaskRunner<
               message: err,
               stackTrace: err.stack,
             };
-            throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+            throw createTaskRunError(
+              new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err),
+              TaskErrorSource.USER
+            );
           }
         }
 
@@ -541,18 +576,47 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAndLogAlerts({
-        eventLogger: this.alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      alertsClient.processAlerts({
         flappingSettings,
-        notifyWhen,
-        maintenanceWindowIds,
+        notifyOnActionGroupChange:
+          notifyWhen === RuleNotifyWhen.CHANGE ||
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
       });
     });
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
       await alertsClient.persistAlerts();
+    });
+
+    let updateAlertsMaintenanceWindowResult = null;
+
+    try {
+      updateAlertsMaintenanceWindowResult =
+        await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery?.({
+          ruleId: rule.id,
+          spaceId,
+          executionUuid: this.executionId,
+          maintenanceWindows,
+        });
+    } catch (e) {
+      this.logger.debug(
+        `Failed to update alert matched by maintenance window scoped query for rule  ${ruleLabel}.`
+      );
+    }
+
+    // Set the event log MW ids again, this time including the ids that matched alerts with
+    // scoped query
+    if (updateAlertsMaintenanceWindowResult?.maintenanceWindowIds) {
+      this.alertingEventLogger.setMaintenanceWindowIds(
+        updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+      );
+    }
+
+    alertsClient.logAlerts({
+      eventLogger: this.alertingEventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
     });
 
     const executionHandler = new ExecutionHandler({
@@ -569,7 +633,6 @@ export class TaskRunner<
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
-      maintenanceWindowIds,
       alertsClient,
     });
 
@@ -779,7 +842,10 @@ export class TaskRunner<
         const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
         this.ruleData = { data };
       } catch (err) {
-        const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+        const error = createTaskRunError(
+          new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err),
+          getErrorSource(err)
+        );
         this.ruleData = { error };
       }
       return this.ruleData;
@@ -856,7 +922,7 @@ export class TaskRunner<
     ): RuleTaskState => {
       return {
         ...omit(runStateWithMetrics, ['metrics']),
-        previousStartedAt: startedAt,
+        previousStartedAt: startedAt?.toISOString(),
       };
     };
 
@@ -870,6 +936,14 @@ export class TaskRunner<
       metrics: executionMetrics,
       timings: this.timer.toJson(),
     });
+
+    const getTaskRunError = (state: Result<RuleTaskStateAndMetrics, Error>) => {
+      return isErr(state)
+        ? {
+            taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
+          }
+        : {};
+    };
 
     return {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
@@ -918,7 +992,7 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
-      hasError: isErr(schedule),
+      ...getTaskRunError(stateWithMetrics),
     };
   }
 

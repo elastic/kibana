@@ -78,6 +78,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
+import { AlertsPanel } from './alerts';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -263,8 +264,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }, [anomalyExplorerPanelState]);
 
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
-  const { anomalyTimelineStateService, anomalyExplorerCommonStateService, chartsStateService } =
-    useAnomalyExplorerContext();
+  const {
+    anomalyTimelineStateService,
+    anomalyExplorerCommonStateService,
+    chartsStateService,
+    anomalyDetectionAlertsStateService,
+  } = useAnomalyExplorerContext();
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -282,6 +287,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyExplorerCommonStateService.getSelectedJobs$(),
     anomalyExplorerCommonStateService.getSelectedJobs()
   );
+
+  const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
 
   const applyFilter = useCallback(
     (fieldName: string, fieldValue: string, action: FilterAction) => {
@@ -486,6 +493,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       <AnomalyTimeline explorerState={explorerState} />
 
       <EuiSpacer size="m" />
+
+      {alertsData.length > 0 ? <AlertsPanel /> : null}
 
       {annotationsError !== undefined && (
         <>

@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
@@ -25,6 +26,7 @@ export const getLogEntryCategoryDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
     // log view
     logView: persistedLogViewReferenceRT,
+    idFormat: idFormatRT,
     // the time range to fetch the category datasets from
     timeRange: timeRangeRT,
   }),

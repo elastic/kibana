@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  title: Execute Action Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/execute:
+    post:
+      summary: Execute Action
+      operationId: EndpointExecuteAction
+      x-codegen-enabled: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    ExecuteActionRequestBody:
+      allOf:
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  $ref: '../model/schema/common.schema.yaml#/components/schemas/Command'
+                timeout:
+                  $ref: '../model/schema/common.schema.yaml#/components/schemas/Timeout'

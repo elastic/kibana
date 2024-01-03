@@ -200,6 +200,7 @@ export interface SOWithMetadata<Attributes extends object = object> {
     statusCode: number;
     metadata?: Record<string, unknown>;
   };
+  managed?: boolean;
   attributes: Attributes;
   references: Reference[];
   namespaces?: string[];

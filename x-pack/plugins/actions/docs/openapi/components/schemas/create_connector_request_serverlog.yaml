@@ -10,8 +10,10 @@ properties:
     description: The type of connector.
     enum:
       - .server-log
-    example: .server-log
+    examples:
+      - .server-log
   name:
     type: string
     description: The display name for the connector.
-    example: my-connector
+    examples:
+      - my-connector

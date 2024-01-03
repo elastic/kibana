@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useContext, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiAccordion,
@@ -20,6 +21,8 @@ import {
   EuiLink,
   EuiText,
   EuiSpacer,
+  useEuiTheme,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -75,6 +78,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
   settings,
   actionErrors,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     links: { watchActionsConfigurationMap },
     toasts,
@@ -96,8 +100,15 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
           initialIsOpen={action.isNew || hasErrors} // If an action contains errors in edit mode, we want the accordion open so the user is aware
           key={action.id}
           id={action.id}
-          className="euiAccordionForm"
-          buttonContentClassName="euiAccordionForm__button"
+          borders="horizontal"
+          buttonProps={{
+            paddingSize: 'm',
+            css: css`
+              &:hover {
+                text-decoration: none;
+              }
+            `,
+          }}
           data-test-subj="watchActionAccordion"
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -105,7 +116,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                 <EuiIcon type={action.iconClass} size="m" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="s" className="euiAccordionForm__title">
+                <EuiTitle size="s">
                   <h6>{action.typeName}</h6>
                 </EuiTitle>
               </EuiFlexItem>
@@ -115,7 +126,18 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             <EuiButtonIcon
               iconType="cross"
               color="danger"
-              className="euiAccordionForm__extraAction"
+              css={css`
+                opacity: 0;
+
+                &:focus,
+                .euiAccordion:hover & {
+                  opacity: 1;
+                }
+
+                ${euiCanAnimate} {
+                  transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+                }
+              `}
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.threshold.accordion.deleteIconAriaLabel',
                 {

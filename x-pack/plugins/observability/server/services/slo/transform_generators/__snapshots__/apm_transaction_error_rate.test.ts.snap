@@ -20,7 +20,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -122,7 +122,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -151,7 +151,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -178,29 +178,9 @@ Object {
       "field": "service.environment",
     },
   },
-  "slo.budgetingMethod": Object {
-    "terms": Object {
-      "field": "slo.budgetingMethod",
-    },
-  },
-  "slo.description": Object {
-    "terms": Object {
-      "field": "slo.description",
-    },
-  },
-  "slo.groupBy": Object {
-    "terms": Object {
-      "field": "slo.groupBy",
-    },
-  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
-    },
-  },
-  "slo.indicator.type": Object {
-    "terms": Object {
-      "field": "slo.indicator.type",
     },
   },
   "slo.instanceId": Object {
@@ -208,34 +188,9 @@ Object {
       "field": "slo.instanceId",
     },
   },
-  "slo.name": Object {
-    "terms": Object {
-      "field": "slo.name",
-    },
-  },
-  "slo.objective.target": Object {
-    "terms": Object {
-      "field": "slo.objective.target",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
-    },
-  },
-  "slo.tags": Object {
-    "terms": Object {
-      "field": "slo.tags",
-    },
-  },
-  "slo.timeWindow.duration": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.duration",
-    },
-  },
-  "slo.timeWindow.type": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.type",
     },
   },
 }
@@ -261,7 +216,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -288,29 +243,9 @@ Object {
       "field": "service.name",
     },
   },
-  "slo.budgetingMethod": Object {
-    "terms": Object {
-      "field": "slo.budgetingMethod",
-    },
-  },
-  "slo.description": Object {
-    "terms": Object {
-      "field": "slo.description",
-    },
-  },
-  "slo.groupBy": Object {
-    "terms": Object {
-      "field": "slo.groupBy",
-    },
-  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
-    },
-  },
-  "slo.indicator.type": Object {
-    "terms": Object {
-      "field": "slo.indicator.type",
     },
   },
   "slo.instanceId": Object {
@@ -318,34 +253,9 @@ Object {
       "field": "slo.instanceId",
     },
   },
-  "slo.name": Object {
-    "terms": Object {
-      "field": "slo.name",
-    },
-  },
-  "slo.objective.target": Object {
-    "terms": Object {
-      "field": "slo.objective.target",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
-    },
-  },
-  "slo.tags": Object {
-    "terms": Object {
-      "field": "slo.tags",
-    },
-  },
-  "slo.timeWindow.duration": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.duration",
-    },
-  },
-  "slo.timeWindow.type": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.type",
     },
   },
 }
@@ -371,7 +281,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -393,29 +303,9 @@ Object {
       "fixed_interval": "1m",
     },
   },
-  "slo.budgetingMethod": Object {
-    "terms": Object {
-      "field": "slo.budgetingMethod",
-    },
-  },
-  "slo.description": Object {
-    "terms": Object {
-      "field": "slo.description",
-    },
-  },
-  "slo.groupBy": Object {
-    "terms": Object {
-      "field": "slo.groupBy",
-    },
-  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
-    },
-  },
-  "slo.indicator.type": Object {
-    "terms": Object {
-      "field": "slo.indicator.type",
     },
   },
   "slo.instanceId": Object {
@@ -423,34 +313,9 @@ Object {
       "field": "slo.instanceId",
     },
   },
-  "slo.name": Object {
-    "terms": Object {
-      "field": "slo.name",
-    },
-  },
-  "slo.objective.target": Object {
-    "terms": Object {
-      "field": "slo.objective.target",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
-    },
-  },
-  "slo.tags": Object {
-    "terms": Object {
-      "field": "slo.tags",
-    },
-  },
-  "slo.timeWindow.duration": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.duration",
-    },
-  },
-  "slo.timeWindow.type": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.type",
     },
   },
   "transaction.name": Object {
@@ -481,7 +346,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -503,29 +368,9 @@ Object {
       "fixed_interval": "1m",
     },
   },
-  "slo.budgetingMethod": Object {
-    "terms": Object {
-      "field": "slo.budgetingMethod",
-    },
-  },
-  "slo.description": Object {
-    "terms": Object {
-      "field": "slo.description",
-    },
-  },
-  "slo.groupBy": Object {
-    "terms": Object {
-      "field": "slo.groupBy",
-    },
-  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
-    },
-  },
-  "slo.indicator.type": Object {
-    "terms": Object {
-      "field": "slo.indicator.type",
     },
   },
   "slo.instanceId": Object {
@@ -533,34 +378,9 @@ Object {
       "field": "slo.instanceId",
     },
   },
-  "slo.name": Object {
-    "terms": Object {
-      "field": "slo.name",
-    },
-  },
-  "slo.objective.target": Object {
-    "terms": Object {
-      "field": "slo.objective.target",
-    },
-  },
   "slo.revision": Object {
     "terms": Object {
       "field": "slo.revision",
-    },
-  },
-  "slo.tags": Object {
-    "terms": Object {
-      "field": "slo.tags",
-    },
-  },
-  "slo.timeWindow.duration": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.duration",
-    },
-  },
-  "slo.timeWindow.type": Object {
-    "terms": Object {
-      "field": "slo.timeWindow.type",
     },
   },
   "transaction.type": Object {
@@ -576,12 +396,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 2,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v2",
-    "pipeline": ".slo-observability.sli.pipeline",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -629,29 +449,9 @@ Object {
           "field": "service.name",
         },
       },
-      "slo.budgetingMethod": Object {
-        "terms": Object {
-          "field": "slo.budgetingMethod",
-        },
-      },
-      "slo.description": Object {
-        "terms": Object {
-          "field": "slo.description",
-        },
-      },
-      "slo.groupBy": Object {
-        "terms": Object {
-          "field": "slo.groupBy",
-        },
-      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
-        },
-      },
-      "slo.indicator.type": Object {
-        "terms": Object {
-          "field": "slo.indicator.type",
         },
       },
       "slo.instanceId": Object {
@@ -659,39 +459,9 @@ Object {
           "field": "slo.instanceId",
         },
       },
-      "slo.name": Object {
-        "terms": Object {
-          "field": "slo.name",
-        },
-      },
-      "slo.objective.sliceDurationInSeconds": Object {
-        "terms": Object {
-          "field": "slo.objective.sliceDurationInSeconds",
-        },
-      },
-      "slo.objective.target": Object {
-        "terms": Object {
-          "field": "slo.objective.target",
-        },
-      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
-        },
-      },
-      "slo.tags": Object {
-        "terms": Object {
-          "field": "slo.tags",
-        },
-      },
-      "slo.timeWindow.duration": Object {
-        "terms": Object {
-          "field": "slo.timeWindow.duration",
-        },
-      },
-      "slo.timeWindow.type": Object {
-        "terms": Object {
-          "field": "slo.timeWindow.type",
         },
       },
       "transaction.name": Object {
@@ -708,6 +478,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -730,7 +501,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -758,33 +529,9 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "slo.budgetingMethod": Object {
-        "script": Object {
-          "source": "emit('timeslices')",
-        },
-        "type": "keyword",
-      },
-      "slo.description": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.groupBy": Object {
-        "script": Object {
-          "source": "emit('*')",
-        },
-        "type": "keyword",
-      },
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
-        },
-        "type": "keyword",
-      },
-      "slo.indicator.type": Object {
-        "script": Object {
-          "source": "emit('sli.apm.transactionErrorRate')",
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -794,47 +541,11 @@ Object {
         },
         "type": "keyword",
       },
-      "slo.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.objective.sliceDurationInSeconds": Object {
-        "script": Object {
-          "source": "emit(120)",
-        },
-        "type": "long",
-      },
-      "slo.objective.target": Object {
-        "script": Object {
-          "source": "emit(0.98)",
-        },
-        "type": "double",
-      },
       "slo.revision": Object {
         "script": Object {
           "source": "emit(1)",
         },
         "type": "long",
-      },
-      "slo.tags": Object {
-        "script": Object {
-          "source": "emit('critical,k8s')",
-        },
-        "type": "keyword",
-      },
-      "slo.timeWindow.duration": Object {
-        "script": Object {
-          "source": "emit('7d')",
-        },
-        "type": "keyword",
-      },
-      "slo.timeWindow.type": Object {
-        "script": Object {
-          "source": "emit('rolling')",
-        },
-        "type": "keyword",
       },
     },
   },
@@ -844,7 +555,7 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;
 
@@ -853,12 +564,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 2,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v2",
-    "pipeline": ".slo-observability.sli.pipeline",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -897,29 +608,9 @@ Object {
           "field": "service.name",
         },
       },
-      "slo.budgetingMethod": Object {
-        "terms": Object {
-          "field": "slo.budgetingMethod",
-        },
-      },
-      "slo.description": Object {
-        "terms": Object {
-          "field": "slo.description",
-        },
-      },
-      "slo.groupBy": Object {
-        "terms": Object {
-          "field": "slo.groupBy",
-        },
-      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
-        },
-      },
-      "slo.indicator.type": Object {
-        "terms": Object {
-          "field": "slo.indicator.type",
         },
       },
       "slo.instanceId": Object {
@@ -927,34 +618,9 @@ Object {
           "field": "slo.instanceId",
         },
       },
-      "slo.name": Object {
-        "terms": Object {
-          "field": "slo.name",
-        },
-      },
-      "slo.objective.target": Object {
-        "terms": Object {
-          "field": "slo.objective.target",
-        },
-      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
-        },
-      },
-      "slo.tags": Object {
-        "terms": Object {
-          "field": "slo.tags",
-        },
-      },
-      "slo.timeWindow.duration": Object {
-        "terms": Object {
-          "field": "slo.timeWindow.duration",
-        },
-      },
-      "slo.timeWindow.type": Object {
-        "terms": Object {
-          "field": "slo.timeWindow.type",
         },
       },
       "transaction.name": Object {
@@ -971,6 +637,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -993,7 +660,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -1021,33 +688,9 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "slo.budgetingMethod": Object {
-        "script": Object {
-          "source": "emit('occurrences')",
-        },
-        "type": "keyword",
-      },
-      "slo.description": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.groupBy": Object {
-        "script": Object {
-          "source": "emit('*')",
-        },
-        "type": "keyword",
-      },
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
-        },
-        "type": "keyword",
-      },
-      "slo.indicator.type": Object {
-        "script": Object {
-          "source": "emit('sli.apm.transactionErrorRate')",
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -1057,41 +700,11 @@ Object {
         },
         "type": "keyword",
       },
-      "slo.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.objective.target": Object {
-        "script": Object {
-          "source": "emit(0.999)",
-        },
-        "type": "double",
-      },
       "slo.revision": Object {
         "script": Object {
           "source": "emit(1)",
         },
         "type": "long",
-      },
-      "slo.tags": Object {
-        "script": Object {
-          "source": "emit('critical,k8s')",
-        },
-        "type": "keyword",
-      },
-      "slo.timeWindow.duration": Object {
-        "script": Object {
-          "source": "emit('7d')",
-        },
-        "type": "keyword",
-      },
-      "slo.timeWindow.type": Object {
-        "script": Object {
-          "source": "emit('rolling')",
-        },
-        "type": "keyword",
       },
     },
   },
@@ -1101,6 +714,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;

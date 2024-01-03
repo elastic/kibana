@@ -11,6 +11,7 @@ import type { PolicyConfig } from '../endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
+  policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -243,6 +244,19 @@ function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointProtectionUpdatesValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidEnterpriseFeatures();
+
+  return policy.global_manifest_version === defaults.global_manifest_version;
+}
+
 /**
  * Given an endpoint package policy, verifies that all enabled features that
  * require a certain license level have a valid license for them.
@@ -257,7 +271,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
     isEndpointBehaviorPolicyValidForLicense(policy, license) &&
     isEndpointAdvancedPolicyValidForLicense(policy, license) &&
-    isEndpointCredentialDumpingPolicyValidForLicense(policy, license)
+    isEndpointCredentialDumpingPolicyValidForLicense(policy, license) &&
+    isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };
 
@@ -269,8 +284,12 @@ export const unsetPolicyFeaturesAccordingToLicenseLevel = (
   policy: PolicyConfig,
   license: ILicense | null
 ): PolicyConfig => {
-  if (isAtLeast(license, 'platinum')) {
+  if (isAtLeast(license, 'enterprise')) {
     return policyFactoryWithSupportedFeatures(policy);
+  }
+  if (isAtLeast(license, 'platinum')) {
+    const policyWithSupportedFeatures = policyFactoryWithSupportedFeatures(policy);
+    return policyFactoryWithoutPaidEnterpriseFeatures(policyWithSupportedFeatures);
   }
 
   // set any license-gated features back to the defaults

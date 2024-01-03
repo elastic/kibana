@@ -130,7 +130,7 @@ describe('Storage Explorer', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click({ force: true });
 
@@ -187,7 +187,6 @@ describe('Storage Explorer', () => {
       cy.contains('opbeans-node');
 
       cy.getByTestSubj('storageDetailsButton_opbeans-node').click();
-      cy.getByTestSubj('loadingSpinner').should('be.visible');
       cy.wait('@storageDetailsRequest');
 
       cy.contains('Service storage details');

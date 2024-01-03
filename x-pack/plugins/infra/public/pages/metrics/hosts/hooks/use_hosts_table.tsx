@@ -13,9 +13,11 @@ import {
   type EuiBasicTable,
 } from '@elastic/eui';
 import createContainer from 'constate';
+import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
-import { hostLensFormulas } from '../../../../common/visualizations';
+import { CloudProvider } from '@kbn/custom-icons';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -24,10 +26,8 @@ import type {
   InfraAssetMetricsItem,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
@@ -37,7 +37,6 @@ import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 /**
  * Columns and items types
  */
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
 
 interface HostMetadata {
@@ -126,10 +125,13 @@ const sortTableData =
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
-  const { searchCriteria } = useUnifiedSearchContext();
-  const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
+
+  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+
+  const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
       telemetry,
@@ -140,11 +142,9 @@ export const useHostsTable = () => {
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
 
-  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
-  const popoverContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<EuiBasicTable | null>(null);
 
-  const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
+  const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
 
   const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
     setSelectedItems(newSelectedItems);
@@ -195,8 +195,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutState?.itemId),
-    [hostFlyoutState?.itemId, items]
+    () => items.find(({ id }) => id === detailsItemId),
+    [detailsItemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -218,19 +218,13 @@ export const useHostsTable = () => {
           {
             name: TABLE_COLUMN_LABEL.toggleDialogAction,
             description: TABLE_COLUMN_LABEL.toggleDialogAction,
-            icon: ({ id }) =>
-              hostFlyoutState?.itemId && id === hostFlyoutState?.itemId ? 'minimize' : 'expand',
+            icon: ({ id }) => (id === detailsItemId ? 'minimize' : 'expand'),
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
-              setHostFlyoutState({
-                itemId: id,
+              setProperties({
+                detailsItemId: id === detailsItemId ? null : id,
               });
-              if (id === hostFlyoutState?.itemId) {
-                setHostFlyoutState(null);
-              } else {
-                setHostFlyoutState({ itemId: id });
-              }
             },
           },
         ],
@@ -242,11 +236,7 @@ export const useHostsTable = () => {
         truncateText: true,
         'data-test-subj': 'hostsView-tableRow-title',
         render: (title: HostNodeRow['title']) => (
-          <EntryTitle
-            title={title}
-            time={searchCriteria.dateRange}
-            onClick={() => reportHostEntryClick(title)}
-          />
+          <EntryTitle title={title} onClick={() => reportHostEntryClick(title)} />
         ),
         width: '20%',
       },
@@ -255,7 +245,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.value}
+            formula={formulas?.cpuUsage.value}
           />
         ),
         field: 'cpu',
@@ -269,7 +259,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.value}
+            formula={formulas?.normalizedLoad1m.value}
           />
         ),
         field: 'normalizedLoad1m',
@@ -283,7 +273,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.value}
+            formula={formulas?.memoryUsage.value}
           />
         ),
         field: 'memory',
@@ -297,7 +287,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.value}
+            formula={formulas?.memoryFree.value}
           />
         ),
         field: 'memoryFree',
@@ -310,8 +300,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
-            toolTip={METRICS_TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.value}
+            toolTip={METRICS_TOOLTIP.diskUsage}
+            formula={formulas?.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
@@ -325,7 +315,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={METRICS_TOOLTIP.rx}
-            formula={hostLensFormulas.rx.value}
+            formula={formulas?.rx.value}
           />
         ),
         field: 'rx',
@@ -340,7 +330,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={METRICS_TOOLTIP.tx}
-            formula={hostLensFormulas.tx.value}
+            formula={formulas?.tx.value}
           />
         ),
         field: 'tx',
@@ -351,7 +341,18 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [hostFlyoutState?.itemId, reportHostEntryClick, searchCriteria.dateRange, setHostFlyoutState]
+    [
+      detailsItemId,
+      formulas?.cpuUsage.value,
+      formulas?.diskUsage.value,
+      formulas?.memoryFree.value,
+      formulas?.memoryUsage.value,
+      formulas?.normalizedLoad1m.value,
+      formulas?.rx.value,
+      formulas?.tx.value,
+      reportHostEntryClick,
+      setProperties,
+    ]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {
@@ -365,7 +366,7 @@ export const useHostsTable = () => {
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutState?.itemId,
+    isFlyoutOpen: detailsItemId !== null,
     onTableChange,
     pagination,
     sorting,
@@ -373,7 +374,6 @@ export const useHostsTable = () => {
     selectedItemsCount: selectedItems.length,
     filterSelectedHosts,
     refs: {
-      popoverContainerRef,
       tableRef,
     },
   };

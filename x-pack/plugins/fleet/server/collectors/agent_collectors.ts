@@ -58,13 +58,13 @@ export const getAgentUsage = async (
   };
 };
 
+export interface AgentPerVersion {
+  version: string;
+  count: number;
+}
+
 export interface AgentData {
-  agents_per_version: Array<
-    {
-      version: string;
-      count: number;
-    } & AgentStatus
-  >;
+  agents_per_version: Array<AgentPerVersion & AgentStatus>;
   agent_checkin_status: {
     error: number;
     degraded: number;
@@ -75,10 +75,11 @@ export interface AgentData {
     version: string;
     count: number;
   }>;
-  components_status: Array<{
-    id: string;
-    status: string;
-    count: number;
+  upgrade_details: Array<{
+    target_version: string;
+    state: string;
+    error_msg: string;
+    agent_count: number;
   }>;
 }
 
@@ -87,7 +88,7 @@ const DEFAULT_AGENT_DATA = {
   agents_per_policy: [],
   agents_per_version: [],
   agents_per_os: [],
-  components_status: [],
+  upgrade_details: [],
 };
 
 export const getAgentData = async (
@@ -141,23 +142,21 @@ export const getAgentData = async (
               ],
             },
           },
-          components: {
-            nested: {
-              path: 'components',
-            },
-            aggs: {
-              components_status: {
-                multi_terms: {
-                  terms: [
-                    {
-                      field: 'components.id',
-                    },
-                    {
-                      field: 'components.status',
-                    },
-                  ],
+          upgrade_details: {
+            multi_terms: {
+              size: 1000,
+              terms: [
+                {
+                  field: 'upgrade_details.target_version.keyword',
                 },
-              },
+                {
+                  field: 'upgrade_details.state',
+                },
+                {
+                  field: 'upgrade_details.metadata.error_msg.keyword',
+                  missing: '',
+                },
+              ],
             },
           },
         },
@@ -215,20 +214,21 @@ export const getAgentData = async (
       count: bucket.doc_count,
     }));
 
-    const componentsStatus = (
-      (response?.aggregations?.components as any).components_status?.buckets ?? []
-    ).map((bucket: any) => ({
-      id: bucket.key[0],
-      status: bucket.key[1],
-      count: bucket.doc_count,
-    }));
+    const upgradeDetails = ((response?.aggregations?.upgrade_details as any).buckets ?? []).map(
+      (bucket: any) => ({
+        target_version: bucket.key[0],
+        state: bucket.key[1],
+        error_msg: bucket.key[2],
+        agent_count: bucket.doc_count,
+      })
+    );
 
     return {
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
       agents_per_os: agentsPerOS,
-      components_status: componentsStatus,
+      upgrade_details: upgradeDetails,
     };
   } catch (error) {
     if (error.statusCode === 404) {

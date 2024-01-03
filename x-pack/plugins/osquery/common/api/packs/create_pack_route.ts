@@ -13,7 +13,7 @@ export const createPackRequestBodySchema = t.type({
   description: t.union([t.string, t.undefined]),
   enabled: t.union([t.boolean, t.undefined]),
   policy_ids: t.union([t.array(t.string), t.undefined]),
-  shards: t.record(t.string, toNumberRt),
+  shards: t.union([t.record(t.string, toNumberRt), t.undefined]),
   queries: t.record(
     t.string,
     t.type({

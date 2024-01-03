@@ -8,11 +8,10 @@
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
-  RedirectAppLinks,
-  useUiSetting$,
+  useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
@@ -32,7 +31,7 @@ import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context
 import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { ApmPluginStartDeps } from '../../../plugin';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { ApmErrorBoundary } from '../apm_error_boundary';
 import { apmRouter } from '../apm_route_config';
 import { TrackPageview } from '../track_pageview';
@@ -49,27 +48,32 @@ const storage = new Storage(localStorage);
 export function ApmAppRoot({
   apmPluginContextValue,
   pluginsStart,
+  apmServices,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
   pluginsStart: ApmPluginStartDeps;
+  apmServices: ApmServices;
 }) {
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
   return (
-    <RedirectAppLinks
-      application={core.application}
+    <div
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
       role="main"
     >
-      <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
-          <i18nCore.Context>
-            <ObservabilityAIAssistantProvider
-              value={apmPluginContextValue.observabilityAIAssistant}
-            >
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
+        }}
+      >
+        <ApmPluginContext.Provider value={apmPluginContextValue}>
+          <KibanaContextProvider
+            services={{ ...core, ...pluginsStart, storage, ...apmServices }}
+          >
+            <i18nCore.Context>
               <TimeRangeIdContextProvider>
                 <RouterProvider history={history} router={apmRouter as any}>
                   <ApmErrorBoundary>
@@ -108,11 +112,11 @@ export function ApmAppRoot({
                   </ApmErrorBoundary>
                 </RouterProvider>
               </TimeRangeIdContextProvider>
-            </ObservabilityAIAssistantProvider>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </ApmPluginContext.Provider>
-    </RedirectAppLinks>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </ApmPluginContext.Provider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 
@@ -128,7 +132,7 @@ function MountApmHeaderActionMenu() {
 }
 
 export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const darkMode = useDarkMode(false);
 
   return (
     <ThemeProvider

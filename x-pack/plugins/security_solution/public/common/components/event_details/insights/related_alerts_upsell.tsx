@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { INSIGHTS_UPSELL } from './translations';
-import { useNavigation } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 
 const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -23,15 +23,7 @@ const StyledIcon = euiStyled(EuiIcon)`
 `;
 
 export const RelatedAlertsUpsell = React.memo(() => {
-  const { getAppUrl, navigateTo } = useNavigation();
-  const subscriptionUrl = getAppUrl({
-    appId: 'management',
-    path: 'stack/license_management',
-  });
-  const goToSubscription = useCallback(() => {
-    navigateTo({ url: subscriptionUrl });
-  }, [navigateTo, subscriptionUrl]);
-
+  const { application } = useKibana().services;
   return (
     <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -40,7 +32,13 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiLink color="subdued" onClick={goToSubscription} target="_blank">
+            <EuiLink
+              color="subdued"
+              target="_blank"
+              href={application.getUrlForApp('management', {
+                path: 'stack/license_management/home',
+              })}
+            >
               {INSIGHTS_UPSELL}
             </EuiLink>
           </EuiText>

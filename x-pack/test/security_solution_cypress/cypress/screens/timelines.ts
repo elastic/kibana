@@ -23,7 +23,7 @@ export const TIMELINE = (id: string | undefined) => {
   if (id == null) {
     throw new TypeError('id should never be null or undefined');
   }
-  return `[data-test-subj="title-${id}"]`;
+  return `[data-test-subj="timeline-title-${id}"]`;
 };
 
 export const TIMELINE_CHECKBOX = (id: string) => {
@@ -36,7 +36,7 @@ export const TIMELINE_ITEM_ACTION_BTN = (id: string) => {
 
 export const EXPORT_TIMELINE = '[data-test-subj="export-timeline"]';
 
-export const TIMELINE_NAME = '[data-test-subj^=title]';
+export const TIMELINE_NAME = '[data-test-subj^=timeline-title-]';
 
 export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';
 
@@ -59,3 +59,7 @@ export const TIMELINES_OVERVIEW_ONLY_FAVORITES = `${TIMELINES_OVERVIEW} [data-te
 export const TIMELINES_OVERVIEW_SEARCH = `${TIMELINES_OVERVIEW} [data-test-subj="search-bar"]`;
 
 export const TIMELINES_OVERVIEW_TABLE = `${TIMELINES_OVERVIEW} [data-test-subj="timelines-table"]`;
+
+export const ROWS = '.euiTableRow';
+
+export const TIMELINES_TAB_TEMPLATE = '[data-test-subj="timeline-tab-template"]';

@@ -74,15 +74,20 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
   configureAgentYaml,
   appendedSteps = [],
 }: Props<PlatformId>) {
+  const configPath =
+    selectedPlatform === 'macos'
+      ? '/Library/Elastic/Agent/elastic-agent.yml'
+      : '/opt/Elastic/Agent/elastic-agent.yml';
+
   const isInstallStarted =
     intersection(
       Object.keys(installProgressSteps),
-      Object.keys(PROGRESS_STEP_TITLES(selectedPlatform))
+      Object.keys(PROGRESS_STEP_TITLES(configPath))
     ).length > 0;
   const autoDownloadConfigStep = getStep(
     'ea-config',
     installProgressSteps,
-    selectedPlatform
+    configPath
   );
 
   const customInstallStep = installAgentPlatformOptions.find(
@@ -108,15 +113,10 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
               const { title, status, message } = getStep(
                 stepId,
                 installProgressSteps,
-                selectedPlatform
+                configPath
               );
               return (
-                <StepStatus
-                  key={stepId}
-                  status={status}
-                  title={title}
-                  message={message}
-                />
+                <StepStatus status={status} title={title} message={message} />
               );
             })}
           </EuiFlexGroup>
@@ -136,7 +136,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                   defaultMessage:
                     'The agent config below will be downloaded by the install script and written to ({configPath}). This will overwrite any existing agent configuration.',
                   values: {
-                    configPath: '/opt/Elastic/Agent/elastic-agent.yml',
+                    configPath,
                   },
                 }
               )
@@ -144,9 +144,9 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 'xpack.observability_onboarding.installElasticAgent.configStep.manual.description',
                 {
                   defaultMessage:
-                    'Add the following configuration to {configPath} on the host where you installed the Elastic agent.',
+                    'Add the following configuration to {configPath} on the host where you installed the Elastic Agent.',
                   values: {
-                    configPath: '/opt/Elastic/Agent/elastic-agent.yml',
+                    configPath,
                   },
                 }
               )}
@@ -157,7 +157,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         isLoading={false}
         contentAriaLabel={i18n.translate(
           'xpack.observability_onboarding.installElasticAgent.configStep.yamlCodeBlockdescription',
-          { defaultMessage: 'Elastic agent yaml configuration' }
+          { defaultMessage: 'Elastic Agent yaml configuration' }
         )}
         width="100%"
         height={300}
@@ -184,6 +184,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         download="elastic-agent.yml"
         target="_blank"
         isDisabled={autoDownloadConfig}
+        data-test-subj="obltOnboardingConfigureElasticAgentStepDownloadConfig"
       >
         {i18n.translate(
           'xpack.observability_onboarding.installElasticAgent.configStep.downloadConfigButton',
@@ -209,6 +210,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
     <EuiSteps
       steps={[
         {
+          'data-test-subj': 'obltOnboardingInstallElasticAgentStep',
           title: i18n.translate(
             'xpack.observability_onboarding.installElasticAgent.installStep.title',
             { defaultMessage: 'Install the Elastic Agent' }
@@ -224,6 +226,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                     values={{
                       hostRequirementsLink: (
                         <EuiLink
+                          data-test-subj="observabilityOnboardingInstallElasticAgentStepsHostRequirementsAndOtherInstallationOptionsLink"
                           external
                           href="https://www.elastic.co/guide/en/fleet/8.7/elastic-agent-installation.html"
                         >
@@ -274,6 +277,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 checked={autoDownloadConfig}
                 onChange={onToggleAutoDownloadConfig}
                 disabled={disableSteps || isInstallStarted}
+                data-test-subj="obltOnboardingInstallElasticAgentAutoDownloadConfig"
               />
               <EuiSpacer size="l" />
               {autoDownloadConfig && (
@@ -288,6 +292,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                     )}
                     color="warning"
                     iconType="warning"
+                    data-test-subj="obltOnboardingInstallElasticAgentAutoDownloadConfigCallout"
                   />
                   <EuiSpacer size="l" />
                 </>
@@ -318,9 +323,10 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           ),
         },
         {
+          'data-test-subj': 'obltOnboardingConfigureElasticAgentStep',
           title: i18n.translate(
             'xpack.observability_onboarding.installElasticAgent.configureStep.title',
-            { defaultMessage: 'Configure the Elastic agent' }
+            { defaultMessage: 'Configure the Elastic Agent' }
           ),
           status: disableSteps ? 'disabled' : configureAgentStatus,
           children: disableSteps ? <></> : configureStep,
@@ -329,6 +335,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           children: null,
           ...euiStep,
           status: disableSteps ? 'disabled' : euiStep.status,
+          'data-test-subj': euiStep['data-test-subj'],
         })),
       ]}
     />
@@ -338,10 +345,10 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
 function getStep(
   id: ProgressStepId,
   installProgressSteps: Props<string>['installProgressSteps'],
-  selectedPlatform: string
+  configPath: string
 ): { title: string; status: EuiStepStatus; message?: string } {
   const { loadingTitle, completedTitle, incompleteTitle } =
-    PROGRESS_STEP_TITLES(selectedPlatform)[id];
+    PROGRESS_STEP_TITLES(configPath)[id];
   const stepProgress = installProgressSteps[id];
   if (stepProgress) {
     const { status, message } = stepProgress;
@@ -365,11 +372,11 @@ function getStep(
 }
 
 const PROGRESS_STEP_TITLES: (
-  selectedPlatform: string
+  configPath: string
 ) => Record<
   ProgressStepId,
   Record<'incompleteTitle' | 'loadingTitle' | 'completedTitle', string>
-> = (selectedPlatform: string) => ({
+> = (configPath: string) => ({
   'ea-download': {
     incompleteTitle: i18n.translate(
       'xpack.observability_onboarding.installElasticAgent.progress.eaDownload.incompleteTitle',
@@ -444,10 +451,7 @@ const PROGRESS_STEP_TITLES: (
       {
         defaultMessage: 'Elastic Agent config written to {configPath}',
         values: {
-          configPath:
-            selectedPlatform === 'macos'
-              ? '/Library/Elastic/Agent/elastic-agent.yml'
-              : '/opt/Elastic/Agent/elastic-agent.yml',
+          configPath,
         },
       }
     ),

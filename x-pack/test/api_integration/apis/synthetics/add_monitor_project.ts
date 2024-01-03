@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
+import {
+  ELASTIC_MANAGED_LOCATIONS_DISABLED,
+  REQUEST_TOO_LARGE,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
@@ -132,6 +135,18 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
+    it('project monitors - returns forbidden if no access to public locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      await monitorTestService.generateProjectAPIKey(false);
+      const response = await monitorTestService.addProjectMonitors(
+        project,
+        projectMonitors.monitors
+      );
+      expect(response.status).to.eql(403);
+      expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;
@@ -229,6 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -412,6 +428,7 @@ export default function ({ getService }: FtrProviderContext) {
             mode: 'any',
             ipv6: true,
             ipv4: true,
+            max_attempts: 2,
           });
         }
       } finally {
@@ -528,6 +545,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv6: true,
             ipv4: true,
             params: '',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -640,6 +658,7 @@ export default function ({ getService }: FtrProviderContext) {
             ipv4: true,
             ipv6: true,
             params: '',
+            max_attempts: 2,
           });
         }
       } finally {
@@ -750,6 +769,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 type: 'browser',
                 hash: 'ekrjelkjrelkjre',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -1915,6 +1935,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: 'Cannot update monitor to different type.',
             },
@@ -2047,6 +2068,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -2126,6 +2148,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
@@ -2205,6 +2228,7 @@ export default function ({ getService }: FtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",
             },

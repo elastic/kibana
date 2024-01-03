@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 import { CELL_COPY_BUTTON, FILTER_BADGE, SHOW_TOP_N_HEADER } from '../../../screens/alerts';
@@ -25,11 +24,10 @@ import {
   filterOutAlertProperty,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
-  clearKqlQueryBar,
   fillAddFilterForm,
   fillKqlQueryBar,
   openAddFilterPopover,
@@ -38,9 +36,8 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule());
   });
 
@@ -70,8 +67,6 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
       filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
       cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
-
-      clearKqlQueryBar();
     });
 
     it('should filter out a non-empty property', () => {
@@ -95,12 +90,11 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
       filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
       cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
-
-      clearKqlQueryBar();
     });
   });
 
-  describe('Add to timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172231
+  describe.skip('Add to timeline', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -112,7 +106,7 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
         .first()
         .invoke('text')
         .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
@@ -133,7 +127,8 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
     });
   });
 
-  describe('Show Top N', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172232
+  describe.skip('Show Top N', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -145,14 +140,15 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
           cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
         });
     });
   });
 
-  describe('Copy to clipboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172233
+  describe.skip('Copy to clipboard', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -164,7 +160,7 @@ describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, (
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           cy.window().then((win) => {
             cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
           });

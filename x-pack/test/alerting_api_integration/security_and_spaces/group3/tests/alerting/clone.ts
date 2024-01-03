@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getTestRuleData,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
   TaskManagerDoc,
@@ -121,11 +122,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'create',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -198,7 +195,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: response.body.id,
               });
               break;

@@ -19,6 +19,7 @@ export interface ServerApiError {
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
   prebuiltRulesPackageVersion?: string;
+  offeringSettings: Record<string, boolean>;
 }
 
 /**

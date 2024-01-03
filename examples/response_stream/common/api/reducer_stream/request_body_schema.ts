@@ -9,11 +9,13 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const reducerStreamRequestBodySchema = schema.object({
-  /** Boolean flag to enable/disabling simulation of response errors. */
+  /** Boolean flag to enable/disable simulation of response errors. */
   simulateErrors: schema.maybe(schema.boolean()),
   /** Maximum timeout between streaming messages. */
   timeout: schema.maybe(schema.number()),
   /** Setting to override headers derived compression */
   compressResponse: schema.maybe(schema.boolean()),
+  /** Boolean flag to enable/disable 4KB payload flush fix. */
+  flushFix: schema.maybe(schema.boolean()),
 });
 export type ReducerStreamRequestBodySchema = TypeOf<typeof reducerStreamRequestBodySchema>;

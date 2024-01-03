@@ -79,7 +79,7 @@ export const registerDeleteScriptedFieldRoute = (
             throw new Error('Only scripted fields can be deleted.');
           }
 
-          indexPattern.fields.remove(field);
+          indexPattern.removeScriptedField(name);
 
           await indexPatternsService.updateSavedObject(indexPattern);
 

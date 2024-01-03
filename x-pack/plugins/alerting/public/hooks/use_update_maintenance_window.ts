@@ -7,12 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../utils/kibana_react';
 import { MaintenanceWindow } from '../pages/maintenance_windows/types';
 import { updateMaintenanceWindow } from '../services/maintenance_windows_api/update';
 
-export function useUpdateMaintenanceWindow() {
+interface UseUpdateMaintenanceWindowProps {
+  onError?: (error: IHttpFetchError<KibanaServerError>) => void;
+}
+
+export function useUpdateMaintenanceWindow(props?: UseUpdateMaintenanceWindowProps) {
+  const { onError } = props || {};
+
   const {
     http,
     notifications: { toasts },
@@ -39,12 +47,13 @@ export function useUpdateMaintenanceWindow() {
         })
       );
     },
-    onError: () => {
+    onError: (error: IHttpFetchError<KibanaServerError>) => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsUpdateFailure', {
           defaultMessage: 'Failed to update maintenance window.',
         })
       );
+      onError?.(error);
     },
   });
 }

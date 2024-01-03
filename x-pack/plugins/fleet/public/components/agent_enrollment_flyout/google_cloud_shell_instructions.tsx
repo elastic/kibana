@@ -14,17 +14,20 @@ import { GoogleCloudShellGuide } from '../google_cloud_shell_guide';
 interface Props {
   cloudShellUrl: string;
   cloudShellCommand: string;
+  projectId?: string;
 }
 
 export const GoogleCloudShellInstructions: React.FunctionComponent<Props> = ({
   cloudShellUrl,
   cloudShellCommand,
+  projectId,
 }) => {
   return (
     <>
-      <GoogleCloudShellGuide commandText={cloudShellCommand} />
+      <GoogleCloudShellGuide commandText={cloudShellCommand} hasProjectId={!!projectId} />
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="launchGoogleCloudShellButtonAgentFlyoutTestId"
         color="primary"
         fill
         target="_blank"

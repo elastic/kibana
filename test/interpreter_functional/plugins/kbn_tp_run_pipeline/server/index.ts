@@ -9,4 +9,5 @@
 import { PluginInitializer } from '@kbn/core/server';
 import { TestPlugin, TestPluginSetup, TestPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = () => new TestPlugin();
+export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = async () =>
+  new TestPlugin();

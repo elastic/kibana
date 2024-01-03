@@ -6,33 +6,43 @@
  */
 
 import React from 'react';
-import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
-import { DateRangeProvider } from './hooks/use_date_range';
+import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
+import { DatePickerProvider } from './hooks/use_date_picker';
+import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import { AssetDetailsProps } from './types';
 
 export const ContextProviders = ({
-  props,
   children,
-}: { props: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> } & {
+  ...props
+}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> & {
   children: React.ReactNode;
 }) => {
-  const { asset, dateRange, overrides, onTabsStateChange, assetType = 'host', renderMode } = props;
+  const {
+    assetId,
+    assetName,
+    autoRefresh,
+    dateRange,
+    overrides,
+    assetType = 'host',
+    renderMode,
+  } = props;
+
   return (
-    <DateRangeProvider dateRange={dateRange}>
-      <MetadataStateProvider asset={asset} assetType={assetType}>
-        <AssetDetailsStateProvider
-          state={{
-            asset,
-            assetType,
-            overrides,
-            onTabsStateChange,
-            renderMode,
-          }}
-        >
-          {children}
-        </AssetDetailsStateProvider>
-      </MetadataStateProvider>
-    </DateRangeProvider>
+    <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
+      <LoadingStateProvider>
+        <MetadataStateProvider assetId={assetId} assetType={assetType}>
+          <AssetDetailsRenderPropsProvider
+            assetId={assetId}
+            assetName={assetName}
+            assetType={assetType}
+            overrides={overrides}
+            renderMode={renderMode}
+          >
+            {children}
+          </AssetDetailsRenderPropsProvider>
+        </MetadataStateProvider>
+      </LoadingStateProvider>
+    </DatePickerProvider>
   );
 };

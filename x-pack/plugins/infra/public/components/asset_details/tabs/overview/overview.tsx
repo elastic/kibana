@@ -5,90 +5,78 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
+import React, { useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  MetadataSummaryList,
+  MetadataSummaryListCompact,
+} from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
-import { MetricsGrid } from './metrics/metrics_grid';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
-import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { MetricsSection, MetricsSectionCompact } from './metrics/metrics_section';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { SectionSeparator } from './section_separator';
+import { MetadataErrorCallout } from '../../components/metadata_error_callout';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 export const Overview = () => {
-  const { asset, assetType, dateRange, renderMode } = useAssetDetailsStateContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const { dateRange } = useDatePickerContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-  } = useMetadataStateProviderContext();
+  } = useMetadataStateContext();
+
   const { logs, metrics } = useDataViewsProviderContext();
 
+  const isFullPageView = renderMode.mode !== 'flyout';
+
+  const state = useIntersectingState(ref, { dateRange });
+
+  const metricsSection = isFullPageView ? (
+    <MetricsSection
+      dateRange={state.dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  ) : (
+    <MetricsSectionCompact
+      dateRange={state.dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  );
+  const metadataSummarySection = isFullPageView ? (
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
+  ) : (
+    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
+  );
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metrics.dataView} />
+        <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {fetchMetadataError ? (
-          <EuiCallOut
-            title={i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorTitle', {
-              defaultMessage: 'Sorry, there was an error',
-            })}
-            color="danger"
-            iconType="error"
-            data-test-subj="infraMetadataErrorCallout"
-          >
-            <FormattedMessage
-              id="xpack.infra.assetDetailsEmbeddable.overview.errorMessage"
-              defaultMessage="There was an error loading your host metadata. Try to {reload} and open the host details again."
-              values={{
-                reload: (
-                  <EuiLink
-                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
-                    onClick={() => window.location.reload()}
-                  >
-                    {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
-                      defaultMessage: 'reload the page',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
-        ) : (
-          <MetadataSummaryList
-            metadata={metadata}
-            metadataLoading={metadataLoading}
-            isCompactView={renderMode?.mode === 'flyout'}
-          />
-        )}
+        {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
-        <SectionSeparator />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricsGrid
-          timeRange={dateRange}
-          logsDataView={logs.dataView}
-          metricsDataView={metrics.dataView}
-          nodeName={asset.name}
+        <AlertsSummaryContent
+          assetName={asset.name}
+          assetType={asset.type}
+          dateRange={state.dateRange}
         />
+        <SectionSeparator />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
-
-const SectionSeparator = () => (
-  <EuiHorizontalRule
-    margin="m"
-    css={css`
-      margin-bottom: 0;
-    `}
-  />
-);

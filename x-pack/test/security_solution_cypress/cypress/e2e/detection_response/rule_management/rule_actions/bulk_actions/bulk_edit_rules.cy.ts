@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
@@ -27,7 +28,7 @@ import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/com
 
 import {
   selectAllRules,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
@@ -48,6 +49,7 @@ import {
   clickAddIndexPatternsMenuItem,
   checkPrebuiltRulesCannotBeModified,
   checkMachineLearningRulesCannotBeModified,
+  checkEsqlRulesCannotBeModified,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
@@ -73,19 +75,16 @@ import {
 } from '../../../../../tasks/rules_bulk_actions';
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { tag } from '../../../../../tags';
 import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
+  getEsqlRule,
   getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
@@ -96,6 +95,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
 
@@ -114,16 +114,13 @@ const defaultRuleData = {
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
-describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
+describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
       getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
@@ -152,10 +149,15 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       })
     );
     createRule(
-      getNewTermsRule({ ...defaultRuleData, rule_id: '6', name: 'New Terms Rule', enabled: false })
+      getNewTermsRule({
+        ...defaultRuleData,
+        rule_id: '6',
+        name: 'New Terms Rule',
+        enabled: false,
+      })
     );
 
-    visitSecurityDetectionRulesPage();
+    visitRulesManagementTable();
     disableAutoRefresh();
   });
 
@@ -180,8 +182,8 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
     });
 
-    it('Only prebuilt rules selected', () => {
-      createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+    it('Only prebuilt rules selected', { tags: ['@brokenInServerlessQA'] }, () => {
+      createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       filterByElasticRules();
@@ -198,49 +200,55 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       });
     });
 
-    it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
-      getRulesManagementTableRows().then((existedRulesRows) => {
-        createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+    it(
+      'Prebuilt and custom rules selected: user proceeds with custom rules editing',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
+        getRulesManagementTableRows().then((existedRulesRows) => {
+          createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
 
-        waitForMixedRulesBulkEditModal(existedRulesRows.length);
+          waitForMixedRulesBulkEditModal(existedRulesRows.length);
 
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+            checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          });
+
+          // user can proceed with custom rule editing
+          cy.get(MODAL_CONFIRMATION_BTN)
+            .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
+            .click();
+
+          // action should finish
+          typeTags(['test-tag']);
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
         });
+      }
+    );
 
-        // user can proceed with custom rule editing
-        cy.get(MODAL_CONFIRMATION_BTN)
-          .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
-          .click();
+    it(
+      'Prebuilt and custom rules selected: user cancels action',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
+        createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
-        // action should finish
-        typeTags(['test-tag']);
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
-      });
-    });
+        getRulesManagementTableRows().then((rows) => {
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
+          waitForMixedRulesBulkEditModal(rows.length);
 
-    it('Prebuilt and custom rules selected: user cancels action', () => {
-      createAndInstallMockedPrebuiltRules({ rules: PREBUILT_RULES });
+          checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
-      getRulesManagementTableRows().then((rows) => {
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
-        waitForMixedRulesBulkEditModal(rows.length);
-
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          // user cancels action and modal disappears
+          cancelConfirmationModal();
         });
-
-        // user cancels action and modal disappears
-        cancelConfirmationModal();
-      });
-    });
+      }
+    );
 
     it('should not lose rules selection after edit action', () => {
       const rulesToUpdate = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
@@ -402,7 +410,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         });
 
         // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
     });
@@ -441,7 +449,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         });
 
         // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
     });
@@ -497,7 +505,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
       // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
+      goToRuleDetailsOf(RULE_NAME);
       hasIndexPatterns(indexPattersToWrite.join(''));
     });
 
@@ -522,7 +530,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
       waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
       // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
+      goToRuleDetailsOf(RULE_NAME);
       hasIndexPatterns(resultingIndexPatterns.join(''));
     });
 
@@ -573,7 +581,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if timeline template has been updated to selected one
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
       });
     });
@@ -591,7 +599,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
       });
     });
@@ -628,7 +636,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         submitBulkEditForm();
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
 
         assertRuleScheduleValues({
           interval: '20h',
@@ -652,7 +660,7 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         submitBulkEditForm();
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
 
         assertRuleScheduleValues({
           interval: '1h',
@@ -660,5 +668,75 @@ describe('Detection rules, bulk edit', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLES
         });
       });
     });
+  });
+});
+
+// ES|QL rule type is supported  only in ESS environment
+// Adding 2 use cases only for this rule type, while it is disabled on serverless
+// Created these limited separate scenarios, is done for purpose not duplicating existing tests with new rule type added only for ESS env
+// as they will fail when enabled on serverless
+// Having 2 sets of complete scenarios for both envs would have a high maintenance cost
+// When ES|QL enabled on serverless this rule type can be added to complete set of tests, with minimal changes to tests itself (adding creation of new rule, change number of expected rules, etc)
+describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () => {
+  beforeEach(() => {
+    login();
+    preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
+    deleteAlertsAndRules();
+    createRule(
+      getEsqlRule({
+        tags: ['test-default-tag-1', 'test-default-tag-2'],
+        enabled: false,
+      })
+    );
+    visitRulesManagementTable();
+    disableAutoRefresh();
+  });
+
+  describe('Tags actions', () => {
+    // ensures bulk edit action is applied to the rule type
+    it('Add tags to ES|QL rule', { tags: ['@ess'] }, () => {
+      getRulesManagementTableRows().then((rows) => {
+        const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+        const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
+
+        // check if only pre-populated tags exist in the tags filter
+        checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+
+        selectAllRules();
+
+        // open add tags form and add 2 new tags
+        openBulkEditAddTagsForm();
+        typeTags(tagsToBeAdded);
+        submitBulkEditForm();
+        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+        // check if all rules have been updated with new tags
+        testAllTagsBadges(resultingTags);
+
+        // check that new tags were added to tags filter
+        // tags in tags filter sorted alphabetically
+        const resultingTagsInFilter = [...resultingTags].sort();
+        checkTagsInTagsFilter(resultingTagsInFilter, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
+      });
+    });
+  });
+
+  describe('Index patterns', () => {
+    it(
+      'Index pattern action applied to ES|QL rules, user cancels action',
+      { tags: ['@ess'] },
+      () => {
+        selectAllRules();
+        clickAddIndexPatternsMenuItem();
+
+        // confirm editing custom rules, that are not Machine Learning
+        checkEsqlRulesCannotBeModified(1);
+
+        // user cancels action and modal disappears
+        cancelConfirmationModal();
+      }
+    );
   });
 });

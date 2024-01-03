@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
@@ -44,7 +44,6 @@ export async function getExitSpanThroughput({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...rangeQuery(start, end),
         ...termQuery(
           SPAN_DESTINATION_SERVICE_RESOURCE,
           spanDestinationServiceResource
@@ -73,7 +72,7 @@ export async function getExitSpanThroughput({
       ...fetchedSerie,
       value:
         fetchedSerie.value !== null
-          ? fetchedSerie.value / rangeInMinutes
+          ? (fetchedSerie.value * bucketSizeInMinutes) / rangeInMinutes
           : null,
       data: fetchedSerie.data.map((bucket) => {
         return {

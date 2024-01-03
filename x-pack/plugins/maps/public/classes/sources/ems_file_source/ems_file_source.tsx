@@ -66,16 +66,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
     this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
-      this.createField({ fieldName: propertyKey })
+      this.getFieldByName(propertyKey)
     );
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    return new EMSFileField({
-      fieldName,
-      source: this,
-      origin: FIELD_ORIGIN.SOURCE,
-    });
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
@@ -188,10 +180,22 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     };
   }
 
-  async getLeftJoinFields() {
+  async getFields(): Promise<IField[]> {
     const emsFileLayer = await this.getEMSFileLayer();
     const fields = emsFileLayer.getFieldsInLanguage();
-    return fields.map((f) => this.createField({ fieldName: f.name }));
+    return fields.map((f) => this.getFieldByName(f.name));
+  }
+
+  getFieldByName(fieldName: string): IField {
+    return new EMSFileField({
+      fieldName,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
+  }
+
+  async getLeftJoinFields() {
+    return this.getFields();
   }
 
   hasTooltipProperties() {
@@ -216,4 +220,38 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsSettings = getEMSSettings();
     return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
+
+  private async _getFieldValues(fieldName: string): Promise<string[]> {
+    try {
+      const emsFileLayer = await this.getEMSFileLayer();
+      const targetEmsField = emsFileLayer.getFields().find(({ id }) => id === fieldName);
+      if (targetEmsField?.values?.length) {
+        return targetEmsField.values;
+      }
+
+      // Fallback to pulling values from feature properties when values are not available in file definition
+      const valuesSet = new Set<string>(); // use set to avoid duplicate values
+      const featureCollection = await emsFileLayer.getGeoJson();
+      featureCollection?.features.forEach((feature) => {
+        if (
+          feature.properties &&
+          fieldName in feature.properties &&
+          feature.properties[fieldName] != null
+        ) {
+          valuesSet.add(feature.properties[fieldName].toString());
+        }
+      });
+      return Array.from(valuesSet);
+    } catch (error) {
+      // ignore errors
+      return [];
+    }
+  }
+
+  getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
+    const values = await this._getFieldValues(field.getName());
+    return query.length
+      ? values.filter((value) => value.toLowerCase().includes(query.toLowerCase()))
+      : values;
+  };
 }

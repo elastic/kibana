@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { EnterpriseSearchPluginStart } from '@kbn/enterprise-search-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -15,9 +16,10 @@ export interface ServerlessSearchPluginSetup {}
 export interface ServerlessSearchPluginStart {}
 
 export interface StartDependencies {
-  enterpriseSearch: EnterpriseSearchPluginStart;
+  dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
 }
 export interface SetupDependencies {
-  ml: MlPluginSetup;
+  serverless: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }

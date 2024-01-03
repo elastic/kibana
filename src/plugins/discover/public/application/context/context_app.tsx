@@ -10,25 +10,28 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { removeInterceptedWarningDuplicates } from '@kbn/search-response-warnings';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import {
+  DOC_TABLE_LEGACY,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
-import { useColumns } from '../../hooks/use_data_grid_columns';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
-import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 
@@ -68,7 +71,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
-    config: uiSettings,
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
     useNewFieldsApi,
@@ -173,12 +176,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const interceptedWarnings = useMemo(
-    () =>
-      removeInterceptedWarningDuplicates([
-        ...(fetchedState.predecessorsInterceptedWarnings || []),
-        ...(fetchedState.anchorInterceptedWarnings || []),
-        ...(fetchedState.successorsInterceptedWarnings || []),
-      ]),
+    () => [
+      ...(fetchedState.predecessorsInterceptedWarnings || []),
+      ...(fetchedState.anchorInterceptedWarnings || []),
+      ...(fetchedState.successorsInterceptedWarnings || []),
+    ],
     [
       fetchedState.predecessorsInterceptedWarnings,
       fetchedState.anchorInterceptedWarnings,
@@ -205,12 +207,14 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      showSaveQuery: false,
+      saveQueryMenuVisibility: 'hidden' as const,
       showDatePicker: false,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,
     };
   };
+
+  const titlePadding = useEuiPaddingSize('m');
 
   return (
     <Fragment>
@@ -232,12 +236,16 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageBody
               panelled
-              paddingSize="s"
+              paddingSize="none"
               className="dscDocsContent"
               panelProps={{ role: 'main' }}
             >
-              <EuiSpacer size="s" />
-              <EuiText data-test-subj="contextDocumentSurroundingHeader">
+              <EuiText
+                data-test-subj="contextDocumentSurroundingHeader"
+                css={css`
+                  padding: ${titlePadding} ${titlePadding} 0;
+                `}
+              >
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"

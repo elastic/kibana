@@ -128,12 +128,14 @@ describe('rules', () => {
           muted: false,
           actionGroupId: 'default',
           flapping: false,
+          tracked: true,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
           flapping: false,
+          tracked: true,
         },
       },
     });
@@ -192,11 +194,13 @@ describe('rules', () => {
         status: 'OK',
         muted: false,
         flapping: false,
+        tracked: true,
       },
       ['us-east']: {
         status: 'OK',
         muted: false,
         flapping: false,
+        tracked: true,
       },
     };
 
@@ -228,8 +232,8 @@ describe('rules', () => {
       mutedInstanceIds: ['us-west', 'us-east'],
     });
     const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false };
+    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
+    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
 
     const wrapper = mountWithIntl(
       <RuleComponentWithProvider
@@ -243,11 +247,13 @@ describe('rules', () => {
               status: 'OK',
               muted: false,
               flapping: false,
+              tracked: true,
             },
             'us-east': {
               status: 'OK',
               muted: false,
               flapping: false,
+              tracked: true,
             },
           },
         })}
@@ -275,6 +281,7 @@ describe('alertToListItem', () => {
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -285,6 +292,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -295,6 +303,7 @@ describe('alertToListItem', () => {
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -305,6 +314,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -316,6 +326,7 @@ describe('alertToListItem', () => {
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -326,6 +337,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: true,
+      tracked: true,
     });
   });
 
@@ -335,6 +347,7 @@ describe('alertToListItem', () => {
       muted: false,
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -345,6 +358,7 @@ describe('alertToListItem', () => {
       duration: 0,
       sortPriority: 0,
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -354,6 +368,7 @@ describe('alertToListItem', () => {
       muted: true,
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
@@ -363,6 +378,7 @@ describe('alertToListItem', () => {
       duration: 0,
       sortPriority: 1,
       isMuted: true,
+      tracked: true,
     });
   });
 });
@@ -457,12 +473,14 @@ describe('tabbed content', () => {
           muted: false,
           actionGroupId: 'default',
           flapping: false,
+          tracked: true,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
           flapping: false,
+          tracked: true,
         },
       },
     });
@@ -544,6 +562,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
         muted: false,
         actionGroupId: 'testActionGroup',
         flapping: false,
+        tracked: true,
       },
     },
     executionDuration: {

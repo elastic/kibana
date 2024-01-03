@@ -33,7 +33,7 @@ export class UrlPatternMatcher {
     // We'll group endpoints by the methods which are attached to them,
     //to avoid suggesting endpoints that are incompatible with the
     //method that the user has entered.
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
+    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE', 'PATCH'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {

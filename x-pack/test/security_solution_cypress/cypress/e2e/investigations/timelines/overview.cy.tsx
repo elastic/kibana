@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import {
   TIMELINES_OVERVIEW_TABLE,
@@ -18,17 +17,14 @@ import {
   sharedTimelineTitleFragment,
 } from '../../../objects/timeline';
 
-import { cleanKibana } from '../../../tasks/common';
-
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('timeline overview search', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
@@ -37,7 +33,7 @@ describe('timeline overview search', { tags: [tag.ESS, tag.SERVERLESS] }, () => 
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
   });
 

@@ -31,7 +31,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-}"
-  GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
+  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
@@ -54,7 +54,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -u -- . ':!.bazelrc'
+      git add -A -- . ':!.bazelrc'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
@@ -169,4 +169,35 @@ npm_install_global() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+
+vault_get() {
+  path=$1
+  field=$2
+
+  fullPath="secret/ci/elastic-kibana/$path"
+  if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+    fullPath="secret/kibana-issues/dev/$path"
+  fi
+
+  if [[ -z "${2:-}" ]]; then
+    retry 5 5 vault read "$fullPath"
+  else
+    retry 5 5 vault read -field="$field" "$fullPath"
+  fi
+}
+
+vault_set() {
+  path=$1
+  shift
+  fields=("$@")
+
+  fullPath="secret/ci/elastic-kibana/$path"
+  if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+    fullPath="secret/kibana-issues/dev/$path"
+  fi
+
+  # shellcheck disable=SC2068
+  retry 5 5 vault write "$fullPath" ${fields[@]}
 }

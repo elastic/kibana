@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
+import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
@@ -17,7 +20,7 @@ import {
   ALERTS_TAB,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
-  REFRESH_BUTTON,
+  LAST_EXECUTION_STATUS_REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
   DEFINITION_DETAILS,
@@ -28,10 +31,11 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
-  BACK_TO_RULES_TABLE,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
+  RULE_NAME_HEADER,
 } from '../screens/rule_details';
+import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -39,14 +43,36 @@ import {
   submitNewExceptionItem,
 } from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
+import { visit } from './navigation';
 
-export const enablesRule = () => {
+interface VisitRuleDetailsPageOptions {
+  tab?: RuleDetailsTabs;
+  role?: SecurityRoleName;
+}
+
+export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
+  visit(ruleDetailsUrl(ruleId, options?.tab));
+}
+
+export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
+  });
+};
+
+export const clickDisableRuleSwitch = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
+  cy.get(RULE_SWITCH).should('be.visible');
+  cy.get(RULE_SWITCH).click();
+  cy.wait('@bulk_action').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
 };
 
@@ -104,8 +130,8 @@ export const goToEndpointExceptionsTab = () => {
 };
 
 export const openEditException = (index = 0) => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
-  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click();
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click();
 };
 
 export const removeException = () => {
@@ -114,10 +140,22 @@ export const removeException = () => {
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
+/**
+ * Waits for rule details page to be loaded
+ *
+ * @param ruleName rule's name
+ */
+export const waitForPageToBeLoaded = (ruleName: string): void => {
+  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
+  cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
+  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
+};
+
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
-    cy.log('Wating for the rule to be executed');
-    cy.get(REFRESH_BUTTON).click({ force: true });
+    cy.log('Waiting for the rule to be executed');
+    cy.get(LAST_EXECUTION_STATUS_REFRESH_BUTTON).click();
+
     return cy
       .get(RULE_STATUS)
       .invoke('text')
@@ -126,7 +164,7 @@ export const waitForTheRuleToBeExecuted = () => {
 };
 
 export const goBackToRulesTable = () => {
-  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

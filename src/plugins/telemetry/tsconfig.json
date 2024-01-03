@@ -35,6 +35,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
+    "@kbn/analytics-collection-utils",
   ],
   "exclude": [
     "target/**/*",

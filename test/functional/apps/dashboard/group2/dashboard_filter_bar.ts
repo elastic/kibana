@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -208,9 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (isLegacyDefault) {
           await testSubjects.click('docTableCellFilter');
         } else {
-          const documentCell = await dataGrid.getCellElement(1, 3);
-          await documentCell.click();
-          await testSubjects.click('filterForButton');
+          await dataGrid.clickCellFilterForButton(1, 3);
         }
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

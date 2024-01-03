@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
+
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+} from '../../../common/services/output_helpers';
 
 import type {
   FullAgentPolicy,
@@ -18,7 +25,11 @@ import type {
   FleetProxy,
   FleetServerHost,
 } from '../../types';
-import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
+import type {
+  FullAgentPolicyMonitoring,
+  FullAgentPolicyOutputPermissions,
+  PackageInfo,
+} from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
 import { DEFAULT_OUTPUT } from '../../constants';
@@ -26,6 +37,8 @@ import { DEFAULT_OUTPUT } from '../../constants';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
+
+import { getOutputSecretReferences } from '../secrets';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -105,6 +118,39 @@ export async function getFullAgentPolicy(
     acc[name] = featureConfig;
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+
+  const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
+  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+    (policy) => policy.secret_references || []
+  );
+  const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
+    enabled: false,
+    logs: false,
+    metrics: false,
+  };
+
+  let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
+
+  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
+  // a monitoring config for the resulting compiled agent policy
+  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
+    monitoring = {
+      namespace: agentPolicy.namespace,
+      use_output: getOutputIdForAgentPolicy(monitoringOutput),
+      enabled: true,
+      logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+      metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
+    };
+    // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
+    // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
+  } else if (agentPolicy.keep_monitoring_alive) {
+    monitoring = {
+      enabled: true,
+      logs: false,
+      metrics: false,
+    };
+  }
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -119,25 +165,14 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
-    secret_references: (agentPolicy?.package_policies || []).flatMap(
-      (policy) => policy.secret_references || []
-    ),
+    secret_references: [...outputSecretReferences, ...packagePolicySecretReferences],
     revision: agentPolicy.revision,
     agent: {
       download: {
         sourceURI: downloadSourceUri,
         ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
-      monitoring:
-        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-          ? {
-              namespace: agentPolicy.namespace,
-              use_output: getOutputIdForAgentPolicy(monitoringOutput),
-              enabled: true,
-              logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-              metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            }
-          : { enabled: false, logs: false, metrics: false },
+      monitoring,
       features,
       protection: {
         enabled: agentPolicy.is_protected,
@@ -178,7 +213,10 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
-    if (output && output.type === outputType.Elasticsearch) {
+    if (
+      output &&
+      (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    ) {
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -280,8 +318,17 @@ export function transformOutputToFullPolicyOutput(
   proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
+  const {
+    config_yaml,
+    type,
+    hosts,
+    ca_sha256,
+    ca_trusted_fingerprint,
+    ssl,
+    shipper,
+    secrets,
+    preset,
+  } = output;
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
@@ -292,7 +339,6 @@ export function transformOutputToFullPolicyOutput(
   let kafkaData = {};
 
   if (type === outputType.Kafka) {
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       client_id,
       version,
@@ -363,7 +409,7 @@ export function transformOutputToFullPolicyOutput(
             topic: topicName,
             when: {
               [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value.replace(/\s/g, ''),
+                [keyName.replace(/\s/g, '')]: value,
               },
             },
           };
@@ -408,6 +454,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
+    ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
@@ -443,6 +490,14 @@ export function transformOutputToFullPolicyOutput(
   if (output.type === outputType.Elasticsearch && standalone) {
     newOutput.username = '${ES_USERNAME}';
     newOutput.password = '${ES_PASSWORD}';
+  }
+
+  if (output.type === outputType.RemoteElasticsearch) {
+    newOutput.service_token = output.service_token;
+  }
+
+  if (outputTypeSupportPresets(output.type)) {
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', safeLoad);
   }
 
   return newOutput;

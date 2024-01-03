@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import expect from '@kbn/expect';
 import {
@@ -155,6 +155,36 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('filter by multiple status', async () => {
+        const openCase = await createCase(supertest, postCaseReq);
+        const toCloseCase = await createCase(supertest, postCaseReq);
+        const closedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: toCloseCase.id,
+                version: toCloseCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { status: [CaseStatuses.closed, CaseStatuses.open] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [openCase, closedCases[0]],
+          count_open_cases: 1,
+          count_closed_cases: 1,
+        });
+      });
+
       it('filters by severity', async () => {
         await createCase(supertest, postCaseReq);
         const theCase = await createCase(supertest, postCaseReq);
@@ -191,6 +221,26 @@ export default ({ getService }: FtrProviderContext): void => {
           ...findCasesResp,
           total: 0,
           cases: [],
+        });
+      });
+
+      it('filters by multiple severities', async () => {
+        const lowSeverityCase = await createCase(supertest, postCaseReq);
+        const criticalSeverityCase = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { severity: [CaseSeverity.LOW, CaseSeverity.CRITICAL] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [lowSeverityCase, criticalSeverityCase],
+          count_open_cases: 2,
         });
       });
 
@@ -387,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should successfully find a case with a valid uuid in title', async () => {
-          const uuid = uuidv1();
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, title: uuid });
 
           const cases = await findCases({
@@ -400,7 +450,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should successfully find a case with a valid uuid in description', async () => {
-          const uuid = uuidv1();
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
           const cases = await findCases({

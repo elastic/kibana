@@ -24,7 +24,7 @@ import {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-
+import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
@@ -104,6 +104,8 @@ export interface DocumentCountChartProps {
   brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   /** Optional width */
   width?: number;
+  /** Optional chart height */
+  height?: number;
   /** Data chart points */
   chartPoints: LogRateHistogramItem[];
   /** Data chart points split */
@@ -130,6 +132,8 @@ export interface DocumentCountChartProps {
   deviationBrush?: BrushSettings;
   /** Optional settings override for the 'baseline' brush */
   baselineBrush?: BrushSettings;
+  /** Optional data-test-subject */
+  dataTestSubj?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -140,16 +144,6 @@ const BADGE_WIDTH = 75;
 enum VIEW_MODE {
   ZOOM = 'zoom',
   BRUSH = 'brush',
-}
-
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
 }
 
 function getBaselineBadgeOverflow(
@@ -174,9 +168,11 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
     width,
+    height,
     chartPoints,
     chartPointsSplit,
     timeRangeEarliest,
@@ -194,7 +190,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
@@ -291,7 +286,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     timefilterUpdateHandler({ from, to });
   };
 
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
 
   const [originalWindowParameters, setOriginalWindowParameters] = useState<
     WindowParameters | undefined
@@ -417,7 +412,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
+        <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={
@@ -461,11 +456,14 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
         </div>
       )}
-      <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+      <div
+        css={{ width: width ?? '100%' }}
+        data-test-subj={dataTestSubj ?? 'aiopsDocumentCountChart'}
+      >
         <Chart
           size={{
             width: '100%',
-            height: 120,
+            height: height ?? 120,
           }}
         >
           <Settings
@@ -475,11 +473,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);
             }}
-            theme={chartTheme}
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
             showLegend={false}
             showLegendExtra={false}
+            locale={i18n.getLocale()}
           />
           <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
           <Axis
@@ -499,6 +497,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPoints}
               timeZone={timeZone}
               color={barColor}
@@ -514,6 +513,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
+              stackAccessors={['true']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
               color={barHighlightColor}

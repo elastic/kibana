@@ -8,7 +8,6 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import moment from 'moment';
 import {
   InstallPrebuiltRulesAndTimelinesResponse,
@@ -30,10 +29,10 @@ import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_
 import { rulesToMap } from '../../logic/utils';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'public',
       path: PREBUILT_RULES_URL,
-      validate: false,
       options: {
         tags: ['access:securitySolution'],
         timeout: {
@@ -44,28 +43,33 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
           idleSocket: moment.duration('1', 'hour').asMilliseconds(),
         },
       },
-    },
-    async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      async (context, _, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const rulesClient = (await context.alerting).getRulesClient();
+        try {
+          const rulesClient = (await context.alerting).getRulesClient();
 
-        const validated = await createPrepackagedRules(
-          await context.securitySolution,
-          rulesClient,
-          undefined
-        );
-        return response.ok({ body: validated ?? {} });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          const validated = await createPrepackagedRules(
+            await context.securitySolution,
+            rulesClient,
+            undefined
+          );
+          return response.ok({ body: validated ?? {} });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export class PrepackagedRulesError extends Error {
@@ -111,9 +115,7 @@ export const createPrepackagedRules = async (
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }
 
-  const { result: timelinesResult, error: timelinesError } = await performTimelinesInstallation(
-    context
-  );
+  const { result: timelinesResult } = await performTimelinesInstallation(context);
 
   await upgradePrebuiltRules(rulesClient, rulesToUpdate);
 
@@ -124,17 +126,5 @@ export const createPrepackagedRules = async (
     timelines_updated: timelinesResult?.timelines_updated ?? 0,
   };
 
-  const [validated, genericErrors] = validate(
-    prebuiltRulesOutput,
-    InstallPrebuiltRulesAndTimelinesResponse
-  );
-
-  if (genericErrors != null && timelinesError != null) {
-    throw new PrepackagedRulesError(
-      [genericErrors, timelinesError].filter((msg) => msg != null).join(', '),
-      500
-    );
-  }
-
-  return validated;
+  return InstallPrebuiltRulesAndTimelinesResponse.parse(prebuiltRulesOutput);
 };

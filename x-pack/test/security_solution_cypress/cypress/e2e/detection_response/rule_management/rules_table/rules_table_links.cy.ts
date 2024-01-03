@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { tag } from '../../../../tags';
-
 import { getNewRule } from '../../../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-describe('Rules table: links', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Rules table: links', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
     createRule(getNewRule({ rule_id: 'rule1', enabled: false }));
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
   });
 
   it('should render correct link for rule name - rules', () => {

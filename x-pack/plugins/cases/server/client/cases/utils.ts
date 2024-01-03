@@ -19,11 +19,16 @@ import type {
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
+  CustomFieldsConfiguration,
   ExternalService,
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import type {
+  CasePostRequest,
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -453,3 +458,41 @@ export const getUserProfiles = async (
     return acc;
   }, new Map());
 };
+
+export const fillMissingCustomFields = ({
+  customFields = [],
+  customFieldsConfiguration = [],
+}: {
+  customFields?: CaseRequestCustomFields;
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): CaseRequestCustomFields => {
+  const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
+  const missingCustomFields: CaseRequestCustomFields = [];
+
+  for (const confCustomField of customFieldsConfiguration) {
+    if (!customFieldsKeys.has(confCustomField.key)) {
+      missingCustomFields.push({
+        key: confCustomField.key,
+        type: confCustomField.type,
+        value: null,
+      });
+    }
+  }
+
+  return [...customFields, ...missingCustomFields];
+};
+
+export const normalizeCreateCaseRequest = (
+  request: CasePostRequest,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+) => ({
+  ...request,
+  title: request.title.trim(),
+  description: request.description.trim(),
+  category: request.category?.trim() ?? null,
+  tags: request.tags?.map((tag) => tag.trim()) ?? [],
+  customFields: fillMissingCustomFields({
+    customFields: request.customFields,
+    customFieldsConfiguration,
+  }),
+});

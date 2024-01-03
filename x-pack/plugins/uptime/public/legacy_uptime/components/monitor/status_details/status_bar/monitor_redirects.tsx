@@ -7,19 +7,18 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover } from '@elastic/eui';
-import styled from 'styled-components';
+import {
+  EuiPopover,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { Ping } from '../../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
-import { MonListDescription, MonListTitle } from './status_bar';
 
 interface Props {
   monitorStatus: Ping | null;
 }
-
-const RedirectBtn = styled.span`
-  cursor: pointer;
-`;
 
 export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
   const list = monitorStatus?.http?.response?.redirects;
@@ -27,11 +26,13 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <MonListDescription>
-      <RedirectBtn
+    <EuiDescriptionListDescription>
+      <EuiButtonEmpty
         className="euiLink euiLink--primary"
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         data-test-subj="uptimeMonitorRedirectInfo"
+        iconType="arrowDown"
+        iconSide="right"
       >
         {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {
           defaultMessage: '{number}',
@@ -39,13 +40,13 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
             number: list?.length ?? 0,
           },
         })}
-      </RedirectBtn>
-    </MonListDescription>
+      </EuiButtonEmpty>
+    </EuiDescriptionListDescription>
   );
 
   return list ? (
     <>
-      <MonListTitle>Redirects</MonListTitle>
+      <EuiDescriptionListTitle>Redirects</EuiDescriptionListTitle>
       <EuiPopover
         button={button}
         isOpen={isPopoverOpen}

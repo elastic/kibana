@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { validatePermissions } from './edit_monitor';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
@@ -39,10 +40,13 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     const { monitorId } = request.params;
 
     try {
-      const errors = await deleteMonitor({
+      const { errors, res } = await deleteMonitor({
         routeContext,
         monitorId,
       });
+      if (res) {
+        return res;
+      }
 
       if (errors && errors.length > 0) {
         return response.ok({
@@ -68,7 +72,7 @@ export const deleteMonitor = async ({
   routeContext: RouteContext;
   monitorId: string;
 }) => {
-  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
+  const { response, spaceId, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -77,6 +81,17 @@ export const deleteMonitor = async ({
     server,
     spaceId
   );
+
+  const err = await validatePermissions(routeContext, monitor.attributes.locations);
+  if (err) {
+    return {
+      res: response.forbidden({
+        body: {
+          message: err,
+        },
+      }),
+    };
+  }
 
   let deletePromise;
 
@@ -113,7 +128,7 @@ export const deleteMonitor = async ({
       )
     );
 
-    return errors;
+    return { errors };
   } catch (e) {
     if (deletePromise) {
       await deletePromise;

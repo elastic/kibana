@@ -5,297 +5,164 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  RegisterRenderFunctionDefinition,
+  RenderFunction,
+} from '@kbn/observability-ai-assistant-plugin/public/types';
+
 import { groupBy } from 'lodash';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS } from '../hooks/use_fetcher';
-import { callApmApi } from '../services/rest/create_call_apm_api';
-import { getTimeZone } from '../components/shared/charts/helper/timezone';
-import { TimeseriesChart } from '../components/shared/charts/timeseries_chart';
-import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
-import { ApmThemeProvider } from '../components/routing/app_root';
-import { Coordinate, TimeSeries } from '../../typings/timeseries';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../components/shared/charts/helper/get_timeseries_color';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   asPercent,
   asTransactionRate,
   getDurationFormatter,
 } from '../../common/utils/formatters';
+import type {
+  GetApmTimeseriesFunctionArguments,
+  GetApmTimeseriesFunctionResponse,
+} from '../../server/assistant_functions/get_apm_timeseries';
+import { Coordinate, TimeSeries } from '../../typings/timeseries';
+import { ApmThemeProvider } from '../components/routing/app_root';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../components/shared/charts/helper/get_timeseries_color';
+import { getTimeZone } from '../components/shared/charts/helper/timezone';
+import { TimeseriesChart } from '../components/shared/charts/timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../components/shared/charts/transaction_charts/helper';
+import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
+import { FETCH_STATUS } from '../hooks/use_fetcher';
 
 export function registerGetApmTimeseriesFunction({
-  registerFunction,
+  registerRenderFunction,
 }: {
-  registerFunction: RegisterFunctionDefinition;
+  registerRenderFunction: RegisterRenderFunctionDefinition;
 }) {
-  registerFunction(
-    {
-      contexts: ['apm'],
-      name: 'get_apm_timeseries',
-      descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
-        {
-          defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
-        }
-      ),
-      description: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions. In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\/\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!`,
-      parameters: {
-        type: 'object',
-        properties: {
-          start: {
-            type: 'string',
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
-          },
-          end: {
-            type: 'string',
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
-          },
-          stats: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                timeseries: {
-                  description: 'The metric to be displayed',
-                  oneOf: [
-                    {
-                      type: 'object',
-                      properties: {
-                        name: {
-                          type: 'string',
-                          enum: [
-                            'transaction_throughput',
-                            'transaction_failure_rate',
-                          ],
-                        },
-                        'transaction.type': {
-                          type: 'string',
-                          description: 'The transaction type',
-                        },
-                      },
-                      required: ['name'],
-                    },
-                    {
-                      type: 'object',
-                      properties: {
-                        name: {
-                          type: 'string',
-                          enum: [
-                            'exit_span_throughput',
-                            'exit_span_failure_rate',
-                            'exit_span_latency',
-                          ],
-                        },
-                        'span.destination.service.resource': {
-                          type: 'string',
-                          description:
-                            'The name of the downstream dependency for the service',
-                        },
-                      },
-                      required: ['name'],
-                    },
-                    {
-                      type: 'object',
-                      properties: {
-                        name: {
-                          type: 'string',
-                          const: 'error_event_rate',
-                        },
-                      },
-                      required: ['name'],
-                    },
-                    {
-                      type: 'object',
-                      properties: {
-                        name: {
-                          type: 'string',
-                          const: 'transaction_latency',
-                        },
-                        'transaction.type': {
-                          type: 'string',
-                        },
-                        function: {
-                          type: 'string',
-                          enum: ['avg', 'p95', 'p99'],
-                        },
-                      },
-                      required: ['name', 'function'],
-                    },
-                  ],
-                },
-                'service.name': {
-                  type: 'string',
-                  description: 'The name of the service',
-                },
-                'service.environment': {
-                  type: 'string',
-                  description:
-                    'The environment that the service is running in.',
-                },
-                filter: {
-                  type: 'string',
-                  description:
-                    'a KQL query to filter the data by. If no filter should be applied, leave it empty.',
-                },
-                title: {
-                  type: 'string',
-                  description:
-                    'A unique, human readable, concise title for this specific group series.',
-                },
-                offset: {
-                  type: 'string',
-                  description:
-                    'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
-                },
-              },
-              required: [
-                'service.name',
-                'service.environment',
-                'timeseries',
-                'title',
-              ],
-            },
-          },
-        },
-        required: ['stats', 'start', 'end'],
-      } as const,
-    },
-    async ({ arguments: { stats, start, end } }, signal) => {
-      const response = await callApmApi(
-        'POST /internal/apm/assistant/get_apm_timeseries',
-        {
-          signal,
-          params: {
-            body: { stats: stats as any, start, end },
-          },
-        }
-      );
+  registerRenderFunction('get_apm_timeseries', (parameters) => {
+    const { response } = parameters as Parameters<
+      RenderFunction<
+        GetApmTimeseriesFunctionArguments,
+        GetApmTimeseriesFunctionResponse
+      >
+    >[0];
 
-      return response;
-    },
-    ({ arguments: args, response }) => {
-      const groupedSeries = groupBy(response.data, (series) => series.group);
+    const groupedSeries = groupBy(response.data, (series) => series.group);
 
-      const {
-        services: { uiSettings },
-      } = useKibana();
+    const {
+      services: { uiSettings },
+    } = useKibana();
 
-      const timeZone = getTimeZone(uiSettings);
+    const timeZone = getTimeZone(uiSettings);
 
-      return (
-        <ChartPointerEventContextProvider>
-          <ApmThemeProvider>
-            <EuiFlexGroup direction="column">
-              {Object.values(groupedSeries).map((groupSeries) => {
-                const groupId = groupSeries[0].group;
+    return (
+      <ChartPointerEventContextProvider>
+        <ApmThemeProvider>
+          <EuiFlexGroup direction="column">
+            {Object.values(groupedSeries).map((groupSeries) => {
+              const groupId = groupSeries[0].group;
 
-                const maxY = getMaxY(groupSeries);
-                const latencyFormatter = getDurationFormatter(maxY);
+              const maxY = getMaxY(groupSeries);
+              const latencyFormatter = getDurationFormatter(maxY, 10, 1000);
 
-                let yLabelFormat: (value: number) => string;
+              let yLabelFormat: (value: number) => string;
 
-                const firstStat = groupSeries[0].stat;
+              const firstStat = groupSeries[0].stat;
 
-                switch (firstStat.timeseries.name) {
-                  case 'transaction_throughput':
-                  case 'exit_span_throughput':
-                  case 'error_event_rate':
-                    yLabelFormat = asTransactionRate;
-                    break;
+              switch (firstStat.timeseries.name) {
+                case 'transaction_throughput':
+                case 'exit_span_throughput':
+                case 'error_event_rate':
+                  yLabelFormat = asTransactionRate;
+                  break;
 
-                  case 'transaction_latency':
-                  case 'exit_span_latency':
-                    yLabelFormat =
-                      getResponseTimeTickFormatter(latencyFormatter);
-                    break;
+                case 'transaction_latency':
+                case 'exit_span_latency':
+                  yLabelFormat = getResponseTimeTickFormatter(latencyFormatter);
+                  break;
 
-                  case 'transaction_failure_rate':
-                  case 'exit_span_failure_rate':
-                    yLabelFormat = (y) => asPercent(y || 0, 100);
-                    break;
-                }
+                case 'transaction_failure_rate':
+                case 'exit_span_failure_rate':
+                  yLabelFormat = (y) => asPercent(y || 0, 100);
+                  break;
+              }
 
-                const timeseries: Array<TimeSeries<Coordinate>> =
-                  groupSeries.map((series): TimeSeries<Coordinate> => {
-                    let chartType: ChartType;
+              const timeseries: Array<TimeSeries<Coordinate>> = groupSeries.map(
+                (series): TimeSeries<Coordinate> => {
+                  let chartType: ChartType;
 
-                    switch (series.stat.timeseries.name) {
-                      case 'transaction_throughput':
-                      case 'exit_span_throughput':
-                        chartType = ChartType.THROUGHPUT;
-                        break;
+                  const data = series.data;
 
-                      case 'transaction_failure_rate':
-                      case 'exit_span_failure_rate':
-                        chartType = ChartType.FAILED_TRANSACTION_RATE;
-                        break;
+                  switch (series.stat.timeseries.name) {
+                    case 'transaction_throughput':
+                    case 'exit_span_throughput':
+                      chartType = ChartType.THROUGHPUT;
+                      break;
 
-                      case 'transaction_latency':
-                        if (
-                          series.stat.timeseries.function ===
-                          LatencyAggregationType.p99
-                        ) {
-                          chartType = ChartType.LATENCY_P99;
-                        } else if (
-                          series.stat.timeseries.function ===
-                          LatencyAggregationType.p95
-                        ) {
-                          chartType = ChartType.LATENCY_P95;
-                        } else {
-                          chartType = ChartType.LATENCY_AVG;
-                        }
-                        break;
+                    case 'transaction_failure_rate':
+                    case 'exit_span_failure_rate':
+                      chartType = ChartType.FAILED_TRANSACTION_RATE;
+                      break;
 
-                      case 'exit_span_latency':
+                    case 'transaction_latency':
+                      if (
+                        series.stat.timeseries.function ===
+                        LatencyAggregationType.p99
+                      ) {
+                        chartType = ChartType.LATENCY_P99;
+                      } else if (
+                        series.stat.timeseries.function ===
+                        LatencyAggregationType.p95
+                      ) {
+                        chartType = ChartType.LATENCY_P95;
+                      } else {
                         chartType = ChartType.LATENCY_AVG;
-                        break;
+                      }
+                      break;
 
-                      case 'error_event_rate':
-                        chartType = ChartType.ERROR_OCCURRENCES;
-                        break;
-                    }
+                    case 'exit_span_latency':
+                      chartType = ChartType.LATENCY_AVG;
+                      break;
 
-                    return {
-                      title: series.id,
-                      type: 'line',
-                      color: getTimeSeriesColor(chartType!).currentPeriodColor,
-                      data: series.data,
-                    };
-                  });
+                    case 'error_event_rate':
+                      chartType = ChartType.ERROR_OCCURRENCES;
+                      break;
+                  }
 
-                return (
-                  <EuiFlexItem grow={false} key={groupId}>
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      <EuiFlexItem>
-                        <EuiText size="m">{groupId}</EuiText>
-                        <TimeseriesChart
-                          comparisonEnabled={false}
-                          fetchStatus={FETCH_STATUS.SUCCESS}
-                          id={groupId}
-                          timeZone={timeZone}
-                          timeseries={timeseries}
-                          yLabelFormat={yLabelFormat!}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGroup>
-          </ApmThemeProvider>
-        </ChartPointerEventContextProvider>
-      );
-    }
-  );
+                  return {
+                    title: series.id,
+                    type: 'line',
+                    color: getTimeSeriesColor(chartType!).currentPeriodColor,
+                    data,
+                  };
+                }
+              );
+
+              return (
+                <EuiFlexItem grow={false} key={groupId}>
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexItem>
+                      <EuiText size="m">{groupId}</EuiText>
+                      <TimeseriesChart
+                        comparisonEnabled={false}
+                        fetchStatus={FETCH_STATUS.SUCCESS}
+                        id={groupId}
+                        timeZone={timeZone}
+                        timeseries={timeseries}
+                        yLabelFormat={yLabelFormat!}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        </ApmThemeProvider>
+      </ChartPointerEventContextProvider>
+    );
+  });
 }

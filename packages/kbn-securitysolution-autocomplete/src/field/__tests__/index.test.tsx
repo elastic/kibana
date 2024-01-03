@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { FieldComponent } from '..';
@@ -31,7 +31,9 @@ describe('FieldComponent', () => {
       />
     );
     expect(wrapper).toMatchSnapshot();
-    expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('machine.os.raw');
+    const comboBox = wrapper.getByTestId('fieldAutocompleteComboBox');
+    const input = within(comboBox).getByRole('combobox');
+    expect(input).toHaveAttribute('value', 'machine.os.raw');
   });
   it('should render the component disabled if isDisabled is true', () => {
     const wrapper = render(
@@ -110,9 +112,7 @@ describe('FieldComponent', () => {
     );
     const fieldAutocompleteComboBox = wrapper.getByTestId('comboBoxSearchInput');
     fireEvent.change(fieldAutocompleteComboBox, { target: { value: '_source' } });
-    await waitFor(() =>
-      expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('_source')
-    );
+    expect(fieldAutocompleteComboBox).toHaveValue('_source');
   });
 
   it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {

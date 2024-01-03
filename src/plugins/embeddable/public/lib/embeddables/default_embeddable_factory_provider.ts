@@ -30,6 +30,7 @@ export const defaultEmbeddableFactoryProvider = <
   }
 
   const factory: EmbeddableFactory<I, O, E, T> = {
+    ...def,
     latestVersion: def.latestVersion,
     isContainerType: def.isContainerType ?? false,
     canCreateNew: def.canCreateNew ? def.canCreateNew.bind(def) : () => true,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { Subject, mergeMap } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -16,8 +16,9 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
@@ -56,6 +57,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -66,6 +68,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * The current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'
    */
   readonly kibanaVersion: string;
+  /**
+   * Whether the environment is 'serverless' or 'traditional'
+   */
+  readonly buildFlavor: string;
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
@@ -83,6 +89,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  readonly configSettings: ConfigSettings;
   private queryService: QueryService = new QueryService();
   private nowProvider: NowProvider = new NowProvider();
 
@@ -91,10 +98,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental || []
     ).features;
+    this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.contract = new PluginContract();
+    this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }
@@ -169,23 +178,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         http: core.http,
       });
 
-      const filterManager = new FilterManager(core.uiSettings);
-
       // used for creating a custom stateful KQL Query Bar
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
-        query: {
-          ...query,
-          filterManager,
-        },
+        query,
+        // @ts-expect-error
+        _name: 'custom',
       };
+
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         ...this.contract.getStartServices(),
+        configSettings: this.configSettings,
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
+        setHeaderActionMenu: params.setHeaderActionMenu,
         storage: this.storage,
         sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
@@ -193,9 +204,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
-        savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
+        contentManagement: startPluginsDeps.contentManagement,
         telemetry: this.telemetry.start(),
-        discoverFilterManager: filterManager,
         customDataService,
         topValuesPopover: new TopValuesPopoverService(),
       };
@@ -270,6 +280,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ...plugins,
       kibanaBranch: this.kibanaBranch,
       kibanaVersion: this.kibanaVersion,
+      buildFlavor: this.buildFlavor,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -337,7 +348,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public stop() {
     this.queryService.stop();
     licenseService.stop();
-    return this.contract.getStopContract();
+    this.contract.getStopContract();
   }
 
   private lazyHelpersForRoutes() {
@@ -511,9 +522,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const { upsellingService, appLinksSwitcher } = this.contract;
+    const { upsellingService, appLinksSwitcher, deepLinksFormatter } = this.contract;
 
-    registerDeepLinksUpdater(this.appUpdater$);
+    registerDeepLinksUpdater(this.appUpdater$, deepLinksFormatter);
 
     const baseLinksPermissions: LinksPermissions = {
       experimentalFeatures: this.experimentalFeatures,
@@ -521,18 +532,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       capabilities: core.application.capabilities,
     };
 
-    license$.subscribe(async (license) => {
-      const linksPermissions: LinksPermissions = {
-        ...baseLinksPermissions,
-        ...(license.type != null && { license }),
-      };
+    license$
+      .pipe(
+        mergeMap(async (license) => {
+          const linksPermissions: LinksPermissions = {
+            ...baseLinksPermissions,
+            ...(license.type != null && { license }),
+          };
 
-      // set initial links to not block rendering
-      updateAppLinks(appLinksSwitcher(links), linksPermissions);
+          // set initial links to not block rendering
+          updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
-      // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
-    });
+          // set filtered links asynchronously
+          const filteredLinks = await getFilteredLinks(core, plugins);
+          updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
+        })
+      )
+      .subscribe();
   }
 }

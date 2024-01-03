@@ -278,7 +278,6 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
   const parsedResults = _.reduce(
     results,
     (acc: CypressCommandLine.CypressRunResult, result) => {
-      acc.status = result.status;
       acc.startedTestsAt =
         acc.startedTestsAt && new Date(result.startedTestsAt) > new Date(acc.startedTestsAt)
           ? acc.startedTestsAt
@@ -358,12 +357,8 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
 
     _.each(runs, (run) => {
       const { spec, stats } = run;
-      const ms = durationInMinutes(stats.duration);
-      const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1));
-
-      if (run.skippedSpec) {
-        return table2.push(['-', formattedSpec, color('SKIPPED', 'gray'), '-', '-', '-', '-', '-']);
-      }
+      const ms = durationInMinutes(stats?.duration ?? 0);
+      const formattedSpec = formatPath(spec.relative, getWidth(table2, 1));
 
       return table2.push([
         formatSymbolSummary(stats.failures),

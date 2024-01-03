@@ -236,6 +236,29 @@
             "path": "packages/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-common.KibanaRootContextProviderProps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "The `AnalyticsServiceStart` API from `CoreStart`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -7,6 +7,7 @@
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
   RuleContextOpts,
@@ -19,7 +20,6 @@ import {
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
-  ActionsCompletion,
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
@@ -41,11 +41,13 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   ruleTaskTimeout: '1m',
   validate: {
     params: schema.any(),
   },
+  validLegacyConsumers: [],
 };
 
 const context: RuleContextOpts = {
@@ -728,6 +730,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
       });
 
@@ -826,6 +829,7 @@ describe('AlertingEventLogger', () => {
           totalSearchDurationMs: 10333,
           hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
+          hasReachedQueuedActionsLimit: false,
         },
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,

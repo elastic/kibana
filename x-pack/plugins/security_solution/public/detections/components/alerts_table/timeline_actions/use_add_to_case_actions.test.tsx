@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -20,6 +20,7 @@ import {
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import type { AlertTableContextMenuItem } from '../types';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
@@ -76,15 +77,6 @@ describe('useAddToCaseActions', () => {
       isTourShown: () => false,
     });
 
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
-    });
-
     useKibanaMock.mockReturnValue({
       services: {
         cases: {
@@ -94,6 +86,7 @@ describe('useAddToCaseActions', () => {
           },
           helpers: {
             getRuleIdFromEvent: () => null,
+            canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
           },
         },
       },

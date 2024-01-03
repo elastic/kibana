@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -12,14 +13,7 @@ export interface UseFetchIndexPatternFieldsResponse {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: Field[] | undefined;
-}
-
-export interface Field {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  searchable: boolean;
+  data: FieldSpec[] | undefined;
 }
 
 export function useFetchIndexPatternFields(
@@ -34,7 +28,7 @@ export function useFetchIndexPatternFields(
         return [];
       }
       try {
-        return await dataViews.getFieldsForWildcard({ pattern: indexPattern });
+        return await dataViews.getFieldsForWildcard({ pattern: indexPattern, allowNoIndex: true });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }

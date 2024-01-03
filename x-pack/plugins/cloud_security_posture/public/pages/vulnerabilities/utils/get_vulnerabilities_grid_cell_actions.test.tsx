@@ -127,12 +127,10 @@ describe('getRowValueByColumnId', () => {
 
   it('should return package fields', () => {
     const vulnerabilityRow = {
-      vulnerability: {
-        package: {
-          name: 'test',
-          version: '1.0.0',
-          fixed_version: '1.0.1',
-        },
+      package: {
+        name: 'test',
+        version: '1.0.0',
+        fixed_version: '1.0.1',
       },
     };
     const columns1 = vulnerabilitiesColumns;

@@ -19,7 +19,8 @@ export interface BuildAggregationOpts {
   aggType: string;
   aggField?: string;
   termSize?: number;
-  termField?: string;
+  termField?: string | string[];
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
   topHitsSize?: number;
   condition?: {
     resultLimit?: number;
@@ -30,9 +31,10 @@ export interface BuildAggregationOpts {
 export const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
 export const BUCKET_SELECTOR_FIELD = `params.${BUCKET_SELECTOR_PATH_NAME}`;
 export const DEFAULT_GROUPS = 100;
+export const MAX_SOURCE_FIELDS_TO_COPY = 10;
 
 export const isCountAggregation = (aggType: string) => aggType === 'count';
-export const isGroupAggregation = (termField?: string) => !!termField;
+export const isGroupAggregation = (termField?: string | string[]) => !!termField;
 
 export const buildAggregation = ({
   timeSeries,
@@ -40,6 +42,7 @@ export const buildAggregation = ({
   aggField,
   termField,
   termSize,
+  sourceFieldsParams,
   condition,
   topHitsSize,
 }: BuildAggregationOpts): Record<string, AggregationsAggregationContainer> => {
@@ -48,6 +51,7 @@ export const buildAggregation = ({
   };
   const isCountAgg = isCountAggregation(aggType);
   const isGroupAgg = isGroupAggregation(termField);
+  const isMultiTerms = Array.isArray(termField);
   const isDateAgg = !!timeSeries;
   const includeConditionInQuery = !!condition;
 
@@ -82,10 +86,19 @@ export const buildAggregation = ({
   if (isGroupAgg) {
     aggParent.aggs = {
       groupAgg: {
-        terms: {
-          field: termField,
-          size: terms,
-        },
+        ...(isMultiTerms
+          ? {
+              multi_terms: {
+                terms: termField.map((field) => ({ field })),
+                size: terms,
+              },
+            }
+          : {
+              terms: {
+                field: termField,
+                size: terms,
+              },
+            }),
       },
       ...(includeConditionInQuery
         ? {
@@ -116,8 +129,19 @@ export const buildAggregation = ({
         },
       };
     }
-
     aggParent = aggParent.aggs.groupAgg;
+  }
+
+  // add sourceField aggregations
+  if (sourceFieldsParams && sourceFieldsParams.length > 0) {
+    sourceFieldsParams.forEach((field) => {
+      aggParent.aggs = {
+        ...aggParent.aggs,
+        [field.label]: {
+          terms: { field: field.searchPath, size: MAX_SOURCE_FIELDS_TO_COPY },
+        },
+      };
+    });
   }
 
   // next, add the time window aggregation

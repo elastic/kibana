@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
+import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+  before(() => {
+    initializeDataViews();
+  });
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

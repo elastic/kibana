@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
@@ -15,14 +15,18 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
-import type { PostureInput } from '../../../common/types';
+import type { PostureInput } from '../../../common/types_old';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
 export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
+export const getMockPolicyAzure = () => getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure');
 export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
+export const getMockAgentlessAgentPolicy = () => {
+  return createAgentPolicyMock({ id: 'agentless' });
+};
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {
@@ -80,7 +84,7 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
+export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   return {
     version: packageVersion,
     name: 'cspm',
@@ -93,6 +97,28 @@ export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
           {
             type: CLOUDBEAT_GCP,
             title: 'GCP',
+            description: '',
+            vars: [{}],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
+export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
+  return {
+    version: packageVersion,
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_AZURE,
+            title: 'Azure',
             description: '',
             vars: [{}],
           },
@@ -130,9 +156,24 @@ const getPolicyMock = (
   };
 
   const gcpVarsMock = {
-    project_id: { type: 'text' },
-    credentials_file: { type: 'text' },
-    credentials_json: { type: 'text' },
+    'gcp.project_id': { type: 'text' },
+    'gcp.organization_id': { type: 'text' },
+    'gcp.credentials.file': { type: 'text' },
+    'gcp.credentials.json': { type: 'text' },
+    'gcp.credentials.type': { type: 'text' },
+    'gcp.account_type': { value: 'organization-account', type: 'text' },
+  };
+
+  const azureVarsMock = {
+    'azure.credentials.type': { value: 'arm_template', type: 'text' },
+    'azure.account_type': { type: 'text' },
+    'azure.credentials.tenant_id': { type: 'text' },
+    'azure.credentials.client_id': { type: 'text' },
+    'azure.credentials.client_secret': { type: 'text' },
+    'azure.credentials.client_certificate_path': { type: 'text' },
+    'azure.credentials.client_certificate_password': { type: 'text' },
+    'azure.credentials.client_username': { type: 'text' },
+    'azure.credentials.client_password': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
@@ -181,7 +222,9 @@ const getPolicyMock = (
         type: CLOUDBEAT_AZURE,
         policy_template: 'cspm',
         enabled: false,
-        streams: [{ enabled: false, data_stream: dataStream }],
+        streams: [
+          { enabled: type === CLOUDBEAT_AZURE, data_stream: dataStream, vars: azureVarsMock },
+        ],
       },
       {
         type: CLOUDBEAT_VULN_MGMT_AWS,

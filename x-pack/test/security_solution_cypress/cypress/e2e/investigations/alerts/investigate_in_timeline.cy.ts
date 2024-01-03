@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
-import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
-import { FILTER_BADGE } from '../../../screens/alerts';
+import {
+  PROVIDER_BADGE,
+  QUERY_TAB_BUTTON,
+  TIMELINE_FILTER_BADGE,
+  TIMELINE_TITLE,
+} from '../../../screens/timeline';
 
 import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
@@ -28,16 +31,15 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 
-describe('Investigate in timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule());
   });
 
   describe('From alerts table', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -56,7 +58,7 @@ describe('Investigate in timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -67,10 +69,12 @@ describe('Investigate in timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
+      cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).eq(5).scrollIntoView();
       cy.get(ALERT_FLYOUT)
         .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .last()
-        .should('have.text', alertCount)
+        .eq(5)
+        .should('be.visible')
+        .and('have.text', alertCount)
         .click();
 
       // Make sure a new timeline is created and opened
@@ -80,7 +84,7 @@ describe('Investigate in timeline', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
 
       // The correct filter is applied to the timeline query
-      cy.get(FILTER_BADGE).should(
+      cy.get(TIMELINE_FILTER_BADGE).should(
         'have.text',
         ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
       );

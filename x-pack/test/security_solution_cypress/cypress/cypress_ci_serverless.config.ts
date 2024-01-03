@@ -7,13 +7,19 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { samlAuthentication } from './support/saml_auth';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
   defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless',
+    grepOmitFiltered: true,
+    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
@@ -29,10 +35,12 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

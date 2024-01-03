@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { queryPings } from '../../common/pings/query_pings';
@@ -22,6 +22,8 @@ export const getPingsRouteQuerySchema = schema.object({
   sort: schema.maybe(schema.string()),
   status: schema.maybe(schema.string()),
 });
+
+type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;
 
 export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -41,7 +43,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations,
       excludedLocations,
-    } = request.query;
+    } = request.query as GetPingsRouteRequest;
 
     return await queryPings({
       uptimeEsClient,

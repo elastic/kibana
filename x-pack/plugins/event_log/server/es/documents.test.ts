@@ -9,8 +9,7 @@ import { getIndexTemplate } from './documents';
 import { getEsNames } from './names';
 
 describe('getIndexTemplate()', () => {
-  const kibanaVersion = '1.2.3';
-  const esNames = getEsNames('XYZ', kibanaVersion);
+  const esNames = getEsNames('XYZ');
 
   test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames);

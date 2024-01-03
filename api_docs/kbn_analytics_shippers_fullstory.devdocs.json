@@ -288,7 +288,7 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nShuts down the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+              "\nShuts down the shipper."
             ],
             "signature": [
               "() => void"
@@ -346,6 +346,20 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-common.FullStoryShipperConfig.pageVarsDebounceTimeMs",
+            "type": "number",
+            "tags": [],
+            "label": "pageVarsDebounceTimeMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,

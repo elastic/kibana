@@ -6,11 +6,7 @@
     "id": "navigation",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "unifiedSearch"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredPlugins": ["unifiedSearch"],
+    "requiredBundles": []
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBottomBar } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 import { Scrubber } from './scrubber';
 import { Title } from './title';
@@ -33,24 +33,24 @@ export interface Props {
  * The Footer of the Shareable Canvas Workpad.
  */
 export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = false }) => {
-  const { root, bar, title } = css;
+  const { root, title } = css;
 
   return (
     <div className={root} style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
-      <div className={bar} style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
-        <EuiFlexGroup gutterSize="none">
+      <EuiBottomBar style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
+        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
           <EuiFlexItem className={title}>
             <Title />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="m" responsive={false}>
               <PageControls />
               <Settings />
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </EuiBottomBar>
     </div>
   );
 };

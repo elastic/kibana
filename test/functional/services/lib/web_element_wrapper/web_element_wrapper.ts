@@ -261,26 +261,26 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
+    const value = await this.getAttribute('value');
+    if (!value.length) {
+      return;
+    }
+
     if (options.charByChar === true) {
-      const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
         await setTimeoutAsync(100);
       }
     } else {
-      if (this.isChromium) {
-        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
-        await this.retryCall(async function clearValueWithKeyboard(wrapper) {
-          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
-        });
-        await this.pressKeys(this.Keys.BACK_SPACE);
-      } else {
-        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-        await this.pressKeys([selectionKey, 'a']);
-        await this.pressKeys(this.Keys.NULL); // Release modifier keys
-        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
-      }
+      await this.selectValueWithKeyboard();
+      await this.pressKeys(this.Keys.BACK_SPACE);
     }
+  }
+
+  async selectValueWithKeyboard() {
+    const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await this.pressKeys([selectionKey, 'a']);
+    await this.pressKeys(this.Keys.NULL); // Release modifier keys
   }
 
   /**
@@ -730,7 +730,32 @@ export class WebElementWrapper {
   }
 
   /**
-   * Scroll the element into view, avoiding the fixed header if necessary
+   * Scroll the element into view
+   *
+   * @param {ScrollIntoViewOptions} scrollIntoViewOptions
+   * @return {Promise<void>}
+   */
+  public scrollIntoView(scrollIntoViewOptions?: ScrollIntoViewOptions) {
+    return this.driver.executeScript<void>(
+      (target: HTMLElement, options: ScrollIntoViewOptions) => target.scrollIntoView(options),
+      this._webElement,
+      scrollIntoViewOptions
+    );
+  }
+
+  /**
+   * Scroll the element into view if it is not already, avoiding the fixed header if necessary
+   * This method is a variation of the scrollIntoView method, where we only scroll into an element
+   * if it is not part of the "scrollable view".
+   * This implies a specific behavior, since the "scrollable view" of the view is identified by
+   * the `document.scrollingElement`, which always results to the html or body tag.
+   *
+   * Use cases:
+   * - An element (a section, a footer) is not visible in the whole page and we need to scroll into it.
+   * - An element is covered by the fixed header and we need to scroll into it ensuring is not covered.
+   *
+   * In case you have a scrollable list smaller that the size of the HTML document and you need
+   * to scroll into an element of that list, prefer using the `.scrollIntoView` method.
    *
    * @nonstandard
    * @return {Promise<void>}

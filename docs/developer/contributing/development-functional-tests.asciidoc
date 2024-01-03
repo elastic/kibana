@@ -81,11 +81,12 @@ export TEST_BROWSER_HEADLESS=1
 export TEST_THROTTLE_NETWORK=1
 ----------
 
-** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at: {kibana-blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
+** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.
 +
 ["source", "shell"]
 ----------
 node scripts/functional_test_runner --exclude-tag skipCloud
+node scripts/functional_test_runner --exclude-tag skipMKI
 ----------
 
 [discrete]
@@ -118,7 +119,7 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/ela
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. See {kibana-blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. See {kibana-blob}/STYLEGUIDE.mdx[STYLEGUIDE.mdx].
 
 [discrete]
 ==== Definitions
@@ -270,7 +271,7 @@ The first and only argument to all providers is a Provider API Object. This obje
 Within config files the API has the following properties
 
 [horizontal]
-`log`::: An instance of the {kibana-blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`log`::: An instance of the `ToolingLog` that is ready for use
 `readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
@@ -293,17 +294,17 @@ Within a test Provider the API is exactly the same as the service providers API 
 The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
-* Source: {kibana-blob}src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
-* Schema: {kibana-blob}src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
+// * Source: {kibana-blob}src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
+// * Schema: {kibana-blob}src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-* Source: {kibana-blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
+// * Source: {kibana-blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {kibana-blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
+// * Source: {kibana-blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
@@ -314,14 +315,14 @@ The `FunctionalTestRunner` comes with three built-in services:
 The {kib} functional tests define the vast majority of the actual functionality used by tests.
 
 **browser**:::
-* Source: {kibana-blob}test/functional/services/browser.ts[test/functional/services/browser.ts]
+// * Source: {kibana-blob}test/functional/services/browser.ts[test/functional/services/browser.ts]
 * Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
 ** `browser.getWindowSize()`
 ** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {kibana-blob}test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
+// * Source: {kibana-blob}test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -346,21 +347,21 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {kibana-blob}test/functional/services/find.ts[test/functional/services/find.ts]
+// * Source: {kibana-blob}test/functional/services/find.ts[test/functional/services/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
 ** `find.allByCssSelector()`
 
 **retry:**:::
-* Source: {kibana-blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
+// * Source: {kibana-blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
 ** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
 ** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
-* Source: {kibana-blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
+// * Source: {kibana-blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
 * Helpers for interacting with {kib}'s server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -368,7 +369,7 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-* Source: {kibana-blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
+// * Source: {kibana-blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(path)`
@@ -380,11 +381,11 @@ Full list of services that are used in functional tests can be found here: {kiba
 
 **Low-level utilities:**:::
 * es
-** Source: {kibana-blob}test/common/services/es.ts[test/common/services/es.ts]
+// ** Source: {kibana-blob}test/common/services/es.ts[test/common/services/es.ts]
 ** {es} client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
-** Source: {kibana-blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
+// ** Source: {kibana-blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
 ** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
 ** To perform browser actions, use `remote` service

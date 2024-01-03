@@ -24,7 +24,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { FieldIcon, FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
+import { FieldIcon } from '@kbn/field-utils';
+import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),

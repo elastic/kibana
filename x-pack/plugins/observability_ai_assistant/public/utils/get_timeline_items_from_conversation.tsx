@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { v4 } from 'uuid';
-import { isEmpty, omitBy } from 'lodash';
+import { isEmpty, last, omitBy } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,6 +15,8 @@ import { Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
+import { ChatState } from '../hooks/use_chat';
+import { safeJsonParse } from './safe_json_parse';
 
 function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   let value: object;
@@ -22,7 +24,7 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   if (!message.name) {
     const name = message.function_call?.name;
     const args = message.function_call?.arguments
-      ? JSON.parse(message.function_call.arguments)
+      ? safeJsonParse(message.function_call.arguments)
       : undefined;
 
     value = {
@@ -32,9 +34,9 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   } else {
     const content =
       message.role !== MessageRole.Assistant && message.content
-        ? JSON.parse(message.content)
+        ? safeJsonParse(message.content)
         : message.content;
-    const data = message.data ? JSON.parse(message.data) : undefined;
+    const data = message.data ? safeJsonParse(message.data) : undefined;
     value = omitBy(
       {
         content,
@@ -53,30 +55,44 @@ function FunctionName({ name: functionName }: { name: string }) {
   return <span style={{ fontFamily: euiTheme.font.familyCode, fontSize: 13 }}>{functionName}</span>;
 }
 
+export type StartedFrom = 'contextualInsight' | 'appTopNavbar' | 'conversationView';
+
 export function getTimelineItemsfromConversation({
-  currentUser,
-  messages,
-  hasConnector,
   chatService,
+  currentUser,
+  hasConnector,
+  messages,
+  startedFrom,
+  chatState,
 }: {
-  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
-  messages: Message[];
-  hasConnector: boolean;
   chatService: ObservabilityAIAssistantChatService;
+  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
+  hasConnector: boolean;
+  messages: Message[];
+  startedFrom?: StartedFrom;
+  chatState: ChatState;
 }): ChatTimelineItem[] {
-  return [
+  const messagesWithoutSystem = messages.filter(
+    (message) => message.message.role !== MessageRole.System
+  );
+
+  const items: ChatTimelineItem[] = [
     {
       id: v4(),
       actions: { canCopy: false, canEdit: false, canGiveFeedback: false, canRegenerate: false },
       display: { collapsed: false, hide: false },
       currentUser,
       loading: false,
-      role: MessageRole.User,
+      message: {
+        '@timestamp': new Date().toISOString(),
+        message: { role: MessageRole.User },
+      },
       title: i18n.translate('xpack.observabilityAiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
+      role: MessageRole.User,
     },
-    ...messages.map((message, index) => {
+    ...messagesWithoutSystem.map((message, index) => {
       const id = v4();
 
       let title: React.ReactNode = '';
@@ -84,11 +100,13 @@ export function getTimelineItemsfromConversation({
       let element: React.ReactNode | undefined;
 
       const prevFunctionCall =
-        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
-          ? messages[index - 1].message.function_call
+        message.message.name &&
+        messagesWithoutSystem[index - 1] &&
+        messagesWithoutSystem[index - 1].message.function_call
+          ? messagesWithoutSystem[index - 1].message.function_call
           : undefined;
 
-      const role = message.message.function_call?.trigger || message.message.role;
+      let role = message.message.function_call?.trigger || message.message.role;
 
       const actions = {
         canCopy: false,
@@ -103,10 +121,6 @@ export function getTimelineItemsfromConversation({
       };
 
       switch (role) {
-        case MessageRole.System:
-          display.hide = true;
-          break;
-
         case MessageRole.User:
           actions.canCopy = true;
           actions.canGiveFeedback = false;
@@ -116,14 +130,14 @@ export function getTimelineItemsfromConversation({
 
           // User executed a function:
           if (message.message.name && prevFunctionCall) {
-            let parsedContent;
+            let isError = false;
             try {
-              parsedContent = JSON.parse(message.message.content ?? 'null');
+              const parsedContent = JSON.parse(message.message.content ?? 'null');
+              isError =
+                parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
             } catch (error) {
-              parsedContent = message.message.content;
+              isError = true;
             }
-
-            const isError = typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -154,8 +168,12 @@ export function getTimelineItemsfromConversation({
 
             content = !element ? convertMessageToMarkdownCodeBlock(message.message) : undefined;
 
+            if (prevFunctionCall?.trigger === MessageRole.Assistant) {
+              role = MessageRole.Assistant;
+            }
+
             actions.canEdit = false;
-            display.collapsed = !isError && !element;
+            display.collapsed = !element;
           } else if (message.message.function_call) {
             // User suggested a function
             title = (
@@ -179,6 +197,14 @@ export function getTimelineItemsfromConversation({
 
             actions.canEdit = hasConnector;
             display.collapsed = false;
+
+            if (startedFrom === 'contextualInsight') {
+              const firstUserMessageIndex = messagesWithoutSystem.findIndex(
+                (el) => el.message.role === MessageRole.User
+              );
+
+              display.collapsed = index === firstUserMessageIndex;
+            }
           }
 
           break;
@@ -186,7 +212,7 @@ export function getTimelineItemsfromConversation({
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
           actions.canCopy = true;
-          actions.canGiveFeedback = false;
+          actions.canGiveFeedback = true;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -200,9 +226,19 @@ export function getTimelineItemsfromConversation({
                 }}
               />
             );
-            content = convertMessageToMarkdownCodeBlock(message.message);
+            if (message.message.content) {
+              // TODO: we want to show the content always, and hide
+              // the function request initially, but we don't have a
+              // way to do that yet, so we hide the request here until
+              // we have a fix.
+              // element = message.message.content;
+              content = message.message.content;
+              display.collapsed = false;
+            } else {
+              content = convertMessageToMarkdownCodeBlock(message.message);
+              display.collapsed = true;
+            }
 
-            display.collapsed = true;
             actions.canEdit = true;
           } else {
             // is an assistant response
@@ -225,7 +261,53 @@ export function getTimelineItemsfromConversation({
         currentUser,
         function_call: message.message.function_call,
         loading: false,
+        message,
       };
     }),
   ];
+
+  const isLoading = chatState === ChatState.Loading;
+
+  let lastMessage = last(items);
+
+  const isNaturalLanguageOnlyAnswerFromAssistant =
+    lastMessage?.message.message.role === MessageRole.Assistant &&
+    !lastMessage.message.message.function_call?.name;
+
+  const addLoadingPlaceholder = isLoading && !isNaturalLanguageOnlyAnswerFromAssistant;
+
+  if (addLoadingPlaceholder) {
+    items.push({
+      id: v4(),
+      actions: {
+        canCopy: false,
+        canEdit: false,
+        canGiveFeedback: false,
+        canRegenerate: false,
+      },
+      display: {
+        collapsed: false,
+        hide: false,
+      },
+      content: '',
+      currentUser,
+      loading: chatState === ChatState.Loading,
+      role: MessageRole.Assistant,
+      title: '',
+      message: {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.Assistant,
+          content: '',
+        },
+      },
+    });
+    lastMessage = last(items);
+  }
+
+  if (isLoading && lastMessage) {
+    lastMessage.loading = isLoading;
+  }
+
+  return items;
 }

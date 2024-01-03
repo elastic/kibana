@@ -16,10 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...svlSharedConfig.getAll(),
     esTestCluster: {
       ...svlSharedConfig.get('esTestCluster'),
-      serverArgs: [
-        ...svlSharedConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.enabled=true',
-      ],
+      serverArgs: [...svlSharedConfig.get('esTestCluster.serverArgs')],
     },
     kbnTestServer: {
       ...svlSharedConfig.get('kbnTestServer'),

@@ -35,9 +35,9 @@ import {
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import * as timelineActions from '../../timelines/store/timeline/actions';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
+import { timelineSelectors } from '../../timelines/store';
+import * as timelineActions from '../../timelines/store/actions';
+import type { TimelineModel } from '../../timelines/store/model';
 import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
@@ -45,7 +45,7 @@ import { createRootEpic } from './epic';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
-import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
+import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/types';
 import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
@@ -69,6 +69,7 @@ export const createStoreFactory = async (
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
         method: 'GET',
       });
     }
@@ -168,6 +169,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };
@@ -175,7 +177,6 @@ export const createStoreFactory = async (
 const timelineActionsWithNonserializablePayloads = [
   timelineActions.updateTimeline.type,
   timelineActions.addTimeline.type,
-  timelineActions.updateAutoSaveMsg.type,
   timelineActions.initializeTimelineSettings.type,
 ];
 
@@ -199,14 +200,6 @@ const actionSanitizer = (action: AnyAction) => {
         payload: {
           ...payload,
           timeline: sanitizeTimelineModel(payload.timeline),
-        },
-      };
-    } else if (type === timelineActions.updateAutoSaveMsg.type) {
-      return {
-        ...action,
-        payload: {
-          ...payload,
-          newTimelineModel: sanitizeTimelineModel(payload.newTimelineModel),
         },
       };
     } else if (type === timelineActions.initializeTimelineSettings.type) {
@@ -271,6 +264,10 @@ export const createStore = (
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
     stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
+    // uncomment the following to enable redux action tracing
+    // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
+    // trace: true,
+    // traceLimit: 100,
   };
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);

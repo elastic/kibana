@@ -12,7 +12,7 @@ import {
   TransformSource,
   TransformTimeSync,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];
@@ -36,6 +36,7 @@ export const getSLOTransformTemplate = (
   dest: destination,
   settings: {
     deduce_mappings: false,
+    unattended: true,
   },
   sync: {
     time: {

@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { ResourceInstaller, SummaryTransformInstaller } from '.';
+import { ResourceInstaller } from '.';
 
 export interface SLOInstaller {
   install(): Promise<void>;
@@ -15,14 +15,10 @@ export interface SLOInstaller {
 export class DefaultSLOInstaller implements SLOInstaller {
   private isInstalling: boolean = false;
 
-  constructor(
-    private sloResourceInstaller: ResourceInstaller,
-    private sloSummaryInstaller: SummaryTransformInstaller,
-    private logger: Logger
-  ) {}
+  constructor(private sloResourceInstaller: ResourceInstaller, private logger: Logger) {}
 
   public async install() {
-    if (this.isInstalling || process.env.CI) {
+    if (this.isInstalling) {
       return;
     }
     this.isInstalling = true;
@@ -32,11 +28,8 @@ export class DefaultSLOInstaller implements SLOInstaller {
       installTimeout = setTimeout(() => (this.isInstalling = false), 60000);
 
       await this.sloResourceInstaller.ensureCommonResourcesInstalled();
-      await this.sloSummaryInstaller.installAndStart();
     } catch (error) {
-      this.logger.error('Failed to install SLO common resources and summary transforms', {
-        error,
-      });
+      this.logger.error('Failed to install SLO common resources');
     } finally {
       this.isInstalling = false;
       clearTimeout(installTimeout);

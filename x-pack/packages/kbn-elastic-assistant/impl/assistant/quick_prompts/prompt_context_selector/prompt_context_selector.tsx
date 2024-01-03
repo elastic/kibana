@@ -33,6 +33,7 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
             category: pc.category,
           },
           label: pc.description,
+          'data-test-subj': pc.description,
         })),
       [promptContexts]
     );

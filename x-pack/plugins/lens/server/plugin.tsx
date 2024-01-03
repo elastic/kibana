@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
@@ -64,7 +64,7 @@ export interface LensServerPluginSetup {
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
 
-  constructor() {}
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
@@ -79,7 +79,10 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new LensStorage(),
+      storage: new LensStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.initializerContext.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

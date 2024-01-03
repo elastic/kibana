@@ -11,18 +11,11 @@ import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiDescriptionList,
-  EuiHorizontalRule,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiHorizontalRule, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime } from './styles';
+import { StyledDescriptionList, BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
@@ -216,6 +209,7 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
             <EuiSpacer size="m" />
             <StyledDescriptionList
               type="column"
+              columnWidths={['fit-content(8em)', 'auto']} // sets a max width of 8em on the title column
               align="left"
               titleProps={{
                 className: 'desc-title',
@@ -327,17 +321,6 @@ function EventDetailBreadcrumbs({
   ]);
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }
-
-const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
-    overflow-wrap: break-word;
-  }
-  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
-    max-width: calc(100% - 8.5em);
-    overflow-wrap: break-word;
-  }
-`);
 
 // Also prevents horizontal scrollbars on long descriptive names
 const StyledDescriptiveName = memo(styled(EuiText)`

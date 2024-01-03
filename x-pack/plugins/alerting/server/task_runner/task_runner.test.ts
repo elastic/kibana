@@ -16,10 +16,13 @@ import {
   RuleExecutionStatusWarningReasons,
   Rule,
   RuleAction,
-  MaintenanceWindow,
   RuleAlertData,
 } from '../types';
-import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  isUnrecoverableError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -80,8 +83,11 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
+import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -237,6 +243,8 @@ describe('Task Runner', () => {
     logger.get.mockImplementation(() => logger);
 
     ruleType.executor.mockResolvedValue({ state: {} });
+
+    actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
   test('successfully executes the task', async () => {
@@ -299,7 +307,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -381,7 +389,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -469,7 +477,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -661,6 +669,206 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('skips alert notification if active maintenance window contains the rule type category', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+    ]);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+    const maintenanceWindowIds = ['test-id-1'];
+
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      newAlerts: 1,
+      status: 'active',
+      logAlert: 2,
+      maintenanceWindowIds,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+        maintenanceWindowIds,
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+        maintenanceWindowIds,
+      })
+    );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('allows alert notification if active maintenance window does not contain the rule type category', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['something-else'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+    ]);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      generatedActions: 1,
+      newAlerts: 1,
+      triggeredActions: 1,
+      status: 'active',
+      logAlert: 2,
+      logAction: 1,
+    });
+
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('should update alerts with maintenance window if scoped query matches said alerts', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+
+    const mockMaintenanceWindows = [
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as unknown as MaintenanceWindow,
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        scopedQuery: {
+          kql: "kibana.alert.rule.name: 'test123'",
+          filters: [],
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+        id: 'test-id-2',
+      } as unknown as MaintenanceWindow,
+    ];
+
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(
+      mockMaintenanceWindows
+    );
+
+    alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery.mockResolvedValue({
+      alertIds: [],
+      maintenanceWindowIds: ['test-id-1', 'test-id-2'],
+    });
+
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+    expect(alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery).toHaveBeenLastCalledWith({
+      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      maintenanceWindows: mockMaintenanceWindows,
+      ruleId: '1',
+      spaceId: 'default',
+    });
+
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
+    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
+      'test-id-1',
+      'test-id-2',
+    ]);
+  });
+
   test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is muted %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
@@ -723,7 +931,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1168,7 +1376,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -1295,7 +1503,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         6,
-        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}`
+        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`
       );
 
       testAlertingEventLogCalls({
@@ -1490,7 +1698,7 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
     }
   );
@@ -1562,10 +1770,10 @@ describe('Task Runner', () => {
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true, actionTypeId: 'slack' })
       );
       expect(result.state.summaryActions).toEqual({
-        '111-111': { date: new Date(DATE_1970) },
+        '111-111': { date: new Date(DATE_1970).toISOString() },
       });
     }
   );
@@ -1689,6 +1897,8 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
+    const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
+
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -1700,7 +1910,7 @@ describe('Task Runner', () => {
         string,
         RuleAlertData
       >) => {
-        throw new Error(GENERIC_ERROR_MESSAGE);
+        throw taskRunError;
       }
     );
 
@@ -1718,7 +1928,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, taskRunError }));
 
     testAlertingEventLogCalls({
       status: 'error',
@@ -1737,12 +1947,15 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
+    const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
+
     // used in loadIndirectParams() which is called to load rule data
     rulesClient.getAlertFromRaw.mockImplementation(() => {
-      throw new Error(GENERIC_ERROR_MESSAGE);
+      throw taskRunError;
     });
 
     const taskRunner = new TaskRunner({
@@ -1758,7 +1971,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, hasError: true }));
+    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0, taskRunError }));
 
     testAlertingEventLogCalls({
       setRuleName: false,
@@ -1771,8 +1984,10 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Runner of a legacy Alert task which has no schedule throws an exception when fetching attributes', async () => {
-    rulesClient.get.mockImplementation(() => {
-      throw new Error(GENERIC_ERROR_MESSAGE);
+    const taskRunError = new TypeError(GENERIC_ERROR_MESSAGE);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
+      throw taskRunError;
     });
 
     // legacy alerts used to run by returning a new `runAt` instead of using a schedule
@@ -1782,18 +1997,15 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: legacyTaskInstance,
-
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
-
     const runnerResult = await taskRunner.run();
 
     expect(runnerResult).toEqual(
-      generateRunnerResult({ successRatio: 0, interval: '5m', hasError: true })
+      generateRunnerResult({ successRatio: 0, interval: '5m', taskRunError })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -1835,17 +2047,11 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(runnerResult.state.previousStartedAt).toEqual(
-      new Date(originalAlertSate.previousStartedAt)
-    );
+    expect(runnerResult.state.previousStartedAt).toEqual(originalAlertSate.previousStartedAt);
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
-    rulesClient.get.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
-    });
-
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: {
@@ -1855,7 +2061,6 @@ describe('Task Runner', () => {
           spaceId: 'foo',
         },
       },
-
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -1886,10 +2091,6 @@ describe('Task Runner', () => {
   });
 
   test('reschedules for next schedule interval if es connectivity error encountered and schedule interval is less than connectivity retry', async () => {
-    rulesClient.get.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
-    });
-
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
@@ -1907,7 +2108,10 @@ describe('Task Runner', () => {
 
   test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
     rulesClient.getAlertFromRaw.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+        RULE_SAVED_OBJECT_TYPE,
+        '1'
+      );
     });
 
     const taskRunner = new TaskRunner({
@@ -1932,10 +2136,6 @@ describe('Task Runner', () => {
   });
 
   test('correctly logs warning when Alert Task Runner throws due to failing to fetch the alert in a space', async () => {
-    rulesClient.get.mockImplementation(() => {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
-    });
-
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: {
@@ -2442,7 +2642,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -2472,6 +2672,7 @@ describe('Task Runner', () => {
   });
 
   test('successfully stores failure runs', async () => {
+    const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
@@ -2494,16 +2695,17 @@ describe('Task Runner', () => {
         string,
         RuleAlertData
       >) => {
-        throw new Error(GENERIC_ERROR_MESSAGE);
+        throw taskRunError;
       }
     );
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(
-      generateRunnerResult({ successRatio: 0, success: false, hasError: true })
+      generateRunnerResult({ successRatio: 0, success: false, taskRunError })
     );
   });
 
   test('successfully stores the success ratio', async () => {
+    const taskRunError = new Error(GENERIC_ERROR_MESSAGE);
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
@@ -2530,7 +2732,7 @@ describe('Task Runner', () => {
         string,
         RuleAlertData
       >) => {
-        throw new Error(GENERIC_ERROR_MESSAGE);
+        throw taskRunError;
       }
     );
     const runnerResult = await taskRunner.run();
@@ -2539,7 +2741,7 @@ describe('Task Runner', () => {
       generateRunnerResult({
         successRatio: 0.75,
         history: [true, true, true, false],
-        hasError: true,
+        taskRunError,
       })
     );
   });
@@ -2745,7 +2947,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],
@@ -2915,7 +3117,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],
@@ -2932,7 +3134,7 @@ describe('Task Runner', () => {
             meta: {
               uuid: expect.any(String),
               lastScheduledActions: {
-                date: new Date(DATE_1970),
+                date: new Date(DATE_1970).toISOString(),
                 group: 'default',
               },
               flappingHistory: [true],
@@ -2964,7 +3166,7 @@ describe('Task Runner', () => {
       status: 'warning',
       errorReason: `maxExecutableActions`,
       logAlert: 4,
-      logAction: 5,
+      logAction: 3,
     });
   });
 
@@ -3130,6 +3332,7 @@ describe('Task Runner', () => {
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ error });
+    expect(getErrorSource(result.error as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   function testAlertingEventLogCalls({
@@ -3148,6 +3351,7 @@ describe('Task Runner', () => {
     logAlert = 0,
     logAction = 0,
     hasReachedAlertLimit = false,
+    hasReachedQueuedActionsLimit = false,
   }: {
     status: string;
     ruleContext?: RuleContextOpts;
@@ -3164,6 +3368,7 @@ describe('Task Runner', () => {
     errorReason?: string;
     errorMessage?: string;
     hasReachedAlertLimit?: boolean;
+    hasReachedQueuedActionsLimit?: boolean;
   }) {
     expect(alertingEventLogger.initialize).toHaveBeenCalledWith(ruleContext);
     if (status !== 'skip') {
@@ -3217,6 +3422,7 @@ describe('Task Runner', () => {
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'partial',
+          hasReachedQueuedActionsLimit,
         },
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
@@ -3252,6 +3458,7 @@ describe('Task Runner', () => {
           totalSearchDurationMs: 23423,
           hasReachedAlertLimit,
           triggeredActionsStatus: 'complete',
+          hasReachedQueuedActionsLimit,
         },
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),

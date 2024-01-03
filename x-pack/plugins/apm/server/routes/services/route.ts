@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  isoToEpochRt,
+  jsonRt,
+  toBooleanRt,
+  toNumberRt,
+} from '@kbn/io-ts-utils';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -105,7 +110,12 @@ const servicesRoute = createApmServerRoute({
       t.partial({ serviceGroup: t.string }),
       t.intersection([
         probabilityRt,
-        serviceTransactionDataSourceRt,
+        t.intersection([
+          serviceTransactionDataSourceRt,
+          t.type({
+            useDurationSummary: toBooleanRt,
+          }),
+        ]),
         environmentRt,
         kueryRt,
         rangeRt,
@@ -131,6 +141,7 @@ const servicesRoute = createApmServerRoute({
       probability,
       documentType,
       rollupInterval,
+      useDurationSummary,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
@@ -163,6 +174,7 @@ const servicesRoute = createApmServerRoute({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
     });
   },
 });
@@ -234,24 +246,25 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
-    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { start, end, environment } = params.query;
 
     const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
+      environment,
       apmEventClient,
       start,
       end,
     });
 
     if (serviceMetadataDetails?.container?.ids) {
+      const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceOverviewContainerMetadata({
         infraMetricsClient,
         containerIds: serviceMetadataDetails.container.ids,
@@ -327,27 +340,22 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, serviceTransactionDataSourceRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceTransactionTypesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { start, end, documentType, rollupInterval } = params.query;
 
     return getServiceTransactionTypes({
       serviceName,
       apmEventClient,
-      searchAggregatedTransactions: await getSearchTransactionsEvents({
-        apmEventClient,
-        config,
-        start,
-        end,
-        kuery: '',
-      }),
       start,
       end,
+      documentType,
+      rollupInterval,
     });
   },
 });
@@ -360,14 +368,20 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      serviceTransactionDataSourceRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceNodeMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end, environment } = params.query;
+    const { kuery, start, end, environment, documentType, rollupInterval } =
+      params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -377,6 +391,8 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       start,
       end,
       environment,
+      documentType,
+      rollupInterval,
     });
   },
 });
@@ -748,7 +764,6 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       (ServiceInstanceContainerMetadataDetails | {})
   > => {
     const apmEventClient = await getApmEventClient(resources);
-    const infraMetricsClient = createInfraMetricsClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
@@ -763,6 +778,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
+      const infraMetricsClient = createInfraMetricsClient(resources);
       const containerMetadata = await getServiceInstanceContainerMetadata({
         infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,

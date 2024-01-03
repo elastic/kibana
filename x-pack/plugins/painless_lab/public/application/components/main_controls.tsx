@@ -93,7 +93,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
                     size="s"
                     iconType="help"
                     iconSide="left"
-                    color="ghost"
+                    color="text"
                     onClick={() => setIsHelpOpen(!isHelpOpen)}
                   >
                     {i18n.translate('xpack.painlessLab.helpButtonLabel', {
@@ -114,7 +114,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            color="ghost"
+            color="text"
             onClick={toggleRequestFlyout}
             data-test-subj="btnViewRequest"
           >

@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../../tags';
 
-import { scrollWithinDocumentDetailsExpandableFlyoutRightSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel_json_tab';
 import { openJsonTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_right_panel_json_tab';
-import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import {
+  DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_JSON_TAB_COPY_TO_CLIPBOARD_BUTTON,
+} from '../../../../screens/expandable_flyout/alert_details_right_panel_json_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -19,10 +21,10 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel json tab',
-  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
+      deleteAlertsAndRules();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);
@@ -32,10 +34,13 @@ describe(
     });
 
     it('should display the json component', () => {
-      // the json component is rendered within a dom element with overflow, so Cypress isn't finding it
-      // this next line is a hack that vertically scrolls down to ensure Cypress finds it
-      scrollWithinDocumentDetailsExpandableFlyoutRightSection(0, 7000);
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB_COPY_TO_CLIPBOARD_BUTTON).should(
+        'have.text',
+        'Copy to clipboard'
+      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT)
+        .should('contain.text', '_index')
+        .and('contain.text', '_id');
     });
   }
 );

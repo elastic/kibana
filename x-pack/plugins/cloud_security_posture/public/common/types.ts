@@ -14,10 +14,16 @@ export type FindingsGroupByKind = 'default' | 'resource';
 export interface FindingsBaseURLQuery {
   query: Query;
   filters: Filter[];
+  /**
+   * Filters that are part of the query but not persisted in the URL or in the Filter Manager
+   */
+  nonPersistedFilters?: Filter[];
 }
 
 export interface FindingsBaseProps {
   dataView: DataView;
+  dataViewRefetch?: () => void;
+  dataViewIsRefetching?: boolean;
 }
 
 export interface FindingsBaseESQueryConfig {
@@ -74,6 +80,10 @@ export interface RuleCreateProps {
   description: string;
   tags: string[];
   max_signals: number;
+  investigation_fields?: {
+    field_names: string[];
+  };
+  note?: string;
 }
 
 export interface RuleResponse extends RuleCreateProps {

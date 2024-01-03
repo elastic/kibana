@@ -16,7 +16,7 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
@@ -72,7 +72,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       {
         range: {
           '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}`,
+            gte: `now-${slo.timeWindow.duration.format()}/d`,
           },
         },
       },

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchOptions } from '../../../../common';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -24,11 +26,15 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>) {
+export function toKibanaSearchResponse(
+  rawResponse: estypes.SearchResponse<unknown>,
+  requestParams?: ConnectionRequestParams
+) {
   return {
     rawResponse,
     isPartial: false,
     isRunning: false,
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

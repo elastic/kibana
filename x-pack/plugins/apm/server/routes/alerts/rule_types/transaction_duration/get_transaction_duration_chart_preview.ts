@@ -11,10 +11,8 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import {
-  AggregationType,
-  ApmRuleType,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -24,7 +22,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
@@ -60,7 +58,7 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    kqlFilter,
+    searchConfiguration,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -68,7 +66,7 @@ export async function getTransactionDurationChartPreview({
     kuery: '',
   });
 
-  const termFilterQuery = !kqlFilter
+  const termFilterQuery = !searchConfiguration
     ? [
         ...termQuery(SERVICE_NAME, serviceName, {
           queryEmptyString: false,
@@ -87,9 +85,11 @@ export async function getTransactionDurationChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(kqlFilter),
+        ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
         ...rangeQuery(start, end),
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
       ] as QueryDslQueryContainer[],
     },
   };

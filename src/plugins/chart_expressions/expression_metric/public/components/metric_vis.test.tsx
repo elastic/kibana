@@ -971,11 +971,6 @@ describe('MetricVisComponent', function () {
   });
 
   it('should report render complete', () => {
-    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-      cb(0);
-      return 0;
-    });
-
     const renderCompleteSpy = jest.fn();
     const component = shallow(
       <MetricVis
@@ -1000,8 +995,6 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
-
-    (window.requestAnimationFrame as jest.Mock).mockRestore();
   });
 
   it('should convert null values to NaN', () => {

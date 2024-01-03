@@ -42,11 +42,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('forecasts', function () {
     this.tags(['ml']);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/164381
-    describe.skip('with single metric job', function () {
+    describe('with single metric job', function () {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-        await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
         await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
-        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteDataViewByTitle('ft_farequote');
       });
 
       it('opens a job from job list link', async () => {

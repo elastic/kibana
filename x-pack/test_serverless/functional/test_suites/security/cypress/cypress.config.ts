@@ -20,6 +20,12 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
+  env: {
+    KIBANA_USERNAME: 'system_indices_superuser',
+    KIBANA_PASSWORD: 'changeme',
+    ELASTICSEARCH_USERNAME: 'system_indices_superuser',
+    ELASTICSEARCH_PASSWORD: 'changeme',
+  },
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,

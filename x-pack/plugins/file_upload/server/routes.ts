@@ -8,8 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { CoreSetup, Logger } from '@kbn/core/server';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MAX_FILE_SIZE_BYTES } from '../common/constants';
-import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
+import type { IngestPipelineWrapper, InputData } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -29,8 +33,8 @@ function importData(
   client: IScopedClusterClient,
   id: string | undefined,
   index: string,
-  settings: Settings,
-  mappings: Mappings,
+  settings: IndicesIndexSettings,
+  mappings: MappingTypeMapping,
   ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {

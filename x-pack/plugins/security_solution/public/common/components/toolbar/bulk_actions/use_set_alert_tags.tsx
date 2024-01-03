@@ -38,7 +38,7 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
   const setAlertTagsRef = useRef<SetAlertTagsFunc | null>(null);
 
   const onUpdateSuccess = useCallback(
-    (updated: number) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
+    (updated: number = 0) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
     [addSuccess]
   );
 
@@ -60,7 +60,7 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
         if (!ignore) {
           onSuccess();
           setTableLoading(false);
-          onUpdateSuccess(response.items.length);
+          onUpdateSuccess(response.updated);
         }
       } catch (error) {
         if (!ignore) {

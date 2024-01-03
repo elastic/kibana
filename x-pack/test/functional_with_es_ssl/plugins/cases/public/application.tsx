@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPageTemplate,
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
@@ -43,6 +43,7 @@ const permissions = {
   delete: true,
   push: true,
   connectors: true,
+  settings: true,
 };
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];

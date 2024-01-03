@@ -19,47 +19,55 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { validateAlertTagsArrays } from './helpers';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
-      validate: {
-        body: buildRouteValidation<typeof setAlertTagsRequestBody, SetAlertTagsRequestBodyDecoded>(
-          setAlertTagsRequestBody
-        ),
-      },
+      access: 'public',
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const { tags, ids } = request.body;
-      const core = await context.core;
-      const securitySolution = await context.securitySolution;
-      const esClient = core.elasticsearch.client.asCurrentUser;
-      const siemClient = securitySolution?.getAppClient();
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateAlertTagsArrays(tags, ids);
-      const spaceId = securitySolution?.getSpaceId() ?? 'default';
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidation<
+              typeof setAlertTagsRequestBody,
+              SetAlertTagsRequestBodyDecoded
+            >(setAlertTagsRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { tags, ids } = request.body;
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const siemClient = securitySolution?.getAppClient();
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateAlertTagsArrays(tags, ids);
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
 
-      if (!siemClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
 
-      const tagsToAdd = uniq(tags.tags_to_add);
-      const tagsToRemove = uniq(tags.tags_to_remove);
+        const tagsToAdd = uniq(tags.tags_to_add);
+        const tagsToRemove = uniq(tags.tags_to_remove);
 
-      const painlessScript = {
-        params: { tagsToAdd, tagsToRemove },
-        source: `List newTagsArray = []; 
+        const painlessScript = {
+          params: { tagsToAdd, tagsToRemove },
+          source: `List newTagsArray = [];
         if (ctx._source["kibana.alert.workflow_tags"] != null) {
           for (tag in ctx._source["kibana.alert.workflow_tags"]) {
             if (!params.tagsToRemove.contains(tag)) {
               newTagsArray.add(tag);
-            } 
+            }
           }
           for (tag in params.tagsToAdd) {
             if (!newTagsArray.contains(tag)) {
@@ -71,37 +79,45 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
           ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
         }
         `,
-        lang: 'painless',
-      };
+          lang: 'painless',
+        };
 
-      const bulkUpdateRequest = [];
-      for (const id of ids) {
-        bulkUpdateRequest.push(
-          {
-            update: {
-              _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-              _id: id,
+        const bulkUpdateRequest = [];
+        for (const id of ids) {
+          bulkUpdateRequest.push(
+            {
+              update: {
+                _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+                _id: id,
+              },
             },
-          },
-          {
-            script: painlessScript,
-          }
-        );
-      }
+            {
+              script: painlessScript,
+            }
+          );
+        }
 
-      try {
-        const body = await esClient.bulk({
-          refresh: 'wait_for',
-          body: bulkUpdateRequest,
-        });
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+        try {
+          const body = await esClient.updateByQuery({
+            index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+            refresh: true,
+            body: {
+              script: painlessScript,
+              query: {
+                bool: {
+                  filter: { terms: { _id: ids } },
+                },
+              },
+            },
+          });
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

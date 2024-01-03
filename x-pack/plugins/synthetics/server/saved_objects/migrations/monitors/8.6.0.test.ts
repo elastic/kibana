@@ -5,13 +5,9 @@
  * 2.0.
  */
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { migration860 } from './8.6.0';
+import { migration860, SyntheticsUnsanitizedDoc860 } from './8.6.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import {
-  ConfigKey,
-  LocationStatus,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../../../common/runtime_types';
+import { ConfigKey, LocationStatus } from '../../../../common/runtime_types';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -53,10 +49,10 @@ const monitor850UI = {
     revision: 1,
     secrets:
       '{"password":"","check.request.body":{"type":"text","value":""},"check.request.headers":{},"check.response.body.negative":[],"check.response.body.positive":[],"check.response.headers":{},"ssl.key":"","ssl.key_passphrase":"","username":""}',
-  } as SyntheticsMonitorWithSecretsAttributes,
+  },
   references: [],
   coreMigrationVersion: '8.5.0',
-};
+} as SyntheticsUnsanitizedDoc860;
 
 const monitor850Project = {
   id: '3ab5c90f-aa7f-4370-ada2-b559191398f0',
@@ -119,10 +115,10 @@ const monitor850Project = {
     revision: 1,
     secrets:
       '{"params":"{\\"url\\":\\"https://elastic.github.io/synthetics-demo/\\"}","source.inline.script":"","source.project.content":"UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAXAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNVkL1uwzAMhHc/BeFJAQyrLdAlQYouXbp3KjqwMhMrlUVVohMYgd+9in+AdCHED6c7kloDpkSy1R+JYtINd9bb356Mw/hDuqGzToOXlsSapIWSPOkT99HTkDR7qpemllTYLnAUuMLCKkhCoYKOvRWOMMIhcgflKzlM2e/OudwVZ4xgIqHQ+/wd9qA8drSB/QtcC1h96j6RuvUA0kYWcdYftzATgIYv3jE2W3h8qBbWh5k8r8DlGG+Gm2YiY67jZpfrMvuUXIG6QsBjfgSM2KWsWYeBaTlVOuy9aQFDcNagWPZllW86eAPqTgyAF7QyudVHFlazY91HN+Wu+bc67orPErNP+V1+1QeOb2hapXDy+3ejzLL+D1BLBwgqc7lrFgEAAMYBAABQSwECLQMUAAgACAAAACEAKnO5axYBAADGAQAAFwAAAAAAAAAAACAApIEAAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBFAAAAWwEAAAAA","source.zip_url.username":"","source.zip_url.password":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
-  } as SyntheticsMonitorWithSecretsAttributes,
+  },
   references: [],
   coreMigrationVersion: '8.5.0',
-};
+} as SyntheticsUnsanitizedDoc860;
 
 describe('Case migrations v8.5.0 -> v8.6.0', () => {
   beforeEach(() => {

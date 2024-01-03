@@ -13,12 +13,13 @@ import {
   GLOBAL_SEARCH_BAR_SUBMIT_BUTTON,
   ADD_FILTER_FORM_SAVE_BUTTON,
   ADD_FILTER_FORM_FIELD_INPUT,
-  ADD_FILTER_FORM_OPERATOR_OPTION_IS,
   ADD_FILTER_FORM_OPERATOR_FIELD,
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
   GLOBAL_KQL_INPUT,
   LOCAL_KQL_INPUT,
   GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON,
+  EDIT_AS_QUERY_DSL,
+  KIBANA_CODE_EDITOR,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
@@ -51,19 +52,17 @@ export const removeKqlFilter = () => {
   });
 };
 
-export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {
+export const fillAddFilterForm = ({ key, operator, value }: SearchBarFilter) => {
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('exist');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
-  if (!operator) {
-    cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).click();
-    cy.get(ADD_FILTER_FORM_OPERATOR_OPTION_IS).click();
-  } else {
-    cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{enter}`);
-  }
+
+  cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).type(`${operator}{downarrow}{enter}`);
+
   if (value) {
     cy.get(ADD_FILTER_FORM_FILTER_VALUE_INPUT).type(value);
   }
+
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
 };
@@ -74,4 +73,12 @@ export const fillLocalSearchBar = (query: string) => {
 
 export const submitLocalSearch = (localSearchBarSelector: string) => {
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(localSearchBarSelector)).click();
+};
+
+export const fillAddFilterFormAsQueryDSL = (query: string) => {
+  cy.get(EDIT_AS_QUERY_DSL).trigger('click');
+  cy.get(KIBANA_CODE_EDITOR).type(`{selectAll}{backspace}`);
+  cy.get(KIBANA_CODE_EDITOR).type(query, { parseSpecialCharSequences: false });
+  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
+  cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
 };

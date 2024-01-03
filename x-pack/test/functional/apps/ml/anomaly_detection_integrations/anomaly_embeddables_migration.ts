@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
@@ -80,19 +80,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         testDataList.map((d) => d.dashboardSavedObject)
       );
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
       const { dashboardSavedObject, panelTitle, type } = testData;
       describe(`for ${panelTitle}`, function () {
         before(async () => {
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
         });
 
         after(async () => {

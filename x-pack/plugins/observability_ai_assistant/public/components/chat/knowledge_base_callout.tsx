@@ -89,6 +89,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
   } else if (!knowledgeBase.status.value?.ready && !knowledgeBase.status.error) {
     content = (
       <EuiLink
+        data-test-subj="observabilityAiAssistantKnowledgeBaseCalloutLink"
         onClick={() => {
           knowledgeBase.install();
         }}
@@ -111,7 +112,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         hasShadow={false}
         borderRadius="none"
         color={color}
-        paddingSize={knowledgeBase.status.value?.ready ? 'none' : 's'}
+        paddingSize="s"
         css={{ width: 'max-content' }}
       >
         {content}

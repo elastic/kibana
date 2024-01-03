@@ -411,11 +411,12 @@ describe('collectMultiNamespaceReferences', () => {
       expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
         expect.anything(),
         [
-          { type: obj1.type, origin: obj1.id },
-          { type: obj2.type, origin: obj2.originId }, // If the found object has an `originId`, that is used instead of the object's `id`.
-          { type: obj3.type, origin: obj3.id },
+          { type: obj1.type, id: obj1.id },
+          { type: obj2.type, id: obj2.id, origin: obj2.originId },
+          { type: obj3.type, id: obj3.id },
         ],
-        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
+        undefined
       );
       expect(result.objects).toEqual([
         // Note: in a realistic scenario, `spacesWithMatchingOrigins` would be a superset of `spaces`. But for the purposes of this unit
@@ -441,8 +442,9 @@ describe('collectMultiNamespaceReferences', () => {
       expect(mockFindSharedOriginObjects).toHaveBeenCalledTimes(1);
       expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
         expect.anything(),
-        [{ type: obj1.type, origin: obj1.id }],
-        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+        [{ type: obj1.type, id: obj1.id }],
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
+        undefined
       );
     });
 
@@ -456,6 +458,25 @@ describe('collectMultiNamespaceReferences', () => {
 
       await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
         'Failed to retrieve shared origin objects: Oh no!'
+      );
+    });
+
+    it('passes options to findSharedOriginObjects', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-2' };
+      const params = setup([obj1, obj2]);
+      mockMgetResults({ found: true }, { found: false }); // results for obj1 and obj2
+
+      await collectMultiNamespaceReferences({
+        ...params,
+        options: { purpose: 'updateObjectsSpaces' },
+      });
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledTimes(1);
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
+        expect.anything(),
+        [{ type: obj1.type, id: obj1.id }],
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
+        'updateObjectsSpaces'
       );
     });
   });

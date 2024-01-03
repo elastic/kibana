@@ -44,7 +44,10 @@ export class SecuritySolutionEssPlugin
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    securitySolution.setComponents({
+      GetStarted: getSecurityGetStartedComponent(services),
+    });
+
     subscribeBreadcrumbs(services);
 
     return {};

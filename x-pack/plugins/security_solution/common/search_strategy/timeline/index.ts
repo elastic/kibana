@@ -133,6 +133,7 @@ export interface TimelineInput {
   savedQueryId?: Maybe<string>;
   sort?: Maybe<SortTimelineInput[]>;
   status?: Maybe<TimelineStatus>;
+  savedSearchId: Maybe<string>;
 }
 
 export enum FlowDirection {

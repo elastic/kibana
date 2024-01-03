@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
   getConnectorIds,
@@ -27,14 +27,9 @@ import {
 import { goToCreateNewCase } from '../../../tasks/all_cases';
 import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
-import { cleanKibana } from '../../../tasks/common';
 
-describe('Cases connector incident fields', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
+// FLAKY: https://github.com/elastic/kibana/issues/165712
+describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
@@ -70,7 +65,7 @@ describe('Cases connector incident fields', { tags: [tag.ESS, tag.SERVERLESS] },
   });
 
   it('Correct incident fields show when connector is changed', () => {
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(getCase1());
     fillJiraConnectorOptions(getJiraConnectorOptions());
@@ -81,7 +76,7 @@ describe('Cases connector incident fields', { tags: [tag.ESS, tag.SERVERLESS] },
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
     cy.get(CONNECTOR_CARD_DETAILS).should(
       'have.text',
-      `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+      `Incident types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
         getIbmResilientConnectorOptions().severity
       }`
     );

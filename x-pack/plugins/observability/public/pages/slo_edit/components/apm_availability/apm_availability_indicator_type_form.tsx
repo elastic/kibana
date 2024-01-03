@@ -5,17 +5,38 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
+import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm>();
+  const { watch, setValue } = useFormContext<CreateSLOForm>();
+  const { data: apmIndex } = useFetchApmIndex();
+
+  useEffect(() => {
+    if (apmIndex !== '') {
+      setValue('indicator.params.index', apmIndex);
+    }
+  }, [setValue, apmIndex]);
+  const timestampField = watch('indicator.params.timestampField');
+  const groupByField = watch('groupBy');
+
+  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
+    useFetchIndexPatternFields(apmIndex);
+
+  const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
+    useFetchGroupByCardinality(apmIndex, timestampField, groupByField);
+  const groupByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -118,6 +139,43 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <IndexFieldSelector
+        indexFields={groupByFields}
+        name="groupBy"
+        defaultValue={ALL_VALUE}
+        label={
+          <span>
+            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+              defaultMessage: 'Group by',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+                defaultMessage: 'Create individual SLOs for each value of the selected field.',
+              })}
+              position="top"
+            />
+          </span>
+        }
+        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+          defaultMessage: 'Select an optional field to group by',
+        })}
+        isLoading={!!apmIndex && isIndexFieldsLoading}
+        isDisabled={!apmIndex}
+      />
+
+      {!isGroupByCardinalityLoading && !!groupByCardinality && (
+        <EuiCallOut
+          size="s"
+          iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
+          color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
+          title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
+            defaultMessage:
+              "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
+            values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+          })}
+        />
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>

@@ -11,6 +11,7 @@ import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
+import { EmbeddableAppContext } from '../../embeddable_panel/types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
@@ -30,6 +31,8 @@ export interface EmbeddableOutput {
   title?: string;
   description?: string;
   editable?: boolean;
+  // set this to true if the embeddable allows inline editing
+  inlineEditable?: boolean;
   // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
   editableWithExplicitInput?: boolean;
   savedObjectId?: string;
@@ -178,6 +181,11 @@ export interface IEmbeddable<
    * is not within a parent.
    */
   getRoot(): IEmbeddable | IContainer;
+
+  /**
+   * Returns the context of this embeddable's container, or undefined.
+   */
+  getAppContext(): EmbeddableAppContext | undefined;
 
   /**
    * Renders the embeddable at the given node.

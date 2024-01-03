@@ -7,17 +7,15 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import type { Message } from '../../../common/types';
-import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
 const containerClassName = css`
@@ -29,49 +27,39 @@ const bodyClassName = css`
 `;
 
 export function ChatFlyout({
-  title,
-  messages,
-  conversationId,
-  isOpen,
+  initialTitle,
+  initialMessages,
   onClose,
-  onChatUpdate,
-  onChatComplete,
+  isOpen,
+  startedFrom,
 }: {
-  title: string;
-  messages: Message[];
-  conversationId?: string;
+  initialTitle: string;
+  initialMessages: Message[];
   isOpen: boolean;
+  startedFrom: StartedFrom;
   onClose: () => void;
-  onChatUpdate?: (messages: Message[]) => void;
-  onChatComplete?: (messages: Message[]) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { http },
   } = useKibana();
+
+  const { euiTheme } = useEuiTheme();
 
   const currentUser = useCurrentUser();
 
   const connectors = useGenAIConnectors();
 
-  const service = useObservabilityAIAssistant();
-
-  const chatService = useAbortableAsync(
-    ({ signal }) => {
-      return service.start({ signal });
-    },
-    [service]
-  );
-
   const router = useObservabilityAIAssistantRouter();
 
   const knowledgeBase = useKnowledgeBase();
 
-  const { saveTitle } = useConversation({
-    conversationId,
-    chatService: chatService.value,
-    connectorId: connectors.selectedConnector,
-  });
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  const conversationsHeaderClassName = css`
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: solid 1px ${euiTheme.border.color};
+  `;
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -86,10 +74,11 @@ export function ChatFlyout({
             hasShadow={false}
             hasBorder={false}
             borderRadius="none"
-            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
+            className={conversationsHeaderClassName}
           >
             {conversationId ? (
               <EuiLink
+                data-test-subj="observabilityAiAssistantChatFlyoutOpenConversationLink"
                 href={router.link('/conversations/{conversationId}', {
                   path: { conversationId },
                 })}
@@ -99,7 +88,10 @@ export function ChatFlyout({
                 })}
               </EuiLink>
             ) : (
-              <EuiLink href={router.link('/conversations/new')}>
+              <EuiLink
+                data-test-subj="observabilityAiAssistantChatFlyoutGoToConversationsLink"
+                href={router.link('/conversations/new')}
+              >
                 {i18n.translate('xpack.observabilityAiAssistant.conversationListDeepLinkLabel', {
                   defaultMessage: 'Go to conversations',
                 })}
@@ -109,25 +101,15 @@ export function ChatFlyout({
         </EuiFlexItem>
         <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
-            loading={false}
             connectors={connectors}
-            title={title}
-            messages={messages}
+            initialTitle={initialTitle}
+            initialMessages={initialMessages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
             knowledgeBase={knowledgeBase}
-            onChatUpdate={(nextMessages) => {
-              if (onChatUpdate) {
-                onChatUpdate(nextMessages);
-              }
-            }}
-            onChatComplete={(nextMessages) => {
-              if (onChatComplete) {
-                onChatComplete(nextMessages);
-              }
-            }}
-            onSaveTitle={(newTitle) => {
-              saveTitle(newTitle);
+            startedFrom={startedFrom}
+            onConversationUpdate={(conversation) => {
+              setConversationId(conversation.conversation.id);
             }}
           />
         </EuiFlexItem>

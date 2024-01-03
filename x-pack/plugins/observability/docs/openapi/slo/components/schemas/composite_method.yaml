@@ -1,6 +1,0 @@
-title: Composite method
-type: string
-description: The composite method to use for the composite SLO.
-enum:
-  - weightedAverage
-example: weightedAverage

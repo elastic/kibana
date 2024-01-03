@@ -51,8 +51,14 @@ client.bulk(body: documents)
 `,
   installClient: `# Requires Ruby version 3.0 or higher
 
-# From the project's root directory:$ gem build elasticsearch-serverless.gemspec
-$ gem install elasticsearch-serverless-x.x.x.gem`,
+# Install from RubyGems:
+gem install elasticsearch-serverless --pre
+
+# Or include the gem in your Gemfile
+gem 'elasticsearch-serverless'
+
+# And require it in your code
+require 'elasticsearch-serverless'`,
   name: i18n.translate('xpack.serverlessSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),

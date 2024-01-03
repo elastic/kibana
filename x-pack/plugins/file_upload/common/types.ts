@@ -124,22 +124,6 @@ export interface ImportDocMessage {
 
 export type ImportDoc = ImportDocMessage | string | object;
 
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
-}
-
-export interface Mappings {
-  _meta?: {
-    created_by: string;
-  };
-  properties: {
-    [key: string]: any;
-  };
-}
-
 export interface IngestPipelineWrapper {
   id: string;
   pipeline: IngestPipeline;

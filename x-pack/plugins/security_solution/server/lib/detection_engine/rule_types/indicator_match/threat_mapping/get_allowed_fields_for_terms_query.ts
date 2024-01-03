@@ -5,39 +5,34 @@
  * 2.0.
  */
 
-import type { IndicesGetFieldMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AllowedFieldsForTermsQuery, GetAllowedFieldsForTermQuery } from './types';
 
-const allowedFieldTypes = ['keyword', 'constant_keyword', 'wildcard', 'ip'];
+const allowedFieldTypesSet = new Set(['keyword', 'constant_keyword', 'wildcard', 'ip']);
 
 /*
  * Return map of fields allowed for term query
  */
 export const getAllowedFieldForTermQueryFromMapping = (
-  indexMapping: IndicesGetFieldMappingResponse
+  fieldsCapsResponse: FieldCapsResponse,
+  fields: string[]
 ): Record<string, boolean> => {
-  const result: Record<string, boolean> = {};
-  const notAllowedFields: string[] = [];
+  const fieldsCaps = fieldsCapsResponse.fields;
 
-  const indices = Object.values(indexMapping);
-  indices.forEach((index) => {
-    Object.entries(index.mappings).forEach(([field, fieldValue]) => {
-      Object.values(fieldValue.mapping).forEach((mapping) => {
-        const fieldType = mapping?.type;
-        if (!fieldType) return;
+  const availableFields = fields.filter((field) => {
+    const fieldCaps = fieldsCaps[field];
 
-        if (allowedFieldTypes.includes(fieldType) && !notAllowedFields.includes(field)) {
-          result[field] = true;
-        } else {
-          notAllowedFields.push(field);
-          // if we the field allowed in one index, but not allowed in another, we should delete it from result
-          delete result[field];
-        }
-      });
+    const isAllVariationsAllowed = Object.values(fieldCaps).every((fieldCapByType) => {
+      return allowedFieldTypesSet.has(fieldCapByType.type);
     });
+
+    return isAllVariationsAllowed;
   });
 
-  return result;
+  return availableFields.reduce<Record<string, boolean>>((acc, field) => {
+    acc[field] = true;
+    return acc;
+  }, {});
 };
 
 /**
@@ -53,19 +48,25 @@ export const getAllowedFieldsForTermQuery = async ({
   let allowedFieldsForTermsQuery = { source: {}, threat: {} };
   try {
     const [sourceFieldsMapping, threatFieldsMapping] = await Promise.all([
-      services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+      services.scopedClusterClient.asCurrentUser.fieldCaps({
         index: inputIndex,
         fields: threatMatchedFields.source,
       }),
-      services.scopedClusterClient.asCurrentUser.indices.getFieldMapping({
+      services.scopedClusterClient.asCurrentUser.fieldCaps({
         index: threatIndex,
         fields: threatMatchedFields.threat,
       }),
     ]);
 
     allowedFieldsForTermsQuery = {
-      source: getAllowedFieldForTermQueryFromMapping(sourceFieldsMapping),
-      threat: getAllowedFieldForTermQueryFromMapping(threatFieldsMapping),
+      source: getAllowedFieldForTermQueryFromMapping(
+        sourceFieldsMapping,
+        threatMatchedFields.source
+      ),
+      threat: getAllowedFieldForTermQueryFromMapping(
+        threatFieldsMapping,
+        threatMatchedFields.threat
+      ),
     };
   } catch (e) {
     ruleExecutionLogger.debug(`Can't get allowed fields for terms query: ${e}`);

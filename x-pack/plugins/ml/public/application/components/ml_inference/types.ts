@@ -46,3 +46,9 @@ export interface AdditionalSettings {
   condition?: string;
   tag?: string;
 }
+
+export const TEST_PIPELINE_MODE = {
+  STAND_ALONE: 'stand_alone',
+  STEP: 'step',
+} as const;
+export type TestPipelineMode = typeof TEST_PIPELINE_MODE[keyof typeof TEST_PIPELINE_MODE];

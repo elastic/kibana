@@ -12,8 +12,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isMobileAgentName } from '../../../../common/agent_name';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
@@ -23,6 +21,7 @@ interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
+  showQueryInput?: boolean;
   showTransactionTypeSelector?: boolean;
   searchBarPlaceholder?: string;
   searchBarBoolFilter?: QueryDslQueryContainer[];
@@ -33,12 +32,10 @@ export function SearchBar({
   showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  showQueryInput = true,
   searchBarPlaceholder,
   searchBarBoolFilter,
 }: Props) {
-  const { agentName } = useApmServiceContext();
-  const isMobileAgent = isMobileAgentName(agentName);
-
   const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
@@ -49,7 +46,7 @@ export function SearchBar({
     isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
-    <>
+    <EuiFlexItem grow={false}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -72,6 +69,7 @@ export function SearchBar({
                 <UnifiedSearchBar
                   placeholder={searchBarPlaceholder}
                   boolFilter={searchBarBoolFilter}
+                  showQueryInput={showQueryInput}
                 />
               </EuiFlexItem>
             )}
@@ -92,7 +90,7 @@ export function SearchBar({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size={isMobileAgent ? 's' : 'm'} />
-    </>
+      <EuiSpacer size="m" />
+    </EuiFlexItem>
   );
 }

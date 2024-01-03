@@ -123,6 +123,7 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlReindexWithPipeline",
     "MlSpecificIndexExists",
 
     "JobAuditMessages",
@@ -179,6 +180,9 @@
     "InferTrainedModelDeployment",
     "CreateInferencePipeline",
     "GetIngestPipelines",
+    "GetTrainedModelDownloadList",
+    "GetElserConfig",
+    "InstallElasticTrainedModel",
 
     "Alerting",
     "PreviewAlert",

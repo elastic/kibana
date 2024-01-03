@@ -12,9 +12,10 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
+  savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -25,6 +26,7 @@ import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -37,6 +39,7 @@ const securityPluginStart = securityMock.createStart();
 
 const alertingAuthorization = alertingAuthorizationMock.create();
 const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
@@ -44,7 +47,11 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   eventLog: eventLogMock.createStart(),
@@ -79,7 +86,7 @@ test('creates a rules client with proper constructor arguments when security is 
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -101,11 +108,15 @@ test('creates a rules client with proper constructor arguments when security is 
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     createAPIKey: expect.any(Function),
+    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
+    maxScheduledPerMinute: 10000,
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    getAlertIndicesAlias: expect.any(Function),
+    alertsService: null,
   });
 });
 
@@ -123,7 +134,7 @@ test('creates a rules client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -139,13 +150,17 @@ test('creates a rules client with proper constructor arguments', async () => {
     namespace: 'default',
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
+    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
+    maxScheduledPerMinute: 10000,
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    getAlertIndicesAlias: expect.any(Function),
+    alertsService: null,
   });
 });
 

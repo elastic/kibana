@@ -31,6 +31,9 @@ const actionParams = {
       description: 'some description',
       tags: ['kibana'],
       externalId: null,
+      id: '10006',
+      severity: 'High',
+      status: 'Open',
     },
     comments: [],
   },
@@ -65,6 +68,10 @@ describe('WebhookParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-severity-selection"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-status-filter"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').first().prop('disabled')).toEqual(
       false
     );

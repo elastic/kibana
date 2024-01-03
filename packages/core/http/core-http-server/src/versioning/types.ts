@@ -26,7 +26,7 @@ export type { ApiVersion };
 
 /**
  * Configuration for a versioned route
- * @experimental
+ * @public
  */
 export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
@@ -51,7 +51,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @note When enabled `apiVersion` is a reserved query parameter and will not
    *       be passed to the route handler or handler validation.
    * @note `apiVersion` is a reserved query parameter, avoid using it
-   * @experimental
+   * @public
    * @default false
    */
   enableQueryVersion?: boolean;
@@ -62,7 +62,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
  *
  * @param config - The route configuration
  * @returns A versioned route
- * @experimental
+ * @public
  */
 export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCtx = RqCtx> = (
   config: VersionedRouteConfig<Method>
@@ -157,31 +157,31 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *     }
  *   );
 
- * @experimental
+ * @public
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   /**
-   * @experimental
+   * @public
    * @track-adoption
    */
   get: VersionedRouteRegistrar<'get', Ctx>;
   /**
-   * @experimental
+   * @public
    * @track-adoption
    */
   put: VersionedRouteRegistrar<'put', Ctx>;
   /**
-   * @experimental
+   * @public
    * @track-adoption
    */
   post: VersionedRouteRegistrar<'post', Ctx>;
   /**
-   * @experimental
+   * @public
    * @track-adoption
    */
   patch: VersionedRouteRegistrar<'patch', Ctx>;
   /**
-   * @experimental
+   * @public
    * @track-adoption
    */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
@@ -201,7 +201,7 @@ export type VersionedSpecValidation<V = unknown> =
   | RouteValidationFunction<V>
   | Type<V>;
 
-/** @experimental */
+/** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
   RouteValidatorFullConfig<P, Q, B>,
   'params' | 'query' | 'body'
@@ -211,7 +211,7 @@ export type VersionedRouteRequestValidation<P, Q, B> = Omit<
   body?: VersionedSpecValidation<B>;
 };
 
-/** @experimental */
+/** @public */
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: { body: VersionedSpecValidation<any> };
   unsafe?: { body?: boolean };
@@ -219,19 +219,19 @@ export interface VersionedRouteResponseValidation {
 
 /**
  * Versioned route validation
- * @experimental
+ * @public
  */
 export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
-   * @experimental
+   * @public
    */
   request?: VersionedRouteRequestValidation<P, Q, B>;
   /**
    * Validation to run against route output
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
-   * @experimental
+   * @public
    */
   response?: VersionedRouteResponseValidation;
 }
@@ -239,24 +239,24 @@ export interface FullValidationConfig<P, Q, B> {
 /**
  * Options for a versioned route. Probably needs a lot more options like sunsetting
  * of an endpoint etc.
- * @experimental
+ * @public
  */
 export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
-   * @experimental
+   * @public
    */
   version: ApiVersion;
   /**
    * Validation for this version of a route
-   * @experimental
+   * @public
    */
   validate: false | FullValidationConfig<P, Q, B> | (() => FullValidationConfig<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**
  * A versioned route
- * @experimental
+ * @public
  */
 export interface VersionedRoute<
   Method extends RouteMethod = RouteMethod,
@@ -267,7 +267,7 @@ export interface VersionedRoute<
    * @param opts {@link AddVersionOpts | Options} for this version of a route
    * @param handler The request handler for this version of a route
    * @returns A versioned route, allows for fluent chaining of version declarations
-   * @experimental
+   * @public
    */
   addVersion<P = unknown, Q = unknown, B = unknown>(
     options: AddVersionOpts<P, Q, B>,

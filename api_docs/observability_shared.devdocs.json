@@ -55,7 +55,17 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "() => { navigation: { registerSections: (sections$: ",
+              "(coreSetup: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, pluginsSetup: ",
+              "ObservabilitySharedSetup",
+              ") => { locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -70,7 +80,45 @@
             "path": "x-pack/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreSetup",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "pluginsSetup",
+                "description": [],
+                "signature": [
+                  "ObservabilitySharedSetup"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -91,7 +139,7 @@
               },
               ", plugins: ",
               "ObservabilitySharedStart",
-              ") => { navigation: { PageTemplate: (pageTemplateProps: ",
+              ") => { locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
               ") => JSX.Element; registerSections: (sections$: ",
               "Observable",
@@ -239,6 +287,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.allCasesPermissions",
+        "type": "Function",
+        "tags": [],
+        "label": "allCasesPermissions",
+        "description": [],
+        "signature": [
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/utils/cases_permissions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -272,6 +337,119 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFlamegraph",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFlamegraph",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFlamegraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFunctions",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFunctions",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFunctions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableProfilingSearchBar",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableProfilingSearchBar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.EmbeddableProfilingSearchBarProps",
+            "text": "EmbeddableProfilingSearchBarProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.EmbeddableProfilingSearchBarProps",
+                "text": "EmbeddableProfilingSearchBarProps"
+              }
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -283,8 +461,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           "; triggerId: ",
           {
@@ -327,15 +505,17 @@
                 "label": "uiActions",
                 "description": [],
                 "signature": [
-                  "{ readonly addTriggerAction: (triggerId: string, action: ",
+                  "{ readonly registerTrigger: (trigger: ",
                   {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
+                    "pluginId": "@kbn/ui-actions-browser",
+                    "scope": "common",
+                    "docId": "kibKbnUiActionsBrowserPluginApi",
+                    "section": "def-common.Trigger",
+                    "text": "Trigger"
                   },
-                  "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+                  ") => void; readonly getTrigger: (triggerId: string) => ",
+                  "TriggerContract",
+                  "<object>; readonly registerAction: <Context extends object>(definition: ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -351,17 +531,15 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<Context>; readonly registerTrigger: (trigger: ",
+                  "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
                   {
-                    "pluginId": "@kbn/ui-actions-browser",
-                    "scope": "common",
-                    "docId": "kibKbnUiActionsBrowserPluginApi",
-                    "section": "def-common.Trigger",
-                    "text": "Trigger"
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
                   },
-                  ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-                  "TriggerContract",
-                  "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+                  "<any>) => void; readonly getAction: (id: string) => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -595,9 +773,26 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/utils/cases_permissions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ProfilingEmptyState",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfilingEmptyState",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/profiling_empty_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -682,7 +877,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
@@ -721,7 +916,7 @@
               "DisambiguateSet",
               "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
               "DisambiguateSet",
-              "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+              "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
               "IconType",
               " | undefined; iconProps?: Omit<",
               "EuiIconProps",
@@ -752,7 +947,7 @@
           "CommonProps",
           " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+          "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
           "Property",
           ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
         ],
@@ -772,7 +967,7 @@
               "CommonProps",
               " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+              "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
               "Property",
               ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
@@ -967,7 +1162,13 @@
         "description": [],
         "signature": [
           "(extraCrumbs: ",
-          "EuiBreadcrumbProps",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          },
           "[], app?: { id: string; label: string; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -982,7 +1183,13 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -1031,22 +1238,92 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useChartTheme",
+        "id": "def-public.useChartThemes",
         "type": "Function",
         "tags": [],
-        "label": "useChartTheme",
+        "label": "useChartThemes",
         "description": [],
         "signature": [
-          "() => ",
+          "() => { baseTheme: ",
+          "Theme",
+          "; theme: ",
           "RecursivePartial",
           "<",
           "Theme",
-          ">[]"
+          ">[]; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_chart_theme.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useEditableSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "useEditableSettings",
+        "description": [],
+        "signature": [
+          "(app: ",
+          "ObservabilityApp",
+          ", settingsKeys: string[]) => { settingsEditableConfig: Record<string, ",
+          "FieldSetting",
+          ">; unsavedChanges: Record<string, ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ">; handleFieldChange: (key: string, fieldState: ",
+          {
+            "pluginId": "advancedSettings",
+            "scope": "public",
+            "docId": "kibAdvancedSettingsPluginApi",
+            "section": "def-public.FieldState",
+            "text": "FieldState"
+          },
+          ") => void; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              "ObservabilityApp"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useEditableSettings.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "settingsKeys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1246,30 +1523,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useGetUserCasesPermissions",
-        "type": "Function",
-        "tags": [],
-        "label": "useGetUserCasesPermissions",
-        "description": [],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CasesPermissions",
-            "text": "CasesPermissions"
-          }
-        ],
-        "path": "x-pack/plugins/observability_shared/public/hooks/use_get_user_cases_permissions.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.useInspectorContext",
         "type": "Function",
         "tags": [],
@@ -1319,7 +1572,7 @@
         "label": "useLinkProps",
         "description": [],
         "signature": [
-          "({ app, pathname, hash, search }: ",
+          "({ app, pathname, hash, search, state }: ",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -1347,7 +1600,7 @@
             "id": "def-public.useLinkProps.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ app, pathname, hash, search }",
+            "label": "{ app, pathname, hash, search, state }",
             "description": [],
             "signature": [
               {
@@ -1690,6 +1943,138 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableProfilingSearchBarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableProfilingSearchBarProps",
+        "description": [],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.showDatePicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showDatePicker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onQuerySubmit",
+            "description": [],
+            "signature": [
+              "(params: { dateRange: { from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }; query: string; }) => void"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1.dateRange",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "dateRange",
+                    "description": [],
+                    "signature": [
+                      "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                    ],
+                    "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.EmbeddableProfilingSearchBarProps.onQuerySubmit.$1.query",
+                    "type": "string",
+                    "tags": [],
+                    "label": "query",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.onRefresh",
+            "type": "Function",
+            "tags": [],
+            "label": "onRefresh",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableProfilingSearchBarProps.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.FetcherResult",
         "type": "Interface",
         "tags": [],
@@ -1833,6 +2218,20 @@
             "description": [],
             "signature": [
               "Search | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.LinkDescriptor.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "unknown"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
             "deprecated": false,
@@ -2143,20 +2542,6 @@
             "label": "cls",
             "description": [],
             "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/plugins/observability_shared/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.UXMetrics.fid",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fid",
-            "description": [],
-            "signature": [
               "number | null | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
@@ -2184,6 +2569,9 @@
             "tags": [],
             "label": "tbt",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2209,6 +2597,9 @@
             "tags": [],
             "label": "coreVitalPages",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2221,21 +2612,7 @@
             "label": "lcpRanks",
             "description": [],
             "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/observability_shared/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.UXMetrics.fidRanks",
-            "type": "Array",
-            "tags": [],
-            "label": "fidRanks",
-            "description": [],
-            "signature": [
-              "number[]"
+              "number[] | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
@@ -2249,7 +2626,49 @@
             "label": "clsRanks",
             "description": [],
             "signature": [
-              "number[]"
+              "number[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.inp",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inp",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.hasINP",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasINP",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.UXMetrics.inpRanks",
+            "type": "Array",
+            "tags": [],
+            "label": "inpRanks",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
             ],
             "path": "x-pack/plugins/observability_shared/public/types.ts",
             "deprecated": false,
@@ -2344,6 +2763,57 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FLAMEGRAPH",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FLAMEGRAPH",
+        "description": [
+          "Profiling flamegraph embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FLAMEGRAPH\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FUNCTIONS",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FUNCTIONS",
+        "description": [
+          "Profiling functions embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FUNCTIONS\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_PROFILING_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_PROFILING_SEARCH_BAR",
+        "description": [
+          "Profiling search bar embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_PROFILING_SEARCH_BAR\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2446,7 +2916,7 @@
         "label": "ObservabilitySharedPluginSetup",
         "description": [],
         "signature": [
-          "{ navigation: { registerSections: (sections$: ",
+          "{ locators: ObservabilitySharedLocators; navigation: { registerSections: (sections$: ",
           "Observable",
           "<",
           {
@@ -2471,7 +2941,7 @@
         "label": "ObservabilitySharedPluginStart",
         "description": [],
         "signature": [
-          "{ navigation: { PageTemplate: (pageTemplateProps: ",
+          "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
           "WrappedPageTemplateProps",
           ") => JSX.Element; registerSections: (sections$: ",
           "Observable",
@@ -2525,6 +2995,27 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ProfilingLocators",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingLocators",
+        "description": [],
+        "signature": [
+          "{ flamegraphLocator: ",
+          "FlamegraphLocator",
+          "; topNFunctionsLocator: ",
+          "TopNFunctionsLocator",
+          "; stacktracesLocator: ",
+          "StacktracesLocator",
+          "; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.SectionLinkProps",
         "type": "Type",
         "tags": [],
@@ -2548,7 +3039,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
@@ -3313,6 +3804,36 @@
           "\"transaction.marks.agent.largestContentfulPaint\""
         ],
         "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/explorer-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOGS_ONBOARDING_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ONBOARDING_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/logs-onboarding-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -18,6 +18,7 @@ import { createTitleUserActionBuilder } from './title';
 import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
 import { createCategoryUserActionBuilder } from './category';
+import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 
 export const builderMap: UserActionBuilderMap = {
   create_case: createCaseUserActionBuilder,
@@ -32,4 +33,5 @@ export const builderMap: UserActionBuilderMap = {
   settings: createSettingsUserActionBuilder,
   assignees: createAssigneesUserActionBuilder,
   category: createCategoryUserActionBuilder,
+  customFields: createCustomFieldsUserActionBuilder,
 };

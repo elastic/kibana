@@ -105,7 +105,8 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
-import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
+import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -113,10 +114,7 @@ import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboa
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import {
-  EmbeddableComponentProps,
-  getEmbeddableComponent,
-} from './embeddable/embeddable_component';
+import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -129,6 +127,8 @@ import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+
+export type { SaveProps } from './app_plugin';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -209,7 +209,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  EmbeddableComponent: EmbeddableComponent;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -328,6 +328,9 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
+      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
+      setDatasourceMap(datasourceMap);
+      setVisualizationMap(visualizationMap);
       const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
@@ -598,6 +601,10 @@ export class LensPlugin {
       core.theme
     );
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
+    // Displays the add ESQL panel in the dashboard add Panel menu
+    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
+    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { VulnerabilityStat } from '../../../common/types';
+import { VulnerabilityStat } from '../../../common/types_old';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface VulnerabilityBucket {
@@ -72,9 +72,11 @@ export interface VulnerabilitiesQueryResult {
   };
 }
 
-const getVulnerabilitiesQuery = (query: QueryDslQueryContainer): SearchRequest => ({
+const getVulnerabilitiesQuery = (): SearchRequest => ({
   size: 0,
-  query,
+  query: {
+    match_all: {},
+  },
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {
     vulnerabilities: {
@@ -104,19 +106,19 @@ const getVulnerabilitiesQuery = (query: QueryDslQueryContainer): SearchRequest =
         },
         packageFixVersion: {
           terms: {
-            field: 'vulnerability.package.fixed_version',
+            field: 'package.fixed_version',
             size: 1,
           },
         },
         packageName: {
           terms: {
-            field: 'vulnerability.package.name',
+            field: 'package.name',
             size: 1,
           },
         },
         packageVersion: {
           terms: {
-            field: 'vulnerability.package.version',
+            field: 'package.version',
             size: 1,
           },
         },
@@ -126,11 +128,10 @@ const getVulnerabilitiesQuery = (query: QueryDslQueryContainer): SearchRequest =
 });
 
 export const getTopVulnerabilities = async (
-  esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  esClient: ElasticsearchClient
 ): Promise<VulnerabilityStat[]> => {
   const queryResult = await esClient.search<unknown, VulnerabilitiesQueryResult>(
-    getVulnerabilitiesQuery(query)
+    getVulnerabilitiesQuery()
   );
 
   if (!queryResult?.aggregations?.vulnerabilities) return [];

@@ -106,9 +106,12 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
       // filter other clauses, i.e. the mode and status filters
       if (c.type !== 'is' && Array.isArray(c.value)) {
         // the status value is an array of string(s) e.g. ['failed', 'stopped']
-        ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
+        ts = transforms.filter(
+          (transform) => transform.stats && (c.value as Value[]).includes(transform.stats.state)
+        );
       } else {
         ts = transforms.filter((transform) => {
+          if (!transform.stats) return false;
           if (c.type === 'field' && c.field === 'health') {
             return transform.stats.health?.status === c.value;
           }

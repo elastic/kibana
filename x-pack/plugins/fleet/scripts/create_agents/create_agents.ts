@@ -34,6 +34,7 @@ const printUsage = () =>
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
+const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes
 const ES_URL = 'http://localhost:9200';
@@ -42,7 +43,7 @@ const ES_PASSWORD = 'password';
 
 const DEFAULT_AGENT_COUNT = 50000;
 
-const INDEX_BULK_OP = '{ "index":{ } }\n';
+const INDEX_BULK_OP = '{ "index":{ "_id": "{{id}}" } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
@@ -144,6 +145,10 @@ function createAgentWithStatus({
   hostname: string;
 }) {
   const baseAgent = {
+    agent: {
+      id: uuidv4(),
+      version,
+    },
     access_api_key_id: 'api-key-1',
     active: true,
     policy_id: policyId,
@@ -200,6 +205,7 @@ async function getAgentPolicy(id: string) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
   const data = await res.json();
@@ -233,7 +239,12 @@ async function deleteAgents() {
 
 async function createAgentDocsBulk(agents: Agent[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
-  const body = agents.flatMap((agent) => [INDEX_BULK_OP, JSON.stringify(agent) + '\n']).join('');
+  const body = agents
+    .flatMap((agent) => [
+      INDEX_BULK_OP.replace(/{{id}}/, agent.agent?.id ?? ''),
+      JSON.stringify(agent) + '\n',
+    ])
+    .join('');
   const res = await fetch(`${ES_URL}/.fleet-agents/_bulk`, {
     method: 'post',
     body,
@@ -300,6 +311,8 @@ async function createAgentPolicy(id: string, name: string) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      // Note: version can change in the future
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
   const data = await res.json();
@@ -343,6 +356,7 @@ async function bumpAgentPolicyRevision(id: string, policy: any) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
 

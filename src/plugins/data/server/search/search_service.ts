@@ -79,8 +79,9 @@ import {
   SearchSourceService,
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
+  ESQL_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -95,6 +96,7 @@ import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
+import { esqlSearchStrategyProvider } from './strategies/esql_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -176,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         usage
       )
     );
+    this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
@@ -216,6 +219,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEssql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEql({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
@@ -433,11 +437,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
   };
 
-  private cancel = async (
-    deps: SearchStrategyDependencies,
-    id: string,
-    options: ISearchOptions = {}
-  ) => {
+  private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -464,14 +464,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     await Promise.allSettled(
-      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+      Array.from(searchIdMapping).map(async ([searchId, strategyName]) => {
         const searchOptions = {
           sessionId,
           strategy: strategyName,
           isStored: true,
         };
 
-        return this.cancel(deps, searchId, searchOptions);
+        try {
+          await this.cancel(deps, searchId, searchOptions);
+        } catch (e) {
+          this.logger.error(`cancelSessionSearches error: ${e.message}`);
+        }
       })
     );
   };

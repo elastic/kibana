@@ -8,6 +8,7 @@
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getDefaultConfigSettings } from '../common/config_settings';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
@@ -26,9 +27,10 @@ export const createMockConfig = (): ConfigType => {
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
-
+    settings: getDefaultConfigSettings(),
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
+    enableUiSettingsValidations: false,
   };
 };
 

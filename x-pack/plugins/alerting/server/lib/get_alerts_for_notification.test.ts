@@ -9,7 +9,6 @@ import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../comm
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
 import { alertsWithAnyUUID } from '../test_utils';
-import { RuleNotifyWhen } from '../types';
 
 describe('getAlertsForNotification', () => {
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
@@ -20,7 +19,7 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.CHANGE,
+      true,
       'default',
       {
         '1': alert1,
@@ -85,7 +84,7 @@ describe('getAlertsForNotification', () => {
       currentRecoveredAlerts,
     } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.CHANGE,
+      true,
       'default',
       {},
       {},
@@ -212,7 +211,7 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
         DISABLE_FLAPPING_SETTINGS,
-        RuleNotifyWhen.CHANGE,
+        true,
         'default',
         {},
         {},
@@ -337,7 +336,7 @@ describe('getAlertsForNotification', () => {
       currentRecoveredAlerts,
     } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.ACTIVE,
+      false,
       'default',
       {},
       {},

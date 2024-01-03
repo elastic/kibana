@@ -6,7 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { FileUploadPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FileUploadPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { FileUploadPlugin } = await import('./plugin');
+  return new FileUploadPlugin(initializerContext);
+};

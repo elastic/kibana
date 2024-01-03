@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
-import type { ChatRegistrationFunction, ObservabilityAIAssistantService } from '../types';
-import { createChatService } from './create_chat_service';
+import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
 
 export function createService({
+  analytics,
   coreStart,
-  securityStart,
   enabled,
+  licenseStart,
+  securityStart,
+  shareStart,
 }: {
+  analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
-  securityStart: SecurityPluginStart;
   enabled: boolean;
-}): ObservabilityAIAssistantService & { register: (fn: ChatRegistrationFunction) => void } {
+  licenseStart: LicensingPluginStart;
+  securityStart: SecurityPluginStart;
+  shareStart: SharePluginStart;
+}): ObservabilityAIAssistantService {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
-  const registrations: ChatRegistrationFunction[] = [];
+  const registrations: ChatRegistrationRenderFunction[] = [];
 
   return {
     isEnabled: () => {
@@ -32,10 +39,12 @@ export function createService({
       registrations.push(fn);
     },
     start: async ({ signal }) => {
-      return await createChatService({ client, signal, registrations });
+      const mod = await import('./create_chat_service');
+      return await mod.createChatService({ analytics, client, signal, registrations });
     },
-
     callApi: client,
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
+    getLicense: () => licenseStart.license$,
+    getLicenseManagementLocator: () => shareStart,
   };
 }

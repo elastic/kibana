@@ -8,13 +8,19 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
+
+export const MAX_NUM_OF_COLUMNS = 5;
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -135,7 +141,32 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   if ('sql' in query) {
     indexPattern = getIndexPatternFromSQLQuery(query.sql);
   }
+  if ('esql' in query) {
+    indexPattern = getIndexPatternFromESQLQuery(query.esql);
+  }
   // other textbased queries....
 
   return indexPattern;
+}
+
+export function canColumnBeDroppedInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
+}
+
+export function canColumnBeUsedBeInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return (
+    !hasNumberTypeColumns ||
+    columns.length >= MAX_NUM_OF_COLUMNS ||
+    (hasNumberTypeColumns && selectedColumnType === 'number')
+  );
 }

@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import { stringHash } from '@kbn/ml-string-hash';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
+    async clickApmServicesLink() {
+      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
+    },
+
+    async clickOpenAsPageLink() {
+      return testSubjects.click('infraAssetDetailsOpenAsPageButton');
+    },
+
     // Overview
-    async clickOverviewFlyoutTab() {
+    async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
@@ -28,8 +37,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getAssetDetailsMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsMetricsChartGrid');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
+      const container = await testSubjects.find('infraAssetDetailsHostMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsHostMetricsChart"]'
+      );
+    },
+
+    async getAssetDetailsKubernetesMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
+      );
     },
 
     async clickOverviewLinkToAlerts() {
@@ -44,12 +62,24 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
     },
 
-    async clickApmServicesLink() {
-      return testSubjects.click('infraAssetDetailsViewAPMServicesButton');
+    async cpuProfilingPromptExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async cpuProfilingPromptMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async profilingTabExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProfilingTab');
+    },
+
+    async profilingTabMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
     },
 
     // Metadata
-    async clickMetadataFlyoutTab() {
+    async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');
     },
 
@@ -73,13 +103,19 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail('infraAssetDetailsMetadataTable');
     },
 
+    async metadataTableMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+    },
+
     async metadataRemovePinExists() {
       return testSubjects.exists('infraAssetDetailsMetadataRemovePin');
     },
 
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
-        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
+        `filter-badge-${stringHash(
+          'host.architecture: arm64'
+        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },
@@ -88,8 +124,12 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('infraAssetDetailsMetadataRemoveFilterButton');
     },
 
+    async getMetadataSearchField() {
+      return await testSubjects.find('infraAssetDetailsMetadataSearchBarInput');
+    },
+
     // Processes
-    async clickProcessesFlyoutTab() {
+    async clickProcessesTab() {
       return testSubjects.click('infraAssetDetailsProcessesTab');
     },
 
@@ -120,13 +160,44 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
+    async getProcessesSearchField() {
+      return await testSubjects.find('infraAssetDetailsProcessesSearchBarInput');
+    },
+
+    async processesSearchInputErrorMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
+    async processesSearchInputErrorExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProcessesSearchInputError');
+    },
+
     // Logs
-    async clickLogsFlyoutTab() {
+    async clickLogsTab() {
       return testSubjects.click('infraAssetDetailsLogsTab');
     },
 
     async logsExists() {
       await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+    },
+
+    async getLogsSearchField() {
+      return await testSubjects.find('infraAssetDetailsLogsTabFieldSearch');
+    },
+
+    // Anomalies
+    async clickAnomaliesTab() {
+      return testSubjects.click('infraAssetDetailsAnomaliesTab');
+    },
+
+    // Osquery
+    async clickOsqueryTab() {
+      return testSubjects.click('infraAssetDetailsOsqueryTab');
+    },
+
+    // APM Tab link
+    async clickApmTabLink() {
+      return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
     },
   };
 }

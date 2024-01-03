@@ -5,127 +5,110 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
+import { ObservabilityPublicPluginsStart } from '../../../..';
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
-import { useFetchIndices } from '../../../../hooks/use_fetch_indices';
 import { CreateSLOForm } from '../../types';
 
-interface Option {
-  label: string;
-  options: Array<{ value: string; label: string }>;
-}
-
 export function IndexSelection() {
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
+  const { dataViews: dataViewsService } = useKibana().services;
 
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [dataViewOptions, setDataViewOptions] = useState<Option[]>([]);
-  const [indexPatternOption, setIndexPatternOption] = useState<Option | undefined>();
+  const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
 
-  const { isLoading: isIndicesLoading, data: indices = [] } = useFetchIndices({
-    search: searchValue,
-  });
-  const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews({
-    name: searchValue,
-  });
+  const { dataViewEditor } = useKibana<ObservabilityPublicPluginsStart>().services;
+
+  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
+
+  const currentIndexPattern = watch('indicator.params.index');
 
   useEffect(() => {
-    if (dataViews.length > 0) {
-      setDataViewOptions(createDataViewOptions(dataViews));
+    if (!isDataViewsLoading) {
+      const missingAdHocDataView =
+        dataViews.find((dataView) => dataView.title === currentIndexPattern) ||
+        adHocDataViews.find((dataView) => dataView.getIndexPattern() === currentIndexPattern);
+
+      if (!missingAdHocDataView && currentIndexPattern) {
+        async function loadMissingDataView() {
+          const dataView = await dataViewsService.create(
+            {
+              title: currentIndexPattern,
+              allowNoIndex: true,
+            },
+            true
+          );
+          if (dataView.getIndexPattern() === currentIndexPattern) {
+            setAdHocDataViews((prev) => [...prev, dataView]);
+          }
+        }
+
+        loadMissingDataView();
+      }
     }
-  }, [dataViews]);
+  }, [adHocDataViews, currentIndexPattern, dataViews, dataViewsService, isDataViewsLoading]);
 
-  useEffect(() => {
-    if (indices.length === 0) {
-      setIndexPatternOption(undefined);
-    } else if (!!searchValue) {
-      const searchPattern = searchValue.endsWith('*') ? searchValue : `${searchValue}*`;
+  const getDataViewPatternById = (id?: string) => {
+    return (
+      dataViews.find((dataView) => dataView.id === id)?.title ||
+      adHocDataViews.find((dataView) => dataView.id === id)?.getIndexPattern()
+    );
+  };
 
-      setIndexPatternOption({
-        label: i18n.translate(
-          'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternLabel',
-          { defaultMessage: 'Use the index pattern' }
-        ),
-        options: [
-          {
-            value: searchPattern,
-            label: i18n.translate(
-              'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternFoundLabel',
-              {
-                defaultMessage:
-                  '{searchPattern} (match {num, plural, one {# index} other {# indices}})',
-                values: {
-                  searchPattern,
-                  num: indices.length,
-                },
-              }
-            ),
-          },
-        ],
-      });
-    }
-  }, [indices.length, searchValue]);
-
-  const onDataViewSearchChange = useMemo(
-    () => debounce((value: string) => setSearchValue(value), 300),
-    []
-  );
-
-  const placeholder = i18n.translate(
-    'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
-    {
-      defaultMessage: 'Select a Data View or use an index pattern',
-    }
-  );
+  const getDataViewIdByIndexPattern = (indexPattern: string) => {
+    return (
+      dataViews.find((dataView) => dataView.title === indexPattern) ||
+      adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern)
+    );
+  };
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.observability.slo.sloEdit.customKql.indexSelection.label', {
-        defaultMessage: 'Index',
-      })}
-      helpText={i18n.translate(
-        'xpack.observability.slo.sloEdit.customKql.indexSelection.helpText',
-        {
-          defaultMessage: 'Use * to broaden your query.',
-        }
-      )}
-      isInvalid={getFieldState('indicator.params.index').invalid}
-    >
+    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState('indicator.params.index').invalid}>
       <Controller
         defaultValue=""
         name="indicator.params.index"
         control={control}
         rules={{ required: true }}
         render={({ field, fieldState }) => (
-          <EuiComboBox
-            {...field}
-            aria-label={placeholder}
-            async
-            data-test-subj="indexSelection"
-            isClearable
-            isInvalid={fieldState.invalid}
-            isLoading={isIndicesLoading && isDataViewsLoading}
-            onChange={(selected: EuiComboBoxOptionOption[]) => {
-              if (selected.length) {
-                return field.onChange(selected[0].value);
-              }
-
-              field.onChange('');
+          <DataViewPicker
+            adHocDataViews={adHocDataViews}
+            trigger={{
+              label: field.value || SELECT_DATA_VIEW,
+              fullWidth: true,
+              color: 'text',
+              isLoading: isDataViewsLoading,
+              'data-test-subj': 'indexSelection',
             }}
-            onSearchChange={onDataViewSearchChange}
-            options={
-              indexPatternOption ? [...dataViewOptions, indexPatternOption] : dataViewOptions
-            }
-            placeholder={placeholder}
-            selectedOptions={
-              !!field.value ? [findSelectedIndexPattern(dataViews, field.value)] : []
-            }
-            singleSelection
+            onChangeDataView={(newId: string) => {
+              field.onChange(getDataViewPatternById(newId));
+              dataViewsService.get(newId).then((dataView) => {
+                if (dataView.timeFieldName) {
+                  setValue('indicator.params.timestampField', dataView.timeFieldName);
+                }
+              });
+            }}
+            currentDataViewId={getDataViewIdByIndexPattern(field.value)?.id}
+            onDataViewCreated={() => {
+              dataViewEditor.openEditor({
+                allowAdHocDataView: true,
+                onSave: (dataView: DataView) => {
+                  if (!dataView.isPersisted()) {
+                    setAdHocDataViews([...adHocDataViews, dataView]);
+                    field.onChange(dataView.getIndexPattern());
+                  } else {
+                    field.onChange(getDataViewPatternById(dataView.id));
+                  }
+                  if (dataView.timeFieldName) {
+                    setValue('indicator.params.timestampField', dataView.timeFieldName);
+                  }
+                },
+              });
+            }}
           />
         )}
       />
@@ -133,42 +116,16 @@ export function IndexSelection() {
   );
 }
 
-function findSelectedIndexPattern(dataViews: DataView[], indexPattern: string) {
-  const selectedDataView = dataViews.find((view) => view.getIndexPattern() === indexPattern);
-  if (selectedDataView) {
-    return {
-      value: selectedDataView.getIndexPattern(),
-      label: createDataViewLabel(selectedDataView),
-      'data-test-subj': 'indexSelectionSelectedValue',
-    };
+const SELECT_DATA_VIEW = i18n.translate(
+  'xpack.observability.slo.sloEdit.customKql.dataViewSelection.label',
+  {
+    defaultMessage: 'Select a Data view',
   }
+);
 
-  return {
-    value: indexPattern,
-    label: indexPattern,
-    'data-test-subj': 'indexSelectionSelectedValue',
-  };
-}
-
-function createDataViewLabel(dataView: DataView) {
-  return `${dataView.getName()} (${dataView.getIndexPattern()})`;
-}
-
-function createDataViewOptions(dataViews: DataView[]): Option[] {
-  const options = [];
-
-  options.push({
-    label: i18n.translate(
-      'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
-      { defaultMessage: 'Select an existing Data View' }
-    ),
-    options: dataViews
-      .map((view) => ({
-        label: createDataViewLabel(view),
-        value: view.getIndexPattern(),
-      }))
-      .sort((a, b) => String(a.label).localeCompare(b.label)),
-  });
-
-  return options;
-}
+const INDEX_LABEL = i18n.translate(
+  'xpack.observability.slo.sloEdit.customKql.indexSelection.label',
+  {
+    defaultMessage: 'Index',
+  }
+);

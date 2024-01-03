@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { exportTimeline } from '../../../tasks/timelines';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,
@@ -15,13 +15,10 @@ import {
 
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
-describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
@@ -35,7 +32,7 @@ describe('Export timelines', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
     exportTimeline(this.templateId);
 

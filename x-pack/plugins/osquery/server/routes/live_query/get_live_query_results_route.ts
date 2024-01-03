@@ -20,8 +20,10 @@ import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
 } from '../../../common/search_strategy';
-import { OsqueryQueries } from '../../../common/search_strategy';
+import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
 import {
@@ -79,7 +81,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
           );
 
           const res = await lastValueFrom(
-            search.search<{}>(
+            search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
@@ -88,10 +90,12 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
                 ),
-                sort: {
-                  direction: request.query.sortOrder ?? 'desc',
-                  field: request.query.sort ?? '@timestamp',
-                },
+                sort: [
+                  {
+                    direction: request.query.sortOrder ?? Direction.desc,
+                    field: request.query.sort ?? '@timestamp',
+                  },
+                ],
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

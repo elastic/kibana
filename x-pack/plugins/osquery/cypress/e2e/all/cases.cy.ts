@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tag } from '../../tags';
+import { initializeDataViews } from '../../tasks/login';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
@@ -19,6 +19,7 @@ describe('Add to Cases', () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
   before(() => {
+    initializeDataViews();
     loadLiveQuery({
       agent_all: true,
       query: "SELECT * FROM os_version where name='Ubuntu';",
@@ -29,10 +30,10 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('observability', { tags: [tag.ESS] }, () => {
+  describe('observability', { tags: ['@ess'] }, () => {
     let caseId: string;
     let caseTitle: string;
-    before(() => {
+    beforeEach(() => {
       loadCase('observability').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
@@ -41,7 +42,7 @@ describe('Add to Cases', () => {
       navigateTo('/app/osquery');
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 
@@ -60,11 +61,11 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('security', { tags: ['@ess', '@serverless'] }, () => {
     let caseId: string;
     let caseTitle: string;
 
-    before(() => {
+    beforeEach(() => {
       loadCase('securitySolution').then((caseInfo) => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
@@ -73,7 +74,7 @@ describe('Add to Cases', () => {
       navigateTo('/app/osquery');
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 

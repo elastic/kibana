@@ -57,7 +57,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       };
     }
 
-    const { enabledMonitorQueryIds } = await processMonitors(
+    const { enabledMonitorQueryIds } = processMonitors(
       monitors,
       server,
       savedObjectsClient,

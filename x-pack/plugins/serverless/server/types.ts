@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginSetup {}
+export interface ServerlessServerSetup {
+  setupProjectSettings(keys: string[]): void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginStart {}
+export interface ServerlessServerStart {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerlessServerSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerlessServerStartDependencies {}

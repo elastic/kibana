@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { samlAuthentication } from './support/saml_auth';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -23,13 +24,15 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless',
+    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   e2e: {
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      samlAuthentication(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

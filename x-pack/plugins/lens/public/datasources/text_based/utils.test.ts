@@ -15,6 +15,7 @@ import {
   loadIndexPatternRefs,
   getStateFromAggregateQuery,
   getAllColumns,
+  canColumnBeUsedBeInMetricDimension,
 } from './utils';
 import type { TextBasedLayerColumn } from './types';
 import { type AggregateQuery } from '@kbn/es-query';
@@ -62,6 +63,22 @@ describe('Text based languages utils', () => {
     it('should return empty index pattern for non sql query', () => {
       const indexPattern = getIndexPatternFromTextBasedQuery({
         lang1: 'SELECT bytes, memory from foo',
+      } as unknown as AggregateQuery);
+
+      expect(indexPattern).toBe('');
+    });
+
+    it('should return the index pattern for es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        esql: 'from foo | keep bytes, memory ',
+      });
+
+      expect(indexPattern).toBe('foo');
+    });
+
+    it('should return empty index pattern for non es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        lang1: 'from foo | keep bytes, memory ',
       } as unknown as AggregateQuery);
 
       expect(indexPattern).toBe('');
@@ -467,6 +484,113 @@ describe('Text based languages utils', () => {
           },
         },
       });
+    });
+  });
+
+  describe('canColumnBeUsedBeInMetricDimension', () => {
+    it('should return true if there are non numeric field', async () => {
+      const fieldList = [
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'string',
+          },
+        },
+      ] as DatatableColumn[];
+      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'string');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return true if there are numeric field and the selected type is number', async () => {
+      const fieldList = [
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'string',
+          },
+        },
+      ] as DatatableColumn[];
+      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'number');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return false if there are non numeric fields and the selected type is non numeric', async () => {
+      const fieldList = [
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'string',
+          },
+        },
+      ] as DatatableColumn[];
+      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return true if there are many columns regardless the types', async () => {
+      const fieldList = [
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'c',
+          name: 'Test 3',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'd',
+          name: 'Test 4',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          id: 'e',
+          name: 'Test 5',
+          meta: {
+            type: 'string',
+          },
+        },
+      ] as DatatableColumn[];
+      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
+      expect(flag).toBeTruthy();
     });
   });
 });

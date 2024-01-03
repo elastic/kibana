@@ -8,7 +8,6 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, HeatmapConfig } from '../config';
-import { VisTypeHeatmapServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<HeatmapConfig> = {
   exposeToBrowser: {
@@ -17,5 +16,7 @@ export const config: PluginConfigDescriptor<HeatmapConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new VisTypeHeatmapServerPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypeHeatmapServerPlugin } = await import('./plugin');
+  return new VisTypeHeatmapServerPlugin(initializerContext);
+};

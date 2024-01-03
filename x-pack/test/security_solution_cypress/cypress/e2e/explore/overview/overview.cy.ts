@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../../../tasks/overview';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { OVERVIEW_URL } from '../../../urls/navigation';
 
-import { cleanKibana } from '../../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Overview Page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-    cy.task('esArchiverLoad', 'overview');
+    cy.task('esArchiverLoad', { archiveName: 'overview' });
   });
 
   beforeEach(() => {
     login();
-    visit(OVERVIEW_URL);
+    visitWithTimeRange(OVERVIEW_URL);
   });
 
   after(() => {
@@ -48,13 +46,14 @@ describe('Overview Page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('Favorite Timelines', () => {
+  // https://github.com/elastic/kibana/issues/173168
+  describe('Favorite Timelines', { tags: ['@brokenInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
-            visit(OVERVIEW_URL);
+            visitWithTimeRange(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',
               getTimeline().title
@@ -65,17 +64,10 @@ describe('Overview Page', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
-  before(() => {
-    cy.task('esArchiverUnload', 'auditbeat');
-  });
-  after(() => {
-    cy.task('esArchiverLoad', 'auditbeat');
-  });
-
+describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
   it('Splash screen should be here', () => {
     login();
-    visit(OVERVIEW_URL);
+    visitWithTimeRange(OVERVIEW_URL);
     cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
   });
 });

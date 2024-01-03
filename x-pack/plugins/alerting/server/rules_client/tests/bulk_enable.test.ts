@@ -6,7 +6,7 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -34,6 +34,7 @@ import {
 } from './test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { migrateLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -45,6 +46,10 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+jest.mock('../../application/rule/methods/get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -53,6 +58,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -67,14 +73,18 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -758,12 +768,12 @@ describe('bulkEnableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 

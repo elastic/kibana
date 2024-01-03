@@ -18,6 +18,7 @@ export const MetricRowControls = ({ onDelete, disableDelete }: MetricRowControlP
     <>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
+          data-test-subj="infraMetricRowControlsButton"
           iconType="trash"
           color="danger"
           style={{ marginBottom: '0.2em' }}

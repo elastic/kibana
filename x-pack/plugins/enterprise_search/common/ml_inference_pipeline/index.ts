@@ -28,7 +28,6 @@ import {
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 export const ML_INFERENCE_PREFIX = 'ml.inference.';
-export const ELSER_MODEL_ID = '.elser_model_1';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -203,10 +202,18 @@ export const parseModelStateFromStats = (
     modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)
   )
     return TrainedModelState.Started;
-  switch (model?.deployment_stats?.state) {
+
+  return parseModelState(model?.deployment_stats?.state);
+};
+
+export const parseModelState = (state?: string) => {
+  switch (state) {
     case 'started':
+    case 'fully_allocated':
       return TrainedModelState.Started;
     case 'starting':
+    case 'downloading':
+    case 'downloaded':
       return TrainedModelState.Starting;
     case 'stopping':
       return TrainedModelState.Stopping;

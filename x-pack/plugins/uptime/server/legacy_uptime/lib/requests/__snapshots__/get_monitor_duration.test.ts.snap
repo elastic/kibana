@@ -31,6 +31,20 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
+              "exists": Object {
+                "field": "summary",
+              },
+            },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "exists": Object {
+                    "field": "run_once",
+                  },
+                },
+              },
+            },
+            Object {
               "range": Object {
                 "@timestamp": Object {
                   "gte": "now-15m",
@@ -55,7 +69,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat-8*,heartbeat-7*",
+    "index": "heartbeat-*",
   },
   Object {
     "meta": true,

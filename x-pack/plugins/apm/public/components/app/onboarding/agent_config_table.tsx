@@ -53,6 +53,7 @@ function ConfigurationValueColumn({
       </EuiText>
       {value && (
         <EuiButtonIcon
+          data-test-subj="apmConfigurationValueColumnButton"
           aria-label={i18n.translate(
             'xpack.apm.onboarding.column.value.copyIconText',
             {

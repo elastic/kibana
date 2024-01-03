@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+const toSecretValidator =
+  (validator: (value: string) => string[] | undefined) =>
+  (value: string | { id: string } | undefined) => {
+    if (typeof value === 'object') {
+      return undefined;
+    }
+
+    return validator(value ?? '');
+  };
+
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -78,14 +88,29 @@ export function validateKafkaHosts(value: string[]) {
 export function validateESHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
+  const urlRequiredMessage = i18n.translate(
+    'xpack.fleet.settings.outputForm.elasticUrlRequiredError',
+    {
+      defaultMessage: 'URL is required',
+    }
+  );
   value.forEach((val, idx) => {
     try {
       if (!val) {
-        throw new Error('Host URL required');
-      }
-      const urlParsed = new URL(val);
-      if (!['http:', 'https:'].includes(urlParsed.protocol)) {
-        throw new Error('Invalid protocol');
+        res.push({
+          message: urlRequiredMessage,
+          index: idx,
+        });
+      } else {
+        const urlParsed = new URL(val);
+        if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.outputForm.invalidProtocolError', {
+              defaultMessage: 'Invalid protocol',
+            }),
+            index: idx,
+          });
+        }
       }
     } catch (error) {
       res.push({
@@ -115,9 +140,7 @@ export function validateESHosts(value: string[]) {
 
   if (value.length === 0) {
     res.push({
-      message: i18n.translate('xpack.fleet.settings.outputForm.elasticUrlRequiredError', {
-        defaultMessage: 'URL is required',
-      }),
+      message: urlRequiredMessage,
     });
   }
 
@@ -237,6 +260,8 @@ export function validateKafkaPassword(value: string) {
   }
 }
 
+export const validateKafkaPasswordSecret = toSecretValidator(validateKafkaPassword);
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
@@ -247,6 +272,18 @@ export function validateCATrustedFingerPrint(value: string) {
     ];
   }
 }
+
+export function validateServiceToken(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.serviceTokenRequiredErrorMessage', {
+        defaultMessage: 'Service Token is required',
+      }),
+    ];
+  }
+}
+
+export const validateServiceTokenSecret = toSecretValidator(validateServiceToken);
 
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {
@@ -268,6 +305,8 @@ export function validateSSLKey(value: string) {
   }
 }
 
+export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
+
 export function validateKafkaDefaultTopic(value: string) {
   if (!value || value === '') {
     return [
@@ -287,6 +326,20 @@ export function validateKafkaClientId(value: string) {
           defaultMessage:
             'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.',
         }),
+      ];
+}
+
+export function validateKafkaPartitioningGroupEvents(value: string) {
+  const regex = /^[0-9]+$/;
+  return regex.test(value)
+    ? undefined
+    : [
+        i18n.translate(
+          'xpack.fleet.settings.outputForm.kafkaPartitioningGroupEventsFormattingMessage',
+          {
+            defaultMessage: 'Number of events must be a number',
+          }
+        ),
       ];
 }
 

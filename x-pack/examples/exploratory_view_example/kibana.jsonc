@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/exploratory-view-example-plugin",
-  "owner": "@elastic/uptime",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "exploratoryViewExample",
     "server": false,

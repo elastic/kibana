@@ -46,6 +46,11 @@ export function getRoutingTransform() {
             index = `metrics-apm.internal-${namespace}`;
           }
           break;
+        default:
+          if (document['event.action'] != null) {
+            index = `logs-apm.app-${namespace}`;
+          }
+          break;
       }
 
       if (!index) {

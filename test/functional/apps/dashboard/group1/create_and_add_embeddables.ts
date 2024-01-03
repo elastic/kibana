@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('ensure toolbar popover closes on add', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add new visualization link', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.dashboard.loadSavedDashboard('few panels');
       });

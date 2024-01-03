@@ -56,14 +56,26 @@ export function AskAssistantButton({
   switch (variant) {
     case 'basic':
       return (
-        <EuiButton fill={fill} size={size} iconType="sparkles" onClick={onClick}>
+        <EuiButton
+          data-test-subj="observabilityAiAssistantAskAssistantButton"
+          fill={fill}
+          size={size}
+          iconType="sparkles"
+          onClick={onClick}
+        >
           {buttonLabel}
         </EuiButton>
       );
 
     case 'empty':
       return (
-        <EuiButtonEmpty size={size} flush={flush} iconType="sparkles" onClick={onClick}>
+        <EuiButtonEmpty
+          data-test-subj="observabilityAiAssistantAskAssistantButton"
+          size={size}
+          flush={flush}
+          iconType="sparkles"
+          onClick={onClick}
+        >
           {buttonLabel}
         </EuiButtonEmpty>
       );
@@ -73,7 +85,7 @@ export function AskAssistantButton({
         <EuiToolTip
           position="top"
           title={i18n.translate('xpack.observabilityAiAssistant.askAssistantButton.popoverTitle', {
-            defaultMessage: 'Elastic Assistant',
+            defaultMessage: 'AI Assistant for Observability',
           })}
           content={i18n.translate(
             'xpack.observabilityAiAssistant.askAssistantButton.popoverContent',
@@ -83,8 +95,15 @@ export function AskAssistantButton({
           )}
         >
           <EuiButtonIcon
-            iconType="sparkles"
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.askAssistantButton.popoverTitle',
+              {
+                defaultMessage: 'AI Assistant for Observability',
+              }
+            )}
+            data-test-subj="observabilityAiAssistantAskAssistantButtonButtonIcon"
             display={fill ? 'fill' : 'base'}
+            iconType="sparkles"
             size={size}
             style={{ minWidth: 'auto' }}
             onClick={onClick}

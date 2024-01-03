@@ -6,38 +6,54 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IncomingMessage } from 'http';
-import { compact, isEmpty, merge, omit } from 'lodash';
-import type {
-  ChatCompletionFunctions,
-  ChatCompletionRequestMessage,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai';
+import type OpenAI from 'openai';
+import { decode, encode } from 'gpt-tokenizer';
+import { compact, isEmpty, last, merge, omit, pick, take } from 'lodash';
+import { isObservable, lastValueFrom } from 'rxjs';
+import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
-  type CompatibleJSONSchema,
+  ConversationNotFoundError,
+  isChatCompletionError,
+  StreamingChatResponseEventType,
+  type StreamingChatResponseEvent,
+} from '../../../common/conversation_complete';
+import {
+  FunctionResponse,
   MessageRole,
+  type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService } from '../kb_service';
+import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
+import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
+import type { ChatFunctionClient } from '../chat_function_client';
+import {
+  KnowledgeBaseEntryOperationType,
+  KnowledgeBaseService,
+  RecalledEntry,
+} from '../knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
+import { streamIntoObservable } from '../util/stream_into_observable';
+import { handleLlmResponse } from './handle_llm_response';
 
 export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
       namespace: string;
-      esClient: ElasticsearchClient;
+      esClient: {
+        asInternalUser: ElasticsearchClient;
+        asCurrentUser: ElasticsearchClient;
+      };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user: {
@@ -51,7 +67,7 @@ export class ObservabilityAIAssistantClient {
   private getConversationWithMetaFields = async (
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       query: {
         bool: {
@@ -97,25 +113,314 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
-    await this.dependencies.esClient.delete({
+    await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id,
       index: conversation._index,
-      refresh: 'wait_for',
+      refresh: true,
     });
+  };
+
+  complete = async (
+    params: {
+      messages: Message[];
+      connectorId: string;
+      signal: AbortSignal;
+      functionClient: ChatFunctionClient;
+      persist: boolean;
+    } & ({ conversationId: string } | { title?: string })
+  ) => {
+    const stream = new PassThrough();
+
+    const { messages, connectorId, signal, functionClient, persist } = params;
+
+    let conversationId: string = '';
+    let title: string = '';
+    if ('conversationId' in params) {
+      conversationId = params.conversationId;
+    }
+
+    if ('title' in params) {
+      title = params.title || '';
+    }
+
+    function write(event: StreamingChatResponseEvent) {
+      if (stream.destroyed) {
+        return Promise.resolve();
+      }
+
+      return new Promise<void>((resolve, reject) => {
+        stream.write(`${JSON.stringify(event)}\n`, 'utf-8', (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      });
+    }
+
+    function fail(error: Error) {
+      const code = isChatCompletionError(error) ? error.code : undefined;
+      write({
+        type: StreamingChatResponseEventType.ConversationCompletionError,
+        error: {
+          message: error.message,
+          stack: error.stack,
+          code,
+        },
+      }).finally(() => {
+        stream.end();
+      });
+    }
+
+    let numFunctionsCalled: number = 0;
+
+    const MAX_FUNCTION_CALLS = 3;
+    const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
+    const next = async (nextMessages: Message[]): Promise<void> => {
+      const lastMessage = last(nextMessages);
+
+      const isUserMessage = lastMessage?.message.role === MessageRole.User;
+
+      const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+
+      const recallFirst =
+        isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
+
+      const isAssistantMessageWithFunctionRequest =
+        lastMessage?.message.role === MessageRole.Assistant &&
+        !!lastMessage?.message.function_call?.name;
+
+      if (recallFirst) {
+        const addedMessage = {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'recall',
+              arguments: JSON.stringify({
+                queries: [],
+                contexts: [],
+              }),
+              trigger: MessageRole.Assistant as const,
+            },
+          },
+        };
+        await write({
+          type: StreamingChatResponseEventType.MessageAdd,
+          id: v4(),
+          message: addedMessage,
+        });
+        return await next(nextMessages.concat(addedMessage));
+      } else if (isUserMessage) {
+        const { message } = await handleLlmResponse({
+          signal,
+          write,
+          source$: streamIntoObservable(
+            await this.chat({
+              messages: nextMessages,
+              connectorId,
+              stream: true,
+              signal,
+              functions:
+                numFunctionsCalled >= MAX_FUNCTION_CALLS
+                  ? []
+                  : functionClient
+                      .getFunctions()
+                      .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+            })
+          ).pipe(processOpenAiStream()),
+        });
+        return await next(nextMessages.concat({ message, '@timestamp': new Date().toISOString() }));
+      }
+
+      if (isAssistantMessageWithFunctionRequest) {
+        const functionResponse =
+          numFunctionsCalled >= MAX_FUNCTION_CALLS
+            ? {
+                content: {
+                  error: {},
+                  message: 'Function limit exceeded, ask the user what to do next',
+                },
+              }
+            : await functionClient
+                .executeFunction({
+                  connectorId,
+                  name: lastMessage.message.function_call!.name,
+                  messages: nextMessages,
+                  args: lastMessage.message.function_call!.arguments,
+                  signal,
+                })
+                .then((response) => {
+                  if (isObservable(response)) {
+                    return response;
+                  }
+
+                  const encoded = encode(JSON.stringify(response.content || {}));
+
+                  if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
+                    return response;
+                  }
+
+                  return {
+                    data: response.data,
+                    content: {
+                      message:
+                        'Function response exceeded the maximum length allowed and was truncated',
+                      truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                    },
+                  };
+                })
+                .catch((error): FunctionResponse => {
+                  return {
+                    content: {
+                      message: error.toString(),
+                      error,
+                    },
+                  };
+                });
+
+        numFunctionsCalled++;
+
+        if (signal.aborted) {
+          return;
+        }
+
+        const functionResponseIsObservable = isObservable(functionResponse);
+
+        const functionResponseMessage = {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            name: lastMessage.message.function_call!.name,
+            ...(functionResponseIsObservable
+              ? { content: '{}' }
+              : {
+                  content: JSON.stringify(functionResponse.content || {}),
+                  data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
+                }),
+            role: MessageRole.User,
+          },
+        };
+
+        nextMessages = nextMessages.concat(functionResponseMessage);
+        await write({
+          type: StreamingChatResponseEventType.MessageAdd,
+          message: functionResponseMessage,
+          id: v4(),
+        });
+
+        if (functionResponseIsObservable) {
+          const { message } = await handleLlmResponse({
+            signal,
+            write,
+            source$: functionResponse,
+          });
+          return await next(
+            nextMessages.concat({ '@timestamp': new Date().toISOString(), message })
+          );
+        }
+        return await next(nextMessages);
+      }
+
+      if (!persist) {
+        stream.end();
+        return;
+      }
+
+      // store the updated conversation and close the stream
+      if (conversationId) {
+        const conversation = await this.getConversationWithMetaFields(conversationId);
+        if (!conversation) {
+          throw new ConversationNotFoundError();
+        }
+
+        if (signal.aborted) {
+          return;
+        }
+
+        const updatedConversation = await this.update(
+          merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
+        );
+        await write({
+          type: StreamingChatResponseEventType.ConversationUpdate,
+          conversation: updatedConversation.conversation,
+        });
+      } else {
+        const generatedTitle = await titlePromise;
+        if (signal.aborted) {
+          return;
+        }
+
+        const conversation = await this.create({
+          '@timestamp': new Date().toISOString(),
+          conversation: {
+            title: generatedTitle || title || 'New conversation',
+          },
+          messages: nextMessages,
+          labels: {},
+          numeric_labels: {},
+          public: false,
+        });
+        await write({
+          type: StreamingChatResponseEventType.ConversationCreate,
+          conversation: conversation.conversation,
+        });
+      }
+
+      stream.end();
+    };
+
+    next(messages).catch((error) => {
+      if (!signal.aborted) {
+        this.dependencies.logger.error(error);
+      }
+      fail(error);
+    });
+
+    const titlePromise =
+      !conversationId && !title && persist
+        ? this.getGeneratedTitle({
+            messages,
+            connectorId,
+            signal,
+          }).catch((error) => {
+            this.dependencies.logger.error(
+              'Could not generate title, falling back to default title'
+            );
+            this.dependencies.logger.error(error);
+            return Promise.resolve(undefined);
+          })
+        : Promise.resolve(undefined);
+
+    signal.addEventListener('abort', () => {
+      stream.end();
+    });
+
+    return stream;
   };
 
   chat = async <TStream extends boolean | undefined = true>({
     messages,
     connectorId,
     functions,
+    functionCall,
     stream = true,
+    signal,
   }: {
     messages: Message[];
     connectorId: string;
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+    functionCall?: string;
     stream?: TStream;
-  }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
-    const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
+    signal: AbortSignal;
+  }): Promise<TStream extends false ? OpenAI.ChatCompletion : Readable> => {
+    const messagesForOpenAI: Array<
+      Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
+        role: MessageRole;
+      }
+    > = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
         .map((message) => {
@@ -133,14 +438,18 @@ export class ObservabilityAIAssistantClient {
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
+    const functionsForOpenAI = functions;
 
-    const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
-      messages: messagesForOpenAI,
-      stream: true,
-      functions: functionsForOpenAI,
+    const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
+      messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
+      ...(stream ? { stream: true } : {}),
+      ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
       temperature: 0,
+      function_call: functionCall ? { name: functionCall } : undefined,
     };
+
+    this.dependencies.logger.debug(`Sending conversation to connector`);
+    this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
@@ -157,11 +466,19 @@ export class ObservabilityAIAssistantClient {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    return executeResult.data as any;
+    const response = stream
+      ? (executeResult.data as Readable)
+      : (executeResult.data as OpenAI.ChatCompletion);
+
+    if (response instanceof Readable) {
+      signal.addEventListener('abort', () => response.destroy());
+    }
+
+    return response as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       allow_no_indices: true,
       query: {
@@ -198,67 +515,57 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: updatedConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
   };
 
-  autoTitle = async ({
-    conversationId,
+  getGeneratedTitle = async ({
+    messages,
     connectorId,
+    signal,
   }: {
-    conversationId: string;
+    messages: Message[];
     connectorId: string;
+    signal: AbortSignal;
   }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const response = await this.chat({
+    const stream = await this.chat({
       messages: [
         {
           '@timestamp': new Date().toISOString(),
           message: {
-            role: MessageRole.Assistant,
-            content: conversation.messages.slice(1).reduce((acc, curr) => {
+            role: MessageRole.User,
+            content: messages.slice(1).reduce((acc, curr) => {
               return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on this content: '),
+            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Here is the content:'),
           },
         },
       ],
       connectorId,
-      stream: false,
+      stream: true,
+      signal,
     });
 
-    if ('object' in response && response.object === 'chat.completion') {
-      const title =
-        response.choices[0].message?.content?.slice(1, -1) ||
-        `Conversation on ${conversation['@timestamp']}`;
+    const response = await lastValueFrom(
+      streamIntoObservable(stream).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+    );
 
-      const updatedConversation: Conversation = merge(
-        {},
-        conversation,
-        { conversation: { title } },
-        this.getConversationUpdateValues(new Date().toISOString())
-      );
+    const input = response.message?.content || '';
 
-      await this.setTitle({ conversationId, title });
-
-      return updatedConversation;
-    }
-    return conversation;
+    // This regular expression captures a string enclosed in single or double quotes.
+    // It extracts the string content without the quotes.
+    // Example matches:
+    // - "Hello, World!" => Captures: Hello, World!
+    // - 'Another Example' => Captures: Another Example
+    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+    const match = input.match(/^["']?([^"']+)["']?$/);
+    const title = match ? match[1] : input;
+    return title;
   };
 
   setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
@@ -280,11 +587,11 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: { conversation: { title } },
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
@@ -303,32 +610,28 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(now)
     );
 
-    await this.dependencies.esClient.index({
+    await this.dependencies.esClient.asInternalUser.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return createdConversation;
   };
 
-  recall = async (query: string): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  recall = async ({
+    queries,
+    contexts,
+  }: {
+    queries: string[];
+    contexts?: string[];
+  }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      query,
-    });
-  };
-
-  summarise = async ({
-    entry,
-  }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-  }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarise({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      entry,
+      queries,
+      contexts,
+      asCurrentUser: this.dependencies.esClient.asCurrentUser,
     });
   };
 
@@ -338,5 +641,46 @@ export class ObservabilityAIAssistantClient {
 
   setupKnowledgeBase = () => {
     return this.dependencies.knowledgeBaseService.setup();
+  };
+
+  createKnowledgeBaseEntry = async ({
+    entry,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry,
+    });
+  };
+
+  importKnowledgeBaseEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+  }): Promise<void> => {
+    const operations = entries.map((entry) => ({
+      type: KnowledgeBaseEntryOperationType.Index,
+      document: { ...entry, '@timestamp': new Date().toISOString() },
+    }));
+
+    await this.dependencies.knowledgeBaseService.addEntries({ operations });
+  };
+
+  getKnowledgeBaseEntries = async ({
+    query,
+    sortBy,
+    sortDirection,
+  }: {
+    query: string;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+  }) => {
+    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+  };
+
+  deleteKnowledgeBaseEntry = async (id: string) => {
+    return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 }

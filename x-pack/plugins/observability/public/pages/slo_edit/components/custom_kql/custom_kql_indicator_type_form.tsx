@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { createOptionsFromFields } from '../../helpers/create_options';
+import { useFormContext } from 'react-hook-form';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { GroupByFieldSelector } from '../common/group_by_field_selector';
+import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 
 export function CustomKqlIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-
+  const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
-  const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
+  const timestampField = watch('indicator.params.timestampField');
+  const groupByField = watch('groupBy');
+
+  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
+    indexPatternString: index,
+  });
+  const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
+  const groupByFields = dataView?.fields?.filter((field) => field.aggregatable) ?? [];
+
+  const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
+    useFetchGroupByCardinality(index, timestampField, groupByField);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -37,57 +39,21 @@ export function CustomKqlIndicatorTypeForm() {
         <EuiFlexItem>
           <IndexSelection />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
-              { defaultMessage: 'Timestamp field' }
-            )}
-            isInvalid={getFieldState('indicator.params.timestampField').invalid}
-          >
-            <Controller
-              name="indicator.params.timestampField"
-              defaultValue=""
-              rules={{ required: true }}
-              control={control}
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <EuiComboBox
-                  {...field}
-                  async
-                  placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
-                    { defaultMessage: 'Select a timestamp field' }
-                  )}
-                  aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
-                    { defaultMessage: 'Select a timestamp field' }
-                  )}
-                  data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
-                  isClearable
-                  isDisabled={!index}
-                  isInvalid={fieldState.invalid}
-                  isLoading={!!index && isLoading}
-                  onChange={(selected: EuiComboBoxOptionOption[]) => {
-                    if (selected.length) {
-                      return field.onChange(selected[0].value);
-                    }
 
-                    field.onChange('');
-                  }}
-                  options={createOptionsFromFields(timestampFields)}
-                  selectedOptions={
-                    !!index &&
-                    !!field.value &&
-                    timestampFields.some((timestampField) => timestampField.name === field.value)
-                      ? [{ value: field.value, label: field.value }]
-                      : []
-                  }
-                  singleSelection
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+        <IndexFieldSelector
+          indexFields={timestampFields}
+          name="indicator.params.timestampField"
+          label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
+            defaultMessage: 'Timestamp field',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slo.sloEdit.timestampField.placeholder',
+            { defaultMessage: 'Select a timestamp field' }
+          )}
+          isLoading={!!index && isIndexFieldsLoading}
+          isDisabled={!index}
+          isRequired
+        />
       </EuiFlexGroup>
 
       <EuiFlexItem>
@@ -176,7 +142,42 @@ export function CustomKqlIndicatorTypeForm() {
         />
       </EuiFlexItem>
 
-      <GroupByFieldSelector index={index} />
+      <IndexFieldSelector
+        indexFields={groupByFields}
+        name="groupBy"
+        defaultValue={ALL_VALUE}
+        label={
+          <span>
+            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
+              defaultMessage: 'Group by',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
+                defaultMessage: 'Create individual SLOs for each value of the selected field.',
+              })}
+              position="top"
+            />
+          </span>
+        }
+        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
+          defaultMessage: 'Select an optional field to group by',
+        })}
+        isLoading={!!index && isIndexFieldsLoading}
+        isDisabled={!index}
+      />
+
+      {!isGroupByCardinalityLoading && !!groupByCardinality && (
+        <EuiCallOut
+          size="s"
+          iconType={groupByCardinality.isHighCardinality ? 'warning' : ''}
+          color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
+          title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
+            defaultMessage:
+              "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
+            values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+          })}
+        />
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>

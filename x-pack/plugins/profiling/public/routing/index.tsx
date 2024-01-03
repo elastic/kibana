@@ -6,24 +6,32 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import {
+  StackTracesDisplayOption,
+  TopNComparisonFunctionSortField,
+  topNComparisonFunctionSortFieldRt,
+  TopNFunctionSortField,
+  topNFunctionSortFieldRt,
+  TopNType,
+} from '@kbn/profiling-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
-import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
+import { AddDataTabs, AddDataView } from '../views/add_data_view';
+import { DeleteDataView } from '../views/delete_data_view';
 import { FlameGraphsView } from '../views/flamegraphs';
 import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
 import { FlameGraphView } from '../views/flamegraphs/flamegraph';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
-import { AddDataTabs, AddDataView } from '../views/add_data_view';
+import { Settings } from '../views/settings';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
@@ -41,8 +49,29 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/settings': {
+        element: (
+          <RouteBreadcrumb
+            title={i18n.translate('xpack.profiling.breadcrumb.settings', {
+              defaultMessage: 'Settings',
+            })}
+            href="/settings"
+          >
+            <Settings />
+          </RouteBreadcrumb>
+        ),
+      },
       '/add-data-instructions': {
-        element: <AddDataView />,
+        element: (
+          <RouteBreadcrumb
+            title={i18n.translate('xpack.profiling.breadcrumb.addDataView', {
+              defaultMessage: 'Add profiling data',
+            })}
+            href="/add-data-instructions"
+          >
+            <AddDataView />
+          </RouteBreadcrumb>
+        ),
         params: t.type({
           query: t.type({
             selectedTab: t.union([
@@ -61,6 +90,9 @@ const routes = {
             selectedTab: AddDataTabs.Kubernetes,
           },
         },
+      },
+      '/delete_data_instructions': {
+        element: <DeleteDataView />,
       },
       '/': {
         children: {
@@ -232,6 +264,8 @@ const routes = {
                         t.literal(NormalizationMode.Scale),
                         t.literal(NormalizationMode.Time),
                       ]),
+                      comparisonSortField: topNComparisonFunctionSortFieldRt,
+                      comparisonSortDirection: t.union([t.literal('asc'), t.literal('desc')]),
                     }),
                     t.partial({
                       baseline: toNumberRt,
@@ -246,6 +280,8 @@ const routes = {
                     comparisonRangeTo: 'now',
                     comparisonKuery: '',
                     normalizationMode: NormalizationMode.Time,
+                    comparisonSortField: TopNComparisonFunctionSortField.ComparisonRank,
+                    comparisonSortDirection: 'asc',
                   },
                 },
               },

@@ -15,7 +15,9 @@ import { Store } from 'redux';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
@@ -66,7 +68,7 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, userProfile } = plugins;
+  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -84,6 +86,20 @@ export const renderApp = (
 
   resetContext({ createStore: true });
   const store = getContext().store;
+  let user: AuthenticatedUser | null = null;
+  try {
+    security.authc
+      .getCurrentUser()
+      .then((newUser) => {
+        user = newUser;
+      })
+      .catch(() => {
+        user = null;
+      });
+  } catch {
+    user = null;
+  }
+
   const unmountKibanaLogic = mountKibanaLogic({
     application,
     capabilities,
@@ -95,12 +111,13 @@ export const renderApp = (
     history,
     isSidebarEnabled,
     lens,
+    ml,
     navigateToUrl,
     productAccess,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
-        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
@@ -108,7 +125,7 @@ export const renderApp = (
     setDocTitle: chrome.docTitle.change,
     share,
     uiSettings,
-    userProfile,
+    user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
@@ -123,7 +140,7 @@ export const renderApp = (
 
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme$={params.theme$}>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
             <Provider store={store}>
@@ -168,12 +185,17 @@ export const renderApp = (
 export const renderHeaderActions = (
   HeaderActions: React.FC,
   store: Store,
+  params: AppMountParameters,
   kibanaHeaderEl: HTMLElement
 ) => {
   ReactDOM.render(
-    <Provider store={store}>
-      <HeaderActions />
-    </Provider>,
+    <I18nProvider>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+        <Provider store={store}>
+          <HeaderActions />
+        </Provider>
+      </KibanaThemeProvider>
+    </I18nProvider>,
     kibanaHeaderEl
   );
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);

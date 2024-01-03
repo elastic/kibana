@@ -46,6 +46,7 @@ Array [
       <div
         class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
         data-fixed-header="true"
+        style="inset-block-start: 0px;"
       >
         <div
           class="euiHeaderSection emotion-euiHeaderSection"
@@ -107,37 +108,33 @@ Array [
             class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="helpMenuButton"
               id="headerHelpMenu"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Help menu"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+                type="button"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                  aria-label="Help menu"
-                  class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-                  type="button"
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
-                        class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
-                      >
-                        <span
-                          data-euiicon-type="help"
-                        />
-                      </span>
+                        data-euiicon-type="help"
+                      />
                     </span>
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
           <div
@@ -148,6 +145,7 @@ Array [
       <div
         class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
         data-fixed-header="true"
+        style="inset-block-start: 48px;"
       >
         <div
           class="euiHeaderSection emotion-euiHeaderSection"

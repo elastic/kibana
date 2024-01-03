@@ -7,7 +7,7 @@
 
 import type { CoreSetup, HttpServerInfo, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createMockConfigSchema } from '../test_helpers';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createConfig } from './create_config';
 
 describe('Reporting server createConfig', () => {
@@ -51,6 +51,9 @@ describe('Reporting server createConfig', () => {
         port: 5677,
         protocol: 'httpsa',
       },
+      statefulSettings: {
+        enabled: true,
+      },
     });
     const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
 
@@ -91,6 +94,9 @@ describe('Reporting server createConfig', () => {
         },
         "roles": Object {
           "enabled": false,
+        },
+        "statefulSettings": Object {
+          "enabled": true,
         },
       }
     `);

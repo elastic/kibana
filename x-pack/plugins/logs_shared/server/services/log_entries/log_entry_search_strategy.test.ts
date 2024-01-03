@@ -99,6 +99,7 @@ describe('LogEntry search strategy', () => {
   });
 
   it('handles subsequent polling requests', async () => {
+    const date = new Date(1605116827143).toISOString();
     const esSearchStrategyMock = createEsSearchStrategyMock({
       id: 'ASYNC_REQUEST_ID',
       isRunning: false,
@@ -116,10 +117,10 @@ describe('LogEntry search strategy', () => {
               _score: 0,
               _source: null,
               fields: {
-                '@timestamp': [1605116827143],
+                '@timestamp': [date],
                 message: ['HIT_MESSAGE'],
               },
-              sort: [1605116827143 as any, 1 as any], // incorrectly typed as string upstream
+              sort: [date as any, 1 as any], // incorrectly typed as string upstream
             },
           ],
         },
@@ -163,11 +164,11 @@ describe('LogEntry search strategy', () => {
       id: 'HIT_ID',
       index: 'HIT_INDEX',
       cursor: {
-        time: 1605116827143,
+        time: date,
         tiebreaker: 1,
       },
       fields: [
-        { field: '@timestamp', value: [1605116827143] },
+        { field: '@timestamp', value: [date] },
         { field: 'message', value: ['HIT_MESSAGE'] },
       ],
     });

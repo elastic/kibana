@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -16,24 +15,25 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
 import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-describe('All rules - read only', { tags: tag.ESS }, () => {
+// TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
   });
 
   beforeEach(() => {
-    login(ROLES.reader);
-    visitSecurityDetectionRulesPage(ROLES.reader);
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

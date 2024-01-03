@@ -1,0 +1,168 @@
+{
+  "id": "@kbn/calculate-auto",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/calculate-auto",
+        "id": "def-common.calculateAuto",
+        "type": "Object",
+        "tags": [],
+        "label": "calculateAuto",
+        "description": [],
+        "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/calculate-auto",
+            "id": "def-common.calculateAuto.near",
+            "type": "Function",
+            "tags": [],
+            "label": "near",
+            "description": [],
+            "signature": [
+              "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
+            ],
+            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.near.$1",
+                "type": "number",
+                "tags": [],
+                "label": "buckets",
+                "description": [],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.near.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "duration",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/calculate-auto",
+            "id": "def-common.calculateAuto.lessThan",
+            "type": "Function",
+            "tags": [],
+            "label": "lessThan",
+            "description": [],
+            "signature": [
+              "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
+            ],
+            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.lessThan.$1",
+                "type": "number",
+                "tags": [],
+                "label": "buckets",
+                "description": [],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.lessThan.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "duration",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/calculate-auto",
+            "id": "def-common.calculateAuto.atLeast",
+            "type": "Function",
+            "tags": [],
+            "label": "atLeast",
+            "description": [],
+            "signature": [
+              "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
+            ],
+            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.atLeast.$1",
+                "type": "number",
+                "tags": [],
+                "label": "buckets",
+                "description": [],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/calculate-auto",
+                "id": "def-common.calculateAuto.atLeast.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "duration",
+                "description": [],
+                "signature": [
+                  "moment.Duration"
+                ],
+                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
