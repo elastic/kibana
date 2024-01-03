@@ -55,7 +55,6 @@ export const getESQLDocumentCountStats = async (
         {
           params: {
             query: esqlBaseQuery + aggQuery,
-            time_zone: 'UTC',
             locale: 'en',
           },
         },
@@ -94,7 +93,6 @@ export const getESQLDocumentCountStats = async (
         {
           params: {
             query: esqlBaseQuery + '| STATS _count_ = COUNT(*)  | LIMIT 1',
-            time_zone: 'UTC',
             locale: 'en',
           },
         },

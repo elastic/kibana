@@ -246,7 +246,6 @@ export const useESQLFieldStatsData = ({
             {
               params: {
                 query: esqlBaseQuery + fieldStatsQuery,
-                time_zone: 'UTC',
                 locale: 'en',
                 filter: {
                   bool: {
@@ -304,7 +303,6 @@ export const useESQLFieldStatsData = ({
                   {
                     params: {
                       query: esqlBaseQuery + query,
-                      time_zone: 'UTC',
                       locale: 'en',
                       filter: {
                         bool: {
@@ -358,7 +356,6 @@ export const useESQLFieldStatsData = ({
                   {
                     params: {
                       query: esqlBaseQuery + query,
-                      time_zone: 'UTC',
                       locale: 'en',
                       filter: {
                         bool: {
@@ -502,7 +499,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
           {
             params: {
               query: esqlBaseQuery + '| LIMIT 0',
-              time_zone: 'UTC',
               locale: 'en',
               filter: {
                 bool: {
@@ -601,7 +597,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
             {
               params: {
                 query: searchQuery.esql + countQuery,
-                time_zone: 'UTC',
                 locale: 'en',
               },
             },
