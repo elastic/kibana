@@ -12,9 +12,22 @@ import { NO_DATA_API_PATHS } from '../../common';
 import { HasApiKeysResponse } from '../types';
 
 /**
- * TODO: consider moving this to a package under the
- * Security domain as it is tied to a Security API
- * endpoint.
+ * Creation function for the "useHasApiKeys" React hook.
+ *
+ * Usage:
+ * const MyComponent: React.FC = () => {
+ *   const { hasApiKeys, loading, error } = useHasApiKeys();
+ *
+ *   // Handle error
+ *   throwIfError(error);
+ *
+ *   // Handle loading
+ *
+ *   // Present custom UX for users depending on their access to API Keys
+ * };
+ *
+ * TODO: consider moving this to a package under the Security domain
+ * as it is tied to a Security API endpoint.
  */
 export const createUseHasApiKeys = ({ http }: { http: HttpSetup }) => {
   return function useHasApiKeys(): HasApiKeysResponse {
