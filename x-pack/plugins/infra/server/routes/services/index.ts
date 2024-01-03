@@ -10,6 +10,7 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   GetServicesRequestQueryRT,
   GetServicesRequestQuery,
+  ServicesAPIResponseRT,
 } from '../../../common/http_api/host_details';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getServices } from '../../lib/host_details/get_services';
@@ -55,7 +56,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
           filters,
         });
         return response.ok({
-          body: services,
+          body: ServicesAPIResponseRT.encode(services),
         });
       } catch (err) {
         if (Boom.isBoom(err)) {

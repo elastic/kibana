@@ -13,22 +13,11 @@ import {
 } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
-const AgentNameRT = rt.union([rt.string, rt.null]);
-
-export const serviceAssetRT = rt.type({
-  'service.name': rt.string,
-  'agent.name': AgentNameRT,
-});
-
-export type ServiceAsset = rt.TypeOf<typeof serviceAssetRT>;
-
 export const sizeRT = rt.union([
   inRangeFromStringRt(1, 100),
   createLiteralValueFromUndefinedRT(10),
 ]);
 export const assetDateRT = rt.union([dateRt, datemathStringRt]);
-
-export type GetServicesRequestQuery = rt.TypeOf<typeof GetServicesRequestQueryRT>;
 
 export const servicesFiltersRT = rt.exact(
   rt.type({
@@ -47,11 +36,15 @@ export const GetServicesRequestQueryRT = rt.intersection([
   }),
 ]);
 
+export type GetServicesRequestQuery = rt.TypeOf<typeof GetServicesRequestQueryRT>;
+
 export interface ServicesAPIRequest {
   filters: ServicesFilter;
   from: string;
   to?: string;
 }
+
+const AgentNameRT = rt.union([rt.string, rt.null]);
 
 export const ServicesAPIQueryAggregationRT = rt.type({
   services: rt.type({
@@ -76,3 +69,14 @@ export const ServicesAPIQueryAggregationRT = rt.type({
 export type ServicesAPIQueryAggregationAggregation = rt.TypeOf<
   typeof ServicesAPIQueryAggregationRT
 >;
+
+export const ServiceRT = rt.type({
+  'service.name': rt.string,
+  'agent.name': AgentNameRT,
+});
+
+export type Service = rt.TypeOf<typeof ServiceRT>;
+
+export const ServicesAPIResponseRT = rt.type({
+  services: rt.array(ServiceRT),
+});

@@ -9,7 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { ESSearchClient } from '../metrics/types';
 import {
-  ServiceAsset,
+  Service,
   ServicesAPIRequest,
   ServicesAPIQueryAggregationAggregation,
 } from '../../../common/http_api/host_details';
@@ -76,7 +76,7 @@ export const getServices = async (
   });
 
   const { buckets: servicesListBuckets } = result.aggregations!.services;
-  const services = servicesListBuckets.reduce((acc: ServiceAsset[], bucket) => {
+  const services = servicesListBuckets.reduce((acc: Service[], bucket) => {
     const serviceName = bucket.key;
     const agentName = bucket.latestAgent.top[0].metrics['agent.name'];
 
@@ -84,7 +84,7 @@ export const getServices = async (
       return acc;
     }
 
-    const service: ServiceAsset = {
+    const service: Service = {
       'service.name': serviceName,
       'agent.name': agentName,
     };
