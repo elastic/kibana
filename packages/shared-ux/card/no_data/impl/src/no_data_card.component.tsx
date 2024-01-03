@@ -74,7 +74,7 @@ export const NoDataCard = ({
 
     // Default footer action is a button with the provided or default string
     return (
-      <EuiButton fill href={href}>
+      <EuiButton fill href={href} data-test-subj="noDataDefaultFooterAction">
         {button || titleProp || defaultTitle}
       </EuiButton>
     );

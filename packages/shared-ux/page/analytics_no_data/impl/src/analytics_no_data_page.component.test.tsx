@@ -110,7 +110,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         services.pageFlavor = 'serverless_search';
       });
 
-      it('renders getting started card', async () => {
+      it('renders Add Data card', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
@@ -123,10 +123,10 @@ describe('AnalyticsNoDataPageComponent', () => {
           </I18nProvider>
         );
 
-        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+        await screen.findByTestId('kbnOverviewElasticsearchAddData');
       });
 
-      it('renders the same getting started card when fleet is not available', async () => {
+      it('renders the same Add Data card when fleet is not available', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider
@@ -141,7 +141,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           </I18nProvider>
         );
 
-        await screen.findByTestId('kbnOverviewElasticsearchGettingStarted');
+        await screen.findByTestId('kbnOverviewElasticsearchAddData');
       });
     });
 
@@ -150,7 +150,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         services.pageFlavor = 'serverless_observability';
       });
 
-      it('renders getting started card', async () => {
+      it('renders Add Data card', async () => {
         render(
           <I18nProvider>
             <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
