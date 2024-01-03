@@ -93,7 +93,7 @@ const getJobParams = (
 const renderDescription = (objectType: string) => {
   return objectType === 'dashboard'
     ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
-    : `CSV exports can take a few minutes to generate based upon the size of your report.`;
+    : `CSV exports can take a few minutes to generate based upon the size of your export. `;
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
@@ -328,11 +328,20 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         data-test-subj="generateReportButton"
         isLoading={Boolean(createReportingJob)}
       >
-        <FormattedMessage
-          id="xpack.reporting.generateButtonLabel"
-          defaultMessage="Generate export"
-        />
-      </EuiButton>
+        <EuiButton
+          disabled={Boolean(createReportingJob)}
+          fill
+          onClick={() => generateReportingJob()}
+          data-test-subj="generateReportButton"
+          size="s"
+          isLoading={Boolean(createReportingJob)}
+        >
+          <FormattedMessage
+            id="xpack.reporting.generateButtonLabel"
+            defaultMessage="Generate report"
+          />
+        </EuiButton>
+      </EuiFormRow>
     ) : (
       <EuiButton
         disabled={Boolean(createReportingJob)}
@@ -343,7 +352,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       >
         <FormattedMessage
           id="xpack.reporting.generateButtonLabel"
-          defaultMessage="Generate export"
+          defaultMessage="Generate report"
         />
       </EuiButton>
     );
@@ -396,6 +405,47 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       </EuiButtonEmpty>
       {saveWarningMessageWithButton}
     </EuiModalFooter>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiCallOut size="s" title={renderDescription(objectType)} iconType="iInCircle" />
+        <EuiSpacer size="m" />
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+          <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
+            <EuiRadioGroup
+              options={[
+                { id: 'printablePdfV2', label: 'PDF' },
+                { id: 'pngV2', label: 'PNG' },
+              ]}
+              onChange={(id) => setSelectedRadio(id)}
+              name="image reporting radio group"
+              idSelected={selectedRadio}
+              legend={{
+                children: <span>File type</span>,
+              }}
+            />
+          </EuiFlexGroup>
+          {renderOptions()}
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem>
+                <EuiButtonEmpty onClick={onClose}>
+                  <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>{saveWarningMessageWithButton}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalFooter>
     </>
   );
 };

@@ -11,10 +11,6 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type {
-  JobParamsProviderOptions,
-  ReportingSharingData,
-} from '@kbn/reporting-plugin/public/share_context_menu';
 import { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormatFactory } from '../../../common/types';
@@ -128,6 +124,9 @@ export const downloadCsvShareProvider = ({
           <DownloadPanelContent
             isDisabled={!csvEnabled}
             warnings={getWarnings(activeData)}
+            onClose={() => {
+              session.close();
+            }}
             onClick={async () => {
               await downloadCSVs({
                 title,
@@ -135,9 +134,6 @@ export const downloadCsvShareProvider = ({
                 activeData,
                 uiSettings,
               });
-              () => {
-                session.close();
-              };
             }}
           />,
           { theme, i18n: i18nStart }
@@ -172,28 +168,8 @@ export const downloadCsvShareProvider = ({
       },
     ];
   };
-
-  const jobProviderOptions = ({
-    objectType,
-    objectId,
-    isDirty,
-    onClose,
-    shareableUrl,
-    shareableUrlForSavedObject,
-    ...shareOpts
-  }: ShareContext) => {
-    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-
-    const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
-      objectType,
-      sharingData,
-    };
-    return jobProviderOptions;
-  };
   return {
     id: 'csv export',
     getShareMenuItems,
-    jobProviderOptions: jobProviderOptions as unknown as JobParamsProviderOptions,
   };
 };
