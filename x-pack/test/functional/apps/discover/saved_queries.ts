@@ -92,6 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Navigate to Discover ensure updated query exists
         await PageObjects.common.navigateToApp('discover');
         await savedQueryManagementComponent.savedQueryExistOrFail(name);
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await savedQueryManagementComponent.deleteSavedQuery(name);
       });
     });
