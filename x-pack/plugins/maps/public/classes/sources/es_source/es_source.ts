@@ -120,6 +120,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.id;
   }
 
+  getInspectorRequestIds(): string[] {
+    return [this.getId()];
+  }
+
   getApplyGlobalQuery(): boolean {
     return this._descriptor.applyGlobalQuery;
   }

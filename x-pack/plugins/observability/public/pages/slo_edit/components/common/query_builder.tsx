@@ -6,7 +6,6 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -32,11 +31,17 @@ export function QueryBuilder({
   required,
   tooltip,
 }: Props) {
-  const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
-    useKibana().services;
+  const {
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useKibana().services;
 
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  const { dataView } = useCreateDataView({ indexPatternString });
+
+  const { dataView } = useCreateDataView({
+    indexPatternString,
+  });
 
   return (
     <EuiFormRow
@@ -64,20 +69,10 @@ export function QueryBuilder({
             appName="Observability"
             bubbleSubmitEvent={false}
             dataTestSubj={dataTestSubj}
-            deps={{
-              data,
-              dataViews,
-              docLinks,
-              http,
-              notifications,
-              storage,
-              uiSettings,
-              unifiedSearch,
-            }}
             disableAutoFocus
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
-            isDisabled={!indexPatternString}
+            isDisabled={!dataView}
             isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
