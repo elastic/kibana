@@ -31,15 +31,6 @@ export const getESQLDocumentCountStats = async (
   intervalMs: number | undefined,
   searchOptions: ISearchOptions
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
-  // const timeFields = columnsResp.rawResponse.columns
-  //   .filter((c) => c.type === 'date')
-  //   .sort((a, b) => {
-  //     if (a.name === '@timestamp') return 1;
-  //     if (b.name === '@timestamp') return 1;
-
-  //     return -1;
-  //   });
-
   if (!isESQLQuery(query)) {
     throw Error('No ESQL query provided');
   }
@@ -93,7 +84,6 @@ export const getESQLDocumentCountStats = async (
         {
           params: {
             query: esqlBaseQuery + '| STATS _count_ = COUNT(*)  | LIMIT 1',
-            locale: 'en',
           },
         },
         { ...searchOptions, strategy: 'esql' }

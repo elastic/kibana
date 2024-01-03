@@ -333,7 +333,6 @@ export const useESQLFieldStatsData = ({
                   fieldName: field.name,
                   topValues: terms,
                   topValuesSampleSize,
-                  // @TODO: replace topValuesSamplerShardSize
                   topValuesSamplerShardSize: topValuesSampleSize,
                   isTopValuesSampled: false,
                 } as StringFieldStats);
@@ -396,7 +395,6 @@ export const useESQLFieldStatsData = ({
                   fieldName: field.name,
                   topValues: terms,
                   topValuesSampleSize,
-                  // @TODO: replace topValuesSamplerShardSize
                   topValuesSamplerShardSize: topValuesSampleSize,
                   isTopValuesSampled: false,
                   trueCount,
@@ -1083,7 +1081,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         visibleFieldTypes
       ).filteredFields;
 
-      // @todo: renable
       if (fieldStatsProgress.loaded === 100 && fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {
           const loadedFullStats = fieldStats.get(c.name) ?? {};
@@ -1110,82 +1107,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       dataVisualizerListState.pageSize,
     ]
   );
-
-  // @TODO: remove
-  // const configs = useMemo(() => {
-  //   return [...(aggregatableFields ?? []), ...(nonAggregatableFields ?? [])];
-  // }, [aggregatableFields, nonAggregatableFields]);
-
-  // const configsWithoutStats = useMemo(() => {
-  //   if (overallStatsProgress.loaded < 100) return;
-  //   const existMetricFields = metricConfigs
-  //     .map((config) => {
-  //       return {
-  //         ...config,
-  //         cardinality: config.stats?.cardinality,
-  //       };
-  //     })
-  //     .filter((c) => c !== undefined) as FieldRequestConfig[];
-
-  //   // Pass the field name, type and cardinality in the request.
-  //   // Top values will be obtained on a sample if cardinality > 100000.
-  //   const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
-  //     .map((config) => {
-  //       return {
-  //         ...config,
-  //         cardinality: config.stats?.cardinality,
-  //       };
-  //     })
-  //     .filter((c) => c !== undefined) as FieldRequestConfig[];
-
-  //   return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
-  // }, [aggregatableFields, nonAggregatableFields, overallStatsProgress.loaded]);
-
-  // const onAddFilter = useCallback(
-  //   (field: DataViewField | string, values: string, operation: '+' | '-') => {
-  //     const newFilters = generateFilters(
-  //       data.query.filterManager,
-  //       field,
-  //       values,
-  //       operation,
-  //       currentDataView
-  //     );
-  //     if (newFilters) {
-  //       data.query.filterManager.addFilters(newFilters);
-  //     }
-
-  //     // Merge current query with new filters
-  //     const mergedQuery = {
-  //       query: searchString || '',
-  //       language: searchQueryLanguage,
-  //     };
-
-  //     const combinedQuery = createMergedEsQuery(
-  //       {
-  //         query: searchString || '',
-  //         language: searchQueryLanguage,
-  //       },
-  //       data.query.filterManager.getFilters() ?? [],
-  //       currentDataView,
-  //       uiSettings
-  //     );
-
-  //     setSearchParams({
-  //       searchQuery: combinedQuery,
-  //       searchString: mergedQuery.query,
-  //       queryLanguage: mergedQuery.language as SearchQueryLanguage,
-  //       filters: data.query.filterManager.getFilters(),
-  //     });
-  //   },
-  //   [
-  //     currentDataView,
-  //     data.query.filterManager,
-  //     searchQueryLanguage,
-  //     searchString,
-  //     setSearchParams,
-  //     uiSettings,
-  //   ]
-  // );
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting
