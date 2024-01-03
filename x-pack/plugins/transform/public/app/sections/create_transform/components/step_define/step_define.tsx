@@ -24,7 +24,7 @@ import { useWizardContext } from '../wizard/wizard';
 import { StepDefineForm } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
-export const StepDefine: FC = () => {
+export const StepDefineFormWrapper: FC = () => {
   const appDependencies = useAppDependencies();
   const {
     ml: { FieldStatsFlyoutProvider },
@@ -36,7 +36,6 @@ export const StepDefine: FC = () => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
 
-  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
   const transformConfigValid = useSelector(selectTransformConfigValid);
   const createTransformRequestBody = useWizardSelector((s) =>
@@ -58,26 +57,26 @@ export const StepDefine: FC = () => {
 
   return (
     <>
-      {currentStep === WIZARD_STEPS.DEFINE ? (
-        <>
-          <FieldStatsFlyoutProvider
-            dataView={dataView}
-            fieldStatsServices={fieldStatsServices}
-            timeRangeMs={stepDefineState.timeRangeMs}
-            dslQuery={createTransformRequestBody.source.query}
-          >
-            <StepDefineForm />
-          </FieldStatsFlyoutProvider>
-          <WizardNav
-            next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
-            nextActive={transformConfigValid}
-          />
-        </>
-      ) : (
-        <StepDefineSummary />
-      )}
+      <FieldStatsFlyoutProvider
+        dataView={dataView}
+        fieldStatsServices={fieldStatsServices}
+        timeRangeMs={stepDefineState.timeRangeMs}
+        dslQuery={createTransformRequestBody.source.query}
+      >
+        <StepDefineForm />
+      </FieldStatsFlyoutProvider>
+      <WizardNav
+        next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
+        nextActive={transformConfigValid}
+      />
     </>
   );
+};
+
+const StepDefine = () => {
+  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
+
+  return currentStep === WIZARD_STEPS.DEFINE ? <StepDefineFormWrapper /> : <StepDefineSummary />;
 };
 
 export const euiStepDefine = {

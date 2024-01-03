@@ -17,25 +17,31 @@ import { WizardNav } from '../wizard_nav';
 import { StepDetailsForm } from './step_details_form';
 import { StepDetailsSummary } from './step_details_summary';
 
-const StepDetails: FC = () => {
-  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
+const StepDetailsNav: FC = () => {
   const stepDetailsValid = useWizardSelector((s) => s.stepDetails.valid);
-
   const { setCurrentStep } = useWizardActions();
 
   return (
+    <WizardNav
+      previous={() => {
+        setCurrentStep(WIZARD_STEPS.DEFINE);
+      }}
+      next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
+      nextActive={stepDetailsValid}
+    />
+  );
+};
+
+const StepDetails: FC = () => {
+  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
+
+  return currentStep === WIZARD_STEPS.DETAILS ? (
     <>
-      {currentStep === WIZARD_STEPS.DETAILS ? <StepDetailsForm /> : <StepDetailsSummary />}
-      {currentStep === WIZARD_STEPS.DETAILS && (
-        <WizardNav
-          previous={() => {
-            setCurrentStep(WIZARD_STEPS.DEFINE);
-          }}
-          next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-          nextActive={stepDetailsValid}
-        />
-      )}
+      <StepDetailsForm />
+      <StepDetailsNav />
     </>
+  ) : (
+    <StepDetailsSummary />
   );
 };
 
