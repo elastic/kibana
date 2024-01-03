@@ -353,12 +353,9 @@ export const getDefaultState = (config?: TransformConfigUnion): State => ({
 
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
-const isFormValid = (fieldsState: FormFieldsState) =>
-  Object.values(fieldsState).every((d) => d.errorMessages.length === 0);
-const selectIsFormValid = createSelector(
-  (state: State) => state.formFields,
-  (formFields) => isFormValid(formFields)
-);
+const isFormValid = (formFields: FormFieldsState) =>
+  Object.values(formFields).every((d) => d.errorMessages.length === 0);
+const selectIsFormValid = createSelector((state: State) => state.formFields, isFormValid);
 export const useIsFormValid = () => useSelector(selectIsFormValid);
 
 const getFieldValues = (fields: FormFieldsState) => Object.values(fields).map((f) => f.value);
