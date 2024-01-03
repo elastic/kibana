@@ -61,7 +61,7 @@ type ValueParserName = keyof typeof valueParsers;
 // The form state defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final config object will be nested.
 // For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
-export type EditTransformFormFields =
+export type FormFields =
   | 'description'
   | 'destinationIndex'
   | 'destinationIngestPipeline'
@@ -72,18 +72,18 @@ export type EditTransformFormFields =
   | 'retentionPolicyField'
   | 'retentionPolicyMaxAge';
 
-type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
+type FormFieldsState = Record<FormFields, FormField>;
 
 export interface FormField {
-  formFieldName: EditTransformFormFields;
+  formFieldName: FormFields;
   configFieldName: string;
   defaultValue: string;
-  dependsOn: EditTransformFormFields[];
+  dependsOn: FormFields[];
   errorMessages: string[];
   isNullable: boolean;
   isOptional: boolean;
   isOptionalInSection?: boolean;
-  section?: EditTransformFormSections;
+  section?: FormSections;
   validator: ValidatorName;
   value: string;
   valueParser: ValueParserName;
@@ -94,16 +94,16 @@ export interface FormField {
 // this overall part of the configuration is not optional. However, `retention_policy` is optional,
 // so we need to support to recognize this based on the form state and be able to reset it by
 // created a request body containing `{ retention_policy: null }`.
-type EditTransformFormSections = 'retentionPolicy';
+type FormSections = 'retentionPolicy';
 
 export interface FormSection {
-  formSectionName: EditTransformFormSections;
+  formSectionName: FormSections;
   configFieldName: string;
   defaultEnabled: boolean;
   enabled: boolean;
 }
 
-type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSection>;
+type FormSectionsState = Record<FormSections, FormSection>;
 
 // The utility functions in this file provide the following features:
 // - getDefaultState()
@@ -121,7 +121,7 @@ type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSe
 //   field part of the request, otherwise the update would fail.
 
 export const initializeFormField = (
-  formFieldName: EditTransformFormFields,
+  formFieldName: FormFields,
   configFieldName: string,
   config?: TransformConfigUnion,
   overloads?: Partial<FormField>
@@ -146,7 +146,7 @@ export const initializeFormField = (
 };
 
 export const initializeFormSection = (
-  formSectionName: EditTransformFormSections,
+  formSectionName: FormSections,
   configFieldName: string,
   config?: TransformConfigUnion,
   overloads?: Partial<FormSection>
@@ -167,10 +167,10 @@ export const initializeFormSection = (
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
 const getUpdateValue = (
-  attribute: EditTransformFormFields,
+  attribute: FormFields,
   config: TransformConfigUnion,
-  formFields: EditTransformFlyoutFieldsState,
-  formSections: EditTransformFlyoutSectionsState,
+  formFields: FormFieldsState,
+  formSections: FormSectionsState,
   enforceFormValue = false
 ) => {
   const formStateAttribute = formFields[attribute];
@@ -231,12 +231,12 @@ const getUpdateValue = (
 // transform update API endpoint.
 export const applyFormStateToTransformConfig = (
   config: TransformConfigUnion,
-  formFields: EditTransformFlyoutFieldsState,
-  formSections: EditTransformFlyoutSectionsState
+  formFields: FormFieldsState,
+  formSections: FormSectionsState
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  (Object.keys(formFields) as EditTransformFormFields[]).reduce(
+  (Object.keys(formFields) as FormFields[]).reduce(
     (updateConfig, field) =>
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
     {}
@@ -346,7 +346,7 @@ export const getDefaultState = (config?: TransformConfigUnion): State => ({
 
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
-const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
+const isFormValid = (fieldsState: FormFieldsState) =>
   Object.values(fieldsState).every((d) => d.errorMessages.length === 0);
 const selectIsFormValid = createSelector(
   (state: State) => state.formFields,
@@ -354,9 +354,8 @@ const selectIsFormValid = createSelector(
 );
 export const useIsFormValid = () => useSelector(selectIsFormValid);
 
-const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
-  Object.values(fields).map((f) => f.value);
-const getSectionValues = (sections: EditTransformFlyoutSectionsState) =>
+const getFieldValues = (fields: FormFieldsState) => Object.values(fields).map((f) => f.value);
+const getSectionValues = (sections: FormSectionsState) =>
   Object.values(sections).map((s) => s.enabled);
 
 interface EditTransformFlyoutProviderProps {
@@ -366,14 +365,14 @@ interface EditTransformFlyoutProviderProps {
 
 interface State {
   apiErrorMessage?: string;
-  formFields: EditTransformFlyoutFieldsState;
-  formSections: EditTransformFlyoutSectionsState;
+  formFields: FormFieldsState;
+  formSections: FormSectionsState;
 }
 
 const isFormTouched = (
   config: TransformConfigUnion,
-  formFields: EditTransformFlyoutFieldsState,
-  formSections: EditTransformFlyoutSectionsState
+  formFields: FormFieldsState,
+  formSections: FormSectionsState
 ) => {
   const defaultState = getDefaultState(config);
   return (
@@ -393,7 +392,7 @@ export const useIsFormTouched = () => {
   return useSelector(selectIsFormTouched);
 };
 
-function isFormFieldOptional(state: State, field: EditTransformFormFields) {
+function isFormFieldOptional(state: State, field: FormFields) {
   const formField = state.formFields[field];
 
   let isOptional = formField.isOptional;
@@ -429,10 +428,7 @@ const editTransformFlyoutSlice = createSlice({
     },
     // Updates a form field with its new value, runs validation and
     // populates `errorMessages` if any errors occur.
-    setFormField: (
-      state,
-      action: PayloadAction<{ field: EditTransformFormFields; value: string }>
-    ) => {
+    setFormField: (state, action: PayloadAction<{ field: FormFields; value: string }>) => {
       if (!state) return;
 
       const formField = state.formFields[action.payload.field];
@@ -447,10 +443,7 @@ const editTransformFlyoutSlice = createSlice({
       formField.value = action.payload.value;
     },
     // Updates a form section.
-    setFormSection: (
-      state,
-      action: PayloadAction<{ section: EditTransformFormSections; enabled: boolean }>
-    ) => {
+    setFormSection: (state, action: PayloadAction<{ section: FormSections; enabled: boolean }>) => {
       if (!state) return;
 
       state.formSections[action.payload.section].enabled = action.payload.enabled;
@@ -458,7 +451,7 @@ const editTransformFlyoutSlice = createSlice({
       // After a section change we re-evaluate all form fields, since optionality
       // of a field could change if a section got toggled.
       Object.entries(state.formFields).forEach(([formFieldName, formField]) => {
-        const isOptional = isFormFieldOptional(state, formFieldName as EditTransformFormFields);
+        const isOptional = isFormFieldOptional(state, formFieldName as FormFields);
 
         formField.errorMessages = getFormFieldErrorMessages(
           formField.value,
@@ -507,8 +500,8 @@ export const useEditTransformFlyoutActions = () => {
   return bindActionCreators(editTransformFlyoutSlice.actions, dispatch);
 };
 
-const createSelectFormField = (field: EditTransformFormFields) => (s: State) => s.formFields[field];
-export const useFormField = (field: EditTransformFormFields) => {
+const createSelectFormField = (field: FormFields) => (s: State) => s.formFields[field];
+export const useFormField = (field: FormFields) => {
   const selectFormField = useMemo(() => createSelectFormField(field), [field]);
   return useSelector(selectFormField);
 };
