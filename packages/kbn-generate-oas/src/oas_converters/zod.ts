@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import { z } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { OpenAPIConverter } from '../type';
-import { getVersionedContentString } from './common';
 
 // Most of file copied from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
