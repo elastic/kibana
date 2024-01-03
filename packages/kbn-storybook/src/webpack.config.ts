@@ -109,9 +109,10 @@ export default function ({ config: storybookConfig }: { config: Configuration })
                     resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
                   )};\n${content}`;
                 },
-                implementation: require('node-sass'),
+                implementation: require('sass-embedded'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                  quietDeps: true,
                 },
               },
             },

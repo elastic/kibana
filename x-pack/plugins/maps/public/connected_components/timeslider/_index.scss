@@ -6,7 +6,7 @@ $timesliderWidth: 585px;
   left: 50%;
   bottom: $euiSize;
   // we could center with translateX but this would impact the animation
-  margin-left: -($timesliderWidth / 2);
+  margin-left: calc(-1 * $timesliderWidth / 2);
   width: $timesliderWidth;
   z-index: 99999;
   background: $euiColorEmptyShade;

@@ -20,7 +20,7 @@ describe('importFile', () => {
     const file = new File([`not_parseable`], 'file.json');
 
     await expect(importLegacyFile(file)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unexpected token o in JSON at position 1"`
+      `"Unexpected token 'o', \\"not_parseable\\" is not valid JSON"`
     );
   });
 });
