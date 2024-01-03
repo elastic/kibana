@@ -478,6 +478,7 @@ export class VisualizeEmbeddable
       this.handler.events$
         .pipe(
           mergeMap(async (event) => {
+            // Visualize doesn't respond to sizing events, so ignore.
             if (isDimensionsEvent(event)) {
               return;
             }
