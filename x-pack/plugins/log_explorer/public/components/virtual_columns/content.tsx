@@ -22,11 +22,11 @@ import {
 } from '../../hooks/use_virtual_column_services';
 
 const SourceDocument = dynamic(
-  () => import('@kbn/unified-data-table/src/utils/render_source_document')
+  () => import('@kbn/unified-data-table/src/components/source_document')
 );
 
 const DiscoverSourcePopoverContent = dynamic(
-  () => import('@kbn/unified-data-table/src/utils/render_source_document_popover')
+  () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {

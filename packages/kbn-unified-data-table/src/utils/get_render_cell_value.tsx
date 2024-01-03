@@ -21,8 +21,8 @@ import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discov
 import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import { CustomCellRenderer } from '../..';
-import { SourceDocument } from './render_source_document';
-import SourcePopoverContent from './render_source_document_popover';
+import { SourceDocument } from '../components/source_document';
+import SourcePopoverContent from '../components/source_popover_content';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 

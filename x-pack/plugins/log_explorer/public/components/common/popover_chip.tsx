@@ -112,7 +112,9 @@ export function ChipWithPopover({
         <EuiFlexItem>
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
-              <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">{text}</span>
+              <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">
+                {property}:{text}
+              </span>
             </EuiText>
           </div>
         </EuiFlexItem>

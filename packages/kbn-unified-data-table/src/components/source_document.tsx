@@ -22,7 +22,7 @@ import {
   EuiDescriptionListTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import { getInnerColumns } from './columns';
+import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 

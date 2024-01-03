@@ -17,6 +17,7 @@ import { CodeEditorProps, KibanaContextProvider } from '@kbn/kibana-react-plugin
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SourceDocument } from '../components/source_document';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -198,11 +199,13 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders _source column correctly', () => {
+    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
+    const rows = rowsSource.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsSource.map(build),
+      rows,
       useNewFieldsApi: false,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -218,191 +221,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="_source"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        maxEntries={100}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "bytes": 100,
-              "extension": ".gz",
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": Object {
-                "bytes": 100,
-                "extension": ".gz",
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={false}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
@@ -471,11 +302,13 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders _source column correctly if on text based mode and have nulls', () => {
+    const rows = rowsSourceWithEmptyValues.map(build);
+    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsSourceWithEmptyValues.map(build),
+      rows,
       useNewFieldsApi: false,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -492,200 +325,30 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="_source"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        isPlainRecord={true}
-        maxEntries={100}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "bytes": 100,
-              "extension": null,
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": Object {
-                "bytes": 100,
-                "extension": null,
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={false}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+      isPlainRecord: true,
+    });
   });
 
   it('renders fields-based column correctly', () => {
+    const rows = rowsFields.map(build);
+    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFields.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -701,208 +364,29 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="_source"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        maxEntries={100}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "bytes": Array [
-                100,
-              ],
-              "extension": Array [
-                ".gz",
-              ],
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": undefined,
-              "fields": Object {
-                "bytes": Array [
-                  100,
-                ],
-                "extension": Array [
-                  ".gz",
-                ],
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={false}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('limits amount of rendered items', () => {
+    const rows = rowsFields.map(build);
+    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFields.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
@@ -919,200 +403,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="_source"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        maxEntries={1}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "bytes": Array [
-                100,
-              ],
-              "extension": Array [
-                ".gz",
-              ],
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": undefined,
-              "fields": Object {
-                "bytes": Array [
-                  100,
-                ],
-                "extension": Array [
-                  ".gz",
-                ],
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={false}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 1,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
@@ -1190,12 +493,14 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('collect object fields and renders them like _source', () => {
+    const showFieldHandler = (fieldName) =>
+      ['object.value', 'extension', 'bytes'].includes(fieldName);
+    const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFieldsWithTopLevelObject.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) =>
-        ['object.value', 'extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -1211,210 +516,31 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="object"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        maxEntries={100}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "extension": Array [
-                ".gz",
-              ],
-              "object.value": Array [
-                100,
-              ],
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": undefined,
-              "fields": Object {
-                "extension": Array [
-                  ".gz",
-                ],
-                "object.value": Array [
-                  100,
-                ],
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={true}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: 'object',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      useTopLevelObjectColumns: true,
+      row: rows[0],
+    });
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const showFieldHandler = (fieldName) =>
+      ['extension', 'bytes', 'object.value'].includes(fieldName);
+    const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFieldsWithTopLevelObject.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) =>
-        ['extension', 'bytes', 'object.value'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -1430,200 +556,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <SourceDocument
-        columnId="object"
-        dataView={
-          Object {
-            "docvalueFields": Array [],
-            "fields": Array [
-              Object {
-                "aggregatable": false,
-                "filterable": false,
-                "name": "_source",
-                "scripted": false,
-                "type": "_source",
-              },
-              Object {
-                "aggregatable": false,
-                "filterable": true,
-                "name": "_index",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": false,
-                "displayName": "message",
-                "filterable": false,
-                "name": "message",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "extension",
-                "filterable": true,
-                "name": "extension",
-                "scripted": false,
-                "type": "string",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "bytesDisplayName",
-                "filterable": true,
-                "name": "bytes",
-                "scripted": false,
-                "sortable": true,
-                "type": "number",
-              },
-              Object {
-                "displayName": "scripted",
-                "filterable": false,
-                "name": "scripted",
-                "scripted": true,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "object.value",
-                "filterable": true,
-                "name": "object.value",
-                "scripted": false,
-                "type": "number",
-              },
-              Object {
-                "aggregatable": true,
-                "displayName": "@timestamp",
-                "filterable": true,
-                "name": "@timestamp",
-                "scripted": false,
-                "type": "date",
-              },
-            ],
-            "getComputedFields": [Function],
-            "getFieldByName": [MockFunction],
-            "getFormatterForField": [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-                Array [
-                  Object {
-                    "aggregatable": true,
-                    "displayName": "bytesDisplayName",
-                    "filterable": true,
-                    "name": "bytes",
-                    "scripted": false,
-                    "sortable": true,
-                    "type": "number",
-                  },
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [Function],
-                  },
-                },
-              ],
-            },
-            "getIndexPattern": [Function],
-            "getName": [Function],
-            "getSourceFiltering": [Function],
-            "getTimeField": [Function],
-            "id": "the-data-view-id",
-            "isPersisted": [Function],
-            "isTimeBased": [Function],
-            "isTimeNanosBased": [Function],
-            "metaFields": Array [
-              "_index",
-              "_score",
-            ],
-            "name": "the-data-view",
-            "timeFieldName": "",
-            "title": "the-data-view-title",
-            "toMinimalSpec": [Function],
-            "toSpec": [Function],
-            "type": "default",
-          }
-        }
-        fieldFormats={
-          Object {
-            "getDefaultInstance": [MockFunction],
-          }
-        }
-        maxEntries={100}
-        row={
-          Object {
-            "flattened": Object {
-              "_index": "test",
-              "_score": 1,
-              "extension": Array [
-                ".gz",
-              ],
-              "object.value": Array [
-                100,
-              ],
-            },
-            "id": "test::1::",
-            "isAnchor": undefined,
-            "raw": Object {
-              "_id": "1",
-              "_index": "test",
-              "_score": 1,
-              "_source": undefined,
-              "fields": Object {
-                "extension": Array [
-                  ".gz",
-                ],
-                "object.value": Array [
-                  100,
-                ],
-              },
-              "highlight": Object {
-                "extension": Array [
-                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                ],
-              },
-            },
-          }
-        }
-        shouldShowFieldHandler={[Function]}
-        useTopLevelObjectColumns={true}
-      />
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: 'object',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      useTopLevelObjectColumns: true,
+      row: rows[0],
+    });
   });
 
   it('collect object fields and renders them as json in details', () => {

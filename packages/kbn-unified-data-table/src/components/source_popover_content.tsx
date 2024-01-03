@@ -9,9 +9,9 @@
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
+import JsonCodeEditor from './json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from '../constants';
-import { getInnerColumns } from './columns';
+import { getInnerColumns } from '../utils/columns';
 
 export const SourcePopoverContent = ({
   closeButton,
