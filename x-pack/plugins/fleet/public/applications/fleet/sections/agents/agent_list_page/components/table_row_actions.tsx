@@ -107,7 +107,7 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
+        disabled={!isAgentUpgradeable(agent)}
         onClick={() => {
           onUpgradeClick();
         }}

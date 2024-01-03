@@ -102,7 +102,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="refresh"
-        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
+        disabled={!isAgentUpgradeable(agent)}
         onClick={() => {
           setIsUpgradeModalOpen(true);
         }}

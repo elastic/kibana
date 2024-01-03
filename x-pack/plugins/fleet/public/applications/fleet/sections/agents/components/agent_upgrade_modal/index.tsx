@@ -49,8 +49,8 @@ import {
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
-  isAgentUpgradeable,
   getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
 } from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
@@ -242,7 +242,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       const { error } =
         isSingleAgent &&
         !isScheduled &&
-        isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value)
+        isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
               force: isUpdating,
@@ -339,8 +339,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       confirmButtonDisabled={
         isSubmitting ||
         (isUpdating && updatingAgents === 0) ||
-        (isSingleAgent &&
-          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value))
+        (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value))
       }
       confirmButtonText={
         isSingleAgent ? (
@@ -370,7 +369,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     >
       <p>
         {isSingleAgent ? (
-          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value) ? (
+          !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value) ? (
             <EuiCallOut
               data-test-subj="agentUpgradeModal.notUpgradeableCallout"
               color="warning"

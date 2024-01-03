@@ -293,13 +293,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AgentUpgradeStatus
-                  isAgentUpgradable={
-                    !!(
-                      isAgentSelectable(agent) &&
-                      latestAgentVersion &&
-                      isAgentUpgradeable(agent, latestAgentVersion)
-                    )
-                  }
+                  isAgentUpgradable={!!(isAgentSelectable(agent) && isAgentUpgradeable(agent))}
                   agent={agent}
                   latestAgentVersion={latestAgentVersion}
                 />
@@ -333,12 +327,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       items={
         totalAgents
           ? showUpgradeable
-            ? agents.filter(
-                (agent) =>
-                  isAgentSelectable(agent) &&
-                  latestAgentVersion &&
-                  isAgentUpgradeable(agent, latestAgentVersion)
-              )
+            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
             : agents
           : []
       }

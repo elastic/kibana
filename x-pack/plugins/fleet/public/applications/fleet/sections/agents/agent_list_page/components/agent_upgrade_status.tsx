@@ -9,11 +9,13 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import moment from 'moment';
-import semverLt from 'semver/functions/lt';
 
 import type { Agent } from '../../../../types';
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
-import { getNotUpgradeableMessage } from '../../../../../../../common/services';
+import {
+  getNotUpgradeableMessage,
+  isAgentUpgradeAvailable,
+} from '../../../../../../../common/services';
 
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
@@ -280,12 +282,8 @@ export const AgentUpgradeStatus: React.FC<{
   const status = useMemo(() => getStatusComponents(agent.upgrade_details), [agent.upgrade_details]);
   const minVersion = '8.12';
   const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
-  const isAgentLessThanLatestVersion =
-    !!latestAgentVersion &&
-    agent?.local_metadata?.elastic?.agent?.version &&
-    semverLt(agent.local_metadata.elastic.agent.version, latestAgentVersion);
 
-  if (isAgentUpgradable && isAgentLessThanLatestVersion) {
+  if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
     return (
       <EuiBadge color="hollow" iconType="sortUp">
         <FormattedMessage

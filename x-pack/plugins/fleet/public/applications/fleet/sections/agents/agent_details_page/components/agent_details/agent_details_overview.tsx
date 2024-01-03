@@ -177,11 +177,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <EuiFlexItem grow={false}>
                       <AgentUpgradeStatus
                         isAgentUpgradable={
-                          !!(
-                            agentPolicy?.is_managed !== true &&
-                            latestAgentVersion &&
-                            isAgentUpgradeable(agent, latestAgentVersion)
-                          )
+                          !!(agentPolicy?.is_managed !== true && isAgentUpgradeable(agent))
                         }
                         agent={agent}
                         latestAgentVersion={latestAgentVersion}
