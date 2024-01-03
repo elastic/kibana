@@ -27,7 +27,7 @@ export interface DiscoverCustomizationContext {
    */
   displayMode: DiscoverDisplayMode;
   /**
-   * Whether or not to show the Log Explorer tabs
+   * Whether or not to show the Logs Explorer tabs
    */
   showLogExplorerTabs: boolean;
 }

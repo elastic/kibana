@@ -76,7 +76,7 @@ describe('LogExplorerTabs', () => {
     expect(mockLogExplorerLocator.navigate).toHaveBeenCalledWith({});
   });
 
-  it('should render Log Explorer as the selected tab', () => {
+  it('should render Logs Explorer as the selected tab', () => {
     const { mockDiscoverLocator, mockLogExplorerLocator } = renderTabs('log-explorer');
     expect(getLogExplorerTab()).toHaveAttribute('aria-selected', 'true');
     userEvent.click(getLogExplorerTab());

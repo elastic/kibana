@@ -5026,7 +5026,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/log-explorer-plugin@link:x-pack/plugins/log_explorer":
+"@kbn/logs-explorer-plugin@link:x-pack/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
@@ -5306,7 +5306,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-log-explorer-plugin@link:x-pack/plugins/observability_log_explorer":
+"@kbn/observability-logs-explorer-plugin@link:x-pack/plugins/observability_logs_explorer":
   version "0.0.0"
   uid ""
 

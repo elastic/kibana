@@ -160,9 +160,9 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
-    "@kbn/observability-log-explorer-plugin",
+    "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/log-explorer-plugin",
+    "@kbn/logs-explorer-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/typed-react-router-config",
   ]
