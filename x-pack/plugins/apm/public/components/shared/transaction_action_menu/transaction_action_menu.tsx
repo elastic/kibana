@@ -43,7 +43,7 @@ import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 import { CustomLinkFlyout } from './custom_link_flyout';
-import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 interface Props {
   readonly transaction?: Transaction;

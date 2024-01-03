@@ -24,7 +24,7 @@ import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useProcessorEvent } from '../../../hooks/use_processor_event';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';

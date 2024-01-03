@@ -14,7 +14,7 @@ import rison from '@kbn/rison';
 import url from 'url';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { useAdHocApmDataView } from '../../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 
 interface Props {
   query: {

@@ -34,7 +34,7 @@ import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
 import { DashboardSelector } from './dashboard_selector';
-import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';

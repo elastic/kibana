@@ -44,7 +44,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useAdHocApmDataView } from '../../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 

@@ -19,7 +19,7 @@ import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
-import { useAdHocApmDataView } from '../../../hooks/use_ad_hoc_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
