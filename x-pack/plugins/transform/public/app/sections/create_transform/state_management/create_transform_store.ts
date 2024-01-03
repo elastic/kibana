@@ -22,6 +22,7 @@ import { advancedRuntimeMappingsEditorSlice } from './advanced_runtime_mappings_
 import { advancedSourceEditorSlice } from './advanced_source_editor_slice';
 import { stepDefineSlice } from './step_define_slice';
 import { stepDetailsSlice } from './step_details_slice';
+import { stepCreateSlice } from './step_create_slice';
 import { wizardSlice } from './wizard_slice';
 
 // Because we get the redux store with a factory function we need to
@@ -34,6 +35,7 @@ export const getTransformWizardStore = () =>
       wizard: wizardSlice.reducer,
       stepDefine: stepDefineSlice.reducer,
       stepDetails: stepDetailsSlice.reducer,
+      stepCreate: stepCreateSlice.reducer,
       advancedPivotEditor: advancedPivotEditorSlice.reducer,
       advancedRuntimeMappingsEditor: advancedRuntimeMappingsEditorSlice.reducer,
       advancedSourceEditor: advancedSourceEditorSlice.reducer,
@@ -51,6 +53,7 @@ export function useWizardActions() {
           ...wizardSlice.actions,
           ...stepDefineSlice.actions,
           ...stepDetailsSlice.actions,
+          ...stepCreateSlice.actions,
           ...advancedPivotEditorSlice.actions,
           ...advancedRuntimeMappingsEditorSlice.actions,
           ...advancedSourceEditorSlice.actions,

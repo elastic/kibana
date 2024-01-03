@@ -5,42 +5,38 @@
  * 2.0.
  */
 
-import React, { type FC, createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { type FC, createContext, useContext, useEffect } from 'react';
 import { isEqual, pick } from 'lodash';
 
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import { EuiSteps } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { getCreateTransformRequestBody, matchAllQuery } from '../../../../common';
+import { matchAllQuery } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
-import { WIZARD_STEPS } from '../../state_management/wizard_slice';
+import { useWizardActions } from '../../state_management/create_transform_store';
 
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
   euiStepDefine,
 } from '../step_define';
-import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
+import { euiStepCreate } from '../step_create';
 import {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,
   euiStepDetails,
 } from '../step_details';
-import { WizardNav } from '../wizard_nav';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 
@@ -64,25 +60,13 @@ export const useWizardContext = () => {
 };
 
 export const Wizard: FC = React.memo(() => {
+  const appDependencies = useAppDependencies();
   const { searchItems, cloneConfig } = useWizardContext();
   const { showNodeInfo } = useEnabledFeatures();
-  const appDependencies = useAppDependencies();
-  const {
-    ml: { FieldStatsFlyoutProvider },
-    uiSettings,
-    data,
-    fieldFormats,
-    charts,
-  } = appDependencies;
   const { dataView } = searchItems;
 
-  const currentStep = useWizardSelector((s) => s.wizard.currentStep);
-  const stepDefineState = useWizardSelector((s) => s.stepDefine);
-  const stepDetailsState = useWizardSelector((s) => s.stepDetails);
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const {
     setAdvancedSourceEditorEnabled,
-    setCurrentStep,
     setRuntimeMappings,
     setSourceConfigUpdated,
     setStepDefineState,
@@ -114,52 +98,7 @@ export const Wizard: FC = React.memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The CREATE state
-  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
-
-  const stepCreate = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
-        defaultMessage: 'Create',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.CREATE && stepDefineState && stepDetailsState ? (
-            <StepCreateForm
-              createDataView={stepDetailsState.createDataView}
-              transformId={stepDetailsState.transformId}
-              transformConfig={getCreateTransformRequestBody(
-                dataView,
-                stepDefineState,
-                stepDetailsState,
-                runtimeMappings
-              )}
-              onChange={setStepCreateState}
-              overrides={stepCreateState}
-              timeFieldName={stepDetailsState.dataViewTimeField}
-            />
-          ) : (
-            <StepCreateSummary />
-          )}
-          {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [
-    dataView,
-    currentStep,
-    setCurrentStep,
-    setStepCreateState,
-    stepDetailsState,
-    stepCreateState,
-    stepDefineState,
-    runtimeMappings,
-  ]);
-
-  const euiStepsConfig = [euiStepDefine, euiStepDetails, stepCreate];
+  const euiStepsConfig = [euiStepDefine, euiStepDetails, euiStepCreate];
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -167,34 +106,13 @@ export const Wizard: FC = React.memo(() => {
     showFrozenDataTierChoice: showNodeInfo,
   };
 
-  const fieldStatsServices: FieldStatsServices = useMemo(
-    () => ({
-      uiSettings,
-      dataViews: data.dataViews,
-      data,
-      fieldFormats,
-      charts,
-    }),
-    [uiSettings, data, fieldFormats, charts]
-  );
-
   return (
-    <FieldStatsFlyoutProvider
-      dataView={dataView}
-      fieldStatsServices={fieldStatsServices}
-      timeRangeMs={stepDefineState.timeRangeMs}
-      dslQuery={
-        getCreateTransformRequestBody(dataView, stepDefineState, stepDetailsState, runtimeMappings)
-          .source.query
-      }
-    >
-      <UrlStateProvider>
-        <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
-          <DatePickerContextProvider {...datePickerDeps}>
-            <EuiSteps className="transform__steps" steps={euiStepsConfig} />
-          </DatePickerContextProvider>
-        </StorageContextProvider>
-      </UrlStateProvider>
-    </FieldStatsFlyoutProvider>
+    <UrlStateProvider>
+      <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+        <DatePickerContextProvider {...datePickerDeps}>
+          <EuiSteps className="transform__steps" steps={euiStepsConfig} />
+        </DatePickerContextProvider>
+      </StorageContextProvider>
+    </UrlStateProvider>
   );
 });

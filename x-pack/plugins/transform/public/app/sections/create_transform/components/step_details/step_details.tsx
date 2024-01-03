@@ -17,30 +17,26 @@ import { WizardNav } from '../wizard_nav';
 import { StepDetailsForm } from './step_details_form';
 import { StepDetailsSummary } from './step_details_summary';
 
-export const StepDetails: FC = () => {
+const StepDetails: FC = () => {
   const currentStep = useWizardSelector((s) => s.wizard.currentStep);
-  const stepDetailsState = useWizardSelector((s) => s.stepDetails);
+  const stepDetailsValid = useWizardSelector((s) => s.stepDetails.valid);
 
   const { setCurrentStep } = useWizardActions();
 
-  return stepDetailsState ? (
+  return (
     <>
-      {currentStep === WIZARD_STEPS.DETAILS ? (
-        <StepDetailsForm />
-      ) : (
-        <StepDetailsSummary {...stepDetailsState} />
-      )}
+      {currentStep === WIZARD_STEPS.DETAILS ? <StepDetailsForm /> : <StepDetailsSummary />}
       {currentStep === WIZARD_STEPS.DETAILS && (
         <WizardNav
           previous={() => {
             setCurrentStep(WIZARD_STEPS.DEFINE);
           }}
           next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-          nextActive={stepDetailsState.valid}
+          nextActive={stepDetailsValid}
         />
       )}
     </>
-  ) : null;
+  );
 };
 
 export const euiStepDetails = {

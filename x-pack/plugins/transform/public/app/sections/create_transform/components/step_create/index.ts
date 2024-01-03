@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { StepCreateForm, getDefaultStepCreateState } from './step_create_form';
+export { euiStepCreate } from './step_create';
+export { StepCreateForm } from './step_create_form';
 export { StepCreateSummary } from './step_create_summary';

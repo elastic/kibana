@@ -73,7 +73,9 @@ export const StepDetailsForm: FC = () => {
   const transformId = useWizardSelector((s) => s.stepDetails.transformId);
   const transformDescription = useWizardSelector((s) => s.stepDetails.transformDescription);
   const destinationIndex = useWizardSelector((s) => s.stepDetails.transformDescription);
-  const destinationIngestPipeline = useWizardSelector((s) => s.stepDetails.transformDescription);
+  const destinationIngestPipeline = useWizardSelector(
+    (s) => s.stepDetails.destinationIngestPipeline
+  );
   const createDataView = useWizardSelector((s) => s.stepDetails.createDataView);
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);

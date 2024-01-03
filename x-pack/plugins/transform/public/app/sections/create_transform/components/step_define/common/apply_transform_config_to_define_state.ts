@@ -70,10 +70,6 @@ export function applyTransformConfigToDefineState(
       {} as PivotGroupByConfigDict
     );
 
-    state.previewRequest = {
-      pivot: transformConfig.pivot,
-    };
-
     state.validationStatus = validatePivotConfig(transformConfig.pivot);
   }
 
@@ -92,9 +88,6 @@ export function applyTransformConfigToDefineState(
           : transformConfig.latest.sort,
       },
     };
-    state.previewRequest = {
-      latest: transformConfig.latest,
-    };
     state.validationStatus = validateLatestConfig(transformConfig.latest);
   }
 
@@ -104,7 +97,5 @@ export function applyTransformConfigToDefineState(
     state.searchQuery = query;
   }
 
-  // applying a transform config to wizard state will always result in a valid configuration
-  state.valid = true;
   return state;
 }

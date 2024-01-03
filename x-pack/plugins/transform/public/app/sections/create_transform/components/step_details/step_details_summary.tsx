@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './common';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
-export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
+export const StepDetailsSummary: FC = () => {
   const {
     continuousModeDateField,
     createDataView,
@@ -30,7 +30,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     destinationIngestPipeline,
     touched,
     dataViewTimeField,
-  } = props;
+  } = useWizardSelector((s) => s.stepDetails);
 
   if (touched === false) {
     return null;
@@ -167,4 +167,4 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       </EuiAccordion>
     </div>
   );
-});
+};
