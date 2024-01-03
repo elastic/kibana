@@ -243,8 +243,12 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {isPlainRecord ? null : <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />}
+          {isPlainRecord || !flyoutActions.length ? null : (
+            <>
+              <EuiSpacer size="s" />
+              <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
+            </>
+          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
       </EuiFlyout>
