@@ -17,7 +17,7 @@ import {
 import type {
   BulkActionBenchmarkRulesResponse,
   RulesToUpdate,
-} from '../../../../common/types/rules/v3';
+} from '../../../../common/types/rules/v4';
 
 const muteStatesMap = {
   mute: true,
@@ -41,12 +41,11 @@ export const bulkActionBenchmarkRulesHandler = async (
   const rulesKeys = rulesToUpdate.map((rule) =>
     buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
-
   const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], rulesToUpdate);
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
-  const disabledRulesCounter =
-    action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : 0;
+  const disabledDetectionRules =
+    action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : [];
 
-  return { newCspSettings, disabledRulesCounter };
+  return { newCspSettings, disabledRules: disabledDetectionRules };
 };

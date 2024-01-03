@@ -435,6 +435,42 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
   }
 );
 
+export const getMostCommonDataViewId = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const counts: { [key: string]: number } = {};
+    function incrementCount(ids: string[]) {
+      ids.forEach((id) => {
+        const count = counts.hasOwnProperty(id) ? counts[id] : 0;
+        counts[id] = count + 1;
+      });
+    }
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+        incrementCount(layer.getIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        incrementCount(layer.getIndexPatternIds());
+      });
+    }
+
+    let mostCommonId: string | undefined;
+    let mostCommonCount = 0;
+    Object.keys(counts).forEach((id) => {
+      if (counts[id] > mostCommonCount) {
+        mostCommonId = id;
+        mostCommonCount = counts[id];
+      }
+    });
+
+    return mostCommonId;
+  }
+);
+
 export const getGeoFieldNames = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,

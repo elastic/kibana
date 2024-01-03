@@ -43,6 +43,7 @@ import {
 import { schema } from '@kbn/config-schema';
 import { RequeueInvalidTasksConfig } from '../config';
 
+const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const mockRequeueInvalidTasksConfig = {
@@ -315,8 +316,16 @@ describe('TaskManagerRunner', () => {
       expect(instance.attempts).toEqual(initialAttempts + 1);
       expect(instance.status).toBe('running');
       expect(instance.startedAt!.getTime()).toEqual(Date.now());
-      const expectedRunAt = Date.now() + calculateDelay(initialAttempts + 1);
-      expect(instance.retryAt!.getTime()).toEqual(expectedRunAt + timeoutMinutes * 60 * 1000);
+
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
+      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
+        minRunAt + timeoutMinutes * 60 * 1000
+      );
+      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
+        maxRunAt + timeoutMinutes * 60 * 1000
+      );
+
       expect(instance.enabled).not.toBeDefined();
     });
 
@@ -347,9 +356,13 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
       const instance = store.update.mock.calls[0][0];
 
-      const expectedRetryAt = new Date(Date.now() + calculateDelay(initialAttempts + 1));
-      expect(instance.retryAt!.getTime()).toEqual(
-        new Date(expectedRetryAt.getTime() + timeoutMinutes * 60 * 1000).getTime()
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 1);
+      expect(instance.retryAt!.getTime()).toBeGreaterThanOrEqual(
+        minRunAt + timeoutMinutes * 60 * 1000
+      );
+      expect(instance.retryAt!.getTime()).toBeLessThanOrEqual(
+        maxRunAt + timeoutMinutes * 60 * 1000
       );
       expect(instance.enabled).not.toBeDefined();
     });
@@ -742,8 +755,12 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.id).toEqual(id);
-      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
-      expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
+
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 2);
+      expect(instance.runAt.getTime()).toBeGreaterThanOrEqual(minRunAt);
+      expect(instance.runAt.getTime()).toBeLessThanOrEqual(maxRunAt);
+
       expect(instance.params).toEqual({ a: 'b' });
       expect(instance.state).toEqual({ hey: 'there' });
       expect(instance.enabled).not.toBeDefined();
@@ -1098,8 +1115,11 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
       const instance = store.update.mock.calls[0][0];
 
-      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
-      expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
+      const minRunAt = Date.now();
+      const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 2);
+      expect(instance.runAt.getTime()).toBeGreaterThanOrEqual(minRunAt);
+      expect(instance.runAt.getTime()).toBeLessThanOrEqual(maxRunAt);
+
       expect(instance.enabled).not.toBeDefined();
     });
 
@@ -2541,6 +2561,26 @@ describe('TaskManagerRunner', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Error encountered when running onTaskRemoved() hook for testbar2 "foo": Fail`
       );
+    });
+
+    describe('calculateDelay', () => {
+      it('returns 30s on the first attempt', () => {
+        expect(calculateDelay(1)).toBe(30000);
+      });
+
+      it('returns delay with jitter', () => {
+        const delay = calculateDelay(5);
+        // with jitter should be random between 0 and 40 min (inclusive)
+        expect(delay).toBeGreaterThanOrEqual(0);
+        expect(delay).toBeLessThanOrEqual(2400000);
+      });
+
+      it('returns delay capped at 1 hour', () => {
+        const delay = calculateDelay(10);
+        // with jitter should be random between 0 and 1 hr (inclusive)
+        expect(delay).toBeGreaterThanOrEqual(0);
+        expect(delay).toBeLessThanOrEqual(60 * 60 * 1000);
+      });
     });
   });
 
