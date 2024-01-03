@@ -46,7 +46,7 @@ export function getEntitiesAndGenerateAlerts(
         alertsClient!.report({
           id: getAlertId(entityName, context.containingBoundaryName),
           actionGroup: ActionGroupId,
-          context: context,
+          context,
         });
       }
     });
