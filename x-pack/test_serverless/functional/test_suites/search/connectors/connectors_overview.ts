@@ -16,6 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   describe('connectors', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/173929
+    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
