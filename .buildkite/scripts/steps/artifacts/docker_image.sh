@@ -88,6 +88,7 @@ echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
 echo "--- Upload CDN assets"
+cd target
 gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_QA_KEY")
 
 CDN_ASSETS_FOLDER=$(mktemp -d)
@@ -96,7 +97,6 @@ tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip
 gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
 
 echo "--- Upload archives"
-cd target
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
