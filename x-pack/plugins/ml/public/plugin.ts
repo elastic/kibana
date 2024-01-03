@@ -69,6 +69,7 @@ import {
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 import { ElasticModels } from './application/services/elastic_models_service';
+import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
   cases?: CasesUiStart;
@@ -241,6 +242,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
+                mlCapabilities,
                 pluginsSetup.alerting
               );
             }
@@ -283,7 +285,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   start(
     core: CoreStart,
     deps: MlStartDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    elasticModels?: ElasticModels;
+    mlApi?: MlApiServices;
+  } {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
@@ -295,6 +301,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
+      mlApi: this.sharedMlServices?.mlApiServices,
     };
   }
 
