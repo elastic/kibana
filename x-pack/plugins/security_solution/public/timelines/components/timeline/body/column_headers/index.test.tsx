@@ -18,7 +18,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import type { ColumnHeadersComponentProps } from '.';
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';

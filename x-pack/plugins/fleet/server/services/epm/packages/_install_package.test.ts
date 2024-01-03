@@ -22,7 +22,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
-import { saveArchiveEntries } from '../archive/storage';
+import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 
@@ -78,7 +78,7 @@ describe('_installPackage', () => {
       esReferences: [],
       installedIlms: [],
     });
-    jest.mocked(saveArchiveEntries).mockResolvedValue({
+    jest.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
     jest.mocked(restartInstallation).mockReset();
@@ -103,18 +103,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
       },
       installType: 'install',
       installSource: 'registry',
@@ -160,18 +163,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
       },
       installType: 'install',
       installSource: 'registry',
@@ -219,18 +225,21 @@ describe('_installPackage', () => {
       savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
-      paths: [],
-      packageInfo: {
-        title: 'title',
-        name: 'xyz',
-        version: '4.5.6',
-        description: 'test',
-        type: 'integration',
-        categories: ['cloud', 'custom'],
-        format_version: 'string',
-        release: 'experimental',
-        conditions: { kibana: { version: 'x.y.z' } },
-        owner: { github: 'elastic/fleet' },
+      packageInstallContext: {
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        } as any,
+        assetsMap: new Map(),
+        paths: [],
       },
       installType: 'install',
       installSource: 'registry',
@@ -288,12 +297,15 @@ describe('_installPackage', () => {
           savedObjectsImporter: jest.fn(),
           esClient,
           logger: loggerMock.create(),
-          paths: [],
-          packageInfo: {
-            name: mockInstalledPackageSo.attributes.name,
-            version: mockInstalledPackageSo.attributes.version,
-            title: mockInstalledPackageSo.attributes.name,
-          } as any,
+          packageInstallContext: {
+            paths: [],
+            assetsMap: new Map(),
+            packageInfo: {
+              name: mockInstalledPackageSo.attributes.name,
+              version: mockInstalledPackageSo.attributes.version,
+              title: mockInstalledPackageSo.attributes.name,
+            } as any,
+          },
           installedPkg: {
             ...mockInstalledPackageSo,
             attributes: {
@@ -319,12 +331,15 @@ describe('_installPackage', () => {
               savedObjectsImporter: jest.fn(),
               esClient,
               logger: loggerMock.create(),
-              paths: [],
-              packageInfo: {
-                name: mockInstalledPackageSo.attributes.name,
-                version: mockInstalledPackageSo.attributes.version,
-                title: mockInstalledPackageSo.attributes.name,
-              } as any,
+              packageInstallContext: {
+                paths: [],
+                assetsMap: new Map(),
+                packageInfo: {
+                  name: mockInstalledPackageSo.attributes.name,
+                  version: mockInstalledPackageSo.attributes.version,
+                  title: mockInstalledPackageSo.attributes.name,
+                } as any,
+              },
               installedPkg: {
                 ...mockInstalledPackageSo,
                 attributes: {
@@ -345,12 +360,15 @@ describe('_installPackage', () => {
             savedObjectsImporter: jest.fn(),
             esClient,
             logger: loggerMock.create(),
-            paths: [],
-            packageInfo: {
-              name: mockInstalledPackageSo.attributes.name,
-              version: mockInstalledPackageSo.attributes.version,
-              title: mockInstalledPackageSo.attributes.name,
-            } as any,
+            packageInstallContext: {
+              paths: [],
+              assetsMap: new Map(),
+              packageInfo: {
+                name: mockInstalledPackageSo.attributes.name,
+                version: mockInstalledPackageSo.attributes.version,
+                title: mockInstalledPackageSo.attributes.name,
+              } as any,
+            },
             installedPkg: {
               ...mockInstalledPackageSo,
               attributes: {

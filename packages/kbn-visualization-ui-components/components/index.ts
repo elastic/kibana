@@ -14,8 +14,6 @@ export * from './debounced_input';
 
 export * from './debounced_value';
 
-export * from './tooltip_wrapper';
-
 export * from './color_picker';
 
 export * from './icon_select';

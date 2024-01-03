@@ -1164,54 +1164,6 @@
             "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/shared_imports.ts"
           },
@@ -1346,6 +1298,54 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
             "plugin": "osquery",
@@ -1534,18 +1534,6 @@
           {
             "plugin": "crossClusterReplication",
             "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
-          },
-          {
-            "plugin": "globalSearchBar",
-            "path": "x-pack/plugins/global_search_bar/public/plugin.tsx"
           },
           {
             "plugin": "graph",
@@ -2758,11 +2746,11 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/edit_action_helpers.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/edit_action_helpers.ts"
           },
           {
             "plugin": "security",
@@ -2889,6 +2877,22 @@
             "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
+            "plugin": "telemetry",
+            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
           },
@@ -2983,22 +2987,6 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
           },
           {
             "plugin": "timelines",
@@ -3194,35 +3182,35 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/ingest_pipelines.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/ingest_pipelines.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/ingest_pipelines.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/ingest_pipelines.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/stored_scripts.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/stored_scripts.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/stored_scripts.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/stored_scripts.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/saved_objects.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/saved_objects.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/explore/containers/risk_score/onboarding/api/saved_objects.ts"
+            "path": "x-pack/plugins/security_solution/public/entity_analytics/deprecated_risk_engine/api/saved_objects.ts"
           },
           {
             "plugin": "securitySolution",
@@ -3498,6 +3486,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.useDarkMode",
+        "type": "Function",
+        "tags": [],
+        "label": "useDarkMode",
+        "description": [],
+        "signature": [
+          "(defaultValue?: boolean | undefined) => boolean"
+        ],
+        "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useDarkMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -5010,8 +5031,8 @@
             "pluginId": "@kbn/core-theme-browser",
             "scope": "common",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           " | undefined; plugins?: ",
           {
