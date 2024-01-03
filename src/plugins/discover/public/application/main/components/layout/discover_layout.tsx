@@ -90,8 +90,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const dataView = useInternalStateSelector((state) => state.dataView!);
-
-  console.log('dataView', dataView);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
