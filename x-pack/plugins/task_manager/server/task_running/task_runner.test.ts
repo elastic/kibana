@@ -1585,7 +1585,7 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
-                error: new Error(`Alerting task failed to run.`),
+                error: new Error(`test`),
                 isExpired: false,
               })
             )
@@ -1633,7 +1633,7 @@ describe('TaskManagerRunner', () => {
                 persistence: TaskPersistence.Recurring,
                 result: TaskRunResult.Success,
                 isExpired: true,
-                error: new Error(`Alerting task failed to run.`),
+                error: new Error(`test`),
               })
             )
           )
