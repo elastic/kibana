@@ -21,6 +21,7 @@ import {
   RecoveryActionGroupId,
   GEO_CONTAINMENT_ID,
 } from './constants';
+import { STACK_ALERTS_AAD_CONFIG } from '../constants';
 
 const actionVariables = {
   context: [
@@ -204,12 +205,6 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
-    alerts: {
-      context: 'stack',
-      mappings: {
-        fieldMap: {},
-      },
-      shouldWrite: true,
-    }
+    alerts: STACK_ALERTS_AAD_CONFIG
   };
 }
