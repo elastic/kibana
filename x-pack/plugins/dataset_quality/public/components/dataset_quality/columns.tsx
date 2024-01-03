@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiBadge,
   EuiBasicTableColumn,
@@ -16,17 +15,19 @@ import {
   EuiSkeletonRectangle,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
+import { LogExplorerLink } from '../log_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
@@ -43,6 +44,17 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
   defaultMessage: 'Degraded Docs',
+});
+
+const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
+  defaultMessage: 'Last Activity',
+});
+
+const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
+  defaultMessage: 'Actions',
+});
+const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
+  defaultMessage: 'Open',
 });
 
 const degradedDocsDescription = (minimimPercentage: number) =>
@@ -83,10 +95,6 @@ const degradedDocsColumnTooltip = (
     }}
   />
 );
-
-const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
-  defaultMessage: 'Last Activity',
-});
 
 export const getDatasetQualitTableColumns = ({
   fieldFormats,
@@ -169,6 +177,13 @@ export const getDatasetQualitTableColumns = ({
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
           .convert(timestamp),
       sortable: true,
+    },
+    {
+      name: actionsColumnName,
+      render: (dataStreamStat: DataStreamStat) => (
+        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+      ),
+      width: '100px',
     },
   ];
 };

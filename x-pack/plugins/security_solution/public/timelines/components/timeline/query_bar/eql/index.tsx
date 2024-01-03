@@ -24,7 +24,7 @@ import type { FieldValueQueryBar } from '../../../../../detections/components/ru
 
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 

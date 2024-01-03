@@ -6,17 +6,16 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { Feedback, FeedbackButtons } from '../feedback_buttons';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
+
+const containerClassName = css`
+  padding-top: 4px;
+  padding-bottom: 4px;
+`;
 
 export function ChatItemControls({
   error,
@@ -65,9 +64,8 @@ export function ChatItemControls({
 
   return controls ? (
     <>
-      <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" color={euiTheme.colors.lightestShade} />
-      <EuiPanel hasShadow={false} paddingSize="s">
+      <EuiPanel hasShadow={false} paddingSize="s" className={containerClassName}>
         {controls}
       </EuiPanel>
     </>
