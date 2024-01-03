@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
@@ -23,7 +27,7 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
 };
 
 export const getCspBenchmarkRulesStatesHandler = async (
-  encryptedSoClient: SavedObjectsClientContract
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<CspBenchmarkRulesStates> => {
   try {
     const getSoResponse = await encryptedSoClient.get<CspSettings>(
@@ -42,4 +46,28 @@ export const getCspBenchmarkRulesStatesHandler = async (
       `An error occurred while trying to fetch csp settings: ${error.message}, ${error.statusCode}`
     );
   }
+};
+
+export const buildMutedRulesFilter = async (
+  encryptedSoClient: ISavedObjectsRepository
+): Promise<QueryDslQueryContainer[]> => {
+  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+  const mutedRules = Object.fromEntries(
+    Object.entries(rulesStates).filter(([key, value]) => value.muted === true)
+  );
+
+  const mutedRulesFilterQuery = Object.keys(mutedRules).map((key) => {
+    const rule = mutedRules[key];
+    return {
+      bool: {
+        must: [
+          { term: { 'rule.benchmark.id': rule.benchmark_id } },
+          { term: { 'rule.benchmark.version': rule.benchmark_version } },
+          { term: { 'rule.benchmark.rule_number': rule.rule_number } },
+        ],
+      },
+    };
+  });
+
+  return mutedRulesFilterQuery;
 };
