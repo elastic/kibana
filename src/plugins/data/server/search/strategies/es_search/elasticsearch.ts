@@ -15,9 +15,3 @@ export type IndexAsString<Map> = {
 } & Map;
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
-export interface BoolQuery {
-  must_not: Array<Record<string, any>>;
-  should: Array<Record<string, any>>;
-  filter: Array<Record<string, any>>;
-}
