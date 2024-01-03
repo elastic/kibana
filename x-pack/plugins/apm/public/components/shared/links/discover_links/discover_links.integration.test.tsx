@@ -33,6 +33,10 @@ describe('DiscoverLinks', () => {
       };
     });
   });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it('produces the correct URL for a transaction', async () => {
     const transaction = {
       transaction: {

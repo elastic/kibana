@@ -30,6 +30,7 @@ import {
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -106,20 +107,35 @@ const expectInfraLocatorsToBeCalled = () => {
   expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
 };
 
+let useAdHocApmDataViewSpy: jest.SpyInstance;
+
 describe('TransactionActionMenu ', () => {
   jest.spyOn(hooks, 'useFetcher').mockReturnValue({
     // return as Profiling had been initialized
     data: {
       initialized: true,
-      apmDataViewIndexPattern:
-        'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*',
     },
     status: hooks.FETCH_STATUS.SUCCESS,
     refetch: jest.fn(),
   });
+
+  useAdHocApmDataViewSpy = jest.spyOn(
+    useAdHocApmDataView,
+    'useAdHocApmDataView'
+  );
+
+  useAdHocApmDataViewSpy.mockImplementation(() => {
+    return {
+      dataView: {
+        id: 'foo-1',
+      },
+    };
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   it('should render the discover link when there is adhoc data view', async () => {
     const { findByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
@@ -451,6 +467,19 @@ describe('Profiling not initialized', () => {
       data: { initialized: false },
       status: hooks.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
+    });
+
+    useAdHocApmDataViewSpy = jest.spyOn(
+      useAdHocApmDataView,
+      'useAdHocApmDataView'
+    );
+
+    useAdHocApmDataViewSpy.mockImplementation(() => {
+      return {
+        dataView: {
+          id: 'foo-1',
+        },
+      };
     });
   });
   afterEach(() => {
