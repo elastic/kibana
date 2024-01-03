@@ -10,16 +10,13 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TransformId } from '../../../../../common/types/transform';
 import type { EsIndexName } from '../components/step_details/common';
 
-import {
-  getDefaultStepDetailsState,
-  type StepDetailsExposedState,
-} from '../components/step_details';
+import { getDefaultStepDetailsState, type StepDetailsState } from '../components/step_details';
 
 export const stepDetailsSlice = createSlice({
   name: 'stepDetails',
   initialState: getDefaultStepDetailsState(),
   reducers: {
-    setStepDetailsState: (_, action: PayloadAction<StepDetailsExposedState>) => action.payload,
+    setStepDetailsState: (_, action: PayloadAction<StepDetailsState>) => action.payload,
     setTransformId: (state, action: PayloadAction<TransformId>) => {
       state.transformId = action.payload;
     },
@@ -55,7 +52,7 @@ export const stepDetailsSlice = createSlice({
     },
     setTransformSettingsMaxPageSearchSize: (
       state,
-      action: PayloadAction<StepDetailsExposedState['transformSettingsMaxPageSearchSize']>
+      action: PayloadAction<StepDetailsState['transformSettingsMaxPageSearchSize']>
     ) => {
       state.transformSettingsMaxPageSearchSize = action.payload;
     },
@@ -64,7 +61,7 @@ export const stepDetailsSlice = createSlice({
     },
     setTransformSettingsNumFailureRetries: (
       state,
-      action: PayloadAction<StepDetailsExposedState['transformSettingsNumFailureRetries']>
+      action: PayloadAction<StepDetailsState['transformSettingsNumFailureRetries']>
     ) => {
       state.transformSettingsNumFailureRetries = action.payload;
     },

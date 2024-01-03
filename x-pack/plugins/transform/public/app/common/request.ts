@@ -28,8 +28,8 @@ import type {
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsState } from '../sections/create_transform/components/step_details';
 
 import {
   getEsAggFromAggConfig,
@@ -174,7 +174,7 @@ export function getPreviewTransformRequestBody(
   transformConfigQuery: TransformConfigQuery,
   partialRequest?: PreviewRequest,
   runtimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  timeRangeMs?: StepDefineState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
@@ -210,7 +210,7 @@ export function getPreviewTransformRequestBody(
 }
 
 export const getCreateTransformSettingsRequestBody = (
-  transformDetailsState: Partial<StepDetailsExposedState>
+  transformDetailsState: Partial<StepDetailsState>
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
     // conditionally add optional max_page_search_size, skip if default value
@@ -234,7 +234,7 @@ export const getCreateTransformSettingsRequestBody = (
 
 export const getCreateTransformRequestBody = (
   previewRequest: PostTransformsPreviewRequestSchema,
-  transformDetailsState: StepDetailsExposedState
+  transformDetailsState: StepDetailsState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...previewRequest,
   // conditionally add optional description

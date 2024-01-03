@@ -17,7 +17,7 @@ export type EsIndexName = string;
 export type EsIngestPipelineName = string;
 export type DataViewTitle = string;
 
-export interface StepDetailsExposedState {
+export interface StepDetailsState {
   continuousModeDateField: string;
   continuousModeDelay: string;
   createDataView: boolean;
@@ -39,7 +39,7 @@ export interface StepDetailsExposedState {
   _meta?: Record<string, unknown>;
 }
 
-export function getDefaultStepDetailsState(): StepDetailsExposedState {
+export function getDefaultStepDetailsState(): StepDetailsState {
   return {
     continuousModeDateField: '',
     continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -63,9 +63,9 @@ export function getDefaultStepDetailsState(): StepDetailsExposedState {
 }
 
 export function applyTransformConfigToDetailsState(
-  state: StepDetailsExposedState,
+  state: StepDetailsState,
   transformConfig?: TransformConfigUnion
-): StepDetailsExposedState {
+): StepDetailsState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
     // Continuous mode

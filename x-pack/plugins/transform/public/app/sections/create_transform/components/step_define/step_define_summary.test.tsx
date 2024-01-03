@@ -18,7 +18,7 @@ import {
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineExposedState } from './common';
+import { StepDefineState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../../shared_imports');
@@ -52,7 +52,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       aggName: 'the-group-by-agg-name',
       dropDownName: 'the-group-by-drop-down-name',
     };
-    const formState: StepDefineExposedState = {
+    const formState: StepDefineState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedSourceEditorEnabled: false,

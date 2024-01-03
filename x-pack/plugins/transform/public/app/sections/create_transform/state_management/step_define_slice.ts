@@ -16,7 +16,7 @@ import {
   type PivotGroupByConfig,
 } from '../../../common';
 
-import type { StepDefineExposedState } from '../components/step_define';
+import type { StepDefineState } from '../components/step_define';
 import { getDefaultStepDefineState } from '../components/step_define/common';
 
 export const stepDefineSlice = createSlice({
@@ -34,27 +34,27 @@ export const stepDefineSlice = createSlice({
     },
     setLatestFunctionConfigUniqueKey: (
       state,
-      action: PayloadAction<StepDefineExposedState['latestConfig']['unique_key']>
+      action: PayloadAction<StepDefineState['latestConfig']['unique_key']>
     ) => {
       state.latestConfig.unique_key = action.payload;
     },
     setLatestFunctionConfigSort: (
       state,
-      action: PayloadAction<StepDefineExposedState['latestConfig']['sort']>
+      action: PayloadAction<StepDefineState['latestConfig']['sort']>
     ) => {
       state.latestConfig.sort = action.payload;
     },
-    setSearchLanguage: (state, action: PayloadAction<StepDefineExposedState['searchLanguage']>) => {
+    setSearchLanguage: (state, action: PayloadAction<StepDefineState['searchLanguage']>) => {
       state.searchLanguage = action.payload;
     },
-    setSearchQuery: (state, action: PayloadAction<StepDefineExposedState['searchQuery']>) => {
+    setSearchQuery: (state, action: PayloadAction<StepDefineState['searchQuery']>) => {
       state.searchQuery = action.payload;
     },
     setSearchString: (state, action: PayloadAction<string | undefined>) => {
       state.searchString = action.payload;
     },
-    setStepDefineState: (_, action: PayloadAction<StepDefineExposedState>) => action.payload,
-    setTimeRangeMs: (state, action: PayloadAction<StepDefineExposedState['timeRangeMs']>) => {
+    setStepDefineState: (_, action: PayloadAction<StepDefineState>) => action.payload,
+    setTimeRangeMs: (state, action: PayloadAction<StepDefineState['timeRangeMs']>) => {
       state.timeRangeMs = action.payload;
     },
     setTransformFunction: (state, action: PayloadAction<TransformFunction>) => {

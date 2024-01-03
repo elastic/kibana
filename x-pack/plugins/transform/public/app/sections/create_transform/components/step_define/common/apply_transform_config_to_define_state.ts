@@ -26,17 +26,17 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
 
-import { StepDefineExposedState } from './types';
+import { StepDefineState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
 
 export function applyTransformConfigToDefineState(
-  state: StepDefineExposedState,
+  state: StepDefineState,
   transformConfig?: TransformBaseConfig,
   dataView?: DataView
-): StepDefineExposedState {
+): StepDefineState {
   if (transformConfig === undefined) {
     return state;
   }

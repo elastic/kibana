@@ -23,7 +23,7 @@ import {
 
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
-import type { Field, StepDefineExposedState } from './types';
+import type { Field, StepDefineState } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
@@ -60,7 +60,7 @@ export interface DropDownOptionWithField extends DropDownOption {
 }
 export function getPivotDropdownOptions(
   dataView: DataView,
-  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+  runtimeMappings?: StepDefineState['runtimeMappings']
 ) {
   // The available group by options
   const groupByOptions: Array<Omit<DropDownOptionWithField, 'options'>> = [];

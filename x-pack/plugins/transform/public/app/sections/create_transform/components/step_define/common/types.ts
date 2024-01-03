@@ -33,7 +33,7 @@ export interface Field {
   type: KBN_FIELD_TYPES | TIME_SERIES_METRIC_TYPES.COUNTER;
 }
 
-export interface StepDefineExposedState {
+export interface StepDefineState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;

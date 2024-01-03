@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { StepDefineExposedState } from './common';
+export type { StepDefineState } from './common';
 export {
   defaultSearch,
   applyTransformConfigToDefineState,

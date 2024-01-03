@@ -12,8 +12,8 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '.';
 
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import type { PivotAggsConfig } from './pivot_aggs';
@@ -232,7 +232,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() skips default values', () => {
-    const transformConfigState: StepDefineExposedState = {
+    const transformConfigState: StepDefineState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
       isDatePickerApplyEnabled: false,
@@ -252,7 +252,7 @@ describe('Transform: Common', () => {
         isValid: true,
       },
     };
-    const transformDetailsState: StepDetailsExposedState = {
+    const transformDetailsState: StepDetailsState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
       continuousModeDelay: '60s',
       createDataView: false,
@@ -307,7 +307,7 @@ describe('Transform: Common', () => {
       },
     };
 
-    const pivotState: StepDefineExposedState = {
+    const pivotState: StepDefineState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
       isDatePickerApplyEnabled: false,
@@ -327,7 +327,7 @@ describe('Transform: Common', () => {
         isValid: true,
       },
     };
-    const transformDetailsState: StepDetailsExposedState = {
+    const transformDetailsState: StepDetailsState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
       continuousModeDelay: '3600s',
       createDataView: false,
@@ -382,7 +382,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() with multiple settings', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: 400,
       transformSettingsMaxPageSearchSize: 100,
     };
@@ -398,7 +398,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() with one setting', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: 400,
     };
 
@@ -412,7 +412,7 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformSettingsRequestBody() skips default settings', () => {
-    const transformDetailsState: Partial<StepDetailsExposedState> = {
+    const transformDetailsState: Partial<StepDetailsState> = {
       transformSettingsDocsPerSecond: null,
       transformSettingsMaxPageSearchSize: 500,
     };
