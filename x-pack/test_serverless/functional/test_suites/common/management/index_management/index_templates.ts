@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
 
   const TEST_TEMPLATE = 'a_test_template';
 
@@ -32,6 +33,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      log.debug('Cleaning up created template');
+
+      try {
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
+      } catch (e) {
+        log.debug('[Setup error] Error creating test policy');
+        throw e;
+      }
+
       await pageObjects.svlCommonPage.forceLogout();
     });
 

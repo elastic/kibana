@@ -16,8 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  const ENRICH_INDEX_NAME = 'test-policy-1';
-  const ENRICH_POLICY_NAME = 'test-policy-1';
+  const ENRICH_INDEX_NAME = `index-${Math.random()}`;
+  const ENRICH_POLICY_NAME = `policy-${Math.random()}`;
 
   describe('Enrich policies tab', function () {
     // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="kibana-chrome"])
