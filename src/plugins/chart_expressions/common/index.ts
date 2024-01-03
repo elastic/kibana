@@ -12,12 +12,7 @@ export {
   getOverridesFor,
   isOnAggBasedEditor,
 } from './utils';
-export type {
-  Simplify,
-  MakeOverridesSerializable,
-  ChartDimensionOptions,
-  DimensionsEvent,
-} from './types';
-export { isDimensionsEvent } from './types';
+export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
+export { isChartSizeEvent } from './types';
 export { getColorCategories } from './color_categories';
-export { useDimensionTransitionVeil } from './dimension_transition_veil';
+export { useSizeTransitionVeil } from './chart_size_transition_veil';

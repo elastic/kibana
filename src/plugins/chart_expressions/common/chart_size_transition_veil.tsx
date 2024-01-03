@@ -9,7 +9,7 @@
 import React from 'react';
 import { useCallback, useRef, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
-import type { ChartDimensionOptions } from './types';
+import type { ChartSizeSpec } from './types';
 
 /**
  * This hook is used to show a veil over the chart while it is being resized
@@ -17,14 +17,14 @@ import type { ChartDimensionOptions } from './types';
  *
  * It is only relevant if client dimensions are being requested based on chart configuration.
  */
-export function useDimensionTransitionVeil(
-  dimensions: ChartDimensionOptions,
-  setDimensions: (d: ChartDimensionOptions) => void
+export function useSizeTransitionVeil(
+  chartSizeSpec: ChartSizeSpec,
+  setChartSize: (d: ChartSizeSpec) => void
 ) {
   const [showVeil, setShowVeil] = useState(false);
-  const currentDimensions = useRef<ChartDimensionOptions>();
+  const currentChartSizeSpec = useRef<ChartSizeSpec>();
 
-  if (!fastIsEqual(dimensions, currentDimensions.current)) {
+  if (!fastIsEqual(chartSizeSpec, currentChartSizeSpec.current)) {
     // If the dimensions have changed we request new dimensions from the client
     // and set off a chain of events:
     //
@@ -35,9 +35,9 @@ export function useDimensionTransitionVeil(
     // 5. the charts library will resize the chart to the updated container dimensions
     // 6. we hide the veil
 
-    setDimensions(dimensions);
+    setChartSize(chartSizeSpec);
     setShowVeil(true);
-    currentDimensions.current = dimensions;
+    currentChartSizeSpec.current = chartSizeSpec;
   }
 
   const onResize = useCallback(() => {

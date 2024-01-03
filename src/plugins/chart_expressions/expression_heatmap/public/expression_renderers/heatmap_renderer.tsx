@@ -15,7 +15,7 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  DimensionsEvent,
+  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
@@ -82,8 +82,8 @@ export const heatmapRenderer: (
       handlers.done();
     };
 
-    const dimensionsEvent: DimensionsEvent = {
-      name: 'dimensions',
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
       data: {
         maxDimensions: {
           x: 100,
@@ -93,7 +93,7 @@ export const heatmapRenderer: (
       },
     };
 
-    handlers.event(dimensionsEvent);
+    handlers.event(chartSizeEvent);
 
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');

@@ -28,20 +28,20 @@ export type MakeOverridesSerializable<T> = {
     : NonNullable<T[KeyType]>;
 };
 
-export interface DimensionsEvent extends ExpressionRendererEvent {
-  name: 'dimensions';
-  data: ChartDimensionOptions;
+export interface ChartSizeEvent extends ExpressionRendererEvent {
+  name: 'chartSize';
+  data: ChartSizeSpec;
 }
 
-export type ChartDimensionUnit = 'pixels' | 'percentage';
+export type ChartSizeUnit = 'pixels' | 'percentage';
 
-export type ChartDimensionOptions =
+export type ChartSizeSpec =
   | {
       // if maxDimensions are provided, the aspect ratio will be computed from them
       maxDimensions?: {
         x: number;
         y: number;
-        unit: ChartDimensionUnit;
+        unit: ChartSizeUnit;
       };
       aspectRatio?: never;
     }
@@ -50,6 +50,7 @@ export type ChartDimensionOptions =
       maxDimensions?: never;
     };
 
-export function isDimensionsEvent(event: ExpressionRendererEvent): event is DimensionsEvent {
-  return event.name === 'dimensions';
+export function isChartSizeEvent(event: ExpressionRendererEvent): event is ChartSizeEvent {
+  const expectedName: ChartSizeEvent['name'] = 'chartSize';
+  return event.name === expectedName;
 }

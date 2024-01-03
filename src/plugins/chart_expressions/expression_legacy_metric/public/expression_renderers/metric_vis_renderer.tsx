@@ -22,7 +22,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
-  DimensionsEvent,
+  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
@@ -96,8 +96,8 @@ export const getMetricVisRenderer: (
       handlers.done();
     };
 
-    const dimensionsEvent: DimensionsEvent = {
-      name: 'dimensions',
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
       data: {
         maxDimensions: {
           x: 100,
@@ -107,7 +107,7 @@ export const getMetricVisRenderer: (
       },
     };
 
-    handlers.event(dimensionsEvent);
+    handlers.event(chartSizeEvent);
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>

@@ -14,7 +14,7 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  DimensionsEvent,
+  ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
@@ -70,13 +70,13 @@ export const gaugeRenderer: (
       handlers.done();
     };
 
-    const setDimensions = (dimensions: DimensionsEvent['data']) => {
-      const dimensionsEvent: DimensionsEvent = {
-        name: 'dimensions',
-        data: dimensions,
+    const setChartSize = (chartSizeSpec: ChartSizeEvent['data']) => {
+      const event: ChartSizeEvent = {
+        name: 'chartSize',
+        data: chartSizeSpec,
       };
 
-      handlers.event(dimensionsEvent);
+      handlers.event(event);
     };
 
     const { GaugeComponent } = await import('../components/gauge_component');
@@ -85,7 +85,7 @@ export const gaugeRenderer: (
         <div className="gauge-container" data-test-subj="gaugeChart">
           <GaugeComponent
             {...config}
-            setDimensions={setDimensions}
+            setChartSize={setChartSize}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}

@@ -27,8 +27,8 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
-  ChartDimensionOptions,
-  DimensionsEvent,
+  type ChartSizeEvent,
+  type ChartSizeSpec,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
@@ -220,8 +220,8 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
-    const setDimensions = (data: ChartDimensionOptions) => {
-      const event: DimensionsEvent = { name: 'dimensions', data };
+    const setChartSize = (data: ChartSizeSpec) => {
+      const event: ChartSizeEvent = { name: 'chartSize', data };
       handlers.event(event);
     };
 
@@ -286,7 +286,7 @@ export const getXyChartRenderer = ({
               syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
-              setDimensions={setDimensions}
+              setChartSize={setChartSize}
             />
           </div>
         </I18nProvider>

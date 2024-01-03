@@ -42,7 +42,7 @@ import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import { DimensionsEvent } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -1394,7 +1394,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
-      | DimensionsEvent
+      | ChartSizeEvent
   ) => void;
 }
 

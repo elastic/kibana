@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { DimensionsEvent } from '@kbn/chart-expressions-common';
+import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
@@ -93,8 +93,8 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         handlers.done();
       };
 
-      const dimensionsEvent: DimensionsEvent = {
-        name: 'dimensions',
+      const chartSizeEvent: ChartSizeEvent = {
+        name: 'chartSize',
         data: {
           maxDimensions: {
             x: 100,
@@ -104,7 +104,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         },
       };
 
-      handlers.event(dimensionsEvent);
+      handlers.event(chartSizeEvent);
 
       ReactDOM.render(
         <ChoroplethChart

@@ -27,7 +27,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ChartDimensionOptions, isDimensionsEvent } from '@kbn/chart-expressions-common';
+import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -411,7 +411,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [expressionExists, localState.expressionToRender]);
 
-  const [dimensionOptions, setDimensionOptions] = useState<ChartDimensionOptions | undefined>();
+  const [chartSizeSpec, setChartSize] = useState<ChartSizeSpec | undefined>();
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -444,15 +444,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
 
-      if (isDimensionsEvent(event)) {
-        setDimensionOptions(event.data);
+      if (isChartSizeEvent(event)) {
+        setChartSize(event.data);
       }
     },
     [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
   );
 
   const displayOptions = activeVisualization?.getDisplayOptions?.();
-
   const hasCompatibleActions = useCallback(
     async (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -484,8 +483,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
   const renderDragDropPrompt = () => {
-    if (dimensionOptions) {
-      setDimensionOptions(undefined);
+    if (chartSizeSpec) {
+      setChartSize(undefined);
     }
 
     return (
@@ -542,8 +541,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderApplyChangesPrompt = () => {
-    if (dimensionOptions) {
-      setDimensionOptions(undefined);
+    if (chartSizeSpec) {
+      setChartSize(undefined);
     }
 
     const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
@@ -661,7 +660,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
-      displayOptions={dimensionOptions}
+      displayOptions={chartSizeSpec}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>

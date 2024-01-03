@@ -13,9 +13,9 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
-  type ChartDimensionOptions,
+  type ChartSizeSpec,
   getOverridesFor,
-  useDimensionTransitionVeil,
+  useSizeTransitionVeil,
 } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
@@ -182,7 +182,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
-    setDimensions,
+    setChartSize,
   }) => {
     const {
       shape: gaugeType,
@@ -258,7 +258,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [renderComplete]
     );
 
-    const dimensions: ChartDimensionOptions = {
+    const chartSizeSpec: ChartSizeSpec = {
       maxDimensions: {
         unit: 'pixels',
         ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
@@ -273,7 +273,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       },
     };
 
-    const { veil, onResize } = useDimensionTransitionVeil(dimensions, setDimensions);
+    const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
 
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);

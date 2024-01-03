@@ -40,7 +40,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { DimensionsEvent, getOverridesFor } from '@kbn/chart-expressions-common';
+import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
@@ -164,8 +164,8 @@ export const MetricVis = ({
 
   const onWillRender = useCallback(() => {
     const maxTileSideLength = grid.current.length * grid.current[0].length > 1 ? 200 : 300;
-    const event: DimensionsEvent = {
-      name: 'dimensions',
+    const event: ChartSizeEvent = {
+      name: 'chartSize',
       data: {
         maxDimensions: {
           y: grid.current.length * maxTileSideLength,

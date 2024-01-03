@@ -16,7 +16,7 @@ import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  DimensionsEvent,
+  type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
@@ -70,8 +70,8 @@ export const tagcloudRenderer: (
       handlers.done();
     };
 
-    const dimensionsEvent: DimensionsEvent = {
-      name: 'dimensions',
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
       data: {
         maxDimensions: {
           x: 100,
@@ -81,7 +81,7 @@ export const tagcloudRenderer: (
       },
     };
 
-    handlers.event(dimensionsEvent);
+    handlers.event(chartSizeEvent);
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
     let isDarkMode = false;

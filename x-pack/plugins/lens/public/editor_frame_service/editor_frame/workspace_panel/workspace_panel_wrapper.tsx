@@ -11,8 +11,8 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartDimensionOptions } from '@kbn/chart-expressions-common';
-import { ChartDimensionUnit } from '@kbn/chart-expressions-common/types';
+import { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
 import { Interpolation, Theme, css } from '@emotion/react';
 import {
   DatasourceMap,
@@ -49,10 +49,10 @@ export interface WorkspacePanelWrapperProps {
   isFullscreen: boolean;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
-  displayOptions: ChartDimensionOptions | undefined;
+  displayOptions: ChartSizeSpec | undefined;
 }
 
-const unitToCSSUnit: Record<ChartDimensionUnit, string> = {
+const unitToCSSUnit: Record<ChartSizeUnit, string> = {
   pixels: 'px',
   percentage: '%',
 };

@@ -129,7 +129,7 @@ describe('XYChart component', () => {
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-      setDimensions: jest.fn(),
+      setChartSize: jest.fn(),
     };
   });
 

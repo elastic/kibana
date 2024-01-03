@@ -53,9 +53,9 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import {
-  useDimensionTransitionVeil,
-  ChartDimensionOptions,
+  useSizeTransitionVeil,
   getOverridesFor,
+  ChartSizeSpec,
 } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
@@ -150,7 +150,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
-  setDimensions: (dimensions: ChartDimensionOptions) => void;
+  setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
@@ -205,7 +205,7 @@ export function XYChart({
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
-  setDimensions,
+  setChartSize,
   interactive = true,
   syncColors,
   syncTooltips,
@@ -301,7 +301,7 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
-  const dimensions = {
+  const chartSizeSpec = {
     aspectRatio: isHorizontalChart(dataLayers)
       ? { x: 9, y: 16 }
       : {
@@ -310,7 +310,7 @@ export function XYChart({
         },
   };
 
-  const { veil, onResize } = useDimensionTransitionVeil(dimensions, setDimensions);
+  const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
 
   const formattedDatatables = useMemo(
     () =>

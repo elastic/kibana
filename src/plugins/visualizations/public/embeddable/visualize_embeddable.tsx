@@ -40,7 +40,7 @@ import {
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { isDimensionsEvent } from '@kbn/chart-expressions-common';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -479,7 +479,7 @@ export class VisualizeEmbeddable
         .pipe(
           mergeMap(async (event) => {
             // Visualize doesn't respond to sizing events, so ignore.
-            if (isDimensionsEvent(event)) {
+            if (isChartSizeEvent(event)) {
               return;
             }
             if (!this.input.disableTriggers) {
