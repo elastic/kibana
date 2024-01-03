@@ -17,12 +17,23 @@ import {
 } from '@kbn/observability-plugin/common/slo/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-function assertTransformsResponseBody(body: GetTransformsResponseSchema, expectedTransforms: any) {
+interface ExpectedTransformBase {
+  count: number;
+  typeOfVersion: string;
+  typeOfCreateTime: string;
+}
+
+type ExpectedTransforms = ExpectedTransformBase & Record<string, { id: string; destIndex: string }>;
+
+function assertTransformsResponseBody(
+  body: GetTransformsResponseSchema,
+  expectedTransforms: ExpectedTransforms
+) {
   expect(body.count).to.eql(expectedTransforms.count);
   expect(body.transforms).to.have.length(expectedTransforms.count);
 
   body.transforms.forEach((transform, index) => {
-    const expectedTransform = (expectedTransforms as any)[`transform${index}`];
+    const expectedTransform = expectedTransforms[`transform${index}`];
     expect(transform.id).to.eql(expectedTransform.id);
     expect(transform.dest.index).to.eql(expectedTransform.destIndex);
     expect(typeof transform.version).to.eql(expectedTransforms.typeOfVersion);
