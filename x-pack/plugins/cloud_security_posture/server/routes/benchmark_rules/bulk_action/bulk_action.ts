@@ -23,6 +23,9 @@ import { bulkActionBenchmarkRulesHandler } from './v1';
 	  action: 'mute' | 'unmute'; // Specify the bulk action type (mute or unmute)
 	  rules: [
 	    {
+        benchmark_id: string;       // Identifier for the CSP benchmark
+	      benchmark_version: string;  // Version of the CSP benchmark
+	      rule_number: string;        // Rule number within the benchmark
 	      rule_id: string;            // Unique identifier for the rule
 	    },
 	    // ... (additional benchmark rules)
