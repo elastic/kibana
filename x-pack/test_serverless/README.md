@@ -48,10 +48,11 @@ x-pack/test_serverless/
 ### Common tests
 
 As outlined above, tests in the `common` API integration and functional test suites are
-covering functionality that's shared across serverless projects. As a result, these tests
-are automatically included in all project specific test configurations and don't have a
-dedicated configuration file. We always run in the context of one of the serverless projects
-and invoke the corresponding set of tests, which then also includes the `common` tests.
+covering functionality that's shared across serverless projects. That's why these tests
+don't have a dedicated config file and instead need to be included in project specific
+configurations.
+
+**If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
 
 In case a common test needs to be skipped for one of the projects, there are the following
 suite tags available to do so: `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be
@@ -70,6 +71,8 @@ specific test directory and not to `common` with two skips.
 
 Note, that `common` tests are invoked three times in a full test run: once per project to make
 sure the covered shared functionality works correctly in every project. So when writing tests there, be mindful about the test run time.
+
+See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/api_integration/test_suites/common/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/functional/test_suites/common/README.md).
 
 ### Shared services and page objects
 
