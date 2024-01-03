@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
+import { useWizardContext } from '../../../../wizard/wizard';
+import { useWizardSelector } from '../../../../../state_management/create_transform_store';
 
 /**
  * Resolves supported filters for provided field.
@@ -56,7 +57,9 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   onChange,
   selectedField,
 }) => {
-  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const filterAggsOptions = useMemo(
     () => getSupportedFilterAggs(selectedField, dataView!, runtimeMappings),
