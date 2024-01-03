@@ -19,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSkeletonText,
@@ -40,7 +41,7 @@ import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import type { CategorizedApiKey } from './api_keys_grid_page';
-import { ApiKeyBadge, ApiKeyStatus, TimeToolTip, UsernameWithIcon } from './api_keys_grid_page';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_grid_page';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import { FormField } from '../../../components/form_field';
@@ -296,199 +297,259 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 ) : null
               ) : null}
               <EuiPanel hasBorder>
-                <div>
-                  <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="gear" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h4>
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.apiKeyFlyout.setup.title"
-                            defaultMessage="Setup"
-                          />
-                        </h4>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="xs" />
-                  <EuiText color="subdued" size="xs">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.setup.description"
-                        defaultMessage="Basic configuration details to create your API key."
-                      />
-                    </p>
-                  </EuiText>
-                </div>
-                <EuiSpacer size="s" />
-                <FormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
-                      defaultMessage="Name"
-                    />
-                  }
-                  fullWidth
-                >
-                  <FormField
-                    name="name"
-                    inputRef={firstFieldRef}
-                    data-test-subj="apiKeyNameInput"
-                    disabled={readOnly || !!apiKey}
-                    validate={{
-                      required: i18n.translate(
-                        'xpack.security.management.apiKeys.apiKeyFlyout.nameRequired',
-                        {
-                          defaultMessage: 'Enter a name.',
-                        }
-                      ),
-                    }}
-                    fullWidth
-                  />
-                </FormRow>
                 {apiKey ? (
                   <>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                          defaultMessage="Overview"
+                        />
+                      </h4>
+                    </EuiTitle>
                     <EuiSpacer />
-                    <EuiFlexGroup gutterSize="xl">
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow
-                          label={
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
                             <FormattedMessage
-                              id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                              defaultMessage="Type"
+                              id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
+                              defaultMessage="Name"
                             />
-                          }
-                        >
-                          <ApiKeyBadge type={apiKey.type} />
-                        </EuiFormRow>
+                          </strong>
+                        </EuiText>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow
-                          label={
+                      <EuiFlexItem grow={false}>{apiKey.name}</EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.ownerLabel"
                               defaultMessage="Owner"
                             />
-                          }
-                        >
-                          <UsernameWithIcon username={apiKey.username} />
-                        </EuiFormRow>
+                          </strong>
+                        </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiFormRow
-                          label={
+                        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="user" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{apiKey.username}</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                              defaultMessage="Type"
+                            />
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ApiKeyBadge type={apiKey.type} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.realmLabel"
+                              defaultMessage="Realm"
+                            />
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{apiKey.realm}</EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.createdLabel"
                               defaultMessage="Created"
                             />
-                          }
-                        >
-                          <TimeToolTip timestamp={apiKey.creation} />
-                        </EuiFormRow>
+                          </strong>
+                        </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiFormRow
-                          label={
+                        <TimeToolTip timestamp={apiKey.creation} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiHorizontalRule margin="s" />
+
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem>
+                        <EuiText size="xs">
+                          <strong>
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.statusLabel"
                               defaultMessage="Status"
                             />
-                          }
-                        >
-                          <ApiKeyStatus expiration={apiKey.expiration} />
-                        </EuiFormRow>
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ApiKeyStatus expiration={apiKey.expiration} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </>
-                ) : canManageCrossClusterApiKeys ? (
-                  <FormRow
-                    name="type"
-                    label={
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                        defaultMessage="Type"
-                      />
-                    }
-                    fullWidth
-                  >
-                    <EuiFlexGroup gutterSize="m">
-                      <EuiFlexItem>
-                        <EuiCheckableCard
-                          id="rest"
-                          label={
-                            <>
-                              <EuiTitle size="xxs">
-                                <h2>
-                                  <FormattedMessage
-                                    id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
-                                    defaultMessage="Personal API key"
-                                  />
-                                </h2>
-                              </EuiTitle>
-                              <EuiSpacer size="xs" />
-                              <EuiText size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.apiKeyFlyout.restTypeDescription"
-                                  defaultMessage="Allow external services to access the Elastic Stack on your behalf."
-                                />
-                              </EuiText>
-                            </>
-                          }
-                          onChange={() => formik.setFieldValue('type', 'rest')}
-                          checked={formik.values.type === 'rest'}
-                        />
+                ) : (
+                  <>
+                    <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="gear" />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiCheckableCard
-                          id="cross_cluster"
-                          label={
-                            <>
-                              <EuiTitle size="xxs">
-                                <h2>
-                                  <FormattedMessage
-                                    id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
-                                    defaultMessage="Cross-Cluster API key"
-                                  />
-                                </h2>
-                              </EuiTitle>
-                              <EuiSpacer size="xs" />
-                              <EuiText size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
-                                  defaultMessage="Allow remote clusters to connect to your local cluster."
-                                />
-                              </EuiText>
-                            </>
-                          }
-                          onChange={() => formik.setFieldValue('type', 'cross_cluster')}
-                          checked={formik.values.type === 'cross_cluster'}
-                        />
+                        <EuiTitle size="xs">
+                          <h4>
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.setup.title"
+                              defaultMessage="Setup"
+                            />
+                          </h4>
+                        </EuiTitle>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </FormRow>
-                ) : (
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                        defaultMessage="Type"
+                    <EuiSpacer size="xs" />
+                    <EuiText color="subdued" size="xs">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.setup.description"
+                          defaultMessage="Basic configuration details to create your API key."
+                        />
+                      </p>
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <FormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
+                          defaultMessage="Name"
+                        />
+                      }
+                      fullWidth
+                    >
+                      <FormField
+                        name="name"
+                        inputRef={firstFieldRef}
+                        data-test-subj="apiKeyNameInput"
+                        disabled={readOnly || !!apiKey}
+                        validate={{
+                          required: i18n.translate(
+                            'xpack.security.management.apiKeys.apiKeyFlyout.nameRequired',
+                            {
+                              defaultMessage: 'Enter a name.',
+                            }
+                          ),
+                        }}
+                        fullWidth
                       />
-                    }
-                  >
-                    <ApiKeyBadge type="rest" />
-                  </EuiFormRow>
+                    </FormRow>
+                    {canManageCrossClusterApiKeys ? (
+                      <FormRow
+                        name="type"
+                        label={
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                            defaultMessage="Type"
+                          />
+                        }
+                        fullWidth
+                      >
+                        <EuiFlexGroup gutterSize="m">
+                          <EuiFlexItem>
+                            <EuiCheckableCard
+                              id="rest"
+                              label={
+                                <>
+                                  <EuiTitle size="xxs">
+                                    <h2>
+                                      <FormattedMessage
+                                        id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
+                                        defaultMessage="Personal API key"
+                                      />
+                                    </h2>
+                                  </EuiTitle>
+                                  <EuiSpacer size="xs" />
+                                  <EuiText size="s">
+                                    <FormattedMessage
+                                      id="xpack.security.accountManagement.apiKeyFlyout.restTypeDescription"
+                                      defaultMessage="Allow external services to access the Elastic Stack on your behalf."
+                                    />
+                                  </EuiText>
+                                </>
+                              }
+                              onChange={() => formik.setFieldValue('type', 'rest')}
+                              checked={formik.values.type === 'rest'}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiCheckableCard
+                              id="cross_cluster"
+                              label={
+                                <>
+                                  <EuiTitle size="xxs">
+                                    <h2>
+                                      <FormattedMessage
+                                        id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
+                                        defaultMessage="Cross-Cluster API key"
+                                      />
+                                    </h2>
+                                  </EuiTitle>
+                                  <EuiSpacer size="xs" />
+                                  <EuiText size="s">
+                                    <FormattedMessage
+                                      id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
+                                      defaultMessage="Allow remote clusters to connect to your local cluster."
+                                    />
+                                  </EuiText>
+                                </>
+                              }
+                              onChange={() => formik.setFieldValue('type', 'cross_cluster')}
+                              checked={formik.values.type === 'cross_cluster'}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </FormRow>
+                    ) : (
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                            defaultMessage="Type"
+                          />
+                        }
+                      >
+                        <ApiKeyBadge type="rest" />
+                      </EuiFormRow>
+                    )}
+                  </>
                 )}
               </EuiPanel>
               <EuiSpacer />
-              <EuiPanel hasBorder>
-                <div style={{ paddingRight: euiTheme.size.s }}>
-                  <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
+              {!apiKey && (
+                <>
+                  <EuiPanel hasBorder>
+                    <div style={{ paddingRight: euiTheme.size.s }}>
                       <EuiSwitch
                         label={
-                          <EuiTitle>
+                          <EuiTitle size="xs">
                             <h4>
                               <FormattedMessage
                                 id="xpack.security.accountManagement.apiKeyFlyout.applyExpirationDateLabel"
@@ -499,74 +560,75 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         }
                         data-test-subj="apiKeysMetadataSwitch"
                         checked={Boolean(formik.values.customExpiration)}
-                        disabled={readOnly || (apiKey && !canEdit)}
+                        disabled={readOnly || !!apiKey}
                         onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="xs" />
-                  <EuiText color="subdued" size="xs">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.expiresFieldHelpText"
-                        defaultMessage="Setting an expiration date is a security best practice. Defaults to no expiration."
-                      />
-                    </p>
-                  </EuiText>
-                </div>
-                {formik.values.customExpiration && (
-                  <>
-                    <EuiSpacer />
-                    <EuiFormRow
-                      fullWidth
-                      helpText={
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.apiKeyFlyout.expirationHelpText"
-                          defaultMessage="This API Key will expire on {expirationDate}"
-                          values={{
-                            expirationDate: (
-                              <strong>
-                                <FormattedDate
-                                  year="numeric"
-                                  month="long"
-                                  day="numeric"
-                                  value={expirationDate!}
-                                />
-                              </strong>
-                            ),
-                          }}
-                        />
-                      }
-                    >
-                      <FormField
-                        as={EuiFieldNumber}
-                        name="expiration"
-                        min={0}
-                        append={i18n.translate(
-                          'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
-                          {
-                            defaultMessage: 'days',
+                      <EuiSpacer size="xs" />
+                      <EuiText color="subdued" size="xs">
+                        <p>
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.expiresFieldHelpText"
+                            defaultMessage="Setting an expiration date is a security best practice. Defaults to no expiration."
+                          />
+                        </p>
+                      </EuiText>
+                    </div>
+                    {formik.values.customExpiration && (
+                      <>
+                        <EuiSpacer />
+                        <EuiFormRow
+                          fullWidth
+                          helpText={
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.expirationHelpText"
+                              defaultMessage="This API Key will expire on {expirationDate}"
+                              values={{
+                                expirationDate: (
+                                  <strong>
+                                    <FormattedDate
+                                      year="numeric"
+                                      month="long"
+                                      day="numeric"
+                                      value={expirationDate!}
+                                    />
+                                  </strong>
+                                ),
+                              }}
+                            />
                           }
-                        )}
-                        validate={{
-                          min: {
-                            value: 1,
-                            message: i18n.translate(
-                              'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
+                        >
+                          <FormField
+                            as={EuiFieldNumber}
+                            name="expiration"
+                            min={0}
+                            append={i18n.translate(
+                              'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
                               {
-                                defaultMessage: 'Enter a valid duration or disable this option.',
+                                defaultMessage: 'days',
                               }
-                            ),
-                          },
-                        }}
-                        disabled={readOnly || !!apiKey}
-                        data-test-subj="apiKeyCustomExpirationInput"
-                      />
-                    </EuiFormRow>
-                  </>
-                )}
-              </EuiPanel>
-              <EuiSpacer size="l" />
+                            )}
+                            validate={{
+                              min: {
+                                value: 1,
+                                message: i18n.translate(
+                                  'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
+                                  {
+                                    defaultMessage:
+                                      'Enter a valid duration or disable this option.',
+                                  }
+                                ),
+                              },
+                            }}
+                            disabled={readOnly || !!apiKey}
+                            data-test-subj="apiKeyCustomExpirationInput"
+                          />
+                        </EuiFormRow>
+                      </>
+                    )}
+                  </EuiPanel>
+                  <EuiSpacer size="l" />
+                </>
+              )}
               {formik.values.type === 'cross_cluster' ? (
                 <EuiPanel hasBorder>
                   <div style={{ paddingRight: euiTheme.size.s }}>
@@ -650,30 +712,24 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               ) : (
                 <EuiPanel hasBorder>
                   <div style={{ paddingRight: euiTheme.size.s }}>
-                    <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          label={
-                            <EuiTitle size="xs">
-                              <h4>
-                                {i18n.translate(
-                                  'xpack.security.accountManagement.apiKeyFlyout.privileges.title',
-                                  {
-                                    defaultMessage: 'Control security privileges',
-                                  }
-                                )}
-                              </h4>
-                            </EuiTitle>
-                          }
-                          checked={formik.values.customPrivileges}
-                          data-test-subj="apiKeysRoleDescriptorsSwitch"
-                          onChange={(e) =>
-                            formik.setFieldValue('customPrivileges', e.target.checked)
-                          }
-                          disabled={readOnly || (apiKey && !canEdit)}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiSwitch
+                      label={
+                        <EuiTitle size="xs">
+                          <h4>
+                            {i18n.translate(
+                              'xpack.security.accountManagement.apiKeyFlyout.privileges.title',
+                              {
+                                defaultMessage: 'Control security privileges',
+                              }
+                            )}
+                          </h4>
+                        </EuiTitle>
+                      }
+                      checked={formik.values.customPrivileges}
+                      data-test-subj="apiKeysRoleDescriptorsSwitch"
+                      onChange={(e) => formik.setFieldValue('customPrivileges', e.target.checked)}
+                      disabled={readOnly || (apiKey && !canEdit)}
+                    />
                     <EuiSpacer size="xs" />
                     <EuiText color="subdued" size="xs">
                       <p>
@@ -751,26 +807,22 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               <EuiSpacer size="l" />
               <EuiPanel hasBorder>
                 <div style={{ paddingRight: euiTheme.size.s }}>
-                  <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        label={
-                          <EuiTitle size="xs">
-                            <h4>
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.apiKeyFlyout.metadata.title"
-                                defaultMessage="Add metadata"
-                              />
-                            </h4>
-                          </EuiTitle>
-                        }
-                        data-test-subj="apiKeysMetadataSwitch"
-                        checked={formik.values.includeMetadata}
-                        disabled={readOnly || (apiKey && !canEdit)}
-                        onChange={(e) => formik.setFieldValue('includeMetadata', e.target.checked)}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiSwitch
+                    label={
+                      <EuiTitle size="xs">
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.metadata.title"
+                            defaultMessage="Add metadata"
+                          />
+                        </h4>
+                      </EuiTitle>
+                    }
+                    data-test-subj="apiKeysMetadataSwitch"
+                    checked={formik.values.includeMetadata}
+                    disabled={readOnly || (apiKey && !canEdit)}
+                    onChange={(e) => formik.setFieldValue('includeMetadata', e.target.checked)}
+                  />
                   <EuiSpacer size="xs" />
                   <EuiText color="subdued" size="xs">
                     <p>
