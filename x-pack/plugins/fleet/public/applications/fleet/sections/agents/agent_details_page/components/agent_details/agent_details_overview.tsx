@@ -23,7 +23,11 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion } from '../../../../../hooks';
-import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../../../services';
+import {
+  ExperimentalFeaturesService,
+  isAgentUpgradeable,
+  getNotUpgradeableMessage,
+} from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
@@ -186,6 +190,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         agentUpgradeStartedAt={agent.upgrade_started_at}
                         agentUpgradedAt={agent.upgraded_at}
                         agentUpgradeDetails={agent.upgrade_details}
+                        notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

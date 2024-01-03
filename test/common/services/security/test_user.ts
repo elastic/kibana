@@ -61,7 +61,10 @@ export class TestUser extends FtrService {
     });
 
     if (this.browser && this.testSubjects && !options?.skipBrowserRefresh) {
-      if (await this.testSubjects.exists('kibanaChrome', { allowHidden: true })) {
+      if (
+        (await this.browser.hasOpenWindow()) &&
+        (await this.testSubjects.exists('kibanaChrome', { allowHidden: true }))
+      ) {
         await this.browser.refresh();
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
