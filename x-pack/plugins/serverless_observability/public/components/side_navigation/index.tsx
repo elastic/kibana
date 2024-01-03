@@ -33,8 +33,6 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Discover',
           }),
           link: 'observability-log-explorer',
-          // prevent this entry from ever becoming active, effectively falling through to the obs-log-explorer child
-          getIsActive: () => false,
           // avoid duplicate "Discover" breadcrumbs
           breadcrumbStatus: 'hidden',
           renderAs: 'item',
