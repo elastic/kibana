@@ -11,16 +11,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
-  EuiSpacer,
   EuiFlexItem,
   EuiForm,
-  EuiRadioGroup,
-  EuiModal,
-  EuiButtonEmpty,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiFormRow,
   EuiLoadingSpinner,
   EuiModal,
@@ -460,4 +452,3 @@ export class LinkModal extends Component<LinkModalProps, State> {
     );
   }
 }
-

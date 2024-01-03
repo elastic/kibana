@@ -135,28 +135,9 @@ export const reportingScreenshotShareProvider = ({
     shareActions.push(reportingModal);
     return shareActions;
   };
-  const jobProviderOptions = ({
-    objectType,
-    objectId,
-    isDirty,
-    onClose,
-    shareableUrl,
-    shareableUrlForSavedObject,
-    ...shareOpts
-  }: ShareContext) => {
-    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-
-    const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
-      objectType,
-      sharingData,
-    };
-    return jobProviderOptions;
-  };
 
   return {
     id: 'screenCaptureExports',
     getShareMenuItems,
-    jobProviderOptions: jobProviderOptions as unknown as JobParamsProviderOptions,
   };
 };

@@ -93,7 +93,7 @@ const getJobParams = (
 const renderDescription = (objectType: string) => {
   return objectType === 'dashboard'
     ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
-    : `CSV exports can take a few minutes to generate based upon the size of your export. `;
+    : `CSV exports can take a few minutes to generate based upon the size of your report.`;
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
@@ -292,53 +292,53 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) => {
-    // if (isUnsaved) {
-    //   if (exceedsMaxLength) {
-    //     return <ErrorUrlTooLongPanel isUnsaved />;
-    //   }
-    //   return <ErrorUnsavedWorkPanel />;
-    // } else if (exceedsMaxLength) {
-    //   return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    // }
+    if (isUnsaved) {
+      if (exceedsMaxLength) {
+        return <ErrorUrlTooLongPanel isUnsaved />;
+      }
+      return <ErrorUnsavedWorkPanel />;
+    } else if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    }
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={0}>
-          <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-            {(copy) => (
-              <EuiButtonEmpty disabled={isUnsaved || exceedsMaxLength ? true : false} iconType="copy" flush="both" onClick={copy} data-test-subj="shareReportingCopyURL">
-                <FormattedMessage
-                  id="xpack.reporting.panelContent.copyUrlButtonLabel"
-                  defaultMessage="Copy URL  "
-                /> 
-              </EuiButtonEmpty>
-            )}
-          </EuiCopy>
-        </EuiFlexItem>
-        <EuiFlexItem grow={0}>{isUnsaved ? (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved />) : (<ErrorUnsavedWorkPanel />)) : (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved={false} />) : null)}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
+        {(copy) => (
+          <EuiButtonEmpty
+            iconType="copy"
+            flush="both"
+            onClick={copy}
+            data-test-subj="shareReportingCopyURL"
+          >
+            <FormattedMessage
+              id="xpack.reporting.panelContent.copyUrlButtonLabel"
+              defaultMessage="Copy URL  "
+            />
+          </EuiButtonEmpty>
+        )}
+      </EuiCopy>
     );
   };
 
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' ? (
-      <EuiButton
-        disabled={Boolean(createReportingJob)}
-        fill
-        onClick={() => generateReportingJob()}
-        data-test-subj="generateReportButton"
-        isLoading={Boolean(createReportingJob)}
+      <EuiFormRow
+        helpText={
+          <FormattedMessage
+            id="xpack.reporting.panelContent.saveWorkDescription"
+            defaultMessage="Please save your work before generating a report."
+          />
+        }
       >
         <EuiButton
           disabled={Boolean(createReportingJob)}
           fill
           onClick={() => generateReportingJob()}
           data-test-subj="generateReportButton"
-          size="s"
           isLoading={Boolean(createReportingJob)}
         >
           <FormattedMessage
             id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate report"
+            defaultMessage="Generate export"
           />
         </EuiButton>
       </EuiFormRow>
@@ -352,59 +352,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       >
         <FormattedMessage
           id="xpack.reporting.generateButtonLabel"
-          defaultMessage="Generate report"
+          defaultMessage="Generate export"
         />
       </EuiButton>
     );
   return (
     <>
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
-    </EuiModalHeader>
-    <EuiModalBody>
-      <EuiCallOut 
-        size="s"
-        title={
-          <FormattedMessage
-          id="xpack.reporting.panelContent.saveWorkDescription"
-          defaultMessage="Save your work before generating a report."
-          />
-        }
-        iconType="save"
-      />
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        title={renderDescription(objectType)}
-        iconType="iInCircle"
-      />
-      <EuiSpacer size="m" />
-      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-        <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-          <EuiRadioGroup
-            options={[
-              { id: 'printablePdfV2', label: 'PDF' },
-              { id: 'pngV2', label: 'PNG' },
-            ]}
-            onChange={(id) => setSelectedRadio(id)}
-            name="image reporting radio group"
-            idSelected={selectedRadio}
-            legend={{
-              children: <span>File type</span>
-            }}
-          />
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {renderOptions()}
-      </EuiForm>
-    </EuiModalBody>
-    <EuiModalFooter>
-      {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-      <EuiButtonEmpty onClick={onClose}>
-        <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
-      </EuiButtonEmpty>
-      {saveWarningMessageWithButton}
-    </EuiModalFooter>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -426,6 +379,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
               }}
             />
           </EuiFlexGroup>
+          <EuiSpacer size="m" />
           {renderOptions()}
         </EuiForm>
       </EuiModalBody>

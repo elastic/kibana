@@ -113,7 +113,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
       <EuiButton iconType="arrowDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
         <FormattedMessage
           id="data.inspector.table.downloadCSVToggleButtonLabel"
-          defaultMessage="Download CSV"
+          defaultMessage="Download Export"
         />
       </EuiButton>
     );

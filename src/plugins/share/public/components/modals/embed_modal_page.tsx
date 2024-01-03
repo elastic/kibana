@@ -7,19 +7,10 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCheckboxGroup,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
   EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCheckboxGroup,
-  EuiRadioGroup,
-  EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
   EuiFormRow,
@@ -30,9 +21,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiRadioGroup,
-  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiIconTip,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';

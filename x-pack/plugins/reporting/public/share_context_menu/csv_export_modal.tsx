@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiForm, EuiModalBody, EuiModalFooter, EuiModalHeader, EuiModalHeaderTitle, EuiSpacer, } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiForm,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -108,11 +116,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-          <EuiCallOut
-            size="s"
-            title={renderDescription(objectType)}
-            iconType="iInCircle"
-          />
+          <EuiCallOut size="s" title={renderDescription(objectType)} iconType="iInCircle" />
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
@@ -123,7 +127,10 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           data-test-subj="generateReportButton"
           isLoading={Boolean(createReportingJob)}
         >
-          <FormattedMessage id="xpack.reporting.generateButtonLabel" defaultMessage="Generate CSV" />
+          <FormattedMessage
+            id="xpack.reporting.generateButtonLabel"
+            defaultMessage="Generate Export"
+          />
         </EuiButton>
       </EuiModalFooter>
     </>
