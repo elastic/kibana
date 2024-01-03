@@ -423,14 +423,11 @@ const editTransformFlyoutSlice = createSlice({
     initialize: (_, action: PayloadAction<EditTransformFlyoutProviderProps>) =>
       getDefaultState(action.payload.config),
     setApiError: (state, action: PayloadAction<string | undefined>) => {
-      if (!state) return;
       state.apiErrorMessage = action.payload;
     },
     // Updates a form field with its new value, runs validation and
     // populates `errorMessages` if any errors occur.
     setFormField: (state, action: PayloadAction<{ field: FormFields; value: string }>) => {
-      if (!state) return;
-
       const formField = state.formFields[action.payload.field];
       const isOptional = isFormFieldOptional(state, action.payload.field);
 
@@ -444,8 +441,6 @@ const editTransformFlyoutSlice = createSlice({
     },
     // Updates a form section.
     setFormSection: (state, action: PayloadAction<{ section: FormSections; enabled: boolean }>) => {
-      if (!state) return;
-
       state.formSections[action.payload.section].enabled = action.payload.enabled;
 
       // After a section change we re-evaluate all form fields, since optionality
