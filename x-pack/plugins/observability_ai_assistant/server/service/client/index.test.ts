@@ -7,9 +7,11 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { merge } from 'lodash';
+import { waitFor } from '@testing-library/react';
+import { last, merge, repeat } from 'lodash';
+import type OpenAI from 'openai';
 import { Subject } from 'rxjs';
-import { PassThrough, type Readable } from 'stream';
+import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { createResourceNamesMap } from '..';
@@ -49,6 +51,8 @@ function createLlmSimulator() {
         choices: [
           {
             delta: msg,
+            index: 0,
+            finish_reason: null,
           },
         ],
       };
@@ -70,7 +74,7 @@ function createLlmSimulator() {
   };
 }
 
-describe('Observability AI Assistant service', () => {
+describe('Observability AI Assistant client', () => {
   let client: ObservabilityAIAssistantClient;
 
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
@@ -84,14 +88,8 @@ describe('Observability AI Assistant service', () => {
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
-    search: jest.fn().mockResolvedValue({
-      hits: {
-        hits: [],
-      },
-    }),
-    fieldCaps: jest.fn().mockResolvedValue({
-      fields: [],
-    }),
+    search: jest.fn(),
+    fieldCaps: jest.fn(),
   } as any;
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
@@ -107,16 +105,29 @@ describe('Observability AI Assistant service', () => {
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
     executeFunction: jest.fn(),
-    getFunctions: jest.fn().mockReturnValue([]),
-    hasFunction: jest.fn().mockImplementation((name) => {
-      return name !== 'recall';
-    }),
+    getFunctions: jest.fn(),
+    hasFunction: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
 
   function createClient() {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    functionClientMock.getFunctions.mockReturnValue([]);
+    functionClientMock.hasFunction.mockImplementation((name) => {
+      return name !== 'recall';
+    });
+
+    currentUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
+    currentUserEsClientMock.fieldCaps.mockResolvedValue({
+      fields: [],
+    } as any);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
@@ -157,6 +168,10 @@ describe('Observability AI Assistant service', () => {
       typeof content === 'string' ? { message: { content } } : content
     );
   }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('when completing a conversation without an initial conversation id', () => {
     let stream: Readable;
@@ -961,6 +976,7 @@ describe('Observability AI Assistant service', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
@@ -1011,6 +1027,7 @@ describe('Observability AI Assistant service', () => {
             model: 'gpt-4',
             object: 'chat.completion.chunk',
             choices: [
+              // @ts-expect-error
               {
                 delta: {
                   content: 'Hello',
@@ -1146,6 +1163,199 @@ describe('Observability AI Assistant service', () => {
           },
         },
       });
+    });
+  });
+
+  describe('when the LLM keeps on calling a function and the limit has been exceeded', () => {
+    let stream: Readable;
+
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+
+      const onLlmCall = new EventEmitter();
+
+      function waitForNextLlmCall() {
+        return new Promise<void>((resolve) => onLlmCall.addListener('next', resolve));
+      }
+
+      actionsClientMock.execute.mockImplementation(async () => {
+        llmSimulator = createLlmSimulator();
+        onLlmCall.emit('next');
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.getFunctions.mockImplementation(() => [
+        {
+          definition: {
+            name: 'get_top_alerts',
+            contexts: ['core'],
+            description: '',
+            parameters: {},
+          },
+          respond: async () => {
+            return { content: 'Call this function again' };
+          },
+        },
+      ]);
+
+      functionClientMock.hasFunction.mockImplementation((name) => name === 'get_top_alerts');
+      functionClientMock.executeFunction.mockImplementation(async () => ({
+        content: 'Call this function again',
+      }));
+
+      stream = await client.complete({
+        connectorId: 'foo',
+        messages: [system('This is a system message'), user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      async function requestAlertsFunctionCall() {
+        const body = JSON.parse(
+          (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+        );
+
+        let nextLlmCallPromise: Promise<void>;
+
+        if (body.functions?.length) {
+          nextLlmCallPromise = waitForNextLlmCall();
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+        } else {
+          nextLlmCallPromise = Promise.resolve();
+          await llmSimulator.next({ content: 'Looks like we are done here' });
+        }
+
+        await llmSimulator.complete();
+
+        await nextLlmCallPromise;
+      }
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await finished(stream);
+    });
+
+    it('executed the function no more than three times', () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not give the LLM the choice to call a function anymore', () => {
+      const firstBody = JSON.parse(
+        (actionsClientMock.execute.mock.calls[0][0].params as any).subActionParams.body
+      );
+      const body = JSON.parse(
+        (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+      );
+
+      expect(firstBody.functions.length).toBe(1);
+
+      expect(body.functions).toBeUndefined();
+    });
+  });
+
+  describe('when the function response exceeds the max no of tokens for one', () => {
+    let stream: Readable;
+
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+
+      let functionResponsePromiseResolve: Function | undefined;
+
+      actionsClientMock.execute.mockImplementation(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.getFunctions.mockImplementation(() => [
+        {
+          definition: {
+            name: 'get_top_alerts',
+            contexts: ['core'],
+            description: '',
+            parameters: {},
+          },
+          respond: async () => {
+            return { content: '' };
+          },
+        },
+      ]);
+
+      functionClientMock.hasFunction.mockImplementation((name) => name === 'get_top_alerts');
+
+      functionClientMock.executeFunction.mockImplementation(() => {
+        return new Promise((resolve) => {
+          functionResponsePromiseResolve = resolve;
+        });
+      });
+
+      stream = await client.complete({
+        connectorId: 'foo',
+        messages: [system('This is a system message'), user('How many alerts do I have?')],
+        functionClient: functionClientMock,
+        signal: new AbortController().signal,
+        title: 'My predefined title',
+        persist: true,
+      });
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+
+      await llmSimulator.complete();
+
+      await waitFor(() => functionResponsePromiseResolve !== undefined);
+
+      functionResponsePromiseResolve!({
+        content: repeat('word ', 10000),
+      });
+
+      await waitFor(() => actionsClientMock.execute.mock.calls.length > 1);
+
+      await llmSimulator.next({ content: 'Looks like this was truncated' });
+
+      await llmSimulator.complete();
+
+      await finished(stream);
+    });
+    it('truncates the message', () => {
+      const body = JSON.parse(
+        (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+      ) as OpenAI.Chat.ChatCompletionCreateParams;
+
+      const parsed = JSON.parse(last(body.messages)!.content! as string);
+
+      expect(parsed).toEqual({
+        message: 'Function response exceeded the maximum length allowed and was truncated',
+        truncated: expect.any(String),
+      });
+
+      expect(parsed.truncated.includes('word ')).toBe(true);
     });
   });
 });
