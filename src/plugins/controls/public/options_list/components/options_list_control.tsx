@@ -114,13 +114,13 @@ export const OptionsListControl = ({
           ) : (
             <>
               {validSelections?.length ? (
-                <span className="optionsList__filterValid">
+                <span className="optionsList__filter">
                   {validSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
               ) : null}
               {validSelections?.length && invalidSelections?.length ? delimiter : null}
               {invalidSelections?.length ? (
-                <span className="optionsList__filterInvalid">
+                <span className="optionsList__filter optionsList__filterInvalid">
                   {invalidSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
               ) : null}
