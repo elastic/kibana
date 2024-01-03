@@ -18,13 +18,15 @@
       "logsShared",
       "observabilityShared",
       "share",
-      "kibanaUtils",
       "datasetQuality"
     ],
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+    ],
     "extraPublicDirs": [
       "common",
     ]

@@ -9,13 +9,17 @@
     "browser": true,
     "requiredPlugins": [
       "savedObjects",
-      "kibanaReact",
       "contentManagement",
       "embeddable",
       "expressions",
       "dataViews",
       "uiActions"
     ],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaReact",
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

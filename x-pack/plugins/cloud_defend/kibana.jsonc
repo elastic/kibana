@@ -7,19 +7,27 @@
     "id": "cloudDefend",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "cloudDefend"],
+    "configPath": [
+      "xpack",
+      "cloudDefend"
+    ],
     "requiredPlugins": [
       "navigation",
       "data",
       "fleet",
       "unifiedSearch",
-      "kibanaReact",
       "cloud",
       "security",
       "licensing",
       "kubernetesSecurity"
     ],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaReact", "usageCollection"]
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "usageCollection",
+      "kibanaReact",
+    ]
   }
 }

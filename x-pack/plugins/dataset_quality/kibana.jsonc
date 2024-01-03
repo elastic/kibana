@@ -7,10 +7,25 @@
     "id": "datasetQuality",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "datasetQuality"],
-    "requiredPlugins": ["data", "kibanaReact", "kibanaUtils", "controls", "embeddable", "share", "observabilityShared", "fleet", "fieldFormats"],
+    "configPath": [
+      "xpack",
+      "datasetQuality"
+    ],
+    "requiredPlugins": [
+      "data",
+      "controls",
+      "embeddable",
+      "share",
+      "observabilityShared",
+      "fleet",
+      "fieldFormats"
+    ],
     "optionalPlugins": [],
-    "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "kibanaReact",
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

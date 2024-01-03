@@ -19,8 +19,6 @@
       "lens",
       "licensing",
       "features",
-      "kibanaReact",
-      "kibanaUtils",
       "triggersActionsUi",
       "management",
       "security",
@@ -38,7 +36,10 @@
       "spaces",
       "serverless",
     ],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+    ],
     "extraPublicDirs": [
       "common"
     ]

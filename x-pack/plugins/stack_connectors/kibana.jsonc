@@ -13,9 +13,9 @@
     "requiredPlugins": [
       "actions",
       "esUiShared",
-      "kibanaReact",
       "triggersActionsUi"
     ],
+    "requiredBundles": [],
     "extraPublicDirs": [
       "public/common"
     ]

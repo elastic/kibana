@@ -14,8 +14,6 @@
       "management",
       "charts",
       "data",
-      "kibanaReact",
-      "kibanaUtils",
       "savedObjects",
       "unifiedSearch",
       "fieldFormats",
