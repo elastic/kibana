@@ -26,20 +26,22 @@ interface DataTableColumnHeaderProps {
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
   const {
     columnDisplayName,
-    headerRowHeight,
     showColumnTokens,
     columnName,
     columnTypes,
     dataView,
+    headerRowHeight = 1,
   } = props;
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      responsive={false}
-      alignItems="flexStart"
-      gutterSize="xs"
+    <EuiTextBlockTruncate
+      lines={headerRowHeight}
       css={css`
+        overflow-wrap: anywhere;
+        overflow: auto;
+        white-space: normal;
+        word-break: break-all;
+        line-height: 16px;
         .euiDataGridHeaderCell--numeric & {
           justify-content: flex-end;
         }
@@ -52,11 +54,8 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
           dataView={dataView}
         />
       )}
-      <DataTableColumnTitle
-        columnDisplayName={columnDisplayName}
-        headerRowHeight={headerRowHeight}
-      />
-    </EuiFlexGroup>
+      <DataTableColumnTitle columnDisplayName={columnDisplayName} />
+    </EuiTextBlockTruncate>
   );
 };
 
@@ -69,24 +68,23 @@ const DataTableColumnToken: React.FC<
     [columnName, columnTypes, dataView]
   );
 
-  return columnToken ? <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem> : null;
-};
-
-const DataTableColumnTitle: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnDisplayName' | 'headerRowHeight'>
-> = ({ columnDisplayName, headerRowHeight = 1 }) => {
-  return (
-    <EuiFlexItem
-      grow={false}
-      data-test-subj="unifiedDataTableColumnTitle"
+  return columnToken ? (
+    <span
       css={css`
-        white-space: normal;
-        overflow-wrap: anywhere;
+        vertical-align: middle;
+        line-height: 0.8;
+        padding-right: 4px;
       `}
     >
-      <EuiTextBlockTruncate lines={headerRowHeight}>{columnDisplayName}</EuiTextBlockTruncate>
-    </EuiFlexItem>
-  );
+      {columnToken}
+    </span>
+  ) : null;
+};
+
+const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDisplayName'>> = ({
+  columnDisplayName,
+}) => {
+  return <span data-test-subj="unifiedDataTableColumnTitle">{columnDisplayName}</span>;
 };
 
 function getRenderedToken({
