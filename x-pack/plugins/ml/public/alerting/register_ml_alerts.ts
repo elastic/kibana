@@ -7,6 +7,7 @@
 
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { MlCapabilities } from '../../common/types/capabilities';
 import type { MlCoreSetup } from '../plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
@@ -18,9 +19,10 @@ import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   getStartServices: MlCoreSetup['getStartServices'],
+  mlCapabilities: MlCapabilities,
   alerting?: AlertingSetup
 ) {
-  registerAnomalyDetectionRule(triggersActionsUi, getStartServices);
+  registerAnomalyDetectionRule(triggersActionsUi, getStartServices, mlCapabilities);
 
   registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 

@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlCoreSetup } from '../../plugin';
 import { JobSelectorControl } from '../job_selector';
-import { useMlKibana } from '../../application/contexts/kibana';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
@@ -37,6 +38,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
     getStartServices: MlCoreSetup['getStartServices'];
+    mlCapabilities: MlCapabilities;
   };
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
@@ -47,15 +49,18 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   ruleInterval,
   alertNotifyWhen,
   getStartServices,
+  mlCapabilities,
 }) => {
   const {
     services: { http },
-  } = useMlKibana();
+  } = useKibana();
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let mounted = true;
+
+    if (!mlCapabilities.canCreateJob) return;
 
     getStartServices().then((startServices) => {
       const locator = startServices[2].locator;
@@ -70,9 +75,9 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     return () => {
       mounted = false;
     };
-  }, [getStartServices]);
+  }, [getStartServices, mlCapabilities]);
 
-  const mlHttpService = useMemo(() => new HttpService(http), [http]);
+  const mlHttpService = useMemo(() => new HttpService(http!), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
   const alertingApiService = useMemo(() => alertingApiProvider(mlHttpService), [mlHttpService]);
   const { displayErrorToast } = useToastNotificationService();
