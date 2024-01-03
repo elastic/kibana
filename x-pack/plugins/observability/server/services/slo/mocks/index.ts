@@ -25,6 +25,7 @@ const createTransformManagerMock = (): jest.Mocked<TransformManager> => {
     uninstall: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    inspect: jest.fn(),
   };
 };
 
@@ -35,6 +36,7 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
     uninstall: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    inspect: jest.fn(),
   };
 };
 

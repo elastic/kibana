@@ -7,7 +7,8 @@
 
 import Axios from 'axios';
 import { createHash } from 'crypto';
-import { closeSync, mkdirSync, openSync, writeSync } from 'fs';
+import { mkdir, open } from 'fs/promises';
+import { writeSync } from 'fs';
 import { dirname } from 'path';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
@@ -21,9 +22,8 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
 
   const hash = createHash('sha256');
 
-  mkdirSync(dirname(path), { recursive: true });
-  const handle = openSync(path, 'w');
-
+  await mkdir(dirname(path), { recursive: true });
+  const handle = await open(path, 'w');
   try {
     const response = await Axios.request<Readable>({
       url,
@@ -32,7 +32,7 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
     });
 
     response.data.on('data', (chunk: Buffer) => {
-      writeSync(handle, chunk);
+      writeSync(handle.fd, chunk);
       hash.update(chunk);
     });
 
@@ -43,7 +43,7 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
 
     throw new Error(`Unable to download ${url}: ${error}`);
   } finally {
-    closeSync(handle);
+    await handle.close();
   }
 
   return hash.digest('hex');

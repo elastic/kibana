@@ -8,13 +8,13 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "dataViews"
+      "dataViews",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "visualizations"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
       "data",
