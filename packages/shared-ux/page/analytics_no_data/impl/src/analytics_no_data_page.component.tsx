@@ -122,7 +122,7 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors[pageFlavor]({
     kibanaGuideDocLink,
     prependBasePath,
-    hasApiKeys: hasApiKeys ?? false,
+    hasApiKeys: Boolean(hasApiKeys),
   });
 
   return (
