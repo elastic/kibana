@@ -54,14 +54,19 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   query: {
     bool: {
       filter: [{ term: { policy_template: policyTemplate } }],
-      must: {
-        range: {
-          '@timestamp': {
-            gte: 'now-1d',
-            lte: 'now',
+      must: [
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-1d',
+              lte: 'now',
+            },
           },
         },
-      },
+        {
+          term: { is_enabled_rules_score: true },
+        },
+      ],
     },
   },
 });

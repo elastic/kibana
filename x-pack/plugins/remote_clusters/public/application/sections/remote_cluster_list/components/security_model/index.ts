@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getAsset } from '../../archive';
+export { SecurityModel } from './security_model';

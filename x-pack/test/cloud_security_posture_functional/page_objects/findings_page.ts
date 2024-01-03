@@ -220,6 +220,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const flyoutButton = await table.findAllByTestSubject('docTableExpandToggleColumn');
       await flyoutButton[rowIndex].click();
     },
+
+    async toggleEditDataViewFieldsOption(columnId: string) {
+      const element = await this.getElement();
+      const column = await element.findByCssSelector(`[data-gridcell-column-id="${columnId}"]`);
+      const button = await column.findByCssSelector('.euiDataGridHeaderCell__button');
+      return await button.click();
+    },
   });
 
   const createTableObject = (tableTestSubject: string) => ({
