@@ -7,7 +7,6 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-// xml-crypto is part of devDependencies
 
 import { SignedXml } from 'xml-crypto';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
