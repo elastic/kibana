@@ -16,6 +16,8 @@ import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import './field_item_button.scss';
 
+const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
+
 /**
  * Props of FieldItemButton component
  */
@@ -28,7 +30,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   flush?: FieldButtonProps['flush'];
-  dragHandle?: FieldButtonProps['dragHandle'];
+  withDragIcon?: boolean;
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];
@@ -52,6 +54,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param getCustomFieldType
  * @param dataTestSubj
  * @param size
+ * @param withDragIcon
  * @param onClick
  * @param shouldAlwaysShowAction
  * @param buttonAddFieldToWorkspaceProps
@@ -73,6 +76,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   getCustomFieldType,
   dataTestSubj,
   size,
+  withDragIcon,
   onClick,
   shouldAlwaysShowAction,
   buttonAddFieldToWorkspaceProps,
@@ -104,7 +108,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
-      [`unifiedFieldListItemButton--withDragHandle`]: Boolean(otherProps.dragHandle),
+      [`unifiedFieldListItemButton--withDragIcon`]: Boolean(withDragIcon),
     },
     className
   );
@@ -196,7 +200,16 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           },
         }),
       }}
-      fieldIcon={<FieldIcon {...iconProps} />}
+      fieldIcon={
+        <div className="unifiedFieldListItemButton__fieldIconContainer">
+          <div className="unifiedFieldListItemButton__fieldIcon">
+            <FieldIcon {...iconProps} />
+          </div>
+          {withDragIcon && (
+            <div className="unifiedFieldListItemButton__fieldIconDrag">{DRAG_ICON}</div>
+          )}
+        </div>
+      }
       fieldName={
         <EuiHighlight
           search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}

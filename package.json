@@ -1112,6 +1112,7 @@
     "vega-spec-injector": "^0.0.2",
     "vega-tooltip": "^0.28.0",
     "vinyl": "^2.2.0",
+    "wellknown": "^0.5.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.5.0",
     "xstate": "^4.38.2",
