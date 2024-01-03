@@ -179,12 +179,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        <HideShowContainer
-          $isVisible={TimelineTabs.esql === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
-        >
-          <EsqlTab timelineId={timelineId} />
-        </HideShowContainer>
+        {showTimeline && activeTimelineTab === TimelineTabs.esql && (
+          <HideShowContainer
+            $isVisible={true}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
+          >
+            <EsqlTab timelineId={timelineId} />
+          </HideShowContainer>
+        )}
         <HideShowContainer
           $isVisible={TimelineTabs.pinned === activeTimelineTab}
           data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
