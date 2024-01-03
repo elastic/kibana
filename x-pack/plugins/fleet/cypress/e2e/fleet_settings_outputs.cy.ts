@@ -174,8 +174,9 @@ describe('Outputs', () => {
         cy.wait('@saveOutput').then((interception) => {
           const responseBody = interception.response?.body;
           cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
-          expect(responseBody?.item.service_token).to.equal(undefined);
-          expect(responseBody?.item.secrets.service_token.id).not.to.equal(undefined);
+          // There is no Fleet server, therefore the service token should have been saved in plain text.
+          expect(responseBody?.item.service_token).to.equal('service_token');
+          expect(responseBody?.item.secrets).to.equal(undefined);
         });
 
         cy.get('[placeholder="Specify host URL"').should('have.value', 'https://localhost:5000');
