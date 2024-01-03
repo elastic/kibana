@@ -68,9 +68,8 @@ const flavors: {
           defaultMessage: 'Add data',
         }),
         description: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchDescription', {
-          defaultMessage: hasApiKeys
-            ? `[Placeholder text for prompt to add data when user has created a valid API key.]`
-            : `[Placeholder text for prompt to add data when user has **not** created a valid API key.]`,
+          defaultMessage:
+            'Set up your programming language client, ingest some data, and start searching.',
         }),
         'data-test-subj': 'kbnOverviewElasticsearchAddData',
         href: hasApiKeys

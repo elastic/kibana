@@ -19,7 +19,6 @@ import { DocumentationLink } from './documentation_link';
 export interface AddDataPromptComponentProps {
   addDataHref: string;
   docLink?: string;
-  hasApiKeys?: boolean | null;
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
@@ -34,7 +33,6 @@ const MAX_WIDTH = 830;
 export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   addDataHref,
   docLink: docLink,
-  hasApiKeys,
   emptyPromptColor = EMPTY_PROMPT_COLOR_DEFAULT,
 }) => {
   const createDataViewText = i18n.translate('sharedUXPackages.addDataPrompt.addDataText', {
@@ -61,18 +59,14 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
     </h2>
   );
 
-  const body = hasApiKeys ? (
+  const body = (
     <p>
       <FormattedMessage
         id="sharedUXPackages.addDataPrompt.dataViewExplanation"
-        defaultMessage={`[Placeholder text for prompt to add data when user has created a valid API key.]`}
-      />
-    </p>
-  ) : (
-    <p>
-      <FormattedMessage
-        id="sharedUXPackages.addDataPrompt.dataViewExplanation"
-        defaultMessage={`[Placeholder text for prompt to add data when user **does not have** valid API keys.]`}
+        defaultMessage="Data views identify the Elasticsearch data you want to explore.
+          Once you add your data to Elasticsearch, you can point data views to one or
+          more of the created indices, data streams, and index aliases. Add your data now
+          to start searching."
       />
     </p>
   );
