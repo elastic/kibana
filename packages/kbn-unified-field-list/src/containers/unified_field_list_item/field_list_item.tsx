@@ -349,6 +349,7 @@ function UnifiedFieldListItemComponent({
             fieldSearchHighlight={highlight}
             isEmpty={isEmpty}
             isActive={infoIsOpen}
+            withDragIcon={!isDragDisabled}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
             onClick={field.type !== '_source' ? togglePopover : undefined}
