@@ -6,6 +6,7 @@
  */
 
 import { readFile } from 'fs/promises';
+import dns from 'dns/promises';
 
 import fetch from 'node-fetch';
 
@@ -24,9 +25,11 @@ jest.mock('../app_context', () => {
 
 jest.mock('fs/promises');
 jest.mock('node-fetch');
+jest.mock('dns/promises');
 
 const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
 const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedDnsLookup = dns.lookup as jest.MockedFunction<typeof dns.lookup>;
 
 const emptyResponse = {
   status: 200,
@@ -39,6 +42,9 @@ describe('getAvailableVersions', () => {
   beforeEach(() => {
     mockedReadFile.mockReset();
     mockedFetch.mockReset();
+    mockedDnsLookup.mockReset();
+
+    mockedDnsLookup.mockResolvedValue({ address: '', family: 0 });
   });
 
   it('should return available version and filter version < 7.17', async () => {
@@ -203,5 +209,19 @@ describe('getAvailableVersions', () => {
 
     // Should sort, uniquify and filter out versions < 7.17
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+  });
+
+  it('should gracefully handle DNS resolution errors when fetching from product versions API', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedDnsLookup.mockRejectedValue('ENOTFOUND');
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+
+    expect(mockedDnsLookup).toBeCalledTimes(1);
+    expect(mockedFetch).not.toBeCalled();
+    expect(mockedReadFile).toBeCalledTimes(1);
   });
 });

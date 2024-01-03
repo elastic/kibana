@@ -7,6 +7,7 @@
 
 import { readFile } from 'fs/promises';
 import Path from 'path';
+import dns from 'dns/promises';
 
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
@@ -112,6 +113,16 @@ export const getAvailableVersions = async ({
 
 async function fetchAgentVersionsFromApi() {
   const logger = appContextService.getLogger();
+
+  // Try to run a DNS lookup on the product versions URL, which should fail fast in most
+  // airgapped environments compared to a full DNS resolution. If the API's DNS name can't
+  // be resolved don't try to fetch from the API.
+  try {
+    await dns.lookup(PRODUCT_VERSIONS_URL);
+  } catch (error) {
+    logger.debug(`Unable to resolve ${PRODUCT_VERSIONS_URL}, skipping API call`);
+    return [];
+  }
 
   const options = {
     headers: {
