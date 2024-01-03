@@ -40,9 +40,9 @@ export interface CloudPostureTableResult {
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
-/*
-  Hook for managing common table state and methods for Cloud Posture
-*/
+/**
+ * @deprecated will be replaced by useCloudPostureDataTable
+ */
 export const useCloudPostureTable = ({
   defaultQuery = getDefaultQuery,
   dataView,

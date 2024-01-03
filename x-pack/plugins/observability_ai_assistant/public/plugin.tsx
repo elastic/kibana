@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ComponentType, lazy, Ref } from 'react';
 import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
@@ -17,6 +17,8 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { createService } from './service/create_service';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
@@ -28,6 +30,7 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 import { registerTelemetryEventTypes } from './analytics';
+import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -117,9 +120,54 @@ export class ObservabilityAIAssistantPlugin
       });
     });
 
+    const withProviders = <P extends {}, R = {}>(
+      Component: ComponentType<P>,
+      services: Omit<CoreStart, 'plugins'> & {
+        plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
+      }
+    ) =>
+      React.forwardRef((props: P, ref: Ref<R>) => (
+        <KibanaContextProvider services={services}>
+          <ObservabilityAIAssistantProvider value={service}>
+            <Component {...props} ref={ref} />
+          </ObservabilityAIAssistantProvider>
+        </KibanaContextProvider>
+      ));
+
+    const services = {
+      ...coreStart,
+      plugins: {
+        start: pluginsStart,
+      },
+    };
+
+    const isEnabled = service.isEnabled();
+
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      ObservabilityAIAssistantContextualInsight: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/insight/insight').then((m) => ({ default: m.Insight }))
+              ),
+              services
+            )
+          )
+        : null,
+      ObservabilityAIAssistantActionMenuItem: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/action_menu_item/action_menu_item').then((m) => ({
+                  default: m.ObservabilityAIAssistantActionMenuItem,
+                }))
+              ),
+              services
+            )
+          )
+        : null,
     };
   }
 }
