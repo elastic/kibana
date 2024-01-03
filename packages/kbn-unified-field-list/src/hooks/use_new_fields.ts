@@ -7,8 +7,22 @@
  */
 
 import { useMemo } from 'react';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { ExistingFieldsReader, type FieldListItem, GroupedFieldsParams } from '../..';
+import type { FieldListItem } from '../types';
+import type { ExistingFieldsReader } from './use_existing_fields';
+
+export interface UseNewFieldsParams<T extends FieldListItem> {
+  dataView?: DataView | null;
+  allFields: T[] | null; // `null` is for loading indicator
+  getNewFieldsBySpec?: (fields: FieldSpec[], dataView: DataView | null) => T[];
+  fieldsExistenceReader: ExistingFieldsReader;
+}
+
+export interface UseNewFieldsResult<T extends FieldListItem> {
+  allFieldsModified: T[] | null;
+  hasNewFields: boolean;
+}
 
 /**
  * This hook is used to get the new fields of previous fields for wildcards request, and merges those
@@ -19,31 +33,30 @@ export function useNewFields<T extends FieldListItem = DataViewField>({
   allFields,
   getNewFieldsBySpec,
   fieldsExistenceReader,
-}: {
-  dataView?: DataView | null;
-  allFields: GroupedFieldsParams<T>['allFields'];
-  getNewFieldsBySpec: GroupedFieldsParams<T>['getNewFieldsBySpec'];
-  fieldsExistenceReader: ExistingFieldsReader;
-}) {
+}: UseNewFieldsParams<T>): UseNewFieldsResult<T> {
+  const dataViewId = dataView?.id;
+
   const newFields = useMemo(() => {
-    return allFields && dataView?.id && getNewFieldsBySpec
-      ? getNewFieldsBySpec(fieldsExistenceReader.getNewFields(dataView?.id), dataView)
-      : null;
+    const newLoadedFields =
+      allFields && dataView?.id && getNewFieldsBySpec
+        ? getNewFieldsBySpec(fieldsExistenceReader.getNewFields(dataView?.id), dataView)
+        : null;
+
+    return newLoadedFields?.length ? newLoadedFields : null;
   }, [allFields, dataView, fieldsExistenceReader, getNewFieldsBySpec]);
 
   const hasNewFields = Boolean(allFields && newFields && newFields.length > 0);
 
   const allFieldsModified = useMemo(() => {
-    if (!allFields || !newFields?.length || !dataView) return allFields;
+    if (!allFields || !newFields?.length || !dataViewId) return allFields;
     // Filtering out fields that e.g. Discover provides with fields that were provided by the previous fieldsForWildcards request
     // These can be replaced by the new fields, which are mapped correctly, and therefore can be used in the right way
-    const allFieldsExlNew =
-      allFields && newFields
-        ? allFields.filter((field) => !newFields.some((newField) => newField.name === field.name))
-        : allFields;
+    const allFieldsExlNew = allFields.filter(
+      (field) => !newFields.some((newField) => newField.name === field.name)
+    );
 
-    return newFields ? [...allFieldsExlNew, ...newFields] : allFields;
-  }, [newFields, allFields, dataView]);
+    return [...allFieldsExlNew, ...newFields];
+  }, [newFields, allFields, dataViewId]);
 
   return { allFieldsModified, hasNewFields };
 }

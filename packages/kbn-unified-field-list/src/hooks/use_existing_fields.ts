@@ -20,6 +20,7 @@ import { ExistenceFetchStatus } from '../types';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 const generateId = htmlIdGenerator();
+const DEFAULT_EMPTY_NEW_FIELDS: FieldSpec[] = [];
 
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
@@ -294,10 +295,10 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
       const info = existingFieldsByDataViewMap[dataViewId];
 
       if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
-        return info?.newFields ?? [];
+        return info?.newFields ?? DEFAULT_EMPTY_NEW_FIELDS;
       }
 
-      return [];
+      return DEFAULT_EMPTY_NEW_FIELDS;
     },
     [existingFieldsByDataViewMap]
   );

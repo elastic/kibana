@@ -10,9 +10,9 @@ import { groupBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
-import type { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { useNewFields } from './use_new_fields';
+import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 import {
   type FieldListGroups,
   type FieldsGroup,
@@ -42,7 +42,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
-  getNewFieldsBySpec?: (fields: FieldSpec[], dataView: DataView | null) => T[];
+  getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
