@@ -16,6 +16,8 @@ import {
   EuiAccordion,
   EuiButton,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
@@ -125,31 +127,36 @@ class ReportingPanelContentUi extends Component<Props, State> {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) {
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-      return <ErrorUnsavedWorkPanel />;
-    } else if (exceedsMaxLength) {
-      return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    }
+    // if (isUnsaved) {
+    //   if (exceedsMaxLength) {
+    //     return <ErrorUrlTooLongPanel isUnsaved />;
+    //   }
+    //   return <ErrorUnsavedWorkPanel />;
+    // } else if (exceedsMaxLength) {
+    //   return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    // }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButton
-            color={isUnsaved ? 'warning' : 'primary'}
-            fullWidth
-            onClick={copy}
-            size="s"
-            data-test-subj="shareReportingCopyURL"
-          >
-            <FormattedMessage
-              id="xpack.reporting.panelContent.copyUrlButtonLabel"
-              defaultMessage="Copy POST URL"
-            />
-          </EuiButton>
-        )}
-      </EuiCopy>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={0}>
+          <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+            {(copy) => (
+              <EuiButton
+                color={isUnsaved ? 'warning' : 'primary'}
+                fullWidth
+                onClick={copy}
+                size="s"
+                data-test-subj="shareReportingCopyURL"
+              >
+                <FormattedMessage
+                  id="xpack.reporting.panelContent.copyUrlButtonLabel"
+                  defaultMessage="Copy POST URL"
+                />
+              </EuiButton>
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>{isUnsaved ? (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved />) : (<ErrorUnsavedWorkPanel />)) : (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved={false} />) : null)}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -163,7 +170,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             helpText={
               <FormattedMessage
                 id="xpack.reporting.panelContent.saveWorkDescription"
-                defaultMessage="Please save your work before generating a report."
+                defaultMessage="Save your work before generating a report."
               />
             }
           >

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiForm, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiForm, EuiModalBody, EuiModalFooter, EuiModalHeader, EuiModalHeaderTitle, EuiSpacer, } from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -102,28 +102,31 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   };
 
   return (
-    <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-      <EuiSpacer size="xs" />
-      <EuiTitle>
-        <EuiText>Share as a CSV</EuiText>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFormRow>
-        <EuiText size="s">{renderDescription(objectType)}</EuiText>
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiButton
-        disabled={Boolean(createReportingJob)}
-        fill
-        onClick={() => generateReportingJob()}
-        data-test-subj="generateReportButton"
-        size="s"
-        isLoading={Boolean(createReportingJob)}
-      >
-        <EuiSpacer size="xs" />
-        <FormattedMessage id="xpack.reporting.generateButtonLabel" defaultMessage="Generate CSV" />
-      </EuiButton>
-    </EuiForm>
+    <>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Generate a CSV</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+          <EuiCallOut
+            size="s"
+            title={renderDescription(objectType)}
+            iconType="iInCircle"
+          />
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton
+          disabled={Boolean(createReportingJob)}
+          fill
+          onClick={() => generateReportingJob()}
+          data-test-subj="generateReportButton"
+          isLoading={Boolean(createReportingJob)}
+        >
+          <FormattedMessage id="xpack.reporting.generateButtonLabel" defaultMessage="Generate CSV" />
+        </EuiButton>
+      </EuiModalFooter>
+    </>
   );
 };
 

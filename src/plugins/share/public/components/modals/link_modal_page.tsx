@@ -9,6 +9,7 @@
 import React, { Component } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
@@ -22,6 +23,13 @@ import {
   EuiModalHeaderTitle,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiRadioGroup,
+  EuiSpacer,
   EuiSwitch,
   EuiIconTip,
   EuiSwitchEvent,
@@ -452,3 +460,4 @@ export class LinkModal extends Component<LinkModalProps, State> {
     );
   }
 }
+

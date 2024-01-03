@@ -7,6 +7,9 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCheckboxGroup,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -21,9 +24,15 @@ import {
   EuiButton,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiRadioGroup,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiIconTip,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -508,7 +517,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                     data-test-subj="embedUrlParamExtension"
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem grow={0}>
                   <EuiRadioGroup
                     options={radioOptions}
                     onChange={(id) => this.setState({ selectedRadio: id })}
