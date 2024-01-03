@@ -118,7 +118,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
               ? [
                   {
                     label: i18n.translate('xpack.ml.jobSelector.createNewLabel', {
-                      defaultMessage: '---Create new---',
+                      defaultMessage: '--- Create new ---',
                     }),
                     value: 'createNew',
                   },
