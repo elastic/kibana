@@ -46,7 +46,6 @@ export function getEntitiesAndGenerateAlerts(
         alertsClient!.report({
           id: getAlertId(entityName, context.containingBoundaryName),
           actionGroup: ActionGroupId,
-          state: containment,
           context: context,
         });
       }
