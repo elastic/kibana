@@ -1587,7 +1587,7 @@
     "jsondiffpatch": "0.4.1",
     "license-checker": "^25.0.1",
     "listr": "^0.14.1",
-    "lmdb": "^2.6.9",
+    "lmdb": "^2.9.2",
     "loader-utils": "^2.0.4",
     "marge": "^1.0.1",
     "micromatch": "^4.0.5",
