@@ -38,6 +38,7 @@
     "@kbn/no-data-page-plugin",
     "@kbn/core-application-browser",
     "@kbn/core-doc-links-browser",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",
