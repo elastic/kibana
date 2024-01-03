@@ -282,7 +282,8 @@ export const AgentUpgradeStatus: React.FC<{
   const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
   const isAgentLessThanLatestVersion =
     !!latestAgentVersion &&
-    semverLt(agent.local_metadata?.elastic?.agent?.version, latestAgentVersion);
+    agent?.local_metadata?.elastic?.agent?.version &&
+    semverLt(agent.local_metadata.elastic.agent.version, latestAgentVersion);
 
   if (isAgentUpgradable && isAgentLessThanLatestVersion) {
     return (
