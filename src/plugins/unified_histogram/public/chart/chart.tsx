@@ -27,6 +27,7 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './hooks/use_chart_panels';
@@ -280,6 +281,32 @@ export function Chart({
 
   const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
+  const removeTables = (attributes: LensAttributes) => {
+    const layers = attributes.state.datasourceStates.textBased?.layers;
+
+    const newState = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        dataSourceStates: {
+          formBased: attributes.state.datasourceStates.formBased,
+        },
+      },
+    };
+
+    if (layers) {
+      newState.state.datasourceStates.textBased = { layers: {} };
+      for (const key of Object.keys(layers)) {
+        // Modify the value as needed, e.g., appending ' modified' to each value
+        const newLayer = { ...layers[key] };
+        delete newLayer.table;
+        newState.state.datasourceStates.textBased.layers[key] = newLayer;
+      }
+    }
+
+    return newState;
+  };
+
   return (
     <EuiFlexGroup
       className={className}
@@ -461,7 +488,9 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
         <LensSaveModalComponent
-          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          initialInput={
+            removeTables(lensAttributesContext.attributes) as unknown as LensEmbeddableInput
+          }
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}

@@ -26,6 +26,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
+import { DataDocuments$ } from '@kbn/discover-plugin/public/application/main/services/discover_data_state_container';
 import { Chart } from '../chart';
 import type {
   UnifiedHistogramChartContext,
@@ -175,6 +176,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+
+  documents$: DataDocuments$;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -203,6 +206,7 @@ export const UnifiedHistogramLayout = ({
   disabledActions,
   lensSuggestionsApi,
   input$,
+  documents$,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -231,6 +235,7 @@ export const UnifiedHistogramLayout = ({
     data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
+    documents$,
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;

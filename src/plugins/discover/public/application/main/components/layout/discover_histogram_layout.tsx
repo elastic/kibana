@@ -50,6 +50,7 @@ export const DiscoverHistogramLayout = ({
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
+      documents$={dataState.data$.documents$}
       container={container}
       css={histogramLayoutCss}
     >

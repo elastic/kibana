@@ -1106,7 +1106,7 @@ export class Embeddable
     const getInternalTables = (states: Record<string, unknown>) => {
       const result: Record<string, Datatable> = {};
       if ('textBased' in states) {
-        const layers = (states.valueBased as TextBasedPersistedState).layers;
+        const layers = (states.textBased as TextBasedPersistedState).layers;
         for (const layer in layers) {
           if (layers[layer] && layers[layer].table) {
             result[layer] = layers[layer].table!;

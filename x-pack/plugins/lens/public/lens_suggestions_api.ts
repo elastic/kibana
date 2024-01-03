@@ -6,12 +6,14 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataDocuments$ } from '@kbn/discover-plugin/public/application/main/services/discover_data_state_container';
+import { TextBasedPersistedState } from './datasources/text_based/types';
 import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
 
 interface SuggestionsApi {
-  context: VisualizeFieldContext | VisualizeEditorContext;
+  context: (VisualizeFieldContext | VisualizeEditorContext) & { documents$?: DataDocuments$ };
   dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
@@ -25,6 +27,7 @@ export const suggestionsApi = ({
   visualizationMap,
   excludedVisualizations,
 }: SuggestionsApi) => {
+  const { documents$, ...initialContext } = context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
@@ -39,7 +42,7 @@ export const suggestionsApi = ({
         layers: {},
         fieldList: [],
         indexPatternRefs: [],
-        initialContext: context,
+        initialContext,
       },
     },
   };
@@ -89,5 +92,19 @@ export const suggestionsApi = ({
   // until we separate the text based suggestions logic from the dataview one,
   // we want to sort XY first
   const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
+
+  if (documents$?.value) {
+    sortXYFirst.forEach((suggestion) => {
+      const { layers } = suggestion.datasourceState as TextBasedPersistedState;
+      Object.keys(layers).forEach((key) => {
+        const layer = layers[key];
+        layer.table = {
+          type: 'datatable',
+          rows: documents$.value.result!.map((r) => r.raw),
+          columns: documents$.value.textBasedQueryColumns!,
+        };
+      });
+    });
+  }
   return sortXYFirst;
 };
