@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  Indicator,
+} from '@kbn/slo-schema';
 
-export const isApmIndicatorType = (indicatorType: SLOWithSummaryResponse['indicator']['type']) =>
-  ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'].includes(indicatorType);
+export const isApmIndicatorType = (indicator: Indicator): boolean =>
+  apmTransactionDurationIndicatorSchema.is(indicator) ||
+  apmTransactionErrorRateIndicatorSchema.is(indicator);
