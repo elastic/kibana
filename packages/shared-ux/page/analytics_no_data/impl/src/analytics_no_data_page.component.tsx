@@ -5,11 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
 import { i18n } from '@kbn/i18n';
+import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
-import { AnalyticsNoDataPageFlavor, Services } from '@kbn/shared-ux-page-analytics-no-data-types';
+import { getHasApiKeys$ } from '../lib/get_has_api_keys';
 
 /**
  * Props for the pure component.
@@ -24,7 +28,7 @@ export interface Props {
 }
 
 type AnalyticsNoDataPageProps = Props &
-  Pick<Services, 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor' | 'useHasApiKeys'>;
+  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'>;
 
 const flavors: {
   [K in AnalyticsNoDataPageFlavor]: (deps: {
@@ -116,8 +120,8 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   showPlainSpinner,
   ...services
 }) => {
-  const { prependBasePath, kibanaGuideDocLink, useHasApiKeys, pageFlavor } = services;
-  const { hasApiKeys } = useHasApiKeys() ?? {};
+  const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
+  const { hasApiKeys } = useObservable(useMemo(() => getHasApiKeys$({ get }), [get])) ?? {};
 
   const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors[pageFlavor]({
     kibanaGuideDocLink,

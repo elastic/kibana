@@ -18,14 +18,7 @@ export type NoDataPageServiceFactory = KibanaPluginServiceFactory<
 export const noDataPageServiceFactory: NoDataPageServiceFactory = ({ startPlugins }) => {
   const { noDataPage } = startPlugins;
 
-  const defaults = {
-    getAnalyticsNoDataPageFlavor: () => 'kibana' as const,
-    useHasApiKeys: () => null,
-  };
-
   return {
-    getAnalyticsNoDataPageFlavor:
-      noDataPage?.getAnalyticsNoDataPageFlavor ?? defaults.getAnalyticsNoDataPageFlavor,
-    useHasApiKeys: noDataPage?.useHasApiKeys ?? defaults.useHasApiKeys,
+    getAnalyticsNoDataPageFlavor: noDataPage?.getAnalyticsNoDataPageFlavor ?? (() => 'kibana'),
   };
 };

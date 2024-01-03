@@ -18,14 +18,11 @@ import {
  * A list of services that are consumed by this component.
  */
 export interface Services {
+  kibanaGuideDocLink: string;
   customBranding: { hasCustomBranding$: Observable<boolean> };
   prependBasePath: (path: string) => string;
-  /** A link to documentation. */
-  kibanaGuideDocLink: string;
-  /** The flavor of the empty page to use. */
+  getHttp: <T>(path: string) => Promise<T>;
   pageFlavor: AnalyticsNoDataPageFlavor;
-  /** Hook to query whether API keys exist in the deployment. */
-  useHasApiKeys: NoDataPagePluginSetup['useHasApiKeys'];
 }
 
 /**
@@ -51,6 +48,7 @@ export interface KibanaDependencies {
       basePath: {
         prepend: (path: string) => string;
       };
+      get: <T>(path: string, options?: object) => Promise<T>;
     };
   };
   noDataPage?: NoDataPagePluginSetup;

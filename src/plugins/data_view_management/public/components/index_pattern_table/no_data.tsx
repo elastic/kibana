@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { getHasApiKeys$ } from '@kbn/shared-ux-page-analytics-no-data';
+import { HttpStart } from '@kbn/core-http-browser';
 import { AddDataPrompt } from '../add_data_prompt';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import type { DataViewTableController } from './data_view_table_controller';
@@ -21,18 +24,22 @@ import type { DataViewTableController } from './data_view_table_controller';
  * @internal
  */
 export interface NoDataProps {
+  noDataPage?: NoDataPagePluginStart;
   docLinks: DocLinksStart;
   uiSettings: IUiSettingsClient;
+  http: HttpStart;
   application: ApplicationStart;
   dataViewController: DataViewTableController;
   setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  noDataPage?: NoDataPagePluginStart;
 }
 
-const NoDataServerlessSearch: React.FC<
-  Pick<NoDataProps, 'noDataPage' | 'uiSettings' | 'docLinks'>
-> = ({ noDataPage, uiSettings, docLinks }) => {
-  const { hasApiKeys, error, loading } = noDataPage?.useHasApiKeys() ?? {};
+const NoDataServerlessSearch: React.FC<Pick<NoDataProps, 'uiSettings' | 'http' | 'docLinks'>> = ({
+  uiSettings,
+  http,
+  docLinks,
+}) => {
+  const { hasApiKeys, error, loading } =
+    useObservable(useMemo(() => getHasApiKeys$(http), [http])) ?? {};
 
   if (error) {
     throw error;
@@ -56,8 +63,9 @@ const NoDataServerlessSearch: React.FC<
  */
 export const NoData: React.FC<NoDataProps> = ({
   noDataPage,
-  uiSettings,
   docLinks,
+  http,
+  uiSettings,
   application,
   dataViewController,
   setShowCreateDialog,
@@ -66,13 +74,7 @@ export const NoData: React.FC<NoDataProps> = ({
 
   switch (flavor) {
     case 'serverless_search': {
-      return (
-        <NoDataServerlessSearch
-          noDataPage={noDataPage}
-          uiSettings={uiSettings}
-          docLinks={docLinks}
-        />
-      );
+      return <NoDataServerlessSearch http={http} uiSettings={uiSettings} docLinks={docLinks} />;
     }
 
     default:

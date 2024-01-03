@@ -17,10 +17,7 @@ import type {
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { of } from 'rxjs';
 
-type ServiceArguments = Pick<
-  AnalyticsNoDataPageServices,
-  'kibanaGuideDocLink' | 'customBranding' | 'useHasApiKeys'
->;
+type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink' | 'customBranding'>;
 
 export type Params = ArgumentParams<{}, ServiceArguments> & KibanaNoDataPageStorybookParams;
 
@@ -34,10 +31,6 @@ export class StorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {};
   serviceArguments = {
-    useHasApiKeys: {
-      control: 'function',
-      defaultValue: () => null,
-    },
     kibanaGuideDocLink: {
       control: 'text',
       defaultValue: 'Kibana guide',
@@ -60,8 +53,8 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       pageFlavor: 'kibana',
       prependBasePath: (path) => path,
+      getHttp: <T>() => Promise.resolve({} as T),
       ...kibanaNoDataMock.getServices(params),
-      useHasApiKeys: params.useHasApiKeys,
     };
   }
 

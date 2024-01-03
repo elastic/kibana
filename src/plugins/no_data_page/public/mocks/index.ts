@@ -12,7 +12,6 @@ const initialize = <T extends NoDataPagePublicSetup>() => {
   return () =>
     ({
       getAnalyticsNoDataPageFlavor: () => 'kibana',
-      useHasApiKeys: () => null,
     } as T);
 };
 

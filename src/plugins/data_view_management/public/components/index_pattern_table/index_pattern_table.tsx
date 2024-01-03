@@ -78,6 +78,7 @@ export const IndexPatternTable = ({
 }: Props) => {
   const {
     setBreadcrumbs,
+    http,
     uiSettings,
     application,
     chrome,
@@ -369,6 +370,7 @@ export const IndexPatternTable = ({
           noDataPage={noDataPage}
           docLinks={docLinks}
           uiSettings={uiSettings}
+          http={http}
           application={application}
           dataViewController={dataViewController}
           setShowCreateDialog={setShowCreateDialog}

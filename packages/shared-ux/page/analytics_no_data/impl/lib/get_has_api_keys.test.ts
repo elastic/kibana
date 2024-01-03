@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { getHasApiKeys$ } from './get_has_api_keys';
 
-export interface NoDataPageService {
-  getAnalyticsNoDataPageFlavor: NoDataPagePluginStart['getAnalyticsNoDataPageFlavor'];
-}
+let foo = getHasApiKeys$;
+foo = foo;

@@ -16,7 +16,7 @@ export const getServicesMock = () => {
     kibanaGuideDocLink: 'Kibana guide',
     customBranding: { hasCustomBranding$: of(false) },
     prependBasePath: (path) => path,
-    useHasApiKeys: () => null,
+    getHttp: <T>() => Promise.resolve({} as T),
     pageFlavor: 'kibana',
   };
 
@@ -30,7 +30,7 @@ export const getServicesMockCustomBranding = () => {
     customBranding: { hasCustomBranding$: of(true) },
     kibanaGuideDocLink: 'Kibana guide',
     prependBasePath: (path) => path,
-    useHasApiKeys: () => null,
+    getHttp: <T>() => Promise.resolve({} as T),
     pageFlavor: 'kibana',
   };
 

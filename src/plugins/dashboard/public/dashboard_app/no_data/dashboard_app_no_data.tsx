@@ -23,7 +23,7 @@ export const DashboardAppNoDataPage = ({
     application,
     data: { dataViews },
     dataViewEditor,
-    http: { basePath },
+    http: { basePath, get },
     documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
     customBranding,
     noDataPage,
@@ -38,7 +38,7 @@ export const DashboardAppNoDataPage = ({
         },
       },
       application,
-      http: { basePath },
+      http: { basePath, get },
       customBranding: {
         hasCustomBranding$: customBranding.hasCustomBranding$,
       },
