@@ -149,7 +149,7 @@ describe('Dependencies with high volume of data', () => {
     );
 
     cy.getByTestSubj('dependenciesTable');
-    cy.contains('nav', 'Page 1 of 400');
+    cy.contains('nav', 'Page 1 of 60');
   });
 
   it('shows service dependencies', () => {
