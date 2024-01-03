@@ -79,11 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should display a log level badge when available', async () => {
       await dataGrid.clickRowToggle();
-      await testSubjects.existOrFail('logExplorerFlyoutLogLevel');
+      await testSubjects.existOrFail('dataTablePopoverChip_logExplorerFlyoutLogLevel');
       await dataGrid.closeFlyout();
 
       await dataGrid.clickRowToggle({ rowIndex: 1 });
-      await testSubjects.missingOrFail('logExplorerFlyoutLogLevel');
+      await testSubjects.missingOrFail('dataTablePopoverChip_logExplorerFlyoutLogLevel');
     });
 
     it('should display a message code block when available', async () => {
