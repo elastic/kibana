@@ -84,6 +84,8 @@ export interface EditConfigPanelProps {
   hidesSuggestions?: boolean;
   /** Optional callback for apply flyout button */
   onApplyCb?: () => void;
+  /** Optional callback for cancel flyout button */
+  onCancelCb?: () => void;
 }
 
 export interface LayerConfigurationProps {

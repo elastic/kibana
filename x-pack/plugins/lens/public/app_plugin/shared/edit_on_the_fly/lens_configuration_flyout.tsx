@@ -65,6 +65,7 @@ export function LensEditConfigurationFlyout({
   deletePanel,
   hidesSuggestions,
   onApplyCb,
+  onCancelCb,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -172,6 +173,7 @@ export function LensEditConfigurationFlyout({
     if (isNewPanel && deletePanel) {
       deletePanel();
     }
+    onCancelCb?.();
     closeFlyout?.();
   }, [
     attributesChanged,
@@ -185,6 +187,7 @@ export function LensEditConfigurationFlyout({
     updatePanelState,
     updateSuggestion,
     updateByRefInput,
+    onCancelCb,
   ]);
 
   const onApply = useCallback(() => {

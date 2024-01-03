@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -28,15 +29,19 @@ export async function executeEditEmbeddableAction({
   core,
   attributes,
   lensEvent,
+  container,
   onUpdate,
   onApply,
+  onCancel,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
   attributes: TypedLensByValueInput['attributes'];
   lensEvent: LensChartLoadEvent;
+  container?: HTMLElement | null;
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onApply?: () => void;
+  onCancel?: () => void;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
   if (!isCompatibleAction) {
@@ -110,33 +115,40 @@ export async function executeEditEmbeddableAction({
       displayFlyoutHeader
       datasourceId={activeDatasourceId}
       onApplyCb={onApply}
+      onCancelCb={onCancel}
       canEditTextBasedQuery={activeDatasourceId === 'textBased'}
       updateSuggestion={onUpdateSuggestion}
     />
   );
 
-  const handle = core.overlays.openFlyout(
-    toMountPoint(
-      React.cloneElement(ConfigPanel, {
-        closeFlyout: () => {
-          handle.close();
-        },
-      }),
+  // in case an element is given render the component in the container,
+  // otherwise a flyout will open
+  if (container) {
+    ReactDOM.render(ConfigPanel, container);
+  } else {
+    const handle = core.overlays.openFlyout(
+      toMountPoint(
+        React.cloneElement(ConfigPanel, {
+          closeFlyout: () => {
+            handle.close();
+          },
+        }),
+        {
+          theme$: core.theme.theme$,
+        }
+      ),
       {
-        theme$: core.theme.theme$,
+        className: 'lnsConfigPanel__overlay',
+        size: 's',
+        'data-test-subj': 'customizeLens',
+        type: 'push',
+        paddingSize: 'm',
+        hideCloseButton: true,
+        onClose: (overlayRef) => {
+          overlayRef.close();
+        },
+        outsideClickCloses: true,
       }
-    ),
-    {
-      className: 'lnsConfigPanel__overlay',
-      size: 's',
-      'data-test-subj': 'customizeLens',
-      type: 'push',
-      paddingSize: 'm',
-      hideCloseButton: true,
-      onClose: (overlayRef) => {
-        overlayRef.close();
-      },
-      outsideClickCloses: true,
-    }
-  );
+    );
+  }
 }

@@ -36,7 +36,8 @@ Steps:
     - The attributes of the lens embeddable input
     - The lensChartEvent that you retrieved from the onLoad callback
     - An onUpdate callback to update the embeddable input with the new attributes
-    - An option onApply callback if you want to add an action when the Apply button is clicked
+    - An optional onApply callback if you want to add an action when the Apply button is clicked
+    - An optional onCancel callback if you want to add an action when the Cancel button is clicked
 
 ```tsx
   // my trigger options
@@ -49,6 +50,9 @@ Steps:
     onApply: () => {
       // optional callback when Apply button is clicked
     },
+    onCancel: () => {
+      // optional callback when Cancel button is clicked
+    },
   };
 ```
 
@@ -58,6 +62,6 @@ uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
 ```
 
 ### Important note
-If your Lens embeddable is on a flyout, this is not going to work. This happens because the EUI regular flyout is not compplatible with the push flyout. 
-In that case you will need an extra handling on your side. The Lens start contract exposes the EditLensConfigPanelApi so you can retrieve the inline editing component
-from there and render it as you wish.
+In case you don't want to open a push flyout you can pass an html element to the triggerOptions, the `container` property. This is going
+to render the inline editing component to this container element. In that case you will need an extra handling on your side. 
+Check the 3rd example for implementation details.

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +15,10 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageSection,
+  EuiPanel,
+  EuiSpacer,
+  EuiButton,
+  EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
@@ -21,6 +27,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StartDependencies } from './plugin';
 import { LensChart } from './embeddable';
+import { MultiPaneFlyout } from './flyout';
 
 export const App = (props: {
   core: CoreStart;
@@ -28,6 +35,9 @@ export const App = (props: {
   defaultDataView: DataView;
   stateHelpers: Awaited<ReturnType<LensPublicStart['stateHelperApi']>>;
 }) => {
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isInlineEditingVisible, setIsinlineEditingVisible] = useState(false);
   const configBuilder = useMemo(
     () => new LensConfigBuilder(props.stateHelpers.formula, props.plugins.dataViews),
     [props.plugins.dataViews, props.stateHelpers.formula]
@@ -42,7 +52,7 @@ export const App = (props: {
       }}
     >
       <EuiPage>
-        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <EuiPageBody>
           <EuiPageHeader
             paddingSize="s"
             bottomBorder={true}
@@ -52,7 +62,7 @@ export const App = (props: {
             <EuiFlexGroup
               className="eui-fullHeight"
               gutterSize="none"
-              direction="column"
+              direction="row"
               responsive={false}
             >
               <EuiFlexItem className="eui-fullHeight">
@@ -69,6 +79,77 @@ export const App = (props: {
                   plugins={props.plugins}
                   defaultDataView={props.defaultDataView}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasShadow={false}>
+                  <EuiTitle
+                    size="xs"
+                    css={css`
+                      text-align: center;
+                    `}
+                  >
+                    <h3>#3: Embeddable inside a flyout</h3>
+                  </EuiTitle>
+                  <EuiSpacer />
+                  <EuiTitle
+                    size="xxs"
+                    css={css`
+                      text-align: center;
+                    `}
+                  >
+                    <p>
+                      In case you do not want to use a push flyout, you can check this example.{' '}
+                      <br />
+                      In this example, we have a Lens embeddable inside a flyout and we want to
+                      render the inline editing Component in a second slot of the same flyout.
+                    </p>
+                  </EuiTitle>
+                  <EuiSpacer />
+                  <EuiFlexGroup justifyContent="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show flyout</EuiButton>
+                      {isFlyoutVisible ? (
+                        <MultiPaneFlyout
+                          mainContent={{
+                            content: (
+                              <LensChart
+                                configBuilder={configBuilder}
+                                plugins={props.plugins}
+                                defaultDataView={props.defaultDataView}
+                                container={container}
+                                setIsinlineEditingVisible={setIsinlineEditingVisible}
+                                onApplyCb={() => {
+                                  setIsinlineEditingVisible(false);
+                                  if (container) {
+                                    ReactDOM.unmountComponentAtNode(container);
+                                  }
+                                }}
+                                onCancelCb={() => {
+                                  setIsinlineEditingVisible(false);
+                                  if (container) {
+                                    ReactDOM.unmountComponentAtNode(container);
+                                  }
+                                }}
+                                isESQL
+                              />
+                            ),
+                          }}
+                          inlineEditingContent={{
+                            visible: isInlineEditingVisible,
+                          }}
+                          setContainer={setContainer}
+                          onClose={() => {
+                            setIsFlyoutVisible(false);
+                            setIsinlineEditingVisible(false);
+                            if (container) {
+                              ReactDOM.unmountComponentAtNode(container);
+                            }
+                          }}
+                        />
+                      ) : null}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageSection>

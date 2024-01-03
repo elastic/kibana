@@ -22,6 +22,11 @@ export interface InlineEditLensEmbeddableContext {
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
   // optional onApply callback
   onApply?: () => void;
+  // optional onCancel callback
+  onCancel?: () => void;
+  // custom container element, use in case you need to render outside a flyout
+  // in that case, the styling is responsibility of the consumer
+  container?: HTMLElement | null;
 }
 
 export const getAsyncHelpers = async () => await import('../../async_services');
@@ -54,8 +59,10 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   public async execute({
     attributes,
     lensEvent,
+    container,
     onUpdate,
     onApply,
+    onCancel,
   }: InlineEditLensEmbeddableContext) {
     const { executeEditEmbeddableAction } = await getAsyncHelpers();
     if (attributes) {
@@ -64,8 +71,10 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
         core: this.core,
         attributes,
         lensEvent,
+        container,
         onUpdate,
         onApply,
+        onCancel,
       });
     }
   }

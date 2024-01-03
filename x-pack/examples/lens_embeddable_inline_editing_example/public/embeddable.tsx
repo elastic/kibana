@@ -11,7 +11,15 @@ import type {
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiButtonIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  EuiButtonIcon,
+  EuiTitle,
+} from '@elastic/eui';
 import type { LensChartLoadEvent } from '@kbn/visualization-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { StartDependencies } from './plugin';
@@ -22,6 +30,10 @@ export const LensChart = (props: {
   plugins: StartDependencies;
   defaultDataView: DataView;
   isESQL?: boolean;
+  container?: HTMLElement | null;
+  setIsinlineEditingVisible?: (flag: boolean) => void;
+  onApplyCb?: () => void;
+  onCancelCb?: () => void;
 }) => {
   const ref = useRef(false);
   const [embeddableInput, setEmbeddableInput] = useState<TypedLensByValueInput | undefined>(
@@ -77,18 +89,33 @@ export const LensChart = (props: {
           }
         },
         onApply: () => {
-          alert('optional onApply callback!');
+          'optional onApply callback!';
+          props.onApplyCb?.();
         },
+        onCancel: () => {
+          'optional onCancel callback!';
+          props.onCancelCb?.();
+        },
+        container: props.container,
       };
     }
-  }, [embeddableInput, lensLoadEvent]);
+  }, [embeddableInput, lensLoadEvent, props]);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
   return (
     <EuiPanel hasShadow={false}>
-      <p>
-        {props.isESQL ? 'Inline editing of an ES|QL chart.' : 'Inline editing of a dataview chart.'}
-      </p>
+      <EuiTitle
+        size="xs"
+        css={css`
+          text-align: center;
+        `}
+      >
+        <h3>
+          {props.isESQL
+            ? '#1: Inline editing of an ES|QL chart.'
+            : '#2: Inline editing of a dataview chart.'}
+        </h3>
+      </EuiTitle>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -105,6 +132,7 @@ export const LensChart = (props: {
                 props.plugins.uiActions
                   .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
                   .exec(triggerOptions);
+                props?.setIsinlineEditingVisible?.(true);
               }
             }}
           />
