@@ -22,6 +22,8 @@ export interface FindingsBaseURLQuery {
 
 export interface FindingsBaseProps {
   dataView: DataView;
+  dataViewRefetch?: () => void;
+  dataViewIsRefetching?: boolean;
 }
 
 export interface FindingsBaseESQueryConfig {

@@ -6,15 +6,12 @@
  */
 
 import type { JSONSchema } from 'json-schema-to-ts';
-import type {
-  CreateChatCompletionResponse,
-  CreateChatCompletionResponseChoicesInner,
-} from 'openai';
+import type OpenAI from 'openai';
 import type { Observable } from 'rxjs';
 
-export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionResponse, 'choices'> & {
+export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
   choices: Array<
-    Omit<CreateChatCompletionResponseChoicesInner, 'message'> & {
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
       delta: { content?: string; function_call?: { name?: string; arguments?: string } };
     }
   >;
