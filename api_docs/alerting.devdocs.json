@@ -936,6 +936,46 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.AlertsClientError",
+        "type": "Class",
+        "tags": [],
+        "label": "AlertsClientError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.AlertsClientError",
+            "text": "AlertsClientError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertsClientError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.InstallShutdownError",
         "type": "Class",
         "tags": [],
@@ -3535,10 +3575,6 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts"
-              },
-              {
-                "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/lib/get_entities_and_generate_alerts.ts"
               },
               {
@@ -3675,8 +3711,8 @@
                 "pluginId": "share",
                 "scope": "server",
                 "docId": "kibSharePluginApi",
-                "section": "def-server.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-server.SharePublicStart",
+                "text": "SharePublicStart"
               }
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
@@ -4796,6 +4832,21 @@
           " & { enabled: () => boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.RULE_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "RULE_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"alert\""
+        ],
+        "path": "x-pack/plugins/alerting/server/saved_objects/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

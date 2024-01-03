@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { FlyoutContentProps as DiscoverFlyoutContentProps } from '@kbn/discover-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
 export interface LogExplorerCustomizations {
   flyout?: {
@@ -15,8 +14,13 @@ export interface LogExplorerCustomizations {
   };
 }
 
-export interface LogExplorerFlyoutContentProps extends DiscoverFlyoutContentProps {
-  dataView: DataView;
+export interface LogExplorerFlyoutContentProps {
+  actions: {
+    addFilter: DocViewRenderProps['filter'];
+    addColumn: DocViewRenderProps['onAddColumn'];
+    removeColumn: DocViewRenderProps['onRemoveColumn'];
+  };
+  dataView: DocViewRenderProps['dataView'];
   doc: LogDocument;
 }
 

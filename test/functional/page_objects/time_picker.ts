@@ -107,6 +107,8 @@ export class TimePickerPageObject extends FtrService {
     } else {
       await this.testSubjects.setValue(dataTestSubj, value);
     }
+
+    await this.testSubjects.pressEnter(dataTestSubj);
   }
 
   private async showStartEndTimes() {

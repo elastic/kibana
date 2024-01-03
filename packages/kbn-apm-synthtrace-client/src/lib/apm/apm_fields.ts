@@ -50,6 +50,35 @@ export interface GeoLocation {
   type: string;
 }
 
+export interface APMStacktrace {
+  abs_path?: string;
+  classname?: string;
+  context?: {
+    post?: string[];
+    pre?: string[];
+  };
+  exclude_from_grouping?: boolean;
+  filename?: string;
+  function?: string;
+  module?: string;
+  library_frame?: boolean;
+  line?:
+    | {
+        column?: number;
+        number: number;
+      }
+    | {
+        context?: string;
+      };
+  sourcemap?: {
+    error?: string;
+    updated?: boolean;
+  };
+  vars?: {
+    [key: string]: unknown;
+  };
+}
+
 type ExperimentalFields = Partial<{
   'metricset.interval': string;
   'transaction.duration.summary': string;
@@ -80,6 +109,8 @@ export type ApmFields = Fields<{
     'cloud.provider': string;
     'cloud.region': string;
     'cloud.service.name': string;
+    // otel
+    'code.stacktrace': string;
     'container.id': string;
     'destination.address': string;
     'destination.port': number;
@@ -169,6 +200,7 @@ export type ApmFields = Fields<{
     'span.duration.us': number;
     'span.id': string;
     'span.name': string;
+    'span.stacktrace': APMStacktrace[];
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'span.subtype': string;

@@ -17,7 +17,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-
+import type { PackageInstallContext } from '../../../../common/types';
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
@@ -31,7 +31,6 @@ import type {
   AssetReference,
   Installation,
   InstallType,
-  InstallablePackage,
   InstallSource,
   PackageAssetReference,
   PackageVerificationResult,
@@ -45,7 +44,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
-import { saveArchiveEntries } from '../archive/storage';
+import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
@@ -70,8 +69,7 @@ export async function _installPackage({
   esClient,
   logger,
   installedPkg,
-  paths,
-  packageInfo,
+  packageInstallContext,
   installType,
   installSource,
   spaceId,
@@ -88,8 +86,7 @@ export async function _installPackage({
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
-  paths: string[];
-  packageInfo: InstallablePackage;
+  packageInstallContext: PackageInstallContext;
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
@@ -99,7 +96,9 @@ export async function _installPackage({
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
 }): Promise<AssetReference[]> {
+  const { packageInfo, paths } = packageInstallContext;
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
+
   try {
     // if some installation already exists
     if (installedPkg) {
@@ -164,6 +163,7 @@ export async function _installPackage({
         savedObjectTagClient,
         pkgName,
         pkgTitle,
+        packageInstallContext,
         paths,
         installedPkg,
         logger,
@@ -187,13 +187,12 @@ export async function _installPackage({
       appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
     if (!isILMPoliciesDisabled) {
       esReferences = await withPackageSpan('Install ILM policies', () =>
-        installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+        installILMPolicy(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
       );
       logger.debug(`Package install - Installing Data Stream ILM policies`);
       ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
         installIlmForDataStream(
-          packageInfo,
-          paths,
+          packageInstallContext,
           esClient,
           savedObjectsClient,
           logger,
@@ -205,7 +204,7 @@ export async function _installPackage({
     // installs ml models
     logger.debug(`Package install - installing ML models`);
     esReferences = await withPackageSpan('Install ML models', () =>
-      installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
     );
 
     let indexTemplates: IndexTemplateEntry[] = [];
@@ -217,8 +216,7 @@ export async function _installPackage({
       const { installedTemplates, esReferences: templateEsReferences } =
         await installIndexTemplatesAndPipelines({
           installedPkg: installedPkg ? installedPkg.attributes : undefined,
-          packageInfo,
-          paths,
+          packageInstallContext,
           esClient,
           savedObjectsClient,
           logger,
@@ -249,8 +247,7 @@ export async function _installPackage({
         const { installedTemplates, esReferences: templateEsReferences } =
           await installIndexTemplatesAndPipelines({
             installedPkg: installedPkg ? installedPkg.attributes : undefined,
-            packageInfo,
-            paths,
+            packageInstallContext,
             esClient,
             savedObjectsClient,
             logger,
@@ -280,8 +277,7 @@ export async function _installPackage({
     logger.debug(`Package install - Installing transforms`);
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
       installTransforms({
-        installablePackage: packageInfo,
-        paths,
+        packageInstallContext,
         esClient,
         savedObjectsClient,
         logger,
@@ -331,9 +327,10 @@ export async function _installPackage({
     const installedKibanaAssetsRefs = await kibanaAssetPromise;
     logger.debug(`Package install - Updating archive entries`);
     const packageAssetResults = await withPackageSpan('Update archive entries', () =>
-      saveArchiveEntries({
+      saveArchiveEntriesFromAssetsMap({
         savedObjectsClient,
-        paths,
+        assetsMap: packageInstallContext.assetsMap,
+        paths: packageInstallContext.paths,
         packageInfo,
         installSource,
       })
@@ -351,7 +348,7 @@ export async function _installPackage({
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     logger.debug(`Package install - Updating install status`);
-    const updatedPackage = await withPackageSpan('Update install status', () =>
+    await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         version: pkgVersion,
         install_version: pkgVersion,
@@ -364,8 +361,13 @@ export async function _installPackage({
         ),
       })
     );
-    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
 
+    // Need to refetch the installation again to retrieve all the attributes
+    const updatedPackage = await savedObjectsClient.get<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName
+    );
+    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
     // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
     // associated package policies after installation
     if (updatedPackage.attributes.keep_policies_up_to_date) {
@@ -381,7 +383,7 @@ export async function _installPackage({
         await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
       });
     }
-    logger.debug(`Package install - Installation complete}`);
+    logger.debug(`Package install - Installation complete`);
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
     if (SavedObjectsErrorHelpers.isConflictError(err)) {

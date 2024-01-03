@@ -27,7 +27,7 @@ const NAV_ITEMS_NAMES = {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'Benchmark rules',
+    defaultMessage: 'Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
@@ -63,7 +63,7 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
 export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules`,
     id: 'cloud_security_posture-benchmarks-rules',
   },
 };
