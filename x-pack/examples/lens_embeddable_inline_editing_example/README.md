@@ -6,7 +6,7 @@ This plugin contains examples on how to integrate the inline editing capabilitie
 
 Steps:
   * Add UIActions on your start dependencies
-  * On your embeddable use the onLoad callback to store in the local state the adapters and lensEmbeddableOutput$.\
+  * On your embeddable use the onLoad callback to store in the local state the adapters and lensEmbeddableOutput$.
 
 ```tsx
   // my Lens embeddable
@@ -56,3 +56,8 @@ Steps:
 ```tsx
 uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
 ```
+
+### Important note
+If your Lens embeddable is on a flyout, this is not going to work. This happens because the EUI regular flyout is not compplatible with the push flyout. 
+In that case you will need an extra handling on your side. The Lens start contract exposes the EditLensConfigPanelApi so you can retrieve the inline editing component
+from there and render it as you wish.
