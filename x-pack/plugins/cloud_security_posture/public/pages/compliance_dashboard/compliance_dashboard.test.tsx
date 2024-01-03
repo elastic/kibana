@@ -37,6 +37,8 @@ import {
   ComplianceDashboardDataV2,
   CspStatusCode,
 } from '../../../common/types_old';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -44,10 +46,13 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
+jest.mock('react-use/lib/useLocalStorage');
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    (useLocalStorage as jest.Mock).mockReturnValue([CSPM_POLICY_TEMPLATE, jest.fn()]);
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -387,6 +392,8 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Kubernetes dashboard if there are KSPM findings', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([KSPM_POLICY_TEMPLATE, jest.fn()]);
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -505,6 +512,8 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show Kubernetes dashboard "no findings prompt" if the KSPM integration is installed without findings', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([KSPM_POLICY_TEMPLATE, jest.fn()]);
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -669,6 +678,8 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([KSPM_POLICY_TEMPLATE, jest.fn()]);
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -711,6 +722,8 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('should not select default tab is user has already selected one themselves', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([KSPM_POLICY_TEMPLATE, jest.fn()]);
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -737,17 +750,6 @@ describe('<ComplianceDashboard />', () => {
     }));
 
     const { rerender } = renderComplianceDashboardPage();
-
-    expectIdsInDoc({
-      be: [CLOUD_DASHBOARD_CONTAINER],
-      notToBe: [
-        KUBERNETES_DASHBOARD_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
 
     screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
 
