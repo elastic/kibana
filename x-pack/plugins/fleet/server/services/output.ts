@@ -789,9 +789,7 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<OutputSOAttributes>> = {
-      ...omit(data, ['ssl', 'secrets', 'password', 'service_token']),
-    };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets']) };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
@@ -1000,11 +998,19 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (originalOutput.type === outputType.Logstash && data.type === outputType.Logstash) {
+      if (
+        originalOutput.type === outputType.Logstash &&
+        data.type === outputType.Logstash &&
+        updateData.type === outputType.Logstash
+      ) {
         if (!data.ssl?.key && data.secrets?.ssl?.key) {
           updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
-      } else if (originalOutput.type === outputType.Kafka && data.type === outputType.Kafka) {
+      } else if (
+        originalOutput.type === outputType.Kafka &&
+        data.type === outputType.Kafka &&
+        updateData.type === outputType.Kafka
+      ) {
         if (!data.password && data.secrets?.password) {
           updateData.password = data.secrets?.password as string;
         }
@@ -1013,7 +1019,8 @@ class OutputService {
         }
       } else if (
         originalOutput.type === outputType.RemoteElasticsearch &&
-        data.type === outputType.RemoteElasticsearch
+        data.type === outputType.RemoteElasticsearch &&
+        updateData.type === outputType.RemoteElasticsearch
       ) {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
