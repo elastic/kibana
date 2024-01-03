@@ -11,23 +11,23 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import z from 'zod';
-import zodToJsonSchema from 'zod-to-json-schema';
 
 import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
-import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
+import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
-  instanceofZodType,
-  instanceofZodTypeObject,
-  instanceofZodTypeLikeVoid,
-  instanceofZodTypeLikeString,
-  instanceofZodTypeOptional,
-  unwrapZodType,
-  zodSupportsCoerce,
-  instanceofZodTypeCoercible,
   getPathParameters,
+  extractValidationSchemaFromHandler,
+  getVersionedContentString,
 } from './util';
+
+import { catchAllConverter, zodConverter } from './oas_converters';
+import type { OpenAPIConverter } from './type';
+
+const converters: OpenAPIConverter[] = [zodConverter, catchAllConverter];
+const getConverter = (schema: unknown): OpenAPIConverter => {
+  return converters.find((c) => c.is(schema))!;
+};
 
 export const openApiVersion = '3.0.0';
 
@@ -40,10 +40,10 @@ export interface GenerateOpenApiDocumentOptions {
   tags?: string[];
 }
 
-export function generateOpenApiDocument(
+export const generateOpenApiDocument = (
   appRouters: CoreVersionedRouter[],
   opts: GenerateOpenApiDocumentOptions
-): OpenAPIV3.Document {
+): OpenAPIV3.Document => {
   const paths: OpenAPIV3.PathsObject = {};
   for (const appRouter of appRouters) {
     Object.assign(paths, getOpenApiPathsObject(appRouter));
@@ -72,99 +72,27 @@ export function generateOpenApiDocument(
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
-}
+};
 
-/* For this PoC we assume that we are able to get JSONSchema from our runtime validation types */
-function runtimeSchemaToJsonSchema(schema: z.ZodTypeAny): OpenAPIV3.SchemaObject {
-  return zodToJsonSchema(schema, { target: 'openApi3', $refStrategy: 'none' }) as any;
-}
+const operationIdCounters = new Map<string, number>();
+const getOperationId = (name: string): string => {
+  // Aliases an operationId to ensure it is unique across
+  // multiple method+path combinations sharing a name.
+  // "search" -> "search#0", "search#1", etc.
+  const operationIdCount = operationIdCounters.get(name) ?? 0;
+  const aliasedName = name + '#' + operationIdCount.toString();
+  operationIdCounters.set(name, operationIdCount + 1);
+  return aliasedName;
+};
 
-function getVersionedContentString(version: string): string {
-  return `application/json; Elastic-Api-Version=${version}`;
-}
-
-function extractParameterObjects(
-  schema: unknown,
-  pathParameters: string[],
-  inType: 'path' | 'query'
-): OpenAPIV3.ParameterObject[] | undefined {
-  if (!instanceofZodType(schema)) {
-    throw new Error('Zod validator expected');
-  }
-
-  const isRequired = !schema.isOptional();
-  const unwrappedSchema = unwrapZodType(schema, true);
-
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
-    return undefined;
-  }
-
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw new Error('Input parser must be a ZodObject');
-  }
-
-  const shape = unwrappedSchema.shape;
-  const shapeKeys = Object.keys(shape);
-
-  for (const pathParameter of pathParameters) {
-    if (!shapeKeys.includes(pathParameter)) {
-      throw new Error(`Input parser expects key from path: "${pathParameter}"`);
-    }
-  }
-
-  return shapeKeys
-    .filter((shapeKey) => {
-      const isPathParameter = pathParameters.includes(shapeKey);
-      if (inType === 'path') {
-        return isPathParameter;
-      } else if (inType === 'query') {
-        return !isPathParameter;
-      }
-      return true;
-    })
-    .map((shapeKey) => {
-      let shapeSchema = shape[shapeKey]!;
-      const isShapeRequired = !shapeSchema.isOptional();
-      const isPathParameter = pathParameters.includes(shapeKey);
-
-      if (!instanceofZodTypeLikeString(shapeSchema)) {
-        if (zodSupportsCoerce) {
-          if (!instanceofZodTypeCoercible(shapeSchema)) {
-            throw new Error(
-              `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
-            );
-          }
-        } else {
-          throw new Error(`Input parser key: "${shapeKey}" must be ZodString`);
-        }
-      }
-
-      if (instanceofZodTypeOptional(shapeSchema)) {
-        if (isPathParameter) {
-          throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
-        }
-        shapeSchema = shapeSchema.unwrap();
-      }
-
-      const { description, ...openApiSchemaObject } = runtimeSchemaToJsonSchema(shapeSchema);
-
-      return {
-        name: shapeKey,
-        in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || (isRequired && isShapeRequired),
-        schema: openApiSchemaObject,
-        description,
-      };
-    });
-}
-
-function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyObject['content'] {
+const extractRequestBody = (
+  route: VersionedRouterRoute
+): OpenAPIV3.RequestBodyObject['content'] => {
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
     const schemas = extractValidationSchemaFromHandler(handler);
     if (!schemas?.request) return acc;
-    const schema = instanceofZodType(schemas.request.body)
-      ? runtimeSchemaToJsonSchema(schemas.request.body)
-      : {};
+    const converter = getConverter(schemas.request.body);
+    const schema = converter.convert(schemas.request.body);
     return {
       ...acc,
       [getVersionedContentString(handler.options.version)]: {
@@ -172,16 +100,16 @@ function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyO
       },
     };
   }, {} as OpenAPIV3.RequestBodyObject['content']);
-}
-
-function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObject {
+};
+const extractResponses = (route: VersionedRouterRoute): OpenAPIV3.ResponsesObject => {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
     const schemas = extractValidationSchemaFromHandler(handler);
     if (!schemas?.response) return acc;
     const statusCodes = Object.keys(schemas.response);
     for (const statusCode of statusCodes) {
       const maybeSchema = schemas.response[statusCode as unknown as number].body;
-      const schema = instanceofZodType(maybeSchema) ? runtimeSchemaToJsonSchema(maybeSchema) : {};
+      const converter = getConverter(maybeSchema);
+      const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
         description: route.options.description ?? 'No description',
@@ -195,26 +123,9 @@ function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObjec
     }
     return acc;
   }, {});
-}
+};
 
-const operationIdCounters = new Map<string, number>();
-function getOperationId(name: string): string {
-  // Aliases an operationId to ensure it is unique across
-  // multiple method+path combinations sharing a name.
-  // "search" -> "search#0", "search#1", etc.
-  const operationIdCount = operationIdCounters.get(name) ?? 0;
-  const aliasedName = name + '#' + operationIdCount.toString();
-  operationIdCounters.set(name, operationIdCount + 1);
-  return aliasedName;
-}
-
-function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
-  if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
-  return handler.options.validate;
-}
-
-function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
+const getOpenApiPathsObject = (appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject => {
   const routes = appRouter
     .getRoutes()
     .filter((route) => route.options.access === 'public')
@@ -243,12 +154,14 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
     const schemas = handler ? extractValidationSchemaFromHandler(handler) : undefined;
     if (handler && schemas) {
       const params = schemas.request?.params as any;
-      if (params && instanceofZodType(params)) {
-        pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
+      if (params) {
+        const converter = getConverter(params);
+        pathObjects = converter.extractParameterObjects(params, pathParams, 'path') ?? [];
       }
       const query = schemas.request?.query as any;
-      if (query && instanceofZodType(query)) {
-        queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
+      if (query) {
+        const converter = getConverter(query);
+        queryObjects = converter.extractParameterObjects(query, pathParams, 'query') ?? [];
       }
     }
 
@@ -268,4 +181,4 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
     paths[route.path] = { ...paths[route.path], ...path };
   }
   return paths;
-}
+};
