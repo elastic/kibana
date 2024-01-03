@@ -20,6 +20,7 @@ import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
+import { useCspGetRulesStates } from './use_csp_rules_state';
 interface RulesPageData {
   rules_page: CspBenchmarkRule[];
   all_rules: CspBenchmarkRule[];
@@ -93,6 +94,33 @@ export const RulesContainer = () => {
     params.benchmarkVersion
   );
 
+  const rulesStates = useCspGetRulesStates();
+  const arrayRulesStates = Object.values(rulesStates.data || {});
+  const filteredArrayRulesStates: any[] = arrayRulesStates.filter(
+    (e: any) =>
+      e.benchmark_id === params.benchmarkId && e.benchmark_version === 'v' + params.benchmarkVersion
+  );
+
+  const newRulesItems: any[] = useMemo(() => {
+    return rulesPageData.rules_page.reduce((res: any[], obj1) => {
+      const rulesKey =
+        obj1.metadata.benchmark.id +
+        ';' +
+        obj1.metadata.benchmark.version +
+        ';' +
+        obj1.metadata.benchmark.rule_number;
+      const match = rulesStates?.data?.[rulesKey];
+      if (match) {
+        res.push({
+          ...obj1,
+          ...{ status: rulesStates?.data?.[rulesKey].muted === true ? 'muted' : 'unmuted' },
+        });
+      } else {
+        res.push({ ...obj1, ...{ status: 'unmuted' } });
+      }
+      return res;
+    }, []);
+  }, [rulesPageData.rules_page, rulesStates.data]);
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
@@ -124,7 +152,7 @@ export const RulesContainer = () => {
         />
         <EuiSpacer />
         <RulesTable
-          rules_page={rulesPageData.rules_page}
+          rules_page={newRulesItems}
           total={rulesPageData.total}
           error={rulesPageData.error}
           loading={rulesPageData.loading}
@@ -136,12 +164,22 @@ export const RulesContainer = () => {
           }}
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
+          refetchStatus={rulesStates.refetch}
         />
       </EuiPanel>
       {selectedRuleId && (
         <RuleFlyout
-          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          rule={{
+            ...rulesPageData.rules_map.get(selectedRuleId!),
+            ...{
+              status:
+                filteredArrayRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
+                  ? 'muted'
+                  : 'unmuted',
+            },
+          }}
           onClose={() => setSelectedRuleId(null)}
+          refetchStatus={rulesStates.refetch}
         />
       )}
     </div>

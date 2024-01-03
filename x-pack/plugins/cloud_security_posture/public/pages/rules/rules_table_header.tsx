@@ -13,6 +13,10 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   type EuiComboBoxOptionOption,
+  EuiPanel,
+  EuiAccordion,
+  EuiPopover,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -156,15 +160,75 @@ const SearchField = ({
   );
 };
 
-const CurrentPageOfTotal = ({ pageSize, total }: RuleTableCount) => (
-  <EuiFlexItem grow={true}>
-    <EuiSpacer size="xl" />
-    <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
-      <FormattedMessage
-        id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-        defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
-        values={{ pageSize, total }}
-      />
-    </EuiText>
-  </EuiFlexItem>
-);
+const CurrentPageOfTotal = ({ pageSize, total }: RuleTableCount) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onPopoverClick = () => {
+    setIsPopoverOpen((e) => !e);
+  };
+  const closePopover = () => setIsPopoverOpen(false);
+  const popoverButton = <EuiButtonEmpty onClick={onPopoverClick}>TEST BUTTON</EuiButtonEmpty>;
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiSpacer size="xl" />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}}"
+              values={{ pageSize, total }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesTable.showingTotalSelectedRules"
+              defaultMessage="PUT SELECTED RULES NUMBER HERE"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesTable.selectAllRules"
+              defaultMessage="PUT SELECT ALL RULES BUTTON HERE"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {/* <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesTable.bulkActionsPopover"
+              defaultMessage="PUT BULK ACTIONS BUTTON HERE"
+            />
+          </EuiText> */}
+          <EuiPopover
+            button={popoverButton}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            anchorPosition="downCenter"
+          >
+            <EuiFlexGroup gutterSize="none" direction="column">
+              <EuiFlexItem>
+                <EuiButtonEmpty size="s" color="text" onClick={() => {}}>
+                  Option A
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty size="s" color="text" onClick={() => {}}>
+                  Option B
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopover>
+          {/* <EuiAccordion id="dropDown-bulkactions-id" buttonContent="Click me to togg">
+            <EuiPanel color="subdued">
+              Any content inside of <strong>EuiAccordion</strong> will appear here.
+            </EuiPanel>
+          </EuiAccordion> */}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};

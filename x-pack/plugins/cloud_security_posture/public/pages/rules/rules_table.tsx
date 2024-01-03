@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -12,11 +12,15 @@ import {
   EuiBasicTable,
   EuiBasicTableProps,
   useEuiTheme,
+  EuiSwitch,
+  EuiTableSelectionType,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
+import { useChangeCspRuleStatus } from './change_csp_rule_status';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -25,6 +29,7 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
+  refetchStatus: () => void;
 };
 
 export const RulesTable = ({
@@ -37,10 +42,9 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
+  refetchStatus,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
-
   const euiPagination: EuiBasicTableProps<CspBenchmarkRule>['pagination'] = {
     pageIndex: page,
     pageSize,
@@ -60,32 +64,88 @@ export const RulesTable = ({
     },
   });
 
+  // SELECTION
+
+  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRule[]>([]);
+  const onSelectionChange = (selectedRule: CspBenchmarkRule[]) => {
+    setSelectedRules(selectedRule);
+  };
+
+  const selection: EuiTableSelectionType<CspBenchmarkRule> = {
+    selectable: (rule: CspBenchmarkRule) => rule.metadata.name.length !== 0,
+    onSelectionChange,
+  };
+
+  const bulkSelectedRules = selectedRules.map((e) => ({
+    benchmark_id: e?.metadata.benchmark.id,
+    benchmark_version: e?.metadata.benchmark.version,
+    rule_number: e?.metadata.benchmark.rule_number,
+    rule_id: e?.metadata.id,
+  }));
+  const postRequestChangeRulesStatus = useChangeCspRuleStatus();
+  const muteButton = () => {
+    const useChangeCspRuleStatusFn = async () => {
+      await postRequestChangeRulesStatus('mute', bulkSelectedRules);
+      await refetchStatus();
+    };
+    return selectedRules.length > 0 ? (
+      <EuiButton color="danger" iconType="trash" onClick={useChangeCspRuleStatusFn}>
+        Mute Button
+      </EuiButton>
+    ) : null;
+  };
+  const unmuteButton = () => {
+    const useChangeCspRuleStatusFn = async () => {
+      await postRequestChangeRulesStatus('unmute', bulkSelectedRules);
+      await refetchStatus();
+    };
+    return selectedRules.length > 0 ? (
+      <EuiButton color="danger" iconType="trash" onClick={useChangeCspRuleStatusFn}>
+        Unmute Button
+      </EuiButton>
+    ) : null;
+  };
+  const columns = useMemo(
+    () => getColumns({ setSelectedRuleId, refetchStatus, postRequestChangeRulesStatus }),
+    [refetchStatus, setSelectedRuleId, postRequestChangeRulesStatus]
+  );
+  // TILL HERE
+
   return (
-    <EuiBasicTable
-      data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE}
-      loading={loading}
-      error={error}
-      items={items}
-      columns={columns}
-      pagination={euiPagination}
-      onChange={onTableChange}
-      itemId={(v) => v.metadata.id}
-      rowProps={rowProps}
-    />
+    <>
+      {muteButton()}
+      {unmuteButton()}
+      <EuiBasicTable
+        data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE}
+        loading={loading}
+        error={error}
+        items={items}
+        columns={columns}
+        pagination={euiPagination}
+        onChange={onTableChange}
+        itemId={(v) => v.metadata.id}
+        rowProps={rowProps}
+        isSelectable={true}
+        selection={selection}
+      />
+    </>
   );
 };
 
-type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
+type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId' | 'refetchStatus'>;
 
 const getColumns = ({
   setSelectedRuleId,
-}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
+  refetchStatus,
+  postRequestChangeRulesStatus,
+}): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
   {
     field: 'metadata.benchmark.rule_number',
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
       defaultMessage: 'Rule Number',
     }),
     width: '10%',
+    sortable: true,
   },
   {
     field: 'metadata.name',
@@ -114,5 +174,36 @@ const getColumns = ({
       defaultMessage: 'CIS Section',
     }),
     width: '15%',
+  },
+  {
+    field: 'metadata.name',
+    name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
+      defaultMessage: 'Muted',
+    }),
+    width: '10%',
+    truncateText: true,
+    render: (name, rule) => {
+      const rulesObjectRequest = {
+        benchmark_id: rule?.metadata.benchmark.id,
+        benchmark_version: rule?.metadata.benchmark.version,
+        rule_number: rule?.metadata.benchmark.rule_number,
+        rule_id: rule?.metadata.id,
+      };
+      const nextRuleStatus = rule?.status === 'muted' ? 'unmute' : 'mute';
+
+      const useChangeCspRuleStatusFn = async () => {
+        await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
+        await refetchStatus();
+      };
+      return (
+        <EuiSwitch
+          className="eui-textTruncate"
+          checked={rule?.status === 'muted' ? true : false}
+          onChange={useChangeCspRuleStatusFn}
+          data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+          label=""
+        />
+      );
+    },
   },
 ];
