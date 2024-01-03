@@ -68,5 +68,5 @@ export function mapToReportingError(error: ExecutionError | unknown): ReportingE
     case error instanceof errors.InsufficientMemoryAvailableOnCloudError:
       return new VisualReportingSoftDisabledError();
   }
-  return new UnknownError((error as Error).message);
+  return new UnknownError((error as Error)?.message);
 }
