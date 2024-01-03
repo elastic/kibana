@@ -39,7 +39,7 @@ export interface TimeRange {
   type: 'relative' | 'absolute';
 }
 
-export type LensLayerQuery = string;
+export type LensLayerQuery = string | FormulaValueConfig;
 export interface LensDataviewDataset {
   index: string;
   timeFieldName?: string;
@@ -222,7 +222,7 @@ export interface LensReferenceLineLayerBase {
   lineThickness?: number;
   color?: string;
   fill?: 'none' | 'above' | 'below';
-  value?: number;
+  value?: string;
 }
 
 export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseLayer;
@@ -272,3 +272,32 @@ export interface BuildDependencies {
 }
 
 export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;
+
+type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
+
+export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
+  color?: string;
+  value: string;
+};
+
+export type ChartTypeLensConfig<T extends ChartType> = T extends 'gauge'
+  ? LensGaugeConfig
+  : T extends 'metric'
+  ? LensMetricConfig
+  : T extends 'pie' | 'donut'
+  ? LensPieConfig
+  : T extends 'treemap'
+  ? LensTreeMapConfig
+  : T extends 'tagcloud'
+  ? LensTagCloudConfig
+  : T extends 'regionmap'
+  ? LensRegionMapConfig
+  : T extends 'mosaic'
+  ? LensMosaicConfig
+  : T extends 'table'
+  ? LensTableConfig
+  : T extends 'heatmap'
+  ? LensHeatmapConfig
+  : T extends 'xy'
+  ? LensXYConfig
+  : never;

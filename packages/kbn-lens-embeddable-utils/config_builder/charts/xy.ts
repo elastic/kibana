@@ -22,6 +22,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  isFormulaValue,
 } from '../utils';
 import {
   BuildDependencies,
@@ -145,7 +146,11 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
     getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string),
-    getValueColumn(`${ACCESSOR}${i}`, layer.value, 'number'),
+    getValueColumn(
+      `${ACCESSOR}${i}`,
+      isFormulaValue(layer.value) ? layer.value.value : layer.value,
+      'number'
+    ),
   ];
 }
 
@@ -159,9 +164,7 @@ function buildFormulaLayer(
     const resultLayer = {
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
-        {
-          value: layer.value,
-        },
+        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
         dataView,
         formulaAPI
       ),
@@ -192,9 +195,7 @@ function buildFormulaLayer(
     return {
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
-        {
-          value: layer.value,
-        },
+        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
         dataView,
         formulaAPI
       ),
