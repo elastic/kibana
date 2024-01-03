@@ -13,7 +13,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartDimensionOptions } from '@kbn/chart-expressions-common';
 import { ChartDimensionUnit } from '@kbn/chart-expressions-common/types';
-import { Interpolation, Theme } from '@emotion/react';
+import { Interpolation, Theme, css } from '@emotion/react';
 import {
   DatasourceMap,
   FramePublicAPI,
