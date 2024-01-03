@@ -258,8 +258,7 @@ export const ControlGroupStrings = {
           }),
         getValidateSelectionsSubTitle: () =>
           i18n.translate('controls.controlGroup.management.validate.subtitle', {
-            defaultMessage:
-              'Automatically ignore any control selection that would result in no data.',
+            defaultMessage: 'Highlight control selections that result in no data.',
           }),
       },
       controlChaining: {

@@ -132,7 +132,7 @@ describe('Options list popover', () => {
         validSelection.find('div[data-test-subj="optionsList-document-count-badge"]').text().trim()
       ).toEqual('75');
       const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
-      expect(title).toEqual('Ignored selection');
+      expect(title).toEqual('Invalid selection');
       const invalidSelection = findTestSubject(
         popover,
         'optionsList-control-ignored-selection-woof'
@@ -153,7 +153,7 @@ describe('Options list popover', () => {
         },
       });
       const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
-      expect(title).toEqual('Ignored selections');
+      expect(title).toEqual('Invalid selections');
     });
   });
 

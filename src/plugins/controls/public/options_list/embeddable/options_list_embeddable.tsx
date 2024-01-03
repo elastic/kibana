@@ -381,11 +381,10 @@ export class OptionsListEmbeddable
   };
 
   private buildFilter = async () => {
-    const { validSelections } = this.getState().componentState ?? {};
-    const { existsSelected } = this.getState().explicitInput ?? {};
+    const { existsSelected, selectedOptions } = this.getState().explicitInput ?? {};
     const { exclude } = this.getInput();
 
-    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
+    if ((!selectedOptions || isEmpty(selectedOptions)) && !existsSelected) {
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
@@ -394,11 +393,11 @@ export class OptionsListEmbeddable
     let newFilter: Filter | undefined;
     if (existsSelected) {
       newFilter = buildExistsFilter(field, dataView);
-    } else if (validSelections) {
-      if (validSelections.length === 1) {
-        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+    } else if (selectedOptions) {
+      if (selectedOptions.length === 1) {
+        newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
       } else {
-        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+        newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
       }
     }
 

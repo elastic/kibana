@@ -8,13 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import {
-  EuiSelectableOption,
-  EuiSelectable,
-  EuiSpacer,
-  EuiTitle,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiSelectableOption, EuiSelectable, EuiSpacer, EuiTitle, EuiIcon } from '@elastic/eui';
 
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
@@ -42,12 +36,14 @@ export const OptionsListPopoverInvalidSelections = () => {
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-ignored-selection-${key}`,
         prepend: (
-          <EuiScreenReaderOnly>
-            <div>
-              {OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
-              {'" "'} {/* Adds a pause for the screen reader */}
-            </div>
-          </EuiScreenReaderOnly>
+          <>
+            <EuiIcon
+              type="alert"
+              color="warning"
+              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              size="s"
+            />
+          </>
         ),
       };
     });

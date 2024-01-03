@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: ['bark'],
+          invalidSelections: ['Invalid selection.\nbark'],
         });
         // only valid selections are applied as filters.
         expect(await pieChart.getPieSliceCount()).to.be(1);
@@ -109,10 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           suggestions: {
             hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
           },
-          invalidSelections: ['meow', 'bark'],
+          invalidSelections: ['Invalid selection.\nmeow', 'Invalid selection.\nbark'],
         });
-        // only valid selections are applied as filters.
-        expect(await pieChart.getPieSliceCount()).to.be(1);
+        // there are no valid selections, so no pie chart is rendered.
+        expect(await pieChart.expectEmptyPieChart());
       });
     });
 
@@ -153,6 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           invalidSelections: [],
         });
+        // there are no valid selections, so no pie chart is rendered.
+        expect(await pieChart.expectEmptyPieChart());
       });
     });
   });

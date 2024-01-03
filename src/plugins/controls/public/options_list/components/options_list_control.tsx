@@ -90,12 +90,12 @@ export const OptionsListControl = ({
     [loadMoreSubject]
   );
 
-  const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+  const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     const delimiter = OptionsListStrings.control.getSeparator(fieldSpec?.type);
 
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
-      validSelectionsCount: validSelections?.length,
+      selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
         <>
           {exclude && (
@@ -132,10 +132,11 @@ export const OptionsListControl = ({
   }, [
     exclude,
     existsSelected,
-    validSelections,
-    invalidSelections,
-    fieldFormatter,
     fieldSpec?.type,
+    invalidSelections,
+    validSelections,
+    selectedOptions?.length,
+    fieldFormatter,
   ]);
 
   const button = (
@@ -150,8 +151,8 @@ export const OptionsListControl = ({
       data-test-subj={`optionsList-control-${id}`}
       onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
       isSelected={isPopoverOpen}
-      numActiveFilters={validSelectionsCount}
-      hasActiveFilters={Boolean(validSelectionsCount)}
+      numActiveFilters={selectedOptionsCount}
+      hasActiveFilters={Boolean(selectedOptionsCount)}
     >
       {hasSelections || existsSelected
         ? selectionDisplayNode

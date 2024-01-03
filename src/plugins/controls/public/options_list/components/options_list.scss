@@ -20,8 +20,7 @@
     }
 
     .optionsList__filterInvalid {
-      color: $euiTextSubduedColor;
-      text-decoration: line-through;
+      color: $euiColorWarningText;
       font-weight: $euiFontWeightRegular;
     }
 
@@ -79,8 +78,7 @@
   }
 
   .optionsList__selectionInvalid {
-    text-decoration: line-through;
-    color: $euiTextSubduedColor;
+    color: $euiColorWarningText;
   }
 
   .optionslist--loadingMoreGroupLabel {
