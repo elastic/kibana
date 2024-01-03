@@ -16,11 +16,7 @@ import type {
   GeoContainmentRuleParams,
 } from './types';
 import { executor } from './executor';
-import {
-  ActionGroupId,
-  RecoveryActionGroupId,
-  GEO_CONTAINMENT_ID,
-} from './constants';
+import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
 import { STACK_ALERTS_AAD_CONFIG } from '../constants';
 
 const actionVariables = {
@@ -205,6 +201,6 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
-    alerts: STACK_ALERTS_AAD_CONFIG
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

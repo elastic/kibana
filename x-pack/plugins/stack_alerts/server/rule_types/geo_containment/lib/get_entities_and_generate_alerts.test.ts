@@ -12,7 +12,7 @@ import type { GeoContainmentAlertInstanceContext } from '../types';
 describe('getEntitiesAndGenerateAlerts', () => {
   const alerts: unknown[] = [];
   const mockAlertsClient = {
-    report: ({ id, context }: { id: string; context: GeoContainmentAlertInstanceContext; }) => {
+    report: ({ id, context }: { id: string; context: GeoContainmentAlertInstanceContext }) => {
       alerts.push({
         context: {
           containingBoundaryId: context.containingBoundaryId,
