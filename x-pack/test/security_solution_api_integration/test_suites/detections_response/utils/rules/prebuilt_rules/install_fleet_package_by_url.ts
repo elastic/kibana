@@ -9,6 +9,7 @@ import type SuperTest from 'supertest';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import expect from 'expect';
 import { refreshSavedObjectIndices, retry } from '../..';
 
 /**

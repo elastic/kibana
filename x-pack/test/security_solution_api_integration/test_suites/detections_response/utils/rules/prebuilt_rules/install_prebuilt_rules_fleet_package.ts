@@ -14,6 +14,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import expect from 'expect';
 import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../..';
 
@@ -55,7 +56,7 @@ export const installPrebuiltRulesFleetPackage = async ({
         return testResponse.body;
       },
       retryService,
-      retries: 1,
+      retries: 2,
     });
 
     await refreshSavedObjectIndices(es);
@@ -86,7 +87,7 @@ export const installPrebuiltRulesFleetPackage = async ({
         return body;
       },
       retryService,
-      retries: 1,
+      retries: 2,
     });
 
     await refreshSavedObjectIndices(es);
