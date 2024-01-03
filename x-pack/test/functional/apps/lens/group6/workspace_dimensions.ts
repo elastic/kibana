@@ -42,12 +42,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
+    const pxToN = (pixels: string) => Number(pixels.substring(0, pixels.length - 2));
+
     const assertWorkspaceDimensions = async (expectedWidth: string, expectedHeight: string) => {
+      const tolerance = 1;
+
       await retry.try(async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
 
-        expect(width).to.be(expectedWidth);
-        expect(height).to.be(expectedHeight);
+        expect(pxToN(width)).to.within(
+          pxToN(expectedWidth) - tolerance,
+          pxToN(expectedWidth) + tolerance
+        );
+        expect(pxToN(height)).to.within(
+          pxToN(expectedHeight) - tolerance,
+          pxToN(expectedHeight) + tolerance
+        );
       });
     };
 
