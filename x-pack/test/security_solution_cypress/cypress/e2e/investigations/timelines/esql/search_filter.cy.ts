@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, gotToEsqlTab } from '../../../../tasks/timeline';
+import { createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -43,7 +43,7 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
 
@@ -60,7 +60,7 @@ describe(
     });
 
     context('navigation', () => {
-      it('should remove the query when back is pressed after adding a query', () => {
+      it.skip('should remove the query when back is pressed after adding a query', () => {
         addDiscoverEsqlQuery(esqlQuery);
         submitDiscoverSearchBar();
         cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {

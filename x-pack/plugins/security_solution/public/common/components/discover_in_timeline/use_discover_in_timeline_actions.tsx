@@ -14,6 +14,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { defaultHeaders } from '@kbn/securitysolution-data-table';
 import { endTimelineSaving, startTimelineSaving } from '../../../timelines/store/timeline/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineId } from '../../../../common/types';
@@ -77,10 +78,12 @@ export const useDiscoverInTimelineActions = (
     const localDataViewId = dataViewId ?? 'security-solution-default';
 
     const dataView = await dataViewService.get(localDataViewId);
-
+    const defaultColumns = defaultHeaders.map((header) => header.id);
     return {
       query: {
-        esql: dataView ? `from ${dataView.getIndexPattern()} | limit 10` : '',
+        esql: dataView
+          ? `from ${dataView.getIndexPattern()} | limit 10 | keep ${defaultColumns.join(', ')}`
+          : '',
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
