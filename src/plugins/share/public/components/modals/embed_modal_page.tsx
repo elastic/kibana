@@ -485,13 +485,6 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
         ...this.state.urlParamsSelectedMap,
         [param]: !this.state.urlParamsSelectedMap[param],
       };
-
-      // const urlParamValues = {
-      //   [dashboardUrlParams.showTopMenu]: newSelectedMap[dashboardUrlParams.showTopMenu],
-      //   [dashboardUrlParams.showQueryInput]: newSelectedMap[dashboardUrlParams.showQueryInput],
-      //   [dashboardUrlParams.showTimeFilter]: newSelectedMap[dashboardUrlParams.showTimeFilter],
-      //   [dashboardUrlParams.hideFilterBar]: !newSelectedMap[showFilterBarId],
-      // };
       this.setState({ urlParamsSelectedMap: newSelectedMap });
     };
 
