@@ -14,12 +14,12 @@ import { i18n } from '@kbn/i18n';
 import {
   useEditTransformFlyoutActions,
   useFormField,
-  type EditTransformFormFields,
+  type FormFields,
 } from './use_edit_transform_flyout';
 import { capitalizeFirstLetter } from './capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {
-  field: EditTransformFormFields;
+  field: FormFields;
   label: string;
   helpText?: string;
   placeHolder?: boolean;
