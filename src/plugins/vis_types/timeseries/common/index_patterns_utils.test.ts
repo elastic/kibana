@@ -77,9 +77,9 @@ describe('fetchIndexPattern', () => {
     mockedIndices = [];
 
     indexPatternsService = {
-      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-      get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-      find: jest.fn((search: string, size: number) => {
+      getDefaultLegacy: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      getLegacy: jest.fn(() => Promise.resolve(mockedIndices[0])),
+      findLegacy: jest.fn((search: string, size: number) => {
         if (size !== 1) {
           // shouldn't request more than one data view since there is a significant performance penalty
           throw new Error('trying to fetch too many data views');

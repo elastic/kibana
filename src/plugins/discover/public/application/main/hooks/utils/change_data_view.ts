@@ -41,7 +41,7 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   try {
-    nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
+    nextDataView = typeof id === 'string' ? await dataViews.getLegacy(id, false) : id;
   } catch (e) {
     //
   }

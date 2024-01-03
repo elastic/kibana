@@ -57,7 +57,7 @@ export const getSuggestions = async (
       return adHoc.name === indexPattern;
     });
 
-    const dataView = await deps.dataViews.create(
+    const dataView = await deps.dataViews.createLegacy(
       dataViewSpec ?? {
         title: indexPattern,
       }

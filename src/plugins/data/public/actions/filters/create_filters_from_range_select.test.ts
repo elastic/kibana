@@ -57,7 +57,7 @@ describe('brushEvent', () => {
     setSearchService(dataStart.search);
     setIndexPatterns({
       ...dataStart.indexPatterns,
-      get: async () => indexPattern,
+      getLegacy: async () => indexPattern,
     } as unknown as DataViewsContract);
 
     baseEvent = {

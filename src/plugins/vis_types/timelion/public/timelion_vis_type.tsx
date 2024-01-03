@@ -56,7 +56,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
         );
 
         if (indexArg?.value.text) {
-          return getIndexPatterns().find(indexArg.value.text, 1);
+          return getIndexPatterns().findLegacy(indexArg.value.text, 1);
         }
       } catch {
         // timelion expression is invalid

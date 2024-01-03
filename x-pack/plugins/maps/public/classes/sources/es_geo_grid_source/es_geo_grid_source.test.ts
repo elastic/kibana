@@ -46,7 +46,7 @@ describe('ESGeoGridSource', () => {
 
   let esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
   const mockIndexPatternService = {
-    get() {
+    getLegacy() {
       return {
         getIndexPattern: () => 'foo-*',
         getName: () => 'foo-*',

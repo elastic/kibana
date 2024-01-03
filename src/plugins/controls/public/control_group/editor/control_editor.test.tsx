@@ -40,7 +40,7 @@ describe('Data control editor', () => {
     explicitInput?: Partial<ControlGroupInput>;
   }
 
-  pluginServices.getServices().dataViews.get = jest.fn().mockResolvedValue(stubDataView);
+  pluginServices.getServices().dataViews.getLegacy = jest.fn().mockResolvedValue(stubDataView);
   pluginServices.getServices().dataViews.getIdsWithTitle = jest
     .fn()
     .mockResolvedValue([{ id: stubDataView.id, title: stubDataView.getIndexPattern() }]);

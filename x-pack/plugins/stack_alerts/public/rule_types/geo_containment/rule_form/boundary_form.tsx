@@ -61,7 +61,7 @@ export const BoundaryForm = (props: Props) => {
     setIsLoading(true);
     setDataViewNotFound(false);
     props.data.indexPatterns
-      .get(props.ruleParams.boundaryIndexId)
+      .getLegacy(props.ruleParams.boundaryIndexId)
       .then((nextDataView) => {
         if (!ignore) {
           setDataView(nextDataView);

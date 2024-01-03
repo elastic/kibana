@@ -18,7 +18,7 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const defaultDataView = await plugins.data.indexPatterns.getDefault();
+    const defaultDataView = await plugins.data.indexPatterns.getDefaultLegacy();
     const { formula } = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;

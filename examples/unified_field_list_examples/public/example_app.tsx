@@ -61,7 +61,10 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   useEffect(() => {
     const setDefaultDataView = async () => {
       try {
-        const defaultDataView = await data.dataViews.getDefault();
+        const defaultDataViewLazy = await data.dataViews.getDefault();
+        const defaultDataView = defaultDataViewLazy
+          ? await data.dataViews.toDataView(defaultDataViewLazy)
+          : null;
         setDataView(defaultDataView);
       } catch (e) {
         setDataView(null);
@@ -98,7 +101,7 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
               indexPatternId={dataView?.id || ''}
               onChange={async (dataViewId?: string) => {
                 if (dataViewId) {
-                  const newDataView = await data.dataViews.get(dataViewId);
+                  const newDataView = await data.dataViews.getLegacy(dataViewId);
                   setDataView(newDataView);
                 } else {
                   setDataView(undefined);

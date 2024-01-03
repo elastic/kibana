@@ -68,7 +68,7 @@ export class FilterEditor extends Component<Props, State> {
     const indexPatterns: DataView[] = [];
     const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
-        const indexPattern = await getIndexPatternService().get(indexPatternId);
+        const indexPattern = await getIndexPatternService().getLegacy(indexPatternId);
         indexPatterns.push(indexPattern);
       } catch (err) {
         // unable to fetch index pattern

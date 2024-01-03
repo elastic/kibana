@@ -27,6 +27,7 @@ describe('add analytics collection lib function', () => {
 
   const mockDataViewsService = {
     createAndSave: jest.fn(),
+    toDataView: jest.fn(),
   };
 
   beforeEach(() => {
@@ -65,8 +66,8 @@ describe('add analytics collection lib function', () => {
       {
         allowNoIndex: true,
         name: 'behavioral_analytics.events-example',
-        title: 'example-datastream',
         timeFieldName: '@timestamp',
+        title: 'example-datastream',
       },
       true
     );

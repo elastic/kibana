@@ -51,7 +51,10 @@ export const extractIndexPatternValues = (panel: Panel, defaultIndexId?: string)
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<DataViewsService, 'getDefault' | 'get' | 'find'>,
+  indexPatternsService: Pick<
+    DataViewsService,
+    'getDefault' | 'get' | 'find' | 'getLegacy' | 'getDefaultLegacy' | 'findLegacy'
+  >,
   options: {
     fetchKibanaIndexForStringIndexes: boolean;
   } = {
@@ -62,11 +65,11 @@ export const fetchIndexPattern = async (
   let indexPatternString: string = '';
 
   if (!indexPatternValue) {
-    indexPattern = await indexPatternsService.getDefault();
+    indexPattern = await indexPatternsService.getDefaultLegacy();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
       if (options.fetchKibanaIndexForStringIndexes) {
-        indexPattern = (await indexPatternsService.find(indexPatternValue, 1)).find(
+        indexPattern = (await indexPatternsService.findLegacy(indexPatternValue, 1)).find(
           (index) => index.title === indexPatternValue
         );
       }
@@ -77,7 +80,7 @@ export const fetchIndexPattern = async (
       indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
       try {
-        indexPattern = await indexPatternsService.get(indexPatternValue.id);
+        indexPattern = await indexPatternsService.getLegacy(indexPatternValue.id);
       } catch (e) {
         throw new DataViewNotFoundError(indexPatternValue.id);
       }

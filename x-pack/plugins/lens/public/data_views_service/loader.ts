@@ -13,7 +13,10 @@ import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;
-type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+type MinimalDataViewsContract = Pick<
+  DataViewsContract,
+  'getIdsWithTitle' | 'getLegacy' | 'createLegacy'
+>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
@@ -156,7 +159,9 @@ export async function loadIndexPatterns({
 
   onIndexPatternRefresh?.();
 
-  const allIndexPatterns = await Promise.allSettled(missingIds.map((id) => dataViews.get(id)));
+  const allIndexPatterns = await Promise.allSettled(
+    missingIds.map((id) => dataViews.getLegacy(id))
+  );
   // ignore rejected indexpatterns here, they're already handled at the app level
   let indexPatterns = allIndexPatterns
     .filter(
@@ -167,7 +172,7 @@ export async function loadIndexPatterns({
   // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
   if (!indexPatterns.length && !hasAdHocDataViews && notUsedPatterns) {
     for (const notUsedPattern of notUsedPatterns) {
-      const resp = await dataViews.get(notUsedPattern).catch((e) => {
+      const resp = await dataViews.getLegacy(notUsedPattern).catch((e) => {
         // do nothing
       });
       if (resp) {
@@ -178,7 +183,7 @@ export async function loadIndexPatterns({
   }
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map((spec) => dataViews.createLegacy(spec))
     ))
   );
 

@@ -17,7 +17,7 @@ export const useFieldFormatter = ({
   fieldSpec?: FieldSpec;
 }) => {
   const {
-    dataViews: { get: getDataViewById },
+    dataViews: { getLegacy: getDataViewById },
   } = pluginServices.getServices();
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 

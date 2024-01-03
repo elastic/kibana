@@ -96,7 +96,7 @@ export class EmbeddedLensExamplePlugin
           const [coreStart, { lens: lensStart, dataViews }] = await core.getStartServices();
           // if it's a regular navigation, redirect to Lens
           if (history.action === 'PUSH') {
-            const defaultDataView = await dataViews.getDefault();
+            const defaultDataView = await dataViews.getDefaultLegacy();
             lensStart.navigateToPrefilledEditor({
               id: '',
               timeRange: {

@@ -65,7 +65,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   useEffect(() => {
     let ignore = false;
     const fetchAndSetDataView = async (dataViewId: string) => {
-      const aDatView = await dataViews.get(dataViewId);
+      const aDatView = await dataViews.getLegacy(dataViewId);
       if (ignore) return;
       setDataView(aDatView);
     };

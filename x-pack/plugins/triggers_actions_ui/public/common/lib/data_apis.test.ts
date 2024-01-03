@@ -66,7 +66,7 @@ describe('Data API', () => {
   describe('index patterns', () => {
     beforeEach(() => {
       setDataViewsService({
-        find: mockFind,
+        findLegacy: mockFind,
       });
     });
     afterEach(() => {

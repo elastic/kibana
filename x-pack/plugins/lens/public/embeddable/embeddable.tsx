@@ -1447,7 +1447,7 @@ export class Embeddable
     (
       await Promise.all(
         Object.values(this.savedVis?.state.adHocDataViews || {}).map((spec) =>
-          this.deps.dataViews.create(spec)
+          this.deps.dataViews.createLegacy(spec)
         )
       )
     ).forEach((dataView) => indexPatterns.push(dataView));

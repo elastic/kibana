@@ -655,7 +655,7 @@ export function getTextBasedDatasource({
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {
-        const dataView = await dataViewsService?.get(index);
+        const dataView = await dataViewsService?.getLegacy(index);
         if (dataView) {
           indexPatterns.push(dataView);
         }

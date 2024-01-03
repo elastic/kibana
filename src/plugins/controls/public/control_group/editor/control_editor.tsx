@@ -89,7 +89,7 @@ export const ControlEditor = ({
   setLastUsedDataViewId,
 }: EditControlProps) => {
   const {
-    dataViews: { getIdsWithTitle, getDefaultId, get },
+    dataViews: { getIdsWithTitle, getDefaultId, getLegacy },
     controls: { getControlFactory, getControlTypes },
   } = pluginServices.getServices();
 
@@ -154,7 +154,7 @@ export const ControlEditor = ({
     if (!selectedDataViewId) {
       return;
     }
-    const dataView = await get(selectedDataViewId);
+    const dataView = await getLegacy(selectedDataViewId);
     const registry = await getDataControlFieldRegistry(dataView);
     return {
       selectedDataView: dataView,

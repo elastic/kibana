@@ -49,7 +49,7 @@ export const useDataViewUpdates = (
           visInstance.vis.data.indexPattern &&
           dataView !== visInstance.vis.data.indexPattern.id
         ) {
-          const selectedDataView = await services.dataViews.get(dataView);
+          const selectedDataView = await services.dataViews.getLegacy(dataView);
           if (selectedDataView) {
             updateDataView(services, visInstance, selectedDataView);
             visInstance.embeddableHandler.reload();

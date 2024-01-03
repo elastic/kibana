@@ -21,7 +21,7 @@ let dataViewCache: DataView[] = [];
 export let refreshDataViews: () => Promise<unknown>;
 
 export async function loadDataViews(dataViewsContract: DataViewsContract) {
-  dataViewCache = await dataViewsContract.find('*', 10000);
+  dataViewCache = await dataViewsContract.findLegacy('*', 10000);
   return dataViewCache;
 }
 

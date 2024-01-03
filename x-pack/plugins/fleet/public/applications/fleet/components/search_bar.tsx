@@ -150,7 +150,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       try {
         const fieldSpecs = getFieldSpecs(indexPattern);
         const fieldsMap = data.dataViews.fieldArrayToMap(fieldSpecs);
-        const newDataView = await data.dataViews.create(
+        const newDataView = await data.dataViews.createLegacy(
           { title: indexPattern, fields: fieldsMap },
           true
         );

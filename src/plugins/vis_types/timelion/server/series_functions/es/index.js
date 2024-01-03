@@ -105,9 +105,9 @@ export default new Datasource('es', {
     });
     const indexPatternsService = tlConfig.getIndexPatternsService();
     const indexPatternSpec =
-      (await indexPatternsService.find(config.index, 1)).find(
+      (await indexPatternsService.findLegacy(config.index, 1)).find(
         (index) => index.title === config.index
-      ) || (await indexPatternsService.create({ title: config.index }));
+      ) || (await indexPatternsService.createLegacy({ title: config.index }));
     const timeField = indexPatternSpec && indexPatternSpec.getFieldByName(config.timefield);
     if (timeField && timeField.timeZone?.[0]) {
       config.timezone = timeField?.timeZone?.[0];
@@ -116,7 +116,8 @@ export default new Datasource('es', {
       config.forceFixedInterval = Boolean(timeField?.fixedInterval?.[0]);
     }
 
-    const { scriptFields = {}, runtimeFields = {} } = indexPatternSpec?.getComputedFields() ?? {};
+    const scriptFields = indexPatternSpec?.getScriptedFields() ?? {};
+    const runtimeFields = indexPatternSpec?.getRuntimeFields() ?? {};
     const esShardTimeout = tlConfig.esShardTimeout;
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);

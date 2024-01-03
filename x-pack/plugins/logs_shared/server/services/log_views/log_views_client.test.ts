@@ -189,7 +189,7 @@ describe('LogViewsClient class', () => {
   it('resolveLogView method resolves given LogViewAttributes with DataView reference', async () => {
     const { logViewsClient, dataViews } = createLogViewsClient();
 
-    dataViews.get.mockResolvedValue(
+    dataViews.getLegacy.mockResolvedValue(
       createStubDataView({
         spec: {
           id: 'LOG_DATA_VIEW',

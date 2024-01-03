@@ -17,11 +17,11 @@ export type DataViewsServiceFactory = KibanaPluginServiceFactory<
 
 export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins }) => {
   const {
-    dataViews: { get, getIdsWithTitle, getDefaultId },
+    dataViews: { getLegacy, getIdsWithTitle, getDefaultId },
   } = startPlugins;
 
   return {
-    get,
+    getLegacy,
     getDefaultId,
     getIdsWithTitle,
   };

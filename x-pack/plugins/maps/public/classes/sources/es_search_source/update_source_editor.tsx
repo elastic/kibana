@@ -71,7 +71,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
   async loadFields() {
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().getLegacy(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

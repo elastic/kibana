@@ -107,7 +107,7 @@ export const useExistingFieldsFetcher = (
       let dataView: DataView | null = null;
 
       try {
-        dataView = await dataViews.get(dataViewId, false);
+        dataView = await dataViews.getLegacy(dataViewId, false);
       } catch (e) {
         //
       }

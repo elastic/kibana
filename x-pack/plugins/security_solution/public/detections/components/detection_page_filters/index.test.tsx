@@ -65,7 +65,7 @@ const mockedDataViewServiceGetter = jest.fn(() => {
 const mockDataViewCreator = jest.fn();
 
 const getKibanaServiceWithMockedGetter = (
-  mockedDataViewGetter: DataViewsServicePublic['get'] = mockedDataViewServiceGetter
+  mockedDataViewGetter: DataViewsServicePublic['getLegacy'] = mockedDataViewServiceGetter
 ) => {
   return {
     ...basicKibanaServicesMock,

@@ -42,8 +42,8 @@ describe('eql', () => {
           search: jest.fn((params: any) => of({ rawResponse: params })),
         },
         indexPatterns: {
-          get: jest.fn(),
-          create: jest.fn(),
+          getLegacy: jest.fn(),
+          createLegacy: jest.fn(),
         },
       },
     ];

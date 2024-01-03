@@ -96,9 +96,9 @@ export async function getDataView(
   let dataView: DataView;
 
   try {
-    dataView = await dataViewsAPI.get(index, false);
+    dataView = await dataViewsAPI.getLegacy(index, false);
   } catch {
-    dataView = await dataViewsAPI.create({
+    dataView = await dataViewsAPI.createLegacy({
       title: index,
       timeFieldName: timeField || '@timestamp',
     });

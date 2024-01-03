@@ -11,7 +11,7 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { cloneDeep, mapValues, omit, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -77,6 +77,18 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
 
+  getScriptedFieldsForQuery() {
+    return this.getScriptedFields().reduce((scriptFields, field) => {
+      scriptFields[field.name] = {
+        script: {
+          source: field.script as string,
+          lang: field.lang,
+        },
+      };
+      return scriptFields;
+    }, {} as Record<string, estypes.ScriptField>);
+  }
+
   /**
    * Returns scripted fields
    */
@@ -94,6 +106,8 @@ export class DataView extends AbstractDataView implements DataViewBase {
     // Date value returned in "_source" could be in a number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
+
+    // gets all date fields that are not scripted
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
       return {
         field: dateField.name,
@@ -104,21 +118,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
       };
     });
 
-    each(this.getScriptedFields(), function (field) {
-      scriptFields[field.name] = {
-        script: {
-          source: field.script as string,
-          lang: field.lang,
-        },
-      };
-    });
-
-    const runtimeFields = this.getRuntimeMappings();
-
     return {
-      scriptFields,
+      scriptFields: this.getScriptedFieldsForQuery(),
       docvalueFields,
-      runtimeFields,
+      runtimeFields: this.getRuntimeMappings(),
     };
   }
 
@@ -366,11 +369,11 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    const mappedFields = this.getMappedFieldNames();
     const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
       (acc, fieldName) => {
         // do not include fields that are mapped
-        if (!mappedFields.includes(fieldName)) {
+        const field = this.fields.getByName(fieldName);
+        if (!field?.isMapped) {
           acc[fieldName] = this.runtimeFieldMap[fieldName];
         }
 
@@ -413,15 +416,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
       else fieldObject.count = newCount;
     }
     this.setFieldAttrs(fieldName, 'count', newCount);
-  }
-
-  private getMappedFieldNames() {
-    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
-      if (dataViewField.isMapped) {
-        acc.push(dataViewField.name);
-      }
-      return acc;
-    }, []);
   }
 
   /**

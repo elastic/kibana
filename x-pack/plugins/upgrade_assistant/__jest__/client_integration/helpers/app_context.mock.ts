@@ -42,7 +42,7 @@ const servicesMock = {
     ...data,
     dataViews: {
       ...dataViews,
-      find: findDataView,
+      findLegacy: findDataView,
     },
   },
 };

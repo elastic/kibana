@@ -57,7 +57,7 @@ export async function getESIndexFields({
   return fields;
 }
 
-type DataViewsService = Pick<DataViewsContract, 'find'>;
+type DataViewsService = Pick<DataViewsContract, 'findLegacy'>;
 let dataViewsService: DataViewsService;
 
 export const setDataViewsService = (aDataViewsService: DataViewsService) => {
@@ -73,7 +73,7 @@ export const loadIndexPatterns = async (pattern: string) => {
   const perPage = 1000;
 
   try {
-    const dataViews: DataView[] = await getDataViewsService().find(formattedPattern, perPage);
+    const dataViews: DataView[] = await getDataViewsService().findLegacy(formattedPattern, perPage);
 
     return dataViews.map((dataView: DataView) => dataView.title);
   } catch (e) {

@@ -66,7 +66,7 @@ export async function getAnnotationRequestParams(
     index: annotationIndex.indexPatternString,
     body: {
       ...request,
-      runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+      runtime_mappings: annotationIndex.indexPattern?.getRuntimeMappings() ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
     trackingEsSearchMeta: {

@@ -18,7 +18,7 @@ export function createDiscoverDataViewsMock() {
     getCache: async () => {
       return [dataViewMock];
     },
-    get: async (id: string) => {
+    getLegacy: async (id: string) => {
       if (id === 'invalid-data-view-id') {
         return Promise.reject('Invalid');
       }
@@ -30,13 +30,13 @@ export function createDiscoverDataViewsMock() {
       }
     },
     defaultDataViewExists: jest.fn(() => Promise.resolve(true)),
-    getDefaultDataView: jest.fn(() => dataViewMock),
+    getDefaultLegacy: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),
     getIdsWithTitle: jest.fn(() => {
       return Promise.resolve(dataViewMockList);
     }),
     createFilter: jest.fn(),
-    create: jest.fn(),
+    createLegacy: jest.fn(),
     clearInstanceCache: jest.fn(),
     getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
     refreshFields: jest.fn(),

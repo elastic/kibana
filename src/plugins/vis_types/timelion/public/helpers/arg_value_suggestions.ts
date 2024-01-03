@@ -24,9 +24,11 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    return (await indexPatterns.find(indexPatternTitle, 1)).find(
+    const dataViewLazy = (await indexPatterns.find(indexPatternTitle, 1)).find(
       (index) => index.title === indexPatternTitle
     );
+
+    return dataViewLazy ? indexPatterns.toDataView(dataViewLazy) : undefined;
   }
 
   function containsFieldName(partial: string, field: { name: string }) {

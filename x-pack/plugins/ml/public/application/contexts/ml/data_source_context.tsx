@@ -79,7 +79,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
     if (savedSearchId !== undefined) {
       dataViewAndSavedSearch = await getDataViewAndSavedSearchCb(savedSearchId);
     } else if (dataViewId !== undefined) {
-      dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
+      dataViewAndSavedSearch.dataView = await dataViews.getLegacy(dataViewId);
     }
 
     const { savedSearch, dataView } = dataViewAndSavedSearch;

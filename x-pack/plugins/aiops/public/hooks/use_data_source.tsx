@@ -68,7 +68,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
 
     // support only data views for now
     if (dataViewId) {
-      dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
+      dataViewAndSavedSearch.dataView = await dataViews.getLegacy(dataViewId);
     }
 
     const { savedSearch, dataView } = dataViewAndSavedSearch;

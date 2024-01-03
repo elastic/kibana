@@ -32,7 +32,7 @@ export const useDerivedIndexPattern = (
   const [dataView, setDataView] = useState<DataView>();
   useEffect(() => {
     (async function fetchData() {
-      const result = await dataViews.create({ title: indexPattern });
+      const result = await dataViews.createLegacy({ title: indexPattern });
       setDataView(result);
       setLoading(false);
     })();

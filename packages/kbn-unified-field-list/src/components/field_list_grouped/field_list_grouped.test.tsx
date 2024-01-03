@@ -40,7 +40,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       core: coreMock.createStart(),
     };
 
-    dataViews.get.mockImplementation(async (id: string) => {
+    dataViews.getLegacy.mockImplementation(async (id: string) => {
       return dataView;
     });
 

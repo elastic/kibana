@@ -205,7 +205,7 @@ export const sampleIndexPatterns = {
 
 export function mockDataViewsService() {
   return {
-    get: jest.fn(async (id: '1' | '2') => {
+    getLegacy: jest.fn(async (id: '1' | '2') => {
       const result = {
         ...sampleIndexPatternsFromService[id],
         metaFields: [],
@@ -229,6 +229,6 @@ export function mockDataViewsService() {
         },
       ];
     }),
-    create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+    createLegacy: jest.fn(),
+  } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 
 import { AnalyticsCollection } from '../../../../common/types/analytics';
 import { KibanaLogic } from '../../shared/kibana/kibana_logic';
@@ -18,7 +18,7 @@ jest.mock('../../shared/kibana/kibana_logic', () => ({
       data: {
         dataViews: {
           createAndSave: jest.fn(),
-          find: jest.fn(() => Promise.resolve([])),
+          findLegacy: jest.fn(() => Promise.resolve([])),
         },
       },
     },
@@ -32,7 +32,7 @@ describe('findOrCreateDataView', () => {
 
   it('should find and set dataView when analytics collection fetched', async () => {
     const dataView = { id: 'test', title: 'events1' } as DataView;
-    jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
+    jest.spyOn(KibanaLogic.values.data.dataViews, 'findLegacy').mockResolvedValueOnce([dataView]);
 
     expect(
       await findOrCreateDataView({
@@ -44,7 +44,7 @@ describe('findOrCreateDataView', () => {
   });
 
   it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
-    const dataView = { id: 'test21' } as DataView;
+    const dataView = { id: 'test21' } as DataViewLazy;
     jest.spyOn(KibanaLogic.values.data.dataViews, 'createAndSave').mockResolvedValueOnce(dataView);
 
     expect(

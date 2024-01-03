@@ -51,7 +51,7 @@ export function ProfilingSearchBar({
 
   useEffect(() => {
     dataViews
-      .create({
+      .createLegacy({
         title: INDEX_EVENTS,
       })
       .then((nextDataView) => setDataView(nextDataView));

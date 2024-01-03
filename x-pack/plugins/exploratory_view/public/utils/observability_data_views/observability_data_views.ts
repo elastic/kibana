@@ -133,7 +133,7 @@ export class ObservabilityDataViews {
     const id = getAppDataViewId(app, indices);
 
     try {
-      const dataView = await this.dataViews.create(
+      const dataView = await this.dataViews.createLegacy(
         {
           id,
           title: appIndicesPattern,
@@ -169,7 +169,7 @@ export class ObservabilityDataViews {
 
     const dataViewId = getAppDataViewId(app, indices);
 
-    return await this.dataViews.createAndSave({
+    const dataViewLazy = await this.dataViews.createAndSave({
       title: appIndicesPattern,
       id: dataViewId,
       timeFieldName: '@timestamp',
@@ -177,6 +177,7 @@ export class ObservabilityDataViews {
       name: DataTypesLabels[app],
       allowNoIndex: true,
     });
+    return this.dataViews.toDataView(dataViewLazy);
   }
   // we want to make sure field formats remain same
   async validateFieldFormats(app: AppDataType, dataView: DataView) {
@@ -239,7 +240,7 @@ export class ObservabilityDataViews {
           return await this.createDataView(app, appIndices);
         }
 
-        const dataView = await this.dataViews?.get(dataViewId);
+        const dataView = await this.dataViews?.getLegacy(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
         if (dataView.title !== dataViewTitle) {

@@ -13,7 +13,12 @@ export const getDataViewByIndexPatternId = async (
   dataViews: DataViewsPublicPluginStart
 ) => {
   try {
-    return indexPatternId ? await dataViews.get(indexPatternId) : await dataViews.getDefault();
+    return indexPatternId
+      ? await dataViews.getLegacy(indexPatternId)
+      : (async () => {
+          const defaultDataView = await dataViews.getDefault();
+          return defaultDataView ? await dataViews.toDataView(defaultDataView) : null;
+        })();
   } catch (err) {
     return null;
   }

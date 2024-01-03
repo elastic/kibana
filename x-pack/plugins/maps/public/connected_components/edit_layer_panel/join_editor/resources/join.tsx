@@ -77,7 +77,7 @@ export class Join extends Component<Props, State> {
     this._nextIndexPatternId = indexPatternId;
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(indexPatternId);
+      indexPattern = await getIndexPatternService().getLegacy(indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

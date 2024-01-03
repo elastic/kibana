@@ -185,7 +185,7 @@ async function generateLink(
   const prevFilters = searchSource.getField('filter') as Filter[];
 
   // make new adhoc data view
-  const newDataView = await dataViews.create({
+  const newDataView = await dataViews.createLegacy({
     ...dataViewToUpdate.toSpec(false),
     version: undefined,
     id: undefined,

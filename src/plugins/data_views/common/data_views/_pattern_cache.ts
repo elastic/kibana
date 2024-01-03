@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from './data_view';
+import { DataViewLazy } from './data_view_lazy';
 
 export interface DataViewCache {
-  get: (id: string) => Promise<DataView> | undefined;
-  set: (id: string, value: Promise<DataView>) => Promise<DataView>;
+  get: (id: string) => Promise<DataViewLazy> | undefined;
+  set: (id: string, value: Promise<DataViewLazy>) => Promise<DataViewLazy>;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
 export function createDataViewCache(): DataViewCache {
-  const vals: Record<string, Promise<DataView>> = {};
+  const vals: Record<string, Promise<DataViewLazy>> = {};
   const cache: DataViewCache = {
     get: (id: string) => {
       return vals[id];
     },
-    set: (id: string, prom: Promise<DataView>) => {
+    set: (id: string, prom: Promise<DataViewLazy>) => {
       vals[id] = prom;
       return prom;
     },

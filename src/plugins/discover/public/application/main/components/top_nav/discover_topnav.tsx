@@ -84,7 +84,7 @@ export const DiscoverTopNav = ({
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
+              const dataViewInstance = await data.dataViews.getLegacy(dataView.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
@@ -117,7 +117,9 @@ export const DiscoverTopNav = ({
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       dataViews.clearInstanceCache(editedDataView.id);
-      stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
+      stateContainer.actions.setDataView(
+        await dataViews.createLegacy(editedDataView.toSpec(), true)
+      );
     } else {
       await stateContainer.actions.updateAdHocDataViewId();
     }

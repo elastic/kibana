@@ -225,7 +225,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     (async () => {
       const index = job.datafeed_config.indices[0];
-      const dataView = (await data.dataViews.find(index)).find(
+      const dataView = (await data.dataViews.findLegacy(index)).find(
         (dv) => dv.getIndexPattern() === index
       );
 

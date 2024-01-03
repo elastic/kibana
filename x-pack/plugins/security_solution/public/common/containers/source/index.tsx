@@ -111,7 +111,10 @@ export const useFetchIndex = (
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
-          const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+          const dv = await data.dataViews.createLegacy({
+            title: iNames.join(','),
+            allowNoIndex: true,
+          });
           const dataView = dv.toSpec();
           const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
 

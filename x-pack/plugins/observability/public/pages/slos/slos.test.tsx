@@ -67,12 +67,13 @@ const mockKibana = () => {
       charts: chartPluginMock.createSetupContract(),
       data: {
         dataViews: {
-          find: jest.fn().mockReturnValue([]),
-          get: jest.fn().mockReturnValue([]),
+          findLegacy: jest.fn().mockReturnValue([]),
+          getLegacy: jest.fn().mockReturnValue([]),
+          getDefaultLegacy: jest.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        createLegacy: jest.fn().mockResolvedValue(42),
       },
       docLinks: {
         links: {

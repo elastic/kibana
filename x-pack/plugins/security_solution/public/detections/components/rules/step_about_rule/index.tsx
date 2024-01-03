@@ -112,7 +112,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   useEffect(() => {
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
+        const dv = await data.dataViews.getLegacy(dataViewId);
         setIndexPattern(dv);
       }
     };

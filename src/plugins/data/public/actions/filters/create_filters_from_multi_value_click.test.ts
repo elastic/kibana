@@ -91,7 +91,7 @@ describe('createFiltersFromMultiValueClickAction', () => {
     setSearchService(dataStart.search);
     setIndexPatterns({
       ...dataStart.indexPatterns,
-      get: async () => ({
+      getLegacy: async () => ({
         id: 'logstash-*',
         fields: {
           getByName: () => mockField,

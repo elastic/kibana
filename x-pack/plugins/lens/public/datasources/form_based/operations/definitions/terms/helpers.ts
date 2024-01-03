@@ -152,7 +152,7 @@ export function getDisallowedTermsMessage(
         );
         if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           if (fieldNames.length === 1) {
-            const currentDataView = await data.dataViews.get(indexPattern.id);
+            const currentDataView = await data.dataViews.getLegacy(indexPattern.id);
             const response: FieldStatsResponse<string | number> = await loadFieldStats({
               services: { data },
               dataView: currentDataView,

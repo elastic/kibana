@@ -65,7 +65,7 @@ const msgComplete = {
 };
 
 const getDataViewsService = () => {
-  const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+  const dataViewsCreateMock = discoverServiceMock.dataViews.createLegacy as jest.Mock;
   dataViewsCreateMock.mockImplementation(() => ({
     ...dataViewMock,
   }));

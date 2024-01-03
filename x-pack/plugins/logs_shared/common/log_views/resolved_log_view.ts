@@ -53,7 +53,7 @@ const resolveLegacyReference = async (
   const indices = logViewAttributes.logIndices.indexName;
 
   const dataViewReference = await dataViewsService
-    .create(
+    .createLegacy(
       {
         id: `log-view-${logViewId}`,
         name: logViewAttributes.name,
@@ -92,7 +92,7 @@ const resolveDataViewReference = async (
 
   const { dataViewId } = logViewAttributes.logIndices;
 
-  const dataView = await dataViewsService.get(dataViewId).catch((error) => {
+  const dataView = await dataViewsService.getLegacy(dataViewId).catch((error) => {
     throw new ResolveLogViewError(`Failed to fetch data view "${dataViewId}": ${error}`, error);
   });
 

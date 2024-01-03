@@ -594,13 +594,16 @@ function useAppState({ data }: { data: DataPublicPluginStart }) {
       // eslint-disable-next-line no-console
       console.warn('Loading default data view');
       let loadedDataView = state.dataViewId
-        ? await data.dataViews.get(state.dataViewId)
-        : await data.dataViews.getDefault();
+        ? await data.dataViews.getLegacy(state.dataViewId)
+        : await (async () => {
+            const defaultLazy = await data.dataViews.getDefault();
+            return defaultLazy ? await data.dataViews.toDataView(defaultLazy) : null;
+          })();
       if (!loadedDataView) {
         // try to find any available data view
         const [id] = await data.dataViews.getIds(true);
         if (id) {
-          loadedDataView = await data.dataViews.get(id);
+          loadedDataView = await data.dataViews.getLegacy(id);
         }
       }
       if (canceled) return;

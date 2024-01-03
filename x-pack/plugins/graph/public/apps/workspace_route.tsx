@@ -62,8 +62,8 @@ export const WorkspaceRoute = ({
   const history = useHistory();
 
   const indexPatternProvider = useMemo(
-    () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
-    [getIndexPatternProvider.get]
+    () => createCachedIndexPatternProvider(getIndexPatternProvider.getLegacy),
+    [getIndexPatternProvider.getLegacy]
   );
 
   const services = useMemo(

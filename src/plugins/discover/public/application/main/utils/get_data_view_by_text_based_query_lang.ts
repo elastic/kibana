@@ -32,7 +32,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await services.dataViews.create({
+    const dataViewObj = await services.dataViews.createLegacy({
       title: indexPatternFromQuery,
     });
 

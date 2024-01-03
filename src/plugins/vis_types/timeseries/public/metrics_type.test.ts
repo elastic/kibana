@@ -7,7 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy } from '@kbn/data-views-plugin/public';
 import { setDataViewsStart } from './services';
 import type { TimeseriesVisParams } from './types';
 import type { Vis } from '@kbn/visualizations-plugin/public';
@@ -15,16 +15,16 @@ import { metricsVisDefinition } from './metrics_type';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
-    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataView;
-    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataView;
+    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataViewLazy;
+    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataViewLazy;
     let defaultParams: TimeseriesVisParams;
 
     beforeEach(async () => {
       setDataViewsStart({
-        async getDefault() {
+        async getDefaultLegacy() {
           return indexPattern1;
         },
-        async find(title: string, size: number) {
+        async findLegacy(title: string, size: number) {
           if (size !== 1) {
             throw new Error('trying to fetch too many data views');
           }
@@ -32,12 +32,12 @@ describe('metricsVisDefinition', () => {
           if (title === 'pattern2') return [indexPattern2];
           return [];
         },
-        async get(id: string) {
+        async getLegacy(id: string) {
           if (id === '1') return indexPattern1;
           if (id === '2') return indexPattern2;
           throw new Error();
         },
-      } as DataViewsPublicPluginStart);
+      } as unknown as DataViewsPublicPluginStart);
       defaultParams = (
         await metricsVisDefinition.setup!({
           params: cloneDeep(metricsVisDefinition.visConfig.defaults),

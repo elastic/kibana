@@ -37,7 +37,7 @@ export const DatasetFilter: React.FunctionComponent<{
           acc[curr.name] = curr;
           return acc;
         }, {});
-        const newDataView = await data.dataViews.create({
+        const newDataView = await data.dataViews.createLegacy({
           title: AGENT_LOG_INDEX_PATTERN,
           fields: fieldsMap,
         });

@@ -33,7 +33,12 @@ function UnifiedDocViewerExamplesApp({ data }: { data: DataPublicPluginStart }) 
   const [hit, setHit] = useState<DataTableRecord | null>();
 
   useEffect(() => {
-    data.dataViews.getDefault().then((defaultDataView) => setDataView(defaultDataView));
+    data.dataViews.getDefault().then(async (defaultDataViewLazy) => {
+      const defaultDataView = defaultDataViewLazy
+        ? await data.dataViews.toDataView(defaultDataViewLazy)
+        : null;
+      setDataView(defaultDataView);
+    });
   }, [data]);
 
   useEffect(() => {

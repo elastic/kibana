@@ -80,7 +80,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
     const { dataViewId } = this.getInput();
 
-    const dataView = await dataViewsService.get(dataViewId);
+    const dataView = await dataViewsService.getLegacy(dataViewId);
 
     this.updateOutput({
       indexPatterns: [dataView],

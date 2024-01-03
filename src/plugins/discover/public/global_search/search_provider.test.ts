@@ -94,7 +94,7 @@ describe('ES|QL search provider', () => {
     const dataViewMock = createDiscoverDataViewsMock();
     const updatedDataMock = new Promise<DataPublicPluginStart>((resolve) => {
       resolve({
-        dataViews: { ...dataViewMock, getDefaultDataView: jest.fn(() => undefined) },
+        dataViews: { ...dataViewMock, getDefaultLegacy: jest.fn(() => undefined) },
       } as unknown as DataPublicPluginStart);
     });
     const esqlSearchProvider = getESQLSearchProvider(

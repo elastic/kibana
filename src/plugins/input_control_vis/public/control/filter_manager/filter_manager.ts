@@ -38,7 +38,7 @@ export abstract class FilterManager {
   async init() {
     try {
       if (!this.indexPattern) {
-        this.indexPattern = await this.indexPatternsService.get(this.indexPatternId);
+        this.indexPattern = await this.indexPatternsService.getLegacy(this.indexPatternId);
       }
     } catch (e) {
       // invalid index pattern id

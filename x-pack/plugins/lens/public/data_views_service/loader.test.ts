@@ -21,7 +21,7 @@ describe('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const dataViewsService = mockDataViewsService();
-      dataViewsService.get = jest.fn(() =>
+      dataViewsService.getLegacy = jest.fn(() =>
         Promise.reject('mockIndexPatternService.get should not have been called')
       );
 
@@ -51,7 +51,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          getLegacy: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: [],
@@ -93,8 +93,8 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-          create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          createLegacy: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -110,7 +110,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          getLegacy: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: ['timestamp'],
@@ -152,8 +152,8 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-          create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          createLegacy: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -164,7 +164,7 @@ describe('loader', () => {
         cache: {},
         patterns: ['foo'],
         dataViews: {
-          get: jest.fn(async () => ({
+          getLegacy: jest.fn(async () => ({
             id: 'foo',
             title: 'Foo index',
             metaFields: ['timestamp'],
@@ -210,7 +210,7 @@ describe('loader', () => {
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>,
       });
 
       expect(cache.foo.getFieldByName('bytes_counter')!.timeSeriesMetric).toEqual('counter');
@@ -246,7 +246,7 @@ describe('loader', () => {
 
     it('should load one of the not used indexpatterns if all used ones are not available', async () => {
       const dataViewsService = {
-        get: jest.fn(async (id: string) => {
+        getLegacy: jest.fn(async (id: string) => {
           if (id === '3') {
             return {
               id: '3',
@@ -261,7 +261,7 @@ describe('loader', () => {
           return Promise.reject();
         }),
         getIdsWithTitle: jest.fn(),
-      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+      } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>;
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['1', '2'],
@@ -279,7 +279,7 @@ describe('loader', () => {
         }),
       });
       // trying to load the used patterns 1 and 2, then trying the not used pattern 11 and succeeding with the pattern 3 - 4 loads
-      expect(dataViewsService.get).toHaveBeenCalledTimes(4);
+      expect(dataViewsService.getLegacy).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -290,11 +290,11 @@ describe('loader', () => {
       const cache = await ensureIndexPattern({
         id: '3',
         dataViews: {
-          get: jest.fn(async () => {
+          getLegacy: jest.fn(async () => {
             throw err;
           }),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+        } as unknown as Pick<DataViewsContract, 'getLegacy' | 'getIdsWithTitle' | 'createLegacy'>,
         onError,
       });
 

@@ -48,7 +48,7 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
           }
 
           const indexPatternErrors = await indexPatternService
-            .get(logIndices.dataViewId)
+            .getLegacy(logIndices.dataViewId)
             .then(validateIndexPattern, (error): FormValidationError[] => {
               if (error instanceof SavedObjectNotFound) {
                 return [

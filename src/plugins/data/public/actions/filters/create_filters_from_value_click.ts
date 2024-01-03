@@ -90,7 +90,7 @@ export const createFilter = async (
   const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
     .sourceParams as any;
   const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
-    await getIndexPatterns().get(indexPatternId),
+    await getIndexPatterns().getLegacy(indexPatternId),
     [aggConfigParams as AggConfigSerialized]
   );
   const aggConfig = aggConfigsInstance.aggs[0];

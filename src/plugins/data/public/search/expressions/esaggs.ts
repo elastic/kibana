@@ -44,7 +44,7 @@ export function getFunctionDefinition({
       return defer(async () => {
         const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await indexPatterns.createLegacy(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],

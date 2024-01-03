@@ -120,7 +120,10 @@ export const SearchExamplesApp = ({
   // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
     const setDefaultDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefault();
+      const defaultDataViewLazy = await data.dataViews.getDefault();
+      const defaultDataView = defaultDataViewLazy
+        ? await data.dataViews.toDataView(defaultDataViewLazy)
+        : null;
       setDataView(defaultDataView);
     };
 
@@ -541,7 +544,7 @@ export const SearchExamplesApp = ({
               indexPatternId={dataView?.id || ''}
               onChange={async (dataViewId?: string) => {
                 if (dataViewId) {
-                  const newDataView = await data.dataViews.get(dataViewId);
+                  const newDataView = await data.dataViews.getLegacy(dataViewId);
                   setDataView(newDataView);
                 } else {
                   setDataView(undefined);

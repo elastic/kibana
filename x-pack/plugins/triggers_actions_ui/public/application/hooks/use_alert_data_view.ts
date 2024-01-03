@@ -91,7 +91,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
   // we are using the user privilege to access the security alert index
   useEffect(() => {
     async function createDataView() {
-      const localDataview = await dataService.dataViews.create({
+      const localDataview = await dataService.dataViews.createLegacy({
         title: (indexNames ?? []).join(','),
         allowNoIndex: true,
       });

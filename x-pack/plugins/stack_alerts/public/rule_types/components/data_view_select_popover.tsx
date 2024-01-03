@@ -71,7 +71,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
-      const selectedDataView = await dataViews.get(selectedDataViewId);
+      const selectedDataView = await dataViews.getLegacy(selectedDataViewId);
       onSelectDataView(selectedDataView);
       closeDataViewPopover();
     },
@@ -80,7 +80,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const loadPersistedDataViews = useCallback(async () => {
     const ids = await dataViews.getIds();
-    const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
+    const dataViewsList = await Promise.all(ids.map((id) => dataViews.getLegacy(id)));
 
     setDataViewsItems(dataViewsList.map(toDataViewListItem));
   }, [dataViews]);
@@ -134,7 +134,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {
-      const newDataView = await dataViews.create(dataViewSpec);
+      const newDataView = await dataViews.createLegacy(dataViewSpec);
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }

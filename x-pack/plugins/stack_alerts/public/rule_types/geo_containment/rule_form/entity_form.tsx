@@ -67,7 +67,7 @@ export const EntityForm = (props: Props) => {
     setIsLoading(true);
     setDataViewNotFound(false);
     props.data.indexPatterns
-      .get(props.ruleParams.indexId)
+      .getLegacy(props.ruleParams.indexId)
       .then((nextDataView) => {
         if (!ignore) {
           setDataView(nextDataView);

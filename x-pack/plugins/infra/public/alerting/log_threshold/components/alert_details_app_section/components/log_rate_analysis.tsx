@@ -69,7 +69,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         await logsShared.logViews.client.getResolvedLogView(validatedParams.logView);
 
       if (dataViewReference.id) {
-        const logDataView = await dataViews.get(dataViewReference.id);
+        const logDataView = await dataViews.getLegacy(dataViewReference.id);
         setDataView(logDataView);
         getQuery(timestampField);
       }

@@ -91,7 +91,7 @@ export const registerUpdateScriptedFieldRoute = (
           const name = req.params.name;
           const field = { ...req.body.field, name } as unknown as FieldSpec;
 
-          const indexPattern = await indexPatternsService.get(id);
+          const indexPattern = await indexPatternsService.getLegacy(id);
           let fieldObject = indexPattern.fields.getByName(field.name);
 
           if (!fieldObject) {

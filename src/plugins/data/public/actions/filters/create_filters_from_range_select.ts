@@ -29,7 +29,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
   }
 
   const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
-  const indexPattern = await getIndexPatterns().get(indexPatternId);
+  const indexPattern = await getIndexPatterns().getLegacy(indexPatternId);
   const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
     aggConfigs as AggConfigSerialized,
   ]);

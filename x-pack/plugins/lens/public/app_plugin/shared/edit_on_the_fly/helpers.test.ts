@@ -61,7 +61,7 @@ describe('getSuggestions', () => {
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   const dataViews = dataViewPluginMocks.createStartContract();
-  dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+  dataViews.createLegacy.mockResolvedValue(mockDataViewWithTimefield);
   const dataviewSpecArr = [
     {
       id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',

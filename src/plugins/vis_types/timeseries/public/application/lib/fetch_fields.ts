@@ -29,7 +29,7 @@ export async function fetchFields(
         try {
           if (typeof pattern !== 'string' && pattern?.id) {
             return toSanitizedFieldType(
-              (await getDataViewsStart().get(pattern.id)).getNonScriptedFields()
+              (await getDataViewsStart().getLegacy(pattern.id)).getNonScriptedFields()
             );
           } else {
             return coreStart.http.get(ROUTES.FIELDS, {

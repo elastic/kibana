@@ -22,7 +22,7 @@ export const renderApp = async (
   { data, navigation }: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  const dataViews = await data.dataViews.find('kibana_sample_data_logs');
+  const dataViews = await data.dataViews.findLegacy('kibana_sample_data_logs');
   const examples =
     dataViews.length > 0 ? (
       <>

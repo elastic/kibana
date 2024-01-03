@@ -40,7 +40,7 @@ export function SpatialJoinPopoverContent(props: Props) {
     let ignore = false;
     setIsLoading(true);
     getIndexPatternService()
-      .get(props.sourceDescriptor.indexPatternId)
+      .getLegacy(props.sourceDescriptor.indexPatternId)
       .then((dataView) => {
         if (!ignore) {
           setIsLoading(false);

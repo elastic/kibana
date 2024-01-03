@@ -39,11 +39,11 @@ describe('extractOrGenerateDatasourceInfo', () => {
   let dataViews: DataViewsPublicPluginStart;
   beforeAll(() => {
     dataViews = {
-      getDefault: jest.fn(async () => {
+      getDefaultLegacy: jest.fn(async () => {
         return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
       }),
-      get: getDataview,
-      create: mockCreateDataView,
+      getLegacy: getDataview,
+      createLegacy: mockCreateDataView,
     } as unknown as DataViewsPublicPluginStart;
   });
 

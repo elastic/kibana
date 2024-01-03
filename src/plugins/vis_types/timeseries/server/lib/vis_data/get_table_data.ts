@@ -108,7 +108,7 @@ export async function getTableData(
             buildSeriesMetaParams: () =>
               services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
           })),
-          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+          runtime_mappings: panelIndex.indexPattern?.getRuntimeMappings() ?? {},
         },
         trackingEsSearchMeta: {
           requestId: panel.id,

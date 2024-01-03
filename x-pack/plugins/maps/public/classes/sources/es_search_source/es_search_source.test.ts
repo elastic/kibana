@@ -35,7 +35,7 @@ describe('ESSearchSource', () => {
     describe('getTileUrl', () => {
       const geoFieldName = 'bar';
       const mockIndexPatternService = {
-        get() {
+        getLegacy() {
           return {
             getIndexPattern: () => 'foobar-title-*',
             title: 'foobar-title-*',

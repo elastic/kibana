@@ -201,7 +201,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   useEffect(() => {
     if (!dataViewId) return;
-    dataViewService.get(dataViewId).then(setDataView);
+    dataViewService.getLegacy(dataViewId).then(setDataView);
   }, [dataViewId, dataViewService]);
 
   useEffect(() => {

@@ -25,7 +25,7 @@ jest.mock('../../../../../hooks', () => ({
     data: {
       dataViews: {
         getFieldsForWildcard: jest.fn().mockResolvedValue([]),
-        create: jest.fn().mockResolvedValue([]),
+        createLegacy: jest.fn().mockResolvedValue([]),
       },
     },
     unifiedSearch: {

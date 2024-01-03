@@ -120,8 +120,9 @@ function useDataView(data: DataPublicPluginStart) {
   const [dataView, setDataView] = useState<DataView>();
   useEffect(() => {
     const fetchDataView = async () => {
-      const defaultDataView = await data.dataViews.getDefault();
-      if (defaultDataView) {
+      const defaultDataViewLazy = await data.dataViews.getDefault();
+      if (defaultDataViewLazy) {
+        const defaultDataView = await data.dataViews.toDataView(defaultDataViewLazy);
         setDataView(defaultDataView);
       }
     };

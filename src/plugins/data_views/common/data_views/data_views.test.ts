@@ -8,7 +8,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { defaults, get } from 'lodash';
-import { DataViewsService, DataView } from '.';
+import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
@@ -232,7 +232,7 @@ describe('IndexPatterns', () => {
       },
     });
 
-    expect((await indexPatterns.get(id)).fields.length).toBe(1);
+    expect((await indexPatterns.getLegacy(id)).fields.length).toBe(1);
   });
 
   test('existing indices, so dataView.matchedIndices.length equals 1 ', async () => {
@@ -388,7 +388,7 @@ describe('IndexPatterns', () => {
     indexPatterns.createSavedObject = jest.fn(() =>
       Promise.resolve({
         id: 'id',
-      } as unknown as DataView)
+      } as unknown as DataViewLazy)
     );
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
@@ -415,7 +415,7 @@ describe('IndexPatterns', () => {
 
   test('correctly composes runtime field', async () => {
     setDocsourcePayload('id', savedObject);
-    const indexPattern = await indexPatterns.get('id');
+    const indexPattern = await indexPatterns.getLegacy('id');
     expect(indexPattern.fields).toMatchSnapshot();
   });
 
@@ -645,7 +645,9 @@ describe('IndexPatterns', () => {
         title: 'test',
       };
 
-      const indexPattern = await indexPatterns.create(indexPatternSpec);
+      const indexPatternLazy = await indexPatterns.create(indexPatternSpec);
+      const indexPattern = await indexPatterns.toDataView(indexPatternLazy);
+
       await indexPatterns.refreshFields(indexPattern);
       expect(indexPattern.fields.length).toBe(1);
     });
@@ -655,7 +657,8 @@ describe('IndexPatterns', () => {
         title: 'test',
       };
 
-      const indexPattern = await indexPatterns.create(indexPatternSpec);
+      const indexPatternLazy = await indexPatterns.create(indexPatternSpec);
+      const indexPattern = await indexPatterns.toDataView(indexPatternLazy);
 
       indexPatterns.refreshFields(indexPattern);
       // @ts-expect-error

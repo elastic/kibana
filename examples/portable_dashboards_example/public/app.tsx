@@ -73,7 +73,7 @@ const DashboardsDemo = ({
   dashboard: PortableDashboardsExampleStartDeps['dashboard'];
 }) => {
   const { loading, value: dataviewResults } = useAsync(async () => {
-    const dataViews = await data.dataViews.find('kibana_sample_data_logs');
+    const dataViews = await data.dataViews.findLegacy('kibana_sample_data_logs');
     const findDashboardsService = await dashboard.findDashboardsService();
     const logsSampleDashboardId = (await findDashboardsService?.findByTitle('[Logs] Web Traffic'))
       ?.id;

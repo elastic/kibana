@@ -298,7 +298,10 @@ export function getDiscoverStateContainer({
   const updateAdHocDataViewId = async () => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
-    const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+    const newDataView = await services.dataViews.createLegacy({
+      ...prevDataView.toSpec(),
+      id: uuidv4(),
+    });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences(prevDataView, newDataView);
@@ -341,7 +344,7 @@ export function getDiscoverStateContainer({
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+      setDataView(await services.dataViews.createLegacy(editedDataView.toSpec(), true));
     } else {
       await updateAdHocDataViewId();
     }
@@ -420,7 +423,7 @@ export function getDiscoverStateContainer({
   };
 
   const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
-    const newDataView = await services.dataViews.create(dataViewSpec);
+    const newDataView = await services.dataViews.createLegacy(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }

@@ -23,7 +23,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
 
   useEffect(() => {
     dataViews
-      .get(props.match.params.id)
+      .getLegacy(props.match.params.id)
       .then((ip: DataView) => {
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));

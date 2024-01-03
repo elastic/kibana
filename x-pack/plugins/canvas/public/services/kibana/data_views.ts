@@ -34,14 +34,14 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins 
     return [];
   },
   getFields: async (dataViewTitle: string) => {
-    const dataView = await startPlugins.dataViews.create({ title: dataViewTitle });
+    const dataView = await startPlugins.dataViews.createLegacy({ title: dataViewTitle });
 
     return dataView.fields
       .filter((field) => !field.name.startsWith('_'))
       .map((field) => field.name);
   },
   getDefaultDataView: async () => {
-    const dataView = await startPlugins.dataViews.getDefaultDataView();
+    const dataView = await startPlugins.dataViews.getDefaultLegacy();
 
     return dataView
       ? { id: dataView.id, name: dataView.name, title: dataView.getIndexPattern() }

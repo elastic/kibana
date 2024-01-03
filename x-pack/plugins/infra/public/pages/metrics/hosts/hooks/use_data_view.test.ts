@@ -39,7 +39,7 @@ const mockDataView = {
 describe('useDataView hook', () => {
   beforeEach(() => {
     dataViewMock = {
-      create: jest.fn().mockImplementation(() => Promise.resolve(mockDataView)),
+      createLegacy: jest.fn().mockImplementation(() => Promise.resolve(mockDataView)),
     } as Partial<DataViewsServicePublic> as jest.Mocked<DataViewsServicePublic>;
 
     mockUseKibana();
@@ -58,7 +58,7 @@ describe('useDataView hook', () => {
     const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'metrics' }));
 
     await waitForNextUpdate();
-    expect(dataViewMock.create).toHaveBeenCalledWith({
+    expect(dataViewMock.createLegacy).toHaveBeenCalledWith({
       id: 'infra_metrics_212933f0-c55e-5a36-8b13-e724aed2f66d',
       timeFieldName: '@timestamp',
       title: 'metrics',
@@ -69,7 +69,7 @@ describe('useDataView hook', () => {
     const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'remote-metrics' }));
 
     await waitForNextUpdate();
-    expect(dataViewMock.create).toHaveBeenCalledWith({
+    expect(dataViewMock.createLegacy).toHaveBeenCalledWith({
       id: 'infra_metrics_e40bb657-0351-548e-8e73-093851d9bb6e',
       timeFieldName: '@timestamp',
       title: 'remote-metrics',

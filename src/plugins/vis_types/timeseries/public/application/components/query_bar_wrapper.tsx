@@ -60,7 +60,7 @@ export function QueryBarWrapper({
             }
           }
         } else {
-          const defaultIndex = await dataViews.getDefault();
+          const defaultIndex = await dataViews.getDefaultLegacy();
 
           if (defaultIndex) {
             i.push(defaultIndex);

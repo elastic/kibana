@@ -55,7 +55,7 @@ export function CsmSharedContextProvider({
 
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (dataViewTitle) {
-      return dataViews.create({
+      return dataViews.createLegacy({
         title: dataViewTitle,
         timeFieldName: '@timestamp',
       });

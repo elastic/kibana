@@ -106,7 +106,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       const dataViewId = customUrl?.kibanaSettings?.discoverIndexPatternId;
 
       try {
-        dataViewToUse = await dataViews.get(dataViewId ?? '');
+        dataViewToUse = await dataViews.getLegacy(dataViewId ?? '');
       } catch (e) {
         dataViewToUse = undefined;
       }

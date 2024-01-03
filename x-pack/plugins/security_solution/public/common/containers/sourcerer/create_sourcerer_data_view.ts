@@ -43,7 +43,7 @@ export const createSourcererDataView = async ({
   let siemDataView: DataViewType;
   if (siemDataViewExist === undefined) {
     try {
-      siemDataView = await dataViewService.createAndSave(
+      const siemDataViewLazy = await dataViewService.createAndSave(
         {
           allowNoIndex: true,
           id: dataViewId,
@@ -54,10 +54,11 @@ export const createSourcererDataView = async ({
         // delete it and replace it with our data view
         true
       );
+      siemDataView = await dataViewService.toDataView(siemDataViewLazy);
     } catch (err) {
       const error = transformError(err);
       if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
-        siemDataView = await dataViewService.get(dataViewId);
+        siemDataView = await dataViewService.getLegacy(dataViewId);
       } else {
         throw error;
       }
@@ -66,7 +67,7 @@ export const createSourcererDataView = async ({
     const siemDataViewTitle = siemDataViewExist
       ? ensurePatternFormat(siemDataViewExist.title.split(',')).join()
       : '';
-    siemDataView = await dataViewService.get(dataViewId);
+    siemDataView = await dataViewService.getLegacy(dataViewId);
 
     if (patternListAsTitle !== siemDataViewTitle) {
       siemDataView.title = patternListAsTitle;
