@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ACTION_CUSTOMIZE_PANEL, ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
@@ -29,6 +29,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
 const HOVER_ACTIONS_PADDING = 24;
+const DISABLED_ACTIONS = [ACTION_CUSTOMIZE_PANEL];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
@@ -278,6 +279,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             style={style}
             timeRange={timerange}
             attributes={attributes}
+            disabledActions={DISABLED_ACTIONS}
             onLoad={onLoadCallback}
             onBrushEnd={updateDateRange}
             onFilter={onFilterCallback}
