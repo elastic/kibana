@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiIconTip,
+  EuiCopy,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -533,9 +534,16 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiButton fill onClick={() => handleChange}>
-                      <FormattedMessage id="share.embed.embedButton" defaultMessage="Copy Embed" />
-                    </EuiButton>
+                    <EuiCopy textToCopy={this.state.url ?? ''}>
+                      {(copy) => (
+                        <EuiButton fill onClick={copy}>
+                          <FormattedMessage
+                            id="share.embed.embedButton"
+                            defaultMessage="Copy Embed"
+                          />
+                        </EuiButton>
+                      )}
+                    </EuiCopy>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
