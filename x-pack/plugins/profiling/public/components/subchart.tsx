@@ -34,19 +34,16 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { groupBy } from 'lodash';
 import React, { Fragment, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
-import { useProfilingParams } from '../hooks/use_profiling_params';
-import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
-import { getTracesViewRouteParams } from '../views/stack_traces_view/utils';
 import { StackFrameSummary } from './stack_frame_summary';
 
 export interface SubChartProps {
@@ -59,8 +56,8 @@ export interface SubChartProps {
   percentage: number;
   data: CountPerTime[];
   showAxes: boolean;
-  metadata: StackFrameMetadata[];
-  onShowMoreClick?: () => void;
+  metadata?: StackFrameMetadata[];
+  onClick?: () => void;
   style?: EuiFlexGroupProps['style'];
   showFrames: boolean;
   padTitle: boolean;
@@ -92,8 +89,8 @@ export function SubChart({
   data,
   width,
   showAxes,
-  metadata,
-  onShowMoreClick,
+  metadata = [],
+  onClick,
   style,
   showFrames,
   padTitle,
@@ -104,20 +101,11 @@ export function SubChart({
     Record<string, EuiAccordionProps['forceState']>
   >({});
 
-  const profilingRouter = useProfilingRouter();
-
-  const { path, query } = useProfilingParams('/stacktraces/{topNType}');
-
-  const href = profilingRouter.link(
-    '/stacktraces/{topNType}',
-    getTracesViewRouteParams({ query, topNType: path.topNType, category })
-  );
-
   const timeZone = useKibanaTimeZoneSetting();
 
   const { chartsTheme, chartsBaseTheme } = useProfilingChartsTheme();
 
-  const compact = !!onShowMoreClick;
+  const compact = !!onClick;
 
   const parentsMetadata = metadata.filter((item) => item.Inline === false);
   const displayedFrames = compact
@@ -225,8 +213,8 @@ export function SubChart({
             })}
           </EuiFlexGroup>
 
-          {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
+          {hasMoreFrames && !!onClick && (
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -275,14 +263,10 @@ export function SubChart({
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
-            {showFrames ? (
-              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
-                <EuiText size="s">{label}</EuiText>
-              </EuiLink>
-            ) : category === OTHER_BUCKET_LABEL ? (
+            {category === OTHER_BUCKET_LABEL || onClick === undefined ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={onClick}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}

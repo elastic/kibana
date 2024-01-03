@@ -10,6 +10,7 @@ import { safeDecode } from '@kbn/rison';
 
 import { useDispatch } from 'react-redux';
 
+import { TimelineTabs } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import {
   dispatchUpdateTimeline,
@@ -26,11 +27,16 @@ export const useInitTimelineFromUrlParam = () => {
     'useDiscoverComponentsInTimeline'
   );
 
+  const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
         queryTimelineById({
-          activeTimelineTab: initialState.activeTab,
+          activeTimelineTab:
+            initialState.activeTab === TimelineTabs.esql && isEsqlTabDisabled
+              ? TimelineTabs.query
+              : initialState.activeTab,
           duplicate: false,
           graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
@@ -43,7 +49,7 @@ export const useInitTimelineFromUrlParam = () => {
         });
       }
     },
-    [dispatch, useDiscoverComponentsInTimeline]
+    [dispatch, useDiscoverComponentsInTimeline, isEsqlTabDisabled]
   );
 
   useEffect(() => {
