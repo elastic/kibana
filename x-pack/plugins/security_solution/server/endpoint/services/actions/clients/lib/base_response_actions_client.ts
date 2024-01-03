@@ -101,7 +101,7 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
-type ResponseActionsClientValidateRequestResponse =
+export type ResponseActionsClientValidateRequestResponse =
   | {
       isValid: true;
       error: undefined;
@@ -230,7 +230,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     );
   }
 
-  private async validateRequest(
+  /**
+   * Provides validations against a response action request and returns the result.
+   * Checks made should be generic to all response actions and not specific to any one action.
+   *
+   * @param actionRequest
+   * @protected
+   */
+  protected async validateRequest(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Validation for Automated Response actions

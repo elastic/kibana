@@ -22,13 +22,11 @@ import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
-import type {
-  IsolationRouteRequestBody,
-  BaseActionRequestBody,
-} from '../../../../../../common/api/endpoint';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
@@ -168,54 +166,93 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return s1ApiResponse.data[0];
   }
 
-  private async validateSupport(payload: BaseActionRequestBody): Promise<void> {
+  protected async validateRequest(
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
-      throw new ResponseActionsClientError(
-        `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
-        400
-      );
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          `[body.endpoint_ids]: Multiple agents IDs not currently supported for SentinelOne`,
+          400
+        ),
+      };
     }
+
+    return super.validateRequest(payload);
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateSupport(options);
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: 'isolate',
     };
+
+    let error = (await this.validateRequest(reqIndexOptions)).error;
+
+    if (!error) {
+      try {
+        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+      } catch (err) {
+        error = err;
+      }
+    }
+
+    reqIndexOptions.error = error?.message;
+
+    if (!this.options.isAutomated && error) {
+      throw error;
+    }
+
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      agentId: actionRequestDoc.agent.id,
-      data: {
-        command: actionRequestDoc.EndpointActions.data.command,
-      },
-    });
+
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateSupport(options);
-    await this.sendAction(SUB_ACTION.RELEASE_HOST, {
-      uuid: options.endpoint_ids[0],
-    });
-
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: 'unisolate',
-    });
+    };
 
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      agentId: actionRequestDoc.agent.id,
-      data: {
-        command: actionRequestDoc.EndpointActions.data.command,
-      },
-    });
+    let error = (await this.validateRequest(reqIndexOptions)).error;
+
+    if (!error) {
+      try {
+        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+      } catch (err) {
+        error = err;
+      }
+    }
+
+    reqIndexOptions.error = error?.message;
+
+    if (!this.options.isAutomated && error) {
+      throw error;
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    if (!actionRequestDoc.error) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
