@@ -96,10 +96,11 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
       async run(): Promise<FindingsStatsTaskResult> {
         try {
           logger.info(`Runs task: ${CSPM_FINDINGS_STATS_TASK_TYPE}`);
-          const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          const encryptedSoClient = (
-            await coreStartServices
-          )[0].savedObjects.createInternalRepository([INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE]);
+          const startServices = await coreStartServices;
+          const esClient = startServices[0].elasticsearch.client.asInternalUser;
+          const encryptedSoClient = startServices[0].savedObjects.createInternalRepository([
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+          ]);
 
           const status = await aggregateLatestFindings(esClient, encryptedSoClient, logger);
 

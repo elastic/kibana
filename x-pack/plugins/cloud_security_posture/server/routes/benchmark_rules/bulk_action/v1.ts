@@ -44,8 +44,8 @@ export const bulkActionBenchmarkRulesHandler = async (
   const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], rulesToUpdate);
 
   const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
-  const disabledRules =
+  const disabledDetectionRules =
     action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : [];
 
-  return { newCspSettings, disabledRules };
+  return { newCspSettings, disabledRules: disabledDetectionRules };
 };

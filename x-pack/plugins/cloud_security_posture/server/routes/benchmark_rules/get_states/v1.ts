@@ -52,27 +52,22 @@ export const buildMutedRulesFilter = async (
   encryptedSoClient: ISavedObjectsRepository
 ): Promise<QueryDslQueryContainer[]> => {
   const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
-
-  const mustNotFilter = [];
   const mutedRules = Object.fromEntries(
     Object.entries(rulesStates).filter(([key, value]) => value.muted === true)
   );
-  for (const key in mutedRules) {
-    if (mutedRules.hasOwnProperty(key)) {
-      const rule = mutedRules[key];
-      const mustNotClause = {
-        bool: {
-          must: [
-            { term: { 'rule.benchmark.id': rule.benchmark_id } },
-            { term: { 'rule.benchmark.version': rule.benchmark_version } },
-            { term: { 'rule.benchmark.rule_number': rule.rule_number } },
-          ],
-        },
-      };
 
-      mustNotFilter.push(mustNotClause);
-    }
-  }
+  const mutedRulesFilterQuery = Object.keys(mutedRules).map((key) => {
+    const rule = mutedRules[key];
+    return {
+      bool: {
+        must: [
+          { term: { 'rule.benchmark.id': rule.benchmark_id } },
+          { term: { 'rule.benchmark.version': rule.benchmark_version } },
+          { term: { 'rule.benchmark.rule_number': rule.rule_number } },
+        ],
+      },
+    };
+  });
 
-  return mustNotFilter;
+  return mutedRulesFilterQuery;
 };

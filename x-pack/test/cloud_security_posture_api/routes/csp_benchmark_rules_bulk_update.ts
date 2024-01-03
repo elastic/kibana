@@ -100,10 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
-        types: ['cloud-security-posture-settings'],
-      });
-      await kibanaServer.savedObjects.clean({
-        types: ['alert'],
+        types: ['cloud-security-posture-settings', 'alert'],
       });
     });
 

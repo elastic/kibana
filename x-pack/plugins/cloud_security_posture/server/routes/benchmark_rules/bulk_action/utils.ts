@@ -28,7 +28,9 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
 
-export const getRuleIdsToDisable = async (detectionRules: Array<FindResult<RuleParams>>) => {
+export const getDetectionRuleIdsToDisable = async (
+  detectionRules: Array<FindResult<RuleParams>>
+) => {
   const idsToDisable = detectionRules
     .map((detectionRule) => {
       return detectionRule.data.map((data) => data.id);
@@ -41,7 +43,7 @@ const disableDetectionRules = async (
   detectionRulesClient: RulesClient,
   detectionRules: Array<FindResult<RuleParams>>
 ): Promise<string[]> => {
-  const detectionRulesIdsToDisable = await getRuleIdsToDisable(detectionRules);
+  const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
   if (!detectionRulesIdsToDisable.length) return [];
   await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
   return detectionRulesIdsToDisable;
