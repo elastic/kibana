@@ -37,7 +37,7 @@ interface UseRiskContributingAlertsResult {
   data?: Hit[];
 }
 
-const ALERTS_SIZE = 100;
+const ALERTS_SIZE = 1000;
 
 /**
  * Fetches alerts related to the risk score
