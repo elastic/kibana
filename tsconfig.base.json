@@ -1494,8 +1494,6 @@
       "@kbn/shared-ux-page-no-data-types/*": ["packages/shared-ux/page/no_data/types/*"],
       "@kbn/shared-ux-page-solution-nav": ["packages/shared-ux/page/solution_nav"],
       "@kbn/shared-ux-page-solution-nav/*": ["packages/shared-ux/page/solution_nav/*"],
-      "@kbn/shared-ux-prompt-add-data": ["packages/shared-ux/prompt/add_data"],
-      "@kbn/shared-ux-prompt-add-data/*": ["packages/shared-ux/prompt/add_data/*"],
       "@kbn/shared-ux-prompt-no-data-views": ["packages/shared-ux/prompt/no_data_views/impl"],
       "@kbn/shared-ux-prompt-no-data-views/*": ["packages/shared-ux/prompt/no_data_views/impl/*"],
       "@kbn/shared-ux-prompt-no-data-views-mocks": ["packages/shared-ux/prompt/no_data_views/mocks"],

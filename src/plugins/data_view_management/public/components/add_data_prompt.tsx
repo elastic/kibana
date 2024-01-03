@@ -9,20 +9,45 @@
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { DocumentationLink } from './documentation_link';
+import { EuiLink, EuiTitle } from '@elastic/eui';
+
+interface DocumentationLinkProps {
+  href: string;
+}
+
+export function DocumentationLink({ href }: DocumentationLinkProps) {
+  return (
+    <dl>
+      <EuiTitle size="xxs">
+        <dt className="eui-displayInline">
+          <FormattedMessage
+            id="sharedUXPackages.noDataViewsPrompt.learnMore"
+            defaultMessage="Want to learn more?"
+          />
+        </dt>
+      </EuiTitle>
+      &emsp;
+      <dd className="eui-displayInline">
+        <EuiLink href={href} target="_blank" external>
+          <FormattedMessage
+            id="sharedUXPackages.noDataViewsPrompt.readDocumentation"
+            defaultMessage="Read the docs"
+          />
+        </EuiLink>
+      </dd>
+    </dl>
+  );
+}
 
 export interface AddDataPromptComponentProps {
   addDataHref: string;
   docLink?: string;
-  emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
-
-const EMPTY_PROMPT_COLOR_DEFAULT = 'subdued';
 
 // Using raw value because it is content dependent
 const MAX_WIDTH = 830;
@@ -33,7 +58,6 @@ const MAX_WIDTH = 830;
 export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
   addDataHref,
   docLink: docLink,
-  emptyPromptColor = EMPTY_PROMPT_COLOR_DEFAULT,
 }) => {
   const createDataViewText = i18n.translate('sharedUXPackages.addDataPrompt.addDataText', {
     defaultMessage: 'Add data',
@@ -80,7 +104,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
         return { default: DataViewIllustration };
       })
     ),
-    <EuiPanel color={emptyPromptColor} style={{ width: 226, height: 206 }} />
+    <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
   );
 
   return (
@@ -91,7 +115,7 @@ export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
         max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
         flex-grow: 0;
       `}
-      color={emptyPromptColor}
+      color="subdued"
       {...{
         actions,
         title,

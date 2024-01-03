@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { AddDataPrompt } from '@kbn/shared-ux-prompt-add-data';
-import React from 'react';
+import { AddDataPrompt } from '../add_data_prompt';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import type { DataViewTableController } from './data_view_table_controller';
 
