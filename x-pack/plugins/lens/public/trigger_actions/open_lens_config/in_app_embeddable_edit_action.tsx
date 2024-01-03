@@ -13,7 +13,7 @@ import type { TypedLensByValueInput } from '../../embeddable/embeddable_componen
 
 const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
 
-interface InlineEditLensEmbeddableContext {
+export interface InlineEditLensEmbeddableContext {
   // attributes of the Lens embeddable
   attributes: TypedLensByValueInput['attributes'];
   // chart event, can be fetched from the onLoad embeddable callback

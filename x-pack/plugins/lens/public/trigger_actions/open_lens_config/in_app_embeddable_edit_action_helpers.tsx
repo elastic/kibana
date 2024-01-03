@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { type LensChartLoadEvent } from '@kbn/visualization-utils';
@@ -42,7 +43,8 @@ export async function executeEditEmbeddableAction({
   );
   const visualizationMap = getVisualizationMap();
   const datasourceMap = getDatasourceMap();
-  const activeDatasourceId = 'textBased';
+  const query = attributes.state.query;
+  const activeDatasourceId = isOfAggregateQueryType(query) ? 'textBased' : 'formBased';
 
   const onUpdatePanelState = (
     datasourceState: unknown,
@@ -103,7 +105,7 @@ export async function executeEditEmbeddableAction({
       displayFlyoutHeader
       datasourceId={activeDatasourceId}
       onApplyCb={onApply}
-      canEditTextBasedQuery
+      canEditTextBasedQuery={activeDatasourceId === 'textBased'}
       updateSuggestion={onUpdateSuggestion}
     />
   );

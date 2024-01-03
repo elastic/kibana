@@ -6,7 +6,10 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  TypedLensByValueInput,
+  InlineEditLensEmbeddableContext,
+} from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiButtonIcon } from '@elastic/eui';
 import type { LensChartLoadEvent } from '@kbn/visualization-utils';
@@ -59,23 +62,26 @@ export const LensChart = (props: {
     []
   );
 
-  // type InlineEditLensEmbeddableContext
-  const triggerOptions = {
-    attributes: embeddableInput?.attributes,
-    lensEvent: lensLoadEvent,
-    onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
-      if (embeddableInput) {
-        const newInput = {
-          ...embeddableInput,
-          attributes: newAttributes,
-        };
-        setEmbeddableInput(newInput);
-      }
-    },
-    onApply: () => {
-      alert('optional onApply callback!');
-    },
-  };
+  const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
+    if (lensLoadEvent && embeddableInput?.attributes) {
+      return {
+        attributes: embeddableInput?.attributes,
+        lensEvent: lensLoadEvent,
+        onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
+          if (embeddableInput) {
+            const newInput = {
+              ...embeddableInput,
+              attributes: newAttributes,
+            };
+            setEmbeddableInput(newInput);
+          }
+        },
+        onApply: () => {
+          alert('optional onApply callback!');
+        },
+      };
+    }
+  }, [embeddableInput, lensLoadEvent]);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
   return (
@@ -95,9 +101,11 @@ export const LensChart = (props: {
             size="xs"
             iconType="pencil"
             onClick={() => {
-              props.plugins.uiActions
-                .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                .exec(triggerOptions);
+              if (triggerOptions) {
+                props.plugins.uiActions
+                  .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
+                  .exec(triggerOptions);
+              }
             }}
           />
         </EuiFlexItem>
