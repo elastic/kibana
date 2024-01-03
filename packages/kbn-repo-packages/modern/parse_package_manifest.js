@@ -317,7 +317,7 @@ function readPackageManifest(repoRoot, path) {
   } catch (error) {
     if (error.code === 'ENOENT') {
       const err = new Error(`Missing kibana.jsonc file at ${path}`);
-      throw Object.assign(err, { code: 'ENOENT', manifestPath: path });
+      throw Object.assign(err, { code: 'ENOENT' });
     }
 
     throw error;

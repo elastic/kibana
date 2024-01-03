@@ -114,16 +114,10 @@ function getPackages(repoRoot) {
     return packages;
   } catch (error) {
     if (error.code === 'ENOENT') {
-      try {
-        // a package manifest was removed, auto-regenerate the package map
-        const manifests = Array.from(getRepoRelsSync(repoRoot, ['**/kibana.jsonc']));
-        if (updatePackageMap(repoRoot, manifests)) {
-          return getPackages(repoRoot);
-        }
-      } catch (error2) {
-        throw new Error(
-          `Error reconstructing package list following ENOENT for path ${error.manifestPath}. message: ${error2}`
-        );
+      // a package manifest was removed, auto-regenerate the package map
+      const manifests = Array.from(getRepoRelsSync(repoRoot, ['**/kibana.jsonc']));
+      if (updatePackageMap(repoRoot, manifests)) {
+        return getPackages(repoRoot);
       }
     }
 
