@@ -36,6 +36,22 @@ jest.mock('../../customizations', () => ({
   useDiscoverCustomization: jest.fn(),
 }));
 
+let mockBreakpointSize: string | null = null;
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: jest.fn((breakpoints: string[]) => {
+      if (mockBreakpointSize && breakpoints.includes(mockBreakpointSize)) {
+        return true;
+      }
+
+      return original.useIsWithinBreakpoints(breakpoints);
+    }),
+  };
+});
+
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const waitNextUpdate = async (component: ReactWrapper) => {
@@ -246,6 +262,7 @@ describe('Discover flyout', function () {
 
     describe('when actions are customized', () => {
       it('should display actions added by getActionItems', async () => {
+        mockBreakpointSize = 'xl';
         mockFlyoutCustomization.actions = {
           getActionItems: jest.fn(() => [
             {
@@ -283,6 +300,7 @@ describe('Discover flyout', function () {
         expect(action1.text()).toBe('Action 1');
         expect(action2.text()).toBe('Action 2');
         expect(findTestSubject(component, 'customActionItem3').exists()).toBe(false);
+        mockBreakpointSize = null;
       });
 
       it('should display multiple actions added by getActionItems', async () => {
@@ -323,6 +341,46 @@ describe('Discover flyout', function () {
             .find(EuiContextMenuItem)
             .map((button) => button.prop('data-test-subj'))
         ).toEqual(['customActionItem2', 'customActionItem3', 'customActionItem4']);
+      });
+
+      it('should display multiple actions added by getActionItems in mobile view', async () => {
+        mockBreakpointSize = 's';
+
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 3 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(findTestSubject(component, 'docViewerFlyoutActions').length).toBe(0);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMobileActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'customActionItem2',
+        ]);
+
+        mockBreakpointSize = null;
       });
 
       it('should allow disabling default actions', async () => {

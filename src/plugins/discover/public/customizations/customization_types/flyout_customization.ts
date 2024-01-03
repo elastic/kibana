@@ -8,7 +8,7 @@
 import { EuiFlyoutProps, IconType } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { type ComponentType } from 'react';
+import React, { type ComponentType, MouseEventHandler } from 'react';
 
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;
@@ -24,7 +24,7 @@ export interface FlyoutActionItem {
   enabled: boolean;
   label: string;
   iconType: IconType;
-  onClick: () => void;
+  onClick: (() => void) | MouseEventHandler;
   href?: string;
   dataTestSubj?: string;
 }

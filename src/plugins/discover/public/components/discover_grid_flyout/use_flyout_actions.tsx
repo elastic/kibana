@@ -7,14 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutCustomization } from '../../customizations';
+import { FlyoutActionItem, FlyoutCustomization } from '../../customizations';
 import { UseNavigationProps, useNavigationProps } from '../../hooks/use_navigation_props';
 
 interface UseFlyoutActionsParams extends UseNavigationProps {
   actions?: FlyoutCustomization['actions'];
 }
 
-export const useFlyoutActions = ({ actions, ...props }: UseFlyoutActionsParams) => {
+export const useFlyoutActions = ({
+  actions,
+  ...props
+}: UseFlyoutActionsParams): { flyoutActions: FlyoutActionItem[] } => {
   const { dataView } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
     useNavigationProps(props);
@@ -25,7 +28,7 @@ export const useFlyoutActions = ({ actions, ...props }: UseFlyoutActionsParams) 
   } = actions?.defaultActions ?? {};
   const customActions = [...(actions?.getActionItems?.() ?? [])];
 
-  const flyoutActions = [
+  const flyoutActions: FlyoutActionItem[] = [
     {
       id: 'singleDocument',
       enabled: !viewSingleDocument.disabled,
