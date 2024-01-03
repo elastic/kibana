@@ -67,7 +67,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     snapshotShareWarning,
     embedUrlParamExtensions,
   } = props;
-
   const openLinkModal = () => {
     const session = openModal(
       toMountPoint(
@@ -165,7 +164,10 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
       });
     });
 
-    if (menuItems.length > 1) {
+    // needed for dashboard in serverless where there is only one panel
+    if (menuItems.length === 1) {
+      panels.push({ id: 1, items: menuItems });
+    } else if (menuItems.length > 1) {
       const topLevelMenuPanel = {
         id: panels.length + 1,
         title: i18n.translate('share.contextMenuTitle', {
@@ -205,11 +207,12 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
   };
 
   const { panels } = getPanels();
+  const safeIndex = panels.length < 1 ? 0 : panels.length - 1;
   return (
     <>
       <I18nProvider>
         <EuiContextMenu
-          initialPanelId={panels[panels.length - 1].id}
+          initialPanelId={panels[safeIndex].id}
           panels={panels}
           data-test-subj="shareContextMenu"
         />
