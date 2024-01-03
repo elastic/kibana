@@ -233,17 +233,14 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
     // As we want to test how actions affect the state,
     // we set up this custom hook that combines hooks for
     // actions and state selection, so they react to the same redux store.
-    const { result } = renderHook(
-      () => {
-        return {
-          actions: useEditTransformFlyoutActions(),
-          isFormTouched: useIsFormTouched(),
-          isFormValid: useIsFormValid(),
-          frequency: useFormField('frequency'),
-        };
-      },
-      { wrapper }
-    );
+    const useHooks = () => ({
+      actions: useEditTransformFlyoutActions(),
+      isFormTouched: useIsFormTouched(),
+      isFormValid: useIsFormValid(),
+      frequency: useFormField('frequency'),
+    });
+
+    const { result } = renderHook(useHooks, { wrapper });
 
     act(() => {
       result.current.actions.setFormField({
