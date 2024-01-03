@@ -25,13 +25,13 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
-export const GenerativeAIForSecuritySolutionConnectorFeatureId = 'generativeAIForSecuritySolution';
+export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurity';
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 
-const compatibilityGenerativeAIForSecuritySolution = i18n.translate(
-  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSecuritySolution',
+const compatibilityGenerativeAIForSecurity = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSecurity',
   {
-    defaultMessage: 'Generative AI for Security Solution',
+    defaultMessage: 'Generative AI for Security',
   }
 );
 
@@ -88,10 +88,10 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityAlertingRules,
 };
 
-export const GenerativeAIForSecuritySolutionFeature: ConnectorFeatureConfig = {
-  id: GenerativeAIForSecuritySolutionConnectorFeatureId,
-  name: compatibilityGenerativeAIForSecuritySolution,
-  compatibility: compatibilityGenerativeAIForSecuritySolution,
+export const GenerativeAIForSecurityFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIForSecurityConnectorFeatureId,
+  name: compatibilityGenerativeAIForSecurity,
+  compatibility: compatibilityGenerativeAIForSecurity,
 };
 
 export const GenerativeAIForObservabilityFeature: ConnectorFeatureConfig = {
@@ -105,7 +105,7 @@ const AllAvailableConnectorFeatures = {
   [CasesConnectorFeature.id]: CasesConnectorFeature,
   [UptimeConnectorFeature.id]: UptimeConnectorFeature,
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
-  [GenerativeAIForSecuritySolutionFeature.id]: GenerativeAIForSecuritySolutionFeature,
+  [GenerativeAIForSecurityFeature.id]: GenerativeAIForSecurityFeature,
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
 };
 
