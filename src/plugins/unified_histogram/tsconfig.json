@@ -27,6 +27,7 @@
     "@kbn/discover-utils",
     "@kbn/resizable-layout",
     "@kbn/calculate-width-from-char-count",
+    "@kbn/lens-embeddable-utils",
   ],
   "exclude": [
     "target/**/*",
