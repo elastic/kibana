@@ -54,7 +54,7 @@ export const CategorizationDetector: FC = () => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l">
+      <EuiFlexGroup gutterSize="l" css={{ maxWidth: '1100px' }}>
         <CountCard
           onClick={onCountSelection}
           isSelected={categorizationDetectorType === ML_JOB_AGGREGATION.COUNT}
