@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
+import { v4 as uuidv4 } from 'uuid';
+import type { CommonResponseActionMethodOptions } from '../..';
+import { ResponseActionsClientError } from './errors';
+import { getActionRequestExpiration } from '../create/write_action_to_indices';
 import { stringify } from '../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../types';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { updateCases } from '../create/update_cases';
-import type { CreateActionPayload } from '../create/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
@@ -36,6 +39,8 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
+  LogsEndpointAction,
+  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
@@ -67,31 +72,113 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
-    TResponse extends ActionDetails = ActionDetails
-  >(command: ResponseActionsApiCommandNames, options: TOptions): Promise<TResponse> {
-    const agentIds = await this.checkAgentIds(options.endpoint_ids);
-    const createPayload: CreateActionPayload = {
-      ...options,
-      command,
-      user: { username: this.options.username },
-    };
+    TResponse extends ActionDetails = ActionDetails,
+    TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+  >(
+    command: ResponseActionsApiCommandNames,
+    actionReq: TOptions,
+    options?: TMethodOptions
+  ): Promise<TResponse> {
+    const agentIds = await this.checkAgentIds(actionReq.endpoint_ids);
+    const actionId = uuidv4();
+    const { hosts, ruleName, ruleId } = this.getMethodOptions<TMethodOptions>(options);
+    let actionError: string | undefined;
 
-    const response = await this.options.endpointService
-      .getActionCreateService()
-      .createAction(createPayload, agentIds.valid);
-
+    // Dispatch action to Endpoint using Fleet
     try {
-      await updateCases({
-        casesClient: this.options.casesClient,
-        endpointData: agentIds.hosts,
-        createActionPayload: createPayload,
+      await this.dispatchActionViaFleet({
+        actionId,
+        agents: agentIds.valid,
+        data: {
+          command,
+          parameters: actionReq.parameters as EndpointActionDataParameterTypes,
+        },
       });
-    } catch (err) {
-      // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
+    } catch (e) {
+      // If not in Automated mode, then just throw, else save the error and write
+      // it to the Endpoint Action request doc
+      if (!this.options.isAutomated) {
+        throw e;
+      }
+
+      actionError = e.message;
     }
 
-    return response as TResponse;
+    // Write action to endpoint index
+    await this.writeActionRequestToEndpointIndex({
+      ...actionReq,
+      error: actionError,
+      rule_id: ruleId,
+      rule_name: ruleName,
+      hosts,
+      actionId,
+      command,
+    });
+
+    // Update cases
+    await this.updateCases({
+      command,
+      comment: actionReq.comment,
+      caseIds: actionReq.case_ids,
+      alertIds: actionReq.alert_ids,
+      hosts: actionReq.endpoint_ids.map((hostId) => {
+        return {
+          hostId,
+          hostname:
+            agentIds.hosts.find((host) => host.agent.id === hostId)?.host.hostname ??
+            hosts?.[hostId].name ??
+            '',
+        };
+      }),
+    });
+
+    return this.fetchActionDetails<TResponse>(actionId);
+  }
+
+  private async dispatchActionViaFleet({
+    actionId = uuidv4(),
+    agents,
+    data,
+  }: Pick<FleetActionRequest, 'agents'> & {
+    actionId?: string;
+    data: LogsEndpointAction['EndpointActions']['data'];
+  }): Promise<FleetActionRequest> {
+    const [messageSigningService, fleetActionsService] = await Promise.all([
+      this.options.endpointService.getMessageSigningService(),
+      this.options.endpointService.getFleetActionsClient(),
+    ]);
+    const fleetActionDoc: FleetActionRequest = {
+      '@timestamp': new Date().toISOString(),
+      input_type: 'endpoint',
+      type: 'INPUT_ACTION',
+      timeout: 300, // 5 minutes
+      expiration: getActionRequestExpiration(),
+      user_id: this.options.username,
+      action_id: actionId || uuidv4(),
+      agents,
+      // Casting needed because Fleet type definition, which accepts any object, but was not defined using `any`
+      data: data as unknown as FleetActionRequest['data'],
+    };
+    const signedAction = await messageSigningService.sign(fleetActionDoc);
+
+    fleetActionDoc.signed = {
+      data: signedAction.data.toString('base64'),
+      signature: signedAction.signature,
+    };
+
+    this.log.debug(`Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
+
+    return fleetActionsService.create(fleetActionDoc).catch((err) => {
+      const error = new ResponseActionsClientError(
+        `Attempt to create Fleet [${
+          data.command
+        }] response action request for agents [${agents.join(', ')}] failed with: ${err.message}`,
+        500,
+        err
+      );
+      this.log.error(error);
+      throw error;
+    });
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
