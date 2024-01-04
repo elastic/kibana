@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { promisify } from 'util';
 import { kibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../../';
 import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
@@ -90,18 +89,41 @@ export async function deleteJobResponseHandler(
 
   const docIndex = doc.index;
   const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+  const reportingSetup = reporting.getPluginSetupDeps();
+  const logger = reportingSetup.logger.clone(['delete-report']);
+
+  // An "error" event is emitted if an error is
+  // passed to the `stream.end` callback from
+  // the _final method of the ContentStream.
+  // This event must be handled.
+  stream.on('error', (err) => {
+    logger.error(err);
+  });
 
   try {
-    /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-    await promisify(stream.end.bind(stream, '', 'utf8'))();
+    // Overwriting existing content with an
+    // empty buffer to remove all the chunks.
+    await new Promise<void>((resolve, reject) => {
+      stream.end('', 'utf8', (error?: Error) => {
+        if (error) {
+          // handle error that could be thrown
+          // from the _write method of the ContentStream
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+
     await jobsQuery.delete(docIndex, docId);
+
     return res.ok({
       body: { deleted: true },
     });
   } catch (error) {
+    logger.error(error);
     return res.customError({
-      statusCode: error.statusCode,
-      body: error.message,
+      statusCode: 500,
     });
   }
 }
