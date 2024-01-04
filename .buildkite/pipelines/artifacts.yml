@@ -77,21 +77,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: KIBANA_DOCKER_CONTEXT=ubi8 .buildkite/scripts/steps/artifacts/docker_context.sh
-    label: 'Docker Context Verification'
-    agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
-    timeout_in_minutes: 30
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
