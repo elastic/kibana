@@ -10,10 +10,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type LensChartLoadEvent } from '@kbn/visualization-utils';
-import type { LensPluginStartDependencies } from '../../plugin';
-import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
-import { extractReferencesFromState } from '../../utils';
+import type { LensPluginStartDependencies } from '../../../plugin';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { extractReferencesFromState } from '../../../utils';
+import type { LensChartLoadEvent } from './types';
 
 export function isEmbeddableEditActionCompatible(
   core: CoreStart,
@@ -49,7 +49,7 @@ export async function executeEditEmbeddableAction({
   }
 
   const { getEditLensConfiguration, getVisualizationMap, getDatasourceMap } = await import(
-    '../../async_services'
+    '../../../async_services'
   );
   const visualizationMap = getVisualizationMap();
   const datasourceMap = getDatasourceMap();

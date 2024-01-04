@@ -9,7 +9,5 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/expressions-plugin",
-    "@kbn/embeddable-plugin",
   ]
 }

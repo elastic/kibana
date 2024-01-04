@@ -110,8 +110,8 @@ import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create
 import {
   inAppEmbeddableEditTrigger,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-} from './trigger_actions/open_lens_config/in_app_embeddable_edit_trigger';
-import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit_action';
+} from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
+import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';

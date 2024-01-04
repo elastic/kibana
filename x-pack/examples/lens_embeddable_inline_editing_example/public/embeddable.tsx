@@ -20,7 +20,6 @@ import {
   EuiButtonIcon,
   EuiTitle,
 } from '@elastic/eui';
-import type { LensChartLoadEvent } from '@kbn/visualization-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
@@ -41,7 +40,9 @@ export const LensChart = (props: {
   const [embeddableInput, setEmbeddableInput] = useState<TypedLensByValueInput | undefined>(
     undefined
   );
-  const [lensLoadEvent, setLensLoadEvent] = useState<LensChartLoadEvent | null>(null);
+  const [lensLoadEvent, setLensLoadEvent] = useState<
+    InlineEditLensEmbeddableContext['lensEvent'] | null
+  >(null);
 
   const { config, options } = useMemo(() => {
     return getConfigOptions(props.defaultDataView, props.isESQL);
@@ -62,8 +63,8 @@ export const LensChart = (props: {
   const onLoad = useCallback(
     (
       isLoading: boolean,
-      adapters: LensChartLoadEvent['adapters'] | undefined,
-      lensEmbeddableOutput$?: LensChartLoadEvent['embeddableOutput$']
+      adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
+      lensEmbeddableOutput$?: InlineEditLensEmbeddableContext['lensEvent']['embeddableOutput$']
     ) => {
       const adapterTables = adapters?.tables?.tables;
       if (adapterTables && !isLoading) {

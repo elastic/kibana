@@ -7,29 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { type LensChartLoadEvent } from '@kbn/visualization-utils';
-import type { LensPluginStartDependencies } from '../../plugin';
-import type { TypedLensByValueInput } from '../../embeddable/embeddable_component';
+import type { LensPluginStartDependencies } from '../../../plugin';
+import type { InlineEditLensEmbeddableContext } from './types';
 
 const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
 
-export interface InlineEditLensEmbeddableContext {
-  // attributes of the Lens embeddable
-  attributes: TypedLensByValueInput['attributes'];
-  // chart event, can be fetched from the onLoad embeddable callback
-  lensEvent: LensChartLoadEvent;
-  // callback which runs every time something changes in the dimension panel
-  onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
-  // optional onApply callback
-  onApply?: () => void;
-  // optional onCancel callback
-  onCancel?: () => void;
-  // custom container element, use in case you need to render outside a flyout
-  // in that case, the styling is responsibility of the consumer
-  container?: HTMLElement | null;
-}
-
-export const getAsyncHelpers = async () => await import('../../async_services');
+export const getAsyncHelpers = async () => await import('../../../async_services');
 
 export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;

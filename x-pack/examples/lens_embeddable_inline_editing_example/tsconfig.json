@@ -21,7 +21,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
-    "@kbn/visualization-utils",
     "@kbn/ui-theme",
   ]
 }
