@@ -10,7 +10,11 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
-import { getRecentUpgradeInfoForAgent, isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  isAgentUpgradeable,
+  getNotUpgradeableMessage,
+} from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -86,7 +90,13 @@ export async function upgradeBatch(
         getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
         (!options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version));
       if (isNotAllowed) {
-        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
+        throw new FleetError(
+          `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(
+            agent,
+            latestAgentVersion,
+            options.version
+          )}`
+        );
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {

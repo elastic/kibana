@@ -8,7 +8,6 @@
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
-import numeral from '@elastic/numeral';
 
 interface Props {
   initialBurnRate?: number;
@@ -28,6 +27,7 @@ export function BudgetConsumed({
   const [budgetConsumed, setBudgetConsumed] = useState<number>(
     ((initialBurnRate * longLookbackWindowInHours) / sloTimeWindowInHours) * 100
   );
+  const [formattedValue, setFormattedValue] = useState<string>(budgetConsumed.toFixed(2));
   const hasError = errors !== undefined && errors.length > 0;
 
   const onBudgetConsumedChanged = (event: ChangeEvent<HTMLInputElement>) => {
@@ -60,8 +60,15 @@ export function BudgetConsumed({
         step={0.01}
         min={0.01}
         max={100}
-        value={numeral(budgetConsumed).format('0[.0]')}
-        onChange={(event) => onBudgetConsumedChanged(event)}
+        value={formattedValue}
+        onChange={(event) => {
+          onBudgetConsumedChanged(event);
+          setFormattedValue(event.target.value);
+        }}
+        onBlur={(event) => {
+          const value = event.target.value;
+          setFormattedValue(Number(value).toFixed(2));
+        }}
         data-test-subj="budgetConsumed"
       />
     </EuiFormRow>

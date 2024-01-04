@@ -62,13 +62,30 @@ import * as ActionDetailsService from '../../services/actions/action_details_by_
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { actionCreateService } from '../../services/actions';
+import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
 import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { responseActionsClientMock } from '../../services/actions/clients/mocks';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+
+jest.mock('../../services', () => {
+  const realModule = jest.requireActual('../../services');
+
+  return {
+    ...realModule,
+    getResponseActionsClient: jest.fn((...args) => {
+      return realModule.getResponseActionsClient(...args);
+    }),
+  };
+});
+
+const getResponseActionsClientMock = _getResponseActionsClient;
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -1085,7 +1102,7 @@ describe('Response actions', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should create a file', async () => {
@@ -1145,6 +1162,98 @@ describe('Response actions', () => {
           data: omit(createdUploadAction, 'action'),
         },
       });
+    });
+  });
+
+  describe('and `responseActionsSentinelOneV1Enabled` feature flag is enabled', () => {
+    let testSetup: HttpApiTestSetupMock;
+    let httpRequestMock: ReturnType<HttpApiTestSetupMock['createRequestMock']>;
+    let httpHandlerContextMock: HttpApiTestSetupMock['httpHandlerContextMock'];
+    let httpResponseMock: HttpApiTestSetupMock['httpResponseMock'];
+    let callHandler: () => ReturnType<RequestHandler>;
+
+    beforeEach(async () => {
+      testSetup = createHttpApiTestSetupMock();
+
+      ({ httpHandlerContextMock, httpResponseMock } = testSetup);
+      httpRequestMock = testSetup.createRequestMock();
+
+      testSetup.endpointAppContextMock.experimentalFeatures = {
+        ...testSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsSentinelOneV1Enabled: true,
+      };
+
+      httpHandlerContextMock.actions = Promise.resolve({
+        getActionsClient: () => responseActionsClientMock.createConnectorActionsClient(),
+      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+
+      // Set the esClient to be used in the handler context
+      // eslint-disable-next-line require-atomic-updates
+      httpHandlerContextMock.core = Promise.resolve(
+        set(
+          await httpHandlerContextMock.core,
+          'elasticsearch.client.asInternalUser',
+          responseActionsClientMock.createConstructorOptions().esClient
+        )
+      );
+
+      httpRequestMock = testSetup.createRequestMock({
+        body: {
+          endpoint_ids: ['123-456'],
+        },
+      });
+      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+            },
+          ]),
+        });
+
+      const handler = testSetup.getRegisteredVersionedRoute(
+        'post',
+        ISOLATE_HOST_ROUTE_V2,
+        '2023-10-31'
+      ).routeHandler as RequestHandler;
+
+      callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['blank value', ''],
+      ['endpoint', 'endpoint'],
+    ])(
+      'should use endpoint response actions client when agentType is: %s',
+      async (_, agentTypeValue) => {
+        if (agentTypeValue !== undefined) {
+          httpRequestMock.body.agent_type = agentTypeValue as ResponseActionAgentType;
+        }
+        await callHandler();
+
+        expect(getResponseActionsClientMock).toHaveBeenCalledWith('endpoint', expect.anything());
+        expect(httpResponseMock.ok).toHaveBeenCalled();
+      }
+    );
+
+    it('should use SentinelOne response actions client when agent type is sentinel_one', async () => {
+      httpRequestMock.body.agent_type = 'sentinel_one';
+      await callHandler();
+
+      expect(getResponseActionsClientMock).toHaveBeenCalledWith('sentinel_one', expect.anything());
+      expect(httpResponseMock.ok).toHaveBeenCalled();
     });
   });
 });

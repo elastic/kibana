@@ -6,7 +6,6 @@
  */
 
 import { Dataset } from '../datasets';
-import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy } from './types';
 
 export class AllDatasetSelection implements DatasetSelectionStrategy {
@@ -23,18 +22,13 @@ export class AllDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toDataviewSpec() {
-    const { name, title } = this.selection.dataset.toDataviewSpec();
-    return {
-      id: this.toURLSelectionId(),
-      name,
-      title,
-    };
+    return this.selection.dataset.toDataviewSpec();
   }
 
-  toURLSelectionId() {
-    return encodeDatasetSelection({
+  toPlainSelection() {
+    return {
       selectionType: this.selectionType,
-    });
+    };
   }
 
   public static create() {

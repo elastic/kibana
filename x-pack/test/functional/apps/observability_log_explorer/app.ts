@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.navigationalSearch.searchFor('log explorer');
 
       const results = await PageObjects.navigationalSearch.getDisplayedResults();
-      expect(results[0].label).to.eql('Log Explorer');
+      expect(results[0].label).to.eql('Logs Explorer');
     });
 
     it('is shown in the observability side navigation', async () => {

@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-
+import { pull } from 'lodash';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -144,7 +143,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(hits).not.to.be.empty();
         hits.forEach((hit: any) => {
           expect(hit.fields).not.to.be.empty();
-          expect(Object.keys(hit.fields).sort()).to.eql(Object.keys(hit._source).sort());
+          expect(
+            pull(
+              // remove nested fields
+              Object.keys(hit.fields),
+              'host.hostname',
+              'host.hostname.keyword',
+              'host.id',
+              'host.name'
+            ).sort()
+          ).to.eql(Object.keys(hit._source).sort());
         });
       }
     });

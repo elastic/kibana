@@ -31,6 +31,8 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
+import { getNotUpgradeableMessage } from '../../../../../../../common/services/is_agent_upgradeable';
+
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
@@ -303,6 +305,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                   agentUpgradeStartedAt={agent.upgrade_started_at}
                   agentUpgradedAt={agent.upgraded_at}
                   agentUpgradeDetails={agent.upgrade_details}
+                  notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -7,12 +7,12 @@
 
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { InitRiskEngineResult } from '../../../../common/risk_engine';
+import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import {
   RiskEngineStatus,
   MAX_SPACES_COUNT,
   RiskScoreEntity,
-} from '../../../../common/risk_engine';
+} from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,

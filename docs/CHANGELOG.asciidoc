@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.11.3>>
 * <<release-notes-8.11.2>>
 * <<release-notes-8.11.1>>
 * <<release-notes-8.11.0>>
@@ -55,10 +56,35 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.11.3]]
+== {kib} 8.11.3
+
+The 8.11.3 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.11.3]]
+=== Bug Fixes
+Elastic Security::
+For the Elastic Security 8.11.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes a 500 error in the Fleet API when a request for the product versions endpoint throws `ECONNREFUSED` ({kibana-pull}172850[#172850]).
+* Fixes agent policy timeout to accept only integers ({kibana-pull}172222[#172222]).
+Machine Learning::
+* Fixes data drift numeric fields not displaying correctly ({kibana-pull}172504[#172504]).
+* Fixes Data visualizer, ML field stats, and Data Frame Analytics so the `_tier` field can be excluded ({kibana-pull}172223[#172223]).
+Operations::
+* Fixes an issue where running `kibana-keystore` commands required `kibana.yml` to exist ({kibana-pull}172943[#172943]).
+
 [[release-notes-8.11.2]]
 == {kib} 8.11.2
 
 The 8.11.2 release includes the following bug fixes.
+
+[float]
+[[security-update-v8.11.2]]
+=== Security updates
+
+* The 8.11.2 patch release contains a fix for a potential security vulnerability. https://discuss.elastic.co/c/announcements/security-announcements/31[Please see our security advisory for more details].
 
 [float]
 [[enhancement-v8.11.2]]
@@ -105,7 +131,7 @@ SharedUX::
 * Fixes the custom threshold document link ({kibana-pull}171125[#171125]).
 Uptime::
 * Fixes advanced fields broken for ICMP monitors ({kibana-pull}171161[#171161]).
-
+Ê
 [[release-notes-8.11.1]]
 == {kib} 8.11.1
 

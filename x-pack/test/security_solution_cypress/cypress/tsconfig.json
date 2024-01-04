@@ -40,6 +40,6 @@
     "@kbn/management-settings-ids",
     "@kbn/es-query",
     "@kbn/ml-plugin",
-    "@kbn/license-management-plugin"
+    "@kbn/license-management-plugin",
   ]
 }

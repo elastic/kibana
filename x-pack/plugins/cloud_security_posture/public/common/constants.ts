@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -48,6 +48,8 @@ export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
 export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
+
+export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,

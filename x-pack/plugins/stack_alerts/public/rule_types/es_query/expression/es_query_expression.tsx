@@ -55,6 +55,7 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
+    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -72,6 +73,7 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields,
     }
   );
 
@@ -229,6 +231,7 @@ export const EsQueryExpression: React.FC<
               termSize: DEFAULT_VALUES.TERM_SIZE,
               searchType: SearchType.esQuery,
               excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+              sourceFields: undefined,
             });
           } else {
             await refreshEsFields(indices);
@@ -352,6 +355,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={useCallback(
+          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
+          [setParam]
+        )}
+        sourceFields={sourceFields}
       />
 
       <EuiSpacer />

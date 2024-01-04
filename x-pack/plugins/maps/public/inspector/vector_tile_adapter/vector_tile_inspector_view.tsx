@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Adapters, InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { LazyWrapper } from '../../lazy_wrapper';
 
@@ -25,7 +25,7 @@ export const VectorTileInspectorView = {
   shouldShow(adapters: Adapters) {
     return Boolean(adapters.vectorTiles?.hasLayers());
   },
-  component: (props: { adapters: Adapters }) => {
+  component: (props: InspectorViewProps) => {
     return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
   },
 };

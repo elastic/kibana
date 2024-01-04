@@ -233,6 +233,25 @@ describe('useChat', () => {
       });
     });
 
+    describe('after unmounting the component', () => {
+      beforeEach(() => {
+        act(() => {
+          subject.next({
+            type: StreamingChatResponseEventType.ChatCompletionChunk,
+            id: 'my-message-id',
+            message: {
+              content: 'good',
+            },
+          });
+          hookResult.unmount();
+        });
+      });
+
+      it('shows the partial message and sets chatState to aborted', () => {
+        expect(mockChatService.complete.mock.lastCall?.[0].signal.aborted).toBe(true);
+      });
+    });
+
     describe('after a response errors out', () => {
       beforeEach(() => {
         act(() => {

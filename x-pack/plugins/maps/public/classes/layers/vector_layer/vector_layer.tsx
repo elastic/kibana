@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -274,8 +275,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
-  getErrors(): LayerMessage[] {
-    const errors = super.getErrors();
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
+    const errors = super.getErrors(inspectorAdapters);
 
     this.getValidJoins().forEach((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());

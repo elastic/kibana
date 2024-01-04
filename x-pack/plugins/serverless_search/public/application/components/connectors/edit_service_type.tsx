@@ -37,7 +37,10 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
     connectorTypes?.connectors.map((connectorType) => ({
       inputDisplay: (
         <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`serverlessSearchConnectorServiceType-${connectorType.serviceType}`}
+          >
             <EuiIcon
               size="l"
               title={connectorType.name}
@@ -76,12 +79,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
 
   return (
     <EuiForm>
-      <EuiFormLabel>
+      <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
         {i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
           defaultMessage: 'Connector type',
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}
         options={options}

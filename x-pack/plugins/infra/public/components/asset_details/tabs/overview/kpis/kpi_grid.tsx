@@ -13,6 +13,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations';
 import { Kpi } from './kpi';
+import { CpuProfilingPrompt } from './cpu_profiling_prompt';
 
 interface Props {
   dataView?: DataView;
@@ -48,6 +49,7 @@ export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
             assetName={assetName}
             height={KPI_CHART_HEIGHT}
           />
+          {chartProps.id === 'cpuUsage' && <CpuProfilingPrompt />}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

@@ -101,7 +101,7 @@ Object {
             class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
             id="exceptionItemCardComments"
             inert=""
-            role="region"
+            role="group"
             style="block-size: 0;"
             tabindex="-1"
           >
@@ -239,7 +239,7 @@ Object {
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
           id="exceptionItemCardComments"
           inert=""
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >
@@ -433,7 +433,7 @@ Object {
             aria-labelledby="generated-id"
             class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
             id="exceptionItemCardComments"
-            role="region"
+            role="group"
             style="block-size: 0;"
             tabindex="-1"
           >
@@ -570,7 +570,7 @@ Object {
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="exceptionItemCardComments"
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >

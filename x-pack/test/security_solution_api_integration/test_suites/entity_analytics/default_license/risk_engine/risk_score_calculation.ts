@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import {
   deleteAllAlerts,

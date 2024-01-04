@@ -10,8 +10,10 @@
  *
  * */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import type { TimelineType } from '../../../../../common/api/timeline';
+import type { TimelineTabs } from '../../../../../common/types';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -25,14 +27,26 @@ interface TourState {
   tourSubtitle: string;
 }
 
-const TimelineTourComp = () => {
+export interface TimelineTourProps {
+  activeTab: TimelineTabs;
+  timelineType: TimelineType;
+  switchToTab: (tab: TimelineTabs) => void;
+}
+
+const TimelineTourComp = (props: TimelineTourProps) => {
+  const { activeTab, switchToTab, timelineType } = props;
   const {
     services: { storage },
   } = useKibana();
 
+  const updatedTourSteps = useMemo(
+    () =>
+      timelineTourSteps.filter((step) => !step.timelineType || step.timelineType === timelineType),
+    [timelineType]
+  );
+
   const [tourState, setTourState] = useState<TourState>(() => {
     const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.TIMELINE);
-
     if (restoredTourState != null) {
       return restoredTourState;
     }
@@ -64,7 +78,7 @@ const TimelineTourComp = () => {
   const getFooterAction = useCallback(
     (step: number) => {
       // if it's the last step, we don't want to show the next button
-      return step === timelineTourSteps.length ? (
+      return step === updatedTourSteps.length ? (
         <EuiButton color="success" size="s" onClick={finishTour}>
           {i18n.TIMELINE_TOUR_FINISH}
         </EuiButton>
@@ -79,12 +93,18 @@ const TimelineTourComp = () => {
         ]
       );
     },
-    [finishTour, nextStep]
+    [finishTour, nextStep, updatedTourSteps.length]
   );
 
-  const nextEl = timelineTourSteps[tourState.currentTourStep - 1]?.anchor;
+  const nextEl = updatedTourSteps[tourState.currentTourStep - 1]?.anchor;
 
   const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
+
+  const currentStepConfig = updatedTourSteps[tourState.currentTourStep - 1];
+
+  if (currentStepConfig?.timelineTab && currentStepConfig.timelineTab !== activeTab) {
+    switchToTab(currentStepConfig.timelineTab);
+  }
 
   if (!tourState.isTourActive || !isElementAtCurrentStepMounted) {
     return null;
@@ -92,24 +112,26 @@ const TimelineTourComp = () => {
 
   return (
     <>
-      {timelineTourSteps.map((steps, idx) => {
-        if (tourState.currentTourStep !== idx + 1) return null;
+      {updatedTourSteps.map((steps, idx) => {
+        const stepCount = idx + 1;
+        if (tourState.currentTourStep !== stepCount) return null;
+        const panelProps = {
+          'data-test-subj': `timeline-tour-step-${idx + 1}`,
+        };
         return (
           <EuiTourStep
-            panelProps={{
-              'data-test-subj': `timeline-tour-step-${idx + 1}`,
-            }}
+            panelProps={panelProps}
             key={idx}
-            step={steps.step}
+            step={stepCount}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
             minWidth={tourState.tourPopoverWidth}
-            stepsTotal={timelineTourSteps.length}
+            stepsTotal={updatedTourSteps.length}
             onFinish={finishTour}
             title={steps.title}
             content={steps.content}
             anchor={`#${steps.anchor}`}
             subtitle={tourConfig.tourSubtitle}
-            footerAction={getFooterAction(steps.step)}
+            footerAction={getFooterAction(stepCount)}
           />
         );
       })}

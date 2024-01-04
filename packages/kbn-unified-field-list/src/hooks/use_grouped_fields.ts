@@ -252,7 +252,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         isInitiallyOpen: false,
         showInAccordion: true,
         hideDetails: false,
-        hideIfEmpty: !dataViewId,
+        hideIfEmpty: true,
         title: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabel', {
           defaultMessage: 'Empty fields',
         }),

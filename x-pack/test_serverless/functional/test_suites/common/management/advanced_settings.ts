@@ -33,7 +33,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
-  const security = getService('security');
   const kibanaServer = getService('kibanaServer');
   let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
 
@@ -41,8 +40,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // the suite is flaky on MKI
     this.tags(['failsOnMKI']);
     before(async () => {
-      // We need kibana_admin role in order to update settings
-      await security.testUser.setRoles(['kibana_admin']);
       INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE = await kibanaServer.uiSettings.get('csv:quoteValues');
       // Setting the `csv:quoteValues` setting to its default value
       await kibanaServer.uiSettings.update({
@@ -88,17 +85,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe.skip('updating settings', () => {
+    describe('updating settings', () => {
       it('allows to update a setting', async () => {
         const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
         expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(true);
         await testSubjects.click(fieldTestSubj);
 
+        await retry.waitFor('field to be unchecked', async () => {
+          return !(await testSubjects.isEuiSwitchChecked(fieldTestSubj));
+        });
+
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
+        await pageObjects.common.sleep(2000);
         await browser.refresh();
-        await pageObjects.common.sleep(1000);
 
         // Check if field is now disabled
         expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(false);
@@ -110,11 +111,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists(resetLinkTestSubj)).to.be(true);
         await testSubjects.click(resetLinkTestSubj);
 
+        await retry.waitFor('reset link to be hidden', async () => {
+          return !(await testSubjects.exists(resetLinkTestSubj));
+        });
+
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
+        await pageObjects.common.sleep(2000);
         await browser.refresh();
-        await pageObjects.common.sleep(1000);
 
         // Check if field is now enabled
         expect(await testSubjects.isEuiSwitchChecked(fieldTestSubj)).to.be(true);
@@ -125,13 +130,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'management-settings-editField-' + settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID;
         const fieldEnabled = await testSubjects.isEuiSwitchChecked(fieldTestSubj);
         await testSubjects.click(fieldTestSubj);
+        await pageObjects.common.sleep(2000);
 
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
         expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
         await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
-        await pageObjects.common.sleep(1000);
+        await pageObjects.common.sleep(2000);
 
         // Reset setting to its initial value
         await testSubjects.click(fieldTestSubj);
@@ -146,7 +152,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // The Default columns setting allows maximum 50 columns, so we set more than this
         const invalidValue = new Array(51).fill('test').toString();
         await testSubjects.setValue(fieldTestSubj, invalidValue);
-        await pageObjects.common.sleep(1000);
+        await pageObjects.common.sleep(2000);
 
         // Check if the Save button is disabled
         expect(await testSubjects.isEnabled(SAVE_BUTTON_TEST_SUBJ)).to.be(false);

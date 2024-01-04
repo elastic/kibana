@@ -129,7 +129,7 @@ function EmbeddedMapComponent({
 
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable && !isErrorEmbeddable(embeddable)) {
+      if (embeddable && !isErrorEmbeddable(embeddable) && dataViewId) {
         const layerList = await getLayerList({ selectedMap, maps, dataViewId });
         await Promise.all([
           embeddable.setLayerList(layerList),

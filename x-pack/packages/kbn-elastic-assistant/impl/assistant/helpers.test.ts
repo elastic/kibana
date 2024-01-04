@@ -235,29 +235,12 @@ describe('getBlockBotConversation', () => {
   });
 
   describe('getOptionalRequestParams', () => {
-    it('should return an empty object when ragOnAlerts is false', () => {
-      const params = {
-        alerts: true,
-        alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
-        ragOnAlerts: false, // <-- false
-        replacements: { key: 'value' },
-        size: 10,
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({});
-    });
-
     it('should return an empty object when alerts is false', () => {
       const params = {
-        alerts: false, // <-- false
+        isEnabledRAGAlerts: false, // <-- false
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        ragOnAlerts: true,
         replacements: { key: 'value' },
         size: 10,
       };
@@ -267,13 +250,12 @@ describe('getBlockBotConversation', () => {
       expect(result).toEqual({});
     });
 
-    it('should return the optional request params when ragOnAlerts is true and alerts is true', () => {
+    it('should return the optional request params when alerts is true', () => {
       const params = {
-        alerts: true,
+        isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        ragOnAlerts: true,
         replacements: { key: 'value' },
         size: 10,
       };
@@ -291,8 +273,7 @@ describe('getBlockBotConversation', () => {
 
     it('should return (only) the optional request params that are defined when some optional params are not provided', () => {
       const params = {
-        alerts: true,
-        ragOnAlerts: true,
+        isEnabledRAGAlerts: true,
         allow: ['a', 'b', 'c'], // all the others are undefined
       };
 
@@ -305,31 +286,37 @@ describe('getBlockBotConversation', () => {
   });
 
   describe('hasParsableResponse', () => {
-    it('returns true when assistantLangChain is true', () => {
+    it('returns true when just isEnabledKnowledgeBase is true', () => {
       const result = hasParsableResponse({
-        alerts: false,
-        assistantLangChain: true,
-        ragOnAlerts: false,
+        isEnabledRAGAlerts: false,
+        isEnabledKnowledgeBase: true,
       });
 
       expect(result).toBe(true);
     });
 
-    it('returns true when ragOnAlerts is true and alerts is true', () => {
+    it('returns true when just isEnabledRAGAlerts is true', () => {
       const result = hasParsableResponse({
-        alerts: true,
-        assistantLangChain: false,
-        ragOnAlerts: true,
+        isEnabledRAGAlerts: true,
+        isEnabledKnowledgeBase: false,
       });
 
       expect(result).toBe(true);
     });
 
-    it('returns false when assistantLangChain, ragOnAlerts, and alerts are all false', () => {
+    it('returns true when both isEnabledKnowledgeBase and isEnabledRAGAlerts are true', () => {
       const result = hasParsableResponse({
-        alerts: false,
-        assistantLangChain: false,
-        ragOnAlerts: false,
+        isEnabledRAGAlerts: true,
+        isEnabledKnowledgeBase: true,
+      });
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when both isEnabledKnowledgeBase and isEnabledRAGAlerts are false', () => {
+      const result = hasParsableResponse({
+        isEnabledRAGAlerts: false,
+        isEnabledKnowledgeBase: false,
       });
 
       expect(result).toBe(false);

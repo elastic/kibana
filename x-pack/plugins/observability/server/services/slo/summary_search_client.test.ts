@@ -7,17 +7,13 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
   aSummaryDocument,
 } from './fixtures/summary_search_document';
-import {
-  DefaultSummarySearchClient,
-  Pagination,
-  Sort,
-  SummarySearchClient,
-} from './summary_search_client';
+import { DefaultSummarySearchClient, Sort, SummarySearchClient } from './summary_search_client';
 
 const defaultSort: Sort = {
   field: 'sli_value',
@@ -34,7 +30,7 @@ describe('Summary Search Client', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    service = new DefaultSummarySearchClient(esClientMock, loggerMock.create());
+    service = new DefaultSummarySearchClient(esClientMock, loggerMock.create(), 'some-space');
   });
 
   it('returns an empty response on error', async () => {
@@ -74,10 +70,7 @@ describe('Summary Search Client', () => {
     const SLO_ID3 = 'slo-three';
     const SLO_ID4 = 'slo-four';
     const SLO_ID5 = 'slo-five';
-    esClientMock.count.mockResolvedValue({
-      count: 8,
-      _shards: { failed: 0, successful: 1, total: 1 },
-    });
+
     esClientMock.search.mockResolvedValue({
       took: 0,
       timed_out: false,
@@ -89,7 +82,7 @@ describe('Summary Search Client', () => {
       },
       hits: {
         total: {
-          value: 6,
+          value: 8,
           relation: 'eq',
         },
         max_score: 1,

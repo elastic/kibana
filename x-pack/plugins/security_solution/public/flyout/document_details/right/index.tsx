@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EventKind } from '../shared/constants/event_kinds';
@@ -36,7 +36,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
-  const { openRightPanel } = useExpandableFlyoutContext();
+  const { openRightPanel, closeFlyout } = useExpandableFlyoutContext();
   const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
@@ -62,6 +62,19 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
       },
     });
   };
+
+  // If flyout is open in preview mode, do not reload with stale information
+  useEffect(() => {
+    const beforeUnloadHandler = () => {
+      if (isPreview) {
+        closeFlyout();
+      }
+    };
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    };
+  }, [isPreview, closeFlyout]);
 
   return (
     <>

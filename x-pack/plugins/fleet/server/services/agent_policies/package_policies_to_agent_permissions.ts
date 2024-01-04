@@ -24,6 +24,7 @@ import type {
   RegistryDataStreamPrivileges,
 } from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
+import { PackagePolicyRequestError } from '../../errors';
 
 import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
@@ -46,7 +47,7 @@ export function storedPackagePoliciesToAgentPermissions(
 ): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
-    throw new Error(
+    throw new PackagePolicyRequestError(
       'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
     );
   }
@@ -57,7 +58,9 @@ export function storedPackagePoliciesToAgentPermissions(
 
   const permissionEntries = packagePolicies.map((packagePolicy) => {
     if (!packagePolicy.package) {
-      throw new Error(`No package for package policy ${packagePolicy.name ?? packagePolicy.id}`);
+      throw new PackagePolicyRequestError(
+        `No package for package policy ${packagePolicy.name ?? packagePolicy.id}`
+      );
     }
 
     const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;

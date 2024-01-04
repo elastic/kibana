@@ -191,7 +191,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      before(async () => {
+      beforeEach(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionDuration,
@@ -212,7 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 

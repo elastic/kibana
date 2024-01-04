@@ -25,7 +25,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach } from '@kbn/std';
 
-import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsTermsInclude,
+  AggregationsTermsExclude,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { UninstallTokenError } from '../../../../common/errors';
 
@@ -74,12 +77,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
+   * @param policyIdExcludeFilter
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    policyIdExcludeFilter?: string
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -171,11 +176,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async getTokenMetadata(
     policyIdFilter?: string,
     page = 1,
-    perPage = 20
+    perPage = 20,
+    policyIdExcludeFilter?: string
   ): Promise<GetUninstallTokensMetadataResponse> {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
 
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter);
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(
+      includeFilter,
+      policyIdExcludeFilter
+    );
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
@@ -251,7 +260,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   };
 
   private async getTokenObjectsByIncludeFilter(
-    include?: AggregationsTermsInclude
+    include?: AggregationsTermsInclude,
+    exclude?: AggregationsTermsExclude
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
 
@@ -264,6 +274,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
             field: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id`,
             size: bucketSize,
             include,
+            exclude,
           },
           aggs: {
             latest: {

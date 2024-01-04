@@ -101,6 +101,7 @@ export const createMockEndpointAppContextService = (
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
   const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
   const fleetActionsClientMock = createFleetActionsClientMock();
+  const loggerFactory = loggingSystemMock.create();
 
   return {
     start: jest.fn(),
@@ -108,6 +109,7 @@ export const createMockEndpointAppContextService = (
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
+    createLogger: jest.fn((...parts) => loggerFactory.get(...parts)),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
@@ -133,6 +135,7 @@ export const createMockEndpointAppContextServiceSetupContract =
     return {
       securitySolutionRequestContextFactory: requestContextFactoryMock.create(),
       cloud: cloudMock.createSetup(),
+      loggerFactory: loggingSystemMock.create(),
     };
   };
 
