@@ -15,8 +15,9 @@ properties:
     properties:
       caseId:
         description: The case identifier for Swimlane connectors.
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
   id:
     description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
     type: string
@@ -26,6 +27,7 @@ properties:
   type:
     description: The type of connector.
     type: string
-    example: .swimlane
+    examples:
+      - .swimlane
     enum:
       - .swimlane

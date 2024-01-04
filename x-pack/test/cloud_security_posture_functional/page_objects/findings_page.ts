@@ -220,6 +220,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const flyoutButton = await table.findAllByTestSubject('docTableExpandToggleColumn');
       await flyoutButton[rowIndex].click();
     },
+
+    async toggleEditDataViewFieldsOption(columnId: string) {
+      const element = await this.getElement();
+      const column = await element.findByCssSelector(`[data-gridcell-column-id="${columnId}"]`);
+      const button = await column.findByCssSelector('.euiDataGridHeaderCell__button');
+      return await button.click();
+    },
   });
 
   const createTableObject = (tableTestSubject: string) => ({
@@ -410,6 +417,50 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
+  const groupSelector = (testSubj = 'group-selector-dropdown') => ({
+    async getElement() {
+      return await testSubjects.find(testSubj);
+    },
+    async setValue(value: string) {
+      const contextMenu = await testSubjects.find('groupByContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
+      const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
+      await menuItems[menuItemValueIndex].click();
+      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+    },
+    async openDropDown() {
+      const element = await this.getElement();
+      await element.click();
+    },
+  });
+
+  const findingsGrouping = async (testSubj = 'cloudSecurityGrouping') => ({
+    async getElement() {
+      return await testSubjects.find(testSubj);
+    },
+    async getGroupCount() {
+      const element = await this.getElement();
+      const groupCount = await element.findByTestSubject('group-count');
+      return await groupCount.getVisibleText();
+    },
+    async getUnitCount() {
+      const element = await this.getElement();
+      const unitCount = await element.findByTestSubject('unit-count');
+      return await unitCount.getVisibleText();
+    },
+    async getRowAtIndex(rowIndex: number) {
+      const element = await this.getElement();
+      const row = await element.findAllByTestSubject('grouping-accordion');
+      return await row[rowIndex];
+    },
+  });
+  const isLatestFindingsTableThere = async () => {
+    const table = await testSubjects.findAll('docTable');
+    const trueOrFalse = table.length > 0 ? true : false;
+    return trueOrFalse;
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToVulnerabilities,
@@ -426,5 +477,9 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     misconfigurationsFlyout,
     toastMessage,
     detectionRuleApi,
+    groupSelector,
+    findingsGrouping,
+    createDataTableObject,
+    isLatestFindingsTableThere,
   };
 }

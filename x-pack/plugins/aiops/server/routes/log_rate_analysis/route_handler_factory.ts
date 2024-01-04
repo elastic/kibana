@@ -92,7 +92,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
           }
 
           // Step 2: Significant categories and terms
-          const significantItemsObj = await analysis.significantItemsHandler(indexInfo);
+          const significantItemsObj = indexInfo.zeroDocsFallback
+            ? await analysis.topItemsHandler(indexInfo)
+            : await analysis.significantItemsHandler(indexInfo);
 
           if (!significantItemsObj) {
             return;

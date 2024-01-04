@@ -16,14 +16,18 @@
       "discover",
       "logExplorer",
       "logsShared",
+      "observabilityAIAssistant",
       "observabilityShared",
       "share",
       "kibanaUtils",
+      "datasetQuality"
     ],
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "extraPublicDirs": [
       "common",
     ]

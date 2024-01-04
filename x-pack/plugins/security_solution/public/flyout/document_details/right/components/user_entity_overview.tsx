@@ -19,7 +19,7 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -32,10 +32,11 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+
 import {
   USER_DOMAIN,
   LAST_SEEN,
@@ -70,7 +71,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { openLeftPanel } = useExpandableFlyoutContext();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,

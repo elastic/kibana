@@ -20,7 +20,7 @@ import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);
-  visit(ALERTS_URL, { role });
+  visit(ALERTS_URL);
   waitForAlertsToPopulate();
 };
 

@@ -823,6 +823,10 @@
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/plugin.ts"
+            },
+            {
               "plugin": "profiling",
               "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             },
@@ -2217,6 +2221,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
             },
             {
               "plugin": "painlessLab",

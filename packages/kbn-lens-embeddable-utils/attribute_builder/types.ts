@@ -18,6 +18,7 @@ import type {
   XYLayerConfig,
   FillStyle,
 } from '@kbn/lens-plugin/public';
+
 export type LensAttributes = TypedLensByValueInput['attributes'];
 
 // Attributes
@@ -61,7 +62,6 @@ export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getDataView(): DataView | undefined;
 }
 
-// Chart
 export interface Chart<TVisualizationState extends LensVisualizationState> {
   getTitle(): string;
   getVisualizationType(): string;
@@ -70,6 +70,8 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
   getReferences(): SavedObjectReference[];
   getDataViews(): DataView[];
 }
+
+// Chart
 export interface ChartConfig<
   TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
 > {
@@ -91,3 +93,5 @@ export type StaticValueConfig = Omit<LensFormula, 'formula'> & {
   fill?: FillStyle;
   value: string;
 };
+
+export type VisualizationTypes = 'lnsXY' | 'lnsMetric';

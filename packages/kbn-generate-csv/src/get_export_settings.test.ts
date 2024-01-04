@@ -30,6 +30,7 @@ describe('getExportSettings', () => {
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
+    maxConcurrentShardRequests: 5,
     enablePanelActionDownload: true,
   };
   const logger = loggingSystemMock.createLogger();
@@ -62,6 +63,7 @@ describe('getExportSettings', () => {
         "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
+        "maxConcurrentShardRequests": 5,
         "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",

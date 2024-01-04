@@ -85,6 +85,7 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
     { value: 'm', text: I18n.MINUTES },
     { value: 'h', text: I18n.HOURS },
   ],
+  ...props
 }: DurationInputProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(durationValueField);
   const { value: durationValue, setValue: setDurationValue } = durationValueField;
@@ -106,7 +107,7 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
   );
 
   // EUI missing some props
-  const rest = { disabled: isDisabled };
+  const rest = { disabled: isDisabled, ...props };
 
   return (
     <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>

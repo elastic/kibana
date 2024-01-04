@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { setupSavedObjects } from './saved_objects';
+export { cspBenchmarkRule } from './csp_benchmark_rule';
+export { cspSettings } from './csp_settings';

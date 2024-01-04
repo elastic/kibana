@@ -63,6 +63,8 @@ describe('AgentLogsUI', () => {
     const state = {
       datasets: ['elastic_agent'],
       logLevels: ['info', 'error'],
+      start: '2023-20-04T14:00:00.340Z',
+      end: '2023-20-04T14:20:00.340Z',
       query: '',
     } as any;
     return render(<AgentLogsUI agent={agent} state={state} />);
@@ -97,7 +99,10 @@ describe('AgentLogsUI', () => {
   it('should render Open in Logs UI if capabilities not set', () => {
     mockStartServices();
     const result = renderComponent();
-    expect(result.getByTestId('viewInLogsBtn')).not.toBeNull();
+    expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
+      'href',
+      `http://localhost:5620/app/logs/stream?logPosition=(end%3A'2023-20-04T14%3A20%3A00.340Z'%2Cstart%3A'2023-20-04T14%3A00%3A00.340Z'%2CstreamLive%3A!f)&logFilter=(expression%3A'elastic_agent.id%3Aagent1%20and%20(data_stream.dataset%3Aelastic_agent)%20and%20(log.level%3Ainfo%20or%20log.level%3Aerror)'%2Ckind%3Akuery)`
+    );
   });
 
   it('should render Open in Discover if serverless enabled', () => {
@@ -106,7 +111,7 @@ describe('AgentLogsUI', () => {
     const viewInDiscover = result.getByTestId('viewInDiscoverBtn');
     expect(viewInDiscover).toHaveAttribute(
       'href',
-      `http://localhost:5620/app/discover#/?_a=(index:'logs-*',query:(language:kuery,query:'data_stream.dataset:elastic_agent%20AND%20elastic_agent.id:agent1'))`
+      `http://localhost:5620/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2023-20-04T14:00:00.340Z',to:'2023-20-04T14:20:00.340Z'))&_a=(columns:!(event.dataset,message),index:'logs-*',query:(language:kuery,query:'elastic_agent.id:agent1 and (data_stream.dataset:elastic_agent) and (log.level:info or log.level:error)'))`
     );
   });
 });

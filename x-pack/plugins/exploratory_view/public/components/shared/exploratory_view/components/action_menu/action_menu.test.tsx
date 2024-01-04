@@ -12,8 +12,7 @@ import { sampleAttribute } from '../../configurations/test_data/sample_attribute
 import * as pluginHook from '../../../../../hooks/use_plugin_context';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExpViewActionMenuContent } from './action_menu';
-import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
-import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
@@ -21,12 +20,23 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   },
 } as any);
 
-jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockImplementation(
-  () =>
-    ({
-      useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-    } as any)
-);
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
+jest.mock('../../hooks/use_kibana', () => {
+  const originalModule = jest.requireActual('../../hooks/use_kibana');
+  return {
+    ...originalModule,
+    useKibana: () => {
+      const { services } = originalModule.useKibana();
+      return {
+        services: {
+          ...services,
+          observabilityAIAssistant: mockObservabilityAIAssistant,
+        },
+      };
+    },
+  };
+});
 
 describe('Action Menu', function () {
   afterAll(() => {

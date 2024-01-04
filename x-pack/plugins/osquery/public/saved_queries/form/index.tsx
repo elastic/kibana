@@ -93,7 +93,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent={'spaceBetween'}>
         <EuiFlexItem>
-          <TimeoutField />
+          <TimeoutField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem />
       </EuiFlexGroup>

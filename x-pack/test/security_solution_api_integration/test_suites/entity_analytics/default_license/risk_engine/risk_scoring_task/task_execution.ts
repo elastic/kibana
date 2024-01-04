@@ -179,7 +179,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('with some alerts containing hosts and others containing users', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/171132
+      describe.skip('with some alerts containing hosts and others containing users', () => {
         let hostId: string;
         let userId: string;
 

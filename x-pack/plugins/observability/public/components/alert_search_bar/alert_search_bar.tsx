@@ -10,6 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
@@ -37,7 +38,7 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
-  services: { AlertsSearchBar, timeFilterService, useToasts },
+  services: { AlertsSearchBar, timeFilterService, useToasts, uiSettings },
   status,
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
@@ -52,7 +53,8 @@ export function ObservabilityAlertSearchBar({
               from: rangeFrom,
             },
             kuery,
-            [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries]
+            [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
+            getEsQueryConfig(uiSettings)
           )
         );
       } catch (error) {
@@ -62,7 +64,16 @@ export function ObservabilityAlertSearchBar({
         onKueryChange(DEFAULT_QUERY_STRING);
       }
     },
-    [onEsQueryChange, rangeTo, rangeFrom, kuery, defaultSearchQueries, toasts, onKueryChange]
+    [
+      onEsQueryChange,
+      rangeTo,
+      rangeFrom,
+      kuery,
+      defaultSearchQueries,
+      uiSettings,
+      toasts,
+      onKueryChange,
+    ]
   );
 
   useEffect(() => {
@@ -84,7 +95,8 @@ export function ObservabilityAlertSearchBar({
             from: dateRange.from,
           },
           query,
-          [...getAlertStatusQuery(status), ...defaultSearchQueries]
+          [...getAlertStatusQuery(status), ...defaultSearchQueries],
+          getEsQueryConfig(uiSettings)
         );
         if (query) onKueryChange(query);
         timeFilterService.setTime(dateRange);
@@ -99,13 +111,14 @@ export function ObservabilityAlertSearchBar({
       }
     },
     [
+      status,
       defaultSearchQueries,
+      uiSettings,
+      onKueryChange,
       timeFilterService,
       onRangeFromChange,
       onRangeToChange,
-      onKueryChange,
       onEsQueryChange,
-      status,
       toasts,
     ]
   );

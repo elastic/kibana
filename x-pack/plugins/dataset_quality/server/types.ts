@@ -6,12 +6,15 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
+import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityPluginSetupDependencies {}
+export interface DatasetQualityPluginSetupDependencies {
+  fleet: FleetSetupContract;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DatasetQualityPluginStartDependencies {}
+export interface DatasetQualityPluginStartDependencies {
+  fleet: FleetStartContract;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}

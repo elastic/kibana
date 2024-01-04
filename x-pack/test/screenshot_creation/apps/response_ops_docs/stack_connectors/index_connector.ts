@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('index-connector', screenshotDirectories);
       const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');
       await saveTestButton.click();
-      await testSubjects.setValue('actionJsonEditor', indexDocument);
+      await testSubjects.setValue('documentToIndex', indexDocument);
       await commonScreenshots.takeScreenshot('index-params-test', screenshotDirectories);
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();

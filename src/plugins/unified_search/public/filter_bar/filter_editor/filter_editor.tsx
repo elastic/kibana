@@ -142,6 +142,7 @@ export interface FilterEditorComponentProps {
   mode?: 'edit' | 'add';
   suggestionsAbstraction?: SuggestionsAbstraction;
   docLinks: DocLinksStart;
+  filtersCount?: number;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
@@ -355,6 +356,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
               suggestionsAbstraction={this.props.suggestionsAbstraction}
+              filtersCount={this.props.filtersCount}
             />
           </EuiToolTip>
         </div>

@@ -12,7 +12,6 @@ import { DataViewBase } from '@kbn/es-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
-import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
@@ -77,7 +76,6 @@ describe('ExpressionChart', () => {
 
   it('should display no data message', async () => {
     const expression: MetricExpression = {
-      aggType: CUSTOM_AGGREGATOR,
       metrics: [
         {
           name: 'A',

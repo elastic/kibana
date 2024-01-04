@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
@@ -67,6 +68,7 @@ export function DataViewPicker({
       isOpen={isPopoverOpen}
       input={createTrigger()}
       closePopover={() => setPopoverIsOpen(false)}
+      panelMinWidth={calculateWidthFromEntries(dataViews, ['name', 'id'])}
       panelProps={{
         'data-test-subj': 'data-view-picker-popover',
       }}
@@ -97,6 +99,9 @@ export function DataViewPicker({
         searchProps={{
           compressed: true,
           ...(selectableProps ? selectableProps.searchProps : undefined),
+        }}
+        listProps={{
+          truncationProps: { truncation: 'middle' },
         }}
       >
         {(list, search) => (

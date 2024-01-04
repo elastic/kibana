@@ -14,7 +14,7 @@ import {
   getSecurityTelemetryStats,
   removeTimeFieldsFromTelemetryStats,
 } from '../../../utils';
-import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

@@ -82,6 +82,10 @@ export interface OpsProcessMetrics {
     };
     /** node rss */
     resident_set_size_in_bytes: number;
+    /** memory usage of C++ objects bound to JavaScript objects managed by V8 */
+    external_in_bytes: number;
+    /** memory allocated for array buffers. This is also included in the external value*/
+    array_buffers_in_bytes: number;
   };
   /** mean event loop delay since last collection*/
   event_loop_delay: number;
@@ -152,6 +156,14 @@ export interface OpsOsMetrics {
       /** total amount of time the cgroup has been throttled for */
       time_throttled_nanos: number;
     };
+  };
+
+  /** memory cgroup metrics, undefined when not running in cgroup v2 */
+  cgroup_memory?: {
+    /** The total amount of memory currently being used by the cgroup and its descendants. */
+    current_in_bytes: number;
+    /** The total amount of swap currently being used by the cgroup and its descendants. */
+    swap_current_in_bytes: number;
   };
 }
 

@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.numSkippedRuns).to.eql(2);
       });
 
+      let newLastRun: string;
       await retry.try(async () => {
         const task = await currentTask(createdTask.id);
         expect(task.attempts).to.eql(0);
@@ -63,6 +64,18 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.numSkippedRuns).to.eql(2);
         // keeps rescheduling after skips
         expect(new Date(task.runAt).getTime()).to.greaterThan(new Date(lastRunAt).getTime());
+        newLastRun = task.runAt;
+      });
+
+      // should keep running the rule  after 2 skips and 1 successful run
+      await retry.try(async () => {
+        const task = await currentTask(createdTask.id);
+        expect(task.attempts).to.eql(0);
+        expect(task.retryAt).to.eql(null);
+        // skip attempts remains as it is
+        expect(task.numSkippedRuns).to.eql(2);
+        // keeps rescheduling after skips
+        expect(new Date(task.runAt).getTime()).to.greaterThan(new Date(newLastRun).getTime());
       });
     });
 

@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -44,9 +43,11 @@ export interface Props {
 
 type SizeVoidFunc = (newSize: string) => void;
 
-const Container = styled(EuiPanel)`
+const Container = styled(EuiFlexGroup)`
   border-radius: 0;
-  background: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
   padding: ${({ theme }) => theme.eui.euiSizeXS} ${({ theme }) => theme.eui.euiSizeS};
 `;
 
@@ -161,96 +162,113 @@ export const EqlQueryBarFooter: FC<Props> = ({
 
   return (
     <Container>
-      <FlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-        <EuiFlexItem>
-          {errors.length > 0 && (
-            <ErrorsPopover ariaLabel={i18n.EQL_VALIDATION_ERROR_POPOVER_LABEL} errors={errors} />
-          )}
-          {isLoading && <Spinner data-test-subj="eql-validation-loading" size="m" />}
+      <FlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              {errors.length > 0 && (
+                <ErrorsPopover
+                  ariaLabel={i18n.EQL_VALIDATION_ERROR_POPOVER_LABEL}
+                  errors={errors}
+                />
+              )}
+              {isLoading && <Spinner data-test-subj="eql-validation-loading" size="m" />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {!onOptionsChange && (
-          <EuiFlexItem grow={false}>
-            <EqlOverviewLink />
-          </EuiFlexItem>
-        )}
-        {onOptionsChange && (
-          <>
-            <FlexItemWithMarginRight grow={false}>
-              <EqlOverviewLink />
-            </FlexItemWithMarginRight>
-            <FlexItemLeftBorder grow={false}>
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    onClick={openEqlSettingsHandler}
-                    iconType="controlsVertical"
-                    isDisabled={openEqlSettings}
-                    aria-label="eql settings"
-                    data-test-subj="eql-settings-trigger"
-                  />
-                }
-                isOpen={openEqlSettings}
-                closePopover={closeEqlSettingsHandler}
-                anchorPosition="downCenter"
-                ownFocus={false}
-              >
-                <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
-                <div style={{ width: '300px' }}>
-                  {!isSizeOptionDisabled && (
-                    <EuiFormRow
-                      data-test-subj="eql-size-field"
-                      label={i18n.EQL_OPTIONS_SIZE_LABEL}
-                      helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
-                    >
-                      <EuiFieldNumber
-                        value={localSize}
-                        onChange={handleSizeField}
-                        min={1}
-                        max={10000}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize={'none'} alignItems="center" responsive={false}>
+            {!onOptionsChange && (
+              <EuiFlexItem grow={false}>
+                <EqlOverviewLink />
+              </EuiFlexItem>
+            )}
+
+            {onOptionsChange && (
+              <>
+                <FlexItemWithMarginRight grow={false}>
+                  <EqlOverviewLink />
+                </FlexItemWithMarginRight>
+                <FlexItemLeftBorder grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButtonIcon
+                        onClick={openEqlSettingsHandler}
+                        iconType="controlsVertical"
+                        isDisabled={openEqlSettings}
+                        aria-label="eql settings"
+                        data-test-subj="eql-settings-trigger"
                       />
-                    </EuiFormRow>
-                  )}
-                  <EuiFormRow
-                    data-test-subj="eql-event-category-field"
-                    label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
-                    helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
+                    }
+                    isOpen={openEqlSettings}
+                    closePopover={closeEqlSettingsHandler}
+                    anchorPosition="downCenter"
+                    ownFocus={false}
                   >
-                    <EuiComboBox
-                      options={optionsData?.keywordFields}
-                      selectedOptions={eventCategoryField}
-                      singleSelection={singleSelection}
-                      onChange={handleEventCategoryField}
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow
-                    data-test-subj="eql-tiebreaker-field"
-                    label={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
-                    helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
-                  >
-                    <EuiComboBox
-                      options={optionsData?.nonDateFields}
-                      selectedOptions={tiebreakerField}
-                      singleSelection={singleSelection}
-                      onChange={handleTiebreakerField}
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow
-                    data-test-subj="eql-timestamp-field"
-                    label={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
-                    helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
-                  >
-                    <EuiComboBox
-                      options={optionsData?.dateFields}
-                      selectedOptions={timestampField}
-                      singleSelection={singleSelection}
-                      onChange={handleTimestampField}
-                    />
-                  </EuiFormRow>
-                </div>
-              </EuiPopover>
-            </FlexItemLeftBorder>
-          </>
-        )}
+                    <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
+                    <div style={{ width: '300px' }}>
+                      {!isSizeOptionDisabled && (
+                        <EuiFormRow
+                          data-test-subj="eql-size-field"
+                          label={i18n.EQL_OPTIONS_SIZE_LABEL}
+                          helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
+                        >
+                          <EuiFieldNumber
+                            value={localSize}
+                            onChange={handleSizeField}
+                            min={1}
+                            max={10000}
+                          />
+                        </EuiFormRow>
+                      )}
+                      <EuiFormRow
+                        data-test-subj="eql-event-category-field"
+                        label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+                        helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
+                      >
+                        <EuiComboBox
+                          options={optionsData?.keywordFields}
+                          selectedOptions={eventCategoryField}
+                          singleSelection={singleSelection}
+                          onChange={handleEventCategoryField}
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow
+                        data-test-subj="eql-tiebreaker-field"
+                        label={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+                        helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
+                      >
+                        <EuiComboBox
+                          options={optionsData?.nonDateFields}
+                          selectedOptions={tiebreakerField}
+                          singleSelection={singleSelection}
+                          onChange={handleTiebreakerField}
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow
+                        data-test-subj="eql-timestamp-field"
+                        label={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+                        helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
+                      >
+                        <EuiComboBox
+                          options={optionsData?.dateFields}
+                          selectedOptions={timestampField}
+                          singleSelection={singleSelection}
+                          onChange={handleTimestampField}
+                        />
+                      </EuiFormRow>
+                    </div>
+                  </EuiPopover>
+                </FlexItemLeftBorder>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </FlexGroup>
     </Container>
   );

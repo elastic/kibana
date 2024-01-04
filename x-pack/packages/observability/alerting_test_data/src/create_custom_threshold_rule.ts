@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
@@ -39,7 +38,6 @@ export const createCustomThresholdRule = async (
     params: {
       criteria: ruleParams.params?.criteria || [
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
           threshold: [1],
           timeSize: 1,

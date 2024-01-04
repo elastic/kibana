@@ -30,6 +30,7 @@ import {
   Tooltip,
   XYChartSeriesIdentifier,
   SettingsProps,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -145,7 +146,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
-  shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -208,7 +208,6 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
-  shouldShowLegendAction,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -227,7 +226,6 @@ export function XYChart({
     annotations,
   } = args;
   const chartRef = useRef<Chart>(null);
-  const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
   const filteredLayers = getFilteredLayers(layers);
@@ -798,9 +796,7 @@ export function XYChart({
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
             theme={[
               {
-                ...chartTheme,
                 barSeriesStyle: {
-                  ...chartTheme.barSeriesStyle,
                   ...valueLabelsStyling,
                 },
                 background: {
@@ -811,7 +807,8 @@ export function XYChart({
                 },
                 // if not title or labels are shown for axes, add some padding if required by reference line markers
                 chartMargins: {
-                  ...chartTheme.chartPaddings,
+                  // Temporary margin defaults
+                  ...LEGACY_LIGHT_THEME.chartMargins,
                   ...computeChartMargins(
                     linesPaddings,
                     { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
@@ -841,7 +838,6 @@ export function XYChart({
                     fieldFormats,
                     formattedDatatables,
                     titles,
-                    shouldShowLegendAction,
                     singleTable
                   )
                 : undefined
@@ -951,6 +947,7 @@ export function XYChart({
               syncColors={syncColors}
               valueLabels={valueLabels}
               fillOpacity={args.fillOpacity}
+              minBarHeight={args.minBarHeight}
               formatFactory={formatFactory}
               paletteService={paletteService}
               fittingFunction={fittingFunction}
@@ -995,9 +992,9 @@ export function XYChart({
                 rangeAnnotations.length && shouldHideDetails
                   ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
                   : shouldUseNewTimeAxis
-                  ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
-                    Number(chartTheme.axes?.tickLabel?.fontSize || 0)
-                  : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+                  ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
+                    chartBaseTheme.axes.tickLabel.fontSize
+                  : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
               }
             />
           ) : null}

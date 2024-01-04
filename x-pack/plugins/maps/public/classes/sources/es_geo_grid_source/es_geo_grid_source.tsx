@@ -21,6 +21,7 @@ import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
+import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -553,6 +554,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const dataView = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
+    // Filter out documents without geo fields for broad index-pattern support
+    searchSource.setField('filter', [
+      ...(searchSource.getField('filter') as Filter[]),
+      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+    ]);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`

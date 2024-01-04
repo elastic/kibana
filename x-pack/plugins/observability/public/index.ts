@@ -52,7 +52,6 @@ export {
 
 export type { SloEditLocatorParams } from './locators/slo_edit';
 
-export type { UXMetrics } from './pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';

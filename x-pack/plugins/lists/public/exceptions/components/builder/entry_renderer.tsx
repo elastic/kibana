@@ -30,6 +30,7 @@ import {
   EXCEPTION_OPERATORS_ONLY_LISTS,
   FormattedBuilderEntry,
   OperatorOption,
+  fieldSupportsMatches,
   getEntryOnFieldChange,
   getEntryOnListChange,
   getEntryOnMatchAnyChange,
@@ -50,9 +51,9 @@ import {
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
 import {
-  FILENAME_WILDCARD_WARNING,
   OperatingSystem,
-  validateFilePathInput,
+  WILDCARD_WARNING,
+  validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -310,11 +311,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
     // for event filters forms
-    // show extra operators for wildcards when field is `file.path.text`
-    const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
+    // show extra operators for wildcards when field supports matches
+    const doesFieldSupportMatches = entry.field !== undefined && fieldSupportsMatches(entry.field);
     const isEventFilterList = listType === 'endpoint_events';
     const augmentedOperatorsList =
-      operatorsList && isFilePathTextField && isEventFilterList
+      operatorsList && doesFieldSupportMatches && isEventFilterList
         ? operatorsList
         : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
 
@@ -358,8 +359,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
-  // show this when wildcard filename with matches operator
-  const getWildcardWarning = (precedingWarning: string): React.ReactNode => {
+  // show this when wildcard with matches operator
+  const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -368,7 +369,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           content={
             <FormattedMessage
               id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
-              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
+              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the values. For instance, adding a process.name or file.name field. Creating event filters with both `matches` and `does not match` operators may significantly decrease performance."
             />
           }
           size="m"
@@ -430,10 +431,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
-          const warning = validateFilePathInput({ os, value: wildcardValue });
+          const warning = validatePotentialWildcardInput({
+            field: entry.field?.name,
+            os,
+            value: wildcardValue,
+          });
           actualWarning =
-            warning === FILENAME_WILDCARD_WARNING
-              ? warning && getWildcardWarning(warning)
+            warning === WILDCARD_WARNING && listType === 'endpoint_events'
+              ? getEventFilterWildcardWarningInfo(warning)
               : warning;
         }
 

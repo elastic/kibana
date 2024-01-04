@@ -22,25 +22,28 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type {
+  AuthenticationServiceSetup,
+  AuthenticationServiceStart,
+  SecurityPluginSetup,
+  SecurityPluginStart as SecurityPluginStartWithoutDeprecatedMembers,
+} from '@kbn/security-plugin-types-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
-import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
-import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
 import { SecurityLicenseService } from '../common/licensing';
-import type { SecurityLicense } from '../common/licensing';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -244,34 +247,7 @@ function getLogoutUrl(http: HttpSetup) {
   return `${http.basePath.serverBasePath}/logout`;
 }
 
-export interface SecurityPluginSetup {
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceSetup;
-  /**
-   * Exposes information about the available security features under the current license.
-   */
-  license: SecurityLicense;
-}
-
-export interface SecurityPluginStart {
-  /**
-   * Exposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is.
-   */
-  navControlService: SecurityNavControlServiceStart;
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceStart;
-  /**
-   * A set of methods to work with Kibana user profiles.
-   */
-  userProfiles: Pick<
-    UserProfileAPIClient,
-    'getCurrent' | 'bulkGet' | 'suggest' | 'update' | 'userProfile$'
-  >;
-
+export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecatedMembers {
   /**
    * Exposes UI components that will be loaded asynchronously.
    * @deprecated

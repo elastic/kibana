@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObject }: PluginFunctionalProviderContext) {
   const common = getPageObject('common');
@@ -17,9 +17,23 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
   const find = getService('find');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
+
+  const clickAppLink = async (app: string) => {
+    const appLink = `fooNav${app}`;
+    if (!(await testSubjects.exists(appLink))) {
+      log.debug(`App ${app} not found on side nav`);
+    }
+    await testSubjects.click(appLink);
+  };
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+
+  const checkAppVisible = async (app: string) => {
+    const appContainer = `fooApp${app}`;
+    await testSubjects.existOrFail(appContainer);
+  };
 
   const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('kbnAppWrapper');
@@ -29,8 +43,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/53356
-  describe.skip('ui applications', function describeIndexTests() {
+  describe('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await common.navigateToApp('foo');
@@ -38,48 +51,48 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
     });
 
     it('starts on home page', async () => {
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
     });
 
     it('redirects and renders correctly regardless of trailing slash', async () => {
       await navigateTo(`/app/foo`);
       await browser.waitForUrlToBe('/app/foo/home');
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
       await navigateTo(`/app/foo/`);
       await browser.waitForUrlToBe('/app/foo/home');
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
     });
 
     it('navigates to its own pages', async () => {
       // Go to page A
-      await testSubjects.click('fooNavPageA');
+      await clickAppLink('PageA');
       await browser.waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppPageA');
+      await checkAppVisible('PageA');
 
       // Go to home page
-      await testSubjects.click('fooNavHome');
+      await clickAppLink('Home');
       await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
     });
 
     it('can use the back button to navigate within an app', async () => {
       await browser.goBack();
       await browser.waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppPageA');
+      await checkAppVisible('PageA');
     });
 
     it('navigates to app root when navlink is clicked', async () => {
-      await appsMenu.clickLink('Foo', { category: 'kibana' });
+      await appsMenu.clickLink('Foo');
       await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
     });
 
     it('navigates to other apps', async () => {
-      await testSubjects.click('fooNavBarPageB');
+      await clickAppLink('BarPageB');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('barAppPageB');
       await browser.waitForUrlToBe('/app/bar/page-b?query=here');
@@ -94,7 +107,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
       await browser.goBack();
       await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('fooAppHome');
+      await checkAppVisible('Home');
     });
 
     it('chromeless applications are not visible in apps list', async () => {

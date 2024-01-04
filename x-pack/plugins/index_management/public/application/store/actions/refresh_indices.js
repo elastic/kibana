@@ -26,8 +26,8 @@ export const refreshIndices =
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
-        defaultMessage: 'Successfully refreshed: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully refreshed {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

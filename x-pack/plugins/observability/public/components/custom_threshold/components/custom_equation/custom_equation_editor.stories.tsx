@@ -14,7 +14,6 @@ import {
   Comparator,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import { TimeUnitChar } from '../../../../../common';
 
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
@@ -92,7 +91,6 @@ export const CustomEquationEditorWithFieldError = CustomEquationEditorTemplate.b
 
 const BASE_ARGS: Partial<CustomEquationEditorProps> = {
   expression: {
-    aggType: CUSTOM_AGGREGATOR,
     metrics: [
       {
         name: 'A',
@@ -120,7 +118,6 @@ CustomEquationEditorDefault.args = {
 CustomEquationEditorWithEquationErrors.args = {
   ...BASE_ARGS,
   expression: {
-    aggType: CUSTOM_AGGREGATOR,
     equation: 'Math.round(A / B)',
     metrics: [
       { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },

@@ -46,13 +46,3 @@ steps:
           USE_GROUP_LABEL: true
         agents:
           image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"
-
-  - group: "Observability"
-    steps:
-      - label: ":judge::seedling: Trigger Manual Tests Phase - Observability"
-        command: "make -C /agent trigger-manual-verification-phase"
-        env:
-          NOTIFICATION_APPENDIX: "<!subteam^S896GM05A> please execute your manual testing plan."
-          USE_GROUP_LABEL: true
-        agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

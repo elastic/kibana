@@ -86,9 +86,14 @@ export default ({ getService }: FtrProviderContext) => {
             const groupActions = getGroupActions(data, apiVersion);
             const groups = groupActions.flatMap((d) => d.payload);
 
-            expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
-              orderBy(testData.expected.groups, ['docCount'], ['desc']),
-              'Grouping result does not match expected values.'
+            const actualGroups = orderBy(groups, ['docCount'], ['desc']);
+            const expectedGroups = orderBy(testData.expected.groups, ['docCount'], ['desc']);
+
+            expect(actualGroups).to.eql(
+              expectedGroups,
+              `Grouping result does not match expected values. Expected ${JSON.stringify(
+                expectedGroups
+              )}, got ${JSON.stringify(actualGroups)}`
             );
 
             const groupHistogramActions = getGroupHistogramActions(data, apiVersion);

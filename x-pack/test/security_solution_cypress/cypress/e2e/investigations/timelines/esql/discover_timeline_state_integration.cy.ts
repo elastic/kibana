@@ -34,7 +34,7 @@ import {
   addDescriptionToTimeline,
   addNameToTimelineAndSave,
   createNewTimeline,
-  gotToEsqlTab,
+  goToEsqlTab,
   openTimelineById,
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
@@ -107,14 +107,14 @@ describe.skip(
       login();
       visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
     context('save/restore', () => {
       it('should be able create an empty timeline with default discover state', () => {
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
-        gotToEsqlTab();
+        goToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should(
           'contain.text',
           `Last 15 minutes`
@@ -141,7 +141,7 @@ describe.skip(
             openTimelineFromSettings();
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
-            gotToEsqlTab();
+            goToEsqlTab();
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -191,7 +191,7 @@ describe.skip(
             openTimelineFromSettings();
             openTimelineById(timelineId);
             cy.get(LOADING_INDICATOR).should('not.exist');
-            gotToEsqlTab();
+            goToEsqlTab();
             cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
           });
       });

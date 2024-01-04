@@ -114,7 +114,6 @@ export const findActiveNodes = (
 
   const activeNodeFromKey = (key: string): ChromeProjectNavigationNode => ({
     ...navTree[key],
-    isActive: true,
   });
 
   Object.entries(navTree).forEach(([key, node]) => {

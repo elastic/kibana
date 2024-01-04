@@ -28,7 +28,9 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
-      use_alert_data_for_template: useAlertDataForTemplate,
+      ...(typeof useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
       ...(uuid && { uuid }),
     })
   ),

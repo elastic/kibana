@@ -13,7 +13,7 @@ import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN } from '../constants/plugin';
+import { PLUGIN } from '../../common/constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
   RuleType,

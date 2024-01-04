@@ -11,20 +11,22 @@ import { useStream } from './use_stream';
 const amendMessage = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
+const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
 
 const readerComplete = {
   read: reader
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode('one chunk ')),
+      value: new Uint8Array(new TextEncoder().encode(chunk1)),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode(`another chunk`)),
+      value: new Uint8Array(new TextEncoder().encode(chunk2)),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: new Uint8Array(new TextEncoder().encode(``)),
+      value: new Uint8Array(new TextEncoder().encode('')),
     })
     .mockResolvedValue({
       done: true,
@@ -34,7 +36,12 @@ const readerComplete = {
   closed: jest.fn().mockResolvedValue(true),
 } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
-const defaultProps = { amendMessage, reader: readerComplete, isError: false };
+const defaultProps = {
+  amendMessage,
+  reader: readerComplete,
+  isError: false,
+  connectorTypeTitle: 'OpenAI',
+};
 describe('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +64,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: true,
         isStreaming: true,
-        pendingMessage: 'one chunk ',
+        pendingMessage: 'My',
         setComplete: expect.any(Function),
       });
     });
@@ -67,7 +74,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: false,
         isStreaming: false,
-        pendingMessage: 'one chunk another chunk',
+        pendingMessage: 'My new message',
         setComplete: expect.any(Function),
       });
     });

@@ -241,6 +241,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     unit: 'm',
     value: 5,
   },
+  enableThresholdSuppression: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

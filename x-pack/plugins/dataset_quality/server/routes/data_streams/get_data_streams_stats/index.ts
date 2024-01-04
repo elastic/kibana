@@ -6,16 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DataStreamTypes } from '../../../types/default_api_types';
 import { dataStreamService } from '../../../services';
-import { DataStreamTypes } from '../../../types/data_stream';
 
 export async function getDataStreamsStats(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamTypes;
   datasetQuery?: string;
-  sortOrder: 'asc' | 'desc';
 }) {
-  const { esClient, type, datasetQuery, sortOrder } = options;
+  const { esClient, type, datasetQuery } = options;
 
   const matchingDataStreamsStats = await dataStreamService.getMatchingDataStreamsStats(esClient, {
     type: type ?? '*',
@@ -25,21 +24,13 @@ export async function getDataStreamsStats(options: {
   const mappedDataStreams = matchingDataStreamsStats.map((dataStream) => {
     return {
       name: dataStream.data_stream,
-      size: dataStream.store_size,
-      size_bytes: dataStream.store_size_bytes,
-      last_activity: dataStream.maximum_timestamp,
+      size: dataStream.store_size?.toString(),
+      sizeBytes: dataStream.store_size_bytes,
+      lastActivity: dataStream.maximum_timestamp,
     };
   });
 
-  const sortedDataStreams = mappedDataStreams.sort((a, b) => {
-    if (sortOrder === 'desc') {
-      return b.name.localeCompare(a.name);
-    }
-
-    return a.name.localeCompare(b.name);
-  });
-
   return {
-    items: sortedDataStreams,
+    items: mappedDataStreams,
   };
 }

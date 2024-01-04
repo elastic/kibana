@@ -53,6 +53,7 @@ export class JsonLayout implements Layout {
       },
       process: {
         pid: record.pid,
+        uptime: process.uptime(),
       },
       span: spanId ? { id: spanId } : undefined,
       trace: traceId ? { id: traceId } : undefined,

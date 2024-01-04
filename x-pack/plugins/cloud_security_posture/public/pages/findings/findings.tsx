@@ -100,16 +100,6 @@ export const Findings = () => {
           <EuiSpacer />
           <EuiTabs size="l">
             <EuiTab
-              key="vuln_mgmt"
-              onClick={navigateToVulnerabilitiesTab}
-              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.vulnerabilities"
-                defaultMessage="Vulnerabilities"
-              />
-            </EuiTab>
-            <EuiTab
               key="configurations"
               onClick={navigateToConfigurationsTab}
               isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
@@ -117,6 +107,16 @@ export const Findings = () => {
               <FormattedMessage
                 id="xpack.csp.findings.tabs.misconfigurations"
                 defaultMessage="Misconfigurations"
+              />
+            </EuiTab>
+            <EuiTab
+              key="vuln_mgmt"
+              onClick={navigateToVulnerabilitiesTab}
+              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
               />
             </EuiTab>
           </EuiTabs>

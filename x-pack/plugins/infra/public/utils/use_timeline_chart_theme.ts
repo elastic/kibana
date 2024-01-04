@@ -16,19 +16,15 @@ export function useTimelineChartTheme(): Pick<SettingsProps, 'baseTheme' | 'them
   } = useKibanaContextForPlugin();
 
   const baseTheme = charts.theme.useChartsBaseTheme();
-  const theme = charts.theme.useChartsTheme();
 
   return {
     baseTheme,
     theme: {
-      ...theme,
       background: {
-        ...theme.background,
         color: 'transparent',
       },
       crosshair: {
         band: {
-          ...theme.crosshair?.band,
           fill: euiTheme.colors.lightShade,
         },
       },
@@ -38,7 +34,6 @@ export function useTimelineChartTheme(): Pick<SettingsProps, 'baseTheme' | 'them
             visible: false,
           },
           vertical: {
-            ...theme.axes?.gridLine?.vertical,
             dash: undefined,
           },
         },

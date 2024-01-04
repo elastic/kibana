@@ -15,6 +15,7 @@ import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { HostsTableProvider } from '../hooks/use_hosts_table';
 import { ErrorCallout } from './error_callout';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { HostCountProvider } from '../hooks/use_host_count';
 
 export const HostsContent = () => {
   const { error } = useUnifiedSearchContext();
@@ -28,7 +29,9 @@ export const HostsContent = () => {
           <HostsTableProvider>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <KPIGrid />
+                <HostCountProvider>
+                  <KPIGrid />
+                </HostCountProvider>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <HostsTable />

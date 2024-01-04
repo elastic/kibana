@@ -69,6 +69,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        ingestPipelines: {
+          pathname: '/app/management/ingest/ingest_pipelines',
+        },
         transform: {
           pathname: '/app/management/data/transform',
         },
@@ -99,6 +102,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         context: {
           pathname: '/app/discover',
           hash: '/context',
+        },
+        searchProfiler: {
+          pathname: '/app/dev_tools',
+          hash: '/searchprofiler',
         },
       },
       // choose where screenshots should be saved

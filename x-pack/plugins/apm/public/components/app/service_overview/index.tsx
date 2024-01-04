@@ -20,7 +20,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,
-  isServerlessAgent,
+  isServerlessAgentName,
 } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -60,7 +60,7 @@ export function ServiceOverview() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const isRumAgent = isRumAgentName(agentName);
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
-  const isServerless = isServerlessAgent(serverlessType);
+  const isServerless = isServerlessAgentName(serverlessType);
 
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
     path: {

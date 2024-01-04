@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-// value of const needs to be backwards compatible
-export const APM_STATIC_DATA_VIEW_ID = 'apm_static_index_pattern_id';
+export const DO_NOT_USE_LEGACY_APM_STATIC_DATA_VIEW_ID =
+  'apm_static_index_pattern_id';
+
+const APM_STATIC_DATA_VIEW_ID_PREFIX = 'apm_static_data_view_id';
+
+export function getDataViewId(spaceId: string) {
+  return `${APM_STATIC_DATA_VIEW_ID_PREFIX}_${spaceId}`;
+}

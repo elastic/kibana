@@ -27,6 +27,7 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly comboBox = this.ctx.getService('comboBox');
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -555,9 +556,9 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async selectDashboardTags(tagNames: string[]) {
-    await this.testSubjects.click('savedObjectTagSelector');
+    const tagsComboBox = await this.testSubjects.find('savedObjectTagSelector');
     for (const tagName of tagNames) {
-      await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      await this.comboBox.setElement(tagsComboBox, tagName);
     }
     await this.testSubjects.click('savedObjectTitle');
   }

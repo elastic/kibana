@@ -139,6 +139,38 @@ export const waitForActionToComplete = (
     });
 };
 
+export const waitForActionToSucceed = (
+  actionId: string,
+  timeout = 180000
+): Cypress.Chainable<ActionDetails> => {
+  let action: ActionDetails | undefined;
+
+  return cy
+    .waitUntil(
+      () => {
+        return request<ActionDetailsApiResponse>({
+          method: 'GET',
+          url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+        }).then((response) => {
+          if (response.body.data.isCompleted && response.body.data.status === 'successful') {
+            action = response.body.data;
+            return true;
+          }
+
+          return false;
+        });
+      },
+      { timeout, interval: 2000 }
+    )
+    .then(() => {
+      if (!action) {
+        throw new Error('Failed to retrieve successful action');
+      }
+
+      return action;
+    });
+};
+
 /**
  * Ensure user has the given `accessLevel` to the type of response action
  * @param accessLevel

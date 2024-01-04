@@ -167,6 +167,9 @@ export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertT
 /** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
 export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
   'securitySolution:enableExpandableFlyout' as const;
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
+export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

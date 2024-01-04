@@ -33,7 +33,7 @@ const AddNotesContainer = styled.div`
 AddNotesContainer.displayName = 'AddNotesContainer';
 
 const ButtonsContainer = styled(EuiFlexGroup)`
-  margin-top: 5px;
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 ButtonsContainer.displayName = 'ButtonsContainer';

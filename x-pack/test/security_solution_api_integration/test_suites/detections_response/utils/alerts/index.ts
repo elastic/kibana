@@ -20,4 +20,6 @@ export * from './get_alert_status_empty_response';
 export * from './get_query_alert_ids';
 export * from './set_alert_tags';
 export * from './get_preview_alerts';
+export * from './get_alert_status';
+export * from './alert_assignees';
 export * from './migrations';

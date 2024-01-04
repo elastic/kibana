@@ -195,7 +195,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         </Fragment>
       ))}
       <EuiSpacer />
-      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
+      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} showCreateDataView={true} />
     </EuiForm>
   );
 };

@@ -35,7 +35,25 @@ describe('servicenow action params validation', () => {
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { ['subActionParams.incident.short_description']: [] },
+      errors: {
+        ['subActionParams.incident.correlation_id']: [],
+        ['subActionParams.incident.short_description']: [],
+      },
+    });
+  });
+
+  test(`${SERVICENOW_ITSM_CONNECTOR_TYPE_ID}: action params validation succeeds for closeIncident subAction`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITSM_CONNECTOR_TYPE_ID);
+    const actionParams = {
+      subAction: 'closeIncident',
+      subActionParams: { incident: { correlation_id: '{{test}}{{rule_id}}' } },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        ['subActionParams.incident.correlation_id']: [],
+        ['subActionParams.incident.short_description']: [],
+      },
     });
   });
 
@@ -47,7 +65,23 @@ describe('servicenow action params validation', () => {
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        ['subActionParams.incident.correlation_id']: [],
         ['subActionParams.incident.short_description']: ['Short description is required.'],
+      },
+    });
+  });
+
+  test(`${SERVICENOW_ITSM_CONNECTOR_TYPE_ID}: params validation fails when correlation_id is not valid and subAction is closeIncident`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITSM_CONNECTOR_TYPE_ID);
+    const actionParams = {
+      subAction: 'closeIncident',
+      subActionParams: { incident: { correlation_id: '' } },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        ['subActionParams.incident.correlation_id']: ['Correlation id is required.'],
+        ['subActionParams.incident.short_description']: [],
       },
     });
   });

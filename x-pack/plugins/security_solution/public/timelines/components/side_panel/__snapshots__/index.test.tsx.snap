@@ -50,7 +50,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -122,16 +122,24 @@ Array [
       />
     </span>
   </div>,
-  <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+  .c0 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
+<div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>,
 ]
@@ -164,6 +172,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   padding: 0 12px 12px;
 }
 
+.c2 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
 <div
   data-eui="EuiFlyout"
   data-test-subj="timeline:details-panel:flyout"
@@ -187,7 +199,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -255,15 +267,19 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     </div>
   </div>
   <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c2 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>
 </div>

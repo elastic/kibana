@@ -6,18 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
-  FindProvider,
   PngService,
   ScreenshotsService,
   SnapshotsService,
   TestSubjects,
-  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -40,7 +39,6 @@ import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
-import { RemoteProvider } from './remote';
 import { RenderableService } from './renderable';
 import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
@@ -60,11 +58,9 @@ import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 
 export const services = {
   ...commonServiceProviders,
-
-  __webdriver__: RemoteProvider,
+  ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
   png: PngService,
@@ -101,7 +97,6 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
-  retryOnStale: RetryOnStaleProvider,
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
 };

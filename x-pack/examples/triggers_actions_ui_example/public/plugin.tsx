@@ -138,8 +138,8 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () => (props: any) => {
-        const value = props.data.find((d: any) => d.field === props.columnId)?.value ?? [];
+      getRenderCellValue: () => (props) => {
+        const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
 
         if (Array.isArray(value)) {
           return <>{value.length ? value.join() : '--'}</>;

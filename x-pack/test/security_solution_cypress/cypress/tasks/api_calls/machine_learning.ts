@@ -7,17 +7,12 @@
 
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-plugin/common/constants/app';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const fetchMachineLearningModules = () => {
   return rootRequest<Module[]>({
     method: 'GET',
     url: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': 1,
-    },
     failOnStatusCode: false,
   });
 };

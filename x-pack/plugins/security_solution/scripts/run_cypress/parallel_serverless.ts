@@ -61,7 +61,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
+const BASE_ENV_URL = 'https://console.qa.cld.elstc.co';
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -148,7 +148,8 @@ async function resetCredentials(
   apiKey: string
 ): Promise<Credentials | undefined> {
   log.info(`${runnerId} : Reseting credentials`);
-  try {
+
+  const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
     const response = await axios.post(
       `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
       {},
@@ -158,13 +159,27 @@ async function resetCredentials(
         },
       }
     );
+    log.info('Credentials have ben reset');
     return {
       password: response.data.password,
       username: response.data.username,
     };
-  } catch (error) {
-    throw new Error(`${error.message}`);
-  }
+  };
+
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. A retry will be triggered soon..');
+      } else {
+        log.info(error);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchResetCredentialsStatusAttempt, retryOptions);
 }
 
 // Wait until Project is initialized
@@ -180,7 +195,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       }
     );
     if (response.data.phase !== 'initialized') {
-      throw new Error('Project is not initialized. Retrying in 20s...');
+      throw new Error('Project is not initialized. A retry will be triggered soon...');
     } else {
       log.info('Project is initialized');
     }
@@ -188,7 +203,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. Retrying in 20s...');
+        log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
         log.info(error);
       }
@@ -239,7 +254,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
       },
     });
     if (response.data.status.overall.level !== 'available') {
-      throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
+      throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
       log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
     }
@@ -247,7 +262,9 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(`${runnerId}: The Kibana URL is not yet reachable. Retrying in 20s...`);
+        log.info(
+          `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
+        );
       } else {
         log.info(`${runnerId}: ${error}`);
       }
@@ -264,17 +281,11 @@ function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
-    const response = await axios.get(`${esUrl}`, {
+    await axios.get(`${esUrl}`, {
       headers: {
         Authorization: `Basic ${auth}`,
       },
     });
-
-    if (response.status !== 200) {
-      throw new Error('Cannot access. Retrying in 20s...');
-    } else {
-      log.info('Access performed successfully');
-    }
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -302,19 +313,14 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
   const fetchLoginStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    const response = await axios.post(`${kbUrl}/internal/security/login`, body, {
+    axios.post(`${kbUrl}/internal/security/login`, body, {
       headers: API_HEADERS,
     });
-    if (response.status !== 200) {
-      throw new Error('Cannot login. Retrying in 20s...');
-    } else {
-      log.info('Login can be performed successfully');
-    }
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. Retrying login in 20s...');
+        log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
         log.info(error);
       }
@@ -565,6 +571,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               KIBANA_PASSWORD: credentials.password,
 
               CLOUD_SERVERLESS: true,
+              IS_SERVERLESS: true,
             };
 
             if (process.env.DEBUG && !process.env.CI) {
@@ -576,6 +583,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               ----------------------------------------------
               `);
             }
+            process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
 
             if (isOpen) {
               await cypress.open({

@@ -139,6 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
             field: 'event.dataset',
             value: 1,
           },
+          alert_suppression: undefined,
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });

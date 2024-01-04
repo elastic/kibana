@@ -33,6 +33,7 @@ viewer:
         - ".fleet-agents*"
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
+        - ".asset-criticality.asset-criticality-*"
       privileges:
         - read
   applications:
@@ -93,6 +94,11 @@ editor:
         - "view_index_metadata"
         - "write"
         - "maintenance"
+    - names:
+        - ".asset-criticality.asset-criticality-*"
+      privileges:
+        - "read"
+        - "write"
       allow_restricted_indices: false
   applications:
     - application: "kibana-.kibana"
@@ -148,6 +154,7 @@ t1_analyst:
         - ".fleet-agents*"
         - ".fleet-actions*"
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
   applications:
@@ -198,6 +205,11 @@ t2_analyst:
         - risk-score.risk-score-*
       privileges:
         - read
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -231,6 +243,7 @@ t3_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -240,6 +253,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - maintenance
     - names:
         - .lists*
         - .items*
@@ -293,12 +307,17 @@ threat_intelligence_analyst:
         - endgame-*
         - filebeat-*
         - logs-*
-        - .lists*
-        - .items*
         - packetbeat-*
         - winlogbeat-*
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -317,8 +336,7 @@ threat_intelligence_analyst:
     - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
-        - feature_siem.read
-        - feature_siem.read_alerts
+        - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
         - feature_securitySolutionCases.all
@@ -346,6 +364,7 @@ rule_author:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -411,6 +430,7 @@ soc_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -500,6 +520,11 @@ detections_admin:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -542,6 +567,11 @@ platform_engineer:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -603,6 +633,12 @@ endpoint_operations_analyst:
       privileges:
         - read
         - write
+        - maintenance
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -653,11 +689,16 @@ endpoint_policy_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
-        - .lists*
-        - .items*
         - risk-score.risk-score-*
       privileges:
         - read
+    - names:
+        - .lists*
+        - .items*
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
     - names:
         - .alerts-security*
         - .siem-signals-*

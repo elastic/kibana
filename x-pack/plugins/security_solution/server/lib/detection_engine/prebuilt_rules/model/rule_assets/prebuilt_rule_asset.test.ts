@@ -17,7 +17,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, rule_id: Required, and 26 more"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
   });
 
@@ -40,7 +40,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Required, description: Required, risk_score: Required, severity: Required, version: Required, and 25 more"`
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
   });
 
@@ -177,7 +177,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", index.0: Expected string, received number, index.0: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+      `"index.0: Expected string, received number"`
     );
   });
 
@@ -201,7 +201,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", filters: Expected array, received string, filters: Expected array, received string, type: Invalid literal value, expected \\"saved_query\\", and 20 more"`
+      `"filters: Expected array, received string"`
     );
   });
 
@@ -236,7 +236,7 @@ describe('Prebuilt rule asset schema', () => {
     const result = PrebuiltRuleAsset.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 19 more"`
+      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
     );
   });
 

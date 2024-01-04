@@ -18,11 +18,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  FLYOUT_TITLE_TEST_ID,
-  TITLE_HEADER_ICON_TEST_ID,
-  TITLE_LINK_ICON_TEST_ID,
-} from './test_ids';
 
 export interface FlyoutTitleProps {
   /**
@@ -48,7 +43,7 @@ export interface FlyoutTitleProps {
  * Title component with optional icon to indicate the type of document, can be used for text or a link
  */
 export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
-  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj = FLYOUT_TITLE_TEST_ID }) => {
+  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
 
     const titleIcon = useMemo(() => {
@@ -57,23 +52,23 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
           type={iconType}
           size="m"
           className="eui-alignBaseline"
-          data-test-subj={TITLE_HEADER_ICON_TEST_ID}
+          data-test-subj={`${dataTestSubj}Icon`}
           css={css`
             margin-right: ${euiTheme.size.xs};
           `}
         />
       ) : null;
-    }, [iconType, euiTheme.size.xs]);
+    }, [dataTestSubj, iconType, euiTheme.size.xs]);
 
     const titleComponent = useMemo(() => {
       return (
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj={`${dataTestSubj}Text`}>
           <EuiTextColor color={isLink ? euiTheme.colors.primaryText : undefined}>
             <span>{title}</span>
           </EuiTextColor>
         </EuiTitle>
       );
-    }, [title, isLink, euiTheme.colors.primaryText]);
+    }, [dataTestSubj, title, isLink, euiTheme.colors.primaryText]);
 
     const linkIcon = useMemo(() => {
       return (
@@ -83,19 +78,14 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
           css={css`
             margin-bottom: ${euiTheme.size.xs};
           `}
-          data-test-subj={TITLE_LINK_ICON_TEST_ID}
+          data-test-subj={`${dataTestSubj}LinkIcon`}
         />
       );
-    }, [euiTheme.size.xs]);
+    }, [dataTestSubj, euiTheme.size.xs]);
 
     return (
       <EuiToolTip content={title}>
-        <EuiFlexGroup
-          alignItems="flexEnd"
-          gutterSize="xs"
-          data-test-subj={dataTestSubj}
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" responsive={false}>
           <EuiFlexItem>
             <div
               css={css`

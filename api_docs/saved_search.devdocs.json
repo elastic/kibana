@@ -928,6 +928,23 @@
         "tags": [],
         "label": "DiscoverGridSettings",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettings",
+            "text": "DiscoverGridSettings"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
         "path": "src/plugins/saved_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -964,6 +981,23 @@
         "tags": [],
         "label": "DiscoverGridSettingsColumn",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettingsColumn",
+            "text": "DiscoverGridSettingsColumn"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
         "path": "src/plugins/saved_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1331,15 +1365,14 @@
             "label": "grid",
             "description": [],
             "signature": [
-              "{ columns?: Record<string, ",
               {
                 "pluginId": "savedSearch",
                 "scope": "common",
                 "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.DiscoverGridSettingsColumn",
-                "text": "DiscoverGridSettingsColumn"
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
               },
-              "> | undefined; } | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,

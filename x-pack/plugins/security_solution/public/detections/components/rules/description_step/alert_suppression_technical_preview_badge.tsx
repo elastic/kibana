@@ -8,26 +8,24 @@
 import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import type { LicenseService } from '../../../../../common/license';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
-import * as i18n from './translations';
-import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 interface TechnicalPreviewBadgeProps {
   label: string;
-  license: LicenseService;
 }
 
-export const AlertSuppressionTechnicalPreviewBadge = ({
-  label,
-  license,
-}: TechnicalPreviewBadgeProps) => (
-  <>
-    <TechnicalPreviewBadge label={label} />
-    {!license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) && (
-      <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-        <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
-      </EuiToolTip>
-    )}
-  </>
-);
+export const AlertSuppressionTechnicalPreviewBadge = ({ label }: TechnicalPreviewBadgeProps) => {
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_details');
+
+  return (
+    <>
+      <TechnicalPreviewBadge label={label} />
+      {alertSuppressionUpsellingMessage && (
+        <EuiToolTip position="top" content={alertSuppressionUpsellingMessage}>
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+};

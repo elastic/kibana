@@ -50,6 +50,6 @@ export const registerResolverRoutes = async (
       validate: validateEntities,
       options: { authRequired: true },
     },
-    handleEntities()
+    handleEntities(config.experimentalFeatures)
   );
 };

@@ -15,8 +15,8 @@ import {
   ProjectMonitorCodec,
   ProjectMonitor,
   ConfigKey,
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   HTTPFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
@@ -33,11 +33,11 @@ type MonitorCodecType =
   | typeof HTTPFieldsCodec
   | typeof BrowserFieldsCodec;
 
-const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
-  [DataStream.ICMP]: ICMPFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
+  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -55,7 +55,7 @@ export interface ValidationResult {
 export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
-  const decodedType = DataStreamCodec.decode(monitorType);
+  const decodedType = MonitorTypeCodec.decode(monitorType);
 
   if (isLeft(decodedType)) {
     return {

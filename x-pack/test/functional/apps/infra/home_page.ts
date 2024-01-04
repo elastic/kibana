@@ -146,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '0.8%' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
-            { metric: 'diskSpaceUsage', value: '17.5%' },
+            { metric: 'diskUsage', value: '17.5%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -331,7 +331,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.try(async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+              'demo-stack-redis-01 - Inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -346,7 +346,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await retry.try(async () => {
             const documentTitle = await browser.getTitle();
-            expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+            expect(documentTitle).to.contain(
+              'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+            );
           });
 
           await returnTo(INVENTORY_PATH);

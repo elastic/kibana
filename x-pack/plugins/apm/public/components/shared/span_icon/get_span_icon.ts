@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAgentIcon } from '@kbn/custom-icons';
 import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
 import cassandraIcon from './icons/cassandra.svg';
@@ -22,7 +23,6 @@ import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
 import websocketIcon from './icons/websocket.svg';
-import javaIcon from '../agent_icon/icons/java.svg';
 import dynamodbIcon from './icons/dynamo_db.svg';
 import sThreeIcon from './icons/s3.svg';
 import snsIcon from './icons/sns.svg';
@@ -70,7 +70,7 @@ export const spanTypeIcons: {
   messaging: {
     azurequeue: storageQueueIcon,
     azureservicebus: serviceBusIcon,
-    jms: javaIcon,
+    jms: getAgentIcon('java'),
     kafka: kafkaIcon,
     sns: snsIcon,
     sqs: sqsIcon,

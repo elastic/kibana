@@ -10,6 +10,7 @@ import { switchMap } from 'rxjs';
 
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -18,7 +19,6 @@ import type {
 import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
-import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 

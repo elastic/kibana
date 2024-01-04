@@ -290,10 +290,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "serverless",
-      "id": "def-server.ServerlessPluginSetup",
+      "id": "def-server.ServerlessServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessPluginSetup",
+      "label": "ServerlessServerSetup",
       "description": [],
       "path": "x-pack/plugins/serverless/server/types.ts",
       "deprecated": false,
@@ -301,7 +301,7 @@
       "children": [
         {
           "parentPluginId": "serverless",
-          "id": "def-server.ServerlessPluginSetup.setupProjectSettings",
+          "id": "def-server.ServerlessServerSetup.setupProjectSettings",
           "type": "Function",
           "tags": [],
           "label": "setupProjectSettings",
@@ -315,7 +315,7 @@
           "children": [
             {
               "parentPluginId": "serverless",
-              "id": "def-server.ServerlessPluginSetup.setupProjectSettings.$1",
+              "id": "def-server.ServerlessServerSetup.setupProjectSettings.$1",
               "type": "Array",
               "tags": [],
               "label": "keys",
@@ -337,10 +337,10 @@
     },
     "start": {
       "parentPluginId": "serverless",
-      "id": "def-server.ServerlessPluginStart",
+      "id": "def-server.ServerlessServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessPluginStart",
+      "label": "ServerlessServerStart",
       "description": [],
       "path": "x-pack/plugins/serverless/server/types.ts",
       "deprecated": false,

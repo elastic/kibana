@@ -10,6 +10,11 @@
 #
 # Docs: https://docs.elastic.dev/serverless/qualitygates
 
+agents:
+  cpu: 2
+  ephemeralStorage: "20G"
+  memory: "8G"
+
 env:
   TEAM_CHANNEL: "#kibana-mission-control"
   ENVIRONMENT: ${ENVIRONMENT?}

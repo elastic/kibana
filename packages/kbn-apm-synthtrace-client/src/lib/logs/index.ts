@@ -22,6 +22,7 @@ export type LogDocument = Fields &
     'log.level'?: string;
     'host.name'?: string;
     'trace.id'?: string;
+    'agent.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;

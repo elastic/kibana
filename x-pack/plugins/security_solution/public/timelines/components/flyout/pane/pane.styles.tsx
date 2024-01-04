@@ -68,9 +68,6 @@ export const usePaneStyles = () => {
       .timeline-template-badge {
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0; // top corners only
       }
-      .timeline-body {
-        padding: 0 ${euiTheme.size.s};
-      }
     }
   `;
 };

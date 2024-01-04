@@ -78,18 +78,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickDiscardChanges();
       });
 
-      it('can create a new by-value links panel', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
-        await dashboardLinks.setLayout('horizontal');
-        await createSomeLinks();
-        await dashboardLinks.toggleSaveByReference(false);
-        await dashboardLinks.clickPanelEditorSaveButton();
-        await testSubjects.exists('addObjectToDashboardSuccess');
+      describe('by-value links panel', async () => {
+        it('can create a new by-value links panel', async () => {
+          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+          await dashboardLinks.setLayout('horizontal');
+          await createSomeLinks();
+          await dashboardLinks.toggleSaveByReference(false);
+          await dashboardLinks.clickPanelEditorSaveButton();
+          await testSubjects.exists('addObjectToDashboardSuccess');
 
-        expect(await testSubjects.existOrFail('links--component'));
-        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
-        await dashboard.clickDiscardChanges();
+          expect(await testSubjects.existOrFail('links--component'));
+          expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
+        });
+
+        it('can save by-value links panel to the library', async () => {
+          /** Navigate away to test non-extensible input */
+          await dashboard.gotoDashboardLandingPage();
+          await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
+
+          await dashboard.waitForRenderComplete();
+          await dashboardPanelActions.saveToLibrary('Some more links');
+          await testSubjects.existOrFail('addPanelToLibrarySuccess');
+        });
+
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
       });
     });
 

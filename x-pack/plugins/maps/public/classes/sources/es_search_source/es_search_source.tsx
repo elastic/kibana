@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
+import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -568,6 +568,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return true;
   }
 
+  getInspectorRequestIds(): string[] {
+    return [this.getId(), this._getFeaturesCountRequestId()];
+  }
+
   async getGeoJsonWithMeta(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -923,6 +927,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       })
     );
 
+    // Filter out documents without geo fields to avoid shard failures for indices without geo fields
+    searchSource.setField('filter', [
+      ...(searchSource.getField('filter') as Filter[]),
+      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+    ]);
+
     const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
 
     const tileUrlParams = getTileUrlParams({
@@ -986,6 +996,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return !isWithin;
   }
 
+  private _getFeaturesCountRequestId() {
+    return this.getId() + 'features_count';
+  }
+
   async canLoadAllDocuments(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -997,7 +1011,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
     const resp = await this._runEsQuery({
-      requestId: this.getId() + 'features_count',
+      requestId: this._getFeaturesCountRequestId(),
       requestName: i18n.translate('xpack.maps.vectorSource.featuresCountRequestName', {
         defaultMessage: 'load features count ({layerName})',
         values: { layerName },

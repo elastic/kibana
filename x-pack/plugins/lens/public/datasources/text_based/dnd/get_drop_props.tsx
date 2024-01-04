@@ -10,6 +10,7 @@ import { isOperation } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../types';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
+import { canColumnBeDroppedInMetricDimension } from '../utils';
 
 export const getDropProps = (
   props: GetDropPropsArgs<TextBasedPrivateState>
@@ -44,14 +45,24 @@ export const getDropProps = (
       return { dropTypes: ['reorder'], nextLabel };
     }
 
+    const sourceFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
+      layer.allColumns,
+      sourceField?.meta?.type
+    );
+
+    const targetFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
+      layer.allColumns,
+      targetField?.meta?.type
+    );
+
     const isMoveable =
       !target?.isMetricDimension ||
-      (target.isMetricDimension && sourceField?.meta?.type === 'number');
+      (target.isMetricDimension && sourceFieldCanMoveToMetricDimension);
 
     if (targetColumn) {
       const isSwappable =
         (isMoveable && !source?.isMetricDimension) ||
-        (source.isMetricDimension && targetField?.meta?.type === 'number');
+        (source.isMetricDimension && targetFieldCanMoveToMetricDimension);
       if (isMoveable) {
         if (isSwappable) {
           return {

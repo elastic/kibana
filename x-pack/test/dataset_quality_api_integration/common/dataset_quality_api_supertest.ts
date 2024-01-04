@@ -10,10 +10,7 @@ import supertest from 'supertest';
 import request from 'superagent';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/dataset-quality-plugin/public/services/rest/create_call_dataset_quality_api';
+import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
 
 export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(

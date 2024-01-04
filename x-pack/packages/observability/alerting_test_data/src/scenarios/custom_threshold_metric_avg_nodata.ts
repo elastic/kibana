@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
@@ -23,7 +22,6 @@ export const scenario6 = {
     params: {
       criteria: [
         {
-          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.LT,
           threshold: [1],
           timeSize: 1,

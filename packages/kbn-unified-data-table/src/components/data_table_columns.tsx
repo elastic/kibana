@@ -267,6 +267,20 @@ export function getEuiGridColumns({
   );
 }
 
+export function hasSourceTimeFieldValue(
+  columns: string[],
+  dataView: DataView,
+  columnTypes: DataTableColumnTypes | undefined,
+  showTimeCol: boolean,
+  isPlainRecord: boolean
+) {
+  const timeFieldName = dataView.timeFieldName;
+  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
+    return showTimeCol;
+  }
+  return timeFieldName in columnTypes;
+}
+
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
   const timeFieldName = dataView.timeFieldName;
 

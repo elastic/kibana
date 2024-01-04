@@ -8,7 +8,6 @@
 
 import { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
@@ -19,6 +18,7 @@ import {
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
@@ -130,7 +130,7 @@ export interface ExpressionsServiceSetup {
 }
 
 export interface ExpressionExecutionParams {
-  searchContext?: SerializableRecord;
+  searchContext?: ExecutionContextSearch;
 
   variables?: Record<string, unknown>;
 

@@ -11,55 +11,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { paramsSearchQueryMock } from './__mocks__/params_search_query';
 
-import { fetchIndexInfo, getRandomDocsRequest } from './fetch_index_info';
+import { fetchIndexInfo } from './fetch_index_info';
 
 describe('fetch_index_info', () => {
-  describe('getRandomDocsRequest', () => {
-    it('returns the most basic request body for a sample of random documents', () => {
-      const req = getRandomDocsRequest(paramsSearchQueryMock);
-
-      expect(req).toEqual({
-        body: {
-          _source: false,
-          fields: ['*'],
-          query: {
-            function_score: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        filter: [],
-                        minimum_should_match: 1,
-                        must_not: [],
-                        should: [{ term: { 'the-term': { value: 'the-value' } } }],
-                      },
-                    },
-                    {
-                      range: {
-                        'the-time-field-name': {
-                          format: 'epoch_millis',
-                          gte: 0,
-                          lte: 50,
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              random_score: {},
-            },
-          },
-          size: 1000,
-          track_total_hits: true,
-        },
-        index: paramsSearchQueryMock.index,
-        ignore_throttled: undefined,
-        ignore_unavailable: true,
-      });
-    });
-  });
-
   describe('fetchFieldCandidates', () => {
     it('returns field candidates and total hits', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
@@ -99,15 +53,14 @@ describe('fetch_index_info', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const { totalDocCount, fieldCandidates } = await fetchIndexInfo(
-        esClientMock,
-        paramsSearchQueryMock
-      );
+      const { baselineTotalDocCount, deviationTotalDocCount, fieldCandidates } =
+        await fetchIndexInfo(esClientMock, paramsSearchQueryMock);
 
       expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
-      expect(totalDocCount).toEqual(5000000);
+      expect(baselineTotalDocCount).toEqual(5000000);
+      expect(deviationTotalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
     });
   });
 });

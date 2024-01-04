@@ -37,6 +37,7 @@ export interface ProfilingESClient {
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
@@ -75,7 +76,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize }) {
+    profilingStacktraces({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -87,6 +88,7 @@ export function createProfilingEsClient({
               body: {
                 query,
                 sample_size: sampleSize,
+                requested_duration: durationSeconds,
               },
             },
             {

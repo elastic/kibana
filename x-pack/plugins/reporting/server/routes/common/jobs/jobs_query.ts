@@ -206,11 +206,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-
-        // Using `wait_for` helps avoid users seeing recently-deleted reports temporarily flashing back in the
-        // job listing.
-        const query = { id, index: deleteIndex, refresh: 'wait_for' as const };
-
+        const query = { id, index: deleteIndex };
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
         throw new Error(
