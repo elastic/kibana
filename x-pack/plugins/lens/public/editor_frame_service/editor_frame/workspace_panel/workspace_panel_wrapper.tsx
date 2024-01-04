@@ -7,7 +7,8 @@
 
 import './workspace_panel_wrapper.scss';
 
-import React, { useCallback } from 'react';
+import { useResizeObserver } from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,10 +58,16 @@ const unitToCSSUnit: Record<ChartSizeUnit, string> = {
   percentage: '%',
 };
 
-const computeAspectRatioAndMaxDimensions = ({ x, y }: { x: number; y: number }) => {
+const computeAspectRatioAndMaxDimensions = (
+  { x, y }: { x: number; y: number },
+  parentDimensions: { width: number; height: number }
+) => {
+  const parentAspectRatio = parentDimensions.width / parentDimensions.height;
+  const aspectRatio = x / y;
+
   return {
     aspectRatio: `${x}/${y}`,
-    ...(y > x
+    ...(parentAspectRatio > aspectRatio
       ? {
           height: '100%',
           width: 'auto',
@@ -135,17 +142,26 @@ export function WorkspacePanelWrapper({
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
+  const outerWorkspaceRef = useRef<HTMLDivElement>(null);
+  const workspaceDimensions = useResizeObserver(outerWorkspaceRef.current);
+
   const aspectRatio = displayOptions?.aspectRatio;
   const maxDimensions = displayOptions?.maxDimensions;
 
   let visDimensionsCSS: Interpolation<Theme> = {};
 
   if (aspectRatio) {
-    visDimensionsCSS = computeAspectRatioAndMaxDimensions(aspectRatio ?? maxDimensions);
+    visDimensionsCSS = computeAspectRatioAndMaxDimensions(
+      aspectRatio ?? maxDimensions,
+      workspaceDimensions
+    );
   }
 
   if (maxDimensions) {
-    visDimensionsCSS = computeAspectRatioAndMaxDimensions(aspectRatio ?? maxDimensions);
+    visDimensionsCSS = computeAspectRatioAndMaxDimensions(
+      aspectRatio ?? maxDimensions,
+      workspaceDimensions
+    );
     visDimensionsCSS.maxWidth = `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`;
     visDimensionsCSS.maxHeight = `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`;
   }
@@ -241,6 +257,7 @@ export function WorkspacePanelWrapper({
         color="transparent"
       >
         <EuiFlexGroup
+          ref={outerWorkspaceRef}
           gutterSize="none"
           alignItems="center"
           justifyContent="center"
