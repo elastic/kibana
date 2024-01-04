@@ -22,10 +22,10 @@ import { appContextService } from '../../services';
 import { defaultFleetErrorHandler, AgentRequestInvalidError } from '../../errors';
 import {
   getRecentUpgradeInfoForAgent,
-  isAgentUpgradeable,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
   isAgentUpgrading,
   getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
 } from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
@@ -111,7 +111,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       });
     }
 
-    if (!force && !isAgentUpgradeable(agent, latestAgentVersion, version)) {
+    if (!force && !isAgentUpgradeableToVersion(agent, version)) {
       return response.customError({
         statusCode: 400,
         body: {
