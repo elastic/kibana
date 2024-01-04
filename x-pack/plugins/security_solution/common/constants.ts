@@ -31,7 +31,6 @@ export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threa
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
