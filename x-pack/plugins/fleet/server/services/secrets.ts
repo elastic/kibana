@@ -771,23 +771,24 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
  * new package policy object that includes resolved secret reference values at each
  * provided path.
  */
-function getPolicyWithSecretReferences(
+export function getPolicyWithSecretReferences(
   secretPaths: SecretPath[],
   secrets: Secret[],
   packagePolicy: NewPackagePolicy
 ) {
   const result = JSON.parse(JSON.stringify(packagePolicy));
 
-  secretPaths.forEach((secretPath, secretPathIndex) => {
+  let secretIndex = 0;
+  secretPaths.forEach((secretPath) => {
     secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
       if (!acc[val]) {
         acc[val] = {};
       }
-
-      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
-
-      if (isLast) {
-        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+      const isSecretPath =
+        secretPathComponentIndex === secretPath.path.length - 1 && !!secretPath.value.value;
+      if (isSecretPath) {
+        acc[val].value = toVarSecretRef(secrets[secretIndex].id);
+        secretIndex = secretIndex + 1;
       }
 
       return acc[val];

@@ -18,7 +18,14 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy, UpdatePackagePolicy } from '../types';
+import type {
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+  UpdatePackagePolicy,
+  SecretPath,
+  Secret,
+} from '../types';
 
 import { appContextService } from './app_context';
 import {
@@ -27,6 +34,7 @@ import {
   diffOutputSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  getPolicyWithSecretReferences,
 } from './secrets';
 
 describe('secrets', () => {
@@ -1535,6 +1543,219 @@ describe('diffOutputSecretPaths', () => {
       ],
       toDelete: [],
       noChange: [paths1[0]],
+    });
+  });
+
+  describe.only('getPolicyWithSecretReferences', () => {
+    const paths1: SecretPath[] = [
+      {
+        path: ['somepath1'],
+        value: {
+          type: 'secret_access_key',
+          value: 'test-secret-1',
+        },
+      },
+    ];
+    const packagePolicy = {
+      vars: {
+        'pkg-secret-1': {
+          value: 'pkg-secret-1-val',
+        },
+        'pkg-secret-2': {
+          value: 'pkg-secret-2-val',
+        },
+      },
+      inputs: [
+        {
+          streams: [
+            {
+              vars: [
+                {
+                  access_key_id: {
+                    type: 'text',
+                  },
+                },
+                {
+                  secret_access_key: {
+                    type: 'text',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          streams: [
+            {
+              vars: [
+                {
+                  access_key_id: {
+                    type: 'text',
+                  },
+                },
+                {
+                  secret_access_key: {
+                    type: 'text',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as unknown as NewPackagePolicy;
+
+    const secrets: Secret[] = [{ id: 'secret-1' }];
+
+    it('gets the policy with the secret references', () => {
+      expect(getPolicyWithSecretReferences(paths1, secrets, packagePolicy)).toEqual({
+        inputs: [
+          {
+            streams: [
+              {
+                vars: [
+                  {
+                    access_key_id: {
+                      type: 'text',
+                    },
+                  },
+                  {
+                    secret_access_key: {
+                      type: 'text',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            streams: [
+              {
+                vars: [
+                  {
+                    access_key_id: {
+                      type: 'text',
+                    },
+                  },
+                  {
+                    secret_access_key: {
+                      type: 'text',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        somepath1: {
+          value: {
+            id: 'secret-1',
+            isSecretRef: true,
+          },
+        },
+        vars: {
+          'pkg-secret-1': {
+            value: 'pkg-secret-1-val',
+          },
+          'pkg-secret-2': {
+            value: 'pkg-secret-2-val',
+          },
+        },
+      });
+    });
+
+    it('does not fail when paths has more elements', () => {
+      const secretPaths: SecretPath[] = [
+        {
+          path: ['inputs', '1', 'streams', '0', 'vars', 'secret_access_key'],
+          value: { type: 'text' },
+        },
+        {
+          path: ['inputs', '2', 'streams', '0', 'vars', 'secret_access_key'],
+          value: { value: 'xfgdgh' },
+        },
+      ];
+      // Jest doesn't like `toEqual` here and fails with `serializes to the same string`
+      expect(
+        JSON.stringify(getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy))
+      ).toEqual(
+        JSON.stringify({
+          vars: {
+            'pkg-secret-1': { value: 'pkg-secret-1-val' },
+            'pkg-secret-2': { value: 'pkg-secret-2-val' },
+          },
+          inputs: [
+            {
+              streams: [
+                {
+                  vars: [
+                    { access_key_id: { type: 'text' } },
+                    { secret_access_key: { type: 'text' } },
+                  ],
+                },
+              ],
+            },
+            {
+              streams: [
+                {
+                  vars: [
+                    { access_key_id: { type: 'text' } },
+                    { secret_access_key: { type: 'text' } },
+                  ],
+                },
+              ],
+            },
+            {
+              streams: {
+                '0': {
+                  vars: { secret_access_key: { value: { id: 'secret-1', isSecretRef: true } } },
+                },
+              },
+            },
+          ],
+        })
+      );
+    });
+    it.only('does not fail when paths has multiple secrets', () => {
+      const manySecretPaths: SecretPath[] = [
+        {
+          path: ['inputs', '0', 'streams', '0', 'vars', 'secret_access_key'],
+          value: { value: 'ksdfgn' },
+        },
+        {
+          path: ['inputs', '1', 'streams', '0', 'vars', 'secret_access_key'],
+          value: { value: 'xfgdgh' },
+        },
+      ];
+      const manySecrets: Secret[] = [{ id: 'secret-1' }, { id: 'secret-2' }];
+      expect(getPolicyWithSecretReferences(manySecretPaths, manySecrets, packagePolicy)).toEqual({
+        vars: {
+          'pkg-secret-1': { value: 'pkg-secret-1-val' },
+          'pkg-secret-2': { value: 'pkg-secret-2-val' },
+        },
+        inputs: [
+          {
+            streams: [
+              {
+                vars: [
+                  { access_key_id: { type: 'text' } },
+                  { secret_access_key: { value: { id: 'secret-1', isSecretRef: true } } },
+                ],
+              },
+            ],
+          },
+          {
+            streams: [
+              {
+                vars: [
+                  { access_key_id: { type: 'text' } },
+                  { secret_access_key: { value: { id: 'secret-1', isSecretRef: true } } },
+                ],
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 });
