@@ -30,7 +30,6 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
@@ -48,7 +47,6 @@ export interface SyntheticsServerSetup {
   spaces?: SpacesPluginStart;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
-  data: DataPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -86,7 +84,6 @@ export interface SyntheticsPluginsStartDependencies {
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
-  data: DataPluginStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

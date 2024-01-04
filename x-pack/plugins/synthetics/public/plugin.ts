@@ -112,13 +112,9 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  private readonly _initContext: PluginInitializerContext;
-  constructor(private readonly initContext: PluginInitializerContext) {
-    this._initContext = initContext;
-  }
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
-    const config = this._initContext.config.get<{ serverless?: { enabled?: boolean } }>();
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });

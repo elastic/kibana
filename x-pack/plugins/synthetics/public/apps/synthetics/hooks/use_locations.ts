@@ -14,7 +14,6 @@ export function useLocations() {
   const { error, loading, locations, throttling, locationsLoaded } = useSelector(
     selectServiceLocationsState
   );
-  console.log('locations', error, loading, locations, throttling, locationsLoaded);
 
   useEffect(() => {
     if (!locationsLoaded) {

@@ -14,7 +14,6 @@ export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ syntheticsMonitorClient, server }): Promise<any> => {
     const isESS = Boolean(server.cloud?.isCloudEnabled) && server.config.service?.manifestUrl;
-    console.log('is ess', isESS);
 
     return {
       serviceAllowed: isESS ? syntheticsMonitorClient.syntheticsService.isAllowed : true,

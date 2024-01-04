@@ -86,13 +86,11 @@ export class ServiceAPIClient {
   }
 
   async checkAccountAccessStatus() {
-    console.log('authorization is present', !!this.authorization);
     if (this.authorization) {
       // in case username/password is provided, we assume it's always allowed
       return { allowed: true, signupUrl: null };
     }
 
-    console.log('locations length', this.locations.length);
     if (this.locations.length > 0) {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
@@ -100,7 +98,6 @@ export class ServiceAPIClient {
       /* url is required for service locations, but omitted for private locations.
       /* this.locations is only service locations */
       const httpsAgent = this.getHttpsAgent(url);
-      console.log('https agent', !!httpsAgent);
 
       if (httpsAgent) {
         try {
@@ -111,18 +108,15 @@ export class ServiceAPIClient {
               httpsAgent,
             })
           );
-          console.log('location data', data);
 
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
         } catch (e) {
-          console.log('failed', e);
           this.logger.error(e);
         }
       }
     }
 
-    console.log('using default allowed is false');
     return { allowed: false, signupUrl: null };
   }
 
@@ -130,20 +124,14 @@ export class ServiceAPIClient {
     const parsedTargetUrl = new URL(targetUrl);
 
     const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
-    console.log('reject unauthorized', rejectUnauthorized);
     const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
 
     const config = this.config ?? {};
 
     // If using basic-auth, ignore certificate configs
-    if (this.authorization) {
-      console.log('return base https agent');
-      return baseHttpsAgent;
-    }
+    if (this.authorization) return baseHttpsAgent;
 
-    console.log('set up tls agent');
     if (config.tls && config.tls.certificate && config.tls.key) {
-      console.log('tls vals exist', !!config.tls.certificate, !!config.tls.key);
       const tlsConfig = new SslConfig(config.tls);
 
       return new https.Agent({

@@ -37,7 +37,6 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
         savedObjectsClient,
       });
 
-      console.log('all locations', allLocations);
       return {
         locations: allLocations,
         throttling,
