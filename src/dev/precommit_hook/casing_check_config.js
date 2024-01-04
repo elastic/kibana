@@ -15,6 +15,7 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',

@@ -9,6 +9,7 @@ export const getBenchmarkScoreMockData = (postureType: string) => [
   {
     total_findings: 1,
     policy_template: postureType,
+    is_enabled_rules_score: true,
     '@timestamp': '2023-11-22T16:10:55.229268215Z',
     score_by_cluster_id: {
       'Another Upper case account id': {
