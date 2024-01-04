@@ -22,11 +22,14 @@ import fs from 'fs';
 //   'n2-4-spot': 'n2-standard-4',
 //   'n2-8-spot': 'n2-standard-8',
 // };
-let agentNameUpdateMap: Record<string, string> = {};
+let agentNameUpdateMap: Record<string, { machineType: string; buildPath?: string }> = {};
 if (fs.existsSync('data/agents.json')) {
   const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
-  agentNameUpdateMap = agents.gcp.agents.reduce((acc: Record<string, string>, agent: any) => {
-    acc[agent.queue] = agent.machineType;
+  agentNameUpdateMap = agents.gcp.agents.reduce((acc: typeof agentNameUpdateMap, agent: any) => {
+    acc[agent.queue] = { machineType: agent.machineType };
+    if (agent.buildPath) {
+      acc[agent.queue].buildPath = agent.buildPath;
+    }
     return acc;
   }, {});
 } else {
@@ -162,7 +165,6 @@ function getFullAgentTargetingRule(queue: string) {
     preemptible: true,
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
-    machineType: agentNameUpdateMap[queue] || 'n2-standard-2',
-    buildDirectory: '/dev/shm/bk',
+    ...agentNameUpdateMap[queue],
   };
 }
