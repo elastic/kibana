@@ -16,7 +16,13 @@ const ANALYZE_DATA_DRIFT_LABEL = i18n.translate(
   }
 );
 
-export const DataDriftPromptHint = ({ refresh }) => {
+export const DataDriftPromptHint = ({
+  refresh,
+  canAnalyzeDataDrift,
+}: {
+  refresh: () => void;
+  canAnalyzeDataDrift: boolean;
+}) => {
   return (
     <EuiEmptyPrompt
       color="subdued"
@@ -33,6 +39,7 @@ export const DataDriftPromptHint = ({ refresh }) => {
           </p>
 
           <EuiButton
+            disabled={!canAnalyzeDataDrift}
             fill
             size="m"
             onClick={refresh}

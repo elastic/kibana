@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import {
   getDataComparisonType,
@@ -67,6 +68,15 @@ export const DataDriftView = ({
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >(windowParameters);
+
+  const canAnalyzeDataDrift = useMemo(() => {
+    return isPopulatedObject(windowParameters, [
+      'baselineMin',
+      'baselineMax',
+      'deviationMin',
+      'deviationMax',
+    ]);
+  }, [windowParameters]);
 
   const [fetchInfo, setFetchIno] = useState<
     | {
@@ -192,7 +202,7 @@ export const DataDriftView = ({
     );
   }
   if (showRunAnalysisHint) {
-    return <DataDriftPromptHint refresh={refresh} />;
+    return <DataDriftPromptHint refresh={refresh} canAnalyzeDataDrift={canAnalyzeDataDrift} />;
   }
   return (
     <div>

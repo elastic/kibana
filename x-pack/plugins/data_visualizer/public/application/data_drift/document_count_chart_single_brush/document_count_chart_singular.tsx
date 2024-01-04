@@ -79,7 +79,6 @@ export interface BrushSettings {
  *
  * @param windowParameters Baseline and deviation time ranges.
  * @param force Force update
- * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
  */
 export type BrushSelectionUpdateHandler = (
   windowParameters: SingleBrushWindowParameters,
@@ -352,10 +351,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
     }
   }, [isBrushCleared, originalWindowParameters]);
 
-  function onWindowParametersChange(
-    wp: SingleBrushWindowParameters,
-    wpPx: SingleBrushWindowParameters
-  ) {
+  function onWindowParametersChange(wp: SingleBrushWindowParameters) {
     if (brushSelectionUpdateHandler === undefined) {
       return;
     }
@@ -485,7 +481,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
           {windowParameters && (
             <>
               <DualBrushAnnotation
-                id="aiopsBaseline"
+                id="data-drift-annotation"
                 min={windowParameters.min}
                 max={windowParameters.max}
                 style={brush.annotationStyle}

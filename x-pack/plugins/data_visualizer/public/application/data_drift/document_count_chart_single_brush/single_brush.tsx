@@ -24,29 +24,24 @@ export const getSingleBrushWindowParameters = (
   minTime: number,
   maxTime: number
 ): SingleBrushWindowParameters => {
+  // Workout ideal bounds for the brush when user clicks on the chart
   const totalWindow = maxTime - minTime;
 
-  // min deviation window
+  // min brush window
   const minDeviationWindow = 10 * 60 * 1000; // 10min
-  const minBaselineWindow = 30 * 60 * 1000; // 30min
-  const minWindowGap = 5 * 60 * 1000; // 5min
 
   // work out bounds as done in the original notebooks,
-  // with the deviation window aiming to be a 1/10
+  // with the brush window aiming to be a 1/10
   // of the size of the total window and the baseline window
   // being 3.5/10 of the total window.
-  const deviationWindow = Math.max(totalWindow / 10, minDeviationWindow);
-  const baselineWindow = Math.max(totalWindow / 3.5, minBaselineWindow);
-  const windowGap = Math.max(totalWindow / 10, minWindowGap);
+  const brushWindow = Math.max(totalWindow / 10, minDeviationWindow);
 
-  const deviationMin = clickTime - deviationWindow / 2;
-
-  const baselineMax = deviationMin - windowGap;
-  const baselineMin = baselineMax - baselineWindow;
+  const brushMin = clickTime - brushWindow / 2;
+  const brushMax = clickTime + brushWindow / 2;
 
   return {
-    min: Math.round(baselineMin),
-    max: Math.round(baselineMax),
+    min: Math.round(brushMin),
+    max: Math.round(brushMax),
   };
 };
 export const getSnappedSingleBrushWindowParameters = (
@@ -278,7 +273,6 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
             return 'data-drift-' + b.id;
           })
           .attr('data-test-subj', (b: SingleBrush) => {
-            // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
             return 'dataDriftBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: SingleBrush, i, n) => {
