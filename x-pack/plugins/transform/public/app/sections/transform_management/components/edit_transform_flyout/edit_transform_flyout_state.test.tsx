@@ -18,7 +18,7 @@ import {
   useIsFormTouched,
   useIsFormValid,
   EditTransformFlyoutProvider,
-} from './use_edit_transform_flyout';
+} from './edit_transform_flyout_state';
 
 const getTransformConfigMock = (): TransformPivotConfig => ({
   id: 'the-transform-id',

@@ -24,7 +24,7 @@ import {
   selectRetentionPolicyField,
   useEditTransformFlyoutActions,
   useEditTransformFlyoutContext,
-} from './use_edit_transform_flyout';
+} from './edit_transform_flyout_state';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {

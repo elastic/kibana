@@ -28,7 +28,7 @@ import type { EditAction } from '../action_edit';
 import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
-import { EditTransformFlyoutProvider } from './use_edit_transform_flyout';
+import { EditTransformFlyoutProvider } from './edit_transform_flyout_state';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
 export const EditTransformFlyout: FC<EditAction> = ({

@@ -15,7 +15,7 @@ import {
   useEditTransformFlyoutActions,
   useFormField,
   type FormFields,
-} from './use_edit_transform_flyout';
+} from './edit_transform_flyout_state';
 import { capitalizeFirstLetter } from './capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {

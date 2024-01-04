@@ -21,7 +21,7 @@ import {
   useIsFormValid,
   useIsFormTouched,
   useUpdatedTransformConfig,
-} from './use_edit_transform_flyout';
+} from './edit_transform_flyout_state';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
