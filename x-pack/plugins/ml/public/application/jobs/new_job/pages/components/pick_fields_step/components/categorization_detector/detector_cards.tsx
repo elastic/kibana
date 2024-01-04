@@ -36,7 +36,7 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
 
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
-            defaultMessage="Using Count is more appropriate when categorizing all messages."
+            defaultMessage="Recommended for categorizing all messages."
           />
         </>
       }
