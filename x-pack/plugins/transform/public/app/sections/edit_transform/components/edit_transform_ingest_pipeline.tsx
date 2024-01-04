@@ -11,10 +11,12 @@ import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-import { useGetEsIngestPipelines } from '../../../../hooks';
+import { useGetEsIngestPipelines } from '../../../hooks';
+
+import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
+import { useFormField } from '../state_management/selectors/form_field';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyoutActions, useFormField } from './edit_transform_flyout_state';
 
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',

@@ -5,50 +5,10 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { getTransformConfigMock } from './__mocks__/transform_config';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
-
-import {
-  applyFormStateToTransformConfig,
-  getDefaultState,
-  useEditTransformFlyoutActions,
-  useFormField,
-  useIsFormTouched,
-  useIsFormValid,
-  EditTransformFlyoutProvider,
-} from './edit_transform_flyout_state';
-
-const getTransformConfigMock = (): TransformPivotConfig => ({
-  id: 'the-transform-id',
-  source: {
-    index: ['the-transform-source-index'],
-    query: {
-      match_all: {},
-    },
-  },
-  dest: {
-    index: 'the-transform-destination-index',
-  },
-  pivot: {
-    group_by: {
-      airline: {
-        terms: {
-          field: 'airline',
-        },
-      },
-    },
-    aggregations: {
-      'responsetime.avg': {
-        avg: {
-          field: 'responsetime',
-        },
-      },
-    },
-  },
-  description: 'the-description',
-});
+import { applyFormStateToTransformConfig } from './apply_form_state_to_transform_config';
+import { getDefaultState } from './get_default_state';
 
 describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should exclude unchanged form fields', () => {
@@ -218,61 +178,5 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
     // It should exclude the dependent unchanged destination section
     expect(typeof updateConfig.dest).toBe('undefined');
     expect(updateConfig.retention_policy).toBe(null);
-  });
-});
-
-describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
-  it('field updates should trigger form validation', () => {
-    const transformConfigMock = getTransformConfigMock();
-    const wrapper: FC = ({ children }) => (
-      <EditTransformFlyoutProvider config={transformConfigMock} dataViewId={'the-data-view-id'}>
-        {children}
-      </EditTransformFlyoutProvider>
-    );
-
-    // As we want to test how actions affect the state,
-    // we set up this custom hook that combines hooks for
-    // actions and state selection, so they react to the same redux store.
-    const useHooks = () => ({
-      actions: useEditTransformFlyoutActions(),
-      isFormTouched: useIsFormTouched(),
-      isFormValid: useIsFormValid(),
-      frequency: useFormField('frequency'),
-    });
-
-    const { result } = renderHook(useHooks, { wrapper });
-
-    act(() => {
-      result.current.actions.setFormField({
-        field: 'description',
-        value: 'the-updated-description',
-      });
-    });
-
-    expect(result.current.isFormTouched).toBe(true);
-    expect(result.current.isFormValid).toBe(true);
-
-    act(() => {
-      result.current.actions.setFormField({
-        field: 'description',
-        value: transformConfigMock.description as string,
-      });
-    });
-
-    expect(result.current.isFormTouched).toBe(false);
-    expect(result.current.isFormValid).toBe(true);
-
-    act(() => {
-      result.current.actions.setFormField({
-        field: 'frequency',
-        value: 'the-invalid-value',
-      });
-    });
-
-    expect(result.current.isFormTouched).toBe(true);
-    expect(result.current.isFormValid).toBe(false);
-    expect(result.current.frequency.errorMessages).toStrictEqual([
-      'The frequency value is not valid.',
-    ]);
   });
 });

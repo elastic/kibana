@@ -6,16 +6,15 @@
  */
 
 import React, { type FC } from 'react';
-import { useSelector } from 'react-redux';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { selectApiErrorMessage } from './edit_transform_flyout_state';
+import { useApiErrorMessage } from '../state_management/selectors/api_error_message';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const apiErrorMessage = useSelector(selectApiErrorMessage);
+  const apiErrorMessage = useApiErrorMessage();
 
   if (apiErrorMessage === undefined) return null;
 

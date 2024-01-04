@@ -6,26 +6,28 @@
  */
 
 import React, { useEffect, useMemo, type FC } from 'react';
-import { useSelector } from 'react-redux';
-
-import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { ToastNotificationText } from '../../../../components';
-import type { PostTransformsPreviewRequestSchema } from '../../../../../../common/api_schemas/transforms';
-import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { useGetTransformsPreview } from '../../../../hooks';
 
-import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+
+import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
+import { getErrorMessage } from '../../../../../common/utils/errors';
+
+import { useAppDependencies, useToastNotifications } from '../../../app_dependencies';
+import { useGetTransformsPreview } from '../../../hooks';
+import { ToastNotificationText } from '../../../components';
+
 import {
-  selectFormSections,
-  selectRetentionPolicyField,
   useEditTransformFlyoutActions,
   useEditTransformFlyoutContext,
-} from './edit_transform_flyout_state';
-import { getErrorMessage } from '../../../../../../common/utils/errors';
+} from '../state_management/edit_transform_flyout_state';
+import { useFormSections } from '../state_management/selectors/form_sections';
+import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
+
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
 export const EditTransformRetentionPolicy: FC = () => {
   const { i18n: i18nStart, theme } = useAppDependencies();
@@ -33,8 +35,8 @@ export const EditTransformRetentionPolicy: FC = () => {
   const toastNotifications = useToastNotifications();
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
-  const formSections = useSelector(selectFormSections);
-  const retentionPolicyField = useSelector(selectRetentionPolicyField);
+  const formSections = useFormSections();
+  const retentionPolicyField = useRetentionPolicyField();
   const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {

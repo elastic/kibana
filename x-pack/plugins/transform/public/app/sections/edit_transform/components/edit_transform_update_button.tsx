@@ -11,17 +11,17 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getErrorMessage } from '../../../../../../common/utils/errors';
+import { getErrorMessage } from '../../../../../common/utils/errors';
 
-import { useUpdateTransform } from '../../../../hooks';
+import { useUpdateTransform } from '../../../hooks';
 
 import {
   useEditTransformFlyoutActions,
   useEditTransformFlyoutContext,
-  useIsFormValid,
-  useIsFormTouched,
-  useUpdatedTransformConfig,
-} from './edit_transform_flyout_state';
+} from '../state_management/edit_transform_flyout_state';
+import { useIsFormTouched } from '../state_management/selectors/is_form_touched';
+import { useIsFormValid } from '../state_management/selectors/is_form_valid';
+import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
