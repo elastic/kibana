@@ -419,11 +419,11 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
   nodeFilter?: object[];
 }
 
+export type LensConfigWithId = LensConfig & { id: string };
 export interface DashboardFn {
-  get: (...args: any[]) => LensConfig;
+  get: (...args: any[]) => DashboardModel;
 }
 
-export type LensConfigWithId = LensConfig & { id: string };
 export interface DashboardModel {
   charts: LensConfigWithId[];
   dependsOn?: string[];

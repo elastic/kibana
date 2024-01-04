@@ -48,11 +48,6 @@ export const memoryUsageBreakdown = {
       position: 'bottom',
       show: true,
     },
-    yBounds: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
-    },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,

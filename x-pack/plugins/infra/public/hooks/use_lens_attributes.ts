@@ -12,8 +12,8 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
-  LensAttributes,
-  LensConfig,
+  type LensAttributes,
+  type LensConfig,
   LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { InfraClientStartDeps } from '../types';

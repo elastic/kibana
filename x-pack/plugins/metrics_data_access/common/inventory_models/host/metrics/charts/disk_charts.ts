@@ -138,11 +138,6 @@ export const diskThroughputReadWrite = {
       show: true,
       position: 'bottom',
     },
-    yBounds: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
-    },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,
@@ -188,11 +183,6 @@ export const diskIOReadWrite = {
     legend: {
       show: true,
       position: 'bottom',
-    },
-    yBounds: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
     },
     axisTitleVisibility: {
       showXAxisTitle: false,
