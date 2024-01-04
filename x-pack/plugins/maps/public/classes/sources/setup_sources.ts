@@ -13,6 +13,7 @@ import { ESGeoGridSource } from './es_geo_grid_source';
 import { ESGeoLineSource } from './es_geo_line_source';
 import { ESPewPewSource } from './es_pew_pew_source';
 import { ESSearchSource } from './es_search_source';
+import { ESQLSource } from './esql_source';
 import { GeoJsonFileSource } from './geojson_file_source';
 import { KibanaTilemapSource } from './kibana_tilemap_source';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
@@ -54,6 +55,11 @@ export function setupSources() {
   registerSource({
     ConstructorFunction: ESSearchSource,
     type: SOURCE_TYPES.ES_SEARCH,
+  });
+
+  registerSource({
+    ConstructorFunction: ESQLSource,
+    type: SOURCE_TYPES.ESQL,
   });
 
   registerSource({
