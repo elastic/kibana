@@ -38,14 +38,14 @@ const NoDataServerlessSearch: React.FC<Pick<NoDataProps, 'uiSettings' | 'http' |
   http,
   docLinks,
 }) => {
-  const { hasApiKeys, error, loading } =
+  const { hasApiKeys, error, isLoading } =
     useObservable(useMemo(() => getHasApiKeys$(http), [http])) ?? {};
 
   if (error) {
     throw error;
   }
 
-  if (loading) {
+  if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
