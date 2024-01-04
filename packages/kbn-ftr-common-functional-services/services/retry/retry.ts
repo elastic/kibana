@@ -17,24 +17,25 @@ export class RetryService extends FtrService {
   public async tryForTime<T>(
     timeout: number,
     block: () => Promise<T>,
-    onFailureBlock?: () => Promise<T>
+    onFailureBlock?: () => Promise<T>,
+    retryDelay?: number
   ) {
     return await retryForSuccess(this.log, {
       timeout,
       methodName: 'retry.tryForTime',
       block,
       onFailureBlock,
+      retryDelay,
     });
   }
 
   public async try<T>(
     block: () => Promise<T>,
     onFailureBlock?: () => Promise<T>,
-    retryDelay?: number,
-    timeout?: number
+    retryDelay?: number
   ) {
     return await retryForSuccess(this.log, {
-      timeout: timeout ?? this.config.get('timeouts.try'),
+      timeout: this.config.get('timeouts.try'),
       methodName: 'retry.try',
       block,
       onFailureBlock,

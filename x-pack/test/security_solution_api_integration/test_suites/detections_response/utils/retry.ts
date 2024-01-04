@@ -19,10 +19,11 @@ export const retry = async <T>({
   test: () => Promise<T>;
   retryService: RetryService;
   retries: number;
-  timeout?: number;
+  timeout: number;
 }): Promise<T | Error> => {
   let retryAttempt = 0;
-  const response = await retryService.try(
+  const response = await retryService.tryForTime(
+    timeout,
     async () => {
       if (retryAttempt > retries) {
         // Log error message if we reached the maximum number of retries
@@ -35,8 +36,7 @@ export const retry = async <T>({
       return test();
     },
     undefined,
-    200,
-    timeout
+    200
   );
 
   // Now throw the error in order to fail the test.
