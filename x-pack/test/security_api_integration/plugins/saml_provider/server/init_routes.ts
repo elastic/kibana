@@ -59,6 +59,18 @@ export function initRoutes(core: CoreSetup) {
     }
   );
 
+  // [HACK]: Incredible hack to workaround absence of the Mock IDP plugin in production build used for testing.
+  core.http.resources.register(
+    {
+      path: '/mock_idp/login',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.redirected({ headers: { location: 'https://cloud.elastic.co/projects' } });
+    }
+  );
+
   let attemptsCounter = 0;
   core.http.resources.register(
     {
