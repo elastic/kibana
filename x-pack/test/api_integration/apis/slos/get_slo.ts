@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('gets slos by query', async () => {
       const id = await createSLO();
-      const id2 = await createSLO({ name: 'test int' });
+      await createSLO({ name: 'test int' });
 
       await retry.tryForTime(300 * 1000, async () => {
         const response = await supertestAPI
