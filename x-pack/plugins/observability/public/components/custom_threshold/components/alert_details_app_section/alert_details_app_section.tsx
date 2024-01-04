@@ -20,24 +20,29 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../utils/kibana_react';
-import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertSummaryField, TopAlert } from '../../..';
 
-import { ExpressionChart } from './expression_chart';
-import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
-import { Threshold } from './custom_threshold';
-import { AlertParams, CustomThresholdRuleTypeParams } from '../types';
+import { MetricsExplorerChartType } from '../../../../../common/custom_threshold_rule/types';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { useKibana } from '../../../../utils/kibana_react';
+import { AlertSummaryField, TopAlert } from '../../../..';
+import {
+  AlertParams,
+  CustomThresholdAlertFields,
+  CustomThresholdRuleTypeParams,
+} from '../../types';
+import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
+import { Threshold } from '../custom_threshold';
+import { ExpressionChart } from '../expression_chart';
+import { Groups } from './groups';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
-export type CustomThresholdAlert = TopAlert;
+export type CustomThresholdAlert = TopAlert<CustomThresholdAlertFields>;
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
@@ -84,21 +89,34 @@ export default function AlertDetailsAppSection({
     />,
   ];
   useEffect(() => {
-    setAlertSummaryFields([
-      {
+    const groups = alert.fields[ALERT_GROUP];
+    const alertSummaryFields = [];
+    if (groups) {
+      alertSummaryFields.push({
         label: i18n.translate(
-          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.rule',
+          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.source',
           {
-            defaultMessage: 'Rule',
+            defaultMessage: 'Source',
           }
         ),
-        value: (
-          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-            {rule.name}
-          </EuiLink>
-        ),
-      },
-    ]);
+        value: <Groups groups={groups} />,
+      });
+    }
+    alertSummaryFields.push({
+      label: i18n.translate(
+        'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.rule',
+        {
+          defaultMessage: 'Rule',
+        }
+      ),
+      value: (
+        <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
+          {rule.name}
+        </EuiLink>
+      ),
+    });
+
+    setAlertSummaryFields(alertSummaryFields);
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
 
   const derivedIndexPattern = useMemo<DataViewBase>(

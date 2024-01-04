@@ -15,9 +15,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,
-} from '../mocks/custom_threshold_rule';
+} from '../../mocks/custom_threshold_rule';
+import { ExpressionChart } from '../expression_chart';
 import AlertDetailsAppSection from './alert_details_app_section';
-import { ExpressionChart } from './expression_chart';
+import { Groups } from './groups';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -33,11 +34,11 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('./expression_chart', () => ({
+jest.mock('../expression_chart', () => ({
   ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
 }));
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
       ...mockCoreMock.createStart(),
@@ -83,11 +84,24 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
-  it('should render rule link', async () => {
+  it('should render rule link and group fields', async () => {
     renderComponent();
 
     expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
+      {
+        label: 'Source',
+        value: (
+          <Groups
+            groups={[
+              {
+                field: 'host.name',
+                value: 'host-1',
+              },
+            ]}
+          />
+        ),
+      },
       {
         label: 'Rule',
         value: (
