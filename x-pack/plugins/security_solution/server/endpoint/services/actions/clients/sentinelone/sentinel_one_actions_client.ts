@@ -207,6 +207,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
     if (!actionRequestDoc.error) {
       await this.writeActionResponseToEndpointIndex({
         actionId: actionRequestDoc.EndpointActions.action_id,
@@ -243,6 +256,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
 
     if (!actionRequestDoc.error) {
       await this.writeActionResponseToEndpointIndex({
