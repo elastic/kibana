@@ -7,12 +7,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
+import { css, CSSObject } from '@emotion/react';
 import { EuiIcon, EuiTextBlockTruncate, EuiToolTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnTypes } from '../types';
 
 interface DataTableColumnHeaderProps {
@@ -58,15 +59,7 @@ const DataTableColumnToken: React.FC<
   );
 
   return columnToken ? (
-    <span
-      css={css`
-        vertical-align: middle;
-        line-height: 0.8;
-        padding-right: 4px;
-      `}
-    >
-      {columnToken}
-    </span>
+    <span css={{ paddingRight: euiThemeVars.euiSizeXS }}>{columnToken}</span>
   ) : null;
 };
 
@@ -75,6 +68,8 @@ const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDis
 }) => {
   return <span data-test-subj="unifiedDataTableColumnTitle">{columnDisplayName}</span>;
 };
+
+const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 
 function getRenderedToken({
   dataView,
@@ -88,18 +83,18 @@ function getRenderedToken({
   // for text-based searches
   if (columnTypes) {
     return columnTypes[columnName] && columnTypes[columnName] !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={columnTypes[columnName]} />
+      <FieldIcon type={columnTypes[columnName]} css={fieldIconCss} />
     ) : null;
   }
 
   const dataViewField = dataView.getFieldByName(columnName);
 
   if (dataViewField) {
-    return <FieldIcon {...getFieldIconProps(dataViewField)} />;
+    return <FieldIcon {...getFieldIconProps(dataViewField)} css={fieldIconCss} />;
   }
 
   if (isNestedFieldParent(columnName, dataView)) {
-    return <FieldIcon type="nested" />;
+    return <FieldIcon type="nested" css={fieldIconCss} />;
   }
 
   return null;
@@ -120,9 +115,9 @@ const ColumnHeaderTruncateContainer = ({
         overflow: auto;
         white-space: normal;
         word-break: break-all;
-        line-height: 16px;
+        line-height: ${euiThemeVars.euiSize};
         .euiDataGridHeaderCell--numeric & {
-          text-align: right;
+          float: right;
         }
       `}
     >
