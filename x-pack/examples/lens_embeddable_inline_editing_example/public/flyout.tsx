@@ -43,6 +43,7 @@ export function MultiPaneFlyout({
       onClose={onClose}
       size={inlineEditingContent && inlineEditingContent?.visible ? 'l' : 'm'}
       ownFocus={false}
+      outsideClickCloses
     >
       <EuiFlexGroup direction="row" gutterSize={'none'} style={{ height: '100%' }}>
         <EuiFlexItem

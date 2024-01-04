@@ -38,7 +38,7 @@ export const mount =
             color="danger"
             iconType="warning"
           >
-            <p>This demo only works if your default index pattern is set and time based</p>
+            <p>You need at least one dataview for this demo to work</p>
           </EuiCallOut>
         )}
       </i18nCore.Context>

@@ -10,7 +10,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { mount } from './mount';
 import image from './image.png';
 
@@ -22,7 +21,6 @@ export interface StartDependencies {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
-  settings: SettingsStart;
 }
 
 export class LensInlineEditingPlugin
