@@ -8,13 +8,10 @@
 
 import React from 'react';
 
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 
-// import { ViewMode } from '../../lib';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import userEvent from '@testing-library/user-event';
 import { ViewMode } from '../../../common';
 import {
@@ -22,16 +19,16 @@ import {
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
 } from '../../lib/test_samples';
-import { CustomizePanelAction, EditPanelAction } from '../panel_actions';
+import { EditPanelAction } from '../panel_actions';
+import * as openCustomizePanel from '../panel_actions/customize_panel_action/open_customize_panel';
 import { EmbeddablePanelHeader } from './embeddable_panel_header';
 
-const overlays = overlayServiceMock.createStartContract();
-const theme = themeServiceMock.createStartContract();
-const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
+const getEmbeddableFactory = jest.fn();
+const application = applicationServiceMock.createStartContract();
 
+const editPanelAction = new EditPanelAction(getEmbeddableFactory, application);
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
-customizePanelAction.execute = jest.fn();
+editPanelAction.execute = jest.fn();
 
 const DEFAULT_PANEL_TITLE = 'Panel title';
 
@@ -130,10 +127,10 @@ describe('edit mode', () => {
       <EmbeddablePanelHeader
         embeddable={mockEmbeddable}
         headerId={'headerId'}
-        universalActions={{ customizePanel: customizePanelAction }}
+        universalActions={{ editPanel: editPanelAction }}
       />
     );
-    const titleComponent = await screen.findByTestId('dashboardPanelTitle');
+    const titleComponent = await screen.findByTestId('embeddablePanelTitleInner');
     expect(titleComponent).toHaveTextContent('[No Title]');
   });
 
@@ -146,10 +143,9 @@ describe('edit mode', () => {
       <EmbeddablePanelHeader
         embeddable={mockEmbeddable}
         headerId={'headerId'}
-        universalActions={{ customizePanel: customizePanelAction }}
+        universalActions={{ editPanel: editPanelAction }}
       />
     );
-    screen.debug();
     const titleComponent = await screen.findByTestId('embeddablePanelHeading-');
     const innerTitleComponent = await screen.findByTestId('embeddablePanelTitleInner');
     expect(innerTitleComponent).toBeEmptyDOMElement();
@@ -157,18 +153,19 @@ describe('edit mode', () => {
     expect(titleComponent).toContainElement(menuComponent);
   });
 
-  test('clicking title calls customize panel action', async () => {
+  test('clicking title opens customize panel flyout', async () => {
     const mockEmbeddable = await createEmbeddable({ viewMode: ViewMode.EDIT });
     render(
       <EmbeddablePanelHeader
         embeddable={mockEmbeddable}
         headerId={'headerId'}
-        universalActions={{ customizePanel: customizePanelAction }}
+        universalActions={{ editPanel: editPanelAction }}
       />
     );
-    screen.debug();
     const titleComponent = await screen.findByTestId('embeddablePanelTitleLink');
+
+    const spy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
     userEvent.click(titleComponent);
-    expect(customizePanelAction.execute).toBeCalled();
+    expect(spy).toHaveBeenCalled();
   });
 });

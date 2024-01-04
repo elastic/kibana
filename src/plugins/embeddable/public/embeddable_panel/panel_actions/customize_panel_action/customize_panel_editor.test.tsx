@@ -64,11 +64,11 @@ describe('panel title / description', () => {
     expect(customizePanelForm).not.toContainElement(titleDescriptionComponent);
   });
 
-  test('title input receives focus when `titleFocus` is `true`', async () => {
+  test('title input receives focus when `focusOnTitle` is `true`', async () => {
     const mockEmbeddable = await createEmbeddable({ viewMode: ViewMode.EDIT });
     render(
       <IntlProvider locale="en">
-        <CustomizePanelEditor {...DEFAULT_PROPS} embeddable={mockEmbeddable} titleFocus={true} />
+        <CustomizePanelEditor {...DEFAULT_PROPS} embeddable={mockEmbeddable} focusOnTitle={true} />
       </IntlProvider>
     );
 
@@ -76,11 +76,11 @@ describe('panel title / description', () => {
     expect(customTitleComponent).toHaveFocus();
   });
 
-  test('title input does not receive focus when `titleFocus` is `false`', async () => {
+  test('title input does not receive focus when `focusOnTitle` is `false`', async () => {
     const mockEmbeddable = await createEmbeddable({ viewMode: ViewMode.EDIT });
     render(
       <IntlProvider locale="en">
-        <CustomizePanelEditor {...DEFAULT_PROPS} embeddable={mockEmbeddable} titleFocus={false} />
+        <CustomizePanelEditor {...DEFAULT_PROPS} embeddable={mockEmbeddable} focusOnTitle={false} />
       </IntlProvider>
     );
 
