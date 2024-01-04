@@ -282,11 +282,7 @@ class AgentPolicyService {
       options
     );
 
-    // we do not want to create uninstall tokens for managed policies
-    if (!agentPolicy.is_managed) {
-      await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
-    }
-
+    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
     logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
@@ -529,12 +525,6 @@ class AgentPolicyService {
       );
       // force agent policy to be false if elastic defend is not present
       agentPolicy.is_protected = false;
-    }
-
-    if (existingAgentPolicy.is_managed && agentPolicy?.is_protected) {
-      throw new HostedAgentPolicyRestrictionRelatedError(
-        `Cannot enable tamper protection for hosted agent policy ${id}`
-      );
     }
 
     if (existingAgentPolicy.is_managed && !options?.force) {
