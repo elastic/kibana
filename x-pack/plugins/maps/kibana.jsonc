@@ -27,7 +27,6 @@
       "dashboard",
       "embeddable",
       "mapsEms",
-      "savedObjects",
       "share",
       "presentationUtil",
       "contentManagement"

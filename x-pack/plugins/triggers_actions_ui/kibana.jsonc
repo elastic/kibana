@@ -16,7 +16,6 @@
       "data",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjects",
       "unifiedSearch",
       "fieldFormats",
       "dataViews",
@@ -39,7 +38,8 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "actions"
+      "actions",
+       "savedObjects",
     ],
     "extraPublicDirs": [
       "public/common",

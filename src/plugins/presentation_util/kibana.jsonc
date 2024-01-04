@@ -8,7 +8,6 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "savedObjects",
       "kibanaReact",
       "contentManagement",
       "embeddable",
