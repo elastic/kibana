@@ -40,12 +40,11 @@ export type ReportProcessingFields = Required<{
   process_expiration: Report['process_expiration'];
 }>;
 
-export type ReportFailedFields = Required<{
-  completed_at: Report['completed_at'];
+export interface ReportFailedFields {
   output: ReportOutput | null;
-}> & {
+  completed_at?: Report['completed_at'];
   error?: ExecutionError | unknown;
-};
+}
 
 export type ReportCompletedFields = Required<{
   completed_at: Report['completed_at'];

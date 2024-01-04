@@ -260,9 +260,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     // update the report in the store
     const store = await this.getStore();
-    const completedTime = moment().toISOString();
     const doc: ReportFailedFields = {
-      completed_at: completedTime,
       output: null,
       error: errorParsed,
     };
