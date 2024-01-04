@@ -15,11 +15,10 @@ import {
   Query,
   TimeRange,
 } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DataDocuments$ } from '@kbn/discover-plugin/public/application/main/services/discover_data_state_container';
 import { computeInterval } from './compute_interval';
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
@@ -33,7 +32,7 @@ export const useLensSuggestions = ({
   timeRange,
   lensSuggestionsApi,
   onSuggestionChange,
-  documents$,
+  table,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
@@ -44,7 +43,7 @@ export const useLensSuggestions = ({
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
-  documents$?: DataDocuments$;
+  table?: Datatable;
 }) => {
   const suggestions = useMemo(() => {
     const context = {
@@ -52,7 +51,7 @@ export const useLensSuggestions = ({
       fieldName: '',
       textBasedColumns: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
-      documents$,
+      table,
     };
     const allSuggestions = isPlainRecord
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
@@ -61,7 +60,7 @@ export const useLensSuggestions = ({
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [dataView, columns, query, documents$, isPlainRecord, lensSuggestionsApi]);
+  }, [dataView, columns, query, table, isPlainRecord, lensSuggestionsApi]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
@@ -114,7 +113,7 @@ export const useLensSuggestions = ({
         query: {
           esql: esqlQuery,
         },
-        documents$,
+        table,
       };
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
@@ -124,7 +123,7 @@ export const useLensSuggestions = ({
     }
     histogramQuery.current = undefined;
     return undefined;
-  }, [currentSuggestion, dataView, query, timeRange, data, documents$, lensSuggestionsApi]);
+  }, [currentSuggestion, dataView, query, timeRange, data, table, lensSuggestionsApi]);
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });

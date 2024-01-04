@@ -11,7 +11,7 @@ import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
@@ -26,7 +26,6 @@ import {
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
-import { DataDocuments$ } from '@kbn/discover-plugin/public/application/main/services/discover_data_state_container';
 import { Chart } from '../chart';
 import type {
   UnifiedHistogramChartContext,
@@ -177,7 +176,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
 
-  documents$: DataDocuments$;
+  table: Datatable;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -206,7 +205,7 @@ export const UnifiedHistogramLayout = ({
   disabledActions,
   lensSuggestionsApi,
   input$,
-  documents$,
+  table,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -235,7 +234,7 @@ export const UnifiedHistogramLayout = ({
     data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
-    documents$,
+    table,
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;

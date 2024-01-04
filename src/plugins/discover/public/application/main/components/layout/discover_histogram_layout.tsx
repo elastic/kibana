@@ -39,18 +39,30 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
   });
 
+  const datatable = useObservable(dataState.data$.documents$);
+
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
     return null;
   }
 
+  if (!datatable || !['partial', 'complete'].includes(datatable.fetchStatus)) {
+    return null;
+  }
+
+  const table = {
+    type: 'datatable' as 'datatable',
+    rows: datatable.result!.map((r) => r.raw),
+    columns: datatable.textBasedQueryColumns || [],
+  };
+
   return (
     <UnifiedHistogramContainer
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
-      documents$={dataState.data$.documents$}
+      table={table}
       container={container}
       css={histogramLayoutCss}
     >
