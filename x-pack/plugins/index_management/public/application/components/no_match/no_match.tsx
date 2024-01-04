@@ -6,13 +6,71 @@
  */
 
 import React from 'react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
 
-export const NoMatch = () => (
-  <div data-test-subj="noIndicesMessage">
-    <FormattedMessage
-      id="xpack.idxMgmt.noMatch.noIndicesDescription"
-      defaultMessage="No indices to show"
+export const NoMatch = ({
+  loadIndices,
+  filter,
+  resetFilter,
+}: {
+  loadIndices: () => void;
+  filter: string;
+  resetFilter: () => void;
+}) => {
+  if (filter) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="noIndicesMessage"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.idxMgmt.noMatch.noIndicesTitle"
+              defaultMessage="No indices found"
+            />
+          </h3>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.noMatch.noIndicesDescription"
+              defaultMessage="No indices match your search. Clear the searchbar input or click the button below."
+            />
+          </p>
+        }
+        actions={
+          <EuiButton onClick={resetFilter} fill color="primary" iconType="cross">
+            <FormattedMessage
+              id="xpack.idxMgmt.noMatch.clearSearchButton"
+              defaultMessage="Clear search"
+            />
+          </EuiButton>
+        }
+      />
+    );
+  }
+
+  return (
+    <EuiEmptyPrompt
+      data-test-subj="createIndexMessage"
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.idxMgmt.noMatch.createIndexTitle"
+            defaultMessage="No indices"
+          />
+        </h3>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.noMatch.createIndexDescription"
+            defaultMessage="You don't have any indices yet. Create an index by clicking the button below."
+          />
+        </p>
+      }
+      actions={<CreateIndexButton loadIndices={loadIndices} />}
     />
-  </div>
-);
+  );
+};
