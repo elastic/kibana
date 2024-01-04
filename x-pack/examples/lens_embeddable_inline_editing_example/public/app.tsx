@@ -38,6 +38,8 @@ export const App = (props: {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isInlineEditingVisible, setIsinlineEditingVisible] = useState(false);
+  const [panelActive, setPanelActive] = useState<number | null>(null);
+
   const configBuilder = useMemo(
     () => new LensConfigBuilder(props.stateHelpers.formula, props.plugins.dataViews),
     [props.plugins.dataViews, props.stateHelpers.formula]
@@ -71,6 +73,8 @@ export const App = (props: {
                   plugins={props.plugins}
                   defaultDataView={props.defaultDataView}
                   isESQL
+                  setPanelActive={setPanelActive}
+                  isActive={Boolean(panelActive === 1) || !panelActive}
                 />
               </EuiFlexItem>
               <EuiFlexItem className="eui-fullHeight">
@@ -78,10 +82,19 @@ export const App = (props: {
                   configBuilder={configBuilder}
                   plugins={props.plugins}
                   defaultDataView={props.defaultDataView}
+                  setPanelActive={setPanelActive}
+                  isActive={Boolean(panelActive === 2) || !panelActive}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiPanel hasShadow={false}>
+                <EuiPanel
+                  hasShadow={false}
+                  hasBorder={true}
+                  css={css`
+                    opacity: ${Boolean(panelActive === 3) || !panelActive ? '1' : '0.25'};
+                    pointer-events: ${Boolean(panelActive === 3) || !panelActive ? 'all' : 'none'};
+                  `}
+                >
                   <EuiTitle
                     size="xs"
                     css={css`
@@ -107,7 +120,14 @@ export const App = (props: {
                   <EuiSpacer />
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
-                      <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show flyout</EuiButton>
+                      <EuiButton
+                        onClick={() => {
+                          setIsFlyoutVisible(true);
+                          setPanelActive(3);
+                        }}
+                      >
+                        Show flyout
+                      </EuiButton>
                       {isFlyoutVisible ? (
                         <MultiPaneFlyout
                           mainContent={{
@@ -131,6 +151,7 @@ export const App = (props: {
                                   }
                                 }}
                                 isESQL
+                                isActive
                               />
                             ),
                           }}
@@ -141,6 +162,7 @@ export const App = (props: {
                           onClose={() => {
                             setIsFlyoutVisible(false);
                             setIsinlineEditingVisible(false);
+                            setPanelActive(null);
                             if (container) {
                               ReactDOM.unmountComponentAtNode(container);
                             }

@@ -31,6 +31,8 @@ export const LensChart = (props: {
   defaultDataView: DataView;
   isESQL?: boolean;
   container?: HTMLElement | null;
+  isActive?: boolean;
+  setPanelActive?: (panelNum: number | null) => void;
   setIsinlineEditingVisible?: (flag: boolean) => void;
   onApplyCb?: () => void;
   onCancelCb?: () => void;
@@ -91,10 +93,12 @@ export const LensChart = (props: {
         onApply: () => {
           'optional onApply callback!';
           props.onApplyCb?.();
+          props.setPanelActive?.(null);
         },
         onCancel: () => {
           'optional onCancel callback!';
           props.onCancelCb?.();
+          props.setPanelActive?.(null);
         },
         container: props.container,
       };
@@ -103,7 +107,14 @@ export const LensChart = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
   return (
-    <EuiPanel hasShadow={false}>
+    <EuiPanel
+      hasBorder={!props.container}
+      hasShadow={false}
+      css={css`
+        opacity: ${props.isActive ? '1' : '0.25'};
+        pointer-events: ${props.isActive ? 'all' : 'none'};
+      `}
+    >
       <EuiTitle
         size="xs"
         css={css`
@@ -117,17 +128,18 @@ export const LensChart = (props: {
         </h3>
       </EuiTitle>
       <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {embeddableInput && (
-            <LensComponent style={{ height: 500 }} {...embeddableInput} onLoad={onLoad} />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-self: flex-end;
+          `}
+        >
           <EuiButtonIcon
             size="xs"
             iconType="pencil"
             onClick={() => {
+              props?.setPanelActive?.(props.isESQL ? 1 : 2);
               if (triggerOptions) {
                 props.plugins.uiActions
                   .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
@@ -136,6 +148,11 @@ export const LensChart = (props: {
               }
             }}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {embeddableInput && (
+            <LensComponent style={{ height: 500 }} {...embeddableInput} onLoad={onLoad} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
