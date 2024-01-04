@@ -78,13 +78,7 @@ export const CreateDockerUBI: Task = {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
       context: false,
-      ubi8: true,
-      image: true,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      context: false,
-      ubi9: true,
+      ubi: true,
       image: true,
     });
   },
@@ -122,12 +116,7 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
-      ubi8: true,
-      context: true,
-      image: false,
-    });
-    await runDockerGenerator(config, log, build, {
-      ubi9: true,
+      ubi: true,
       context: true,
       image: false,
     });
