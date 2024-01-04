@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { LensMetricConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensMetricConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
@@ -22,9 +22,9 @@ export const kpi = {
     options?: Pick<LensMetricConfig, 'subtitle' | 'seriesColor'>;
   }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
+      chartType: 'metric',
       formFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
       chartConfig: {
-        chartType: 'metric',
         trendLine: true,
         subtitle: options?.subtitle ?? AVERAGE,
         seriesColor: options?.seriesColor,
@@ -39,7 +39,23 @@ export const kpi = {
     });
 
     return createDashboardModel({
-      charts: [cpuUsage, diskUsage, memoryUsage, normalizedLoad1m],
+      charts: [cpuUsage, diskUsage, memoryUsage, normalizedLoad1m].map((p) => ({
+        ...p,
+        value:
+          typeof p.value === 'string'
+            ? p.value
+            : {
+                ...p.value,
+                format: p.value.format
+                  ? {
+                      ...p.value.format,
+                      params: {
+                        decimals: 1,
+                      },
+                    }
+                  : undefined,
+              },
+      })),
     });
   },
 };

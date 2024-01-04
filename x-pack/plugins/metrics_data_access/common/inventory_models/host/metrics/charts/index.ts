@@ -10,58 +10,63 @@ import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
 type Args<T extends ChartType> = T extends 'xy'
-  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers'> & {
+  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'title' | 'chartType'> & {
       layerConfig?: Partial<ChartTypeLensConfig<'xy'>['layers'][number]>;
     }
-  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'title'>;
+  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'title' | 'chartType'>;
 
+type LensConfigWithId<T extends ChartType> = ChartTypeLensConfig<T> & { id: string };
 export const createBasicCharts = <T extends ChartType>({
+  chartType,
   formFormulas,
   chartConfig,
 }: {
+  chartType: T;
   formFormulas: HostFormulaNames[];
   chartConfig: Args<T>;
-}): Record<HostFormulaNames, ChartTypeLensConfig<T> & { id: string }> => {
+}): Record<HostFormulaNames, LensConfigWithId<T>> => {
   return formFormulas.reduce((acc, curr) => {
-    const chart =
-      chartConfig.chartType === 'xy'
-        ? ({
-            ...chartConfig,
-            id: curr,
-            title: formulas[curr].label ?? '',
-            legend: {
-              show: false,
-              position: 'bottom',
-              ...chartConfig.legend,
+    if (chartType === 'xy') {
+      const { layerConfig, ...rest } = chartConfig as Args<'xy'>;
+      return {
+        ...acc,
+        [curr]: {
+          ...chartConfig,
+          chartType,
+          title: formulas[curr].label ?? '',
+          legend: {
+            show: false,
+            position: 'bottom',
+            ...rest.legend,
+          },
+          axisTitleVisibility: {
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          },
+          layers: [
+            {
+              seriesType: 'line',
+              type: 'series',
+              xAxis: '@timestamp',
+              value: formulas[curr],
+              ...layerConfig,
             },
-            axisTitleVisibility: {
-              showXAxisTitle: false,
-              showYAxisTitle: false,
-            },
-            layers: [
-              {
-                seriesType: 'line',
-                type: 'series',
-                xAxis: '@timestamp',
-                value: formulas[curr],
-                ...chartConfig.layerConfig,
-              },
-            ],
-          } as ChartTypeLensConfig<'xy'>)
-        : {
-            ...chartConfig,
-            id: curr,
-            title: formulas[curr].label ?? '',
-            value: formulas[curr],
-          };
-
-    return {
-      ...acc,
-      [curr]: chart,
-    };
-  }, {} as Record<HostFormulaNames, ChartTypeLensConfig<T> & { id: HostFormulaNames }>);
+          ],
+        } as ChartTypeLensConfig<'xy'>,
+      };
+    } else {
+      return {
+        ...acc,
+        [curr]: {
+          ...chartConfig,
+          chartType,
+          title: formulas[curr].label ?? '',
+          value: formulas[curr],
+        } as ChartTypeLensConfig<T>,
+      };
+    }
+  }, {} as Record<HostFormulaNames, LensConfigWithId<T>>);
 };
-
 // custom charts
 export { cpuUsageBreakdown, normalizedLoad1m, loadBreakdown } from './cpu_charts';
 export {

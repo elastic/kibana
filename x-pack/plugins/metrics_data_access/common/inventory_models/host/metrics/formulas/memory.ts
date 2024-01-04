@@ -54,6 +54,9 @@ export const memoryUsage: FormulaValueConfig = {
   formula: 'average(system.memory.actual.used.pct)',
   format: {
     id: 'percent',
+    params: {
+      decimals: 0,
+    },
   },
 };
 

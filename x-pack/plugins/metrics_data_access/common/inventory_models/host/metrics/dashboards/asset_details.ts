@@ -27,9 +27,9 @@ export const assetDetails = {
     logsDataViewId?: string;
   }) => {
     const { cpuUsage, memoryUsage } = createBasicCharts({
+      chartType: 'xy',
       formFormulas: ['cpuUsage', 'memoryUsage'],
       chartConfig: {
-        chartType: 'xy',
         emphasizeFitting: true,
         fittingFunction: 'Linear',
         ...(metricsDataViewId
@@ -43,9 +43,9 @@ export const assetDetails = {
     });
 
     const { logRate } = createBasicCharts({
+      chartType: 'xy',
       formFormulas: ['logRate'],
       chartConfig: {
-        chartType: 'xy',
         emphasizeFitting: true,
         fittingFunction: 'Linear',
         ...(logsDataViewId

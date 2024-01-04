@@ -13,6 +13,12 @@ export const diskIORead: FormulaValueConfig = {
     defaultMessage: 'Disk Read IOPS',
   }),
   formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
+    },
+  },
   timeScale: 's',
 };
 
@@ -37,6 +43,9 @@ export const diskSpaceAvailable: FormulaValueConfig = {
   formula: 'average(system.filesystem.free)',
   format: {
     id: 'bytes',
+    params: {
+      decimals: 0,
+    },
   },
 };
 
@@ -47,6 +56,9 @@ export const diskSpaceAvailability: FormulaValueConfig = {
   formula: '1 - average(system.filesystem.used.pct)',
   format: {
     id: 'percent',
+    params: {
+      decimals: 0,
+    },
   },
 };
 
@@ -57,6 +69,9 @@ export const diskUsage: FormulaValueConfig = {
   formula: 'average(system.filesystem.used.pct)',
   format: {
     id: 'percent',
+    params: {
+      decimals: 0,
+    },
   },
 };
 
@@ -65,6 +80,12 @@ export const diskIOWrite: FormulaValueConfig = {
     defaultMessage: 'Disk Write IOPS',
   }),
   formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
+    },
+  },
   timeScale: 's',
 };
 
