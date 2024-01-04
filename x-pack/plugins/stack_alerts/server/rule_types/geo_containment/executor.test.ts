@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './tests/es_sample_response.json';
