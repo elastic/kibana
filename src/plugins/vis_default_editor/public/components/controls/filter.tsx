@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { Query } from '@kbn/es-query';
 import { IAggConfig } from '@kbn/data-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -45,14 +44,9 @@ function FilterRow({
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const {
     data,
-    dataViews,
-    unifiedSearch,
-    usageCollection,
-    storage,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
     appName,
   } = services;
 
@@ -117,17 +111,6 @@ function FilterRow({
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
           size="s"
-          deps={{
-            data,
-            dataViews,
-            unifiedSearch,
-            usageCollection,
-            storage,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-          }}
           appName={appName}
         />
       </EuiFormRow>
