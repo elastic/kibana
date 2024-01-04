@@ -5,9 +5,13 @@
  * 2.0.
  */
 import { formatFieldValue } from '@kbn/discover-utils';
-import * as constants from '../../../common/constants';
-import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { FlyoutDoc, LogExplorerFlyoutContentProps, LogDocument } from './types';
+import * as constants from '../../common/constants';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import {
+  FlyoutDoc,
+  LogExplorerFlyoutContentProps,
+  LogDocument,
+} from '../components/flyout_detail/types';
 
 export function useDocDetail(
   doc: LogDocument,
@@ -86,20 +90,19 @@ export function useDocDetail(
   };
 }
 
-export const getDocDetailHeaderRenderFlags = (doc: FlyoutDoc) => {
-  const hasTimestamp = Boolean(doc[constants.TIMESTAMP_FIELD]);
-  const hasLogLevel = Boolean(doc[constants.LOG_LEVEL_FIELD]);
-  const hasMessage = Boolean(doc[constants.MESSAGE_FIELD]);
+export const getMessageWithFallbacks = (doc: FlyoutDoc) => {
+  const rankingOrder = [
+    constants.MESSAGE_FIELD,
+    constants.ERROR_MESSAGE_FIELD,
+    constants.EVENT_ORIGINAL_FIELD,
+  ] as const;
 
-  const hasBadges = hasTimestamp || hasLogLevel;
+  for (const rank of rankingOrder) {
+    if (doc[rank] !== undefined && doc[rank] !== null) {
+      return { field: rank, value: doc[rank] };
+    }
+  }
 
-  const hasFlyoutHeader = hasBadges || hasMessage;
-
-  return {
-    hasTimestamp,
-    hasLogLevel,
-    hasMessage,
-    hasBadges,
-    hasFlyoutHeader,
-  };
+  // If none of the ranks (fallbacks) are present
+  return { field: undefined };
 };

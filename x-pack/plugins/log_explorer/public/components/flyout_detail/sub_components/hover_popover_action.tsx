@@ -13,6 +13,7 @@ import {
   EuiPopoverTitle,
   EuiToolTip,
   PopoverAnchorPosition,
+  type EuiPopoverProps,
 } from '@elastic/eui';
 import { useHoverActions } from '../../../hooks/use_hover_actions';
 
@@ -22,6 +23,7 @@ interface HoverPopoverActionProps {
   value: string;
   title?: string;
   anchorPosition?: PopoverAnchorPosition;
+  display?: EuiPopoverProps['display'];
 }
 
 export const HoverActionPopover = ({
@@ -30,6 +32,7 @@ export const HoverActionPopover = ({
   field,
   value,
   anchorPosition = 'upCenter',
+  display = 'inline-block',
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -58,6 +61,7 @@ export const HoverActionPopover = ({
         anchorPosition={anchorPosition}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
+        display={display}
       >
         {title && (
           <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>

@@ -91,9 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
-            'content',
             'service.name',
             'host.name',
+            'content',
           ]);
         });
         await retry.try(async () => {

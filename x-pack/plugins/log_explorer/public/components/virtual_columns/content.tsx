@@ -11,8 +11,8 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
-import { useDocDetail } from '../flyout_detail/use_doc_detail';
-import { FlyoutDoc, LogDocument, LogExplorerDiscoverServices } from '../../controller';
+import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
+import { LogDocument, LogExplorerDiscoverServices } from '../../controller';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
@@ -143,20 +143,3 @@ export const renderContent =
       </VirtualColumnServiceProvider>
     );
   };
-
-const getMessageWithFallbacks = (doc: FlyoutDoc) => {
-  const rankingOrder = [
-    constants.MESSAGE_FIELD,
-    constants.ERROR_MESSAGE_FIELD,
-    constants.EVENT_ORIGINAL_FIELD,
-  ] as const;
-
-  for (const rank of rankingOrder) {
-    if (doc[rank] !== undefined && doc[rank] !== null) {
-      return { field: rank, value: doc[rank] };
-    }
-  }
-
-  // If none of the ranks are present, return the whole object
-  return { field: undefined };
-};
