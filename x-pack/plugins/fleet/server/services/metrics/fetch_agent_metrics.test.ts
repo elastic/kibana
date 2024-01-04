@@ -29,6 +29,14 @@ describe('fetchAgentMetrics', () => {
     esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
   });
 
+  it('should not fetch agent if .fleet-agents is not created', async () => {
+    esClient.indices.get.mockRejectedValue({ statusCode: 404 });
+
+    const result = await fetchAgentMetrics(mockCore, abortController);
+
+    expect(result).toBeUndefined();
+  });
+
   it('should fetch agent metrics', async () => {
     esClient.search.mockResolvedValue({
       took: 5,

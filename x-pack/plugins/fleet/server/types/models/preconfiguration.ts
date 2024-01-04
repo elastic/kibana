@@ -45,6 +45,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
       },
     }),
     prerelease: schema.maybe(schema.boolean()),
+    skipDataStreamRollover: schema.maybe(schema.boolean()),
   }),
   {
     defaultValue: [],

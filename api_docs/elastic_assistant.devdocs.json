@@ -221,10 +221,10 @@
           },
           {
             "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.assistantLangChain",
+            "id": "def-server.AssistantToolParams.isEnabledKnowledgeBase",
             "type": "boolean",
             "tags": [],
-            "label": "assistantLangChain",
+            "label": "isEnabledKnowledgeBase",
             "description": [],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1546,7 +1546,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { params: { subActionParams: { messages: { role: \"user\" | \"system\" | \"assistant\"; content: string; }[]; } & { model?: string | undefined; n?: number | undefined; stop?: string | string[] | null | undefined; temperature?: number | undefined; }; subAction: string; }; alertsIndexPattern: string | undefined; allow: string[] | undefined; allowReplacement: string[] | undefined; assistantLangChain: boolean; replacements: { [x: string]: string; } | undefined; size: number | undefined; }, any>"
+              "<unknown, unknown, { params: { subActionParams: { messages: { role: \"user\" | \"system\" | \"assistant\"; content: string; }[]; } & { model?: string | undefined; n?: number | undefined; stop?: string | string[] | null | undefined; temperature?: number | undefined; }; subAction: string; }; alertsIndexPattern: string | undefined; allow: string[] | undefined; allowReplacement: string[] | undefined; isEnabledKnowledgeBase: boolean; isEnabledRAGAlerts: boolean; replacements: { [x: string]: string; } | undefined; size: number | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

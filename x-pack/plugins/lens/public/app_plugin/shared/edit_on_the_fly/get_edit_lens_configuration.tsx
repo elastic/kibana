@@ -114,6 +114,8 @@ export async function getEditLensConfiguration(
     navigateToLensEditor,
     displayFlyoutHeader,
     canEditTextBasedQuery,
+    isNewPanel,
+    deletePanel,
     hidesSuggestions,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
@@ -208,6 +210,8 @@ export async function getEditLensConfiguration(
       canEditTextBasedQuery,
       hidesSuggestions,
       setCurrentAttributes,
+      isNewPanel,
+      deletePanel,
     };
 
     return getWrapper(

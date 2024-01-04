@@ -35,7 +35,7 @@ export const generateAgentOption = (
     disabled: agent.status !== 'online',
     label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
     key: agent.local_metadata.elastic.agent.id,
-    color: getColor(groupType),
+    color: agent.status !== 'online' ? 'danger' : getColor(groupType),
     value: {
       groupType,
       groups: {
