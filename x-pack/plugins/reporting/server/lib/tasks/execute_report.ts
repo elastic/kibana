@@ -161,9 +161,6 @@ export class ExecuteReportTask implements ReportingTask {
     const store = await this.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
 
-    // Check if this is a completed job. This may happen if the `reports:monitor`
-    // task detected it to be a zombie job and rescheduled it, but it
-    // eventually completed on its own.
     if (report.status === 'completed') {
       throw new Error(`Can not claim the report job: it is already completed!`);
     }
