@@ -18,11 +18,8 @@ export const CopyButton = ({ property, value }: { property: string; value: strin
         size="s"
         iconType="copyClipboard"
         aria-label={ariaCopyValueText}
-        onClick={() => copyToClipboard(value as string)}
-        data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}_${value.replace(
-          / +/g,
-          ''
-        )}`}
+        onClick={() => copyToClipboard(value)}
+        data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}`}
       >
         {copyValueText}
       </EuiButtonEmpty>

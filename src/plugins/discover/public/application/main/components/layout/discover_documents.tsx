@@ -255,7 +255,7 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const externalCustomRenderers = useDiscoverCustomization('cell_renderer')?.customCellRenderer;
+  const externalCustomRenderers = useDiscoverCustomization('data_table')?.customCellRenderer;
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 

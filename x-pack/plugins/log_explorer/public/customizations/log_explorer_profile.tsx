@@ -83,7 +83,7 @@ export const createLogExplorerProfileCustomizations =
     });
 
     customizations.set({
-      id: 'cell_renderer',
+      id: 'data_table',
       customCellRenderer: createCustomCellRenderer({ data }),
     });
 

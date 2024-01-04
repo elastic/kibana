@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { FlyoutDoc } from '../types';
-import { ChipWithPopover } from '../../common/popover_chip';
-import * as constants from '../../../../common/constants';
+import { FlyoutDoc } from '../flyout_detail/types';
+import { ChipWithPopover } from './popover_chip';
+import * as constants from '../../../common/constants';
 
 const LEVEL_DICT = {
   error: 'danger',
@@ -24,11 +24,7 @@ interface LogLevelProps {
   renderInFlyout?: boolean;
 }
 
-export function LogLevel({
-  level,
-  dataTestSubj = 'logExplorerFlyoutLogLevel',
-  renderInFlyout = false,
-}: LogLevelProps) {
+export function LogLevel({ level, dataTestSubj, renderInFlyout = false }: LogLevelProps) {
   const { euiTheme } = useEuiTheme();
   if (!level) return null;
   const levelColor = LEVEL_DICT[level as keyof typeof LEVEL_DICT]

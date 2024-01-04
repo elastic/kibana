@@ -23,6 +23,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { CustomCellRenderer } from '../..';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
+import { DataTableCellValue } from '../components/data_table_cell_value';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -61,20 +62,22 @@ export const getRenderCellValueFn = ({
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
-      if (row?.isAnchor) {
-        setCellProps({
-          className: 'dscDocsGrid__cell--highlight',
-        });
-      } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
-        setCellProps({
-          style: {
-            backgroundColor: ctx.isDarkMode
-              ? themeDark.euiColorHighlight
-              : themeLight.euiColorHighlight,
-          },
-        });
-      } else {
-        setCellProps({ style: undefined });
+      if (!externalCustomRenderers) {
+        if (row?.isAnchor) {
+          setCellProps({
+            className: 'dscDocsGrid__cell--highlight',
+          });
+        } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
+          setCellProps({
+            style: {
+              backgroundColor: ctx.isDarkMode
+                ? themeDark.euiColorHighlight
+                : themeLight.euiColorHighlight,
+            },
+          });
+        } else {
+          setCellProps({ style: undefined });
+        }
       }
     }, [ctx, row, setCellProps]);
 
@@ -204,20 +207,21 @@ function renderPopoverContent({
       data-test-subj="dataTableExpandCellActionPopover"
     >
       <EuiFlexItem>
-        <span
-          className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
-          // formatFieldValue guarantees sanitized values
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: formatFieldValue(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            ),
-          }}
-        />
+        <DataTableCellValue>
+          <span
+            // formatFieldValue guarantees sanitized values
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: formatFieldValue(
+                row.flattened[columnId],
+                row.raw,
+                fieldFormats,
+                dataView,
+                field
+              ),
+            }}
+          />
+        </DataTableCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
     </EuiFlexGroup>

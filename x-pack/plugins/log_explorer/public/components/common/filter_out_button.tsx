@@ -7,10 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import {
-  createFilter,
-  isEmptyFilterValue,
-} from '@kbn/cell-actions/src/actions/filter/create_filter';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { filterOutText, actionFilterOutText } from './translations';
 import { useVirtualColumnServiceContext } from '../../hooks/use_virtual_column_services';
 
@@ -18,14 +15,11 @@ export const FilterOutButton = ({ property, value }: { property: string; value: 
   const ariaFilterOutText = actionFilterOutText(value);
   const serviceContext = useVirtualColumnServiceContext();
   const filterManager = serviceContext?.data.query.filterManager;
+  const dataView = serviceContext.dataView;
 
   const onFilterOutAction = () => {
     if (filterManager != null) {
-      const filter = createFilter({
-        key: property,
-        value: [value],
-        negate: !isEmptyFilterValue([value]),
-      });
+      const filter = generateFilters(filterManager, property, [value], '-', dataView);
       filterManager.addFilters(filter);
     }
   };
@@ -37,10 +31,7 @@ export const FilterOutButton = ({ property, value }: { property: string; value: 
         iconType="minusInCircle"
         aria-label={ariaFilterOutText}
         onClick={onFilterOutAction}
-        data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}_${value.replace(
-          / +/g,
-          ''
-        )}`}
+        data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
       >
         {filterOutText}
       </EuiButtonEmpty>

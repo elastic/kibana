@@ -12,14 +12,11 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail } from '../flyout_detail/use_doc_detail';
-import { FlyoutDoc, LogDocument } from '../../controller';
-import { LogLevel } from '../flyout_detail/sub_components/log_level';
+import { FlyoutDoc, LogDocument, LogExplorerDiscoverServices } from '../../controller';
+import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
-import {
-  UseVirtualColumnServices,
-  VirtualColumnServiceProvider,
-} from '../../hooks/use_virtual_column_services';
+import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -30,9 +27,10 @@ const DiscoverSourcePopoverContent = dynamic(
 );
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
+  const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
     <EuiFlexGroup gutterSize="xs">
-      {field && (
+      {renderFieldPrefix && (
         <EuiFlexItem grow={false}>
           <EuiText
             size="xs"
@@ -108,10 +106,7 @@ const Content = ({
     <EuiFlexGroup gutterSize="xs">
       {parsedDoc[constants.LOG_LEVEL_FIELD] && (
         <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
-          <LogLevel
-            level={parsedDoc[constants.LOG_LEVEL_FIELD]}
-            dataTestSubj="logExplorerDataTableLogLevel"
-          />
+          <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
@@ -135,9 +130,15 @@ const Content = ({
 };
 
 export const renderContent =
-  (services: UseVirtualColumnServices['services']) => (props: DataGridCellValueElementProps) => {
+  ({ data }: { data: LogExplorerDiscoverServices['data'] }) =>
+  (props: DataGridCellValueElementProps) => {
+    const { dataView } = props;
+    const virtualColumnServices = {
+      data,
+      dataView,
+    };
     return (
-      <VirtualColumnServiceProvider services={services}>
+      <VirtualColumnServiceProvider services={virtualColumnServices}>
         <Content {...props} />
       </VirtualColumnServiceProvider>
     );

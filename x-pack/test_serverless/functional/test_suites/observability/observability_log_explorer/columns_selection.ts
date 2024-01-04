@@ -83,7 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const cellElement = await dataGrid.getCellElement(0, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
-          expect(cellValue.includes('message')).to.be(true);
           expect(cellValue.includes('A sample log')).to.be(true);
         });
       });
@@ -93,7 +92,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const cellElement = await dataGrid.getCellElement(1, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(false);
-          expect(cellValue.includes('message')).to.be(true);
           expect(cellValue.includes('A sample log')).to.be(true);
         });
       });
@@ -124,7 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
 
-          expect(cellValue.includes('message')).to.be(false);
           expect(cellValue.includes('error.message')).to.be(false);
           expect(cellValue.includes('event.original')).to.be(false);
 
@@ -159,19 +156,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level_info'
+            'dataTablePopoverChip_log.level'
           );
           await logLevelChip.click();
           // Check Filter In button is present
-          await testSubjects.existOrFail('dataTableCellAction_addToFilterAction_log.level_info');
+          await testSubjects.existOrFail('dataTableCellAction_addToFilterAction_log.level');
           // Check Filter Out button is present
-          await testSubjects.existOrFail(
-            'dataTableCellAction_removeFromFilterAction_log.level_info'
-          );
+          await testSubjects.existOrFail('dataTableCellAction_removeFromFilterAction_log.level');
           // Check Copy button is present
-          await testSubjects.existOrFail(
-            'dataTableCellAction_copyToClipboardAction_log.level_info'
-          );
+          await testSubjects.existOrFail('dataTableCellAction_copyToClipboardAction_log.level');
         });
       });
 
@@ -179,19 +172,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level_info'
+            'dataTablePopoverChip_log.level'
           );
           await logLevelChip.click();
 
           // Find Filter In button
           const filterInButton = await testSubjects.find(
-            'dataTableCellAction_addToFilterAction_log.level_info'
+            'dataTableCellAction_addToFilterAction_log.level'
           );
 
           await filterInButton.click();
-          const rowWithLogLevelInfo = await testSubjects.findAll(
-            'dataTablePopoverChip_log.level_info'
-          );
+          const rowWithLogLevelInfo = await testSubjects.findAll('dataTablePopoverChip_log.level');
 
           expect(rowWithLogLevelInfo.length).to.be(4);
         });
@@ -201,17 +192,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
-            'dataTablePopoverChip_log.level_info'
+            'dataTablePopoverChip_log.level'
           );
           await logLevelChip.click();
 
           // Find Filter Out button
           const filterOutButton = await testSubjects.find(
-            'dataTableCellAction_removeFromFilterAction_log.level_info'
+            'dataTableCellAction_removeFromFilterAction_log.level'
           );
 
           await filterOutButton.click();
-          await testSubjects.missingOrFail('dataTablePopoverChip_log.level_info');
+          await testSubjects.missingOrFail('dataTablePopoverChip_log.level');
         });
       });
     });

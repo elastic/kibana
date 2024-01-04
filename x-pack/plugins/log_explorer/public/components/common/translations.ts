@@ -122,19 +122,19 @@ export const flyoutShipperLabel = i18n.translate('xpack.logExplorer.flyoutDetail
   defaultMessage: 'Shipper',
 });
 
-export const actionFilterForText = (text: unknown) =>
+export const actionFilterForText = (text: string) =>
   i18n.translate('xpack.logExplorer.flyoutDetail.value.hover.filterFor', {
     defaultMessage: 'Filter for this {value}',
     values: {
-      value: text as string,
+      value: text,
     },
   });
 
-export const actionFilterOutText = (text: unknown) =>
+export const actionFilterOutText = (text: string) =>
   i18n.translate('xpack.logExplorer.flyoutDetail.value.hover.filterOut', {
     defaultMessage: 'Filter out this {value}',
     values: {
-      value: text as string,
+      value: text,
     },
   });
 

@@ -14,14 +14,12 @@ import {
   EuiToolTip,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { ValuesType } from 'utility-types';
 import { useHoverActions } from '../../../hooks/use_hover_actions';
-import { LogDocument } from '..';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   field: string;
-  value: ValuesType<LogDocument['flattened']>;
+  value: string;
   title?: string;
   anchorPosition?: PopoverAnchorPosition;
 }

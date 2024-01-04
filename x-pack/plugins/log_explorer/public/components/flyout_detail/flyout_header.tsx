@@ -9,31 +9,34 @@ import React from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FlyoutDoc } from './types';
 import { getDocDetailHeaderRenderFlags } from './use_doc_detail';
-import { LogLevel } from './sub_components/log_level';
+import { LogLevel } from '../common/log_level';
 import { Timestamp } from './sub_components/timestamp';
 import * as constants from '../../../common/constants';
 import { flyoutMessageLabel } from '../common/translations';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 
 export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
-  const { hasTimestamp, hasLogLevel, hasMessage, hasBadges, hasFlyoutHeader } =
-    getDocDetailHeaderRenderFlags(doc);
+  const { hasBadges, hasFlyoutHeader } = getDocDetailHeaderRenderFlags(doc);
 
   const logLevelAndTimestamp = (
     <EuiFlexItem grow={false}>
       {hasBadges && (
         <EuiFlexGroup responsive={false} gutterSize="m" justifyContent="flexEnd">
-          {hasLogLevel && (
+          {doc[constants.LOG_LEVEL_FIELD] && (
             <HoverActionPopover
-              value={doc[constants.LOG_LEVEL_FIELD] as string}
+              value={doc[constants.LOG_LEVEL_FIELD]}
               field={constants.LOG_LEVEL_FIELD}
             >
               <EuiFlexItem grow={false}>
-                <LogLevel level={doc[constants.LOG_LEVEL_FIELD]} renderInFlyout={true} />
+                <LogLevel
+                  level={doc[constants.LOG_LEVEL_FIELD]}
+                  renderInFlyout={true}
+                  dataTestSubj="logExplorerFlyoutLogLevel"
+                />
               </EuiFlexItem>
             </HoverActionPopover>
           )}
-          {hasTimestamp && (
+          {doc[constants.TIMESTAMP_FIELD] && (
             <EuiFlexItem grow={false}>
               <Timestamp timestamp={doc[constants.TIMESTAMP_FIELD]} />
             </EuiFlexItem>
@@ -45,7 +48,7 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
 
   return hasFlyoutHeader ? (
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logExplorerFlyoutDetail">
-      {hasMessage ? (
+      {doc[constants.MESSAGE_FIELD] ? (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             direction="column"
@@ -56,7 +59,7 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
               <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <HoverActionPopover
-                    value={doc[constants.MESSAGE_FIELD] as string}
+                    value={doc[constants.MESSAGE_FIELD]}
                     field={constants.MESSAGE_FIELD}
                     anchorPosition="rightCenter"
                   >

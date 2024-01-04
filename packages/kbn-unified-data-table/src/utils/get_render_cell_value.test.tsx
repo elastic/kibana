@@ -199,7 +199,7 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders _source column correctly', () => {
-    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const rows = rowsSource.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
@@ -303,7 +303,7 @@ describe('Unified data table cell rendering', function () {
 
   it('renders _source column correctly if on text based mode and have nulls', () => {
     const rows = rowsSourceWithEmptyValues.map(build);
-    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
@@ -343,7 +343,7 @@ describe('Unified data table cell rendering', function () {
 
   it('renders fields-based column correctly', () => {
     const rows = rowsFields.map(build);
-    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
@@ -381,7 +381,7 @@ describe('Unified data table cell rendering', function () {
 
   it('limits amount of rendered items', () => {
     const rows = rowsFields.map(build);
-    const showFieldHandler = (fieldName) => ['extension', 'bytes'].includes(fieldName);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
@@ -423,7 +423,7 @@ describe('Unified data table cell rendering', function () {
       dataView: dataViewMock,
       rows: rowsFields.map(build),
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => false,
+      shouldShowFieldHandler: (fieldName: string) => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -493,7 +493,7 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('collect object fields and renders them like _source', () => {
-    const showFieldHandler = (fieldName) =>
+    const showFieldHandler = (fieldName: string) =>
       ['object.value', 'extension', 'bytes'].includes(fieldName);
     const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
@@ -533,7 +533,7 @@ describe('Unified data table cell rendering', function () {
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-    const showFieldHandler = (fieldName) =>
+    const showFieldHandler = (fieldName: string) =>
       ['extension', 'bytes', 'object.value'].includes(fieldName);
     const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
@@ -781,7 +781,7 @@ describe('Unified data table cell rendering', function () {
       dataView: dataViewMock,
       rows: rowsFieldsUnmapped.map(build),
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['unmapped'].includes(fieldName),
+      shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,

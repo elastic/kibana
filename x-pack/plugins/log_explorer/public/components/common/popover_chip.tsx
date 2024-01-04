@@ -23,6 +23,10 @@ import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './tra
 import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
+import { dynamic } from '../../utils/dynamic';
+const DataTableCellValue = dynamic(
+  () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
+);
 
 interface ChipWithPopoverProps {
   /**
@@ -41,16 +45,10 @@ interface ChipWithPopoverProps {
   shouldRenderPopover?: boolean;
 }
 
-const convertStyleToString = (style: React.CSSProperties) => {
-  return Object.entries(style)
-    .map(([key, value]) => `${key}: ${value};`)
-    .join(' ');
-};
-
 export function ChipWithPopover({
   property,
   text,
-  dataTestSubj = `${property}_${text.replace(/ +/g, '')}`,
+  dataTestSubj = `dataTablePopoverChip_${property}`,
   leftSideIcon,
   rightSideIcon,
   borderColor,
@@ -72,7 +70,7 @@ export function ChipWithPopover({
       color="hollow"
       iconType={rightSideIcon}
       iconSide="right"
-      data-test-subj={`dataTablePopoverChip_${dataTestSubj}`}
+      data-test-subj={dataTestSubj}
       onClick={handleChipClick}
       onClickAriaLabel={openCellActionPopoverAriaText}
       css={css`
@@ -80,8 +78,8 @@ export function ChipWithPopover({
         font-size: ${xsFontSize};
         display: flex;
         justify-content: center;
-        ${style ? css(convertStyleToString(style)) : ''}
       `}
+      style={style}
     >
       <EuiFlexGroup gutterSize="xs">
         {leftSideIcon && (
@@ -112,9 +110,9 @@ export function ChipWithPopover({
         <EuiFlexItem>
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
-              <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">
+              <DataTableCellValue>
                 {property}:{text}
-              </span>
+              </DataTableCellValue>
             </EuiText>
           </div>
         </EuiFlexItem>

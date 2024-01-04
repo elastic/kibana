@@ -6,7 +6,6 @@
  */
 
 import { useMemo, useState } from 'react';
-import { ValuesType } from 'utility-types';
 import { copyToClipboard, IconType } from '@elastic/eui';
 import {
   flyoutHoverActionCopyToClipboardText,
@@ -16,11 +15,10 @@ import {
   flyoutHoverActionToggleColumnText,
 } from '../components/common/translations';
 import { useDiscoverActionsContext } from './use_discover_action';
-import { LogDocument } from '../components/flyout_detail';
 
 interface HoverActionProps {
   field: string;
-  value: ValuesType<LogDocument['flattened']>;
+  value: string;
 }
 
 export interface HoverActionType {
