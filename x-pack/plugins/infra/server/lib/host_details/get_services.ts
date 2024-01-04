@@ -11,7 +11,7 @@ import { ESSearchClient } from '../metrics/types';
 import {
   Service,
   ServicesAPIRequest,
-  ServicesAPIQueryAggregationAggregation,
+  ServicesAPIQueryAggregation,
 } from '../../../common/http_api/host_details';
 
 export const getServices = async (
@@ -20,16 +20,20 @@ export const getServices = async (
   options: ServicesAPIRequest
 ) => {
   const { transaction, error, metric } = apmIndices;
-  const filters: QueryDslQueryContainer[] = [];
-  filters.push({
-    bool: {
-      should: [
-        { term: { 'host.name': options.filters['host.name'] } },
-        { term: { 'host.hostname': options.filters['host.name'] } },
-      ],
-      minimum_should_match: 1,
-    },
-  });
+  const { filters, size, from, to } = options;
+  const filtersList: QueryDslQueryContainer[] = [];
+
+  if (filters['host.name']) {
+    filtersList.push({
+      bool: {
+        should: [
+          { term: { 'host.name': filters['host.name'] } },
+          { term: { 'host.hostname': filters['host.name'] } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
 
   const body = {
     size: 0,
@@ -40,12 +44,12 @@ export const getServices = async (
           {
             range: {
               '@timestamp': {
-                gte: options.from,
-                lte: options.to,
+                gte: from,
+                lte: to,
               },
             },
           },
-          ...filters,
+          ...filtersList,
         ],
       },
     },
@@ -53,7 +57,7 @@ export const getServices = async (
       services: {
         terms: {
           field: 'service.name',
-          size: 10,
+          size,
         },
         aggs: {
           latestAgent: {
@@ -70,7 +74,7 @@ export const getServices = async (
     },
   };
 
-  const result = await client<{}, ServicesAPIQueryAggregationAggregation>({
+  const result = await client<{}, ServicesAPIQueryAggregation>({
     body,
     index: [transaction, error, metric],
   });

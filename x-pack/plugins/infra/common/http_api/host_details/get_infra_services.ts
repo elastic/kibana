@@ -40,7 +40,8 @@ export type GetServicesRequestQuery = rt.TypeOf<typeof GetServicesRequestQueryRT
 export interface ServicesAPIRequest {
   filters: ServicesFilter;
   from: string;
-  to?: string;
+  to: string;
+  size?: number;
 }
 
 const AgentNameRT = rt.union([rt.string, rt.null]);
@@ -65,9 +66,7 @@ export const ServicesAPIQueryAggregationRT = rt.type({
   }),
 });
 
-export type ServicesAPIQueryAggregationAggregation = rt.TypeOf<
-  typeof ServicesAPIQueryAggregationRT
->;
+export type ServicesAPIQueryAggregation = rt.TypeOf<typeof ServicesAPIQueryAggregationRT>;
 
 export const ServiceRT = rt.type({
   'service.name': rt.string,

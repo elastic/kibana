@@ -41,7 +41,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const [{ savedObjects }] = await libs.getStartServices();
-      const { from, to, validatedFilters } = request.query;
+      const { from, to, size = 10, validatedFilters } = request.query;
 
       try {
         if (!validatedFilters) {
@@ -53,6 +53,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         const services = await getServices(client, apmIndices, {
           from,
           to,
+          size,
           filters: validatedFilters,
         });
         return response.ok({
