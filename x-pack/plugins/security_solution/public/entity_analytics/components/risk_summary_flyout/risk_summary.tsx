@@ -55,8 +55,14 @@ function isUserRiskData(
 }
 
 const getEntityData = (riskData: UserRiskScore | HostRiskScore | undefined) => {
-  if (!riskData) return;
-  if (isUserRiskData(riskData)) return riskData.user;
+  if (!riskData) {
+    return;
+  }
+
+  if (isUserRiskData(riskData)) {
+    return riskData.user;
+  }
+
   return riskData.host;
 };
 
