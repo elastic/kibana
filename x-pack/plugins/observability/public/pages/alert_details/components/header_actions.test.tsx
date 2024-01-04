@@ -18,6 +18,7 @@ import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
@@ -55,6 +56,8 @@ const mockUseFetchRuleWithoutData = () => {
   });
 };
 
+const mockOnAlertStatusChange = () => {};
+
 describe('Header Actions', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -67,7 +70,13 @@ describe('Header Actions', () => {
     });
 
     it('should display an actions button', () => {
-      const { queryByTestId } = render(<HeaderActions alert={alertWithTags} />);
+      const { queryByTestId } = render(
+        <HeaderActions
+          alert={alertWithTags}
+          alertStatus={alertWithTags.fields[ALERT_STATUS]}
+          onAlertStatusChange={mockOnAlertStatusChange}
+        />
+      );
       expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
     });
 
@@ -83,7 +92,13 @@ describe('Header Actions', () => {
 
         mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-        const { getByTestId, findByRole } = render(<HeaderActions alert={alertWithTags} />);
+        const { getByTestId, findByRole } = render(
+          <HeaderActions
+            alert={alertWithTags}
+            alertStatus={alertWithTags.fields[ALERT_STATUS]}
+            onAlertStatusChange={mockOnAlertStatusChange}
+          />
+        );
 
         fireEvent.click(await findByRole('button', { name: 'Actions' }));
 
@@ -109,7 +124,13 @@ describe('Header Actions', () => {
       mockUseFetchRuleWithoutData();
     });
     it("should disable the 'View rule details' when the rule is not available/delete", async () => {
-      const { queryByTestId, findByRole } = render(<HeaderActions alert={alertWithTags} />);
+      const { queryByTestId, findByRole } = render(
+        <HeaderActions
+          alert={alertWithTags}
+          alertStatus={alertWithTags.fields[ALERT_STATUS]}
+          onAlertStatusChange={mockOnAlertStatusChange}
+        />
+      );
       fireEvent.click(await findByRole('button', { name: 'Actions' }));
       expect(queryByTestId('view-rule-details-button')).toHaveAttribute('disabled');
     });

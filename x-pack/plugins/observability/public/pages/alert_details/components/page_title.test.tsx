@@ -15,6 +15,7 @@ import { alert } from '../mock/alert';
 describe('Page Title', () => {
   const defaultProps = {
     alert,
+    alertStatus: 'active',
     dataTestSubj: 'ruleTypeId',
   };
 
@@ -41,6 +42,7 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Anomaly',
         },
       },
+      alertStatus: defaultProps.alertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -58,6 +60,7 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Inventory',
         },
       },
+      alertStatus: defaultProps.alertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -80,6 +83,7 @@ describe('Page Title', () => {
           [ALERT_STATUS]: 'recovered',
         },
       },
+      alertStatus: 'recovered',
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -96,6 +100,7 @@ describe('Page Title', () => {
           [ALERT_STATUS]: 'untracked',
         },
       },
+      alertStatus: 'untracked',
       dataTestSubj: defaultProps.dataTestSubj,
     };
 

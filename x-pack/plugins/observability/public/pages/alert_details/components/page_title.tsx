@@ -53,7 +53,7 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
+export function PageTitle({ alert, alertStatus: status, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -73,9 +73,9 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
         <EuiFlexItem grow={false}>
           <AlertLifecycleStatusBadge
             alertStatus={
-              alertStatus === 'active'
+              status === 'active'
                 ? ALERT_STATUS_ACTIVE
-                : alertStatus === 'recovered'
+                : status === 'recovered'
                 ? ALERT_STATUS_RECOVERED
                 : ALERT_STATUS_UNTRACKED
             }
