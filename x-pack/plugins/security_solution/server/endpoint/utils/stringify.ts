@@ -13,6 +13,6 @@ import { inspect } from 'util';
  * @param depth
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dump = (content: any, depth = 8): string => {
+export const stringify = (content: any, depth = 8): string => {
   return inspect(content, { depth });
 };
