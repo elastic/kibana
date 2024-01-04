@@ -52,21 +52,19 @@ export async function getServiceInstancesMainStatistics(
       isComparisonSearch: false,
     });
     const serviceNodeIds = transactionStats.map((item) => item.serviceNodeName);
-    const systemMetricStats = serviceNodeIds.length
-      ? await getServiceInstancesSystemMetricStatistics({
-          ...paramsForSubQueries,
-          isComparisonSearch: false,
-          serviceNodeIds,
-        })
-      : [];
+    const systemMetricStats = await getServiceInstancesSystemMetricStatistics({
+      ...paramsForSubQueries,
+      isComparisonSearch: false,
+      serviceNodeIds,
+    });
 
     const systemMetricStatsMap = keyBy(systemMetricStats, 'serviceNodeName');
-    const stats = systemMetricStats.length
+    const stats = transactionStats.length
       ? transactionStats.map((item) => ({
           ...item,
           ...(systemMetricStatsMap[item.serviceNodeName] || {}),
         }))
-      : transactionStats;
+      : systemMetricStats;
 
     return stats;
   });
