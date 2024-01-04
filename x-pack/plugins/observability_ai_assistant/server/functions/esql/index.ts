@@ -288,6 +288,8 @@ export function registerEsqlFunction({
                       delta: {
                         content: cachedContent,
                       },
+                      index: 0,
+                      finish_reason: null,
                     },
                   ],
                 });
