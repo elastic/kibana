@@ -39,15 +39,15 @@ export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 // UI preferences
 export const DEFAULT_COLUMNS = [
   {
-    field: CONTENT_FIELD,
-  },
-  {
     field: SERVICE_NAME_FIELD,
     width: DATA_GRID_COLUMN_WIDTH_SMALL,
   },
   {
     field: HOST_NAME_FIELD,
     width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
+  },
+  {
+    field: CONTENT_FIELD,
   },
 ];
 export const DEFAULT_ROWS_PER_PAGE = 100;
