@@ -155,7 +155,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
             )}
           </EuiCopy>
         </EuiFlexItem>
-        <EuiFlexItem grow={0}>{isUnsaved ? (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved />) : (<ErrorUnsavedWorkPanel />)) : (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved={false} />) : null)}</EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          {isUnsaved ? (
+            exceedsMaxLength ? (
+              <ErrorUrlTooLongPanel isUnsaved />
+            ) : (
+              <ErrorUnsavedWorkPanel />
+            )
+          ) : exceedsMaxLength ? (
+            <ErrorUrlTooLongPanel isUnsaved={false} />
+          ) : null}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
