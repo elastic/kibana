@@ -149,7 +149,7 @@ export async function getServiceInstancesTransactionStatistics<
         ...getBackwardCompatibleDocumentTypeFilter(
           searchAggregatedTransactions
         ),
-        ...(serviceNodeIds
+        ...(serviceNodeIds?.length
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
       ],
@@ -162,7 +162,7 @@ export async function getServiceInstancesTransactionStatistics<
         field: SERVICE_NODE_NAME,
         missing: SERVICE_NODE_NAME_MISSING,
         ...(size ? { size } : {}),
-        ...(serviceNodeIds ? { include: serviceNodeIds } : {}),
+        ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
         ...(sortField
           ? { order: getOrderInstructions(sortField, sortDirection) }
           : {}),
