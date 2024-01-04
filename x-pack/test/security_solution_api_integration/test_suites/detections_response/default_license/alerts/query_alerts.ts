@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 const roleToAccessSecuritySolution = {
   name: 'sec_all_spaces',
   privileges: {
@@ -64,84 +69,85 @@ const userAllSecWithDls = {
   roles: [roleToAccessSecuritySolutionWithDls.name],
 };
 
-describe('find alert with/without doc level security', () => {
-  const supertest = getService('supertest');
+export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
 
-  before(async () => {
-    await security.role.create(
-      roleToAccessSecuritySolution.name,
-      roleToAccessSecuritySolution.privileges
-    );
-    await security.role.create(
-      roleToAccessSecuritySolutionWithDls.name,
-      roleToAccessSecuritySolutionWithDls.privileges
-    );
-    await security.user.create(userAllSec.username, {
-      password: userAllSec.password,
-      roles: userAllSec.roles,
-      full_name: userAllSec.full_name,
-      email: userAllSec.email,
+  describe('find alert with/without doc level security', () => {
+    before(async () => {
+      await security.role.create(
+        roleToAccessSecuritySolution.name,
+        roleToAccessSecuritySolution.privileges
+      );
+      await security.role.create(
+        roleToAccessSecuritySolutionWithDls.name,
+        roleToAccessSecuritySolutionWithDls.privileges
+      );
+      await security.user.create(userAllSec.username, {
+        password: userAllSec.password,
+        roles: userAllSec.roles,
+        full_name: userAllSec.full_name,
+        email: userAllSec.email,
+      });
+      await security.user.create(userAllSecWithDls.username, {
+        password: userAllSecWithDls.password,
+        roles: userAllSecWithDls.roles,
+        full_name: userAllSecWithDls.full_name,
+        email: userAllSecWithDls.email,
+      });
+
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
+        {
+          useCreate: true,
+          docsOnly: true,
+        }
+      );
     });
-    await security.user.create(userAllSecWithDls.username, {
-      password: userAllSecWithDls.password,
-      roles: userAllSecWithDls.roles,
-      full_name: userAllSecWithDls.full_name,
-      email: userAllSecWithDls.email,
+
+    after(async () => {
+      await security.user.delete(userAllSec.username);
+      await security.user.delete(userAllSecWithDls.username);
+      await security.role.delete(roleToAccessSecuritySolution.name);
+      await security.role.delete(roleToAccessSecuritySolutionWithDls.name);
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
+      );
     });
 
-    await esArchiver.load(
-      'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
-      {
-        useCreate: true,
-        docsOnly: true,
-      }
-    );
-  });
-
-  after(async () => {
-    await security.user.delete(userAllSec.username);
-    await security.user.delete(userAllSecWithDls.username);
-    await security.role.delete(roleToAccessSecuritySolution.name);
-    await security.role.delete(roleToAccessSecuritySolutionWithDls.name);
-    await esArchiver.unload(
-      'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
-    );
-  });
-
-  it('should return alerts with user who has access to security solution privileges', async () => {
-    const query = {
-      query: {
-        bool: {
-          should: [{ match_all: {} }],
+    it('should return alerts with user who has access to security solution privileges', async () => {
+      const query = {
+        query: {
+          bool: {
+            should: [{ match_all: {} }],
+          },
         },
-      },
-    };
-    const { body } = await supertestWithoutAuth
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .auth(userAllSec.username, userAllSec.password)
-      .set('kbn-xsrf', 'true')
-      .send(query)
-      .expect(200);
-    expect(body.hits.total.value).to.eql(3);
-  });
+      };
+      const { body } = await supertestWithoutAuth
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .auth(userAllSec.username, userAllSec.password)
+        .set('kbn-xsrf', 'true')
+        .send(query)
+        .expect(200);
+      expect(body.hits.total.value).to.eql(3);
+    });
 
-  it('should filter out alerts with user who has access to security solution privileges and document level security', async () => {
-    const query = {
-      query: {
-        bool: {
-          should: [{ match_all: {} }],
+    it('should filter out alerts with user who has access to security solution privileges and document level security', async () => {
+      const query = {
+        query: {
+          bool: {
+            should: [{ match_all: {} }],
+          },
         },
-      },
-    };
-    const { body } = await supertestWithoutAuth
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .auth(userAllSecWithDls.username, userAllSecWithDls.password)
-      .set('kbn-xsrf', 'true')
-      .send(query)
-      .expect(200);
-    expect(body.hits.total.value).to.eql(0);
+      };
+      const { body } = await supertestWithoutAuth
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .auth(userAllSecWithDls.username, userAllSecWithDls.password)
+        .set('kbn-xsrf', 'true')
+        .send(query)
+        .expect(200);
+      expect(body.hits.total.value).to.eql(0);
+    });
   });
-});
+};
