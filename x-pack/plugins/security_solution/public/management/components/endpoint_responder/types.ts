@@ -12,6 +12,7 @@ import type { ManagedConsoleExtensionComponentProps } from '../console';
 import type {
   EndpointActionDataParameterTypes,
   HostMetadata,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../console/types';
 
@@ -29,10 +30,10 @@ export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionCo
 
 export type ActionRequestComponentProps<
   TArgs extends object = object,
-  TActionOutputContent extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > = CommandExecutionComponentProps<
   { comment?: string } & TArgs,
-  CommandResponseActionApiState<TActionOutputContent, TParameters>,
+  CommandResponseActionApiState<TOutputContent, TParameters>,
   EndpointCommandDefinitionMeta
 >;
