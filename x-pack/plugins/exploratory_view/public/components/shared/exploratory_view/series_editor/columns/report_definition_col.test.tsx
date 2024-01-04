@@ -39,7 +39,7 @@ describe('Series Builder ReportDefinitionCol', function () {
     await waitFor(() => {
       expect(screen.getByText('Web Application')).toBeInTheDocument();
       expect(screen.getByText('Environment')).toBeInTheDocument();
-      expect(screen.getByText('Search Environment')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search Environment')).toBeInTheDocument();
     });
   });
 

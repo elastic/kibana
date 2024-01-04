@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./index_templates'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./enrich_policies'));
     loadTestFile(require.resolve('./create_enrich_policies'));
     loadTestFile(require.resolve('./index_component_templates'));
     loadTestFile(require.resolve('./cluster_nodes'));

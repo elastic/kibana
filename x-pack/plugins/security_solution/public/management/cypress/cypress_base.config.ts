@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-expect-error
+import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
@@ -64,6 +66,7 @@ export const getCypressBaseConfig = (
         // grep related configs
         grepFilterSpecs: true,
         grepOmitFiltered: true,
+        IS_CI: process.env.CI,
       },
 
       e2e: {
@@ -74,7 +77,8 @@ export const getCypressBaseConfig = (
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
-        setupNodeEvents: async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+        setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+          registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
 

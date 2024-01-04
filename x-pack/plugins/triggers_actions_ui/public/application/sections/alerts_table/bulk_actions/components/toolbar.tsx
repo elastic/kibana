@@ -23,7 +23,7 @@ import {
   RowSelection,
 } from '../../../../../types';
 import * as i18n from '../translations';
-import { BulkActionsContext } from '../context';
+import { AlertsTableContext } from '../../contexts/alerts_table_context';
 
 interface BulkActionsProps {
   totalItems: number;
@@ -87,7 +87,9 @@ const useBulkActionsToMenuPanelMapper = (
   alerts: Alerts,
   closeIfPopoverIsOpen: () => void
 ) => {
-  const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [{ isAllSelected, rowSelection }],
+  } = useContext(AlertsTableContext);
 
   const bulkActionsPanels = useMemo(() => {
     const bulkActionPanelsToReturn = [];
@@ -152,7 +154,9 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   clearSelection,
   refresh,
 }) => {
-  const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [{ rowSelection, isAllSelected }, updateSelectedRows],
+  } = useContext(AlertsTableContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);

@@ -16,6 +16,7 @@ import { outputType } from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
+  GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
@@ -203,6 +204,21 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
     };
 
     return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getLatestOutputHealth: RequestHandler<
+  TypeOf<typeof GetLatestOutputHealthRequestSchema.params>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  try {
+    const outputHealth = await outputService.getLatestOutputHealth(
+      esClient,
+      request.params.outputId
+    );
+    return response.ok({ body: outputHealth });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

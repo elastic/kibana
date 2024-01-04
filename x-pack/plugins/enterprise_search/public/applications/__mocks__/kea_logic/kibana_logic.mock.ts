@@ -63,6 +63,7 @@ export const mockKibanaValues = {
   share: sharePluginMock.createStartContract(),
   ml: mlPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  user: null,
 };
 
 jest.mock('../../shared/kibana', () => ({

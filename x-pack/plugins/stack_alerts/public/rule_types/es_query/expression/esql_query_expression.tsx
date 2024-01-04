@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { get } from 'lodash';
+import { debounce, get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldNumber,
@@ -23,11 +23,13 @@ import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
+  FieldOption,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { SourceFields } from '../../components/source_fields_select';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -39,7 +41,7 @@ export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -57,10 +59,12 @@ export const EsqlQueryExpression: React.FC<
     groupBy: DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
+    sourceFields: sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
+  const [esFields, setEsFields] = useState<FieldOption[]>([]);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -79,6 +83,7 @@ export const EsqlQueryExpression: React.FC<
     if (esqlQuery && 'esql' in esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
+        refreshEsFields(esqlQuery, false);
       }
     }
     if (timeField) {
@@ -138,6 +143,7 @@ export const EsqlQueryExpression: React.FC<
     let hasTimestamp = false;
     const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
     const currentEsFields = await getFields(http, [indexPattern]);
+
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
 
@@ -147,6 +153,29 @@ export const EsqlQueryExpression: React.FC<
       hasTimestamp = true;
     }
     setDetectTimestamp(hasTimestamp);
+  };
+
+  const refreshEsFields = async (q: AggregateQuery, resetSourceFields: boolean = true) => {
+    let fields: FieldOption[] = [];
+    try {
+      const table = await fetchFieldsFromESQL({ esql: `${get(q, 'esql')} | limit 0` }, expressions);
+      if (table) {
+        fields = table.columns.map((c) => ({
+          name: c.id,
+          type: c.meta.type,
+          normalizedType: c.meta.type,
+          searchable: true,
+          aggregatable: true,
+        }));
+      }
+    } catch (error) {
+      /** ignore error */
+    }
+
+    if (resetSourceFields) {
+      setParam('sourceFields', undefined);
+    }
+    setEsFields(fields);
   };
 
   return (
@@ -163,11 +192,12 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <TextBasedLangEditor
           query={query}
-          onTextLangQueryChange={(q: AggregateQuery) => {
+          onTextLangQueryChange={debounce((q: AggregateQuery) => {
             setQuery(q);
             setParam('esqlQuery', q);
             refreshTimeFields(q);
-          }}
+            refreshEsFields(q);
+          }, 1000)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
           onTextLangQuerySubmit={() => {}}
@@ -176,6 +206,14 @@ export const EsqlQueryExpression: React.FC<
           hideRunQueryText={true}
         />
       </EuiFormRow>
+      <SourceFields
+        onChangeSourceFields={(selectedSourceFields) =>
+          setParam('sourceFields', selectedSourceFields)
+        }
+        esFields={esFields}
+        sourceFields={sourceFields}
+        errors={errors.sourceFields}
+      />
       <EuiSpacer />
       <EuiTitle size="xs">
         <h5>

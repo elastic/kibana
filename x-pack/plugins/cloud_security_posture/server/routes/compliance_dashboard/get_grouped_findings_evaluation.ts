@@ -14,7 +14,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 import { KeyDocCount } from './compliance_dashboard';
 
 export interface FailedFindingsQueryResult {

@@ -68,7 +68,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; }>"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>"
                 ],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,

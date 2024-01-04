@@ -23,7 +23,7 @@ import type { inputsModel } from '../../common/store';
 import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../store/timeline';
+import { timelineActions } from '../store';
 import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {

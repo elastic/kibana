@@ -430,6 +430,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
         />
         {!!this.state.selectedJob && (
           <ReportInfoFlyout
+            config={this.props.config}
             onClose={() => this.setState({ selectedJob: undefined })}
             job={this.state.selectedJob}
           />

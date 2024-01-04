@@ -69,7 +69,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
       {!isEditing ? (
         <>
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="serverlessSearchConnectorName">
               <h1>{connector.name || CONNECTOR_LABEL}</h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -113,7 +113,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
-                data-test-subj="serverlessSearchEditNameButton"
+                data-test-subj="serverlessSearchSaveNameButton"
                 color="primary"
                 fill
                 type="submit"
@@ -131,7 +131,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
               `}
             >
               <EuiButton
-                data-test-subj="serverlessSearchEditNameButton"
+                data-test-subj="serverlessSearchCancelNameButton"
                 size="s"
                 isLoading={isLoading}
                 onClick={() => {

@@ -1434,7 +1434,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
       i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-        defaultMessage: 'Expected format: {dateFormat}',
+        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
         values: { dateFormat },
       }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
@@ -1453,6 +1453,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
       defaultMessage: 'Must be a valid range',
+    }),
+    'euiAbsoluteTab.dateFormatHint': i18n.translate('core.euiAbsoluteTab.dateFormatHint', {
+      defaultMessage: 'Press the Enter key to parse as a date.',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',

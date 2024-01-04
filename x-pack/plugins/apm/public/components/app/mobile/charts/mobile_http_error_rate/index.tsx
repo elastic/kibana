@@ -11,13 +11,13 @@ import {
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getComparisonChartTheme } from '../../../../shared/time_comparison/get_comparison_chart_theme';
 import { TimeseriesChartWithContext } from '../../../../shared/charts/timeseries_chart_with_context';
-
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../../../hooks/use_fetcher';
 
 import {
   ChartType,
@@ -100,7 +100,10 @@ export function HttpErrorRateChart({
   ];
 
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel hasBorder={true} style={{ position: 'relative' }}>
+      {isPending(status) && (
+        <EuiProgress size="xs" color="accent" position="absolute" />
+      )}
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">

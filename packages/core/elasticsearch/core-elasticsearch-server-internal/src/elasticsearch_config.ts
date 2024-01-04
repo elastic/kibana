@@ -94,7 +94,7 @@ export const configSchema = schema.object({
       }),
     ],
     {
-      defaultValue: ['authorization'],
+      defaultValue: ['authorization', 'es-client-authentication'],
     }
   ),
   customHeaders: schema.recordOf(schema.string(), schema.string(), {

@@ -13,7 +13,7 @@ import type { NewTimelineProps } from './helpers';
 import { AddToFavoritesButton, NewTimeline } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import {

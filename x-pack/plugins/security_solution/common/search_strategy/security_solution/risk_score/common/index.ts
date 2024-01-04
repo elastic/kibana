@@ -11,7 +11,7 @@ import {
   RiskScoreEntity,
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
-} from '../../../../risk_engine';
+} from '../../../../entity_analytics/risk_engine';
 export { RiskQueries } from '../../../../api/search_strategy';
 
 /**

@@ -528,6 +528,7 @@
     "output_id",
     "partition",
     "password",
+    "preset",
     "proxy_id",
     "random",
     "random.group_events",
@@ -720,7 +721,8 @@
     "indicator.params",
     "indicator.type",
     "name",
-    "tags"
+    "tags",
+    "version"
   ],
   "threshold-explorer-view": [],
   "observability-onboarding-state": [
@@ -966,5 +968,8 @@
     "kuery",
     "serviceEnvironmentFilterEnabled",
     "serviceNameFilterEnabled"
+  ],
+  "cloud-security-posture-settings": [
+    "rules"
   ]
 }

@@ -17,7 +17,7 @@ import type {
   ComplianceDashboardDataV2,
   Evaluation,
   PosturePolicyTemplate,
-} from '../../../../common/types';
+} from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED } from '../../../../common/constants';
 import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
@@ -150,7 +150,7 @@ export const BenchmarksSection = ({
       </EuiFlexGroup>
       {benchmarks.map((benchmark) => (
         <EuiFlexGroup
-          key={benchmark.meta.benchmarkId}
+          key={`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`}
           css={css`
             // card height with 3 items in risk table
             height: 200px;

@@ -371,6 +371,7 @@ describe('mappingFromFieldMap', () => {
                 },
                 system_status: { type: 'keyword' },
                 workflow_reason: { type: 'keyword' },
+                workflow_status_updated_at: { type: 'date' },
                 workflow_user: { type: 'keyword' },
               },
             },

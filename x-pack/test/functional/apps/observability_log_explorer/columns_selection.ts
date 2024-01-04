@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
 import { FtrProviderContext } from './config';
 
 const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
@@ -39,10 +38,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should restore the table columns from the URL state if exists', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: {
-            _a: rison.encode({
-              columns: ['service.name', 'host.name', 'message', 'data_stream.namespace'],
-            }),
+          pageState: {
+            columns: [
+              { field: 'service.name' },
+              { field: 'host.name' },
+              { field: 'message' },
+              { field: 'data_stream.namespace' },
+            ],
           },
         });
 

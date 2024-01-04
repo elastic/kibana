@@ -83,7 +83,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -181,12 +181,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
-  const isAlertSuppressionForThresholdRuleFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForThresholdRuleEnabled'
-  );
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
 
   const { getFields, reset, setFieldValue } = form;
 
@@ -806,8 +804,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled =
-    isQueryRule(ruleType) || (isThresholdRule && isAlertSuppressionForThresholdRuleFeatureEnabled);
+  const isAlertSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
 
   return (
     <>
@@ -981,14 +978,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiSpacer size="m" />
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
-            <EuiToolTip
-              content={
-                !isAlertSuppressionLicenseValid
-                  ? i18n.ENABLE_THRESHOLD_SUPPRESSION_LICENSE_WARNING
-                  : null
-              }
-              position="right"
-            >
+            <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
               <CommonUseField
                 path="enableThresholdSuppression"
                 componentProps={{
@@ -1012,7 +1002,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: termsAggregationFields,
-                disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
+                disabledText: alertSuppressionUpsellingMessage,
                 isDisabled: !isAlertSuppressionLicenseValid,
               }}
             />

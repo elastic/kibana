@@ -9,10 +9,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import type { Tag } from '../types';
 import { useServices } from '../services';
-import type { UserContentCommonSchema, TableListViewTableProps } from '../table_list_view_table';
+import type { TableListViewTableProps } from '../table_list_view_table';
+
 import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<

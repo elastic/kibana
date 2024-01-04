@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-prompt-no-data-views",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPrompt",
+        "id": "def-public.NoDataViewsPrompt",
         "type": "Function",
         "tags": [],
         "label": "NoDataViewsPrompt",
@@ -39,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPrompt.$1",
+            "id": "def-public.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  onDataViewCreated,\n  allowAdHocDataView = false,\n}",
@@ -58,7 +42,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPrompt",
+        "id": "def-public.NoDataViewsPrompt",
         "type": "Function",
         "tags": [],
         "label": "NoDataViewsPrompt",
@@ -76,7 +60,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPrompt.$1",
+            "id": "def-public.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  onClickCreate,\n  canCreateNewDataView,\n  dataViewsDocLink,\n  emptyPromptColor = 'plain',\n}",
@@ -95,7 +79,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptKibanaProvider",
+        "id": "def-public.NoDataViewsPromptKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataViewsPromptKibanaProvider",
@@ -113,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptKibanaProvider.$1",
+            "id": "def-public.NoDataViewsPromptKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -134,7 +118,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptProvider",
+        "id": "def-public.NoDataViewsPromptProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataViewsPromptProvider",
@@ -152,7 +136,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptProvider.$1",
+            "id": "def-public.NoDataViewsPromptProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -175,7 +159,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptComponentProps",
+        "id": "def-public.NoDataViewsPromptComponentProps",
         "type": "Interface",
         "tags": [],
         "label": "NoDataViewsPromptComponentProps",
@@ -186,7 +170,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptComponentProps.canCreateNewDataView",
+            "id": "def-public.NoDataViewsPromptComponentProps.canCreateNewDataView",
             "type": "boolean",
             "tags": [],
             "label": "canCreateNewDataView",
@@ -199,7 +183,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptComponentProps.onClickCreate",
+            "id": "def-public.NoDataViewsPromptComponentProps.onClickCreate",
             "type": "Function",
             "tags": [],
             "label": "onClickCreate",
@@ -217,7 +201,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptComponentProps.dataViewsDocLink",
+            "id": "def-public.NoDataViewsPromptComponentProps.dataViewsDocLink",
             "type": "string",
             "tags": [],
             "label": "dataViewsDocLink",
@@ -233,7 +217,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptComponentProps.emptyPromptColor",
+            "id": "def-public.NoDataViewsPromptComponentProps.emptyPromptColor",
             "type": "CompoundType",
             "tags": [],
             "label": "emptyPromptColor",
@@ -252,7 +236,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptKibanaDependencies",
+        "id": "def-public.NoDataViewsPromptKibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "NoDataViewsPromptKibanaDependencies",
@@ -265,7 +249,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptKibanaDependencies.coreStart",
+            "id": "def-public.NoDataViewsPromptKibanaDependencies.coreStart",
             "type": "Object",
             "tags": [],
             "label": "coreStart",
@@ -279,7 +263,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptKibanaDependencies.dataViewEditor",
+            "id": "def-public.NoDataViewsPromptKibanaDependencies.dataViewEditor",
             "type": "Object",
             "tags": [],
             "label": "dataViewEditor",
@@ -298,7 +282,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptProps",
+        "id": "def-public.NoDataViewsPromptProps",
         "type": "Interface",
         "tags": [],
         "label": "NoDataViewsPromptProps",
@@ -309,7 +293,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptProps.onDataViewCreated",
+            "id": "def-public.NoDataViewsPromptProps.onDataViewCreated",
             "type": "Function",
             "tags": [],
             "label": "onDataViewCreated",
@@ -325,7 +309,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-                "id": "def-common.NoDataViewsPromptProps.onDataViewCreated.$1",
+                "id": "def-public.NoDataViewsPromptProps.onDataViewCreated.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "dataView",
@@ -343,7 +327,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptProps.allowAdHocDataView",
+            "id": "def-public.NoDataViewsPromptProps.allowAdHocDataView",
             "type": "CompoundType",
             "tags": [],
             "label": "allowAdHocDataView",
@@ -362,7 +346,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-        "id": "def-common.NoDataViewsPromptServices",
+        "id": "def-public.NoDataViewsPromptServices",
         "type": "Interface",
         "tags": [],
         "label": "NoDataViewsPromptServices",
@@ -375,7 +359,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptServices.canCreateNewDataView",
+            "id": "def-public.NoDataViewsPromptServices.canCreateNewDataView",
             "type": "boolean",
             "tags": [],
             "label": "canCreateNewDataView",
@@ -388,7 +372,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptServices.openDataViewEditor",
+            "id": "def-public.NoDataViewsPromptServices.openDataViewEditor",
             "type": "Function",
             "tags": [],
             "label": "openDataViewEditor",
@@ -406,7 +390,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-                "id": "def-common.NoDataViewsPromptServices.openDataViewEditor.$1",
+                "id": "def-public.NoDataViewsPromptServices.openDataViewEditor.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -424,7 +408,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
-            "id": "def-common.NoDataViewsPromptServices.dataViewsDocLink",
+            "id": "def-public.NoDataViewsPromptServices.dataViewsDocLink",
             "type": "string",
             "tags": [],
             "label": "dataViewsDocLink",
@@ -439,6 +423,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

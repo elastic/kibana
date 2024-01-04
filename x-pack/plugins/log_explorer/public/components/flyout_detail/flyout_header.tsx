@@ -13,6 +13,7 @@ import { LogLevel } from './sub_components/log_level';
 import { Timestamp } from './sub_components/timestamp';
 import * as constants from '../../../common/constants';
 import { flyoutMessageLabel } from './translations';
+import { HoverActionPopover } from './sub_components/hover_popover_action';
 
 export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
   const { hasTimestamp, hasLogLevel, hasMessage, hasBadges, hasFlyoutHeader } =
@@ -23,9 +24,14 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
       {hasBadges && (
         <EuiFlexGroup responsive={false} gutterSize="m" justifyContent="flexEnd">
           {hasLogLevel && (
-            <EuiFlexItem grow={false}>
-              <LogLevel level={doc[constants.LOG_LEVEL_FIELD]} />
-            </EuiFlexItem>
+            <HoverActionPopover
+              value={doc[constants.LOG_LEVEL_FIELD] as string}
+              field={constants.LOG_LEVEL_FIELD}
+            >
+              <EuiFlexItem grow={false}>
+                <LogLevel level={doc[constants.LOG_LEVEL_FIELD]} />
+              </EuiFlexItem>
+            </HoverActionPopover>
           )}
           {hasTimestamp && (
             <EuiFlexItem grow={false}>
@@ -49,9 +55,15 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    {flyoutMessageLabel}
-                  </EuiText>
+                  <HoverActionPopover
+                    value={doc[constants.MESSAGE_FIELD] as string}
+                    field={constants.MESSAGE_FIELD}
+                    anchorPosition="rightCenter"
+                  >
+                    <EuiText color="subdued" size="xs">
+                      {flyoutMessageLabel}
+                    </EuiText>
+                  </HoverActionPopover>
                 </EuiFlexItem>
                 {logLevelAndTimestamp}
               </EuiFlexGroup>

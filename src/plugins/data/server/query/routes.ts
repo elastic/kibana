@@ -30,7 +30,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
 const savedQueryResponseSchema = schema.object({
   id: schema.string(),
   attributes: SAVED_QUERY_ATTRS_CONFIG,
-  namespaces: schema.arrayOf(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const access = 'internal';

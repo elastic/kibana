@@ -29,6 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/reporting'),
       require.resolve('../../common/grok_debugger'),
       require.resolve('../../common/painless_lab'),
+      require.resolve('../../common/console'),
     ],
     junit: {
       reportName: 'Serverless Security API Integration Tests - Common Group 1',

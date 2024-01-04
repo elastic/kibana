@@ -34,6 +34,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/unified-search-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/search-errors",
     "@kbn/panel-loader",
   ],
   "exclude": ["target/**/*"]

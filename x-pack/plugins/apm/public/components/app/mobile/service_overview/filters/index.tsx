@@ -59,7 +59,7 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
 
 export function MobileFilters() {
   const history = useHistory();
-  const { isSmall, isLarge } = useBreakpoints();
+  const { isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -136,7 +136,7 @@ export function MobileFilters() {
           >
             <EuiSelect
               data-test-subj="apmMobileFiltersSelect"
-              fullWidth={isSmall}
+              fullWidth
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
               options={toSelectOptions(selectOptions)}

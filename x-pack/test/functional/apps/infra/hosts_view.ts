@@ -424,7 +424,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should have an option to open the chart in lens', async () => {
-          await pageObjects.infraHostsView.clickAndValidateMetriChartActionOptions();
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
+          });
         });
       });
 

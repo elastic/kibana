@@ -8,7 +8,12 @@ import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap, FramePublicAPI } from '../../../types';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+} from '../../../types';
 import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
 import type { Document } from '../../../persistence';
@@ -20,6 +25,7 @@ export interface FlyoutWrapperProps {
   displayFlyoutHeader?: boolean;
   language?: string;
   attributesChanged?: boolean;
+  isNewPanel?: boolean;
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
@@ -70,6 +76,12 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   canEditTextBasedQuery?: boolean;
+  /** The flyout is used for adding a new panel by scratch */
+  isNewPanel?: boolean;
+  /** Handler for deleting the embeddable, used in case a user cancels a newly created chart */
+  deletePanel?: () => void;
+  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
+  hidesSuggestions?: boolean;
 }
 
 export interface LayerConfigurationProps {
@@ -82,4 +94,5 @@ export interface LayerConfigurationProps {
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
+  getUserMessages: UserMessagesGetter;
 }

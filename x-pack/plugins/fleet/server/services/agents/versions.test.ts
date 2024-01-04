@@ -179,4 +179,29 @@ describe('getAvailableVersions', () => {
     expect(mockedFetch).toBeCalledTimes(1);
     expect(res2).not.toContain('300.0.0');
   });
+
+  it('should gracefully handle 400 errors when fetching from product versions API', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValue({
+      status: 400,
+      text: 'Bad request',
+    } as any);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    // Should sort, uniquify and filter out versions < 7.17
+    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+  });
+
+  it('should gracefully handle network errors when fetching from product versions API', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockRejectedValue('ECONNREFUSED');
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    // Should sort, uniquify and filter out versions < 7.17
+    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+  });
 });

@@ -7,11 +7,11 @@
 
 import React from 'react';
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendPostBulkAgentUpgrade } from '../../../../hooks';
+import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
 
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
@@ -29,10 +29,13 @@ jest.mock('../../../../hooks', () => {
     }),
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
+    useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
   };
 });
 
 const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
+
+const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();
@@ -45,126 +48,184 @@ function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps
 }
 
 describe('AgentUpgradeAgentModal', () => {
-  it('should set the default to Immediately if there is less than 10 agents using kuery', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: '*',
-      agentCount: 3,
+  describe('maintenance window', () => {
+    it('should set the default to Immediately if there is less than 10 agents using kuery', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 3,
+      });
+
+      const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+      const input = within(container).getByRole<HTMLInputElement>('combobox');
+      expect(input?.value).toBe('Immediately');
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('Immediately');
-  });
+    it('should set the default to Immediately if there is less than 10 agents using selected agents', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [{ id: 'agent1' }, { id: 'agent2' }] as any,
+        agentCount: 3,
+      });
 
-  it('should set the default to Immediately if there is less than 10 agents using selected agents', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: [{ id: 'agent1' }, { id: 'agent2' }] as any,
-      agentCount: 3,
+      const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+      const input = within(container).getByRole<HTMLInputElement>('combobox');
+      expect(input?.value).toBe('Immediately');
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('Immediately');
-  });
+    it('should set the default to 1 hour if there is more than 10 agents', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 13,
+      });
 
-  it('should set the default to 1 hour if there is more than 10 agents', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: '*',
-      agentCount: 13,
-    });
-
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('1 hour');
-  });
-
-  it('should enable the version combo if agents is a query', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: '*',
-      agentCount: 30,
-    });
-
-    const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
-    await waitFor(() => {
-      expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
+      const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+      const input = within(container).getByRole<HTMLInputElement>('combobox');
+      expect(input?.value).toBe('1 hour');
     });
   });
 
-  it('should default the version combo to latest agent version', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: [{ id: 'agent1', local_metadata: { host: 'abc' } }] as any,
-      agentCount: 1,
+  describe('version combo', () => {
+    it('should enable the version combo if agents is a query', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 30,
+      });
+
+      const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+      await waitFor(() => {
+        expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
+      });
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
-    await waitFor(() => {
-      expect(el.textContent).toEqual('8.10.2');
+    it('should default the version combo to latest agent version', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [{ id: 'agent1', local_metadata: { host: 'abc' } }] as any,
+        agentCount: 1,
+      });
+
+      const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+      const input = within(container).getByRole<HTMLInputElement>('combobox');
+
+      await waitFor(() => {
+        expect(input?.value).toEqual('8.10.2');
+      });
+    });
+
+    it('should display available version options', async () => {
+      mockSendGetAgentsAvailableVersions.mockClear();
+      mockSendGetAgentsAvailableVersions.mockResolvedValue({
+        data: {
+          items: ['8.10.4', '8.10.2+build123456789', '8.10.2', '8.7.0'],
+        },
+      });
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.10.2' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+      fireEvent.click(await utils.findByTestId('comboBoxToggleListButton'));
+      const optionList = await utils.findByTestId(
+        'comboBoxOptionsList agentUpgradeModal.VersionCombobox-optionsList'
+      );
+      expect(optionList.textContent).toEqual(['8.10.4', '8.10.2+build123456789'].join(''));
     });
   });
 
-  it('should restart uprade on updating agents if some agents in updating', async () => {
+  describe('restart upgrade', () => {
+    it('should restart uprade on updating agents if some agents in updating', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          { status: 'updating', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
+          { id: 'agent2' },
+        ] as any,
+        agentCount: 2,
+        isUpdating: true,
+      });
+
+      const el = utils.getByTestId('confirmModalTitleText');
+      expect(el.textContent).toEqual('Restart upgrade on 1 out of 2 agents stuck in updating');
+
+      const btn = utils.getByTestId('confirmModalConfirmButton');
+      await waitFor(() => {
+        expect(btn).toBeEnabled();
+      });
+
+      act(() => {
+        fireEvent.click(btn);
+      });
+
+      expect(mockSendPostBulkAgentUpgrade.mock.calls.at(-1)[0]).toEqual(
+        expect.objectContaining({ agents: ['agent1'], force: true })
+      );
+    });
+
+    it('should restart upgrade on updating agents if kuery', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 3,
+        isUpdating: true,
+      });
+
+      const el = await utils.findByTestId('confirmModalTitleText');
+      expect(el.textContent).toEqual('Restart upgrade on 2 out of 3 agents stuck in updating');
+
+      const btn = utils.getByTestId('confirmModalConfirmButton');
+      await waitFor(() => {
+        expect(btn).toBeEnabled();
+      });
+
+      act(() => {
+        fireEvent.click(btn);
+      });
+
+      expect(mockSendPostBulkAgentUpgrade.mock.calls.at(-1)[0]).toEqual(
+        expect.objectContaining({
+          agents:
+            '(*) AND status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-2h',
+          force: true,
+        })
+      );
+    });
+
+    it('should disable submit button if no agents stuck updating', () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          { status: 'offline', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
+          { id: 'agent2' },
+        ] as any,
+        agentCount: 2,
+        isUpdating: true,
+      });
+
+      const el = utils.getByTestId('confirmModalConfirmButton');
+      expect(el).toBeDisabled();
+    });
+  });
+
+  it('should disable submit button and display a warning for a single agent that is not upgradeable', async () => {
     const { utils } = renderAgentUpgradeAgentModal({
       agents: [
-        { status: 'updating', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
-        { id: 'agent2' },
+        {
+          status: 'offline',
+          upgrade_started_at: '2022-11-21T12:27:24Z',
+          id: 'agent1',
+          local_metadata: { elastic: { agent: { version: '8.9.0' } } },
+        },
       ] as any,
       agentCount: 2,
-      isUpdating: true,
     });
-
-    const el = utils.getByTestId('confirmModalTitleText');
-    expect(el.textContent).toEqual('Restart upgrade on 1 out of 2 agents stuck in updating');
-
-    const btn = utils.getByTestId('confirmModalConfirmButton');
     await waitFor(() => {
-      expect(btn).toBeEnabled();
+      expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
+      expect(
+        utils.queryByText(
+          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
+        )
+      ).toBeInTheDocument();
+      const el = utils.getByTestId('confirmModalConfirmButton');
+      expect(el).toBeDisabled();
     });
-
-    act(() => {
-      fireEvent.click(btn);
-    });
-
-    expect(mockSendPostBulkAgentUpgrade.mock.calls.at(-1)[0]).toEqual(
-      expect.objectContaining({ agents: ['agent1'], force: true })
-    );
-  });
-
-  it('should restart upgrade on updating agents if kuery', async () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: '*',
-      agentCount: 3,
-      isUpdating: true,
-    });
-
-    const el = await utils.findByTestId('confirmModalTitleText');
-    expect(el.textContent).toEqual('Restart upgrade on 2 out of 3 agents stuck in updating');
-
-    const btn = utils.getByTestId('confirmModalConfirmButton');
-    await waitFor(() => {
-      expect(btn).toBeEnabled();
-    });
-
-    act(() => {
-      fireEvent.click(btn);
-    });
-
-    expect(mockSendPostBulkAgentUpgrade.mock.calls.at(-1)[0]).toEqual(
-      expect.objectContaining({
-        agents:
-          '(*) AND status:updating AND upgrade_started_at:* AND NOT upgraded_at:* AND upgrade_started_at < now-2h',
-        force: true,
-      })
-    );
-  });
-
-  it('should disable submit button if no agents stuck updating', () => {
-    const { utils } = renderAgentUpgradeAgentModal({
-      agents: [
-        { status: 'offline', upgrade_started_at: '2022-11-21T12:27:24Z', id: 'agent1' },
-        { id: 'agent2' },
-      ] as any,
-      agentCount: 2,
-      isUpdating: true,
-    });
-
-    const el = utils.getByTestId('confirmModalConfirmButton');
-    expect(el).toBeDisabled();
   });
 });

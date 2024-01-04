@@ -15,7 +15,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -29,7 +29,7 @@ import { asDynamicBytes } from '../../../../common/utils/formatters';
 
 export function StorageChart() {
   const { core } = useApmPluginContext();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
 
   const euiPaletteColorBlindRotations = 3;
   const groupedPalette = euiPaletteColorBlind({
@@ -99,8 +99,9 @@ export function StorageChart() {
                 area: { opacity: 1 },
               },
             },
-            ...chartTheme,
+            ...chartThemes.theme,
           ]}
+          baseTheme={chartThemes.baseTheme}
           showLegend
           legendPosition={Position.Right}
           locale={i18n.getLocale()}

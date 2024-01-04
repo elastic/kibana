@@ -118,6 +118,7 @@ describe('CsvGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
       enablePanelActionDownload: true,
+      maxConcurrentShardRequests: 5,
     };
 
     searchSourceMock.getField = jest.fn((key: string) => {
@@ -245,6 +246,7 @@ describe('CsvGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
       enablePanelActionDownload: true,
+      maxConcurrentShardRequests: 5,
     };
 
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -345,7 +347,7 @@ describe('CsvGenerator', () => {
 
     expect(mockDataClient.search).toHaveBeenCalledTimes(10);
     expect(mockDataClient.search).toBeCalledWith(
-      { params: { body: {}, ignore_throttled: undefined } },
+      { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
       { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
     );
 
@@ -356,7 +358,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
@@ -763,6 +765,7 @@ describe('CsvGenerator', () => {
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s' },
         enablePanelActionDownload: true,
+        maxConcurrentShardRequests: 5,
       };
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
@@ -833,7 +836,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
@@ -843,13 +846,14 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockDataClient.search).toBeCalledWith(
       {
         params: {
           body: {},
+          max_concurrent_shard_requests: 5,
         },
       },
       { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }

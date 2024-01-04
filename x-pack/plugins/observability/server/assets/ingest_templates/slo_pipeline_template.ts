@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
 export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => ({
   id,
-  description: 'Monthly date-time index naming for SLO data',
+  description: 'Ingest pipeline for SLO rollup data',
   processors: [
+    {
+      set: {
+        field: 'event.ingested',
+        value: '{{{_ingest.timestamp}}}',
+      },
+    },
     {
       date_index_name: {
         field: '@timestamp',
         index_name_prefix: indexNamePrefix,
         date_rounding: 'M',
+        date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
   ],
   _meta: {
-    description: 'SLO ingest pipeline',
+    description: 'Ingest pipeline for SLO rollup data',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',

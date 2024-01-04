@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
-import {
-  ExpandableFlyout,
-  type ExpandableFlyoutProps,
-  ExpandableFlyoutProvider,
-} from '@kbn/expandable-flyout';
+import React, { memo } from 'react';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -28,8 +24,8 @@ import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
-import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
+import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -72,19 +68,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
-    key: RiskInputsPanelKey,
+    key: UserDetailsPanelKey,
     component: (props) => (
-      <RiskInputsPanel {...(props as RiskInputsExpandableFlyoutProps).params} />
+      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
     ),
   },
 ];
-
-// NOTE: provider below accepts "storage" prop, please take a look into component's JSDoc.
-export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <ExpandableFlyoutProvider storage="url">{children}</ExpandableFlyoutProvider>
-);
-
-SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
 
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />

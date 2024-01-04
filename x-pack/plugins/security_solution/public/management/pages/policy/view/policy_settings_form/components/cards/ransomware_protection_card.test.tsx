@@ -53,7 +53,6 @@ describe('Policy Ransomware Protections Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(getByTestId(testSubj.rulesCallout));
   });
 
   it('should show supported OS values', () => {
@@ -108,8 +107,7 @@ describe('Policy Ransomware Protections Card', () => {
             'Agent version 7.12+' +
             'Notify user' +
             'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            '—'
         )
       );
     });
@@ -133,8 +131,7 @@ describe('Policy Ransomware Protections Card', () => {
             'Agent version 7.12+' +
             'Notify user' +
             'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            '—'
         )
       );
     });
@@ -159,8 +156,7 @@ describe('Policy Ransomware Protections Card', () => {
             'Agent version 7.12+' +
             'Notify user' +
             'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            '—'
         )
       );
     });

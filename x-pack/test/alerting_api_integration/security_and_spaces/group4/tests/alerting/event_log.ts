@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import {
+  descriptorToArray,
+  SavedObjectDescriptor,
+} from '@kbn/encrypted-saved-objects-plugin/server/crypto';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -73,12 +78,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const event = events[1];
       expect(event).to.be.ok();
 
+      const expectedDescriptor: SavedObjectDescriptor = {
+        id: alertId,
+        type: 'alert',
+        // alerts types are multinamespace, so the namespace in the descriptor should not get set
+      };
+
       validateEvent(event, {
         spaceId,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.noop' }],
+        savedObjects: [
+          { type: RULE_SAVED_OBJECT_TYPE, id: alertId, rel: 'primary', type_id: 'test.noop' },
+        ],
         outcome: 'failure',
         message: `test.noop:${alertId}: execution failed`,
-        errorMessage: 'Unable to decrypt attribute "apiKey"',
+        errorMessage: `Unable to decrypt attribute "apiKey" of saved object "${descriptorToArray(
+          expectedDescriptor
+        )}"`,
         status: 'error',
         reason: 'decrypt',
         shouldHaveTask: true,

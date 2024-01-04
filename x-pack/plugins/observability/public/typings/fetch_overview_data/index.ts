@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityApp } from '../../../typings/common';
-import type { UXMetrics } from '../../pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {

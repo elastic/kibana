@@ -28,7 +28,7 @@ import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
-import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+import type { Category } from '../../../common/api/log_categorization/types';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
@@ -86,7 +86,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
-    sparkLines: SparkLinesPerCategory;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -205,34 +204,35 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     const { getIndexPattern, timeFieldName: timeField } = dataView;
     const index = getIndexPattern();
 
-    if (selectedField === undefined || timeField === undefined) {
+    if (
+      selectedField === undefined ||
+      timeField === undefined ||
+      earliest === undefined ||
+      latest === undefined
+    ) {
       setLoading(false);
       return;
     }
 
     cancelRequest();
 
+    const timeRange = {
+      from: earliest,
+      to: latest,
+    };
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery, {
+        runValidateFieldRequest(index, selectedField, timeField, timeRange, searchQuery, {
           [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
         }),
 
-        runCategorizeRequest(
-          index,
-          selectedField,
-          timeField,
-          earliest,
-          latest,
-          searchQuery,
-          intervalMs
-        ),
+        runCategorizeRequest(index, selectedField, timeField, timeRange, searchQuery, intervalMs),
       ]);
 
       setFieldValidationResult(validationResult);
       setData({
         categories: categorizationResult.categories,
-        sparkLines: categorizationResult.sparkLinesPerCategory,
       });
     } catch (error) {
       toasts.addError(error, {
@@ -355,7 +355,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
             selectedCategory={selectedCategory}
-            sparkLines={data?.sparkLines ?? {}}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -380,7 +379,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           aiopsListState={stateFromUrl}
           dataViewId={dataView.id!}
           eventRate={eventRate}
-          sparkLines={data.sparkLines}
           selectedField={selectedField}
           pinnedCategory={pinnedCategory}
           setPinnedCategory={setPinnedCategory}

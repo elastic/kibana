@@ -12,6 +12,7 @@ import type { Writable } from 'stream';
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type {
+  IEsSearchRequest,
   IKibanaSearchResponse,
   ISearchSource,
   ISearchStartSearchSource,
@@ -66,7 +67,11 @@ export class CsvGenerator {
   ) {}
 
   private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
-    const { duration } = settings.scroll;
+    const {
+      includeFrozen,
+      maxConcurrentShardRequests,
+      scroll: { duration },
+    } = settings;
     let pitId: string | undefined;
     this.logger.debug(`Requesting PIT for: [${indexPatternTitle}]...`);
     try {
@@ -77,11 +82,12 @@ export class CsvGenerator {
           keep_alive: duration,
           ignore_unavailable: true,
           // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
-          ignore_throttled: settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+          ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
           requestTimeout: duration,
           maxRetries: 0,
+          maxConcurrentShardRequests,
         }
       );
       pitId = response.id;
@@ -135,7 +141,7 @@ export class CsvGenerator {
     settings: CsvExportSettings,
     searchAfter?: estypes.SortResults
   ) {
-    const { scroll: scrollSettings } = settings;
+    const { scroll: scrollSettings, maxConcurrentShardRequests } = settings;
     searchSource.setField('size', scrollSettings.size);
 
     if (searchAfter) {
@@ -153,8 +159,14 @@ export class CsvGenerator {
       throw new Error('Could not retrieve the search body!');
     }
 
-    const searchParams = { params: { body: searchBody } };
-    let results: estypes.SearchResponse<unknown>;
+    const searchParams: IEsSearchRequest = {
+      params: {
+        body: searchBody,
+        max_concurrent_shard_requests: maxConcurrentShardRequests,
+      },
+    };
+
+    let results: estypes.SearchResponse<unknown> | undefined;
     try {
       const { rawResponse, ...rawDetails } = await lastValueFrom(
         this.clients.data.search(searchParams, {

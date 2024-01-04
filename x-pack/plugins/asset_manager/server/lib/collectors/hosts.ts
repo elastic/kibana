@@ -8,6 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { extractFieldValue } from '../utils';
 
 export async function collectHosts({
   client,
@@ -69,14 +70,14 @@ export async function collectHosts({
 
   const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const { fields = {} } = hit;
-    const hostName = fields['host.hostname'];
-    const k8sNode = fields['kubernetes.node.name'];
-    const k8sPod = fields['kubernetes.pod.uid'];
+    const hostName = extractFieldValue(fields['host.hostname']);
+    const k8sNode = extractFieldValue(fields['kubernetes.node.name']);
+    const k8sPod = extractFieldValue(fields['kubernetes.pod.uid']);
 
     const hostEan = `host:${k8sNode || hostName}`;
 
     const host: Asset = {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': extractFieldValue(fields['@timestamp']),
       'asset.kind': 'host',
       'asset.id': k8sNode || hostName,
       'asset.name': k8sNode || hostName,
@@ -84,23 +85,23 @@ export async function collectHosts({
     };
 
     if (fields['cloud.provider']) {
-      host['cloud.provider'] = fields['cloud.provider'];
+      host['cloud.provider'] = extractFieldValue(fields['cloud.provider']);
     }
 
     if (fields['cloud.instance.id']) {
-      host['cloud.instance.id'] = fields['cloud.instance.id'];
+      host['cloud.instance.id'] = extractFieldValue(fields['cloud.instance.id']);
     }
 
     if (fields['cloud.service.name']) {
-      host['cloud.service.name'] = fields['cloud.service.name'];
+      host['cloud.service.name'] = extractFieldValue(fields['cloud.service.name']);
     }
 
     if (fields['cloud.region']) {
-      host['cloud.region'] = fields['cloud.region'];
+      host['cloud.region'] = extractFieldValue(fields['cloud.region']);
     }
 
     if (fields['orchestrator.cluster.name']) {
-      host['orchestrator.cluster.name'] = fields['orchestrator.cluster.name'];
+      host['orchestrator.cluster.name'] = extractFieldValue(fields['orchestrator.cluster.name']);
     }
 
     if (k8sPod) {

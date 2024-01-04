@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
@@ -22,7 +22,7 @@ export function registerFlameChartSearchRoute({
   router.get(
     {
       path: paths.Flamechart,
-      options: { tags: ['access:profiling'] },
+      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),

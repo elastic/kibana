@@ -58,35 +58,32 @@ export function registerRuleTypes(
     sloBurnRateRuleType(createLifecycleRuleExecutorSLO, basePath, locators.alertsLocator)
   );
 
-  // Threshold RULE
-  if (config.unsafe.thresholdRule.enabled) {
-    const ruleDataClientThreshold = ruleDataService.initializeIndex({
-      feature: observabilityFeatureId,
-      registrationContext: THRESHOLD_RULE_REGISTRATION_CONTEXT,
-      dataset: Dataset.alerts,
-      componentTemplateRefs: [],
-      componentTemplates: [
-        {
-          name: 'mappings',
-          mappings: mappingFromFieldMap({ ...legacyExperimentalFieldMap }, 'strict'),
-        },
-      ],
-    });
+  const ruleDataClientThreshold = ruleDataService.initializeIndex({
+    feature: observabilityFeatureId,
+    registrationContext: THRESHOLD_RULE_REGISTRATION_CONTEXT,
+    dataset: Dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+        mappings: mappingFromFieldMap({ ...legacyExperimentalFieldMap }, 'strict'),
+      },
+    ],
+  });
 
-    const createLifecycleRuleExecutorThreshold = createLifecycleExecutor(
-      logger.get('rules'),
-      ruleDataClientThreshold
-    );
+  const createLifecycleRuleExecutorThreshold = createLifecycleExecutor(
+    logger.get('rules'),
+    ruleDataClientThreshold
+  );
 
-    alertingPlugin.registerType(
-      thresholdRuleType(
-        createLifecycleRuleExecutorThreshold,
-        basePath,
-        config,
-        logger,
-        ruleDataClientThreshold,
-        locators
-      )
-    );
-  }
+  alertingPlugin.registerType(
+    thresholdRuleType(
+      createLifecycleRuleExecutorThreshold,
+      basePath,
+      config,
+      logger,
+      ruleDataClientThreshold,
+      locators
+    )
+  );
 }

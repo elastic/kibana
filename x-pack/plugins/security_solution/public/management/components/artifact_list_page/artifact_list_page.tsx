@@ -163,6 +163,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     });
 
     const policiesRequest = useGetEndpointSpecificPolicies({
+      perPage: 1000,
       onError: (err) => {
         toasts.addWarning(getLoadPoliciesError(err));
       },

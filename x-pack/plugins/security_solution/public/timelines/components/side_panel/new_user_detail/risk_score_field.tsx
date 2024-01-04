@@ -15,8 +15,8 @@ import * as i18n from './translations';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
-import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 
 export const TooltipContainer = styled.div`

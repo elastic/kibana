@@ -4680,6 +4680,54 @@
         ]
       }
     },
+    "/outputs/{outputId}/health": {
+      "get": {
+        "summary": "Get latest output health",
+        "tags": [
+          "Outputs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "description": "state of output, HEALTHY or DEGRADED"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "long message if unhealthy"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "timestamp of reported state"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "get-output-health"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "outputId",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
     "/logstash_api_keys": {
       "post": {
         "summary": "Generate Logstash API key",
@@ -7092,10 +7140,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "package_policies": {
             "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter",
@@ -7195,10 +7243,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "agent_features": {
             "type": "array",
@@ -7267,10 +7315,10 @@
             "nullable": true
           },
           "unenroll_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "inactivity_timeout": {
-            "type": "number"
+            "type": "integer"
           },
           "agent_features": {
             "type": "array",
@@ -7904,6 +7952,16 @@
           "config": {
             "type": "object"
           },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
+          },
           "config_yaml": {
             "type": "string"
           },
@@ -8393,6 +8451,16 @@
           },
           "config": {
             "type": "object"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
           },
           "config_yaml": {
             "type": "string"

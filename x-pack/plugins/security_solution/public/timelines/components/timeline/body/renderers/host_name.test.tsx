@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
@@ -44,8 +44,8 @@ jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
-jest.mock('../../../../store/timeline', () => {
-  const original = jest.requireActual('../../../../store/timeline');
+jest.mock('../../../../store', () => {
+  const original = jest.requireActual('../../../../store');
   return {
     ...original,
     timelineActions: {

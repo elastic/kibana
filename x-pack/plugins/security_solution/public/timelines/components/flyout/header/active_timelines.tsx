@@ -18,7 +18,7 @@ import {
   focusActiveTimelineButton,
 } from '../../timeline/helpers';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import * as i18n from './translations';
 
 export interface ActiveTimelinesProps {

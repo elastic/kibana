@@ -11,26 +11,22 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiSelectableOption, EuiText } from '@elastic/eui';
 
-import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 
-import {
-  DeployModelButton,
-  getContextMenuPanel,
-  ModelSelectOption,
-  ModelSelectOptionProps,
-  StartModelButton,
-} from './model_select_option';
+import { LicenseBadge } from './license_badge';
+import { ModelSelectOption } from './model_select_option';
 
-const DEFAULT_PROPS: ModelSelectOptionProps = {
+const DEFAULT_PROPS: EuiSelectableOption<MlModel> = {
   modelId: 'model_1',
   type: 'ner',
   label: 'Model 1',
   title: 'Model 1',
   description: 'Model 1 description',
-  license: 'elastic',
+  licenseType: 'elastic',
+  modelDetailsPageUrl: 'https://my-model.ai',
   deploymentState: MlModelDeploymentState.NotDeployed,
   startTime: 0,
   targetAllocationCount: 0,
@@ -47,16 +43,16 @@ describe('ModelSelectOption', () => {
   });
   it('renders with license badge if present', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(1);
+    expect(wrapper.find(LicenseBadge)).toHaveLength(1);
   });
   it('renders without license badge if not present', () => {
     const props = {
       ...DEFAULT_PROPS,
-      license: undefined,
+      licenseType: undefined,
     };
 
     const wrapper = shallow(<ModelSelectOption {...props} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(0);
+    expect(wrapper.find(LicenseBadge)).toHaveLength(0);
   });
   it('renders with description if present', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
@@ -71,33 +67,8 @@ describe('ModelSelectOption', () => {
     const wrapper = shallow(<ModelSelectOption {...props} />);
     expect(wrapper.find(EuiText)).toHaveLength(0);
   });
-  it('renders deploy button for a model placeholder', () => {
-    const props = {
-      ...DEFAULT_PROPS,
-      isPlaceholder: true,
-    };
-
-    const wrapper = shallow(<ModelSelectOption {...props} />);
-    expect(wrapper.find(DeployModelButton)).toHaveLength(1);
-  });
-  it('renders start button for a downloaded model', () => {
-    const props = {
-      ...DEFAULT_PROPS,
-      deploymentState: MlModelDeploymentState.Downloaded,
-    };
-
-    const wrapper = shallow(<ModelSelectOption {...props} />);
-    expect(wrapper.find(StartModelButton)).toHaveLength(1);
-  });
   it('renders status badge if there is no action button', () => {
     const wrapper = shallow(<ModelSelectOption {...DEFAULT_PROPS} />);
     expect(wrapper.find(TrainedModelHealth)).toHaveLength(1);
-  });
-
-  describe('getContextMenuPanel', () => {
-    it('gets model details link if URL is present', () => {
-      const panels = getContextMenuPanel('https://model.ai');
-      expect(panels[0].items).toHaveLength(2);
-    });
   });
 });

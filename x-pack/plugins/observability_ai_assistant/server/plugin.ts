@@ -7,19 +7,19 @@
 
 import {
   CoreSetup,
-  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { mapValues } from 'lodash';
+import { mapValues, once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
+import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -31,7 +31,8 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
+import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
+import { registerFunctions } from './functions';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -43,6 +44,8 @@ export class ObservabilityAIAssistantPlugin
     >
 {
   logger: Logger;
+  service: ObservabilityAIAssistantService | undefined;
+
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
   }
@@ -103,11 +106,37 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
-    const service = new ObservabilityAIAssistantService({
+    const getModelId = once(async () => {
+      // Using once to make sure the same model ID is used during service init and Knowledge base setup
+
+      try {
+        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
+        const [_, pluginsStart] = await core.getStartServices();
+
+        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
+        await firstValueFrom(pluginsStart.licensing.license$);
+
+        const elserModelDefinition = await plugins.ml
+          .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
+          .getELSER();
+
+        return elserModelDefinition.model_id;
+      } catch (error) {
+        this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
+
+        // Fallback to ELSER v2
+        return '.elser_model_2';
+      }
+    });
+
+    const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
-    });
+      getModelId,
+    }));
+
+    service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
@@ -116,17 +145,18 @@ export class ObservabilityAIAssistantPlugin
       logger: this.logger,
       dependencies: {
         plugins: routeHandlerPlugins,
-        service,
+        service: this.service,
       },
     });
 
-    return {};
+    return {
+      service,
+    };
   }
 
-  public start(
-    core: CoreStart,
-    plugins: ObservabilityAIAssistantPluginStartDependencies
-  ): ObservabilityAIAssistantPluginStart {
-    return {};
+  public start(): ObservabilityAIAssistantPluginStart {
+    return {
+      service: this.service!,
+    };
   }
 }

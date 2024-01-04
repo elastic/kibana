@@ -22,6 +22,7 @@ import { GROUP_ID } from './constants';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { Ast } from '@kbn/interpreter';
+import { LayoutDirection } from '@elastic/charts';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -318,6 +319,9 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
+                "max": Array [
+                  "max-metric-col-id",
+                ],
                 "maxCols": Array [
                   5,
                 ],
@@ -339,9 +343,6 @@ describe('metric visualization', () => {
                     ],
                     "type": "expression",
                   },
-                ],
-                "progressDirection": Array [
-                  "vertical",
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
@@ -382,6 +383,9 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
+                "max": Array [
+                  "max-metric-col-id",
+                ],
                 "maxCols": Array [
                   5,
                 ],
@@ -406,9 +410,6 @@ describe('metric visualization', () => {
                     ],
                     "type": "expression",
                   },
-                ],
-                "progressDirection": Array [
-                  "vertical",
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
@@ -758,6 +759,18 @@ describe('metric visualization', () => {
           ).chain[1].arguments.color[0]
         ).toEqual(euiThemeVars.euiColorLightestShade);
       });
+    });
+
+    it('defaults progress direction to vertical', () => {
+      const AST = visualization.toExpression(
+        {
+          ...fullState,
+          progressDirection: undefined,
+          showBar: true,
+        },
+        datasourceLayers
+      ) as ExpressionAstExpression;
+      expect(AST.chain[1].arguments.progressDirection[0]).toBe(LayoutDirection.Vertical);
     });
   });
 

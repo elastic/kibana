@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import type { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types_old';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';

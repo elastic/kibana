@@ -59,6 +59,7 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
       error: undefined,
       selectedConnector: 'foo',
       selectConnector: () => {},
+      reloadConnectors: () => {},
     },
     connectorsManagementHref: '',
     currentUser: {

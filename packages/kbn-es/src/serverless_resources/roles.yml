@@ -95,6 +95,7 @@ editor:
   run_as: []
 
 # source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+
 t1_analyst:
   cluster:
   indices:
@@ -118,6 +119,7 @@ t1_analyst:
         - ".fleet-agents*"
         - ".fleet-actions*"
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
   applications:
@@ -168,6 +170,11 @@ t2_analyst:
         - risk-score.risk-score-*
       privileges:
         - read
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -201,6 +208,7 @@ t3_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -271,6 +279,7 @@ threat_intelligence_analyst:
     - names:
         - .lists*
         - .items*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -320,6 +329,7 @@ rule_author:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -385,6 +395,7 @@ soc_manager:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
@@ -474,6 +485,11 @@ detections_admin:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -516,6 +532,11 @@ platform_engineer:
         - risk-score.risk-score-*
       privileges:
         - all
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -578,11 +599,17 @@ endpoint_operations_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .asset-criticality.asset-criticality-*
+      privileges:
+        - read
+        - write
   applications:
     - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
         - feature_siem.all
+        - feature_siem.read_alerts
         - feature_siem.policy_management_all
         - feature_siem.endpoint_list_all
         - feature_siem.trusted_applications_all
@@ -633,6 +660,7 @@ endpoint_policy_manager:
     - names:
         - .lists*
         - .items*
+        - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write

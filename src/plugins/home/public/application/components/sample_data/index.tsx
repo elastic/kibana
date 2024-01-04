@@ -29,7 +29,7 @@ interface Props {
 }
 
 export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
-  const IS_DARK_THEME = getServices().uiSettings.get('theme:darkMode');
+  const IS_DARK_THEME = getServices().theme.getTheme().darkMode;
   const cardGraphicFile = !IS_DARK_THEME
     ? 'illustration_integrations_lightmode.png'
     : 'illustration_integrations_darkmode.png';

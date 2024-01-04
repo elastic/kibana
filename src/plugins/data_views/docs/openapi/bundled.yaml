@@ -125,6 +125,7 @@ paths:
       tags:
         - data views
       parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/view_id'
       responses:
         '204':
@@ -290,6 +291,8 @@ paths:
                     type: object
                   fields:
                     type: array
+                    items:
+                      type: object
               examples:
                 createRuntimeFieldResponse:
                   $ref: '#/components/examples/create_runtime_field_response'
@@ -2017,6 +2020,13 @@ components:
     sourcefilters:
       type: array
       description: The array of field names you want to filter out in Discover.
+      items:
+        type: object
+        required:
+          - value
+        properties:
+          value:
+            type: string
     timefieldname:
       type: string
       description: The timestamp field name, which you use for time-based data views.

@@ -27,10 +27,13 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
 
   const handleActiveAlertsClick = () => {
     if (activeAlerts) {
+      const kuery = encodeURIComponent(
+        `'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`
+      );
       navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=(kuery:'slo.id:"${
-          slo.id
-        }"',rangeFrom:now-15m,rangeTo:now,status:active)`
+        `${basePath.prepend(
+          paths.observability.alerts
+        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
       );
     }
   };

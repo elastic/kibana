@@ -38,7 +38,7 @@ export interface UseConversationProps {
   initialTitle?: string;
   chatService: ObservabilityAIAssistantChatService;
   connectorId: string | undefined;
-  onConversationUpdate?: (conversation: Conversation) => void;
+  onConversationUpdate?: (conversation: { conversation: Conversation['conversation'] }) => void;
 }
 
 export type UseConversationResult = {
@@ -101,76 +101,16 @@ export function useConversation({
       });
   };
 
-  const save = (nextMessages: Message[]) => {
-    const conversationObject = conversation.value!;
-
-    const nextConversationObject = merge({}, omit(conversationObject, 'messages'), {
-      messages: nextMessages,
-    });
-
-    return (
-      displayedConversationId
-        ? update(
-            merge(
-              { conversation: { id: displayedConversationId } },
-              nextConversationObject
-            ) as Conversation
-          )
-        : service
-            .callApi(`POST /internal/observability_ai_assistant/conversation`, {
-              signal: null,
-              params: {
-                body: {
-                  conversation: nextConversationObject,
-                },
-              },
-            })
-            .then((nextConversation) => {
-              setDisplayedConversationId(nextConversation.conversation.id);
-              if (connectorId) {
-                service
-                  .callApi(
-                    `PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title`,
-                    {
-                      signal: null,
-                      params: {
-                        path: {
-                          conversationId: nextConversation.conversation.id,
-                        },
-                        body: {
-                          connectorId,
-                        },
-                      },
-                    }
-                  )
-                  .then(() => {
-                    onConversationUpdate?.(nextConversation);
-                    return conversation.refresh();
-                  });
-              }
-              return nextConversation;
-            })
-            .catch((err) => {
-              notifications.toasts.addError(err, {
-                title: i18n.translate('xpack.observabilityAiAssistant.errorCreatingConversation', {
-                  defaultMessage: 'Could not create conversation',
-                }),
-              });
-              throw err;
-            })
-    ).then((nextConversation) => {
-      onConversationUpdate?.(nextConversation);
-      return nextConversation;
-    });
-  };
-
   const { next, messages, setMessages, state, stop } = useChat({
     initialMessages,
+    initialConversationId,
     chatService,
     connectorId,
-    onChatComplete: (nextMessages) => {
-      save(nextMessages);
+    onConversationUpdate: (event) => {
+      setDisplayedConversationId(event.conversation.id);
+      onConversationUpdate?.({ conversation: event.conversation });
     },
+    persist: true,
   });
 
   const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);

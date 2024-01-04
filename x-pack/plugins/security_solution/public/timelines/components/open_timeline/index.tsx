@@ -18,12 +18,12 @@ import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import type { TimelineModel } from '../../store/timeline/model';
-import { timelineSelectors } from '../../store/timeline';
+import type { TimelineModel } from '../../store/model';
+import { timelineSelectors } from '../../store';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
-} from '../../store/timeline/actions';
+} from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
 

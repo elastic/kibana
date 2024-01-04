@@ -68,14 +68,14 @@ get:
       example: 'slo.name:latency* and slo.tags : "prod"'
     - name: page
       in: query
-      description: The page number to return
+      description: The page to use for pagination, must be greater or equal than 1
       schema:
         type: integer
         default: 1
       example: 1
     - name: perPage
       in: query
-      description: The number of SLOs to return per page
+      description: Number of SLOs returned by page
       schema:
         type: integer
         default: 25

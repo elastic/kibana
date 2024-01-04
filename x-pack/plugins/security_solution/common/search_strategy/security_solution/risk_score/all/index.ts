@@ -8,7 +8,7 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import type { Inspect, Maybe, SortField } from '../../../common';
-import type { RiskInputs } from '../../../../risk_engine';
+import type { RiskInputs } from '../../../../entity_analytics/risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

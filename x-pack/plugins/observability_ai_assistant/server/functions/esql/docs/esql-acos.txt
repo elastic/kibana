@@ -1,0 +1,11 @@
+ACOS
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+DescriptionReturns the arccosine of n as an
+angle, expressed in radians.Supported types
+Example
+ROW a=.9
+| EVAL acos=ACOS(a)

@@ -10,6 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
 import { SecuritySolutionTemplateWrapper } from '.';
+import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
 jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
@@ -48,6 +49,13 @@ jest.mock('../../../common/components/navigation/use_security_solution_navigatio
     }),
   };
 });
+
+const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [
+  { pageName: SecurityPageName.alerts },
+]);
+jest.mock('../../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: () => mockUseRouteSpy(),
+}));
 
 const renderComponent = () => {
   return render(

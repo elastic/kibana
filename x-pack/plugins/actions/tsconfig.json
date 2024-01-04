@@ -44,6 +44,7 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/serverless",
+    "@kbn/actions-types"
   ],
   "exclude": [
     "target/**/*",

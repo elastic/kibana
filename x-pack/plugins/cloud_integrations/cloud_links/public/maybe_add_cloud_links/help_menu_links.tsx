@@ -53,7 +53,6 @@ export const createHelpMenuLinks = ({
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.connectionDetails', {
         defaultMessage: 'Connection details',
       }),
-      iconType: 'console',
       dataTestSubj: 'connectionDetailsHelpLink',
       onClick: () => {
         const modal = overlays.openModal(

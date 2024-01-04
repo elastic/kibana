@@ -7,6 +7,7 @@
  */
 
 export interface ClientConfigType {
+  csv: { scroll: { duration: string; size: number } };
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
   export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };

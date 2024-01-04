@@ -23,7 +23,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import {
@@ -58,7 +58,7 @@ export function InstancesLatencyDistributionChart({
   const hasData = items.length > 0;
 
   const theme = useTheme();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
@@ -129,7 +129,8 @@ export function InstancesLatencyDistributionChart({
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}
             showLegend
-            theme={chartTheme}
+            theme={chartThemes.theme}
+            baseTheme={chartThemes.baseTheme}
             xDomain={xDomain}
             locale={i18n.getLocale()}
           />

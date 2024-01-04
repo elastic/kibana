@@ -25,7 +25,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-  registry.when(
+  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172754
+  registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {

@@ -12,13 +12,13 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import type { ObservedUserData } from './types';
-import { useObservedUserItems } from './hooks';
 import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { getObservedUserTableColumns } from './columns';
 import { ONE_WEEK_IN_HOURS } from './constants';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { OBSERVED_USER_QUERY_ID } from '../../../../explore/users/containers/users/observed_details';
+import { useObservedUserItems } from './hooks/use_observed_user_items';
 
 export const ObservedUser = ({
   observedUser,
@@ -44,7 +44,7 @@ export const ObservedUser = ({
     <>
       <InspectButtonContainer>
         <EuiAccordion
-          initialIsOpen={false}
+          initialIsOpen={true}
           isLoading={observedUser.isLoading}
           id="observedUser-data"
           data-test-subj="observedUser-data"

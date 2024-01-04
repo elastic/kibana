@@ -30,6 +30,7 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -60,10 +61,16 @@ history.replace(
 );
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
+  const mockSpaces = {
+    getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+  };
+
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={apmContextMock} history={history}>
-        {children}
+        <KibanaContextProvider services={{ spaces: mockSpaces }}>
+          {children}
+        </KibanaContextProvider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -412,9 +419,9 @@ describe('TransactionActionMenu component', () => {
             component
               .getByTestId(`${key}.value`)
               .querySelector(
-                '[data-test-subj="comboBoxInput"] span'
-              ) as HTMLSpanElement
-          ).textContent,
+                '[data-test-subj="comboBoxSearchInput"]'
+              ) as HTMLInputElement
+          ).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({

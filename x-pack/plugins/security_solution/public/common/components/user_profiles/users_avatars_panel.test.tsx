@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import { UsersAvatarsPanel } from './users_avatars_panel';
 
 import { TestProviders } from '../../mock';
-import { mockUserProfiles } from '../assignees/mocks';
+import { mockUserProfiles } from './mock';
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,

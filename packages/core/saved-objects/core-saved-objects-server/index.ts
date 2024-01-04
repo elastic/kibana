@@ -73,6 +73,7 @@ export type {
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
+  SavedObjectDoc,
   SavedObjectUnsanitizedDoc,
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';

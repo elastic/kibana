@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroupProps,
   EuiFlexGroup,
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
@@ -107,9 +106,6 @@ export function MobileServiceOverview() {
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiHorizontalRule />
-          </EuiFlexItem>
-          <EuiFlexItem>
             <MobileStats
               start={start}
               end={end}
@@ -119,7 +115,7 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={8}>
                   <GeoMap
                     start={start}
@@ -128,7 +124,7 @@ export function MobileServiceOverview() {
                     filters={embeddableFilters}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={4}>
+                <EuiFlexItem grow={3}>
                   <MobileLocationStats
                     start={start}
                     end={end}

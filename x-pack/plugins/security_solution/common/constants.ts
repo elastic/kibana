@@ -266,6 +266,7 @@ export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
 
 export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
 export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
 
 /**
@@ -283,6 +284,8 @@ export const INTERNAL_TAGS_URL = `/internal/tags`;
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -325,8 +328,6 @@ export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
 export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
-export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
-  `${DETECTION_ENGINE_SIGNALS_URL}/_find` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -443,6 +444,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
