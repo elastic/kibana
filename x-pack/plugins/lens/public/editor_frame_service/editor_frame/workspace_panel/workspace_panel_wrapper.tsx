@@ -58,7 +58,7 @@ const unitToCSSUnit: Record<ChartSizeUnit, string> = {
   percentage: '%',
 };
 
-const computeAspectRatioAndMaxDimensions = (
+const getAspectRatioStyles = (
   { x, y }: { x: number; y: number },
   parentDimensions: { width: number; height: number }
 ) => {
@@ -151,17 +151,15 @@ export function WorkspacePanelWrapper({
   let visDimensionsCSS: Interpolation<Theme> = {};
 
   if (aspectRatio) {
-    visDimensionsCSS = computeAspectRatioAndMaxDimensions(
-      aspectRatio ?? maxDimensions,
-      workspaceDimensions
-    );
+    visDimensionsCSS = getAspectRatioStyles(aspectRatio ?? maxDimensions, workspaceDimensions);
   }
 
   if (maxDimensions) {
-    visDimensionsCSS = computeAspectRatioAndMaxDimensions(
-      aspectRatio ?? maxDimensions,
-      workspaceDimensions
-    );
+    // if the maxDimensions are in pixels, we apply a matching aspect ratio
+    visDimensionsCSS =
+      maxDimensions.unit === 'pixels'
+        ? getAspectRatioStyles(aspectRatio ?? maxDimensions, workspaceDimensions)
+        : {};
     visDimensionsCSS.maxWidth = `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`;
     visDimensionsCSS.maxHeight = `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`;
   }
