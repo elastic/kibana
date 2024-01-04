@@ -97,7 +97,7 @@ describe('Execute Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
+    store.setReportError = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     task._claimJob = jest.fn(() =>
       Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
@@ -119,7 +119,7 @@ describe('Execute Report Task', () => {
     });
     await taskPromise.catch(() => {});
 
-    expect(store.setReportFailed).toHaveBeenLastCalledWith(
+    expect(store.setReportError).toHaveBeenLastCalledWith(
       expect.objectContaining({
         _id: 'test',
       }),
@@ -127,8 +127,7 @@ describe('Execute Report Task', () => {
         error: expect.objectContaining({
           message: `ReportingError(code: ${new KibanaShuttingDownError().code})`,
         }),
-      }),
-      false
+      })
     );
   });
 });
