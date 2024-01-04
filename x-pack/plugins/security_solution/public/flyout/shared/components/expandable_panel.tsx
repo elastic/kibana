@@ -88,7 +88,7 @@ export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
     expandable: false,
     expandedOnFirstRender: false,
   },
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'expandablePanel',
   children,
 }) => {
   const [toggleStatus, setToggleStatus] = useState(expandedOnFirstRender);

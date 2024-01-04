@@ -20,21 +20,38 @@ import {
 } from '../../../tasks/alerts';
 import { USER_COLUMN } from '../../../screens/alerts';
 
-describe('user details flyout', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-  });
+describe(
+  'user details flyout',
+  {
+    tags: ['@ess', '@serverless'],
 
-  it('shows user detail flyout from alert table', () => {
-    visit(ALERTS_URL);
-    createRule(getNewRule({ query: 'user.name:*' }));
-    refreshPage();
-    waitForAlertsToPopulate();
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'newUserDetailsFlyout',
+            'newHostDetailsFlyout',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+    });
 
-    scrollAlertTableColumnIntoView(USER_COLUMN);
-    expandAlertTableCellValue(USER_COLUMN);
-    openUserDetailsFlyout();
+    it('shows user detail flyout from alert table', () => {
+      visit(ALERTS_URL);
+      createRule(getNewRule({ query: 'user.name:*' }));
+      refreshPage();
+      waitForAlertsToPopulate();
 
-    cy.get(ALERT_FLYOUT).should('be.visible');
-  });
-});
+      scrollAlertTableColumnIntoView(USER_COLUMN);
+      expandAlertTableCellValue(USER_COLUMN);
+      openUserDetailsFlyout();
+
+      cy.get(ALERT_FLYOUT).should('be.visible');
+    });
+  }
+);
