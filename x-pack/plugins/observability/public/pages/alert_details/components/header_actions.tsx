@@ -28,9 +28,11 @@ import { paths } from '../../../../common/locators/paths';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
+  alertStatus: string | undefined;
+  onAlertStatusChange: () => void;
 }
 
-export function HeaderActions({ alert }: HeaderActionsProps) {
+export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: HeaderActionsProps) {
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
@@ -38,17 +40,6 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
   } = useKibana().services;
-
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
-
-  const handleUntrackAlert = useCallback(async () => {
-    if (alert) {
-      await untrackAlerts({
-        indices: ['.internal.alerts-observability.threshold.alerts-*'],
-        alertUuids: [alert.fields[ALERT_UUID]],
-      });
-    }
-  }, [alert, untrackAlerts]);
 
   const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
@@ -59,6 +50,18 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
+
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  const handleUntrackAlert = useCallback(async () => {
+    if (alert) {
+      await untrackAlerts({
+        indices: ['.internal.alerts-observability.*'],
+        alertUuids: [alert.fields[ALERT_UUID]],
+      });
+      onAlertStatusChange();
+    }
+  }, [alert, untrackAlerts, onAlertStatusChange]);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -162,6 +165,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
             iconType="eyeClosed"
             onClick={handleUntrackAlert}
             data-test-subj="untrack-alert-button"
+            disabled={alertStatus === 'untracked'}
           >
             <EuiText size="s">
               {i18n.translate('xpack.observability.alertDetails.untrackAlert', {

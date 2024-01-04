@@ -22,7 +22,6 @@ import {
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
@@ -40,6 +39,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  alertStatus: string | undefined;
   dataTestSubj: string;
 }
 
@@ -53,7 +53,7 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
+export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -73,9 +73,9 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
         <EuiFlexItem grow={false}>
           <AlertLifecycleStatusBadge
             alertStatus={
-              alert.fields[ALERT_STATUS] === 'active'
+              alertStatus === 'active'
                 ? ALERT_STATUS_ACTIVE
-                : alert.fields[ALERT_STATUS] === 'recovered'
+                : alertStatus === 'recovered'
                 ? ALERT_STATUS_RECOVERED
                 : ALERT_STATUS_UNTRACKED
             }
