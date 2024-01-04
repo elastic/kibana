@@ -43,7 +43,13 @@ export const PostMessageParamsSchema = schema.object({
   subActionParams: PostMessageSubActionParamsSchema,
 });
 
+export const PostBlockkitParamsSchema = schema.object({
+  subAction: schema.literal('postBlockkit'),
+  subActionParams: PostMessageSubActionParamsSchema,
+});
+
 export const SlackApiParamsSchema = schema.oneOf([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
+  PostBlockkitParamsSchema,
 ]);

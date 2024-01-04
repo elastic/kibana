@@ -29,7 +29,7 @@ import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
 
-const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage'];
+const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit'];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
@@ -70,7 +70,7 @@ const validateSlackUrl = (secretsObject: SlackApiSecrets, validatorServices: Val
 };
 
 const renderParameterTemplates = (params: SlackApiParams, variables: Record<string, unknown>) => {
-  if (params.subAction === 'postMessage')
+  if (params.subAction === 'postMessage' || params.subAction === 'postBlockkit')
     return {
       subAction: params.subAction,
       subActionParams: {
@@ -105,6 +105,7 @@ const slackApiExecutor = async ({
 
   const externalService = createExternalService(
     {
+      config,
       secrets,
     },
     logger,
@@ -120,6 +121,13 @@ const slackApiExecutor = async ({
 
   if (subAction === 'postMessage') {
     return await api.postMessage({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'postBlockkit') {
+    return await api.postBlockkit({
       externalService,
       params: params.subActionParams,
     });
