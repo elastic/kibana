@@ -38,6 +38,24 @@ export const PostMessageSubActionParamsSchema = schema.object({
   text: schema.string({ minLength: 1 }),
 });
 
+export function validateBlockkit(text: string) {
+  try {
+    const parsedText = JSON.parse(text);
+
+    if (!parsedText.hasOwnProperty('blocks')) {
+      return 'block kit body must contain field "blocks"';
+    }
+  } catch (err) {
+    return 'block kit body is not valid JSON';
+  }
+}
+
+export const PostBlockkitSubActionParamsSchema = schema.object({
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  text: schema.string({ validate: validateBlockkit }),
+});
+
 export const PostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
   subActionParams: PostMessageSubActionParamsSchema,
@@ -45,7 +63,7 @@ export const PostMessageParamsSchema = schema.object({
 
 export const PostBlockkitParamsSchema = schema.object({
   subAction: schema.literal('postBlockkit'),
-  subActionParams: PostMessageSubActionParamsSchema,
+  subActionParams: PostBlockkitSubActionParamsSchema,
 });
 
 export const SlackApiParamsSchema = schema.oneOf([
