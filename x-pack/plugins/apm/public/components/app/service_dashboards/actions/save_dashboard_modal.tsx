@@ -28,7 +28,7 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { MergedServiceDashboard } from '..';
@@ -73,7 +73,10 @@ export function SaveDashboardModal({
 
   const {
     path: { serviceName },
-  } = useApmParams('/services/{serviceName}/dashboards');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/dashboards',
+    '/mobile-services/{serviceName}/dashboards'
+  );
 
   const reloadCustomDashboards = useCallback(() => {
     onRefresh();
