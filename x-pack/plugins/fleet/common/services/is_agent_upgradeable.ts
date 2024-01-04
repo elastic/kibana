@@ -42,7 +42,7 @@ export function isAgentUpgradeable(agent: Agent) {
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return false;
   }
-  if (!agent.local_metadata.elastic.agent.upgradeable) {
+  if (!agent.local_metadata?.elastic?.agent?.upgradeable) {
     return false;
   }
   if (isAgentUpgrading(agent)) {

@@ -449,6 +449,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             fullWidth
             placeholder="Enter version"
             value={selectedVersionStr}
+            data-test-subj="agentUpgradeModal.VersionInput"
             onChange={(e) => {
               const newValue = e.target.value;
               setSelectedVersionStr(newValue);
