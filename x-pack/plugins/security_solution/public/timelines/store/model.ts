@@ -21,6 +21,7 @@ import type {
   DataProvider,
   SerializedFilterQuery,
   TimelineEventsType,
+  RowRenderer,
 } from '../../../common/types/timeline';
 import type {
   RowRendererId,
@@ -31,6 +32,8 @@ import type {
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
+
+type NotesMap = Record<string, { notes?: string[]; isAddingNote?: boolean }>;
 
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
@@ -146,6 +149,12 @@ export interface TimelineModel {
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  notesMap: NotesMap;
+  setNotesMap: Function;
+  confirmingNoteId: string | null | undefined;
+  setConfirmingNoteId: Function;
+  timelineId: string;
+  enabledRowRenderers: RowRenderer[];
 }
 
 export type SubsetTimelineModel = Readonly<
