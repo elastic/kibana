@@ -532,6 +532,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   <EuiPanel hasBorder>
                     <div style={{ paddingRight: euiTheme.size.s }}>
                       <EuiSwitch
+                        data-test-subj="apiKeyCustomExpirationSwitch"
                         label={
                           <EuiTitle size="xs">
                             <h4>
@@ -542,7 +543,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                             </h4>
                           </EuiTitle>
                         }
-                        data-test-subj="apiKeysMetadataSwitch"
                         checked={Boolean(formik.values.customExpiration)}
                         disabled={readOnly || !!apiKey}
                         onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
