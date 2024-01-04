@@ -23,7 +23,7 @@ import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,
-  title: 'log_explorer/DatasetSelector',
+  title: 'logs_explorer/DatasetSelector',
   decorators: [(wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>],
   argTypes: {
     datasetsError: {
