@@ -100,6 +100,7 @@ describe('find alert with/without doc level security', () => {
       }
     );
   });
+
   after(async () => {
     await security.user.delete(userAllSec.username);
     await security.user.delete(userAllSecWithDsl.username);
@@ -109,6 +110,7 @@ describe('find alert with/without doc level security', () => {
       'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
     );
   });
+
   it('should return alerts with user who has access to security solution privileges', async () => {
     const query = {
       query: {
@@ -125,6 +127,7 @@ describe('find alert with/without doc level security', () => {
       .expect(200);
     expect(body.hits.total.value).to.eql(3);
   });
+
   it('should filter out alerts with user who has access to security solution privileges and document level security', async () => {
     const query = {
       query: {
