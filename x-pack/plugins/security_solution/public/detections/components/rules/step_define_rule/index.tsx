@@ -84,6 +84,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -180,6 +181,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const license = useLicense();
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
+
+  const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForIndicatorMatchRuleEnabled'
+  );
+  const isAlertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEqlRuleEnabled'
+  );
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
@@ -804,7 +812,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
+  const isAlertSuppressionEnabled =
+    isQueryRule(ruleType) ||
+    isThresholdRule ||
+    (isAlertSuppressionForIndicatorMatchRuleEnabled && isThreatMatchRule(ruleType)) ||
+    (isAlertSuppressionForEqlRuleEnabled && isEqlRule(ruleType));
 
   return (
     <>
@@ -994,7 +1006,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -1030,8 +1042,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </IntendedRuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            // only query rule has this suppression configuration
-            $isVisible={isAlertSuppressionEnabled && isQueryRule(ruleType)}
+            // threshold rule does not have this suppression configuration
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>
