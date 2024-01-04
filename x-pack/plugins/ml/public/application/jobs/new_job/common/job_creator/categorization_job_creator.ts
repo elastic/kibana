@@ -258,10 +258,14 @@ export class CategorizationJobCreator extends JobCreator {
 
     const dtr = detectors[0];
     if (dtr !== undefined && dtr.agg !== null && dtr.field !== null) {
-      const detectorType =
-        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
-          ? ML_JOB_AGGREGATION.COUNT
-          : ML_JOB_AGGREGATION.RARE;
+      let detectorType: DetectorType;
+      if (dtr.agg.id === ML_JOB_AGGREGATION.COUNT) {
+        detectorType = ML_JOB_AGGREGATION.COUNT;
+      } else if (dtr.agg.id === ML_JOB_AGGREGATION.HIGH_COUNT) {
+        detectorType = ML_JOB_AGGREGATION.HIGH_COUNT;
+      } else {
+        detectorType = ML_JOB_AGGREGATION.RARE;
+      }
 
       const bs = job.analysis_config.bucket_span!;
       this.setDetectorType(detectorType);
