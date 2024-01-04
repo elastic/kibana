@@ -86,7 +86,7 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
     selectCaseModal.open({ getAttachments: () => attachments });
   };
 
-  const handleViewRuleDetails = () => {
+  const handleEditRuleDetails = () => {
     setIsPopoverOpen(false);
     setRuleConditionsFlyoutOpen(true);
   };
@@ -101,7 +101,6 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={handleClosePopover}
-        ownFocus
         button={
           <EuiButton
             fill
@@ -135,7 +134,8 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
             size="s"
             color="text"
             iconType="pencil"
-            onClick={handleViewRuleDetails}
+            onClick={handleEditRuleDetails}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             data-test-subj="edit-rule-button"
           >
             <EuiText size="s">
@@ -150,6 +150,7 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
             color="text"
             iconType="bellSlash"
             onClick={handleOpenSnoozeModal}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             data-test-subj="snooze-rule-button"
           >
             <EuiText size="s">
