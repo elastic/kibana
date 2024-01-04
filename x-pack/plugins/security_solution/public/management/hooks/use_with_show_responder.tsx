@@ -51,6 +51,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps: {
               commands: getEndpointConsoleCommands({
+                agentType: agentInfo.agent.type,
                 endpointAgentId,
                 endpointCapabilities: ['isolation'],
                 endpointPrivileges,

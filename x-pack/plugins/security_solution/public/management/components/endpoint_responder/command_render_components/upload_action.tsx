@@ -6,9 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type {
-  ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/api/endpoint';
@@ -31,12 +32,14 @@ export const UploadActionResult = memo<
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const { comment, overwrite, file } = command.args.args;
+    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
 
     if (!endpointId) {
       return;
     }
 
     const reqBody: UploadActionUIRequestBody = {
+      agent_type: agentType,
       endpoint_ids: [endpointId],
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters:
@@ -49,7 +52,11 @@ export const UploadActionResult = memo<
     };
 
     return reqBody;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [
+    command.args.args,
+    command.commandDefinition?.meta?.agentType,
+    command.commandDefinition?.meta?.endpointId,
+  ]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     UploadActionUIRequestBody,

@@ -18,6 +18,7 @@ import type { CommandExecutionComponentProps } from '../console/types';
 
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;
+  agentType: ResponseActionAgentType;
 }
 
 export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{

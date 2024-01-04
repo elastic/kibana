@@ -11,8 +11,13 @@ import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
-  EndpointCapabilities,
   ConsoleResponseActionCommands,
+  EndpointCapabilities,
+  ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { GetFileActionResult } from '../command_render_components/get_file_action';
 import type { Command, CommandDefinition } from '../../console';
@@ -34,10 +39,6 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../../common/endpoint/service/response_actions/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -134,10 +135,12 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
+  agentType,
   endpointCapabilities,
   endpointPrivileges,
 }: {
   endpointAgentId: string;
+  agentType: ResponseActionAgentType;
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
@@ -165,6 +168,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: IsolateActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -195,6 +199,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: ReleaseActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -228,6 +233,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -283,6 +289,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -357,6 +364,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -387,6 +395,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: GetFileActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -434,6 +443,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: ExecuteActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
@@ -492,6 +502,7 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: UploadActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,

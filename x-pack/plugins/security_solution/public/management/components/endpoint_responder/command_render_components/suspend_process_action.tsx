@@ -6,10 +6,11 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
-  SuspendProcessActionOutputContent,
   KillOrSuspendProcessRequestBody,
+  SuspendProcessActionOutputContent,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -23,15 +24,21 @@ export const SuspendProcessActionResult = memo<
   const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
+    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
 
     return endpointId
       ? {
+          agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [
+    command.args.args,
+    command.commandDefinition?.meta?.agentType,
+    command.commandDefinition?.meta?.endpointId,
+  ]);
 
   return useConsoleActionSubmitter<
     KillOrSuspendProcessRequestBody,

@@ -6,8 +6,8 @@
  */
 
 import {
-  type EndpointCapabilities,
   ENDPOINT_CAPABILITIES,
+  type EndpointCapabilities,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   type AppContextTestRender,
@@ -19,9 +19,9 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
 import type {
+  ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionUploadOutputContent,
-  ActionDetailsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { getEndpointConsoleCommands } from '../..';
@@ -71,6 +71,7 @@ describe('When using `upload` response action', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities,
                   endpointPrivileges,

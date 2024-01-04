@@ -6,6 +6,7 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendReleaseEndpointRequest } from '../../../hooks/response_actions/use_send_release_endpoint_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -17,14 +18,20 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
     const actionRequestBody = useMemo(() => {
       const endpointId = command.commandDefinition?.meta?.endpointId;
       const comment = command.args.args?.comment?.[0];
+      const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
 
       return endpointId
         ? {
+            agent_type: agentType,
             endpoint_ids: [endpointId],
             comment,
           }
         : undefined;
-    }, [command.args.args?.comment, command.commandDefinition?.meta?.endpointId]);
+    }, [
+      command.args.args?.comment,
+      command.commandDefinition?.meta?.agentType,
+      command.commandDefinition?.meta?.endpointId,
+    ]);
 
     return useConsoleActionSubmitter({
       ResultComponent,

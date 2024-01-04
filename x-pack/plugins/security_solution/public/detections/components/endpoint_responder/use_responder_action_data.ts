@@ -37,7 +37,7 @@ const getSentinelOneAgentInfo = (
 ): SentinelOneAgentInfo => {
   return {
     agent: {
-      id: getFieldValue({ category: 'agent', field: 'agent.id' }, eventData),
+      id: getFieldValue({ category: 'observer', field: 'observer.serial_number' }, eventData),
       type: getFieldValue(
         { category: 'event', field: 'event.module' },
         eventData

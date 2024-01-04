@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   GetProcessesActionOutputContent,
@@ -47,15 +48,17 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const actionCreator = useSendGetEndpointProcessesRequest();
+    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
 
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
+            agent_type: agentType,
             endpoint_ids: [endpointId],
             comment: command.args.args?.comment?.[0],
           }
         : undefined;
-    }, [command.args.args?.comment, endpointId]);
+    }, [endpointId, agentType, command.args.args?.comment]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,

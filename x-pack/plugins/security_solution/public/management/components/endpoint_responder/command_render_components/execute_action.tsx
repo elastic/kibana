@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
@@ -33,11 +34,13 @@ export const ExecuteActionResult = memo<
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
+    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
 
     if (!endpointId) {
       return;
     }
     return {
+      agentType,
       endpoint_ids: [endpointId],
       parameters: {
         command: command.args.args.command[0],
@@ -47,6 +50,7 @@ export const ExecuteActionResult = memo<
     };
   }, [
     command.commandDefinition?.meta?.endpointId,
+    command.commandDefinition?.meta?.agentType,
     command.args.args.command,
     command.args.args.timeout,
     command.args.args?.comment,

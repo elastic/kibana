@@ -49,6 +49,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             },
             consoleProps: {
               commands: getEndpointConsoleCommands({
+                agentType: 'endpoint',
                 endpointAgentId,
                 endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
                 endpointPrivileges,
