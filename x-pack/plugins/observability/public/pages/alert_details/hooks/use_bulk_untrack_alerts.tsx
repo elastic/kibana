@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
-import { useKibana } from '../../../../common';
+import { useKibana } from '../../../utils/kibana_react';
 
 export const useBulkUntrackAlerts = () => {
   const {
@@ -31,7 +30,6 @@ export const useBulkUntrackAlerts = () => {
       }
     },
     {
-      context: AlertsTableQueryContext,
       onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
