@@ -91,6 +91,16 @@ export interface LensConfigOptions {
   query?: Query;
 }
 
+export interface LensAxisTitleVisibilityConfig {
+  showXAxisTitle?: boolean;
+  showYAxisTitle?: boolean;
+}
+
+export interface LensYBoundsConfig {
+  mode: 'full' | 'custom' | 'dataBounds';
+  lowerBound?: number;
+  upperBound?: number;
+}
 export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
@@ -140,6 +150,7 @@ export interface LensMetricConfigBase {
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
   trendLine?: boolean;
+  subtitle?: string;
 }
 
 export type LensMetricConfig = Identity<LensBaseConfig & LensBaseLayer & LensMetricConfigBase>;
@@ -265,6 +276,10 @@ export interface LensXYConfigBase {
   chartType: 'xy';
   layers: Array<LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer>;
   legend?: Identity<LensLegendConfig>;
+  axisTitleVisibility?: Identity<LensAxisTitleVisibilityConfig>;
+  emphasizeFitting?: boolean;
+  fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
+  yBounds?: LensYBoundsConfig;
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsPublicPluginStart;
@@ -275,9 +290,8 @@ export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;
 
 type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 
-export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
+export type FormulaValueConfig = LensFormula & {
   color?: string;
-  value: string;
 };
 
 export type ChartTypeLensConfig<T extends ChartType> = T extends 'gauge'

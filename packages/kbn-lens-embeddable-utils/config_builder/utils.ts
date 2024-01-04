@@ -78,13 +78,13 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 };
 
 export function isFormulaValue(value: unknown): value is FormulaValueConfig {
-  if (value && typeof value === 'object' && 'value' in value) {
+  if (value && typeof value === 'object' && 'formula' in value) {
     return true;
   }
   return false;
 }
 
-export function isPersistedIndexPatternLayer(
+export function isPersistedStateLayer(
   layer: unknown
 ): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
   if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {
@@ -214,8 +214,7 @@ export const buildDatasourceStates = async (
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
-  const layers: LensAttributes['state']['datasourceStates'] = {
-    // textBased: { layers: {} },
+  let layers: LensAttributes['state']['datasourceStates'] = {
     formBased: { layers: {} },
   };
 
@@ -249,11 +248,15 @@ export const buildDatasourceStates = async (
         getValueColumns
       );
       if (layerConfig) {
-        if (isPersistedIndexPatternLayer(layerConfig)) {
-          layers[type]!.layers[layerId] = layerConfig;
-        } else {
-          layers[type]!.layers = { ...layerConfig };
-        }
+        layers = {
+          ...layers,
+          [type]: {
+            layers: isPersistedStateLayer(layerConfig)
+              ? { ...layers[type]?.layers, [layerId]: layerConfig }
+              : // metric chart can return 2 layers (one for the metric and one for the trendline)
+                { ...layerConfig },
+          },
+        };
       }
 
       if (dataView) {
