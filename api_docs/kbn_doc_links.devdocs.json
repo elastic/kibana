@@ -952,7 +952,7 @@
             "label": "serverlessSearch",
             "description": [],
             "signature": [
-              "{ readonly gettingStartedExplore: string; readonly gettingStartedIngest: string; readonly gettingStartedSearch: string; readonly integrations: string; readonly integrationsBeats: string; readonly integrationsConnectorClient: string; readonly integrationsLogstash: string; }"
+              "{ readonly gettingStartedExplore: string; readonly gettingStartedIngest: string; readonly gettingStartedSearch: string; readonly integrations: string; readonly integrationsBeats: string; readonly integrationsConnectorClient: string; readonly integrationsConnectorClientRunFromSource: string; readonly integrationsConnectorClientRunWithDocker: string; readonly integrationsLogstash: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
