@@ -436,27 +436,27 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
     const showFilterBarId = 'showFilterBar';
     const shareModalStrings = {
       getTopMenuCheckbox: () =>
-        i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+        i18n.translate('share.embedUrlParamExtension.topMenu', {
           defaultMessage: 'Top menu',
         }),
       getQueryCheckbox: () =>
-        i18n.translate('dashboard.embedUrlParamExtension.query', {
+        i18n.translate('share.embedUrlParamExtension.query', {
           defaultMessage: 'Query',
         }),
       getTimeFilterCheckbox: () =>
-        i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+        i18n.translate('share.embedUrlParamExtension.timeFilter', {
           defaultMessage: 'Time filter',
         }),
       getFilterBarCheckbox: () =>
-        i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+        i18n.translate('share.embedUrlParamExtension.filterBar', {
           defaultMessage: 'Filter bar',
         }),
       getCheckboxLegend: () =>
-        i18n.translate('dashboard.embedUrlParamExtension.include', {
+        i18n.translate('share.embedUrlParamExtension.include', {
           defaultMessage: 'Include',
         }),
       getSnapshotShareWarning: () =>
-        i18n.translate('dashboard.snapshotShare.longUrlWarning', {
+        i18n.translate('share.snapshotShare.longUrlWarning', {
           defaultMessage:
             'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
         }),
