@@ -26,8 +26,8 @@ const roleToAccessSecuritySolution = {
     ],
   },
 };
-const roleToAccessSecuritySolutionWithDsl = {
-  name: 'sec_all_spaces_with_dsl',
+const roleToAccessSecuritySolutionWithDls = {
+  name: 'sec_all_spaces_with_dls',
   privileges: {
     elasticsearch: {
       indices: [
@@ -56,12 +56,12 @@ const userAllSec = {
   email: 'userAllSec@elastic.co',
   roles: [roleToAccessSecuritySolution.name],
 };
-const userAllSecWithDsl = {
-  username: 'user_all_sec_with_dsl',
-  password: 'user_all_sec_with_dsl',
-  full_name: 'userAllSecWithDsl',
-  email: 'userAllSecWithDsl@elastic.co',
-  roles: [roleToAccessSecuritySolutionWithDsl.name],
+const userAllSecWithDls = {
+  username: 'user_all_sec_with_dls',
+  password: 'user_all_sec_with_dls',
+  full_name: 'userAllSecWithDls',
+  email: 'userAllSecWithDls@elastic.co',
+  roles: [roleToAccessSecuritySolutionWithDls.name],
 };
 
 describe('find alert with/without doc level security', () => {
@@ -76,8 +76,8 @@ describe('find alert with/without doc level security', () => {
       roleToAccessSecuritySolution.privileges
     );
     await security.role.create(
-      roleToAccessSecuritySolutionWithDsl.name,
-      roleToAccessSecuritySolutionWithDsl.privileges
+      roleToAccessSecuritySolutionWithDls.name,
+      roleToAccessSecuritySolutionWithDls.privileges
     );
     await security.user.create(userAllSec.username, {
       password: userAllSec.password,
@@ -85,11 +85,11 @@ describe('find alert with/without doc level security', () => {
       full_name: userAllSec.full_name,
       email: userAllSec.email,
     });
-    await security.user.create(userAllSecWithDsl.username, {
-      password: userAllSecWithDsl.password,
-      roles: userAllSecWithDsl.roles,
-      full_name: userAllSecWithDsl.full_name,
-      email: userAllSecWithDsl.email,
+    await security.user.create(userAllSecWithDls.username, {
+      password: userAllSecWithDls.password,
+      roles: userAllSecWithDls.roles,
+      full_name: userAllSecWithDls.full_name,
+      email: userAllSecWithDls.email,
     });
 
     await esArchiver.load(
@@ -103,9 +103,9 @@ describe('find alert with/without doc level security', () => {
 
   after(async () => {
     await security.user.delete(userAllSec.username);
-    await security.user.delete(userAllSecWithDsl.username);
+    await security.user.delete(userAllSecWithDls.username);
     await security.role.delete(roleToAccessSecuritySolution.name);
-    await security.role.delete(roleToAccessSecuritySolutionWithDsl.name);
+    await security.role.delete(roleToAccessSecuritySolutionWithDls.name);
     await esArchiver.unload(
       'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
     );
@@ -138,7 +138,7 @@ describe('find alert with/without doc level security', () => {
     };
     const { body } = await supertestWithoutAuth
       .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .auth(userAllSecWithDsl.username, userAllSecWithDsl.password)
+      .auth(userAllSecWithDls.username, userAllSecWithDls.password)
       .set('kbn-xsrf', 'true')
       .send(query)
       .expect(200);
