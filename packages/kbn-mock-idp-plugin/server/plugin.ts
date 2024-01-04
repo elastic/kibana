@@ -40,6 +40,9 @@ export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> =
 
         const userRoles: Array<[string, string]> = [
           ['system_indices_superuser', 'system_indices_superuser'],
+          ['viewer', 'viewer'],
+          ['developer', 'developer'],
+          ['editor', 'editor'],
           ['t1_analyst', 't1_analyst'],
           ['t2_analyst', 't2_analyst'],
           ['t3_analyst', 't3_analyst'],

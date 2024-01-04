@@ -73,7 +73,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
   >;
   esJavaOpts?: string;
   /**

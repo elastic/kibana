@@ -37,6 +37,7 @@ import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
+  SERVERLESS_ROLES_ROOT_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -65,6 +66,8 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
+  /**  Project type */
+  projectType?: 'es' | 'secucity' | 'oblt';
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -536,7 +539,7 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, kibanaUrl, files, resources } = options;
+  const { basePath, clean, ssl, kibanaUrl, files, resources, projectType } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
@@ -589,7 +592,16 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  const rolesResourcePaths = projectType
+    ? [resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml')]
+    : // read roles for all projects if project is not defined
+      ['es', 'obtl', 'security'].map((type) =>
+        resolve(SERVERLESS_ROLES_ROOT_PATH, type, 'roles.yml')
+      );
+
+  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, ...rolesResourcePaths];
+
+  const serverlessResources = resourcesPaths.reduce<string[]>((acc, path) => {
     const fileName = basename(path);
     let localFilePath = path;
 
@@ -608,9 +620,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     throw new Error(
       `Unsupported ES serverless --resources value(s):\n  ${Object.values(
         resourceFileOverrides
-      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
-        basename(filePath)
-      ).join(' | ')}`
+      ).join('  \n')}\n\nValid resources: ${resourcesPaths
+        .map((filePath) => basename(filePath))
+        .join(' | ')}`
     );
   }
 

@@ -184,8 +184,14 @@ function getESServerlessOptions(
   const serverlessHost: string | undefined =
     config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
 
+  const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
+  const projectType: string = kbnServerArgs
+    .find((arg) => arg.startsWith('--serverless'))!
+    .split('=')[1];
+
   const commonOptions = {
     host: serverlessHost,
+    projectType,
     resources: serverlessResources,
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
