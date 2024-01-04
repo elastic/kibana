@@ -69,6 +69,7 @@ const userAllSecWithDls = {
   roles: [roleToAccessSecuritySolutionWithDls.name],
 };
 
+// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
