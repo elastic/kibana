@@ -645,6 +645,7 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than or equal to 500.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -705,6 +706,7 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-1. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -729,6 +731,7 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-2. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -783,6 +786,7 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than 0.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions': 'Query did NOT match documents',
@@ -792,6 +796,87 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' recovered",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        },
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should correctly handle alerts with sourceFields', async () => {
+      mockFetchEsQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'host-1',
+              count: 291,
+              hits: [],
+              sourceFields: {
+                'host.hostname': ['host-1'],
+                'host.id': ['1'],
+                'host.name': ['host-1'],
+              },
+            },
+          ],
+          truncated: false,
+        },
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        // @ts-expect-error
+        params: {
+          ...defaultProps,
+          threshold: [200],
+          thresholdComparator: '>=' as Comparator,
+          groupBy: 'top',
+          termSize: 10,
+          termField: 'host.name',
+          sourceFields: [
+            { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+            { label: 'host.id', searchPath: 'host.id.keyword' },
+            { label: 'host.name', searchPath: 'host.name.keyword' },
+          ],
+        },
+      });
+
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions:
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message:
+            'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
+          title: "rule 'test-rule-name' matched query for group host-1",
+          value: 291,
+          sourceFields: {
+            'host.hostname': ['host-1'],
+            'host.id': ['1'],
+            'host.name': ['host-1'],
+          },
+        },
+        id: 'host-1',
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
+        payload: {
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents for group "host-1" is greater than or equal to 200',
+          'kibana.alert.evaluation.threshold': 200,
+          'kibana.alert.evaluation.value': '291',
+          'kibana.alert.reason':
+            'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
+          'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
+          'kibana.alert.url':
+            'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'host.hostname': ['host-1'],
+          'host.id': ['1'],
+          'host.name': ['host-1'],
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);

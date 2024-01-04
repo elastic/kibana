@@ -27,7 +27,13 @@ import {
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { Comparator } from '../../../../common/comparator_types';
-import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import {
+  CommonRuleParams,
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  SearchType,
+  SourceField,
+} from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -49,7 +55,7 @@ interface LocalStateAction {
   type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
   payload:
     | SearchSourceParamsAction['payload']
-    | (number[] | number | string | string[] | boolean | undefined);
+    | (number[] | number | string | string[] | boolean | SourceField[] | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -112,6 +118,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields: ruleParams.sourceFields,
     }
   );
 
@@ -123,8 +130,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
-    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
     dispatch({ type: 'index', payload: newDataView });
+    dispatch({ type: 'sourceFields', payload: undefined });
+    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {
@@ -223,6 +231,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeExcludeHitsFromPreviousRun = useCallback(
     (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
+    []
+  );
+
+  const onChangeSourceFields = useCallback(
+    (selectedSourceFields: SourceField[]) =>
+      dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );
 
@@ -372,6 +386,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={onChangeSourceFields}
+        sourceFields={ruleConfiguration.sourceFields}
       />
       <EuiSpacer />
     </Fragment>

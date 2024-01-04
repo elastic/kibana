@@ -63,15 +63,19 @@ export const useLatestFindingsDataView = (dataView: string) => {
 
     // or FINDINGS_INDEX_PATTERN
     if (dataView === LATEST_FINDINGS_INDEX_PATTERN) {
+      let shouldUpdate = false;
       Object.entries(cloudSecurityFieldLabels).forEach(([field, label]) => {
         if (
           !dataViewObj.getFieldAttrs()[field]?.customLabel ||
           dataViewObj.getFieldAttrs()[field]?.customLabel === field
         ) {
           dataViewObj.setFieldCustomLabel(field, label);
+          shouldUpdate = true;
         }
       });
-      await dataViews.updateSavedObject(dataViewObj);
+      if (shouldUpdate) {
+        await dataViews.updateSavedObject(dataViewObj);
+      }
     }
 
     return dataViewObj;
