@@ -2,7 +2,13 @@ steps:
   - label: ':male-mechanic::skin-tone-2: Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      queue: kibana-default
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-2
+        buildDirectory: /dev/shm/bk
     timeout_in_minutes: 10
 
   - wait
@@ -10,7 +16,13 @@ steps:
   - label: ':kibana: Scalability Tests'
     command: .buildkite/scripts/steps/scalability/benchmarking.sh
     agents:
-      queue: kb-static-scalability
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-2
+        buildDirectory: /dev/shm/bk
     timeout_in_minutes: 90
     retry:
       automatic:
@@ -23,5 +35,11 @@ steps:
   - label: ':male_superhero::skin-tone-2: Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      queue: kibana-default
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-2
+        buildDirectory: /dev/shm/bk
     timeout_in_minutes: 10

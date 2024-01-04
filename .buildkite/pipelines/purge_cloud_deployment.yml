@@ -10,4 +10,10 @@ steps:
     label: Purge a cloud deployment
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-2
+        buildDirectory: /dev/shm/bk
