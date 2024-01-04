@@ -68,7 +68,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     ],
   ]);
 
-  const expectedAlertResults = [
+  const expectedAlerts = [
     {
       context: {
         containingBoundaryId: '123',
@@ -111,7 +111,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(alerts).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should overwrite older identical entity entries', () => {
@@ -137,7 +137,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(alerts).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should preserve older non-identical entity entries', () => {
@@ -175,7 +175,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
         },
         instanceId: 'd-999',
       },
-      ...expectedAlertResults,
+      ...expectedAlerts,
     ]);
   });
 
@@ -215,7 +215,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
         ],
       ])
     );
-    expect(alerts).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should generate multiple alerts per entity if found in multiple shapes in interval', () => {

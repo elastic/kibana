@@ -201,6 +201,7 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
+    // @ts-ignore
     alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }
