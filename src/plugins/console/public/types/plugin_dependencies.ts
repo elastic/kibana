@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ReactElement } from 'react';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SharePluginSetup, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
+import { RemoteConsoleProps } from './remote_console';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -22,4 +24,8 @@ export interface AppSetupUIPluginDependencies {
 
 export interface ConsolePluginSetup {
   locator?: LocatorPublic<ConsoleUILocatorParams>;
+}
+
+export interface ConsolePluginStart {
+  renderRemoteConsole?: (props?: RemoteConsoleProps) => ReactElement | null;
 }

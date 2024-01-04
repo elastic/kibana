@@ -5,12 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ReactNode } from 'react-markdown';
 
-export * from './plugin_dependencies';
-export * from './core_editor';
-export * from './token';
-export * from './tokens_provider';
-export * from './common';
-export * from './remote_console';
-export type { ClientConfigType } from './config';
-export type { ConsoleUILocatorParams } from './locator';
+export interface RemoteConsoleProps {
+  headerRightSideItem?: ReactNode;
+}
