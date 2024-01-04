@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFocusTrap, keys } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { MessageRole, type Message } from '../../../common';
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { TelemetryEventTypeWithPayload, TELEMETRY } from '../../analytics';
@@ -38,8 +38,6 @@ export function PromptEditor({
   onSubmit,
 }: PromptEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const isFocusTrapEnabled = Boolean(initialContent || initialFunctionCall);
 
   const [mode, setMode] = useState<'prompt' | 'function'>(
     initialFunctionCall?.name ? 'function' : 'prompt'
@@ -135,61 +133,59 @@ export function PromptEditor({
   }, [hidden, onChangeHeight]);
 
   return (
-    <EuiFocusTrap disabled={!isFocusTrapEnabled}>
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
-        <EuiFlexItem grow={false}>
-          <FunctionListPopover
-            mode={mode}
-            selectedFunctionName={innerMessage?.function_call?.name}
-            onSelectFunction={handleSelectFunction}
-            disabled={loading || disabled}
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
+      <EuiFlexItem grow={false}>
+        <FunctionListPopover
+          mode={mode}
+          selectedFunctionName={innerMessage?.function_call?.name}
+          onSelectFunction={handleSelectFunction}
+          disabled={loading || disabled}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {mode === 'function' && innerMessage?.function_call?.name ? (
+          <PromptEditorFunction
+            functionName={innerMessage.function_call.name}
+            functionPayload={innerMessage.function_call.arguments}
+            onChange={handleChangeMessageInner}
+            onFocus={() => setHasFocus(true)}
+            onBlur={() => setHasFocus(false)}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {mode === 'function' && innerMessage?.function_call?.name ? (
-            <PromptEditorFunction
-              functionName={innerMessage.function_call.name}
-              functionPayload={innerMessage.function_call.arguments}
-              onChange={handleChangeMessageInner}
-              onFocus={() => setHasFocus(true)}
-              onBlur={() => setHasFocus(false)}
-            />
-          ) : (
-            <PromptEditorNaturalLanguage
-              disabled={disabled}
-              prompt={innerMessage?.content}
-              onChange={handleChangeMessageInner}
-              onChangeHeight={onChangeHeight}
-              onFocus={() => setHasFocus(true)}
-              onBlur={() => setHasFocus(false)}
-            />
-          )}
-        </EuiFlexItem>
+        ) : (
+          <PromptEditorNaturalLanguage
+            disabled={disabled}
+            prompt={innerMessage?.content}
+            onChange={handleChangeMessageInner}
+            onChangeHeight={onChangeHeight}
+            onFocus={() => setHasFocus(true)}
+            onBlur={() => setHasFocus(false)}
+          />
+        )}
+      </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-            aria-label={i18n.translate(
-              'xpack.observabilityAiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
-              { defaultMessage: 'Submit' }
-            )}
-            disabled={loading || disabled}
-            display={
-              mode === 'function'
-                ? innerMessage?.function_call?.name
-                  ? 'fill'
-                  : 'base'
-                : innerMessage?.content
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+            { defaultMessage: 'Submit' }
+          )}
+          disabled={loading || disabled}
+          display={
+            mode === 'function'
+              ? innerMessage?.function_call?.name
                 ? 'fill'
                 : 'base'
-            }
-            iconType="kqlFunction"
-            isLoading={loading}
-            size="m"
-            onClick={handleSubmit}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFocusTrap>
+              : innerMessage?.content
+              ? 'fill'
+              : 'base'
+          }
+          iconType="kqlFunction"
+          isLoading={loading}
+          size="m"
+          onClick={handleSubmit}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
