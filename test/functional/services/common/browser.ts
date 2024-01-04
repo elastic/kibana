@@ -15,9 +15,9 @@ import Url from 'url';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { Browsers } from '@kbn/ftr-common-functional-ui-services';
 import {
+  WebElementWrapper,
+  Browsers,
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
