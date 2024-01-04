@@ -52,6 +52,7 @@ const testProjectMonitorBrowser = (name: string, config?: Record<string, unknown
         headless: true,
         chromiumSandbox: false,
       },
+      custom_heartbeat_id: 'check-if-title-is-present',
       id: 'check-if-title-is-present',
       tags: [],
       content:

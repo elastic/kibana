@@ -88,11 +88,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await deleteMonitor([monitorId2, monitorId]);
 
-      expect(deleteResponse.body.sort((a, b) => a.id - b.id)).eql(
+      expect(
+        deleteResponse.body.sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1))
+      ).eql(
         [
           { id: monitorId2, deleted: true },
           { id: monitorId, deleted: true },
-        ].sort((a, b) => a.id - b.id)
+        ].sort((a, b) => (a.id > b.id ? 1 : -1))
       );
 
       // Hit get endpoint and expect 404 as well

@@ -178,8 +178,6 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     host: rawHost,
     inline_script: inlineScript,
     custom_heartbeat_id: _customHeartbeatId,
-    original_space: _originalSpace,
-    project_id: _projectId,
     ...rawConfig
   } = flattenedConfig;
   if (rawUrl) {
