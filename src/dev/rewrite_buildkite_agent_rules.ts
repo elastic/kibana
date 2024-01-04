@@ -15,7 +15,6 @@ import { readFile, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { BuildkiteStep } from '../../.buildkite/pipeline-utils';
 
 // const agentNameUpdateMap: Record<string, string> = {
 //   'kibana-default': 'n2-standard-2',
@@ -38,7 +37,7 @@ if (fs.existsSync('data/agents.json')) {
 
 const DRY_RUN = !process.argv.includes('--force');
 
-const isOldStyleAgentTargetingRule = (step: BuildkiteStep) => {
+const isOldStyleAgentTargetingRule = (step: any) => {
   return (
     step.agents && Object.keys(step.agents).length === 1 && Object.keys(step.agents)[0] === 'queue'
   );
