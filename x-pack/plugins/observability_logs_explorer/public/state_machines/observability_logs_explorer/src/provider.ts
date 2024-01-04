@@ -16,12 +16,12 @@ import {
 export const useObservabilityLogExplorerPageState = (
   deps: ObservabilityLogExplorerStateMachineDependencies
 ) => {
-  const observabilityLogExplorerPageStateService = useInterpret(
+  const observabilityLogsExplorerPageStateService = useInterpret(
     () => createObservabilityLogExplorerStateMachine(deps),
     { devTools: getDevToolsOptions() }
   );
 
-  return observabilityLogExplorerPageStateService;
+  return observabilityLogsExplorerPageStateService;
 };
 
 export const [
