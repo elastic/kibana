@@ -104,7 +104,7 @@ export const EmbeddablePanelHeader = ({
           hideTitle={hideTitle}
           embeddable={embeddable}
           description={description}
-          customizePanelAction={universalActions.customizePanel}
+          editPanelAction={universalActions.editPanel}
         />
         {showBadges && badgeComponents}
       </h2>

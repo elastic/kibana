@@ -8,8 +8,6 @@
 
 import React from 'react';
 
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -26,12 +24,10 @@ import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 import { CustomizePanelAction } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
-const overlays = overlayServiceMock.createStartContract();
-const theme = themeServiceMock.createStartContract();
 const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
+const customizePanelAction = new CustomizePanelAction(editPanelActionMock);
 customizePanelAction.execute = jest.fn();
 
 const DEFAULT_PANEL_TITLE = 'Panel title';

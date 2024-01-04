@@ -37,9 +37,9 @@ import {
   ViewMode,
 } from '../../../lib';
 import { canInheritTimeRange } from './can_inherit_time_range';
-import { TimeRangeInput } from './customize_panel_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { FiltersDetails } from './filters_details';
+import { TimeRangeInput } from './time_range_helpers';
 
 type PanelSettings = {
   title?: string;
@@ -55,11 +55,11 @@ interface CustomizePanelProps {
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
   onEdit: () => void;
-  titleFocus?: boolean;
+  focusOnTitle?: boolean;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit, titleFocus } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit, focusOnTitle } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -76,13 +76,13 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       ? (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange
       : undefined
   );
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (titleFocus && inputRef.current) {
-      inputRef.current.focus();
+    if (focusOnTitle && initialFocusRef.current) {
+      initialFocusRef.current.focus();
     }
-  }, [inputRef, titleFocus]);
+  }, [initialFocusRef, focusOnTitle]);
 
   const commonlyUsedRangesForDatePicker = props.commonlyUsedRanges
     ? props.commonlyUsedRanges.map(
@@ -162,7 +162,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           }
         >
           <EuiFieldText
-            inputRef={inputRef}
+            inputRef={initialFocusRef}
             id="panelTitleInput"
             className="panelTitleInputText"
             data-test-subj="customEmbeddablePanelTitleInput"
