@@ -2,12 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
-        buildDirectory: /dev/shm/bk
+      queue: n2-4-spot
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60

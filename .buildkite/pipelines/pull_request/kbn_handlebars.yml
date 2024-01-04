@@ -2,13 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
     label: 'Check @kbn/handlebars for upstream differences'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
-        buildDirectory: /dev/shm/bk
+      queue: n2-2-spot
     depends_on: build
     timeout_in_minutes: 5
     retry:

@@ -10,13 +10,7 @@
 # BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
-  queue:
-    provider: gcp
-    preemptible: true
-    image: family/kibana-ubuntu-2004
-    imageProject: elastic-images-qa
-    machineType: n2-standard-2
-    buildDirectory: /dev/shm/bk
+  queue: kibana-default
 
 steps:
   - label: "Annotate runtime parameters"
@@ -32,13 +26,7 @@ steps:
         key: pre-build
         timeout_in_minutes: 10
         agents:
-          queue:
-            provider: gcp
-            preemptible: true
-            image: family/kibana-ubuntu-2004
-            imageProject: elastic-images-qa
-            machineType: n2-standard-2
-            buildDirectory: /dev/shm/bk
+          queue: kibana-default
 
       - label: "Build Kibana Distribution and Plugins"
         command: .buildkite/scripts/steps/build_kibana.sh
@@ -55,13 +43,7 @@ steps:
       - label: "Pick Test Group Run Order"
         command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
         agents:
-          queue:
-            provider: gcp
-            preemptible: true
-            image: family/kibana-ubuntu-2004
-            imageProject: elastic-images-qa
-            machineType: n2-standard-2
-            buildDirectory: /dev/shm/bk
+          queue: kibana-default
         depends_on: build
         timeout_in_minutes: 10
         env:
@@ -215,10 +197,4 @@ steps:
     command: .buildkite/scripts/lifecycle/post_build.sh
     timeout_in_minutes: 10
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
-        buildDirectory: /dev/shm/bk
+      queue: kibana-default

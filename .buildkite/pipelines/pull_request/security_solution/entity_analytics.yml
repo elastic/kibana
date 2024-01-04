@@ -2,13 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
-        buildDirectory: /dev/shm/bk
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 2
@@ -20,13 +14,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
-        buildDirectory: /dev/shm/bk
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 2
