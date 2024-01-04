@@ -48,6 +48,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
+    console.log(JSON.stringify(input, null, ' '));
     const { MapEmbeddable } = await import('./map_embeddable');
     const usageCollection = getUsageCollection();
     if (usageCollection) {

@@ -7,3 +7,4 @@
 
 export { MapPage, SavedMap } from './map_page';
 export { ListPage } from './list_page';
+export { MapTestPage } from './map_test_page';

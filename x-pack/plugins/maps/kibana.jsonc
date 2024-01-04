@@ -50,7 +50,8 @@
       "usageCollection",
       "unifiedSearch",
       "fieldFormats",
-      "textBasedLanguages"
+      "textBasedLanguages",
+      "presentationPanel"
     ],
     "extraPublicDirs": [
       "common"

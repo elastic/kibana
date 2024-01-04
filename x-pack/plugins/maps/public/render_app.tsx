@@ -24,7 +24,7 @@ import {
   getDocLinks,
   getCore,
 } from './kibana_services';
-import { ListPage, MapPage } from './routes';
+import { ListPage, MapPage, MapTestPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
@@ -124,6 +124,9 @@ export async function renderApp(
               <Routes>
                 <Route path={`/map/:savedMapId`} render={renderMapApp} />
                 <Route exact path={`/map`} render={renderMapApp} />
+                <Route exact path={`/mapTestPage`} render={() => {
+                  return <MapTestPage />;
+                }} />
                 // Redirect other routes to list, or if hash-containing, their non-hash equivalents
                 <Route
                   path={``}
