@@ -54,6 +54,7 @@ import { TechnicalPreviewBadge } from '../../../../detections/components/rules/t
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 interface SavedQueryNameProps {
@@ -426,7 +427,10 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  experimentalFeatures?: Partial<ExperimentalFeatures>
+  {
+    alertSuppressionForEqlRuleEnabled,
+    alertSuppressionForIndicatorMatchRuleEnabled,
+  }: Partial<ExperimentalFeatures> = {}
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -656,7 +660,11 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('alert_suppression' in rule && rule.alert_suppression) {
+  const isSuppressionEnabled =
+    (rule.type === 'eql' && alertSuppressionForEqlRuleEnabled) ||
+    (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled);
+
+  if ('alert_suppression' in rule && rule.alert_suppression && isSuppressionEnabled) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
@@ -738,10 +746,18 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
+  const alertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForIndicatorMatchRuleEnabled'
+  );
+  const alertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEqlRuleEnabled'
+  );
+
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
-    savedQuery
+    savedQuery,
+    { alertSuppressionForIndicatorMatchRuleEnabled, alertSuppressionForEqlRuleEnabled }
   );
 
   return (

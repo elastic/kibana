@@ -137,6 +137,16 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskEnginePrivilegesRouteEnabled: true,
 
+  /**
+   * Enables alerts suppression for indicator match rules
+   */
+  alertSuppressionForIndicatorMatchRuleEnabled: false,
+
+  /**
+   * Enables alerts suppression for EQL rules
+   */
+  alertSuppressionForEqlRuleEnabled: false,
+
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
    */
