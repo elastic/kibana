@@ -67,7 +67,7 @@ export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
           <EuiSpacer size="s" />
 
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description2"
             defaultMessage="Using High Count is more appropriate when categorizing just error messages."
           />
         </>
