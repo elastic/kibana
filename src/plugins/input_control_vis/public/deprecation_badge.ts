@@ -24,7 +24,7 @@ export class InputControlDeprecationBadge implements Action<DeprecationBadgeActi
   public disabled = true;
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.panel.panelHeading.deprecationBadgeLabel', {
+    return i18n.translate('inputControl.deprecationBadgeAction.deprecationBadgeLabel', {
       defaultMessage: 'Deprecated',
     });
   }
@@ -34,7 +34,7 @@ export class InputControlDeprecationBadge implements Action<DeprecationBadgeActi
   }
 
   public getDisplayNameTooltip() {
-    return i18n.translate('visualizations.inputContorlVis.deprecationWarning', {
+    return i18n.translate('inputControl.deprecationBadgeAction.deprecationWarningDescription', {
       defaultMessage:
         'Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data.',
     });
