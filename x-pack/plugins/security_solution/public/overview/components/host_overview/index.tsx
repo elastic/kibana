@@ -13,9 +13,8 @@ import styled from 'styled-components';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import {
   DefaultFieldRenderer,
@@ -84,7 +83,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const darkMode = useDarkMode();
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
