@@ -30,7 +30,7 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionsClient } from './types';
+import type { ResponseActionsClient, CommonResponseActionMethodOptions } from './types';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
@@ -48,6 +48,7 @@ import type {
   EndpointActionDataParameterTypes,
   LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -69,7 +70,7 @@ export interface ResponseActionsClientOptions {
   /**
    * Is the instance of the client being used for automated response actions.
    * When set to `true`, additional checks will be performed and the Endpoint response action
-   * request will always be created, even if there are errors.
+   * request will (almost) always be created, even if there certain errors occur along the way
    */
   isAutomated?: boolean;
 }
@@ -91,7 +92,9 @@ export interface ResponseActionsClientUpdateCasesOptions {
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
   ResponseActionsRequestBody &
-    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name' | 'error'>;
+    Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name' | 'error'> & {
+      actionId?: string;
+    };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -139,12 +142,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     comment = '',
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
-      this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
+      this.log.debug(`No updates to Cases needed. 'caseIds' and 'alertIds' are empty`);
       return;
     }
 
     if (hosts.length === 0) {
-      this.log.debug(`Nothing to do. 'hosts' is empty`);
+      this.log.debug(`No updates to Cases needed. 'hosts' is empty`);
       return;
     }
 
@@ -178,7 +181,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const allCases = [...new Set([...caseIds, ...casesFromAlertIds])];
 
     if (allCases.length === 0) {
-      this.log.debug(`Nothing to do. Alert IDs are not tied to Cases`);
+      this.log.debug(`No updates to Cases needed. Alert IDs are not tied to Cases`);
       return;
     }
 
@@ -213,6 +216,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     );
 
     this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+  }
+
+  protected getMethodOptions<
+    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+  >(options: Partial<T> = {}): WithAllKeys<CommonResponseActionMethodOptions> {
+    return {
+      hosts: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
+      ...options,
+    };
   }
 
   /**
@@ -303,7 +317,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         id: actionRequest.endpoint_ids,
       },
       EndpointActions: {
-        action_id: uuidv4(),
+        action_id: actionRequest.actionId || uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,

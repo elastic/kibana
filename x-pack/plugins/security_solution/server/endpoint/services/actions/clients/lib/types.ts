@@ -18,6 +18,7 @@ import type {
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  EndpointActionData,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -28,38 +29,66 @@ import type {
 } from '../../../../../../common/api/endpoint';
 
 /**
+ * Additional options for response action methods that fall outside of the Request Body
+ */
+export interface CommonResponseActionMethodOptions
+  /**
+   * Host names are sometime passed in from the Alert when running in automated
+   * mode so that it gets stored with the action request if the host is no
+   * longer running elastic defend
+   */
+  extends Pick<EndpointActionData, 'hosts'> {
+  /** Used when invoked from rules */
+  ruleId?: string;
+  /** Used when invoked from rules */
+  ruleName?: string;
+}
+
+/**
  * The interface required for a Response Actions provider
  */
 export interface ResponseActionsClient {
-  isolate: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
+  isolate: (
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails>;
 
-  release: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
+  release: (
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails>;
 
   killProcess: (
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   suspendProcess: (
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   runningProcesses: (
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<GetProcessesActionOutputContent>>;
 
   getFile: (
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
 
   execute: (
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
 
   upload: (
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
 }
