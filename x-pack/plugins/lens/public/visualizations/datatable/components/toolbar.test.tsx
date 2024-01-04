@@ -57,7 +57,7 @@ describe('datatable toolbar', () => {
 
     const selectOptionFromButtonGroup = (testId: string) => (optionName: string | RegExp) => {
       const buttonGroup = screen.getByTestId(testId);
-      const option = within(buttonGroup).getByRole('radio', { name: optionName });
+      const option = within(buttonGroup).getByRole('button', { name: optionName });
       fireEvent.click(option);
     };
 

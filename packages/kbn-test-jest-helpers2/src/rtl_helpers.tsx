@@ -10,10 +10,5 @@ import { screen, within } from '@testing-library/react';
 
 export const getButtonGroupInputValue = (testId: string) => () => {
   const buttonGroup = screen.getByTestId(testId);
-  const options = within(buttonGroup).getAllByRole('radio');
-  const checkedOption = options.find((option) => option.getAttribute('checked') === '');
-  if (checkedOption == null) {
-    throw new Error(`No checked option found in button group ${testId}`);
-  }
-  return checkedOption.nextSibling;
+  return within(buttonGroup).getByRole('button', { pressed: true });
 };
