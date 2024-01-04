@@ -59,6 +59,7 @@ import {
   DataViewId,
   RuleFilterArray,
   SavedQueryId,
+  AlertSuppression,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -68,7 +69,6 @@ import {
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
 import { ResponseAction } from '../rule_response_actions/response_actions.gen';
-import { AlertSuppression } from './specific_attributes/query_attributes.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
