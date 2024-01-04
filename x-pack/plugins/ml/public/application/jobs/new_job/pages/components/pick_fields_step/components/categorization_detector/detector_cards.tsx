@@ -41,9 +41,11 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
 export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
   <EuiFlexItem>
     <EuiCard
-      data-test-subj={`mlJobWizardCategorizationDetectorCountCard${isSelected ? ' selected' : ''}`}
+      data-test-subj={`mlJobWizardCategorizationDetectorHighCountCard${
+        isSelected ? ' selected' : ''
+      }`}
       title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.title',
+        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.title',
         {
           defaultMessage: 'High Count',
         }
@@ -51,7 +53,7 @@ export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
       description={
         <>
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description"
             defaultMessage="Look for anomalies in the event rate of a category."
           />
         </>
