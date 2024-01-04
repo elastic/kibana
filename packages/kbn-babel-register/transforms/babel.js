@@ -18,6 +18,7 @@ const babelTransform = (path, source, cache) => {
 
   const result = transformCode(path, source);
   cache.update(key, {
+    path: path,
     code: result.code,
     map: result.map,
   });

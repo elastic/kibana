@@ -18,7 +18,7 @@ export interface Cache {
   getKey(path: string, source: string): string;
   getCode(key: string): string | undefined;
   getSourceMap(key: string): object | undefined;
-  update(key: string, entry: { code: string; map?: object | null }): Promise<void>;
+  update(key: string, entry: { code: string; map?: object | null; path?: string }): Promise<void>;
 }
 
-export type CacheEntry = [atime: number, code: string, sourceMap: object];
+export type CacheEntry = [atime: number, code: string, sourceMap: object, path?: string];

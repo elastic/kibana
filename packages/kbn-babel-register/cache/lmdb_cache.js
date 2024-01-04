@@ -92,7 +92,7 @@ directory and report this error to the Operations team.\n`);
       // when we use a file from the cache set the "atime" of that cache entry
       // so that we know which cache items we use and which haven't been
       // used in a long time (currently 30 days)
-      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2]]);
+      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2], entry[3]]);
     }
 
     return entry?.[1];
@@ -111,10 +111,10 @@ directory and report this error to the Operations team.\n`);
 
   /**
    * @param {string} key
-   * @param {{ code: string, map: object }} entry
+   * @param {{ code: string, map: object, path: string }} entry
    */
   async update(key, entry) {
-    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.code, entry.map]);
+    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.code, entry.map, entry.path]);
   }
 
   /**
@@ -146,7 +146,7 @@ directory and report this error to the Operations team.\n`);
       db.putSync(key, value);
       this.#debug('PUT', db, key);
     } catch (error) {
-      this.#logError('PUT', db, key, error);
+      this.#logError('PUT', db, key, error, value[3]);
     }
   }
 
@@ -164,12 +164,16 @@ directory and report this error to the Operations team.\n`);
    * @param {Db} db
    * @param {string} key
    * @param {Error} error
+   * @param {string?} path
    */
-  #logError(type, db, key, error) {
-    this.#debug(`ERROR/${type}`, db, `${String(key)}: ${error.stack}`);
+  #logError(type, db, key, error, path = '') {
+    const pathIndicator = path ? '@' + path : '';
+    this.#debug(`ERROR/${type}`, db, `${String(key)}${pathIndicator}: ${error.stack}`);
     process.stderr.write(
       chalk.red(
-        `[@kbn/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
+        `[@kbn/optimizer/node] ${type} error [${dbName(db)}/${String(key)}${pathIndicator}]: ${
+          error.stack
+        }\n`
       )
     );
   }
