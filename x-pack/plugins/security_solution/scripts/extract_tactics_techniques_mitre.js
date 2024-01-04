@@ -181,9 +181,10 @@ const extractSubtechniques = (mitreData) => {
 };
 
 const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
+  const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
-  for (let i = 0; i < 2; i++) {
-    const subtechnique = subtechniques[i];
+  for (let i = 0; i < numberOfThreatsToGenerate; i++) {
+    const subtechnique = subtechniques[i * 2]; // Double our interval to broaden the subtechnique types we're pulling data from a bit
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 
@@ -254,7 +255,7 @@ async function main() {
               .replace(/"{/g, '{')};
 
           /**
-           * A full object of Mitre Attack Threat data that is taken directly from the \`mitre_tactics_techniques.ts\` file
+           * An array of full Mitre Attack Threat objects that are taken directly from the \`mitre_tactics_techniques.ts\` file
            *
            * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
            */
@@ -266,6 +267,11 @@ async function main() {
             .replace(/}"/g, '}')
             .replace(/"{/g, '{')});
 
+          /**
+           * An array of specifically chosen Mitre Attack Threat objects that is taken directly from the \`mitre_tactics_techniques.ts\` file
+           *
+           * These objects have identical technique fields but are assigned to different tactics
+           */
           export const getDuplicateTechniqueThreatData = () => (${JSON.stringify(
             buildDuplicateTechniqueMockThreatData(tacticsData, techniques),
             null,
