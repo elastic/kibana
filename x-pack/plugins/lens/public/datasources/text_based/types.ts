@@ -26,7 +26,6 @@ export interface TextBasedLayer {
   query: AggregateQuery | undefined;
   table?: Datatable;
   columns: TextBasedLayerColumn[];
-  allColumns: TextBasedLayerColumn[];
   timeField?: string;
   errors?: Error[];
 }

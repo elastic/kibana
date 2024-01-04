@@ -7,7 +7,7 @@
 
 import { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop';
-import { column1, column2, column3, emptyDimensionTarget, defaultProps, fieldList } from './mocks';
+import { column1, column2, column3, emptyDimensionTarget, defaultProps } from './mocks';
 import { DatasourceDimensionDropHandlerProps } from '../../../types';
 import { TextBasedPrivateState } from '../types';
 
@@ -34,7 +34,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })
@@ -51,7 +50,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })
@@ -69,7 +67,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })
@@ -114,7 +111,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })
@@ -142,7 +138,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })
@@ -159,7 +154,6 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
           }),
         },
       })

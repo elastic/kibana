@@ -21,8 +21,8 @@ export const getDropProps = (
   }
   const layer = state.layers[target.layerId];
   const targetColumn = layer.columns.find((f) => f.columnId === target.columnId);
-  const targetField = layer.allColumns.find((f) => f.columnId === target.columnId);
-  const sourceField = layer.allColumns.find((f) => f.columnId === source.id);
+  const targetField = layer.columns.find((f) => f.columnId === target.columnId);
+  const sourceField = layer.columns.find((f) => f.columnId === source.id);
 
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
@@ -46,12 +46,12 @@ export const getDropProps = (
     }
 
     const sourceFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      layer.allColumns,
+      layer.columns,
       sourceField?.meta?.type
     );
 
     const targetFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      layer.allColumns,
+      layer.columns,
       targetField?.meta?.type
     );
 

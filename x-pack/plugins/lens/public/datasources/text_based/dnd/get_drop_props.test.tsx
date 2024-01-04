@@ -24,7 +24,6 @@ const defaultProps = {
     layers: {
       first: {
         columns: [column1, column2, column3],
-        allColumns: [...fieldList, column1, column2, column3],
       },
     },
     fieldList,
@@ -83,7 +82,6 @@ describe('Text-based: getDropProps', () => {
         layers: {
           first: {
             columns: [column1, column2, column3],
-            allColumns: [...fieldListNonNumericOnly, column1, column2, column3],
           },
         },
         fieldList: fieldListNonNumericOnly,

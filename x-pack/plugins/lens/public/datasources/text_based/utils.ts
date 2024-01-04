@@ -38,34 +38,6 @@ export async function loadIndexPatternRefs(
     });
 }
 
-export const getAllColumns = (
-  existingColumns: TextBasedLayerColumn[],
-  columnsFromQuery: DatatableColumn[]
-) => {
-  // filter out columns that do not exist on the query
-  const columns = existingColumns.filter((c) => {
-    const columnExists = columnsFromQuery?.some((f) => f.name === c?.fieldName);
-    if (columnExists) return c;
-  });
-  const allCols = [
-    ...columns,
-    ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
-  ];
-  const uniqueIds: string[] = [];
-
-  return allCols.filter((col) => {
-    const isDuplicate = uniqueIds.includes(col.columnId);
-
-    if (!isDuplicate) {
-      uniqueIds.push(col.columnId);
-
-      return true;
-    }
-
-    return false;
-  });
-};
-
 export async function getStateFromAggregateQuery(
   state: TextBasedPrivateState,
   query: AggregateQuery,
@@ -86,7 +58,6 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
     const dataView = await dataViews.create({
@@ -109,7 +80,6 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -120,7 +90,6 @@ export async function getStateFromAggregateQuery(
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns,
         timeField: timeFieldName,
         errors,
       },

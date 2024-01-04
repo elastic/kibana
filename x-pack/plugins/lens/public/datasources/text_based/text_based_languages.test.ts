@@ -106,15 +106,6 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          allColumns: [
-            {
-              columnId: 'col1',
-              fieldName: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
           index: 'foo',
           query: { esql: 'FROM foo' },
         },
@@ -217,15 +208,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [],
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: 'foo',
           },
@@ -262,15 +244,6 @@ describe('Textbased Data Source', () => {
           newLayer: {
             index: 'foo',
             query: { esql: 'FROM foo' },
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
           },
         },
@@ -287,15 +260,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [],
-              allColumns: [
-                {
-                  columnId: 'col1',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
               query: { esql: 'FROM foo' },
               index: 'foo',
             },
@@ -322,22 +286,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [
-                {
-                  columnId: 'a',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-                {
-                  columnId: 'b',
-                  fieldName: 'Test 2',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
-              allColumns: [
                 {
                   columnId: 'a',
                   fieldName: 'Test 1',
@@ -412,23 +360,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: 'bytes',
-                fieldName: 'bytes',
-                inMetricDimension: true,
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: 'bytes',
@@ -564,24 +495,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: '@timestamp',
-                fieldName: '@timestamp',
-                inMetricDimension: true,
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                inMetricDimension: true,
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: '@timestamp',
@@ -708,22 +621,6 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            allColumns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             errors: [new Error('error 1'), new Error('error 2')],
             query: { esql: 'FROM foo' },
             index: 'foo',
@@ -791,22 +688,6 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            allColumns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: '1',
           },
@@ -823,22 +704,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
@@ -881,22 +746,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',

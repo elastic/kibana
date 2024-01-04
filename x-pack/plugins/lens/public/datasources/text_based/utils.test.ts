@@ -14,10 +14,8 @@ import {
   getIndexPatternFromTextBasedQuery,
   loadIndexPatternRefs,
   getStateFromAggregateQuery,
-  getAllColumns,
   canColumnBeUsedBeInMetricDimension,
 } from './utils';
-import type { TextBasedLayerColumn } from './types';
 import { type AggregateQuery } from '@kbn/es-query';
 
 jest.mock('./fetch_data_from_aggregate_query', () => ({
@@ -92,74 +90,6 @@ describe('Text based languages utils', () => {
     });
   });
 
-  describe('getAllColumns', () => {
-    it('should remove columns that do not exist on the query and remove duplicates', async () => {
-      const existingOnLayer = [
-        {
-          fieldName: 'time',
-          columnId: 'time',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          fieldName: 'bytes',
-          columnId: 'bytes',
-          meta: {
-            type: 'number',
-          },
-        },
-      ] as TextBasedLayerColumn[];
-      const columnsFromQuery = [
-        {
-          name: 'timestamp',
-          id: 'timestamp',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          name: 'bytes',
-          id: 'bytes',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          name: 'memory',
-          id: 'memory',
-          meta: {
-            type: 'number',
-          },
-        },
-      ] as DatatableColumn[];
-      const allColumns = getAllColumns(existingOnLayer, columnsFromQuery);
-      expect(allColumns).toStrictEqual([
-        {
-          fieldName: 'bytes',
-          columnId: 'bytes',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          fieldName: 'timestamp',
-          columnId: 'timestamp',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          fieldName: 'memory',
-          columnId: 'memory',
-          meta: {
-            type: 'number',
-          },
-        },
-      ]);
-    });
-  });
-
   describe('getStateFromAggregateQuery', () => {
     const textBasedQueryColumns = [
       {
@@ -181,7 +111,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -294,29 +223,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: '4',
@@ -333,7 +239,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -451,29 +356,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: 'adHoc-id',

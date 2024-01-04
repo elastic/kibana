@@ -105,7 +105,6 @@ const initialState: TextBasedPrivateState = {
     first: {
       index: '1',
       columns: [],
-      allColumns: [],
       query: { sql: 'SELECT * FROM foo' },
     },
   },
