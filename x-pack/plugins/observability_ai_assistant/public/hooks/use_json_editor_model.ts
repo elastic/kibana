@@ -12,9 +12,6 @@ import { safeJsonParse } from '../utils/safe_json_parse';
 
 const { editor, languages, Uri } = monaco;
 
-const SCHEMA_URI = 'http://elastic.co/foo.json';
-const modelUri = Uri.parse(SCHEMA_URI);
-
 export const useJsonEditorModel = ({
   functionName,
   initialJson,
@@ -28,13 +25,20 @@ export const useJsonEditorModel = ({
 
   const [initialJsonValue, setInitialJsonValue] = useState<string | undefined>(initialJson);
 
+  const SCHEMA_URI = `http://elastic.co/${functionName}.json`;
+  const [modelUri, setModelUri] = useState<monaco.Uri | undefined>();
+
+  useEffect(() => {
+    setModelUri(Uri.parse(SCHEMA_URI));
+  }, [SCHEMA_URI, functionName]);
+
   useEffect(() => {
     setInitialJsonValue(initialJson);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [functionName]);
 
   return useMemo(() => {
-    if (!functionDefinition) {
+    if (!functionDefinition || !modelUri) {
       return {};
     }
 
@@ -66,5 +70,5 @@ export const useJsonEditorModel = ({
     }
 
     return { model, initialJsonString };
-  }, [functionDefinition, initialJsonValue]);
+  }, [SCHEMA_URI, functionDefinition, initialJsonValue, modelUri]);
 };
