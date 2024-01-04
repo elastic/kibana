@@ -7,7 +7,7 @@
 import { getStartDateFromRiskScore } from './get_start_date_from_risk_score';
 
 describe('getStartDateFromRiskScore', () => {
-  it('should retun now-30d if there is an error in parsing the date', () => {
+  it('should return now-30d if there is an error in parsing the date', () => {
     expect(
       getStartDateFromRiskScore({
         riskRangeStart: 'aaa',

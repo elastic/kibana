@@ -13,10 +13,7 @@ import type {
   UserRiskScore,
   HostRiskScore,
 } from '../../../common/search_strategy/security_solution/risk_score/all';
-import {
-  isUserRiskScore,
-  RiskScoreFields,
-} from '../../../common/search_strategy/security_solution/risk_score/all';
+import { getAlertsQueryFromRiskScore } from '../common/get_alerts_query_from_risk_score';
 import { getStartDateFromRiskScore } from '../common/get_start_date_from_risk_score';
 import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
 
@@ -37,8 +34,6 @@ interface UseRiskContributingAlertsResult {
   data?: Hit[];
 }
 
-const ALERTS_SIZE = 1000;
-
 /**
  * Fetches alerts related to the risk score
  */
@@ -57,28 +52,13 @@ export const useRiskContributingAlerts = ({
   useEffect(() => {
     if (!riskEngineSettings?.range?.start || !riskScore) return;
 
-    let entityField: string;
-    let entityValue: string;
-
-    if (isUserRiskScore(riskScore)) {
-      entityField = RiskScoreFields.userName;
-      entityValue = riskScore.user.name;
-    } else {
-      entityField = RiskScoreFields.hostName;
-      entityValue = riskScore.host.name;
-    }
-    const riskScoreTimestamp = riskScore['@timestamp'];
-    const startRiskScoringDate = getStartDateFromRiskScore({
-      riskScoreTimestamp,
-      riskRangeStart: riskEngineSettings.range.start,
-    });
-
     setQuery(
-      getQuery({
-        from: startRiskScoringDate,
-        to: riskScoreTimestamp,
-        entityField,
-        entityValue,
+      getAlertsQueryFromRiskScore({
+        from: getStartDateFromRiskScore({
+          riskScoreTimestamp: riskScore['@timestamp'],
+          riskRangeStart: riskEngineSettings.range.start,
+        }),
+        riskScore,
         fields,
       })
     );
@@ -90,40 +70,5 @@ export const useRiskContributingAlerts = ({
     loading,
     error,
     data: data?.hits.hits,
-  };
-};
-
-const getQuery = ({
-  from,
-  to,
-  entityField,
-  entityValue,
-  fields,
-}: {
-  from: string;
-  to: string;
-  entityField: string;
-  entityValue: string;
-  fields?: string[];
-}) => {
-  return {
-    fields: fields || ['*'],
-    size: ALERTS_SIZE,
-    _source: false,
-    query: {
-      bool: {
-        filter: [
-          { term: { [entityField]: entityValue } },
-          {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-              },
-            },
-          },
-        ],
-      },
-    },
   };
 };

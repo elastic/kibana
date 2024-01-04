@@ -10,7 +10,7 @@ import moment from 'moment';
 /**
  * return start date of risk scoring by calculating the difference between risk score timestamp and risk range start date
  * return the same risk range start date if it's a date
- * return now-30d  if there erros in parsing the date
+ * return now-30d if there are erros in parsing the date
  */
 export const getStartDateFromRiskScore = ({
   riskRangeStart,
