@@ -6,7 +6,10 @@
  */
 
 import moment from 'moment';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  CustomMetricExpressionParams,
+} from '../../../../../common/custom_threshold_rule/types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,
@@ -22,13 +25,20 @@ import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_quer
 export const calculateCurrentTimeFrame = (
   metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number }
-) => ({
-  ...timeframe,
-  start: moment(timeframe.end).subtract(metricParams.timeSize, metricParams.timeUnit).valueOf(),
-});
+) => {
+  const isRateAgg = metricParams.metrics.some((metric) => metric.aggType === Aggregators.RATE);
+  return {
+    ...timeframe,
+    start: moment(timeframe.end)
+      .subtract(
+        isRateAgg ? metricParams.timeSize * 2 : metricParams.timeSize,
+        metricParams.timeUnit
+      )
+      .valueOf(),
+  };
+};
 
 export const createBaseFilters = (
-  metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number },
   timeFieldName: string,
   filterQuery?: string
@@ -186,7 +196,7 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const baseFilters = createBaseFilters(metricParams, timeframe, timeFieldName, filterQuery);
+  const baseFilters = createBaseFilters(timeframe, timeFieldName, filterQuery);
 
   return {
     track_total_hits: true,

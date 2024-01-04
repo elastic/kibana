@@ -32,7 +32,7 @@ export const checkMissingGroups = async (
     return missingGroups;
   }
   const currentTimeFrame = calculateCurrentTimeFrame(metricParams, timeframe);
-  const baseFilters = createBaseFilters(metricParams, currentTimeFrame, timeFieldName, filterQuery);
+  const baseFilters = createBaseFilters(currentTimeFrame, timeFieldName, filterQuery);
   const groupByFields = isString(groupBy) ? [groupBy] : groupBy ? groupBy : [];
 
   const searches = missingGroups.flatMap((group) => {
