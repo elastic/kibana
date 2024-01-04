@@ -556,6 +556,7 @@ export const typeSpecificCamelToSnake = (
         timestamp_field: params.timestampField,
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'esql': {
@@ -582,6 +583,7 @@ export const typeSpecificCamelToSnake = (
         threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'query': {
