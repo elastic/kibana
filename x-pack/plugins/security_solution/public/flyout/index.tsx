@@ -26,6 +26,11 @@ import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
+import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
+import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -71,6 +76,16 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: UserDetailsPanelKey,
     component: (props) => (
       <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+    ),
+  },
+  {
+    key: HostPanelKey,
+    component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: HostDetailsPanelKey,
+    component: (props) => (
+      <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
   },
 ];
