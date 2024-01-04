@@ -11,6 +11,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';
@@ -47,6 +48,7 @@ describe('Risk Scoring Task', () => {
     it('registers the task with TaskManager', () => {
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
       registerRiskScoringTask({
+        experimentalFeatures: {} as ExperimentalFeatures,
         getStartServices: mockCore.getStartServices,
         kibanaVersion: '8.10.0',
         taskManager: mockTaskManagerSetup,
@@ -59,6 +61,7 @@ describe('Risk Scoring Task', () => {
     it('does nothing if TaskManager is not available', () => {
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
       registerRiskScoringTask({
+        experimentalFeatures: {} as ExperimentalFeatures,
         getStartServices: mockCore.getStartServices,
         kibanaVersion: '8.10.0',
         taskManager: undefined,
