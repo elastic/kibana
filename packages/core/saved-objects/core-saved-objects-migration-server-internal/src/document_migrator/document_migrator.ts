@@ -146,7 +146,7 @@ export class DocumentMigrator implements IDocumentMigrator {
    */
   public isDowngradeRequired(
     doc: SavedObjectUnsanitizedDoc,
-    { targetTypeVersion }: IsDowngradeRequiredOptions
+    { targetTypeVersion }: IsDowngradeRequiredOptions = {}
   ): boolean {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
