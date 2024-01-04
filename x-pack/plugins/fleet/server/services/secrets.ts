@@ -241,7 +241,11 @@ export async function extractAndWriteSecrets(opts: {
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy);
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    secrets,
+    packagePolicy
+  );
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -771,24 +775,23 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
  * new package policy object that includes resolved secret reference values at each
  * provided path.
  */
-export function getPolicyWithSecretReferences(
+function getPolicyWithSecretReferences(
   secretPaths: SecretPath[],
   secrets: Secret[],
   packagePolicy: NewPackagePolicy
 ) {
   const result = JSON.parse(JSON.stringify(packagePolicy));
 
-  let secretIndex = 0;
-  secretPaths.forEach((secretPath) => {
+  secretPaths.forEach((secretPath, secretPathIndex) => {
     secretPath.path.reduce((acc, val, secretPathComponentIndex) => {
       if (!acc[val]) {
         acc[val] = {};
       }
-      const isSecretPath =
-        secretPathComponentIndex === secretPath.path.length - 1 && !!secretPath.value.value;
-      if (isSecretPath) {
-        acc[val].value = toVarSecretRef(secrets[secretIndex].id);
-        secretIndex = secretIndex + 1;
+
+      const isLast = secretPathComponentIndex === secretPath.path.length - 1;
+
+      if (isLast) {
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
       }
 
       return acc[val];
