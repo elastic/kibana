@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './risk_engine';
-export * from './get_risk_engine_stats';
-export * from './asset_criticality';
+export * from './asset_criticality_service';
+export * from './asset_criticality_data_client';
