@@ -47,7 +47,7 @@ export function Profiling() {
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.flamegraphInfoPopoverBody"
-              defaultMessage="The flamegraph is a visual representation of the functions that are consuming the most resources. Each function is represented by a rectangle, where the width of the rectangle represents the amount of time spent in the function, and the number of stacked rectangles represents the stack depth. The stack depth is the number of functions that were called to reach the current function. {learnMoreLink}"
+              defaultMessage="See a visual representation of the functions that consume the most resources. Each rectangle represents a function. The rectangle width represents the time spent in the function, and the number of stacked rectangles represents the number of functions called to reach the current function. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
