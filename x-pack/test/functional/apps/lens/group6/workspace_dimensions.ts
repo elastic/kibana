@@ -61,58 +61,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     };
 
-    it('adjusts dimension for various chart types', async () => {
-      const VERTICAL_16_9 = { expectedWidth: '690px', expectedHeight: '388.125px' };
-      const HORIZONTAL_16_9 = { expectedWidth: '225px', expectedHeight: '400px' };
-      const UNCONSTRAINED = { expectedWidth: '690px', expectedHeight: '400px' };
+    const assertWorkspaceAspectRatio = async (expectedRatio: number) => {
+      const tolerance = 0.05;
 
+      await retry.try(async () => {
+        const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+
+        expect(pxToN(width) / pxToN(height)).to.within(
+          expectedRatio - tolerance,
+          expectedRatio + tolerance
+        );
+      });
+    };
+
+    const VERTICAL_16_9 = 16 / 9;
+    const HORIZONTAL_16_9 = 9 / 16;
+    const outerWorkspaceDimensions = { width: 690, height: 400 };
+    const UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
+
+    it('adjusts dimension for various chart types', async () => {
       /**
        * This list is specifically designed to test dimension transitions.
        *
        * I have attempted to order the vis types to maximize the number of transitions.
        */
       const visTypes: Array<{
-        expectedWidth: string;
-        expectedHeight: string;
         id: string;
         searchText?: string;
+        expectedHeight?: string;
+        expectedWidth?: string;
+        aspectRatio?: number;
       }> = [
-        { id: 'lnsDatatable', ...UNCONSTRAINED },
-        { id: 'line', ...VERTICAL_16_9 },
+        { id: 'lnsDatatable', aspectRatio: UNCONSTRAINED },
+        { id: 'line', aspectRatio: VERTICAL_16_9 },
         {
-          id: 'verticalBullet',
-          searchText: 'gauge',
-          // these dimensions are slightly below the requested 300x600
-          // that is because the window size isn't large enough to fit the requested dimensions
-          // and the chart is forced to shrink.
-          //
-          // this is a good thing because it makes this a test case for aspect ratio preservation
-          // even when specific pixel dimensions are requested.
-          expectedWidth: '200px',
-          expectedHeight: '400px',
+          id: 'bar_horizontal_percentage_stacked',
+          searchText: 'bar',
+          aspectRatio: HORIZONTAL_16_9,
         },
-        { id: 'bar_horizontal_percentage_stacked', searchText: 'bar', ...HORIZONTAL_16_9 },
-        { id: 'lnsLegacyMetric', ...UNCONSTRAINED },
-        { id: 'bar_horizontal_stacked', ...HORIZONTAL_16_9 },
-        { id: 'donut', ...UNCONSTRAINED },
-        { id: 'bar', ...VERTICAL_16_9 },
-        { id: 'mosaic', ...UNCONSTRAINED },
-        { id: 'bar_percentage_stacked', searchText: 'bar', ...VERTICAL_16_9 },
-        { id: 'pie', ...UNCONSTRAINED },
-        { id: 'bar_stacked', ...VERTICAL_16_9 },
-        { id: 'lnsMetric', expectedWidth: '300px', expectedHeight: '300px' },
-        { id: 'area', ...VERTICAL_16_9 },
-        { id: 'treemap', ...UNCONSTRAINED },
-        { id: 'area_percentage_stacked', searchText: 'area', ...VERTICAL_16_9 },
-        { id: 'waffle', ...UNCONSTRAINED },
-        { id: 'area_stacked', ...VERTICAL_16_9 },
+        { id: 'lnsLegacyMetric', aspectRatio: UNCONSTRAINED },
+        { id: 'bar_horizontal_stacked', aspectRatio: HORIZONTAL_16_9 },
+        { id: 'donut', aspectRatio: UNCONSTRAINED },
+        { id: 'bar', aspectRatio: VERTICAL_16_9 },
+        { id: 'mosaic', aspectRatio: UNCONSTRAINED },
+        { id: 'bar_percentage_stacked', searchText: 'bar', aspectRatio: VERTICAL_16_9 },
+        { id: 'pie', aspectRatio: UNCONSTRAINED },
+        { id: 'bar_stacked', aspectRatio: VERTICAL_16_9 },
         {
-          id: 'horizontalBullet',
-          searchText: 'gauge',
-          expectedWidth: '600px',
+          id: 'lnsMetric',
+          expectedWidth: '300px',
           expectedHeight: '300px',
         },
-        { id: 'bar_horizontal', ...HORIZONTAL_16_9 },
+        { id: 'area', aspectRatio: VERTICAL_16_9 },
+        { id: 'treemap', aspectRatio: UNCONSTRAINED },
+        { id: 'area_percentage_stacked', searchText: 'area', aspectRatio: VERTICAL_16_9 },
+        { id: 'waffle', aspectRatio: UNCONSTRAINED },
+        { id: 'area_stacked', aspectRatio: VERTICAL_16_9 },
+
+        { id: 'bar_horizontal', aspectRatio: HORIZONTAL_16_9 },
         // { id: 'heatmap', ...UNCONSTRAINED }, // heatmap blocks render unless it's given two dimensions. This stops the expression renderer from requesting new dimensions.
         // { id: 'lnsChoropleth', ...UNCONSTRAINED }, // choropleth currently erases all dimensions
         // { id: 'lnsTagcloud', ...UNCONSTRAINED }, // tag cloud currently erases all dimensions
@@ -126,11 +132,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug(`Testing ${vis.id}... expecting ${vis.expectedWidth}x${vis.expectedHeight}`);
 
-        await assertWorkspaceDimensions(vis.expectedWidth, vis.expectedHeight);
+        if (vis.aspectRatio) {
+          await assertWorkspaceAspectRatio(vis.aspectRatio);
+        } else {
+          await assertWorkspaceDimensions(vis.expectedWidth!, vis.expectedHeight!);
+        }
       }
     });
 
-    it('metric dimensions', async () => {
+    it('metric dimensions (absolute pixels)', async () => {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization('lnsMetric');
       });
@@ -149,6 +159,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsMetric_max_cols', '2');
 
       await assertWorkspaceDimensions('266.664px', '400px');
+    });
+
+    it('gauge dimensions (absolute pixels)', async () => {
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
+      });
+
+      await assertWorkspaceDimensions('600px', '300px');
+
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization('verticalBullet', 'gauge');
+      });
+
+      // these dimensions are slightly below the requested 300x600
+      // that is because the window size isn't large enough to fit the requested dimensions
+      // and the chart is forced to shrink.
+      //
+      // this is a good thing because it makes this a test case for aspect ratio preservation
+      // even when specific pixel dimensions are requested.
+      await assertWorkspaceDimensions('200px', '400px');
+    });
+
+    it('preserves aspect ratio when either dimension is constrained', async () => {
+      const changeWindowAndAssertAspectRatio = async (
+        width: number,
+        height: number,
+        expectedRatio: number
+      ) => {
+        const { width: currentWidth } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+
+        await browser.setWindowSize(width, height);
+
+        // this is important so that we don't assert against the old dimensions
+        await retry.waitFor('workspace width to change', async () => {
+          const { width: newWidth } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+          return newWidth !== currentWidth;
+        });
+
+        await assertWorkspaceAspectRatio(expectedRatio);
+      };
+
+      // this test is designed to make sure the correct aspect ratio is preserved
+      // when the window size is constrained in EITHER width or height
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization('bar');
+      });
+
+      // plenty of height, constrained width
+      await changeWindowAndAssertAspectRatio(1200, 1000, VERTICAL_16_9);
+
+      // plenty of width, constrained height
+      await changeWindowAndAssertAspectRatio(2000, 600, VERTICAL_16_9);
     });
   });
 }
