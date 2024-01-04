@@ -6,16 +6,21 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import { Provider } from 'react-redux';
+import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import {
   CreateEmbeddableComponent,
-
   // you might need to export this in src/plugins/embeddable/public/index.ts
   EmbeddableComponentFactory,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import { HasEditCapabilities, useApiPublisher } from '@kbn/presentation-publishing';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { SavedMap } from './map_page';
+import { waitUntilTimeLayersLoad$ } from './map_page/map_app/wait_until_time_layers_load';
+import { getSpacesApi } from '../kibana_services';
+import { MapContainer } from '../connected_components/map_container';
 
 type MapApi = DefaultPresentationPanelApi &
   HasEditCapabilities & { someSpecialMapFunction: () => void };
@@ -32,14 +37,10 @@ const mapEmbeddableFactory: EmbeddableComponentFactory<MapInput, MapApi> = {
     return state as MapInput;
   },
   getComponent: async (initialState: MapInput) => {
-    /**
-     * The getComponent function is async to ensure compatibility with lazy loading, and allow for
-     * any other async initialization tasks. Here we simulate a timeout. If you need to load a saved object
-     * because the input is by reference, you can do that here.
-     *
-     * This would also be a good place to set up the redux store.
-     */
-    await new Promise((r) => setTimeout(r, 3000));
+    const savedMap = new SavedMap({
+      mapEmbeddableInput: initialState
+    });
+    await savedMap.whenReady();
 
     /**
      * Here we create the actual Component inline. This would be the equavalent of the
@@ -70,13 +71,42 @@ const mapEmbeddableFactory: EmbeddableComponentFactory<MapInput, MapApi> = {
         apiRef
       );
 
-      return (
-        <>
-          <EuiTitle>
-            <h1>TODO: render map component</h1>
-          </EuiTitle>
-        </>
-      );
+      const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
+      const spaces = getSpacesApi();
+      return sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+          <div className="mapEmbeddedError">
+            <EuiEmptyPrompt
+              iconType="warning"
+              iconColor="danger"
+              data-test-subj="embeddable-maps-failure"
+              body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+                targetType: MAP_SAVED_OBJECT_TYPE,
+                sourceId: sharingSavedObjectProps.sourceId!,
+              })}
+            />
+          </div>
+        ) : (
+          <Provider store={savedMap.getStore()}>
+            <MapContainer
+              onSingleValueTrigger={(actionId: string, key: string, value: RawValue) => {
+                console.log(`onSingleValueTrigger, actionId: ${actionId}, key: ${key}, value: ${value}`);
+              }}
+              addFilters={(filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+                console.log(`addFilters, filters: ${filters}, actionId: ${actionId}`);
+              }}
+              getFilterActions={() => {
+                console.log(`getFilterActions`);
+              }}
+              getActionContext={() => {
+                console.log(`getActionContext`);
+              }}
+              title="title"
+              description="description"
+              waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
+              isSharable={true}
+            />
+          </Provider>
+        );
     });
   },
 };
@@ -85,10 +115,11 @@ export const MapTestPage = () => {
   /**
    * imagine we've loaded some raw unknown state from the panel in this Dashboard's input
    */
-  const veryUnknownState: unknown = {};
+  const veryUnknownState: unknown = {
+    savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2'
+  };
 
   const mapInput = mapEmbeddableFactory.deserializeState(veryUnknownState);
-  const componentPromise = mapEmbeddableFactory.getComponent(mapInput);
 
   return (
     <>
@@ -96,7 +127,7 @@ export const MapTestPage = () => {
         <h1>Map Test Page</h1>
       </EuiTitle>
       
-      <PresentationPanel<MapApi> Component={componentPromise} />
+      <PresentationPanel<MapApi> Component={mapEmbeddableFactory.getComponent(mapInput)} />
     </>
   );
 };
