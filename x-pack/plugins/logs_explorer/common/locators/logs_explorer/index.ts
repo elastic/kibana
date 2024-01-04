@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './log_explorer';
+export * from './logs_explorer_locator';

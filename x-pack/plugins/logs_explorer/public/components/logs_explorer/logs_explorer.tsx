@@ -9,7 +9,7 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import type { LogExplorerController } from '../../controller';
-import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
+import { createLogExplorerProfileCustomizations } from '../../customizations/logs_explorer_profile';
 import { LogExplorerStartDeps } from '../../types';
 
 export interface CreateLogExplorerArgs {

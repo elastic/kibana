@@ -8,17 +8,17 @@ This plugin provides an app based on the `LogExplorer` component from the `log_e
 
 #### FTR Server
 ```
-yarn test:ftr:server --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts
+yarn test:ftr:server --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts
 ```
 
 #### FTR Runner
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts --include ./x-pack/test/functional/apps/observability_log_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts --include ./x-pack/test/functional/apps/observability_log_explorer/$1
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/$1
 ```
 
 ### Serverless
@@ -30,11 +30,11 @@ yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/ob
 
 #### Runner
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/index.ts
 ```
 #### Running Individual Tests
 ```
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/$1
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer/$1
 ```
 
 ## Checktypes

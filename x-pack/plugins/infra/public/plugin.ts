@@ -128,7 +128,7 @@ export class Plugin implements InfraClientPluginClass {
                       entries: [
                         {
                           label: 'Explorer',
-                          app: 'observability-log-explorer',
+                          app: 'observability-logs-explorer',
                           path: '/',
                           isBetaFeature: true,
                         },

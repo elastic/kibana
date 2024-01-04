@@ -12,7 +12,7 @@ import React from 'react';
 
 export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
   toasts.addInfo({
-    title: i18n.translate('xpack.observabilityLogExplorer.feedbackToast.title', {
+    title: i18n.translate('xpack.observabilityLogsExplorer.feedbackToast.title', {
       defaultMessage: 'Tell us what you think!',
     }),
     text: mountReactNode(<></>),

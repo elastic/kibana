@@ -4,12 +4,12 @@
   "owner": "@elastic/obs-ux-logs-team",
   "description": "This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.",
   "plugin": {
-    "id": "logExplorer",
+    "id": "logsExplorer",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "logExplorer"
+      "logsExplorer"
     ],
     "requiredPlugins": [
       "controls",

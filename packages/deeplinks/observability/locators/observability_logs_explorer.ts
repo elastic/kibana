@@ -7,7 +7,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { LogExplorerNavigationParams } from './log_explorer';
+import { LogExplorerNavigationParams } from './logs_explorer';
 
 // Will become a union once we have more origins
 export interface ObservabilityLogExplorerLocationState extends SerializableRecord {

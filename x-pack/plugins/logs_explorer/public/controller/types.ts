@@ -19,7 +19,7 @@ import { IDatasetsClient } from '../services/datasets';
 import {
   LogExplorerControllerStateMachine,
   LogExplorerControllerStateService,
-} from '../state_machines/log_explorer_controller';
+} from '../state_machines/logs_explorer_controller';
 import { LogExplorerCustomizations } from './controller_customizations';
 
 export interface LogExplorerController {

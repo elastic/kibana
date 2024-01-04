@@ -35,7 +35,7 @@ export interface ObservabilityLogExplorerSetupDeps {
 export interface ObservabilityLogExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
-  logExplorer: LogExplorerPluginStart;
+  logsExplorer: LogExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;

@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { LogExplorerTabs, LogExplorerTabsProps } from './log_explorer_tabs';
+import { LogExplorerTabs, LogExplorerTabsProps } from './logs_explorer_tabs';
 import { DISCOVER_APP_LOCATOR } from '../../../common';
 import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 

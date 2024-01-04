@@ -4,17 +4,17 @@
   "owner": "@elastic/obs-ux-logs-team",
   "description": "This plugin exposes and registers observability log consumption features.",
   "plugin": {
-    "id": "observabilityLogExplorer",
+    "id": "observabilityLogsExplorer",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "observabilityLogExplorer"
+      "observabilityLogsExplorer"
     ],
     "requiredPlugins": [
       "data",
       "discover",
-      "logExplorer",
+      "logsExplorer",
       "logsShared",
       "observabilityShared",
       "share",

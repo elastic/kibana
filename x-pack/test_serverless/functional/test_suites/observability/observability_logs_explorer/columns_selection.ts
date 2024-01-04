@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await PageObjects.svlCommonPage.login();
     });
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await PageObjects.svlCommonPage.forceLogout();
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
     });
 

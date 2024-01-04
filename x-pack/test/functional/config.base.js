@@ -171,7 +171,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/observability',
       },
       observabilityLogExplorer: {
-        pathname: '/app/observability-log-explorer',
+        pathname: '/app/observability-logs-explorer',
       },
       connectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',

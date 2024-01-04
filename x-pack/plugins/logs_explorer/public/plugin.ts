@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
-import { createLogExplorer } from './components/log_explorer';
+import { createLogExplorer } from './components/logs_explorer';
 import { createLogExplorerControllerLazyFactory } from './controller/lazy_create_controller';
 import type {
   LogExplorerPluginSetup,

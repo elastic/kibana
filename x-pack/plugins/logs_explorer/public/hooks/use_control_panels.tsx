@@ -13,7 +13,7 @@ import { Query, TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { LogExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 export const useControlPanels = (
   logExplorerControllerStateService: LogExplorerControllerStateService,

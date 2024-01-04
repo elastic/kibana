@@ -21,7 +21,7 @@ import { discoverLinkTitle } from '../../common/translations';
 import {
   ObservabilityLogExplorerService,
   useObservabilityLogExplorerPageStateContext,
-} from '../state_machines/observability_log_explorer/src';
+} from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {

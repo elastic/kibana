@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.login();
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           deepLinkId: 'discover',
         });
         await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbMissing({
-          deepLinkId: 'observability-log-explorer',
+          deepLinkId: 'observability-logs-explorer',
         });
         expect(await browser.getCurrentUrl()).contain('/app/discover');
 
@@ -172,9 +172,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           deepLinkId: 'discover',
         });
         await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'observability-log-explorer',
+          deepLinkId: 'observability-logs-explorer',
         });
-        expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
+        expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
       });
     });
 

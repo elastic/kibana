@@ -10,7 +10,7 @@ import { Query } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../hooks/use_control_panels';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { LogExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 const DATASET_FILTERS_CUSTOMIZATION_ID = 'datasetFiltersCustomization';
 

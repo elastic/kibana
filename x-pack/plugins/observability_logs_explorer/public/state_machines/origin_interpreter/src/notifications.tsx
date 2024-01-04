@@ -16,13 +16,13 @@ import { FEEDBACK_TOAST_LIFETIME_MS } from './constants';
 export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
   toasts.addInfo(
     {
-      title: i18n.translate('xpack.observabilityLogExplorer.feedbackToast.title', {
+      title: i18n.translate('xpack.observabilityLogsExplorer.feedbackToast.title', {
         defaultMessage: 'Tell us what you think!',
       }),
       text: mountReactNode(
         <>
           <p>
-            {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.text', {
+            {i18n.translate('xpack.observabilityLogsExplorer.feedbackToast.text', {
               defaultMessage: 'Share with us your onboarding experience and help us improve it.',
             })}
           </p>
@@ -36,7 +36,7 @@ export const createRequestFeedbackNotifier = (toasts: IToasts) => () => {
                 target="_blank"
                 color="primary"
               >
-                {i18n.translate('xpack.observabilityLogExplorer.feedbackToast.buttonText', {
+                {i18n.translate('xpack.observabilityLogsExplorer.feedbackToast.buttonText', {
                   defaultMessage: 'Take a quick survey',
                 })}
               </EuiButton>

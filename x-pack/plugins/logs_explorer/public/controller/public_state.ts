@@ -14,7 +14,7 @@ import {
 import {
   DEFAULT_CONTEXT,
   LogExplorerControllerContext,
-} from '../state_machines/log_explorer_controller';
+} from '../state_machines/logs_explorer_controller';
 import { LogExplorerPublicState, LogExplorerPublicStateUpdate, OptionsListControl } from './types';
 
 export const getPublicStateFromContext = (

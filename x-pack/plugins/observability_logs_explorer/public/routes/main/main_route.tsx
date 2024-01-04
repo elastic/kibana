@@ -12,13 +12,13 @@ import type {
 } from '@kbn/logs-explorer-plugin/public';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
-import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
+import { LogExplorerTopNavMenu } from '../../components/logs_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
-import { createLogExplorerControllerWithCustomizations } from '../../log_explorer_customizations';
+import { createLogExplorerControllerWithCustomizations } from '../../logs_explorer_customizations';
 import {
   ObservabilityLogExplorerPageStateProvider,
   useObservabilityLogExplorerPageStateContext,
-} from '../../state_machines/observability_log_explorer/src';
+} from '../../state_machines/observability_logs_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import { ObservabilityLogExplorerHistory } from '../../types';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
@@ -27,7 +27,7 @@ import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ObservabilityLogExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logExplorer, serverless, chrome, notifications, appParams } = services;
+  const { logsExplorer, serverless, chrome, notifications, appParams } = services;
   const { history } = appParams;
 
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
@@ -35,8 +35,8 @@ export const ObservabilityLogExplorerMainRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const createLogExplorerController = useMemo(
-    () => createLogExplorerControllerWithCustomizations(logExplorer.createLogExplorerController),
-    [logExplorer.createLogExplorerController]
+    () => createLogExplorerControllerWithCustomizations(logsExplorer.createLogExplorerController),
+    [logsExplorer.createLogExplorerController]
   );
 
   return (
@@ -57,7 +57,7 @@ const ConnectedContent = React.memo(() => {
   const {
     services: {
       appParams: { history },
-      logExplorer,
+      logsExplorer: logExplorer,
     },
   } = useKibanaContextForPlugin();
 
@@ -82,7 +82,7 @@ const InitializingContent = React.memo(() => (
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
       title={
         <FormattedMessage
-          id="xpack.observabilityLogExplorer.InitializingTitle"
+          id="xpack.observabilityLogsExplorer.InitializingTitle"
           defaultMessage="Initializing the Logs Explorer"
         />
       }

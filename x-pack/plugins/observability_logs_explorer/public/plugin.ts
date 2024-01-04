@@ -59,7 +59,7 @@ export class ObservabilityLogExplorerPlugin
       mount: async (appMountParams: ObservabilityLogExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
         const { renderObservabilityLogExplorer } = await import(
-          './applications/observability_log_explorer'
+          './applications/observability_logs_explorer'
         );
 
         return renderObservabilityLogExplorer(

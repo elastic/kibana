@@ -6,7 +6,7 @@
  */
 
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { LogExplorerLocatorDefinition } from './log_explorer_locator';
+import { LogExplorerLocatorDefinition } from './logs_explorer_locator';
 import { LogExplorerLocatorDependencies } from './types';
 
 const setup = async () => {

@@ -677,7 +677,7 @@ describe('[Logs onboarding] System logs', () => {
         cy.wait('@systemIntegrationInstall');
         cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 
-        cy.url().should('include', '/app/observability-log-explorer');
+        cy.url().should('include', '/app/observability-logs-explorer');
         cy.get('button').contains('All logs').should('exist');
       });
     });
@@ -696,7 +696,7 @@ describe('[Logs onboarding] System logs', () => {
         cy.wait('@systemIntegrationInstall');
         cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 
-        cy.url().should('include', '/app/observability-log-explorer');
+        cy.url().should('include', '/app/observability-logs-explorer');
         cy.get('button').contains('[System] syslog').should('exist');
       });
     });

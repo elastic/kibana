@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
-import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
+import { LogExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import type { DiscoverStateContainer } from '../../services/discover_state';

@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await PageObjects.observabilityLogExplorer.navigateTo();
     });
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
     });
 

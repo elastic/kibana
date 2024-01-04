@@ -11,7 +11,7 @@ import equal from 'fast-deep-equal';
 import { distinctUntilChanged, EMPTY, from, map, shareReplay } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
-import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
+import { createLogExplorerControllerStateMachine } from '../state_machines/logs_explorer_controller';
 import { LogExplorerStartDeps } from '../types';
 import { LogExplorerCustomizations } from './controller_customizations';
 import { createDataServiceProxy } from './custom_data_service';

@@ -7,48 +7,48 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogExplorer.appTitle', {
+export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
   defaultMessage: 'Logs Explorer',
 });
 
-export const logsAppTitle = i18n.translate('xpack.observabilityLogExplorer.logsAppTitle', {
+export const logsAppTitle = i18n.translate('xpack.observabilityLogsExplorer.logsAppTitle', {
   defaultMessage: 'Logs',
 });
 
 export const observabilityAppTitle = i18n.translate(
-  'xpack.observabilityLogExplorer.observabilityAppTitle',
+  'xpack.observabilityLogsExplorer.observabilityAppTitle',
   {
     defaultMessage: 'Observability',
   }
 );
 
-export const betaBadgeTitle = i18n.translate('xpack.observabilityLogExplorer.betaBadgeTitle', {
+export const betaBadgeTitle = i18n.translate('xpack.observabilityLogsExplorer.betaBadgeTitle', {
   defaultMessage: 'Beta',
 });
 
 export const betaBadgeDescription = i18n.translate(
-  'xpack.observabilityLogExplorer.betaBadgeDescription',
+  'xpack.observabilityLogsExplorer.betaBadgeDescription',
   {
     defaultMessage: 'This application is in beta and therefore subject to change.',
   }
 );
 
 export const discoverLinkTitle = i18n.translate(
-  'xpack.observabilityLogExplorer.discoverLinkTitle',
+  'xpack.observabilityLogsExplorer.discoverLinkTitle',
   {
     defaultMessage: 'Open in Discover',
   }
 );
 
 export const onboardingLinkTitle = i18n.translate(
-  'xpack.observabilityLogExplorer.onboardingLinkTitle',
+  'xpack.observabilityLogsExplorer.onboardingLinkTitle',
   {
     defaultMessage: 'Add data',
   }
 );
 
 export const feedbackLinkTitle = i18n.translate(
-  'xpack.observabilityLogExplorer.feedbackLinkTitle',
+  'xpack.observabilityLogsExplorer.feedbackLinkTitle',
   {
     defaultMessage: 'Give feedback',
   }

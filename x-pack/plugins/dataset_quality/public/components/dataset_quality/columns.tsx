@@ -27,7 +27,7 @@ import {
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import loggingIcon from '../../icons/logging.svg';
-import { LogExplorerLink } from '../log_explorer_link';
+import { LogExplorerLink } from '../logs_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {

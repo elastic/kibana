@@ -13,7 +13,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LogExplorerLocators } from '../common/locators';
-import type { LogExplorerProps } from './components/log_explorer';
+import type { LogExplorerProps } from './components/logs_explorer';
 import type { CreateLogExplorerController } from './controller';
 
 export interface LogExplorerPluginSetup {

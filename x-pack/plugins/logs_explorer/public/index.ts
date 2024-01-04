@@ -16,7 +16,7 @@ export type {
   LogExplorerPublicState,
   LogExplorerPublicStateUpdate,
 } from './controller';
-export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
+export type { LogExplorerControllerContext } from './state_machines/logs_explorer_controller';
 export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
 export {
   getDiscoverColumnsFromDisplayOptions,
