@@ -17,7 +17,7 @@ import { InfraClientCoreSetup, InfraClientStartDeps, InfraClientStartExports } f
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;
 
-interface KibanaEnvContext {
+export interface KibanaEnvContext {
   kibanaVersion?: string;
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
@@ -51,14 +51,18 @@ export const useKibanaContextForPluginProvider = (
   return Provider;
 };
 
-export const useKibanaEnvironmentContextProvider = (plugins: InfraClientStartDeps) => {
+export const useKibanaEnvironmentContextProvider = ({
+  kibanaVersion,
+  isCloudEnv,
+  isServerlessEnv,
+}: KibanaEnvContext) => {
   const value = useMemo(
     () => ({
-      kibanaVersion: plugins.kibanaVersion,
-      isCloudEnv: plugins.isCloudEnv,
-      isServerlessEnv: plugins.isServerlessEnv,
+      kibanaVersion,
+      isCloudEnv,
+      isServerlessEnv,
     }),
-    [plugins]
+    [kibanaVersion, isCloudEnv, isServerlessEnv]
   );
 
   const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({

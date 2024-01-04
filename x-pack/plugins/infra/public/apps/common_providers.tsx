@@ -14,6 +14,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  type KibanaEnvContext,
   useKibanaContextForPluginProvider,
   useKibanaEnvironmentContextProvider,
 } from '../hooks/use_kibana';
@@ -58,12 +59,14 @@ export interface CoreProvidersProps {
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
+  kibanaEnvironment: KibanaEnvContext;
 }
 
 export const CoreProviders: React.FC<CoreProvidersProps> = ({
   children,
   core,
   pluginStart,
+  kibanaEnvironment,
   plugins,
   theme$,
 }) => {
@@ -73,15 +76,15 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
     pluginStart
   );
 
-  const MyEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(plugins);
+  const KibanaEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
 
   return (
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-      <MyEnvContextForPluginProvider kibanaEnvironment={{ ...plugins }}>
+      <KibanaEnvContextForPluginProvider kibanaEnvironment={kibanaEnvironment}>
         <core.i18n.Context>
           <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
         </core.i18n.Context>
-      </MyEnvContextForPluginProvider>
+      </KibanaEnvContextForPluginProvider>
     </KibanaContextProviderForPlugin>
   );
 };
