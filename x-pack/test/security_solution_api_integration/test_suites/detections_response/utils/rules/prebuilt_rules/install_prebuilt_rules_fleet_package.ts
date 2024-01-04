@@ -57,6 +57,7 @@ export const installPrebuiltRulesFleetPackage = async ({
       },
       retryService,
       retries: 2,
+      timeout: 120000,
     });
 
     await refreshSavedObjectIndices(es);
@@ -88,6 +89,7 @@ export const installPrebuiltRulesFleetPackage = async ({
       },
       retryService,
       retries: 2,
+      timeout: 120000,
     });
 
     await refreshSavedObjectIndices(es);

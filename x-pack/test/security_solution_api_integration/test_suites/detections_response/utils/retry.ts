@@ -14,10 +14,12 @@ export const retry = async <T>({
   test,
   retryService,
   retries,
+  timeout,
 }: {
   test: () => Promise<T>;
   retryService: RetryService;
   retries: number;
+  timeout?: number;
 }): Promise<T | Error> => {
   let retryAttempt = 0;
   const response = await retryService.try(
@@ -33,7 +35,8 @@ export const retry = async <T>({
       return test();
     },
     undefined,
-    200
+    200,
+    timeout
   );
 
   // Now throw the error in order to fail the test.
