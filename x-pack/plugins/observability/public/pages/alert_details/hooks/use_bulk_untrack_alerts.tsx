@@ -33,7 +33,7 @@ export const useBulkUntrackAlerts = () => {
       onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
-            'xpack.triggersActionsUI.rules.deleteConfirmationModal.errorNotification.descriptionText',
+            'xpack.observability.alerts.untrackConfirmation.errorNotification.descriptionText',
             {
               defaultMessage: 'Failed to untrack {uuidsCount, plural, one {alert} other {alerts}}',
               values: { uuidsCount: params.alertUuids.length },
@@ -45,7 +45,7 @@ export const useBulkUntrackAlerts = () => {
       onSuccess: (_, params) => {
         toasts.addSuccess(
           i18n.translate(
-            'xpack.triggersActionsUI.rules.deleteConfirmationModal.successNotification.descriptionText',
+            'xpack.observability.alerts.untrackConfirmation.successNotification.descriptionText',
             {
               defaultMessage: 'Untracked {uuidsCount, plural, one {alert} other {alerts}}',
               values: { uuidsCount: params.alertUuids.length },
