@@ -346,7 +346,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     QueryRuleDefaultableFields:
       type: object
@@ -427,7 +427,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
 
