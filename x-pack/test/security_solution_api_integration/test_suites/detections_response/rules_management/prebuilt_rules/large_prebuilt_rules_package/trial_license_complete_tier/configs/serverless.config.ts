@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { createTestConfig } from '../../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../../config/serverless/config.base';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),
