@@ -72,63 +72,56 @@ const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
 >;
 
-async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
-  if (dataset === 'dataset1') {
-    return [
-      {
-        buffer: Buffer.from(`
-type: log
-metricset: ["dataset1"]
-paths:
-{{#each paths}}
-- {{this}}
-{{/each}}
-{{#if hosts}}
-hosts:
-{{#each hosts}}
-- {{this}}
-{{/each}}
-{{/if}}
-`),
-      },
-    ];
-  }
-  if (dataset === 'dataset1_level1') {
-    return [
-      {
-        buffer: Buffer.from(`
-type: log
-metricset: ["dataset1.level1"]
-`),
-      },
-    ];
-  }
-
-  return [
-    {
-      buffer: Buffer.from(`
-hosts:
-{{#each hosts}}
-- {{this}}
-{{/each}}
-`),
-    },
-  ];
-}
+const ASSETS_MAP_FIXTURES = new Map([
+  [
+    '/test-1.0.0/data_stream/dataset1/agent/stream/some_template_path.yml',
+    Buffer.from(`
+  type: log
+  metricset: ["dataset1"]
+  paths:
+  {{#each paths}}
+  - {{this}}
+  {{/each}}
+  {{#if hosts}}
+  hosts:
+  {{#each hosts}}
+  - {{this}}
+  {{/each}}
+  {{/if}}
+  `),
+  ],
+  [
+    '/test-1.0.0/data_stream/dataset1_level1/agent/stream/some_template_path.yml',
+    Buffer.from(`
+  type: log
+  metricset: ["dataset1.level1"]
+  `),
+  ],
+  [
+    '/test-1.0.0/agent/input/some_template_path.yml',
+    Buffer.from(`
+  hosts:
+  {{#each hosts}}
+  - {{this}}
+  {{/each}}
+  `),
+  ],
+]);
 
 async function mockedGetInstallation(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
   if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
+  if (params.pkgName === 'test') pkg = { version: '0.0.1' };
   return Promise.resolve(pkg);
 }
 
 async function mockedGetPackageInfo(params: any) {
   let pkg;
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
-  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
-  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
+  if (params.pkgName === 'aws') pkg = { name: 'aws', version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { name: 'endpoint', version: params.pkgVersion };
   if (params.pkgName === 'test') {
     pkg = {
       version: '1.0.2',
@@ -162,12 +155,6 @@ async function mockedGetPackageInfo(params: any) {
   return Promise.resolve(pkg);
 }
 
-jest.mock('./epm/packages/assets', () => {
-  return {
-    getAssetsData: mockedGetAssetsData,
-  };
-});
-
 jest.mock('./epm/packages', () => {
   return {
     getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
@@ -181,7 +168,13 @@ jest.mock('../../common/services/package_to_package_policy', () => ({
   packageToPackagePolicy: jest.fn(),
 }));
 
-jest.mock('./epm/registry');
+jest.mock('./epm/registry', () => ({
+  getPackage: jest.fn().mockResolvedValue({ assetsMap: [] }),
+}));
+
+jest.mock('./epm/packages/get', () => ({
+  getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
+}));
 
 jest.mock('./agent_policy');
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
@@ -488,6 +481,8 @@ describe('Package policy service', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [
             {
               type: 'logs',
@@ -520,7 +515,8 @@ describe('Package policy service', () => {
               },
             ],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -551,6 +547,8 @@ describe('Package policy service', () => {
     it('should work with a two level dataset name', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [
             {
               type: 'logs',
@@ -578,7 +576,8 @@ describe('Package policy service', () => {
               },
             ],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -603,6 +602,8 @@ describe('Package policy service', () => {
     it('should work with config variables at the input level', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [
             {
               dataset: 'package.dataset1',
@@ -635,7 +636,8 @@ describe('Package policy service', () => {
               },
             ],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -666,6 +668,8 @@ describe('Package policy service', () => {
     it('should work with config variables at the package level', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [
             {
               dataset: 'package.dataset1',
@@ -702,7 +706,8 @@ describe('Package policy service', () => {
               },
             ],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -734,6 +739,8 @@ describe('Package policy service', () => {
     it('should work with an input with a template and no streams', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [],
           policy_templates: [
             {
@@ -753,7 +760,8 @@ describe('Package policy service', () => {
             },
             streams: [],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -776,6 +784,8 @@ describe('Package policy service', () => {
     it('should work with an input with a template and streams', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           data_streams: [
             {
               dataset: 'package.dataset1',
@@ -828,7 +838,8 @@ describe('Package policy service', () => {
             },
             streams: [],
           },
-        ]
+        ],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([
@@ -881,6 +892,8 @@ describe('Package policy service', () => {
     it('should work with a package without input', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           policy_templates: [
             {
               inputs: undefined,
@@ -888,7 +901,8 @@ describe('Package policy service', () => {
           ],
         } as unknown as PackageInfo,
         {},
-        []
+        [],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([]);
@@ -897,6 +911,8 @@ describe('Package policy service', () => {
     it('should work with a package with a empty inputs array', async () => {
       const inputs = await _compilePackagePolicyInputs(
         {
+          name: 'test',
+          version: '1.0.0',
           policy_templates: [
             {
               inputs: [],
@@ -904,7 +920,8 @@ describe('Package policy service', () => {
           ],
         } as unknown as PackageInfo,
         {},
-        []
+        [],
+        ASSETS_MAP_FIXTURES
       );
 
       expect(inputs).toEqual([]);
