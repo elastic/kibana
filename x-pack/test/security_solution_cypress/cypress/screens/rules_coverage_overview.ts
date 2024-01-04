@@ -29,3 +29,11 @@ export const COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON =
 export const COVERAGE_OVERVIEW_FILTER_LIST = '[data-test-subj="coverageOverviewFilterList"]';
 
 export const COVERAGE_OVERVIEW_SEARCH_BAR = '[data-test-subj="coverageOverviewFilterSearchBar"]';
+
+export const COVERAGE_OVERVIEW_TACTIC_PANEL = '[data-test-subj="coverageOverviewTacticPanel"]';
+
+export const COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS =
+  '[data-test-subj="ruleStatsEnabledRulesCount"]';
+
+export const COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS =
+  '[data-test-subj="ruleStatsDisabledRulesCount"]';

@@ -14,6 +14,9 @@ import {
   COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
   COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES,
   COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES,
+  COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS,
+  COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS,
+  COVERAGE_OVERVIEW_TACTIC_PANEL,
   COVERAGE_OVERVIEW_TECHNIQUE_TITLE,
 } from '../../../../screens/rules_coverage_overview';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -368,14 +371,16 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
         getNewRule({
           rule_id: 'duplicate_technique_rule_2',
           name: 'Rule with tactic 2',
-          enabled: true,
+          enabled: false,
           threat: [MockCustomRuleDuplicateTechniqueThreat2],
         })
       );
       visit(RULES_COVERAGE_OVERVIEW_URL);
     });
 
-    it('technique panel renders rule data when the same technique exists in multiple tactics', () => {
+    it('technique panels render unique rule data', () => {
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
+
       // Open duplicated technique panel under first tactic
       cy.get(COVERAGE_OVERVIEW_TECHNIQUE_TITLE(DuplicateTechniqueMitreData1.technique.id))
         .first()
@@ -383,17 +388,42 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
         .contains('Rule with tactic 1')
         .should('not.exist');
-
-      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Rule with tactic 2');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Rule with tactic 2');
 
       // Open duplicated technique panel under second tactic
       cy.get(COVERAGE_OVERVIEW_TECHNIQUE_TITLE(DuplicateTechniqueMitreData2.technique.id))
         .last()
         .click();
       cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Rule with tactic 1');
-      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
         .contains('Rule with tactic 2')
         .should('not.exist');
+    });
+
+    it('tactic panels render correct rule stats', () => {
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
+
+      // Validate rule count stats for first tactic
+      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
+        .contains(DuplicateTechniqueMitreData1.tactic.name)
+        .get(COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS)
+        .contains('0');
+
+      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
+        .contains(DuplicateTechniqueMitreData1.tactic.name)
+        .get(COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS)
+        .contains('1');
+
+      // Validate rule count stats for second tactic
+      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
+        .contains(DuplicateTechniqueMitreData2.tactic.name)
+        .get(COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS)
+        .contains('1');
+
+      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
+        .contains(DuplicateTechniqueMitreData2.tactic.name)
+        .get(COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS)
+        .contains('0');
     });
   });
 });
