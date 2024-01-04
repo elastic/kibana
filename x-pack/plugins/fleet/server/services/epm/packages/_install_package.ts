@@ -390,7 +390,9 @@ export async function _installPackage({
       throw new PackageSavedObjectConflictError(
         `Saved Object conflict encountered while installing ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'
-        }. Original error: ${err.message}`
+        }. There may be a conflicting Saved Object saved to another Space. Original error: ${
+          err.message
+        }`
       );
     } else {
       throw err;
